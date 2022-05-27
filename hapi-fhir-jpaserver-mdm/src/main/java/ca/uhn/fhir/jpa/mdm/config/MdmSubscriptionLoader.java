@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -59,6 +60,8 @@ public class MdmSubscriptionLoader {
 	@Autowired
 	IChannelNamer myChannelNamer;
 	@Autowired
+	private SubscriptionLoader mySubscriptionLoader;
+	@Autowired
 	private IMdmSettings myMdmSettings;
 
 	private IFhirResourceDao<IBaseResource> mySubscriptionDao;
@@ -86,6 +89,10 @@ public class MdmSubscriptionLoader {
 		mySubscriptionDao = myDaoRegistry.getResourceDao("Subscription");
 		for (IBaseResource subscription : subscriptions) {
 			updateIfNotPresent(subscription);
+		}
+		//After loading all the subscriptions, sync the subscriptions to the registry.
+		if (subscriptions != null && subscriptions.size() > 0) {
+			mySubscriptionLoader.syncSubscriptions();
 		}
 	}
 

@@ -17,6 +17,12 @@ class NicknameMatcherTest {
 		assertTrue(matcher.matches("Kenneth", "Kenny"));
 		assertTrue(matcher.matches("Ken", "Kenneth"));
 		assertTrue(matcher.matches("Kenny", "Kenneth"));
+		assertTrue(matcher.matches("Jim", "Jimmy"));
+		assertTrue(matcher.matches("Jimmy", "Jim"));
+		assertTrue(matcher.matches("Jim", "James"));
+		assertTrue(matcher.matches("Jimmy", "James"));
+		assertTrue(matcher.matches("James", "Jimmy"));
+		assertTrue(matcher.matches("James", "Jim"));
 
 		assertFalse(matcher.matches("Ken", "Bob"));
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher

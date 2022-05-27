@@ -1,5 +1,25 @@
 package ca.uhn.fhir.batch2.model;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Batch2 Task Processor
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -20,7 +40,6 @@ import java.util.List;
  */
 public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobWorkCursor.class);
-
 	public final JobDefinition<PT> jobDefinition;
 	public final boolean isFirstStep;
 	public final JobDefinitionStep<PT, IT, OT> currentStep;
@@ -45,8 +64,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 	}
 
-	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndWorkNotification(JobDefinition<PT> theJobDefinition, JobWorkNotification theWorkNotification) {
-		String requestedStepId = theWorkNotification.getTargetStepId();
+	public static <PT extends IModelJson> JobWorkCursor<PT,?,?> fromJobDefinitionAndRequestedStepId(JobDefinition<PT> theJobDefinition, String theRequestedStepId) {
 		boolean isFirstStep = false;
 		JobDefinitionStep<PT,?,?> currentStep = null;
 		JobDefinitionStep<PT,?,?> nextStep = null;
@@ -54,7 +72,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		List<JobDefinitionStep<PT, ?, ?>> steps = theJobDefinition.getSteps();
 		for (int i = 0; i < steps.size(); i++) {
 			JobDefinitionStep<PT, ?, ?> step = steps.get(i);
-			if (step.getStepId().equals(requestedStepId)) {
+			if (step.getStepId().equals(theRequestedStepId)) {
 				currentStep = step;
 				if (i == 0) {
 					isFirstStep = true;
@@ -67,7 +85,7 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		}
 
 		if (currentStep == null) {
-			String msg = "Unknown step[" + requestedStepId + "] for job definition ID[" + theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion() + "]";
+			String msg = "Unknown step[" + theRequestedStepId + "] for job definition ID[" + theJobDefinition.getJobDefinitionId() + "] version[" + theJobDefinition.getJobDefinitionVersion() + "]";
 			ourLog.warn(msg);
 			throw new InternalErrorException(Msg.code(2042) + msg);
 		}

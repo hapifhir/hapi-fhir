@@ -38,7 +38,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertEquals("?name=ken,kendall,kendrick,kendrik,kenneth,kenny,kent,mckenna", newSearch);
+		assertEquals("?name=ken,kendall,kendrick,kendrik,kenna,kenneth,kenny,kent,mckenna,meaka", newSearch);
 	}
 
 	@Test

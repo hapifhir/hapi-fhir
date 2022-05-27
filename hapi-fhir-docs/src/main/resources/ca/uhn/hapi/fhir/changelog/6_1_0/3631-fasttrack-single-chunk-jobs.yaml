@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3631
+title: "If a gated Batch job step and all prior steps produced only a single chunk of work, notify the next step immediately
+instead of waiting for the scheduled job maintenance to advance it."

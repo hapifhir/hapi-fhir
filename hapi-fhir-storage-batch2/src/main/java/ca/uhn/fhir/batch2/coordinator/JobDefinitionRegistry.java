@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.impl;
+package ca.uhn.fhir.batch2.coordinator;
 
 /*-
  * #%L
@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.impl;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -87,5 +88,10 @@ public class JobDefinitionRegistry {
 			throw new InternalErrorException(Msg.code(2043) + msg);
 		}
 		return opt.get();
+	}
+
+	public void setJobDefinition(JobInstance theInstance) {
+		JobDefinition<?> jobDefinition = getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
+		theInstance.setJobDefinition(jobDefinition);
 	}
 }
