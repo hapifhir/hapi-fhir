@@ -124,17 +124,32 @@ Content-Type: application/fhir+json
 { ..resource body.. }
 ```
 
-If a client performs a contention aware update, the ETag version will be placed in the version part of the IdDt/IdType that is passed into the method. For example:
+If a client performs a contention aware update, the ETag version will be placed in the version part of the IdDt/IdType
+that is passed into the method. For example:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updateEtag}}
 ``` 
 
+## Update with History Rewrite
+
+If you wish to update a historical version of a resource without creating new versions, this can now be done with the
+Update operation. This operation not supported by the FHIR specs, it's an enhancement added to Hapi.
+
+In order to use this you will need to set the appropriate flag in DaoConfig to true. For
+example: `setUpdateWithHistoryRewriteEnabled(true)`
+
+The api call would look like this: `PUT Patient/123/_history/3`, with the body of the request be the resource including
+the same version specified in the URL.
+
 <a name="instance_delete" />
 
 # Instance Level - Delete
 
-The [delete](http://hl7.org/implement/standards/fhir/http.html#delete) operation retrieves a specific version of a resource with a given ID. It takes a single ID parameter annotated with an [@IdParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, which supplies the ID of the resource to delete.
+The [delete](http://hl7.org/implement/standards/fhir/http.html#delete) operation retrieves a specific version of a
+resource with a given ID. It takes a single ID parameter annotated with
+an [@IdParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, which supplies the
+ID of the resource to delete.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|delete}}
