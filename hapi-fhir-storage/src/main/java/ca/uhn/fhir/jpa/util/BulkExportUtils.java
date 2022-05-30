@@ -12,8 +12,8 @@ public class BulkExportUtils {
 	/**
 	 * Converts the BulkDataExportOptions -> BulkExportParameters
 	 */
-	public static BulkExportParameters getBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
-		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
+	public static BulkExportParameters getBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions, boolean theStartImmediatelyBool) {
+		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT, theStartImmediatelyBool);
 
 		parameters.setStartDate(theOptions.getSince());
 		parameters.setOutputFormat(theOptions.getOutputFormat());
@@ -24,7 +24,9 @@ public class BulkExportUtils {
 		if (theOptions.getGroupId() != null) {
 			parameters.setGroupId(theOptions.getGroupId().getValue());
 		}
-		parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
+		if (theOptions.getResourceTypes() != null) {
+			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
+		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 
 		return parameters;

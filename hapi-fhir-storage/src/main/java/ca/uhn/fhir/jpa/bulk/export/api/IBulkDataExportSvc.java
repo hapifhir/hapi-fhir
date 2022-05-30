@@ -36,7 +36,12 @@ public interface IBulkDataExportSvc {
 							Boolean useCache,
 							RequestDetails theRequestDetails);
 
-	void saveJobIdToJob(String theId, String theJobId);
+	/// save jobs metadata
+	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
+							String theBatch2JobId,
+							Boolean useCache,
+							RequestDetails theRequestDetails);
+
 
 	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
@@ -50,7 +55,7 @@ public interface IBulkDataExportSvc {
 		 * Legacy - but this jobId is not the job id
 		 * but the actual id of the record storing metadata of the job
 		 */
-		private String myJobId;
+		private String myJobMetadataId;
 		private BulkExportJobStatusEnum myStatus;
 		private List<FileEntry> myFiles;
 		private String myRequest;
@@ -74,12 +79,12 @@ public interface IBulkDataExportSvc {
 			return this;
 		}
 
-		public String getJobId() {
-			return myJobId;
+		public String getJobMetadataId() {
+			return myJobMetadataId;
 		}
 
-		public JobInfo setJobId(String theJobId) {
-			myJobId = theJobId;
+		public JobInfo setJobMetadataId(String theJobId) {
+			myJobMetadataId = theJobId;
 			return this;
 		}
 

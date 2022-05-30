@@ -463,22 +463,21 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
 
 			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, false, requestDetails);
-			assertNotNull(jobDetails.getJobId());
+			assertNotNull(jobDetails.getJobMetadataId());
 
 			// Run a scheduled pass to build the export and wait for completion
 			BulkExportParameters params = BulkExportBatch2TestUtils.getBulkExportParametersFromOptions(myFhirContext,
-				options,
-				jobDetails.getJobId());
-			String batchJobId = myJobRunner.startJob(params);
+				options);
+			String batchJobId = myJobRunner.startNewJob(params);
 
-			myBatch2JobHelper.awaitJobCompletion(batchJobId);
+			myBatch2JobHelper.awaitSingleChunkJobCompletion(batchJobId);
 //		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
 //		myBatchJobHelper.awaitAllBulkJobCompletions(
 //			BatchConstants.BULK_EXPORT_JOB_NAME
 //		);
 
 			//perform export-poll-status
-			HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobId()));
+			HttpGet get = new HttpGet(buildExportUrl(createInPartition, jobDetails.getJobMetadataId()));
 			try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				BulkExportResponseJson responseJson = JsonUtil.deserialize(responseString, BulkExportResponseJson.class);

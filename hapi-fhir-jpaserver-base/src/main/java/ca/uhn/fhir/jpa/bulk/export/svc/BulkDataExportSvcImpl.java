@@ -87,9 +87,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	@Transactional
 	@Override
 	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
+		return null;
+	}
+
+	@Transactional
+	@Override
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
+									 String theBatch2JobId,
+									 Boolean useCache,
+									 RequestDetails theRequestDetails) {
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
 			outputFormat = theBulkDataExportOptions.getOutputFormat();
@@ -172,7 +180,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				.collect(Collectors.toSet());
 
 		BulkExportJobEntity jobEntity = new BulkExportJobEntity();
+		//TODO
 		// no jobid yet
+		jobEntity.setJobId(UUID.randomUUID().toString());
 		jobEntity.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		jobEntity.setSince(since);
 		jobEntity.setCreated(new Date());
@@ -199,12 +209,13 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		return toSubmittedJobInfo(jobEntity);
 	}
 
-	@Override
-	public void saveJobIdToJob(String theId, String theJobId) {
-		BulkExportJobEntity entity = myBulkExportJobDao.getById(Long.parseLong(theId));
-		entity.setJobId(theJobId);
-		myBulkExportJobDao.save(entity);
-	}
+//	@Deprecated
+//	@Override
+//	public void saveJobIdToJob(String theId, String theJobId) {
+//		BulkExportJobEntity entity = myBulkExportJobDao.getById(Long.parseLong(theId));
+//		entity.setJobId(theJobId);
+//		myBulkExportJobDao.save(entity);
+//	}
 
 	public void validateTypes(Set<String> theResourceTypes) {
 		for (String nextType : theResourceTypes) {
@@ -231,7 +242,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {
 		return new JobInfo()
-			.setJobId(Long.toString(theJob.getId()))
+			.setJobMetadataId(Long.toString(theJob.getId()))
 			.setStatus(theJob.getStatus());
 	}
 
@@ -257,7 +268,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
 
 		JobInfo retVal = new JobInfo();
-		retVal.setJobId(theJobId);
+		retVal.setJobMetadataId(theJobId);
 		retVal.setStatus(job.getStatus());
 		retVal.setStatus(job.getStatus());
 		retVal.setStatusTime(job.getStatusTime());

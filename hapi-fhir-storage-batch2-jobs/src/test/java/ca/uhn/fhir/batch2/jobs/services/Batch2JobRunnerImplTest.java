@@ -3,7 +3,7 @@ package ca.uhn.fhir.batch2.jobs.services;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
-import ca.uhn.fhir.jpa.api.model.RunJobParameters;
+import ca.uhn.fhir.jpa.api.model.StartNewJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ch.qos.logback.classic.Level;
@@ -58,7 +58,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startJob(new RunJobParameters(jobId));
+		myJobRunner.startNewJob(new StartNewJobParameters(jobId));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -75,7 +75,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startJob(new RunJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
+		myJobRunner.startNewJob(new StartNewJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -98,7 +98,7 @@ public class Batch2JobRunnerImplTest {
 		parameters.setJobId(jobId);
 
 		// test
-		myJobRunner.startJob(parameters);
+		myJobRunner.startNewJob(parameters);
 
 		// verify
 		ArgumentCaptor<JobInstanceStartRequest> captor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);

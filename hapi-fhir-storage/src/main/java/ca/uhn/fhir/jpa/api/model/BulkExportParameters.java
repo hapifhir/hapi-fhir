@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BulkExportParameters extends RunJobParameters {
+public class BulkExportParameters extends StartNewJobParameters {
 
 	/**
 	 * List of resource types to export.
@@ -64,8 +64,13 @@ public class BulkExportParameters extends RunJobParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
+	public BulkExportParameters(@Nonnull String theJobDefinitionId,
+										 boolean theStartImmediatelyBoolean) {
+		super(theJobDefinitionId, theStartImmediatelyBoolean);
+	}
+
 	public BulkExportParameters(@Nonnull String theJobDefinitionId) {
-		super(theJobDefinitionId);
+		this(theJobDefinitionId, true);
 	}
 
 	public List<String> getResourceTypes() {

@@ -10,6 +10,7 @@ public class BulkExportJobBase implements IModelJson {
 	@JsonProperty("bulkExportJobId")
 	private String myJobId;
 
+	// metadata job id
 	public String getJobId() {
 		return myJobId;
 	}

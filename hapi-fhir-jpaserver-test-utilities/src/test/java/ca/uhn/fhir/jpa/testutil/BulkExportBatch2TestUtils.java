@@ -15,11 +15,9 @@ public class BulkExportBatch2TestUtils {
 
 
 	public static BulkExportParameters getBulkExportParametersFromOptions(FhirContext theCtx,
-																			BulkDataExportOptions theOptions,
-																			String theJobId) {
+																			BulkDataExportOptions theOptions) {
 		// see BulkExportUtils
-		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
-		parameters.setJobId(theJobId);
+		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT, false);
 
 		parameters.setStartDate(theOptions.getSince());
 		parameters.setOutputFormat(theOptions.getOutputFormat());

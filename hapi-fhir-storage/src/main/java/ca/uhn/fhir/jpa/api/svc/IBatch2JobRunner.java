@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.api.svc;
 
-import ca.uhn.fhir.jpa.api.model.RunJobParameters;
+import ca.uhn.fhir.jpa.api.model.StartNewJobParameters;
 
 public interface IBatch2JobRunner {
 
@@ -9,5 +9,5 @@ public interface IBatch2JobRunner {
 	 * @param theParameters
 	 * @return  returns the job id
 	 */
-	String startJob(RunJobParameters theParameters);
+	String startNewJob(StartNewJobParameters theParameters);
 }

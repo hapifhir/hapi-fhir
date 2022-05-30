@@ -87,25 +87,41 @@ public class BulkDataExportProvider {
 	) {
 		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
+
+		startJob(theRequestDetails, bulkDataExportOptions);
+	}
+
+	private void startJob(ServletRequestDetails theRequestDetails,
+								 BulkDataExportOptions theOptions) {
 		Boolean useCache = shouldUseCache(theRequestDetails);
 
-		//TODO - this must be copied down to other exports
-		// maybe make it external and simplified
+		//TODO
 		/**
 		 * the 2 jobids are different
 		 * JobInfo.jobId <- id of db record storing metadata about the job
-		 * jobId from start job <- id of the actual batch2 job
+		 *
+		 * jobId from start job (batch2JobId) <- id of the actual batch2 job used for status and verification
 		 *
 		 * We need to resave the batch2 jobid to jobinfo metadata
 		 */
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
+		// TODO
+		/**
+		 * Problem to solve:
+		 * -saving the metadata is done first. But the job run is done second
+		 * -job start verifies parameters by verifying it has metadata job id
+		 * -even if we do not verify that the saved metadata exists when the job starts,
+		 * we need a way to tie the metadata -> running job. And we don't get that id in the actual
+		 * job run
+		 */
+		// store the job
+		String batch2JobId = myJobRunner.startNewJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions, false));
 
-		String batch2JobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+		// submit the job
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(theOptions, batch2JobId, useCache, theRequestDetails);
 
-		myBulkDataExportSvc.saveJobIdToJob(outcome.getJobId(), batch2JobId);
-
-		outcome.setJobId(batch2JobId); // we set it to the job id from the runner
+		outcome.setJobMetadataId(batch2JobId); // we set it to the job id from the runner
 		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
@@ -152,10 +168,12 @@ public class BulkDataExportProvider {
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
-		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+		startJob(theRequestDetails, bulkDataExportOptions);
 
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+//		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+//
+//		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
+//		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -186,14 +204,15 @@ public class BulkDataExportProvider {
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
+		startJob(theRequestDetails, bulkDataExportOptions);
+//		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
 
-		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
-
-		// outcome and jobId are different
-		// we want the outcomeid for finding the job
-		// we wont hte jobId for finding the binary records...
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+//		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
+//
+//		// outcome and jobId are different
+//		// we want the outcomeid for finding the job
+//		// we wont hte jobId for finding the binary records...
+//		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	/**
@@ -303,7 +322,7 @@ public class BulkDataExportProvider {
 
 	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, IBulkDataExportSvc.JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
-		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobId();
+		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 
