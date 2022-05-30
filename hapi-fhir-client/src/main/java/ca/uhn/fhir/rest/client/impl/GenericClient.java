@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -121,6 +121,9 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQueryTyped;
+import ca.uhn.fhir.rest.gclient.IUpdateWithRewrite;
+import ca.uhn.fhir.rest.gclient.IUpdateWithRewriteExecutable;
+import ca.uhn.fhir.rest.gclient.IUpdateWithRewriteTyped;
 import ca.uhn.fhir.rest.gclient.IValidate;
 import ca.uhn.fhir.rest.gclient.IValidateUntyped;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -390,6 +393,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public MethodOutcome update(String theId, IBaseResource theResource) {
 		return update(new IdDt(theId), theResource);
+	}
+
+	@Override
+	public IUpdateWithRewrite updateHistoryRewrite() {
+		return new UpdateHistoryRewriteInternal();
 	}
 
 	@Override
@@ -2333,6 +2341,90 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			if (isBlank(theId)) {
 				throw new NullPointerException(Msg.code(1400) + "theId must not be blank and must contain an ID, found: " + theId);
+			}
+			myId = new IdDt(theId);
+			return this;
+		}
+
+	}
+
+	private class UpdateHistoryRewriteInternal extends BaseClientExecutable<IUpdateWithRewriteExecutable, MethodOutcome>
+		implements IUpdateWithRewrite, IUpdateWithRewriteTyped, IUpdateWithRewriteExecutable {
+
+		private IIdType myId;
+		private PreferReturnEnum myPrefer;
+		private IBaseResource myResource;
+		private String myResourceBody;
+
+		@Override
+		public MethodOutcome execute() {
+
+			if (myResource == null) {
+				myResource = parseResourceBody(myResourceBody);
+			}
+
+			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
+			if (getParamEncoding() != null) {
+				myResourceBody = null;
+			}
+
+			BaseHttpClientInvocation invocation;
+
+			if (myId == null) {
+				myId = myResource.getIdElement();
+			}
+
+			if (myId == null || !myId.hasIdPart()) {
+				throw new InvalidRequestException(Msg.code(2087) + "No ID supplied for resource to update, can not invoke server");
+			}
+			invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
+
+			addPreferHeader(myPrefer, invocation);
+
+			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
+
+			return invoke(null, binding, invocation);
+		}
+
+		@Override
+		public IUpdateWithRewriteExecutable prefer(PreferReturnEnum theReturn) {
+			myPrefer = theReturn;
+			return this;
+		}
+
+		@Override
+		public IUpdateWithRewriteTyped resource(IBaseResource theResource) {
+			Validate.notNull(theResource, "Resource can not be null");
+			myResource = theResource;
+			return this;
+		}
+
+		@Override
+		public IUpdateWithRewriteTyped resource(String theResourceBody) {
+			Validate.notBlank(theResourceBody, "Body can not be null or blank");
+			myResourceBody = theResourceBody;
+			return this;
+		}
+
+		@Override
+		public IUpdateWithRewriteExecutable withId(IIdType theId) {
+			if (theId == null) {
+				throw new NullPointerException(Msg.code(2088) + "theId can not be null");
+			}
+			if (!theId.hasIdPart()) {
+				throw new NullPointerException(Msg.code(2089) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
+			}
+			myId = theId;
+			return this;
+		}
+
+		@Override
+		public IUpdateWithRewriteExecutable withId(String theId) {
+			if (theId == null) {
+				throw new NullPointerException(Msg.code(2090) + "theId can not be null");
+			}
+			if (isBlank(theId)) {
+				throw new NullPointerException(Msg.code(2091) + "theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
 			return this;

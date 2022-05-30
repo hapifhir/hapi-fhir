@@ -20,15 +20,27 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
-import ca.uhn.fhir.rest.gclient.*;
+import ca.uhn.fhir.rest.gclient.ICreate;
+import ca.uhn.fhir.rest.gclient.IDelete;
+import ca.uhn.fhir.rest.gclient.IFetchConformanceUntyped;
+import ca.uhn.fhir.rest.gclient.IGetPage;
+import ca.uhn.fhir.rest.gclient.IHistory;
+import ca.uhn.fhir.rest.gclient.IMeta;
+import ca.uhn.fhir.rest.gclient.IOperation;
+import ca.uhn.fhir.rest.gclient.IPatch;
+import ca.uhn.fhir.rest.gclient.IRead;
+import ca.uhn.fhir.rest.gclient.ITransaction;
+import ca.uhn.fhir.rest.gclient.IUntypedQuery;
+import ca.uhn.fhir.rest.gclient.IUpdate;
+import ca.uhn.fhir.rest.gclient.IUpdateWithRewrite;
+import ca.uhn.fhir.rest.gclient.IValidate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IGenericClient extends IRestfulClient {
 
@@ -193,7 +205,7 @@ public interface IGenericClient extends IRestfulClient {
 
 	/**
 	 * Implementation of the "instance update" method.
-	 * 
+	 *
 	 * @param theId
 	 *           The ID to update
 	 * @param theResource
@@ -205,13 +217,19 @@ public interface IGenericClient extends IRestfulClient {
 	MethodOutcome update(String theId, IBaseResource theResource);
 
 	/**
+	 * Fluent method for the "update with history rewrite" operation, which updates a resource's historical version
+	 * instance on the server
+	 */
+	IUpdateWithRewrite updateHistoryRewrite();
+
+	/**
 	 * Validate a resource
 	 */
 	IValidate validate();
 
 	/**
 	 * Implementation of the "type validate" method.
-	 * 
+	 *
 	 * @param theResource
 	 *           The resource to validate
 	 * @return An outcome containing any validation issues
