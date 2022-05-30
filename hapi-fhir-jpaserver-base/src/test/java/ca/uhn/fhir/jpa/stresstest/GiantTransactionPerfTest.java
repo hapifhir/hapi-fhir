@@ -355,11 +355,6 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable findForIdAndVersion(long theId, long theVersion) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public Slice<Long> findForResourceId(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}

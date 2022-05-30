@@ -1409,6 +1409,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return;
 		}
 		ResourceHistoryTable currentVersionEntity = theEntity.getCurrentVersionEntity();
+		if (currentVersionEntity == null) {
+			return;
+		}
 		//If the current entity is no longer in LOB territory, migrate it to text column.
 		byte[] resourceBytes = currentVersionEntity.getResource();
 		if (resourceBytes != null && resourceBytes.length > 0) {
