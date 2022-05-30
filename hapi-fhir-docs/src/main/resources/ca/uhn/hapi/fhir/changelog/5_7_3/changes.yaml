@@ -1,7 +1,7 @@
 ---
 - item:
-  type: "fix"
-  title: "This version specifically modifies reindex to support moving data from the RES_TEXT to the RES_TEXT_VC column in the HFJ_RES_VER table. This is especially important
+    type: "fix"
+    title: "This version specifically modifies reindex to support moving data from the RES_TEXT to the RES_TEXT_VC column in the HFJ_RES_VER table. This is especially important
   for PostgreSQL users, as the RES_TEXT column only has an addressable space of about 4 billion resources.
 
 Any installation that exceeds this amount of resources stored in the RES_TEXT will experience that the software hangs on attempting to store new resources.
