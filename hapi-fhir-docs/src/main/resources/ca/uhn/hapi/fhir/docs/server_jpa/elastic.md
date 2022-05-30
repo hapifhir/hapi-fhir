@@ -23,8 +23,46 @@ The Extended Lucene string search indexing supports the default search, as well 
 
 The Extended Lucene Indexing supports the default token search by code, system, or system+code, 
 as well as with the `:text` modifier.
-The `:text` modifier provides the same Simple Query Syntax used by string `:text` searches.
+The `:text` modifier provides the same Simple Query Syntax used by string `:text` searches.  
 See https://www.hl7.org/fhir/search.html#token.
+
+
+## Quantity search
+
+The Extended Lucene Indexing supports the quantity search.  
+See https://www.hl7.org/fhir/search.html#quantity.
+
+
+## URI search
+
+The Extended Lucene Indexing supports the URI search.  
+See https://www.hl7.org/fhir/search.html#uri.  
+
+
+## Date search
+
+We support date searches using the eq, ne, lt, gt, ge, and le comparisons.  
+See https://www.hl7.org/fhir/search.html#date.  
+
+
+## Supported Parameters for all resources
+| Parameter  | Supported | type |
+| ------------- | ------------- | ------------- |
+| _id | no | |
+| _lastUpdated | yes | date | 
+| _tag | yes | token |
+| _profile | yes | URI |
+| _security | yes | token |
+| _text | yes | string |
+| _content | yes | string |
+| _list | no |
+| _has | no |
+| _type | no |
+
+## Additional supported Parameters
+| Parameter  | Supported | type |
+| ------------- | ------------- | ------------- |
+| _source | yes | URI |
 
 ## ValueSet autocomplete extension
 

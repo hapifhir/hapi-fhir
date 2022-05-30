@@ -43,7 +43,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 @TestPropertySource(properties = {
 	"mdm.prevent_multiple_eids=false"
 })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmEventIT extends BaseMdmR4Test {
 

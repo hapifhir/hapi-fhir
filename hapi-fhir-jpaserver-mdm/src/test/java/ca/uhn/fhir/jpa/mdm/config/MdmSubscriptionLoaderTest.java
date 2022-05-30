@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
+import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.model.api.IFhirVersion;
@@ -56,6 +57,9 @@ class MdmSubscriptionLoaderTest {
 
 	@Mock
 	IChannelNamer myChannelNamer;
+
+	@Mock
+	SubscriptionLoader mySubscriptionLoader;
 
 	@InjectMocks
 	MdmSubscriptionLoader mySvc = new MdmSubscriptionLoader();
