@@ -1,5 +1,5 @@
 ---
-type: security
-issue: 3514
+type: fix
+issue: 3654
 title: "Modify reindexing to migrate data HFJ_RES_VER data from the RES_TEXT column to the RES_TEXT_VC 
 if the resource's size falls outside of the configuration defined in DaoConfig's `getInlineResourceTextBelowSize` property."
