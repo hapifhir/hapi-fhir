@@ -1315,6 +1315,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					changed.setChanged(true);
 				}
 
+
 				if (changed.isChanged()) {
 
 					// Make sure that the match URL was actually appropriate for the supplied
@@ -1465,6 +1466,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		return entity;
 	}
+
+
 
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
