@@ -1315,7 +1315,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					changed.setChanged(true);
 				}
 
-				handleLobToTextFieldConversionForHistoricalEntities(entity);
 
 				if (changed.isChanged()) {
 
@@ -1468,25 +1467,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
-	private void handleLobToTextFieldConversionForHistoricalEntities(ResourceTable theEntity) {
-		if (myDaoConfig.getInlineResourceTextBelowSize() <= 0 ) {
-			return;
-		}
-		ResourceHistoryTable currentVersionEntity = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
-		//If the current entity is no longer in LOB territory, migrate it to text column.
-		byte[] resourceBytes = currentVersionEntity.getResource();
-		if (resourceBytes != null && resourceBytes.length > 0) {
-			String decodedResourceText = decodeResource(resourceBytes, currentVersionEntity.getEncoding());
-			if (shouldMigrateToTextField(decodedResourceText)) {
-				currentVersionEntity.setResource(null);
-				currentVersionEntity.setResourceTextVc(decodedResourceText);
-				myResourceHistoryTableDao.save(currentVersionEntity);
-			}
-		}
-	}
-	private boolean shouldMigrateToTextField(String resourceString) {
-		return resourceString.length() < getConfig().getInlineResourceTextBelowSize();
-	}
+
 
 	private void createHistoryEntry(RequestDetails theRequest, IBaseResource theResource, ResourceTable theEntity, EncodedResource theChanged) {
 		boolean versionedTags = getConfig().getTagStorageMode() == DaoConfig.TagStorageModeEnum.VERSIONED;
