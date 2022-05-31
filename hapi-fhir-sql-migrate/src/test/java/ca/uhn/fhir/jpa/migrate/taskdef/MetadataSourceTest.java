@@ -31,6 +31,8 @@ class MetadataSourceTest {
 		"POSTGRES_9_4,,true",
 		"ORACLE_12C,,true",
 		"COCKROACHDB_21_1,,true",
+		// sql server only supports it in Enterprise
+		// https://docs.microsoft.com/en-us/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16#RDBMSHA
 		"MSSQL_2012,Developer Edition (64-bit),false",
 		"MSSQL_2012,Developer Edition (64-bit),false",
 		"MSSQL_2012,Standard Edition (64-bit),false",
