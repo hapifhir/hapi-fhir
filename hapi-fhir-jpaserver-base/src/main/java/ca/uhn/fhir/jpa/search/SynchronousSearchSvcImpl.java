@@ -176,15 +176,20 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				bundleProvider.setCurrentPageSize(theParams.getCount());
 			}
 
-			int bundleSize = resources.size();
-
 			if (wantCount) {
-				bundleSize = count.intValue();
+				bundleProvider.setSize(count.intValue());
+			} else {
+				Integer queryCount = getQueryCount(theLoadSynchronousUpTo, theParams);
+				if (queryCount == null || queryCount > resources.size()) {
+					// No limit, last page or everything was fetched within the limit
+					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), resources.size()));
+				} else {
+					bundleProvider.setSize(null);
+				}
 			}
 
-			bundleProvider.setSize(bundleSize);
-
 			bundleProvider.setPreferredPageSize(theParams.getCount());
+
 			return bundleProvider;
 		});
 	}

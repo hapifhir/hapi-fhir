@@ -270,10 +270,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
 			int toIndex = fromIndex + submittableCount;
 
-			if (nonNull(search)) {
-				// we already have data from the initial step therefor adjust what we can submit (search.size())
+			if (nonNull(search) && isNotEmpty(search.getAllResources())) {
+				// we already have data from the initial step therefor adjust what we can submit (getAllResources().size())
 				// according to what we have room to submit (submittableCount)
-				toIndex = Math.min(toIndex, search.size());
+				toIndex = Math.min(toIndex, search.getAllResources().size());
 
 				ourLog.info("Triggered job[{}] sublisting to index {}", theJobDetails.getJobId(), toIndex - 1);
 				allCurrentResources = search.getAllResources().subList(0, toIndex);
