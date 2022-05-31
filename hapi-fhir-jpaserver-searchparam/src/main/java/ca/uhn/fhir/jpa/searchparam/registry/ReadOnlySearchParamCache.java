@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.Validate;
@@ -33,7 +34,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 public class ReadOnlySearchParamCache {
 
 	// resourceName -> searchParamName -> searchparam
-	protected final Map<String, Map<String, RuntimeSearchParam>> myResourceNameToSpNameToSp;
+	protected final Map<String, ResourceSearchParams> myResourceNameToSpNameToSp;
 	protected final Map<String, RuntimeSearchParam> myUrlToParam;
 
 	/**
@@ -65,12 +65,12 @@ public class ReadOnlySearchParamCache {
 		return myResourceNameToSpNameToSp.values().stream().flatMap(entry -> entry.values().stream());
 	}
 
-	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
-		Map<String, RuntimeSearchParam> retVal = myResourceNameToSpNameToSp.get(theResourceName);
-		if (retVal == null) {
-			return Collections.emptyMap();
+	protected ResourceSearchParams getSearchParamMap(String theResourceName) {
+		ResourceSearchParams retval = myResourceNameToSpNameToSp.get(theResourceName);
+		if (retval == null) {
+			return ResourceSearchParams.empty(theResourceName);
 		}
-		return Collections.unmodifiableMap(myResourceNameToSpNameToSp.get(theResourceName));
+		return retval.readOnly();
 	}
 
 	public int size() {
@@ -100,6 +100,7 @@ public class ReadOnlySearchParamCache {
 		}
 
 		if (allSearchParameterBundle != null) {
+			// For each SearchParameter resource in the bundle of all search parameters defined in this version of FHIR
 			for (IBaseResource next : BundleUtil.toListOfResources(theFhirContext, allSearchParameterBundle)) {
 				RuntimeSearchParam nextCanonical = theCanonicalizer.canonicalizeSearchParameter(next);
 
@@ -127,26 +128,29 @@ public class ReadOnlySearchParamCache {
 						base = resourceNames;
 					}
 
+					// Add it to our return value if permitted by the pattern parameters
 					for (String nextResourceName : base) {
-						Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new HashMap<>());
+						ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 						String nextParamName = nextCanonical.getName();
 						if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-							nameToParam.putIfAbsent(nextParamName, nextCanonical);
+							resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextCanonical);
 						}
 					}
 				}
 			}
 		}
 
+		// Now grab all the runtime search parameters from the resource definitions
 		for (String resourceName : resourceNames) {
 			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
 			String nextResourceName = nextResDef.getName();
 
-			Map<String, RuntimeSearchParam> nameToParam = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new HashMap<>());
+			ResourceSearchParams resourceSearchParams = retVal.myResourceNameToSpNameToSp.computeIfAbsent(nextResourceName, t -> new ResourceSearchParams(nextResourceName));
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 				String nextParamName = nextSp.getName();
+				// Add it to our return value if permitted by the pattern parameters
 				if (theSearchParamPatternsToInclude == null || searchParamMatchesAtLeastOnePattern(theSearchParamPatternsToInclude, nextResourceName, nextParamName)) {
-					nameToParam.putIfAbsent(nextParamName, nextSp);
+					resourceSearchParams.addSearchParamIfAbsent(nextParamName, nextSp);
 				}
 			}
 		}

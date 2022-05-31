@@ -37,6 +37,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -249,7 +251,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	 * If the partition has both, they are validated to ensure that they correspond.
 	 */
 	@Nonnull
-	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, String theResourceType) {
+	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, @Nonnull String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
 		if (retVal.getPartitionNames() != null) {
@@ -260,18 +262,25 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		// Note: It's still possible that the partition only has a date but no name/id
 
+		if (StringUtils.isNotBlank(theResourceType)) {
+			validateHasPartitionPermissions(theRequest, theResourceType, retVal);
+		}
+
+		return retVal;
+
+	}
+
+	public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
-			RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			RuntimeResourceDefinition runtimeResourceDefinition;
+			runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			HookParams params = new HookParams()
-				.add(RequestPartitionId.class, retVal)
+				.add(RequestPartitionId.class, theRequestPartitionId)
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(RuntimeResourceDefinition.class, runtimeResourceDefinition);
 			doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
 		}
-
-		return retVal;
-
 	}
 
 	private RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {

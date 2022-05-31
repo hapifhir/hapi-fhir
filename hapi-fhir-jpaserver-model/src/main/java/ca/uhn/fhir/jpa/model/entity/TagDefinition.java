@@ -33,6 +33,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -42,9 +43,15 @@ import java.io.Serializable;
 import java.util.Collection;
 
 @Entity
-@Table(name = "HFJ_TAG_DEF", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE"})
-})
+@Table(
+	name = "HFJ_TAG_DEF",
+	indexes = {
+		@Index(name = "IDX_TAG_DEF_TP_CD_SYS", columnList = "TAG_TYPE, TAG_CODE, TAG_SYSTEM, TAG_ID"),
+	},
+	uniqueConstraints = {
+		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = {"TAG_TYPE", "TAG_SYSTEM", "TAG_CODE"})
+	}
+)
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;

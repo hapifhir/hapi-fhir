@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 3468
+title: "The resource JSON can now be stored and retrieved in the Lucene/Elasticsearch index.  This enables some queries 
+ to provide results without using the database.  This is enabled via `DaoConfig.setStoreResourceInLuceneIndex()`"

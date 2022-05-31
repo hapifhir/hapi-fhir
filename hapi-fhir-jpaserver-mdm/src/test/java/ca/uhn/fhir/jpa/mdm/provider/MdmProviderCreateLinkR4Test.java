@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.provider;
+
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -17,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
@@ -41,6 +44,53 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
+	}
+
+	@Test
+	public void testCreateLinkWithMatchResultOnSamePartition() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		assertLinkCount(1);
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Patient patient = createPatientOnPartition(buildPatientWithNameAndId("PatientGiven", "ID.PatientGiven.123"), true, false, requestPartitionId);
+		StringType patientId = new StringType(patient.getIdElement().getValue());
+
+		Patient sourcePatient = createPatientOnPartition(buildPatientWithNameAndId("SourcePatientGiven", "ID.SourcePatientGiven.123"), true, false, requestPartitionId);
+		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
+
+		myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
+		assertLinkCount(2);
+
+		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		assertEquals(links.size(), 1);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
+		assertNotNull(links.get(0).getPartitionId());
+		assertEquals(1, links.get(0).getPartitionId().getPartitionId());
+	}
+
+	@Test
+	public void testCreateLinkWithMatchResultOnDifferentPartitions() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		assertLinkCount(1);
+
+		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
+		Patient patient = createPatientOnPartition(buildPatientWithNameAndId("PatientGiven", "ID.PatientGiven.123"), true, false, requestPartitionId1);
+		StringType patientId = new StringType(patient.getIdElement().getValue());
+
+		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
+		Patient sourcePatient = createPatientOnPartition(buildPatientWithNameAndId("SourcePatientGiven", "ID.SourcePatientGiven.123"), true, false, requestPartitionId2);
+		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
+
+		try {
+			myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), endsWith("This operation is only available for resources on the same partition."));
+		}
 	}
 
 	@Test

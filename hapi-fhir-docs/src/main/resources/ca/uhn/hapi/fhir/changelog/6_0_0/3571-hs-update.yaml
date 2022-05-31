@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3571
+title: "Hibernate search has been updated to 6.1.4, which adds support for Elasticsearch 7.16.X. Previous installations running on 7.10.X will continue to work normally, and this change does not
+require you to upgrade your elasticsearch service."

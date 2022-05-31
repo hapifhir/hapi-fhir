@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3569
+title: "The normalized and exact string database indexes have been changed to provide faster string searches."

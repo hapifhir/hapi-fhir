@@ -59,10 +59,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	// This is used for sorting, and for :contains queries currently
 	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
 
-	@Index(name = "IDX_SP_STRING_HASH_NRM", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED"),
-	@Index(name = "IDX_SP_STRING_HASH_EXCT", columnList = "HASH_EXACT"),
+	@Index(name = "IDX_SP_STRING_HASH_NRM_V2", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_STRING_HASH_EXCT_V2", columnList = "HASH_EXACT,RES_ID,PARTITION_ID"),
 
-	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
@@ -80,8 +79,9 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private Long myId;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	private ResourceTable myResourceTable;
+	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false,
+		foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
+	private ResourceTable myResource;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
 	private String myValueExact;
@@ -298,4 +298,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

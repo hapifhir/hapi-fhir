@@ -37,6 +37,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
@@ -166,7 +167,9 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
-		return (IAnyResource) theMsg.getNewPayload(myFhirContext);
+		IBaseResource newPayload = theMsg.getNewPayload(myFhirContext);
+		newPayload.setUserData(Constants.RESOURCE_PARTITION_ID, theMsg.getPartitionId());
+		return (IAnyResource) newPayload;
 	}
 
 	private void handleUpdateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {

@@ -44,7 +44,7 @@ public class BatchJobConfig {
 
 	@Bean
 	@StepScope
-	public ItemReader<String> reader() {
+	public SampleItemReader reader() {
 		return new SampleItemReader();
 	}
 

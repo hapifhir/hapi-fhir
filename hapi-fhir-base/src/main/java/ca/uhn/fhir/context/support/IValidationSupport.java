@@ -24,10 +24,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -84,13 +86,34 @@ public interface IValidationSupport {
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theExpansionOptions         If provided (may be <code>null</code>), contains options controlling the expansion
+	 * @param theExpansionOptions         If provided (can be <code>null</code>), contains options controlling the expansion
 	 * @param theValueSetToExpand         The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
 	@Nullable
 	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		return null;
+	}
+
+	/**
+	 * Expands the given portion of a ValueSet by canonical URL.
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theExpansionOptions         If provided (can be <code>null</code>), contains options controlling the expansion
+	 * @param theValueSetUrlToExpand      The valueset that should be expanded
+	 * @return The expansion, or null
+	 * @throws ResourceNotFoundException If no ValueSet can be found with the given URL
+	 * @since 6.0.0
+	 */
+	@Nullable
+	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetUrlToExpand) throws ResourceNotFoundException {
+		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
+		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
+		if (valueSet == null) {
+			throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
+		}
+		return expandValueSet(theValidationSupportContext, theExpansionOptions, valueSet);
 	}
 
 	/**
@@ -225,7 +248,7 @@ public interface IValidationSupport {
 	}
 
 	/**
-	 * Fetch the given ValueSet by URL
+	 * Fetch the given ValueSet by URL, or returns null if one can't be found for the given URL
 	 */
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
@@ -235,7 +258,7 @@ public interface IValidationSupport {
 	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
-	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
+	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -246,14 +269,14 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 */
 	@Nullable
-	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 
 	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
-	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
+	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
@@ -275,7 +298,7 @@ public interface IValidationSupport {
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language, to return all designation, the this value to null
+	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
 	@Nullable
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
@@ -294,7 +317,7 @@ public interface IValidationSupport {
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 	}
-	
+
 	/**
 	 * Returns <code>true</code> if the given valueset can be validated by the given
 	 * validation support module
@@ -784,21 +807,43 @@ public interface IValidationSupport {
 
 
 	class TranslateCodeRequest {
-		private final String mySourceSystemUrl;
-		private final String mySourceCode;
+		private List<IBaseCoding> myCodings;
 		private final String myTargetSystemUrl;
-		private final int myHashCode;
+		private final String myConceptMapUrl;
+		private final String myConceptMapVersion;
+		private final String mySourceValueSetUrl;
+		private final String myTargetValueSetUrl;
+		private final Long myResourcePid;
+		private final boolean myReverse;
 
-		public TranslateCodeRequest(String theSourceSystemUrl, String theSourceCode, String theTargetSystemUrl) {
-			mySourceSystemUrl = theSourceSystemUrl;
-			mySourceCode = theSourceCode;
+		public TranslateCodeRequest(List<IBaseCoding> theCodings, String theTargetSystemUrl) {
+			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
+			myConceptMapUrl = null;
+			myConceptMapVersion = null;
+			mySourceValueSetUrl = null;
+			myTargetValueSetUrl = null;
+			myResourcePid = null;
+			myReverse = false;
+		}
 
-			myHashCode = new HashCodeBuilder(17, 37)
-				.append(mySourceSystemUrl)
-				.append(mySourceCode)
-				.append(myTargetSystemUrl)
-				.toHashCode();
+		public TranslateCodeRequest(
+				List<IBaseCoding> theCodings,
+				String theTargetSystemUrl,
+				String theConceptMapUrl,
+				String theConceptMapVersion,
+				String theSourceValueSetUrl,
+				String theTargetValueSetUrl,
+				Long theResourcePid,
+				boolean theReverse) {
+			myCodings = theCodings;
+			myTargetSystemUrl = theTargetSystemUrl;
+			myConceptMapUrl = theConceptMapUrl;
+			myConceptMapVersion = theConceptMapVersion;
+			mySourceValueSetUrl = theSourceValueSetUrl;
+			myTargetValueSetUrl = theTargetValueSetUrl;
+			myResourcePid = theResourcePid;
+			myReverse = theReverse;
 		}
 
 		@Override
@@ -814,30 +859,63 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-				.append(mySourceSystemUrl, that.mySourceSystemUrl)
-				.append(mySourceCode, that.mySourceCode)
+				.append(myCodings, that.myCodings)
 				.append(myTargetSystemUrl, that.myTargetSystemUrl)
+				.append(myConceptMapUrl, that.myConceptMapUrl)
+				.append(myConceptMapVersion, that.myConceptMapVersion)
+				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
+				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
+				.append(myResourcePid, that.myResourcePid)
+				.append(myReverse, that.myReverse)
 				.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
-			return myHashCode;
+			return new HashCodeBuilder(17, 37)
+				.append(myCodings)
+				.append(myTargetSystemUrl)
+				.append(myConceptMapUrl)
+				.append(myConceptMapVersion)
+				.append(mySourceValueSetUrl)
+				.append(myTargetValueSetUrl)
+				.append(myResourcePid)
+				.append(myReverse)
+				.toHashCode();
 		}
 
-		public String getSourceSystemUrl() {
-			return mySourceSystemUrl;
-		}
-
-		public String getSourceCode() {
-			return mySourceCode;
+		public List<IBaseCoding> getCodings() {
+			return myCodings;
 		}
 
 		public String getTargetSystemUrl() {
 			return myTargetSystemUrl;
 		}
-	}
 
+		public String getConceptMapUrl() {
+			return myConceptMapUrl;
+		}
+
+		public String getConceptMapVersion() {
+			return myConceptMapVersion;
+		}
+
+		public String getSourceValueSetUrl() {
+			return mySourceValueSetUrl;
+		}
+
+		public String getTargetValueSetUrl() {
+			return myTargetValueSetUrl;
+		}
+
+		public Long getResourcePid() {
+			return myResourcePid;
+		}
+
+		public boolean isReverse() {
+			return myReverse;
+		}
+	}
 
 
 }

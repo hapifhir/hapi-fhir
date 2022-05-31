@@ -82,7 +82,6 @@ public class RuleBulkExportImpl extends BaseRule {
 				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 			}
 		}
-
 		return null;
 	}
 

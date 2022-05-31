@@ -20,6 +20,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +56,7 @@ class CandidateSearcherTest {
 		SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
 
 		bundleProvider.setSize(candidateSearchLimit + offset);
-		when(dao.search(map)).thenReturn(bundleProvider);
+		when(dao.search(eq(map), any())).thenReturn(bundleProvider);
 
 		Optional<IBundleProvider> result = myCandidateSearcher.search(resourceType, criteria);
 

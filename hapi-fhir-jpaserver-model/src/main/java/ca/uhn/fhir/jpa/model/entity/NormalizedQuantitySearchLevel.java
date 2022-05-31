@@ -45,7 +45,7 @@ public enum NormalizedQuantitySearchLevel {
 	 * and {@link ResourceIndexedSearchParamQuantityNormalized}, 
 	 * {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching.
 	 */
-	NORMALIZED_QUANTITY_SEARCH_SUPPORTED,
+	NORMALIZED_QUANTITY_SEARCH_SUPPORTED;
 
 	/**
 	 * Quantity is stored in only in {@link ResourceIndexedSearchParamQuantityNormalized}, 
@@ -55,4 +55,11 @@ public enum NormalizedQuantitySearchLevel {
 	 */
 	// When this is enabled, we can enable testSortByQuantityWithNormalizedQuantitySearchFullSupported()
 	//NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED,
+
+	public boolean storageOrSearchSupported() {
+			return this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED)
+				||  this.equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+	}
+
+
 }

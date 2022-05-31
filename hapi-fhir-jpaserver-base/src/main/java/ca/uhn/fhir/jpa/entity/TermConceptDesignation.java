@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Column;
@@ -145,5 +147,18 @@ public class TermConceptDesignation implements Serializable {
 
 	public Long getPid() {
 		return myId;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("conceptPid", myConcept.getId())
+			.append("pid", myId)
+			.append("language", myLanguage)
+			.append("useSystem", myUseSystem)
+			.append("useCode", myUseCode)
+			.append("useDisplay", myUseDisplay)
+			.append("value", myValue)
+			.toString();
 	}
 }

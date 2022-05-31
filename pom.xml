@@ -6,17 +6,15 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>5.7.3</version>
+	<version>6.1.0-PRE2-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
-
 
 	<organization>
 		<name>Smile CDR, Inc.</name>
 		<url>https://smilecdr.com</url>
 	</organization>
-
 
 	<inceptionYear>2014</inceptionYear>
 
@@ -47,15 +45,6 @@
 	</scm>
 
 	<repositories>
-		<!--
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		-->
 		<repository>
 			<id>oss-snapshot</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -69,9 +58,6 @@
 	</repositories>
 
 	<dependencies>
-		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
-		<!-- <dependency> <groupId>net.sourceforge.cobertura</groupId> <artifactId>cobertura</artifactId> <version>2.1.1</version> <scope>provided</scope> <exclusions> <exclusion> <artifactId>jetty</artifactId>
-			<groupId>org.mortbay.jetty</groupId> </exclusion> </exclusions> </dependency> -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -756,6 +742,11 @@
 		<developer>
 			<id>tarekmamdouh</id>
 		</developer>
+		<developer>
+			<id>JoeShook</id>
+			<name>Joe Shook</name>
+			<organization>Surescripts LLC</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -767,7 +758,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.27</fhir_core_version>
+        <fhir_core_version>5.6.36</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -810,17 +801,17 @@
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.8.2</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>8.4.1</flyway_version>
+        <flyway_version>8.5.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
-        <hibernate_search_version>6.0.3.Final</hibernate_search_version>
+        <hibernate_search_version>6.1.4.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
-        <lucene_version>8.7.0</lucene_version>
+        <lucene_version>8.11.1</lucene_version>
         <hamcrest_version>2.2</hamcrest_version>
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
-        <jackson_version>2.13.1</jackson_version>
-        <jackson_databind_version>${jackson_version}</jackson_databind_version>
+        <jackson_version>2.13.2</jackson_version>
+        <jackson_databind_version>2.13.2.2</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
         <okhttp_version>3.8.1</okhttp_version>
@@ -835,14 +826,14 @@
         <swagger_version>2.1.12</swagger_version>
         <slf4j_version>1.7.33</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
-        <spring_version>5.3.18</spring_version>
+        <spring_version>5.3.20</spring_version>
         <spring_data_version>2.6.1</spring_data_version>
         <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.6.2</spring_boot_version>
+        <spring_boot_version>2.6.7</spring_boot_version>
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
-        <testcontainers_version>1.16.2</testcontainers_version>
+        <testcontainers_version>1.17.1</testcontainers_version>
         <thymeleaf-version>3.0.14.RELEASE</thymeleaf-version>
         <woodstox_core_asl_version>4.4.1</woodstox_core_asl_version>
 
@@ -862,6 +853,10 @@
         <fontawesomeVersion>5.4.1</fontawesomeVersion>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+		  <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.testSource>17</maven.compiler.testSource>
+		  <maven.compiler.testTarget>17</maven.compiler.testTarget>
+		  <maven.compiler.testRelease>17</maven.compiler.testRelease>
     </properties>
 
 	<dependencyManagement>
@@ -912,9 +907,24 @@
 				<version>${jackson_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path</artifactId>
+				<version>2.5.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.jayway.jsonpath</groupId>
+				<artifactId>json-path-assert</artifactId>
+				<version>2.5.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.github.ben-manes.caffeine</groupId>
 				<artifactId>caffeine</artifactId>
 				<version>${caffeine_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.graphql-java</groupId>
+				<artifactId>graphql-java</artifactId>
+				<version>17.3</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -926,13 +936,13 @@
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
 				<version>1.6.4</version>
-				<scope>test</scope>
+				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail-junit5</artifactId>
 				<version>1.6.4</version>
-				<scope>test</scope>
+				<scope>compile</scope>
 			</dependency>
 			<!-- mail end -->
 			<dependency>
@@ -1179,7 +1189,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.27</version>
+				<version>8.0.28</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1189,7 +1199,7 @@
 			<dependency>
 				 <groupId>net.sourceforge.htmlunit</groupId>
 				 <artifactId>htmlunit</artifactId>
-				 <version>2.56.0</version>
+				 <version>2.58.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1607,7 +1617,7 @@
 				-->
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.10.2</version>
+				<version>7.17.3</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -1617,20 +1627,7 @@
 						<groupId>org.yaml</groupId>
 						<artifactId>*</artifactId>
 					</exclusion>
-					<exclusion>
-						<!-- Elastic have repackaged net.java.dev.jna, but we need a newer version to support Mac ARM. Managed below. -->
-						<groupId>org.elasticsearch</groupId>
-						<artifactId>jna</artifactId>
-					</exclusion>
 				</exclusions>
-			</dependency>
-			<!--  Upgrade testcontainers and elasticsearch dependency for Mac M1 ARM64 support.
-			  We can delete this once testcontainers and elasticsearch upgrade. -->
-			<dependency>
-				<groupId>net.java.dev.jna</groupId>
-				<artifactId>jna</artifactId>
-				<version>5.8.0</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1686,7 +1683,7 @@
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>2.7.2</version>
+				<version>3.0.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -1701,12 +1698,26 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.3.2</version>
+				<version>42.3.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>2.3.2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.zaxxer</groupId>
+						<artifactId>HikariCP-java7</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>c3p0</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.mchange</groupId>
+						<artifactId>mchange-commons-java</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1991,12 +2002,12 @@
 							<artifactId>checkstyle</artifactId>
 							<version>8.43</version>
 						</dependency>
-						<dependency>
-							 <groupId>ca.uhn.hapi.fhir</groupId>
-							 <artifactId>hapi-fhir-checkstyle</artifactId>
-							<!-- Remember to bump this when you upgrade the version -->
-							 <version>5.7.3</version>
-						</dependency>
+                        <dependency>
+                            <groupId>ca.uhn.hapi.fhir</groupId>
+                            <artifactId>hapi-fhir-checkstyle</artifactId>
+									<!-- Remember to bump this when you upgrade the version -->
+                            <version>6.1.0-PRE2-SNAPSHOT</version>
+                        </dependency>
 					</dependencies>
 				</plugin>
 				<plugin>
@@ -2048,10 +2059,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.1</version>
+					<version>3.10.1</version>
 					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
 						<encoding>UTF-8</encoding>
 						<fork>true</fork>
@@ -2137,11 +2146,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>buildnumber-maven-plugin</artifactId>
 					<version>1.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.20</version>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -2314,10 +2318,10 @@
 									<version>3.5.4</version>
 								</requireMavenVersion>
 								<requireJavaVersion>
-									<version>11</version>
+									<version>17</version>
 									<message>
-										HAPI FHIR is still targeting JDK 8 for published binaries, but we require JDK 11
-										to build and test this library.
+										HAPI FHIR is targeting JDK 11 for published binaries,
+										but we require JDK 17 to build and test this library.
 									</message>
 								</requireJavaVersion>
 							</rules>
@@ -2360,6 +2364,9 @@
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
 									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
+								</copy>
+								<copy todir="target/site/apidocs-storage-batch2">
+									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-client">
 									<fileset dir="hapi-fhir-client/target/site/apidocs"/>
@@ -2796,6 +2803,9 @@
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
 				<module>hapi-fhir-storage</module>
+				<module>hapi-fhir-storage-batch2</module>
+				<module>hapi-fhir-storage-batch2-jobs</module>
+				<module>hapi-fhir-storage-test-utilities</module>
 				<module>hapi-fhir-jpaserver-cql</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
@@ -2966,15 +2976,53 @@
 							<execution><id>validate</id><phase>none</phase></execution>
 						</executions>
 					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>LGTM</id>
+			<build>
+				<plugins>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>animal-sniffer-maven-plugin</artifactId>
-						<executions>
-							<execution><id>check-java-api</id><phase>none</phase></execution>
-						</executions>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
+
+		<!--
+		This profile is basically here to work around an IJ bug where the
+		<testSource> tag is ignored in IJ's compiler. See:
+		https://youtrack.jetbrains.com/issue/IDEA-85478
+		-->
+		<profile>
+			<id>ide</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>idea.maven.embedder.version</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>17</source>
+							<target>17</target>
+							<release>17</release>
+							<testSource>17</testSource>
+							<testTarget>17</testTarget>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
 	</profiles>
 </project>

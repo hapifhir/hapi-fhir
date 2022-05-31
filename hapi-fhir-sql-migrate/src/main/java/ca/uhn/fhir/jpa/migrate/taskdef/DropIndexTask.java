@@ -32,6 +32,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
+import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -44,63 +45,82 @@ public class DropIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
+	private boolean myOnline;
 
 	public DropIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
 	}
 
-	static List<String> createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
-		Validate.notBlank(theIndexName, "theIndexName must not be blank");
-		Validate.notBlank(theTableName, "theTableName must not be blank");
+	List<String> generateSql() throws SQLException {
+		Validate.notBlank(myIndexName, "indexName must not be blank");
+		Validate.notBlank(getTableName(), "tableName must not be blank");
 
-		if (!JdbcUtils.getIndexNames(theConnectionProperties, theTableName).contains(theIndexName)) {
+		if (!JdbcUtils.getIndexNames(getConnectionProperties(), getTableName()).contains(myIndexName)) {
 			return Collections.emptyList();
 		}
+		boolean isUnique = JdbcUtils.isIndexUnique(getConnectionProperties(), getTableName(), myIndexName);
 
-		boolean isUnique = JdbcUtils.isIndexUnique(theConnectionProperties, theTableName, theIndexName);
+		return doGenerateSql(isUnique);
+	}
 
+	// testable without jdbc
+	@Nonnull
+	List<String> doGenerateSql(boolean isUnique) {
+		DriverTypeEnum driverType = getDriverType();
 		List<String> sql = new ArrayList<>();
 
 		if (isUnique) {
 			// Drop constraint
-			switch (theDriverType) {
+			switch (driverType) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
 					// Need to quote the index name as the word "PRIMARY" is reserved in MySQL
-					sql.add("alter table " + theTableName + " drop index `" + theIndexName + "`");
+					sql.add("alter table " + getTableName() + " drop index `" + myIndexName + "`");
 					break;
 				case H2_EMBEDDED:
-					sql.add("drop index " + theIndexName);
+					sql.add("drop index " + myIndexName);
 					break;
 				case DERBY_EMBEDDED:
-					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
+					sql.add("alter table " + getTableName() + " drop constraint " + myIndexName);
 					break;
 				case ORACLE_12C:
-					sql.add("drop index " + theIndexName);
+					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + theIndexName + " on " + theTableName);
+					sql.add("drop index " + myIndexName + " on " + getTableName() + (myOnline?" WITH (ONLINE = ON)":""));
 					break;
 				case POSTGRES_9_4:
-					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");
-					sql.add("drop index if exists " + theIndexName + " cascade");
+					sql.add("alter table " + getTableName() + " drop constraint if exists " + myIndexName + " cascade");
+					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + "if exists " + myIndexName + " cascade");
+					setTransactional(!myOnline);
+					break;
+				case COCKROACHDB_21_1:
+					sql.add("drop index if exists " + getTableName() + "@" + myIndexName + " cascade");
 					break;
 			}
 		} else {
 			// Drop index
-			switch (theDriverType) {
+			switch (driverType) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql.add("alter table " + theTableName + " drop index " + theIndexName);
+					sql.add("alter table " + getTableName() + " drop index " + myIndexName);
 					break;
 				case POSTGRES_9_4:
+					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + myIndexName);
+					setTransactional(!myOnline);
+					break;
 				case DERBY_EMBEDDED:
 				case H2_EMBEDDED:
+					sql.add("drop index " + myIndexName);
+					break;
 				case ORACLE_12C:
-					sql.add("drop index " + theIndexName);
+					sql.add("drop index " + myIndexName + (myOnline?" ONLINE":""));
 					break;
 				case MSSQL_2012:
-					sql.add("drop index " + theTableName + "." + theIndexName);
+					sql.add("drop index " + getTableName() + "." + myIndexName );
+					break;
+				case COCKROACHDB_21_1:
+					sql.add("drop index " + getTableName() + "@" + myIndexName);
 					break;
 			}
 		}
@@ -163,7 +183,7 @@ public class DropIndexTask extends BaseTableTask {
 		boolean isUnique = JdbcUtils.isIndexUnique(getConnectionProperties(), getTableName(), myIndexName);
 		String uniquenessString = isUnique ? "unique" : "non-unique";
 
-		List<String> sqls = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
+		List<String> sqls = generateSql();
 		if (!sqls.isEmpty()) {
 			logInfo(ourLog, "Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 		}
@@ -196,11 +216,17 @@ public class DropIndexTask extends BaseTableTask {
 		DropIndexTask otherObject = (DropIndexTask) theOtherObject;
 		super.generateEquals(theBuilder, otherObject);
 		theBuilder.append(myIndexName, otherObject.myIndexName);
+		theBuilder.append(myOnline, otherObject.myOnline);
 	}
 
 	@Override
 	protected void generateHashCode(HashCodeBuilder theBuilder) {
 		super.generateHashCode(theBuilder);
 		theBuilder.append(myIndexName);
+		theBuilder.append(myOnline);
+	}
+
+	public void setOnline(boolean theFlag) {
+		this.myOnline = theFlag;
 	}
 }

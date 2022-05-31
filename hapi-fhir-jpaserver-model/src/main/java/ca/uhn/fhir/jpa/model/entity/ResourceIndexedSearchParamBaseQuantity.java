@@ -20,14 +20,13 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourceIndexedSearchParam {
@@ -158,4 +157,5 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
 	}
+
 }

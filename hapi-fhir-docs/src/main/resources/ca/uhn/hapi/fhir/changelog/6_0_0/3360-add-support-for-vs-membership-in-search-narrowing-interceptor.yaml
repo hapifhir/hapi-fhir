@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3360
+title: "The SearchNarrowingInterceptor can now narrow searches to require a `token:in` or `token:not-in` parameter."

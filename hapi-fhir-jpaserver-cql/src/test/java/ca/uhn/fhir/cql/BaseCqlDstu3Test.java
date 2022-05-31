@@ -38,13 +38,10 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	protected
 	DaoRegistry myDaoRegistry;
 	@Autowired
-	protected
-	FhirContext myFhirContext;
-	@Autowired
-	IFhirSystemDao mySystemDao;
-	@Autowired
 	@RegisterExtension
 	protected PartitionHelper myPartitionHelper;
+	@Autowired
+	IFhirSystemDao mySystemDao;
 
 	protected int loadDataFromDirectory(String theDirectoryName) throws IOException {
 		int count = 0;
@@ -73,11 +70,6 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 	}
 
 	@Override
-	public FhirContext getFhirContext() {
-		return myFhirContext;
-	}
-
-	@Override
 	public DaoRegistry getDaoRegistry() {
 		return myDaoRegistry;
 	}
@@ -92,6 +84,16 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 		return bundle;
 	}
 
+	protected Bundle loadBundle(String theLocation) throws IOException {
+		Bundle bundle = parseBundle(theLocation);
+		return loadBundle(bundle);
+	}
+
+	@Override
+	public FhirContext getTestFhirContext() {
+		return myFhirContext;
+	}
+
 	@Configuration
 	static class Config {
 		@Bean
@@ -99,11 +101,4 @@ public class BaseCqlDstu3Test extends BaseJpaDstu3Test implements CqlProviderTes
 			return new PartitionHelper();
 		}
 	}
-
-	protected Bundle loadBundle(String theLocation) throws IOException {
-		Bundle bundle = parseBundle(theLocation);
-		return loadBundle(bundle);
-	}
-
-
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -19,7 +20,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class RuleBulkExportImplTest {
-
+	private RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
+	private Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
 	@Mock
 	private RequestDetails myRequestDetails;
 	@Mock
@@ -30,8 +32,6 @@ public class RuleBulkExportImplTest {
 	@Test
 	public void testDenyBulkRequestWithInvalidResourcesTypes() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
-		RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
 
 		Set<String> myTypes = new HashSet<>();
 		myTypes.add("Patient");
@@ -43,6 +43,7 @@ public class RuleBulkExportImplTest {
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(myWantTypes);
+
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -52,8 +53,6 @@ public class RuleBulkExportImplTest {
 	@Test
 	public void testBulkRequestWithValidResourcesTypes() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
-		RestOperationTypeEnum myOperation = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		Pointcut myPointcut = Pointcut.STORAGE_INITIATE_BULK_EXPORT;
 
 		Set<String> myTypes = new HashSet<>();
 		myTypes.add("Patient");
@@ -66,10 +65,43 @@ public class RuleBulkExportImplTest {
 
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(myWantTypes);
+
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
 		assertNull(verdict);
+	}
+
+	@Test
+	public void testWrongGroupIdDelegatesToNextRule() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		myRule.setAppliesToGroupExportOnGroup("invalid group");
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setGroupId(new IdDt("Group/123"));
+
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertEquals(null, verdict);
+	}
+
+	@Test
+	public void testAllowBulkRequestWithValidGroupId() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		myRule.setAppliesToGroupExportOnGroup("Group/1");
+		myRule.setMode(PolicyEnum.ALLOW);
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setGroupId(new IdDt("Group/1"));
+
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 	}
 
 }

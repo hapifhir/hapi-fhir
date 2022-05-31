@@ -33,6 +33,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -113,6 +114,15 @@ public class MatchUrlService {
 						throw new InvalidRequestException(Msg.code(485) + "Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
+			} else if (Constants.PARAM_SEARCH_TOTAL_MODE.equals(nextParamName)) {
+				if (paramList != null && ! paramList.isEmpty() && ! paramList.get(0).isEmpty()) {
+					String totalModeEnumStr = paramList.get(0).get(0);
+					try {
+						paramMap.setSearchTotalMode(SearchTotalModeEnum.valueOf(totalModeEnumStr));
+					} catch (IllegalArgumentException e) {
+						throw new InvalidRequestException(Msg.code(2078) + "Invalid " + Constants.PARAM_SEARCH_TOTAL_MODE + " value: " + totalModeEnumStr);
+					}
+				}
 			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
 				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
@@ -130,7 +140,7 @@ public class MatchUrlService {
 				type.setValuesAsQueryTokens(myFhirContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(myFhirContext, RestSearchParameterTypeEnum.URI, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (JpaConstants.PARAM_DELETE_EXPUNGE.equals(nextParamName)) {
 				paramMap.setDeleteExpunge(true);

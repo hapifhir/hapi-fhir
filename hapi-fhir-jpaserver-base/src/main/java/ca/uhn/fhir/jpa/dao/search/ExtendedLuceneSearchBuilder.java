@@ -23,11 +23,14 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -47,13 +50,14 @@ public class ExtendedLuceneSearchBuilder {
 	/**
 	 * These params have complicated semantics, or are best resolved at the JPA layer for now.
 	 */
-	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_tag", "_meta");
+	public static final Set<String> ourUnsafeSearchParmeters = Sets.newHashSet("_id", "_meta");
 
 	/**
 	 * Are any of the queries supported by our indexing?
 	 */
 	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
 		return
+			myParams.getLastUpdated() != null ||
 			myParams.entrySet().stream()
 				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
 				// each and clause may have a different modifier, so split down to the ORs
@@ -64,7 +68,7 @@ public class ExtendedLuceneSearchBuilder {
 
 	/**
 	 * Do we support this query param type+modifier?
-	 *
+	 * <p>
 	 * NOTE - keep this in sync with addAndConsumeAdvancedQueryClauses() below.
 	 */
 	private boolean isParamTypeSupported(IQueryParameterType param) {
@@ -90,7 +94,8 @@ public class ExtendedLuceneSearchBuilder {
 					return false;
 			}
 		} else if (param instanceof QuantityParam) {
-			return false;
+			return modifier.equals(EMPTY_MODIFIER);
+
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.
 			if (((ReferenceParam) param).getChain() != null) {
@@ -100,9 +105,18 @@ public class ExtendedLuceneSearchBuilder {
 				case EMPTY_MODIFIER:
 					return true;
 				case Constants.PARAMQUALIFIER_MDM:
+				case Constants.PARAMQUALIFIER_NICKNAME:
 				default:
 					return false;
 			}
+		} else if (param instanceof DateParam) {
+			if (EMPTY_MODIFIER.equals(modifier)) {
+				return true;
+			}
+			return false;
+		} else if (param instanceof UriParam) {
+			return modifier.equals(EMPTY_MODIFIER);
+
 		} else {
 			return false;
 		}
@@ -110,7 +124,7 @@ public class ExtendedLuceneSearchBuilder {
 
 	public void addAndConsumeAdvancedQueryClauses(ExtendedLuceneClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		// copy the keys to avoid concurrent modification error
-		ArrayList<String> paramNames = Lists.newArrayList(theParams.keySet());
+		ArrayList<String> paramNames = compileParamNames(theParams);
 		for (String nextParam : paramNames) {
 			if (ourUnsafeSearchParmeters.contains(nextParam)) {
 				continue;
@@ -129,8 +143,8 @@ public class ExtendedLuceneSearchBuilder {
 
 					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
-
 					break;
+
 				case STRING:
 					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
 					builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
@@ -146,6 +160,8 @@ public class ExtendedLuceneSearchBuilder {
 					break;
 
 				case QUANTITY:
+					List<List<IQueryParameterType>> quantityAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
 					break;
 
 				case REFERENCE:
@@ -153,9 +169,51 @@ public class ExtendedLuceneSearchBuilder {
 					builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
 					break;
 
+				case DATE:
+					List<List<IQueryParameterType>> dateAndOrTerms = nextParam.equalsIgnoreCase("_lastupdated")
+						? getLastUpdatedAndOrList(theParams) : theParams.removeByNameUnmodified(nextParam);
+					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
+					break;
+
+				case URI:
+					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
+
 				default:
 					// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
 			}
 		}
 	}
+
+
+	private List<List<IQueryParameterType>> getLastUpdatedAndOrList(SearchParameterMap theParams) {
+		DateParam activeBound = theParams.getLastUpdated().getLowerBound() != null
+			? theParams.getLastUpdated().getLowerBound()
+			: theParams.getLastUpdated().getUpperBound();
+
+		TemporalPrecisionEnum precision = activeBound.getPrecision();
+
+		List<List<IQueryParameterType>> result = List.of( List.of(activeBound) );
+
+		// indicate parameter was processed
+		theParams.setLastUpdated(null);
+
+		return result;
+	}
+
+
+	/**
+	 * Param name list is not only the params.keySet, but also the "special" parameters extracted from input
+	 * (as _lastUpdated when the input myLastUpdated field is not null, etc).
+	 */
+	private ArrayList<String> compileParamNames(SearchParameterMap theParams) {
+		ArrayList<String> nameList = Lists.newArrayList(theParams.keySet());
+
+		if (theParams.getLastUpdated() != null) {
+			nameList.add("_lastUpdated");
+		}
+
+		return nameList;
+	}
+
 }

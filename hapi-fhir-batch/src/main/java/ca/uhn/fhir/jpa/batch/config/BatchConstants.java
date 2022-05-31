@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch.config;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class BatchConstants {
@@ -42,14 +43,6 @@ public final class BatchConstants {
 	 * Delete Expunge
 	 */
 	public static final String DELETE_EXPUNGE_JOB_NAME = "deleteExpungeJob";
-	/**
-	 * Reindex
-	 */
-	public static final String REINDEX_JOB_NAME = "reindexJob";
-	/**
-	 * Reindex Everything
-	 */
-	public static final String REINDEX_EVERYTHING_JOB_NAME = "reindexEverythingJob";
 	/**
 	 * MDM Clear
 	 */
@@ -97,6 +90,8 @@ public final class BatchConstants {
 	 * Job Execution Context
 	 */
 	public static final String JOB_EXECUTION_RESOURCE_TYPE = "resourceType";
+
+	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES = List.of("Practitioner", "Organization");
 
 	/**
 	 * This Set contains the step names across all job types that are appropriate for

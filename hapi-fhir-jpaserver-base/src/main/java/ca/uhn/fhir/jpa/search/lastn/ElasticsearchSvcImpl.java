@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -54,7 +53,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -76,7 +74,10 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.xcontent.XContentType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -93,6 +94,8 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ElasticsearchSvcImpl.class);
 
 	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
@@ -224,6 +227,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
 					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+				ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -235,6 +239,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
 				createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+			ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
@@ -750,7 +755,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
 		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
 		try {
-			// wip mb what is the limit to an ES hit count?  10k?  We may need to chunk this :-(
 			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
 			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
 			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
@@ -759,16 +763,11 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
 			 * details about parsing raw json to BaseResource
 			 */
-			// WIP what do we do with partition?
-			// WIP what do we do with deleted observation resources
-			// WIP how do you handle provenance?
-			// Parse using tolerant parser
 			return Arrays.stream(observationDocumentHits)
 				.map(this::parseObservationJson)
 				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
 				.collect(Collectors.toList());
 		} catch (IOException theE) {
-			// WIP do we fallback to JPA search then?
 			throw new InvalidRequestException(Msg.code(2003) + "Unable to execute observation document query for provided IDs " + thePids, theE);
 		}
 	}

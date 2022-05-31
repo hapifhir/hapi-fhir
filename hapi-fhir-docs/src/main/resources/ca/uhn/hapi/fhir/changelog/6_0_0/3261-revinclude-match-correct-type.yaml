@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3261
+title: "When performing a search with a `_revinclude`. the results sometimes incorrectly included
+  resources that were reverse included by other search parameters with the same name. Thanks to
+  GitHub user @vivektk84 for reporting and to Jean-Francois Briere for proposing a fix."

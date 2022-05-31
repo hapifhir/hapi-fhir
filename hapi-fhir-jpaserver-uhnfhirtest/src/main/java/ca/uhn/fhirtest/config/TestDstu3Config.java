@@ -1,29 +1,28 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,21 +40,14 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import(CommonConfig.class)
+@Import({CommonConfig.class, JpaDstu3Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestDstu3Config extends BaseJavaConfigDstu3 {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public  static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "${fhir.lucene.location.dstu3}";
+public class TestDstu3Config {
+	public static final String FHIR_LUCENE_LOCATION_DSTU3 = "fhir.lucene.location.dstu3";
 
-	@Value(TestDstu3Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestDstu3Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_DSTU3)
-	private String myFhirLuceneLocation;
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_DSTU3);
 
 	@Bean
 	public DaoConfig daoConfig() {
@@ -85,41 +77,38 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
-	}
-
-
-	@Override
-	@Bean
-	public ValidationSettings validationSettings() {
-		ValidationSettings retVal = super.validationSettings();
-		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
 		return retVal;
 	}
 
 
+	@Bean
+	public ValidationSettings validationSettings() {
+		ValidationSettings retVal = new ValidationSettings();
+		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+		return retVal;
+	}
 
-
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		retVal.setDefaultPageSize(20);
 		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
 
-	
-	@Bean 
+
+	@Bean
 	public PublicSecurityInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
 	}
 
-	@Bean(name = "myPersistenceDataSourceDstu3", destroyMethod = "close")
+	@Bean(name = "myPersistenceDataSourceDstu3")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_dstu3;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_dstu3");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_dstu3");
@@ -140,10 +129,9 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		return dataSource;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -153,7 +141,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
 			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
@@ -177,21 +165,23 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
+	 * @param theFhirInstanceValidator
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
 	}
 
-//	@Bean(autowire = Autowire.BY_TYPE)
+//	@Bean
 //	public IServerInterceptor subscriptionSecurityInterceptor() {
 //		return new SubscriptionsRequireManualActivationInterceptorDstu3();
 //	}

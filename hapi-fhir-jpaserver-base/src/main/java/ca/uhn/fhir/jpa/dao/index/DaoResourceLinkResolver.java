@@ -31,10 +31,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -61,6 +61,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,17 +74,29 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
 	@Override
 	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, RuntimeSearchParam theSearchParam, String theSourcePath, IIdType theSourceResourceId, String theResourceType, Class<? extends IBaseResource> theType, IBaseReference theReference, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		ResourcePersistentId persistentId = null;
+		if (theTransactionDetails != null) {
+			ResourcePersistentId resolvedResourceId = theTransactionDetails.getResolvedResourceId(theSourceResourceId);
+			if (resolvedResourceId != null && resolvedResourceId.getIdAsLong() != null && resolvedResourceId.getAssociatedResourceId() != null) {
+				persistentId = resolvedResourceId;
+			}
+		}
+
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart);
-			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
+			if (persistentId == null) {
+				resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart);
+				ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
+			} else {
+				resolvedResource = new ResourceLookupPersistentIdWrapper(persistentId);
+			}
 		} catch (ResourceNotFoundException e) {
 
 			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest, theTransactionDetails);
@@ -110,6 +123,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		if (resolvedResource.getDeleted() != null) {
 			String resName = resolvedResource.getResourceType();
 			throw new InvalidRequestException(Msg.code(1096) + "Resource " + resName + "/" + idPart + " is deleted, specified in path: " + theSourcePath);
+		}
+
+		if (persistentId == null) {
+			persistentId = new ResourcePersistentId(resolvedResource.getResourceId());
+			persistentId.setAssociatedResourceId(theSourceResourceId);
+			theTransactionDetails.addResolvedResourceId(theSourceResourceId, persistentId);
 		}
 
 		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
@@ -270,4 +289,26 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		myDaoRegistry.getDaoOrThrowException(theType);
 	}
 
+	private static class ResourceLookupPersistentIdWrapper implements IResourceLookup {
+		private final ResourcePersistentId myPersistentId;
+
+		public ResourceLookupPersistentIdWrapper(ResourcePersistentId thePersistentId) {
+			myPersistentId = thePersistentId;
+		}
+
+		@Override
+		public String getResourceType() {
+			return myPersistentId.getAssociatedResourceId().getResourceType();
+		}
+
+		@Override
+		public Long getResourceId() {
+			return myPersistentId.getIdAsLong();
+		}
+
+		@Override
+		public Date getDeleted() {
+			return null;
+		}
+	}
 }

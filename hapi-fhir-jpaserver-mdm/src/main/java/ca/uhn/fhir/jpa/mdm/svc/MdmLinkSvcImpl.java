@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -54,13 +54,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IdHelperService myIdHelperService;
-	@Autowired
-	private IMdmModelConverterSvc myMdmModelConverterSvc;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+	public void updateLink(@Nonnull IAnyResource theGoldenResource, @Nonnull IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
 		if (theMatchOutcome.isPossibleDuplicate() && goldenResourceLinkedAsNoMatch(theGoldenResource, theSourceResource)) {
 			log(theMdmTransactionContext, theGoldenResource.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
@@ -131,10 +129,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		if (theGoldenResource.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
-			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(
-				myIdHelperService.getPidOrNull(theGoldenResource),
-				myIdHelperService.getPidOrNull(theCandidate)
-			);
+			return myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theCandidate);
 		}
 	}
 

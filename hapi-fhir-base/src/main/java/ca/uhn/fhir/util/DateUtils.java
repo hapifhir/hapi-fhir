@@ -242,27 +242,27 @@ public final class DateUtils {
 	public static Pair<String, String> getCompletedDate(String theIncompleteDateStr) {
 		
 		if (StringUtils.isBlank(theIncompleteDateStr)) 
-			return new ImmutablePair<String, String>(null, null);
+			return new ImmutablePair<>(null, null);
 			
 		String lbStr, upStr;
 		// YYYY only, return the last day of the year
 		if (theIncompleteDateStr.length() == 4)  {
 			lbStr = theIncompleteDateStr + "-01-01"; // first day of the year
 			upStr = theIncompleteDateStr + "-12-31"; // last day of the year
-			return new ImmutablePair<String, String>(lbStr, upStr);
+			return new ImmutablePair<>(lbStr, upStr);
 		}
 		
 		// Not YYYY-MM, no change
 		if (theIncompleteDateStr.length() != 7)
-			return new ImmutablePair<String, String>(theIncompleteDateStr, theIncompleteDateStr);
+			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
 		
 		// YYYY-MM Only
-		Date lb=null;
+		Date lb;
 		try {
 			// first day of the month
 			lb = new SimpleDateFormat("yyyy-MM-dd").parse(theIncompleteDateStr+"-01");   
 		} catch (ParseException e) {
-			return new ImmutablePair<String, String>(theIncompleteDateStr, theIncompleteDateStr);
+			return new ImmutablePair<>(theIncompleteDateStr, theIncompleteDateStr);
 		}
 		
 		// last day of the month
@@ -278,7 +278,7 @@ public final class DateUtils {
 	    lbStr = new SimpleDateFormat("yyyy-MM-dd").format(lb);  
 	    upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);  
 		
-		return new ImmutablePair<String, String>(lbStr, upStr);
+		return new ImmutablePair<>(lbStr, upStr);
 	}
 	
 	public static Date getEndOfDay(Date theDate) {

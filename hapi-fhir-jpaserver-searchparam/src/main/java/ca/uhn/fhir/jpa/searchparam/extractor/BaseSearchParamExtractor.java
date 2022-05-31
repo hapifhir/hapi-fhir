@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -85,7 +85,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -95,7 +94,6 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	public static final Set<String> COORDS_INDEX_PATHS;
-	private static final Pattern SPLIT = Pattern.compile("\\||( or )");
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	static {
@@ -730,7 +728,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if ("Coding".equals(nextType)) {
 			String system = extractValueAsString(myCodingSystemValueChild, theValue);
 			String code = extractValueAsString(myCodingCodeValueChild, theValue);
-			return createTokenIndexIfNotBlank(theResourceType, theSearchParam, system, code);
+			return createTokenIndexIfNotBlank(theResourceType, system, code, theSearchParam.getName());
 		} else {
 			return null;
 		}
@@ -1079,7 +1077,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void createTokenIndexIfNotBlankAndAdd(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
-		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSearchParam, theSystem, theValue);
+		ResourceIndexedSearchParamToken nextEntity = createTokenIndexIfNotBlank(theResourceType, theSystem, theValue, theSearchParam.getName());
 		if (nextEntity != null) {
 			theParams.add(nextEntity);
 		}
@@ -1088,11 +1086,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@VisibleForTesting
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
 		myPartitionSettings = thePartitionSettings;
-	}
-
-	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
-		String searchParamName = theSearchParam.getName();
-		return createTokenIndexIfNotBlank(theResourceType, theSystem, theValue, searchParamName);
 	}
 
 	private ResourceIndexedSearchParamToken createTokenIndexIfNotBlank(String theResourceType, String theSystem, String theValue, String searchParamName) {
@@ -1115,17 +1108,68 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public String[] split(String thePaths) {
-		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-			if (!thePaths.contains("|")) {
-				return new String[]{thePaths};
-			}
-			return splitPathsR4(thePaths);
+		if (shouldAttemptToSplitPath(thePaths)) {
+			return splitOutOfParensOrs(thePaths);
 		} else {
-			if (!thePaths.contains("|") && !thePaths.contains(" or ")) {
-				return new String[]{thePaths};
-			}
-			return SPLIT.split(thePaths);
+			return new String[]{thePaths};
 		}
+	}
+
+	public boolean shouldAttemptToSplitPath(String thePath) {
+		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			if (thePath.contains("|")) {
+				return true;
+			}
+		} else {
+			//DSTU 3 and below used "or" as well as "|"
+			if (thePath.contains("|") || thePath.contains(" or ")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
+	 *
+	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
+	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
+	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
+	 * "Patient.select(b) | Patient.select(c)" -->  ["Patient.select(b)", "Patient.select(c)"]
+	 *
+	 * @param thePaths The string to split
+	 * @return The split string
+
+	 */
+	private String[] splitOutOfParensOrs(String thePaths) {
+		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
+		List<String> retVal = topLevelOrExpressions.stream()
+			.flatMap(s -> splitOutOfParensToken(s, " |").stream())
+			.collect(Collectors.toList());
+		return retVal.toArray(new String[retVal.size()]);
+	}
+
+	private List<String> splitOutOfParensToken(String thePath, String theToken) {
+		int tokenLength = theToken.length();
+		int index = thePath.indexOf(theToken);
+		int rightIndex = 0;
+		List<String> retVal = new ArrayList<>();
+		while (index > -1 ) {
+			String left = thePath.substring(rightIndex, index);
+			if (allParensHaveBeenClosed(left)) {
+				retVal.add(left);
+				rightIndex = index + tokenLength;
+			}
+			index = thePath.indexOf(theToken, index + tokenLength);
+		}
+		retVal.add(thePath.substring(rightIndex));
+		return retVal;
+	}
+
+	private boolean allParensHaveBeenClosed(String thePaths) {
+		int open = StringUtils.countMatches(thePaths, "(");
+		int close = StringUtils.countMatches(thePaths, ")");
+		return open == close;
 	}
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(String theSystem, String theCode, BigDecimal theValue) {
@@ -1418,11 +1462,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUnexpectedDatatypeWarning(theParams, theSearchParam, theValue);
 					break;
 			}
-		}
-
-		private boolean isOrCanBeTreatedAsLocal(IIdType theId) {
-			boolean acceptableAsLocalReference = !theId.isAbsolute() || myModelConfig.getTreatBaseUrlsAsLocal().contains(theId.getBaseUrl());
-			return acceptableAsLocalReference;
 		}
 
 		public PathAndRef get(IBase theValue, String thePath) {

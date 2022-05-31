@@ -21,13 +21,18 @@ package ca.uhn.fhir.jpa.model.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
@@ -38,12 +43,20 @@ public class ExtendedLuceneIndexData {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
 
 	final FhirContext myFhirContext;
-	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
-	final SetMultimap<String, TokenParam> mySearchParamTokens = HashMultimap.create();
-	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext) {
+	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
+	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
+	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
+	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
+	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
+	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
+	private String myForcedId;
+	private String myResourceJSON;
+
+	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
 		this.myFhirContext = theFhirContext;
+		this.myModelConfig = theModelConfig;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -54,25 +67,81 @@ public class ExtendedLuceneIndexData {
 			}
 		};
 	}
+
+	/**
+	 * Write the index document.
+	 *
+	 * Called by Hibernate Search after the ResourceTable entity has been flushed/committed.
+	 * Keep this in sync with the schema defined in {@link SearchParamTextPropertyBinder}
+	 *
+	 * @param theDocument the Hibernate Search document for ResourceTable
+	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, theDocument);
+		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
+
+		// todo can this be moved back to ResourceTable as a computed field to merge with myId?
+		theDocument.addValue("myForcedId", myForcedId);
+
+		if (myResourceJSON != null) {
+			theDocument.addValue("myRawResource", myResourceJSON);
+		}
 
 		mySearchParamStrings.forEach(ifNotContained(indexWriter::writeStringIndex));
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
+		// we want to receive the whole entry collection for each invocation
+		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
+		// TODO MB Use RestSearchParameterTypeEnum to define templates.
+		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
+		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
 		mySearchParamStrings.put(theSpName, theText);
 	}
 
-	public void addTokenIndexData(String theSpName, String theSystem,  String theValue) {
-		mySearchParamTokens.put(theSpName, new TokenParam(theSystem, theValue));
+	/**
+	 * Add if not already present.
+	 */
+	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
+		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
+			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
+		if (!isPresent) {
+			addTokenIndexData(theSpName, new CodingDt(theSystem, theValue));
+		}
 	}
 
-	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId){
+	public void addTokenIndexData(String theSpName, IBaseCoding theNextValue) {
+		mySearchParamTokens.put(theSpName, theNextValue);
+	}
+
+	public void addUriIndexData(String theSpName, String theValue) {
+		mySearchParamUri.put(theSpName, theValue);
+	}
+
+	public void addResourceLinkIndexData(String theSpName, String theTargetResourceId) {
 		mySearchParamLinks.put(theSpName, theTargetResourceId);
 	}
+
+	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
+		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	}
+
+	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
+		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
+	}
+
+	public void setForcedId(String theForcedId) {
+		myForcedId = theForcedId;
+	}
+
+	public String getForcedId() {
+		return myForcedId;
+	}
+
+    public void setRawResourceData(String theResourceJSON) {
+		 myResourceJSON = theResourceJSON;
+    }
 }

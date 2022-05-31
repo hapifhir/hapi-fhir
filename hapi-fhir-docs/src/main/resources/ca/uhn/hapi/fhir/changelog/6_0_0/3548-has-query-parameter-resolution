@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3548
+jira: SMILE-4023
+title: "A recent change caused searches that use _has in conjuction with a `Resource` search param (e.g. _id, _text) to fail. This has been fixed."
+
