@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 
 /**
@@ -36,7 +37,7 @@ public class MetadataSource {
 		if (theConnectionProperties.getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT SERVERPROPERTY ('edition')", String.class);
 		} else {
-			throw new UnsupportedOperationException("We only know about MSSQL editions.");
+			throw new UnsupportedOperationException(Msg.code(2084) + "We only know about MSSQL editions.");
 		}
 		return result;
 	}
