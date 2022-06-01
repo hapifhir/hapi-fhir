@@ -113,7 +113,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
-		return myJobInstanceRepository.findAll(PageRequest.of(thePageIndex, thePageSize)).stream().map(t -> toInstance(t)).collect(Collectors.toList());
+		// default sort is myCreateTime Asc
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return myJobInstanceRepository.findAll(pageRequest).stream().map(t -> toInstance(t)).collect(Collectors.toList());
 	}
 
 	@Override
