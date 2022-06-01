@@ -1,5 +1,5 @@
 ---
-type: feature
+type: add
 issue: 3658
 jira: SMILE-3080, SMILE-3372
 title: "Currently neither Hapi nor FHIR supports updating and rewriting historical version of a resource. This

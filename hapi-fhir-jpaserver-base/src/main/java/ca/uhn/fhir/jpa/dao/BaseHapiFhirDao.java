@@ -1668,7 +1668,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// Notify IServerOperationInterceptors about pre-action call
-		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, false);
+		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, theForceUpdateVersion, thePerformIndexing);
@@ -1709,7 +1709,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
 
-		if (isUnchanged) {
+		if (!isUnchanged) {
 			hookParams.add(InterceptorInvocationTimingEnum.class, theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED));
 			interceptorPointcut = Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED;
 		}

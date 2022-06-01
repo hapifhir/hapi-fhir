@@ -1693,7 +1693,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
-		DaoMethodOutcome executeUpdate;
 		if (theResource == null) {
 			String msg = getContext().getLocalizer().getMessage(BaseStorageDao.class, "missingBody");
 			throw new InvalidRequestException(Msg.code(986) + msg);
@@ -1712,13 +1711,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String id = theResource.getIdElement().getValue();
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
-		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theResource.getIdElement().hasVersionIdPart()) {
-			executeUpdate = myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
-		} else {
-			executeUpdate = myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
-		}
 		// Execute the update in a retryable transaction
-		return executeUpdate;
+		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theResource.getIdElement().hasVersionIdPart()) {
+			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
+		} else {
+			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
+		}
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
