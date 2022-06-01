@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -60,6 +61,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_CODE_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_CODE_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
@@ -509,7 +516,7 @@ public class ExtendedLuceneClauseBuilder {
 			quantityTerms.minimumShouldMatchNumber(1);
 
 			for (IQueryParameterType paramType : nextAnd) {
-		BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
+				BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
 				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
 				quantityTerms.should(orQuantityTerms);
 			}
@@ -636,4 +643,52 @@ public class ExtendedLuceneClauseBuilder {
 			myRootClause.must(orTermPredicate);
 		}
 	}
+
+
+	public void addCompositeUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
+		for (List<IQueryParameterType> nextAnd : theCompositeAndOrTerms) {
+			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
+			terms.minimumShouldMatchNumber(1);
+
+			for (IQueryParameterType orParam : nextAnd) {
+				BooleanPredicateClausesStep<?> orTerms = myPredicateFactory.bool();
+				addCompositeOrClauses(theParamName, orParam, orTerms);
+				terms.should(orTerms);
+			}
+
+			myRootClause.must(terms);
+		}
+	}
+
+
+	private void addCompositeOrClauses(String theParamName, IQueryParameterType theOrParam, BooleanPredicateClausesStep<?> theOrTerms) {
+		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theParamName + "." + COMPOS_PARAM_NAME;
+
+//		fixme jm: duplicated
+		CompositeParam<?, ?> compositeParam = (CompositeParam<?, ?>) theOrParam;
+		QuantityParam qtyParam = QuantityParam.toQuantityParam(compositeParam.getRightValue());
+		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
+		setPrefixedQuantityPredicate(theOrTerms, activePrefix, qtyParam, fieldPath + "." + COMPOS_QTY_VALUE);
+
+		if ( isNotBlank(qtyParam.getSystem()) ) {
+			theOrTerms.must(myPredicateFactory.match().field(fieldPath + "." + COMPOS_QTY_SYSTEM).matching(qtyParam.getSystem()));
+		}
+
+		if ( isNotBlank(qtyParam.getUnits()) ) {
+			theOrTerms.must(myPredicateFactory.match().field(fieldPath + "." + COMPOS_QTY_CODE).matching(qtyParam.getUnits()) );
+		}
+//		fixme jm: duplicated end
+
+		TokenParam codeableConceptParam = (TokenParam) compositeParam.getLeftValue();
+
+		theOrTerms.must( f -> f.nested().objectField( fieldPath + "." + "codes" )
+				.nest( f.bool()
+					.must( f.match().field( fieldPath + "." + "codes" + "." + COMPOS_CODE_SYSTEM )
+						.matching( codeableConceptParam.getSystem() ) )
+					.must( f.match().field(  fieldPath + "." + "codes" + "." + COMPOS_CODE_VALUE  )
+						.matching( codeableConceptParam.getValue() ) )
+				) );
+
+	}
+
 }

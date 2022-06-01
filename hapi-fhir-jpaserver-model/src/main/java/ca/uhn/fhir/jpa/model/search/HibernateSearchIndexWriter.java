@@ -50,7 +50,16 @@ public class HibernateSearchIndexWriter {
 
 	public static final String URI_VALUE = "uri-value";
 
-
+	public static final String COMPOS_PARAM_NAME = "obs-composite";
+	public static final String COMPOS_CODE_SYSTEM = "code-system";
+	public static final String COMPOS_CODE_VALUE = "code-value";
+	public static final String COMPOS_QTY_CODE = "qty-code";
+	public static final String COMPOS_QTY_SYSTEM = "qty-system";
+	public static final String COMPOS_QTY_VALUE = "qty-value";
+	public static final String COMPOS_QTY_CODE_NORM = "qty-code-norm";
+	public static final String COMPOS_QTY_VALUE_NORM = "qty-value-norm";
+	public static final String COMPOS_CONCEPT_CODE = "concept-code";
+	public static final String COMPOS_CONCEPT_TEXT = "concept-text";
 
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
@@ -157,5 +166,57 @@ public class HibernateSearchIndexWriter {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
 		}
+	}
+
+
+	public void writeObservationComponentCompositeIndex(String theSearchParam, Collection<ObservationComponentSearchIndexData> theValueCollection) {
+		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
+
+		for (ObservationComponentSearchIndexData theValue : theValueCollection) {
+			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+			DocumentElement nestedCompNode = nestedSpNode.addObject(COMPOS_PARAM_NAME);
+
+			ourLog.trace("Adding Search Param CompositeTokenQuantity: {} -- {}", theSearchParam, theValue);
+//			fixme jm: test multiple codes
+			theValue.getCode().getCoding().forEach(code -> {
+				DocumentElement nestedCompCodeNode = nestedCompNode.addObject("codes");
+				nestedCompCodeNode.addValue(COMPOS_CODE_VALUE, code.getCode());
+				nestedCompCodeNode.addValue(COMPOS_CODE_SYSTEM, code.getSystem());
+			});
+
+			if (theValue.getQuantity() != null) {
+				nestedCompNode.addValue(COMPOS_QTY_VALUE, theValue.getQuantity().getValue().doubleValue());
+				addValueIfNotNull(nestedCompNode, COMPOS_QTY_SYSTEM, theValue.getQuantity().getSystem());
+				addValueIfNotNull(nestedCompNode, COMPOS_QTY_CODE, theValue.getQuantity().getCode());
+
+//				fixme jm: duplicate
+				if (myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+					// convert the value/unit to the canonical form if any
+					Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getQuantity().getSystem(),
+						BigDecimal.valueOf(theValue.getQuantity().getValue().doubleValue()), theValue.getQuantity().getCode());
+					if (canonicalForm != null) {
+						double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
+						String canonicalUnits = canonicalForm.getCode();
+						ourLog.trace("Adding Search Param CompositeTokenQuantity normalized code and value: {} -- code:{}, value:{}",
+							theSearchParam, canonicalUnits, canonicalValue);
+
+						nestedCompNode.addValue(QTY_CODE_NORM, canonicalUnits);
+						nestedCompNode.addValue(QTY_VALUE_NORM, canonicalValue);
+					}
+				}
+			}
+
+			if (theValue.getConcept() != null && ! theValue.getConcept().isEmpty()) {
+				addValueIfNotNull(nestedCompNode, COMPOS_CONCEPT_CODE, theValue.getConcept().getCoding());
+				addValueIfNotNull(nestedCompNode, COMPOS_CONCEPT_TEXT, theValue.getConcept().getText());
+			}
+		}
+	}
+
+	private void addValueIfNotNull(DocumentElement theNode, String theFieldName, Object theValue) {
+		if (theValue != null) {
+			theNode.addValue(theFieldName, theValue);
+		}
+
 	}
 }

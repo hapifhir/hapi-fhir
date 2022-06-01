@@ -35,6 +35,7 @@ import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -45,6 +46,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hl7.fhir.dstu3.model.Observation.SP_COMPONENT_CODE_VALUE_CONCEPT;
+import static org.hl7.fhir.dstu3.model.Observation.SP_COMPONENT_CODE_VALUE_QUANTITY;
 
 /**
  * Extract search params for advanced lucene indexing.
@@ -70,7 +73,7 @@ public class ExtendedLuceneIndexExtractor {
 
 	@NotNull
 	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig, theResource);
 
 		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -105,6 +108,12 @@ public class ExtendedLuceneIndexExtractor {
 		String source = MetaUtil.getSource(myContext, theResource.getMeta());
 		if (isNotBlank(source)) {
 			retVal.addUriIndexData("_source", source);
+		}
+
+		if (theResource.fhirType().equals("Observation")) {
+			((Observation) theResource).getComponent().stream()
+				.filter(this::isComponentFreetextSearchable).forEach(
+					comp -> retVal.addObservationComponentsIndexData(getComponentParamName(comp), comp));
 		}
 
 
@@ -145,6 +154,24 @@ public class ExtendedLuceneIndexExtractor {
 		}
 
 		return retVal;
+	}
+
+
+	private String getComponentParamName(Observation.ObservationComponentComponent theComponent) {
+		if(theComponent.hasValueQuantity()) {
+			return SP_COMPONENT_CODE_VALUE_QUANTITY;
+		}
+		if(theComponent.hasValueCodeableConcept()) {
+			return SP_COMPONENT_CODE_VALUE_CONCEPT;
+		}
+		return ""; // components were filtered before
+	}
+
+	/**
+	 * Only components of values Concept or Quantity participate in composite parameters
+	 */
+	private boolean isComponentFreetextSearchable(Observation.ObservationComponentComponent theComponent) {
+		return theComponent.hasValueQuantity() || theComponent.hasValueCodeableConcept();
 	}
 
 	/**

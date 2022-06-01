@@ -28,6 +28,8 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,12 +53,15 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
+	final SetMultimap<String, ObservationComponentSearchIndexData> mySearchParamObservationComponents = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
+	private IBaseResource myResource;
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
+	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
 		this.myFhirContext = theFhirContext;
 		this.myModelConfig = theModelConfig;
+		myResource = theResource;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -96,6 +101,7 @@ public class ExtendedLuceneIndexData {
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
+		Multimaps.asMap(mySearchParamObservationComponents).forEach(ifNotContained(indexWriter::writeObservationComponentCompositeIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
@@ -131,6 +137,10 @@ public class ExtendedLuceneIndexData {
 
 	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
 		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
+	}
+
+	public void addObservationComponentsIndexData(String theSpName, Observation.ObservationComponentComponent theComponent) {
+		mySearchParamObservationComponents.put(theSpName, new ObservationComponentSearchIndexData(theComponent));
 	}
 
 	public void setForcedId(String theForcedId) {

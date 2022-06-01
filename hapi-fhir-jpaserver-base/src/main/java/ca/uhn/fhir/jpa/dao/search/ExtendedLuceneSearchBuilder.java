@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -93,6 +94,9 @@ public class ExtendedLuceneSearchBuilder {
 			}
 		} else if (param instanceof QuantityParam) {
 			return modifier.equals(EMPTY_MODIFIER);
+
+		} else if (param instanceof CompositeParam) {
+			return true;
 
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.
@@ -172,6 +176,11 @@ public class ExtendedLuceneSearchBuilder {
 				case DATE:
 					List<List<IQueryParameterType>> dateAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
+					break;
+
+				case COMPOSITE:
+					List<List<IQueryParameterType>> compositeAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addCompositeUnmodifiedSearch(nextParam, compositeAndOrTerms);
 					break;
 
 				case URI:
