@@ -1396,33 +1396,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		TransactionDetails transactionDetails = new TransactionDetails(theEntity.getUpdatedDate());
 		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
-		handleLobToTextFieldConversionIfNecessary(resourceTable);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
 	}
-	private boolean shouldMigrateToTextField(String resourceString) {
-		return resourceString.length() < getConfig().getInlineResourceTextBelowSize();
-	}
-	private void handleLobToTextFieldConversionIfNecessary(ResourceTable theEntity) {
-		if (myDaoConfig.getInlineResourceTextBelowSize() <= 0 ) {
-			return;
-		}
-		ResourceHistoryTable currentVersionEntity = theEntity.getCurrentVersionEntity();
-		if (currentVersionEntity == null) {
-			return;
-		}
-		//If the current entity is no longer in LOB territory, migrate it to text column.
-		byte[] resourceBytes = currentVersionEntity.getResource();
-		if (resourceBytes != null && resourceBytes.length > 0) {
-			String decodedResourceText = decodeResource(resourceBytes, currentVersionEntity.getEncoding());
-			if (shouldMigrateToTextField(decodedResourceText)) {
-				currentVersionEntity.setResource(null);
-				currentVersionEntity.setResourceTextVc(decodedResourceText);
-				myResourceHistoryTableDao.save(currentVersionEntity);
-			}
-		}
-	}
+
 
 	@Transactional
 	@Override

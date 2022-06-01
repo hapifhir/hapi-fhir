@@ -90,45 +90,6 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testReindexEverythingMigratesLobsToTextIfNeeded() throws JobParametersInvalidException {
-		//Given: We create a resource
-//		IIdType obsId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
-		Observation o = new Observation();
-		o.setStatus(Observation.ObservationStatus.FINAL);
-		IIdType obsId = myObservationDao.create(o).getId();
-		o.setId(obsId);
-		//Create a whack more historical versions
-		for (int i = 0; i < 10; i++) {
-			o.setEffective( new DateTimeType(DateUtils.addMinutes(new Date(), i)));
-			myObservationDao.update(o);
-		}
-
-		//Ensure the resource history table contains the lob bytes field and no text field
-		ResourceHistoryTable historicalVersion =  runInTransaction(() -> myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(obsId.getIdPartAsLong(), obsId.getVersionIdPartAsLong()));
-		assertThat(historicalVersion.getResource(), is(notNullValue()));
-		assertThat(historicalVersion.getResourceTextVc(), is(nullValue()));
-
-		//When: We set the inline size to large, adn reindex
-		myDaoConfig.setInlineResourceTextBelowSize(50000);
-		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?");
-
-		// execute
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myReindexJob, jobParameters);
-
-		myBatchJobHelper.awaitJobCompletion(jobExecution);
-
-		//Ensure only most recent LOB is updated. First, check an older entity
-		historicalVersion =  runInTransaction(() -> myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(obsId.getIdPartAsLong(), 10));
-		assertThat(historicalVersion.getResource(), is(notNullValue()));
-		assertThat(historicalVersion.getResourceTextVc(), is(nullValue()));
-
-		//Now, check the most recent version.
-		historicalVersion =  runInTransaction(() -> myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(obsId.getIdPartAsLong(), 11));
-		assertThat(historicalVersion.getResource(), is(nullValue()));
-		assertThat(historicalVersion.getResourceTextVc(), is(notNullValue()));
-	}
-
-	@Test
 	public void testReindexEverythingJob() throws Exception {
 		// setup
 
