@@ -1491,7 +1491,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				oldResource = toResource(entity, false);
 			}
 
-			if (theResource != null && theRequest.getServer() != null) {
+			if (theRequest.getServer() != null) {
 				ActionRequestDetails actionRequestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
 			}
 			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
@@ -1553,9 +1553,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		historyEntity.setResourceTextVc(encodedResource.getResourceText());
 		myResourceHistoryTableDao.save(historyEntity);
 
-		if (theResource != null) {
-			updateResourceMetadata(historyEntity, theResource);
-		}
+		updateResourceMetadata(historyEntity, theResource);
 
 		return historyEntity;
 	}
