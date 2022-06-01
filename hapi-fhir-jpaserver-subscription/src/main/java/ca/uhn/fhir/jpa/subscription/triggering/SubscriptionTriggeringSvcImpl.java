@@ -265,18 +265,16 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 			String searchUrl = theJobDetails.getCurrentSearchUrl();
 
-			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} + index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex );
+			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} and index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex );
 
 			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
 			int toIndex = fromIndex + submittableCount;
 
-			if (nonNull(search) && isNotEmpty(search.getAllResources())) {
-				// we already have data from the initial step therefor adjust what we can submit (getAllResources().size())
-				// according to what we have room to submit (submittableCount)
-				toIndex = Math.min(toIndex, search.getAllResources().size());
+			if (nonNull(search) && !search.isEmpty()) {
 
-				ourLog.info("Triggered job[{}] sublisting to index {}", theJobDetails.getJobId(), toIndex - 1);
-				allCurrentResources = search.getAllResources().subList(0, toIndex);
+				// we already have data from the initial step so process as much as we can.
+				ourLog.info("Triggered job[{}] will process up to {} resources", theJobDetails.getJobId(), toIndex);
+				allCurrentResources = search.getResources(0, toIndex);
 
 			} else {
 				if (theJobDetails.getCurrentSearchCount() != null) {

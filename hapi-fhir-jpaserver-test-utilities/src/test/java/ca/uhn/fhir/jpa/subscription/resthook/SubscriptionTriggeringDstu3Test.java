@@ -4,13 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.util.ForceSynchronousSearchInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -41,7 +41,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -335,127 +338,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	}
 
 	@Test
-	public void testTriggerSubscriptionWithSynchronousQueryMode() throws Exception {
-		((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
-
-		String payload = "application/fhir+json";
-		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
-
-		int numberOfPatient = 15;
-
-		// Create lots
-		createPatientsAndWait(numberOfPatient);
-
-		List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-
-		// force synchronous query mode through interceptor
-		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myInterceptorService.registerInterceptor(forceOffsetSearchModeInterceptor);
-
-		// Use a trigger subscription
-		beforeReset();
-		Parameters response = ourClient
-			.operation()
-			.onInstance(sub2id)
-			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
-			.execute();
-
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-
-		waitForSize(0, ourCreatedPatients);
-		waitForSize(numberOfPatient, ourUpdatedPatients);
-
-		List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-
-		assertTrue(resubmittedPatientIds.size() == submittedPatientIds.size());
-		assertTrue(resubmittedPatientIds.containsAll(submittedPatientIds));
-
-		myInterceptorService.unregisterInterceptor(forceOffsetSearchModeInterceptor);
-
-	}
-
-	@Test
-	public void testTriggerSubscriptionWithOffset() throws Exception {
-		((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
-
-		String payload = "application/fhir+json";
-		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
-
-		int numberOfPatient = 15;
-		int offset = 5;
-		// Create lots
-		createPatientsAndWait(numberOfPatient);
-
-		List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-		List<String> expectedPatientIds = submittedPatientIds.subList(offset, submittedPatientIds.size());
-
-		// Use a trigger subscription
-		beforeReset();
-		Parameters response = ourClient
-			.operation()
-			.onInstance(sub2id)
-			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_offset=" + offset))
-			.execute();
-
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-
-		waitForSize(0, ourCreatedPatients);
-		waitForSize(numberOfPatient - offset, ourUpdatedPatients);
-
-		List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-
-		assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
-		assertTrue(resubmittedPatientIds.containsAll(expectedPatientIds));
-
-	}
-
-	@Test
-	public void testTriggerSubscriptionWithOffsetAndCount() throws Exception {
-		((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
-
-		String payload = "application/fhir+json";
-		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
-
-		int numberOfPatient = 15;
-		int offset = 5;
-		int count = 2;
-		// Create lots
-		createPatientsAndWait(numberOfPatient);
-
-		List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-		List<String> expectedPatientIds = submittedPatientIds.subList(offset, offset + count);
-
-		String url = String.format("Patient?_offset=%d&_count=%d", offset, count);
-		// Use a trigger subscription
-		beforeReset();
-		Parameters response = ourClient
-			.operation()
-			.onInstance(sub2id)
-			.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
-			.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType(url))
-			.execute();
-
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-		mySubscriptionTriggeringSvc.runDeliveryPass();
-
-		waitForSize(0, ourCreatedPatients);
-		waitForSize(count, ourUpdatedPatients);
-
-		List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
-
-		assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
-		assertTrue(resubmittedPatientIds.containsAll(expectedPatientIds));
-
-	}
-
-	@Test
 	public void testTriggerUsingSearchesWithCount() throws Exception {
 		String payload = "application/fhir+json";
 		IdType sub1id = createSubscription("Observation?", payload, ourListenerServerBase).getIdElement();
@@ -606,6 +488,97 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	}
 
+
+	@Nested
+	@DisplayName("Testing subscription triggering in synchronous query mode")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	class TestSubscriptionTriggeringInSynchronousQueryMode{
+		ForceSynchronousSearchInterceptor forceSynchronousSearchInterceptor = new ForceSynchronousSearchInterceptor();
+		@BeforeAll
+		public void beforeAllTests(){
+			myInterceptorService.registerInterceptor(forceSynchronousSearchInterceptor);
+		}
+
+		@AfterAll
+		public void afterAllTests(){
+			myInterceptorService.unregisterInterceptor(forceSynchronousSearchInterceptor);
+		}
+
+		@Test
+		public void testTriggerSubscriptionInSynchronousQueryMode() throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+
+			String payload = "application/fhir+json";
+			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+			int numberOfPatient = 15;
+
+			// Create lots
+			createPatientsAndWait(numberOfPatient);
+
+			List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			// Use a trigger subscription
+			beforeReset();
+			Parameters response = ourClient
+				.operation()
+				.onInstance(sub2id)
+				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
+				.execute();
+
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+
+			waitForSize(0, ourCreatedPatients);
+			waitForSize(numberOfPatient, ourUpdatedPatients);
+
+			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			assertTrue(resubmittedPatientIds.size() == submittedPatientIds.size());
+			assertTrue(resubmittedPatientIds.containsAll(submittedPatientIds));
+
+		}
+
+		@Test
+		public void testTriggerSubscriptionInSynchronousQueryModeWithOffset() throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+			ForceSynchronousSearchInterceptor forceSynchronousSearchInterceptor = new ForceSynchronousSearchInterceptor();
+
+			String payload = "application/fhir+json";
+			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+			int numberOfPatient = 15;
+			int offset = 5;
+			// Create lots
+			createPatientsAndWait(numberOfPatient);
+
+			List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+			List<String> expectedPatientIds = submittedPatientIds.subList(offset, submittedPatientIds.size());
+
+			// Use a trigger subscription
+			beforeReset();
+			Parameters response = ourClient
+				.operation()
+				.onInstance(sub2id)
+				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_offset=" + offset))
+				.execute();
+
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+
+			waitForSize(0, ourCreatedPatients);
+			waitForSize(numberOfPatient - offset, ourUpdatedPatients);
+
+			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
+			assertTrue(resubmittedPatientIds.containsAll(expectedPatientIds));
+		}
+	}
 
 	@Override
 	protected boolean shouldLogClient() {
