@@ -1494,7 +1494,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (theResource != null && theRequest.getServer() != null) {
 				ActionRequestDetails actionRequestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
 			}
-			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, false);
+			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
 
 			ResourceTable savedEntity = updateEntity(theRequest, theResource, entity, null, true, false, theTransactionDetails, false, false);
 			// Have to call populate again for the encodedResource, since using createHistoryEntry() will cause version constraint failure, ie updating the same resource at the same time
@@ -1507,7 +1507,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			// Populate the PID in the resource, so it is available to hooks
 			addPidToResource(savedEntity, theResource);
 
-			if (!((ResourceTable) savedEntity).isUnchangedInCurrentOperation()) {
+			if (!savedEntity.isUnchangedInCurrentOperation()) {
 				notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, false);
 			}
 		} else {
