@@ -1,6 +1,7 @@
 This release has breaking changes, and some large database changes.
 * Hibernate Search mappings for Terminology entities have been upgraded, which requires a reindex of ValueSet resources.
-* Database SearchParameter indexes have been redefined.  This may be slow, and can be scheduled before for the main upgrade window.
+* Database SearchParameter indexes have been redefined.
+  This stage of the upgrade may be slow, and can be scheduled before the main upgrade window.
 
 ## Hibernate Search Mappings Upgrade
 
@@ -30,10 +31,12 @@ Content-Type: application/fhir+json
 
 ## Database Indexing
 
-The JPA SearchParameter database indexing has been redesigned.  
-As a result, running an upgrade may take longer than usual.
-To avoid this delay during server restart, you can apply these index changes manually
-before upgrading the server.
+The JPA SearchParameter database indexing has been redesigned in 6.0.
+As a result, performing the upgrade may take longer than usual.
+Database migrations happen automatically after server upgrade during the next restart,
+and the server is unavailable during this migration window. 
+To avoid this prolonged outage during server restart, you can apply these 
+index changes manually before upgrading the server.
 The server is compatible with both the old and new indexes.
 The syntax for index definition varies, and we include separate scripts for MS Sql, Postgres, and Oracle.
 
