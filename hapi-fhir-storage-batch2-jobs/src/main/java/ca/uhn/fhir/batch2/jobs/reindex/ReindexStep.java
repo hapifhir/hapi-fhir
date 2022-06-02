@@ -48,7 +48,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunk, VoidModel> {
 
@@ -100,11 +99,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<ResourcePersistentId> persistentIds = myData
-				.getIds()
-				.stream()
-				.map(t -> new ResourcePersistentId(t.getId()))
-				.collect(Collectors.toList());
+			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
 
 			ourLog.info("Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();

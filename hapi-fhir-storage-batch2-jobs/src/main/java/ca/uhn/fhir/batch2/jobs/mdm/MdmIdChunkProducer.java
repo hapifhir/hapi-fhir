@@ -21,7 +21,7 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRange> {
 	public IdChunk fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, MdmChunkRange theData) {
 		String resourceType = theData.getResourceType();
 
-		ourLog.info("Fetching resource ID chunk for resource type {} - Range {} - {}", resourceType, theNextStart, theEnd);
+		ourLog.info("Fetching golden resource ID chunk for resource type {} - Range {} - {}", resourceType, theNextStart, theEnd);
 
 		return myGoldenResourceSearchSvc.fetchGoldenResourceIdsPage(theNextStart, theEnd, theRequestPartitionId, resourceType);
 	}

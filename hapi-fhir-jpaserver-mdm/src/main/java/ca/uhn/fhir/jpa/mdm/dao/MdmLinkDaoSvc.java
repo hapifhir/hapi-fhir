@@ -386,4 +386,9 @@ public class MdmLinkDaoSvc {
 			myJpaIdHelperService.getPidOrNull(theGoldenResource),
 			myJpaIdHelperService.getPidOrNull(theSourceResource));
 	}
+
+	@Transactional(propagation = Propagation.MANDATORY)
+	public void deleteLinksWithGoldenResourcePids(List<Long> theGoldenResourcePids) {
+		myMdmLinkDao.deleteLinksWithGoldenResourcePids(theGoldenResourcePids);
+	}
 }

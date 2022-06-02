@@ -60,7 +60,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			for (int i = 0; i < nextChunk.getIds().size(); i++) {
 				ResourceIdListWorkChunk.Id nextId = new ResourceIdListWorkChunk.Id();
 				nextId.setResourceType(nextChunk.getResourceTypes().get(i));
-				nextId.setId(nextChunk.getIds().get(i).getId().toString());
+				nextId.setId(nextChunk.getIds().get(i).toString());
 				idBuffer.add(nextId);
 			}
 

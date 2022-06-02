@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -95,6 +97,12 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 			myMdmLinkDaoSvc.deleteLink(mdmLink);
 			theMdmTransactionContext.addMdmLink(mdmLink);
 		}
+	}
+
+	@Override
+	public void deleteLinksWithGoldenResourceIds(List<ResourcePersistentId> theGoldenResourceIds) {
+		List<Long> goldenResourcePids = theGoldenResourceIds.stream().map(ResourcePersistentId::getIdAsLong).toList();
+		myMdmLinkDaoSvc.deleteLinksWithGoldenResourcePids(goldenResourcePids);
 	}
 
 	/**

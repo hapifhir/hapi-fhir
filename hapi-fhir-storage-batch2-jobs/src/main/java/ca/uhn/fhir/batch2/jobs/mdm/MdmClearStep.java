@@ -20,19 +20,21 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,58 +45,70 @@ import org.springframework.transaction.support.TransactionCallback;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceIdListWorkChunk, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearStep.class);
+
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	HapiTransactionService myHapiTransactionService;
 	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
+	DaoRegistry myDaoRegistry;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	IIdHelperService myIdHelperService;
 	@Autowired
-	private IIdHelperService myIdHelperService;
+	IMdmLinkSvc myMdmLinkSvc;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
-		ResourceIdListWorkChunk data = theStepExecutionDetails.getData();
-
-		return doMdmClear(data, theDataSink, theStepExecutionDetails.getInstanceId(), theStepExecutionDetails.getChunkId());
-	}
-
-	@Nonnull
-	public RunOutcome doMdmClear(ResourceIdListWorkChunk data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new MdmClearJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
+		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails, theDataSink));
 
-		return new RunOutcome(data.getIds().size());
+		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	private class MdmClearJob implements TransactionCallback<Void> {
-		private final ResourceIdListWorkChunk myData;
+	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
+		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails, theDataSink);
+	}
+
+	class MdmClearJob implements TransactionCallback<Void> {
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
-		private final IJobDataSink<VoidModel> myDataSink;
+		private final ResourceIdListWorkChunk myData;
 		private final String myChunkId;
 		private final String myInstanceId;
+		private final IJobDataSink<VoidModel> myDataSink;
 
-		public MdmClearJob(ResourceIdListWorkChunk theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
-			myData = theData;
+		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
+			myData = theStepExecutionDetails.getData();
+			myInstanceId = theStepExecutionDetails.getInstanceId();
+			myChunkId = theStepExecutionDetails.getChunkId();
 			myDataSink = theDataSink;
-			myInstanceId = theInstanceId;
-			myChunkId = theChunkId;
 		}
 
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
-			// FIXME KHS implement
+			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+
+			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
+			StopWatch sw = new StopWatch();
+
+			myMdmLinkSvc.deleteLinksWithGoldenResourceIds(persistentIds);
+
+			// FIXME KHS continue rewriting the code below
+			// FIXME KHS there is only one resource type here.  Change the api to reflect that
+			// grab the dao for that single resource type
+			// delete all the mdm links
+			// try delete all the global mdm links.  if fails, try one by one.
+			// Reindex
+
+			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+
 			return null;
 		}
 	}

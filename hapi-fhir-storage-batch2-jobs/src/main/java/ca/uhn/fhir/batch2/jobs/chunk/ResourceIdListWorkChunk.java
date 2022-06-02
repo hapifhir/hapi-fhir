@@ -21,15 +21,16 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  */
 
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hl7.fhir.r4.model.IdType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResourceIdListWorkChunk implements IModelJson {
 
@@ -50,8 +51,19 @@ public class ResourceIdListWorkChunk implements IModelJson {
 			.toString();
 	}
 
-	public void addResourceId(IdType theId) {
-		getIds().add(Id.fromIdType(theId));
+	public List<ResourcePersistentId> getResourcePersistentIds() {
+		return myIds
+			.stream()
+			.map(t -> new ResourcePersistentId(t.getId()))
+			.collect(Collectors.toList());
+	}
+
+	public int size() {
+		return myIds.size();
+	}
+
+	public void addId(String theResourceType, Long thePid) {
+		getIds().add(new Id(theResourceType, thePid.toString()));
 	}
 
 	public static class Id implements IModelJson {
@@ -61,8 +73,11 @@ public class ResourceIdListWorkChunk implements IModelJson {
 		@JsonProperty("id")
 		private String myId;
 
-		public static Id fromIdType(IdType theId) {
-			return new Id().setResourceType(theId.getResourceType()).setId(theId.getId());
+		public Id() {}
+
+		public Id(String theResourceType, String theId) {
+			myResourceType = theResourceType;
+			myId = theId;
 		}
 
 		@Override

@@ -1,15 +1,18 @@
-package ca.uhn.fhir.jpa.batch2.jobs.mdm;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
-import ca.uhn.fhir.batch2.jobs.mdm.MdmClearStep;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -54,13 +57,20 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		assertLinkCount(1);
 
 		ResourceIdListWorkChunk chunk = new ResourceIdListWorkChunk();
-		chunk.addResourceId(goldenPatient.getIdElement());
+		chunk.addId("Patient", goldenPid);
+
 		String instanceId = UUID.randomUUID().toString();
 		String chunkid = UUID.randomUUID().toString();
-		myMdmClearStep.doMdmClear(chunk, myDataSink, instanceId, chunkid);
+		RequestDetails requestDetails = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+		MdmJobParameters parms = new MdmJobParameters();
 
-		assertPatientCount(1);
+		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
+
+		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails, myDataSink));
+
 		assertLinkCount(0);
+		assertPatientCount(1);
 		assertPatientExists(sourcePatient.getIdElement());
 	}
 
