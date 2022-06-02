@@ -56,7 +56,8 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	IIdHelperService myIdHelperService;
-	@Autowired
+	// FIXME KHS right solution?
+	@Autowired(required = false) // Not all systems enable mdm
 	IMdmLinkSvc myMdmLinkSvc;
 
 	@Nonnull
