@@ -67,7 +67,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
 
-		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails, myDataSink));
+		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
 
 		assertLinkCount(0);
 		assertPatientCount(1);

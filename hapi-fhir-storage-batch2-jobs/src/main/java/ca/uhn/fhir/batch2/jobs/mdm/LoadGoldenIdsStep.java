@@ -20,15 +20,15 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexChunkRange;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;

@@ -42,6 +42,7 @@ import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class is in charge of managing MdmLinks between Golden Resources and source resources
@@ -100,9 +101,9 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	}
 
 	@Override
-	public void deleteLinksWithGoldenResourceIds(List<ResourcePersistentId> theGoldenResourceIds) {
-		List<Long> goldenResourcePids = theGoldenResourceIds.stream().map(ResourcePersistentId::getIdAsLong).toList();
-		myMdmLinkDaoSvc.deleteLinksWithGoldenResourcePids(goldenResourcePids);
+	public void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> theGoldenResourceIds) {
+		List<Long> goldenResourcePids = theGoldenResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		myMdmLinkDaoSvc.deleteLinksWithAnyReferenceToPids(goldenResourcePids);
 	}
 
 	/**

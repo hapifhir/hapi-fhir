@@ -49,5 +49,5 @@ public interface IMdmLinkSvc {
 	 */
 	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext);
 
-	void deleteLinksWithGoldenResourceIds(List<ResourcePersistentId> thePersistentIds);
+	void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> thePersistentIds);
 }

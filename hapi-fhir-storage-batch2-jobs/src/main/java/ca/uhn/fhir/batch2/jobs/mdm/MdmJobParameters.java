@@ -21,13 +21,10 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  */
 
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;

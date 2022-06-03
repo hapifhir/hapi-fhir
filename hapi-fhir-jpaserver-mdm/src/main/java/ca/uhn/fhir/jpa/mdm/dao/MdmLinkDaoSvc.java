@@ -388,7 +388,7 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void deleteLinksWithGoldenResourcePids(List<Long> theGoldenResourcePids) {
-		myMdmLinkDao.deleteLinksWithGoldenResourcePids(theGoldenResourcePids);
+	public void deleteLinksWithAnyReferenceToPids(List<Long> theGoldenResourcePids) {
+		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 }

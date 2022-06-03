@@ -44,8 +44,8 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaR
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids)")
-	void deleteLinksWithGoldenResourcePids(@Param("goldenPids") List<Long> theGoldenResourcePids);
+	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) AND mySourcePid IN (:goldenPids)")
+	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
 
 	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
 		"WHERE ml2.myMatchResult=:matchResult " +

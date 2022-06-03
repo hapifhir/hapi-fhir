@@ -11,11 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("unchecked")
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
@@ -56,7 +54,10 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertThat(page.getResourceTypes().toString(), page.getResourceTypes(), contains("Patient", "Patient", "Observation"));
+		assertEquals(3, page.size());
+		assertEquals("Patient", page.getResourceType(0));
+		assertEquals("Patient", page.getResourceType(1));
+		assertEquals("Observation", page.getResourceType(2));
 		assertThat(page.getIds(), contains(new ResourcePersistentId(id0), new ResourcePersistentId(id1), new ResourcePersistentId(id2)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
@@ -86,8 +87,8 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertEquals(0, page.getResourceTypes().size());
-		assertEquals(0, page.getIds().size());
+		assertEquals(0, page.size());
+		// FIXME KHS other assert
 		assertNull(page.getLastDate());
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());
@@ -134,7 +135,9 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertThat(page.getResourceTypes().toString(), page.getResourceTypes(), contains("Patient", "Patient"));
+		assertEquals(2, page.size());
+		assertEquals("Patient", page.getResourceType(0));
+		assertEquals("Patient", page.getResourceType(1));
 		assertThat(page.getIds(), contains(new ResourcePersistentId(id0), new ResourcePersistentId(id1)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));

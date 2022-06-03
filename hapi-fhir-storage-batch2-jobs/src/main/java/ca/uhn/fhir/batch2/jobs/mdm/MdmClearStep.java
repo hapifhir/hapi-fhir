@@ -66,13 +66,13 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails, theDataSink));
+		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
 
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
-		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails, theDataSink);
+	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails) {
+		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
 	}
 
 	class MdmClearJob implements TransactionCallback<Void> {
@@ -81,15 +81,13 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 		private final ResourceIdListWorkChunk myData;
 		private final String myChunkId;
 		private final String myInstanceId;
-		private final IJobDataSink<VoidModel> myDataSink;
 
-		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) {
+		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
 			myInstanceId = theStepExecutionDetails.getInstanceId();
 			myChunkId = theStepExecutionDetails.getChunkId();
-			myDataSink = theDataSink;
 		}
 
 		@Override
@@ -99,7 +97,9 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
-			myMdmLinkSvc.deleteLinksWithGoldenResourceIds(persistentIds);
+			// FIXME check that the batch size is configurable (for Oracle)
+			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
+
 
 			// FIXME KHS continue rewriting the code below
 			// FIXME KHS there is only one resource type here.  Change the api to reflect that

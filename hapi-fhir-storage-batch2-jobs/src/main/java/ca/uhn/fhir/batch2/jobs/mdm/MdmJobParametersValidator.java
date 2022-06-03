@@ -21,12 +21,8 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  */
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;

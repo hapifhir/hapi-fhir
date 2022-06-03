@@ -20,14 +20,18 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.Batch2Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
-
-import static ca.uhn.fhir.batch2.jobs.Batch2Constants.BATCH_START_DATE;
 
 public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobParameters, MdmChunkRange> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
@@ -37,7 +41,7 @@ public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobPar
 	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRange> theDataSink) throws JobExecutionFailedException {
 		MdmJobParameters params = theStepExecutionDetails.getParameters();
 
-		Date start = BATCH_START_DATE;
+		Date start = Batch2Constants.BATCH_START_DATE;
 		Date end = new Date();
 
 		for (String nextResourceType : params.getResourceType()) {
