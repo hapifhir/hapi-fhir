@@ -110,6 +110,47 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(false, newPt.getActive());
 	}
 
+	@Test
+	public void testFhirPatch_TransactionWithSearchParameter() throws Exception {
+		String methodName = "testFhirPatch_Transaction";
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier().setSystem("urn:system").setValue("0");
+			patient.addName().setFamily(methodName).addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		op.addPart().setName("value").setValue(new BooleanType(false));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest().setUrl(String.format("Patient?name=%s", methodName))
+			.setMethod(Bundle.HTTPVerb.PATCH);
+
+		HttpPost post = new HttpPost(ourServerBase);
+		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info("Request:\n{}", encodedRequest);
+
+		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+		}
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
 
 	@Test
 	public void testPatchAddArray() throws IOException {
