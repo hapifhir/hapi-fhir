@@ -114,7 +114,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 			sw.restart();
 			for (int i = 0; i < myData.size(); i++) {
 
-				String nextResourceType = myData.getTypedPids().get(i).getResourceType();
+				String nextResourceType = myData.getResourceType(i);
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
 				try {

@@ -108,8 +108,8 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
 			// FIXME KHS data should include resource type not buried in id
-			ResourceIdListWorkChunkJson.TypedPidJson firstId = myData.getTypedPids().get(0);
-			String resourceName = firstId.getResourceType();
+			ResourceIdListWorkChunkJson.TypedPidJson firstPid = myData.getTypedPids().get(0);
+			String resourceName = firstPid.getResourceType();
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);

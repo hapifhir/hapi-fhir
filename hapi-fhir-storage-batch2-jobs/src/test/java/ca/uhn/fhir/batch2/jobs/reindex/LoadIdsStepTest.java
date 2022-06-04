@@ -84,8 +84,8 @@ public class LoadIdsStepTest {
 	@Nonnull
 	private ResourceIdListWorkChunkJson createIdChunk(int theLow, int theHigh) {
 		ResourceIdListWorkChunkJson retVal = new ResourceIdListWorkChunkJson();
-		for (int i = theLow; i < theHigh; i++) {
-			retVal.getTypedPids().add(new ResourceIdListWorkChunkJson.TypedPidJson().setResourceType("Patient").setPid(Integer.toString(i)));
+		for (long i = theLow; i < theHigh; i++) {
+			retVal.addTypedPid("Patient", i);
 		}
 		return retVal;
 	}

@@ -73,6 +73,10 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 		getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
 	}
 
+	public String getResourceType(int index) {
+		return getTypedPids().get(index).getResourceType();
+	}
+
 	public static class TypedPidJson implements IModelJson {
 
 		@JsonProperty("type")
