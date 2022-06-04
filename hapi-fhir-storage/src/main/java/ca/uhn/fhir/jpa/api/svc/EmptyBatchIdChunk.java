@@ -33,4 +33,9 @@ public class EmptyBatchIdChunk implements IBatchIdChunk {
 	public List<ResourcePersistentId> getIds() {
 		return Collections.emptyList();
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return true;
+	}
 }

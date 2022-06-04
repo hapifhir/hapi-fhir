@@ -10,7 +10,7 @@ public class HomogeneousBatchIdChunk extends BaseBatchIdChunk {
 	@NonNull
 	final String myResourceType;
 
-	HomogeneousBatchIdChunk(List<ResourcePersistentId> theIds, String theResourceType, Date theLastDate) {
+	public HomogeneousBatchIdChunk(List<ResourcePersistentId> theIds, String theResourceType, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceType = theResourceType;
 	}

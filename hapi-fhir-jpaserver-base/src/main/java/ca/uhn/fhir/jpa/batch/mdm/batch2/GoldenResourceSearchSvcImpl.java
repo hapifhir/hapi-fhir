@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.HomogeneousBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -45,7 +46,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 	@Autowired
@@ -81,17 +81,11 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		request.setRequestPartitionId(theRequestPartitionId);
 		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
-		// just a list of the same size where every element is the same resource type
-		List<String> resourceTypes = ids
-			.stream()
-			.map(t -> theResourceType)
-			.collect(Collectors.toList());
-
 		Date lastDate = null;
 		if (ids.size() > 0) {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new IBatchIdChunk(ids, resourceTypes, lastDate);
+		return new HomogeneousBatchIdChunk(ids, theResourceType, lastDate);
 	}
 }

@@ -10,7 +10,7 @@ public class MixedBatchIdChunk extends BaseBatchIdChunk {
 	@NonNull
 	final List<String> myResourceTypes;
 
-	MixedBatchIdChunk(List<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
+	public MixedBatchIdChunk(List<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceTypes = theResourceTypes;
 	}

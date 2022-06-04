@@ -25,8 +25,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.EmptyBatchIdChunk;
+import ca.uhn.fhir.jpa.api.svc.HomogeneousBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.api.svc.MixedBatchIdChunk;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -44,7 +47,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,18 +98,12 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 		request.setRequestPartitionId(theRequestPartitionId);
 		List<ResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
 
-		// just a list of the same size where every element is the same resource type
-		List<String> resourceTypes = ids
-			.stream()
-			.map(t -> resourceType)
-			.collect(Collectors.toList());
-
 		Date lastDate = null;
 		if (ids.size() > 0) {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new IBatchIdChunk(ids, resourceTypes, lastDate);
+		return new HomogeneousBatchIdChunk(ids, resourceType, lastDate);
 	}
 
 	@Nonnull
@@ -124,7 +120,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		List<Object[]> content = slice.getContent();
 		if (content.isEmpty()) {
-			return new IBatchIdChunk(Collections.emptyList(), Collections.emptyList(), null);
+			return new EmptyBatchIdChunk();
 		}
 
 		List<ResourcePersistentId> ids = content
@@ -139,6 +135,6 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		Date lastDate = (Date) content.get(content.size() - 1)[2];
 
-		return new IBatchIdChunk(ids, types, lastDate);
+		return new MixedBatchIdChunk(ids, types, lastDate);
 	}
 }
