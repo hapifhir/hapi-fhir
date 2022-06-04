@@ -87,8 +87,8 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 
+		assertTrue(page.isEmpty());
 		assertEquals(0, page.size());
-		// FIXME KHS other assert
 		assertNull(page.getLastDate());
 
 		assertEquals(1, myCaptureQueriesListener.logSelectQueries().size());

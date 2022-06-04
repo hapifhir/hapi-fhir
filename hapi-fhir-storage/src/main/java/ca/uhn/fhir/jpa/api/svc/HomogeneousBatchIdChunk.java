@@ -8,16 +8,15 @@ import java.util.List;
 
 public class HomogeneousBatchIdChunk extends BaseBatchIdChunk {
 	@NonNull
-	// FIXME KHS rename
-	final String myOnlyResourceType;
+	final String myResourceType;
 
 	HomogeneousBatchIdChunk(List<ResourcePersistentId> theIds, String theResourceType, Date theLastDate) {
 		super(theIds, theLastDate);
-		myOnlyResourceType = theResourceType;
+		myResourceType = theResourceType;
 	}
 
 	@Override
 	public String getResourceType(int i) {
-			return myOnlyResourceType;
+			return myResourceType;
 	}
 }

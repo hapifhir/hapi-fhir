@@ -20,7 +20,12 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -92,6 +97,9 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
+			if (persistentIds.isEmpty()) {
+				return null;
+			}
 
 			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
@@ -99,17 +107,12 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			// FIXME check that the batch size is configurable (for Oracle)
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
-			// FIXME KHS replace with type from work
-			String resourceName = "Patient";
+			// FIXME KHS data should include resource type not buried in id
+			ResourceIdListWorkChunk.Id firstId = myData.getIds().get(0);
+			String resourceName = firstId.getResourceType();
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
-			// FIXME KHS continue rewriting the code below
-			// FIXME KHS there is only one resource type here.  Change the api to reflect that
-			// grab the dao for that single resource type
-			// delete all the mdm links
-			// try delete all the global mdm links.  if fails, try one by one.
-			// Reindex
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 

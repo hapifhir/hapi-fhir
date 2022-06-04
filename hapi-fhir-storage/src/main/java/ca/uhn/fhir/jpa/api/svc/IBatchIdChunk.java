@@ -18,4 +18,6 @@ public interface IBatchIdChunk {
 	String getResourceType(int i);
 
 	List<ResourcePersistentId> getIds();
+
+	boolean isEmpty();
 }

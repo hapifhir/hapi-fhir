@@ -42,6 +42,7 @@ abstract public class BaseBatchIdChunk implements IBatchIdChunk {
 		return Collections.unmodifiableList(retval);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return myIds.isEmpty();
 	}
