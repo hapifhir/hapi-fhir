@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
-public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRange> {
+public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexIdChunkProducer.class);
 	private final IResourceReindexSvc myResourceReindexSvc;
 
@@ -18,7 +18,7 @@ public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRang
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, ReindexChunkRange theData) {
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, ReindexChunkRangeJson theData) {
 		String url = theData.getUrl();
 
 		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);

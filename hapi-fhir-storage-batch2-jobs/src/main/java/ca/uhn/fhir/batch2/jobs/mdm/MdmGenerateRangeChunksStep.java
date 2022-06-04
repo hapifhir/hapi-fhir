@@ -33,12 +33,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobParameters, MdmChunkRange> {
+public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobParameters, MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRange> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink) throws JobExecutionFailedException {
 		MdmJobParameters params = theStepExecutionDetails.getParameters();
 
 		Date start = Batch2Constants.BATCH_START_DATE;
@@ -46,7 +46,7 @@ public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobPar
 
 		for (String nextResourceType : params.getResourceType()) {
 			ourLog.info("Initiating mdm clear of [{}]] Golden Resources from {} to {}", nextResourceType, start, end);
-			MdmChunkRange nextRange = new MdmChunkRange();
+			MdmChunkRangeJson nextRange = new MdmChunkRangeJson();
 			nextRange.setResourceType(nextResourceType);
 			nextRange.setStart(start);
 			nextRange.setEnd(end);

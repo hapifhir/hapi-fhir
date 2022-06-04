@@ -5,8 +5,8 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
@@ -23,7 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRange> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunk> {
+public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdListStep.class);
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
@@ -34,7 +34,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunk> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<PT, IT> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
 		IT data = theStepExecutionDetails.getData();
 
 		Date start = data.getStart();
@@ -44,7 +44,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		Date nextStart = start;
 		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<ResourceIdListWorkChunk.Id> idBuffer = new LinkedHashSet<>();
+		Set<ResourceIdListWorkChunkJson.TypedPidJson> idBuffer = new LinkedHashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
@@ -59,7 +59,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
 
 			for (TypedResourcePid typedResourcePid : nextChunk.getBatchResourceIds()) {
-				ResourceIdListWorkChunk.Id nextId = new ResourceIdListWorkChunk.Id(typedResourcePid);
+				ResourceIdListWorkChunkJson.TypedPidJson nextId = new ResourceIdListWorkChunkJson.TypedPidJson(typedResourcePid);
 				idBuffer.add(nextId);
 			}
 
@@ -74,8 +74,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 			while (idBuffer.size() >= 1000) {
 
-				List<ResourceIdListWorkChunk.Id> submissionIds = new ArrayList<>();
-				for (Iterator<ResourceIdListWorkChunk.Id> iter = idBuffer.iterator(); iter.hasNext(); ) {
+				List<ResourceIdListWorkChunkJson.TypedPidJson> submissionIds = new ArrayList<>();
+				for (Iterator<ResourceIdListWorkChunkJson.TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
 					if (submissionIds.size() >= 1000) {
@@ -97,14 +97,14 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<ResourceIdListWorkChunk.Id> theIdBuffer, IJobDataSink<ResourceIdListWorkChunk> theDataSink) {
+	private void submitWorkChunk(Collection<ResourceIdListWorkChunkJson.TypedPidJson> theIdBuffer, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
 		if (theIdBuffer.isEmpty()) {
 			return;
 		}
 		ourLog.info("Submitting work chunk with {} IDs", theIdBuffer.size());
 
-		ResourceIdListWorkChunk data = new ResourceIdListWorkChunk();
-		data.getIds().addAll(theIdBuffer);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.getTypedPids().addAll(theIdBuffer);
 		theDataSink.accept(data);
 	}
 }

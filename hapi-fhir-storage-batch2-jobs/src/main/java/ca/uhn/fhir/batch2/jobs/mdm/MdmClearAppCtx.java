@@ -21,7 +21,7 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -46,12 +46,12 @@ public class MdmClearAppCtx {
 			.addFirstStep(
 				"generate-ranges",
 				"Generate date ranges to Mdm Clear",
-				MdmChunkRange.class,
+				MdmChunkRangeJson.class,
 				mdmGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"find-golden-resource-ids",
 				"Load ids of golden resources to be cleared",
-				ResourceIdListWorkChunk.class,
+				ResourceIdListWorkChunkJson.class,
 				loadGoldenIdsStep())
 			.addLastStep("Mdm",
 				"Remove golden resources and mdm links",

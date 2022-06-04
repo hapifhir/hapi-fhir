@@ -21,9 +21,10 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +35,7 @@ public class ReindexAppCtx {
 	public static final String JOB_REINDEX = "REINDEX";
 
 	@Bean
-	public JobDefinition<ReindexJobParameters> reindexJobDefinition() {
+	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IResourceReindexSvc theResourceReindexSvc) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_REINDEX)
@@ -46,13 +47,13 @@ public class ReindexAppCtx {
 			.addFirstStep(
 				"generate-ranges",
 				"Generate data ranges to reindex",
-				ReindexChunkRange.class,
+				ReindexChunkRangeJson.class,
 				reindexGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"load-ids",
 				"Load IDs of resources to reindex",
-				ResourceIdListWorkChunk.class,
-				loadIdsStep())
+				ResourceIdListWorkChunkJson.class,
+				loadIdsStep(theResourceReindexSvc))
 			.addLastStep("reindex",
 				"Perform the resource reindex",
 				reindexStep()
@@ -76,8 +77,8 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public LoadIdsStep loadIdsStep() {
-		return new LoadIdsStep();
+	public LoadIdsStep loadIdsStep(IResourceReindexSvc theResourceReindexSvc) {
+		return new LoadIdsStep(theResourceReindexSvc);
 	}
 
 	@Bean

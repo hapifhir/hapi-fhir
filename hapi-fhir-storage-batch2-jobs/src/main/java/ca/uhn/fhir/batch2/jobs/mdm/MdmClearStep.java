@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MDM_CLEAR;
 
-public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceIdListWorkChunk, VoidModel> {
+public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearStep.class);
 
@@ -66,7 +66,7 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
@@ -75,18 +75,18 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails) {
+	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
 	}
 
 	class MdmClearJob implements TransactionCallback<Void> {
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
-		private final ResourceIdListWorkChunk myData;
+		private final ResourceIdListWorkChunkJson myData;
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> theStepExecutionDetails) {
+		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
@@ -108,7 +108,7 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
 			// FIXME KHS data should include resource type not buried in id
-			ResourceIdListWorkChunk.Id firstId = myData.getIds().get(0);
+			ResourceIdListWorkChunkJson.TypedPidJson firstId = myData.getTypedPids().get(0);
 			String resourceName = firstId.getResourceType();
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
 			DeleteConflictList conflicts = new DeleteConflictList();

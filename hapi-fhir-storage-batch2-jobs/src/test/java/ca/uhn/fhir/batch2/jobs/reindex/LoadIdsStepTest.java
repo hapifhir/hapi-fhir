@@ -2,17 +2,17 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,22 +41,26 @@ public class LoadIdsStepTest {
 	private IResourceReindexSvc myResourceReindexSvc;
 
 	@Mock
-	private IJobDataSink<ResourceIdListWorkChunk> mySink;
+	private IJobDataSink<ResourceIdListWorkChunkJson> mySink;
 
-	@InjectMocks
 	private LoadIdsStep mySvc;
 
+	@BeforeEach
+	public void before() {
+		mySvc = new LoadIdsStep(myResourceReindexSvc);
+	}
+
 	@Captor
-	private ArgumentCaptor<ResourceIdListWorkChunk> myChunkIdsCaptor;
+	private ArgumentCaptor<ResourceIdListWorkChunkJson> myChunkIdsCaptor;
 
 	@Test
 	public void testGenerateSteps() {
 		ReindexJobParameters parameters = new ReindexJobParameters();
-		ReindexChunkRange range = new ReindexChunkRange();
+		ReindexChunkRangeJson range = new ReindexChunkRangeJson();
 		range.setStart(DATE_1).setEnd(DATE_END);
 		String instanceId = "instance-id";
 		String chunkId = "chunk-id";
-		StepExecutionDetails<ReindexJobParameters, ReindexChunkRange> details = new StepExecutionDetails<>(parameters, range, instanceId, chunkId);
+		StepExecutionDetails<ReindexJobParameters, ReindexChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, instanceId, chunkId);
 
 		// First Execution
 
@@ -68,6 +72,7 @@ public class LoadIdsStepTest {
 			.thenReturn(createIdChunk(40000L, 40040L, DATE_3));
 
 		mySvc.run(details, mySink);
+
 		verify(mySink, times(41)).accept(myChunkIdsCaptor.capture());
 		for (int i = 0; i < 40; i++) {
 			assertEquals(createIdChunk(i * 1000, (i * 1000) + 1000).toString(), myChunkIdsCaptor.getAllValues().get(i).toString());
@@ -77,10 +82,10 @@ public class LoadIdsStepTest {
 	}
 
 	@Nonnull
-	private ResourceIdListWorkChunk createIdChunk(int theLow, int theHigh) {
-		ResourceIdListWorkChunk retVal = new ResourceIdListWorkChunk();
+	private ResourceIdListWorkChunkJson createIdChunk(int theLow, int theHigh) {
+		ResourceIdListWorkChunkJson retVal = new ResourceIdListWorkChunkJson();
 		for (int i = theLow; i < theHigh; i++) {
-			retVal.getIds().add(new ResourceIdListWorkChunk.Id().setResourceType("Patient").setId(Integer.toString(i)));
+			retVal.getTypedPids().add(new ResourceIdListWorkChunkJson.TypedPidJson().setResourceType("Patient").setPid(Integer.toString(i)));
 		}
 		return retVal;
 	}

@@ -3,7 +3,7 @@ package ca.uhn.fhir.batch2.jobs.mdm;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -56,8 +56,8 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		assertPatientCount(2);
 		assertLinkCount(1);
 
-		ResourceIdListWorkChunk chunk = new ResourceIdListWorkChunk();
-		chunk.addId("Patient", goldenPid);
+		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
+		chunk.addTypedPid("Patient", goldenPid);
 
 		String instanceId = UUID.randomUUID().toString();
 		String chunkid = UUID.randomUUID().toString();
@@ -65,7 +65,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 		TransactionDetails transactionDetails = new TransactionDetails();
 		MdmJobParameters parms = new MdmJobParameters();
 
-		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunk> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
+		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
 
 		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
 

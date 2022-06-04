@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-public class ChunkRange implements IModelJson {
+public class ChunkRangeJson implements IModelJson {
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	@JsonProperty("start")
@@ -28,7 +28,7 @@ public class ChunkRange implements IModelJson {
 		return myStart;
 	}
 
-	public ChunkRange setStart(@Nonnull Date theStart) {
+	public ChunkRangeJson setStart(@Nonnull Date theStart) {
 		myStart = theStart;
 		return this;
 	}
@@ -38,7 +38,7 @@ public class ChunkRange implements IModelJson {
 		return myEnd;
 	}
 
-	public ChunkRange setEnd(@Nonnull Date theEnd) {
+	public ChunkRangeJson setEnd(@Nonnull Date theEnd) {
 		myEnd = theEnd;
 		return this;
 	}

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 
-public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRange> {
+public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmIdChunkProducer.class);
 	private final IGoldenResourceSearchSvc myGoldenResourceSearchSvc;
 
@@ -18,7 +18,7 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRange> {
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, MdmChunkRange theData) {
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, MdmChunkRangeJson theData) {
 		String resourceType = theData.getResourceType();
 
 		ourLog.info("Fetching golden resource ID chunk for resource type {} - Range {} - {}", resourceType, theNextStart, theEnd);

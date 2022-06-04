@@ -34,12 +34,12 @@ import java.util.Date;
 
 import static ca.uhn.fhir.batch2.jobs.Batch2Constants.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRange> {
+public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRange> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<ReindexChunkRangeJson> theDataSink) throws JobExecutionFailedException {
 		ReindexJobParameters params = theStepExecutionDetails.getParameters();
 
 		Date start = BATCH_START_DATE;
@@ -47,14 +47,14 @@ public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobPa
 
 		if (params.getUrl().isEmpty()) {
 			ourLog.info("Initiating reindex of All Resources from {} to {}", start, end);
-			ReindexChunkRange nextRange = new ReindexChunkRange();
+			ReindexChunkRangeJson nextRange = new ReindexChunkRangeJson();
 			nextRange.setStart(start);
 			nextRange.setEnd(end);
 			theDataSink.accept(nextRange);
 		} else {
 			for (String nextUrl : params.getUrl()) {
 				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextUrl, start, end);
-				ReindexChunkRange nextRange = new ReindexChunkRange();
+				ReindexChunkRangeJson nextRange = new ReindexChunkRangeJson();
 				nextRange.setUrl(nextUrl);
 				nextRange.setStart(start);
 				nextRange.setEnd(end);

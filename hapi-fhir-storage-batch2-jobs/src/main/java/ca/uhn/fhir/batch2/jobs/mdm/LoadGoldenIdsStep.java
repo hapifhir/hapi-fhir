@@ -25,7 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
@@ -33,21 +33,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 
-public class LoadGoldenIdsStep implements IJobStepWorker<MdmJobParameters, MdmChunkRange, ResourceIdListWorkChunk> {
+public class LoadGoldenIdsStep implements IJobStepWorker<MdmJobParameters, MdmChunkRangeJson, ResourceIdListWorkChunkJson> {
 	@Autowired
 	private IGoldenResourceSearchSvc myGoldenResourceSearchSvc;
 
-	private final ResourceIdListStep<MdmJobParameters, MdmChunkRange> myResourceIdListStep;
+	private final ResourceIdListStep<MdmJobParameters, MdmChunkRangeJson> myResourceIdListStep;
 
 	public LoadGoldenIdsStep() {
-		IIdChunkProducer<MdmChunkRange> idChunkProducer = new MdmIdChunkProducer(myGoldenResourceSearchSvc);
+		IIdChunkProducer<MdmChunkRangeJson> idChunkProducer = new MdmIdChunkProducer(myGoldenResourceSearchSvc);
 
 		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
 	}
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, MdmChunkRange> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunk> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, MdmChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
 	}
 }

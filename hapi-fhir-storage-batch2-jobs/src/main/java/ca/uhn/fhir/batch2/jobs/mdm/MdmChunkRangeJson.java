@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 /*-
  * #%L
@@ -20,22 +20,23 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
+import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ReindexChunkRange extends ChunkRange {
-	@Nullable
-	@JsonProperty("url")
-	private String myUrl;
+public class MdmChunkRangeJson extends ChunkRangeJson {
+	@Nonnull
+	@JsonProperty("resourceType")
+	private String myResourceType;
 
-	@Nullable
-	public String getUrl() {
-		return myUrl;
+	@Nonnull
+	public String getResourceType() {
+		return myResourceType;
 	}
 
-	public void setUrl(@Nullable String theUrl) {
-		myUrl = theUrl;
+	public void setResourceType(@Nullable String theResourceType) {
+		myResourceType = theResourceType;
 	}
 }

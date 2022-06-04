@@ -34,86 +34,86 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ResourceIdListWorkChunk implements IModelJson {
+public class ResourceIdListWorkChunkJson implements IModelJson {
 
 	@JsonProperty("ids")
-	private List<Id> myIds;
+	private List<TypedPidJson> myTypedPids;
 
 	// FIXME KHS don't use this method.  Take an approach similar to the idchunks
-	public List<Id> getIds() {
-		if (myIds == null) {
-			myIds = new ArrayList<>();
+	public List<TypedPidJson> getTypedPids() {
+		if (myTypedPids == null) {
+			myTypedPids = new ArrayList<>();
 		}
-		return myIds;
+		return myTypedPids;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("ids", myIds)
+			.append("ids", myTypedPids)
 			.toString();
 	}
 
 	public List<ResourcePersistentId> getResourcePersistentIds() {
-		if (myIds.isEmpty()) {
+		if (myTypedPids.isEmpty()) {
 			return Collections.emptyList();
 		}
 
-		return myIds
+		return myTypedPids
 			.stream()
-			.map(t -> new ResourcePersistentId(t.getId()))
+			.map(t -> new ResourcePersistentId(t.getPid()))
 			.collect(Collectors.toList());
 	}
 
 	public int size() {
-		return myIds.size();
+		return myTypedPids.size();
 	}
 
-	public void addId(String theResourceType, Long thePid) {
-		getIds().add(new Id(theResourceType, thePid.toString()));
+	public void addTypedPid(String theResourceType, Long thePid) {
+		getTypedPids().add(new TypedPidJson(theResourceType, thePid.toString()));
 	}
 
-	public static class Id implements IModelJson {
+	public static class TypedPidJson implements IModelJson {
 
 		@JsonProperty("type")
 		private String myResourceType;
 		@JsonProperty("id")
-		private String myId;
+		private String myPid;
 
-		public Id() {}
+		public TypedPidJson() {}
 
-		public Id(String theResourceType, String theId) {
+		public TypedPidJson(String theResourceType, String theId) {
 			myResourceType = theResourceType;
-			myId = theId;
+			myPid = theId;
 		}
 
-		public Id(TypedResourcePid theTypedResourcePid) {
+		public TypedPidJson(TypedResourcePid theTypedResourcePid) {
 			myResourceType = theTypedResourcePid.resourceType;
-			myId = theTypedResourcePid.id.toString();
+			myPid = theTypedResourcePid.id.toString();
 		}
 
 		@Override
 		public String toString() {
 			// We put a space in here and not a "/" since this is a PID, not
 			// a resource ID
-			return "[" + myResourceType + " " + myId + "]";
+			return "[" + myResourceType + " " + myPid + "]";
 		}
 
 		public String getResourceType() {
 			return myResourceType;
 		}
 
-		public Id setResourceType(String theResourceType) {
+		public TypedPidJson setResourceType(String theResourceType) {
 			myResourceType = theResourceType;
 			return this;
 		}
 
-		public String getId() {
-			return myId;
+		public String getPid() {
+			return myPid;
 		}
 
-		public Id setId(String theId) {
-			myId = theId;
+		public TypedPidJson setPid(String thePid) {
+			myPid = thePid;
 			return this;
 		}
 
@@ -123,14 +123,14 @@ public class ResourceIdListWorkChunk implements IModelJson {
 
 			if (theO == null || getClass() != theO.getClass()) return false;
 
-			Id id = (Id) theO;
+			TypedPidJson id = (TypedPidJson) theO;
 
-			return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myId, id.myId).isEquals();
+			return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myPid, id.myPid).isEquals();
 		}
 
 		@Override
 		public int hashCode() {
-			return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
+			return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
 		}
 	}
 
