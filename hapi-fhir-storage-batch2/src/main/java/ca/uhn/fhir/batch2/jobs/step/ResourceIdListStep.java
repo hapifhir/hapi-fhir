@@ -9,8 +9,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
+import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		int totalIdsFound = 0;
 		int chunkCount = 0;
 		while (true) {
-			BatchIdChunk nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, requestPartitionId, theStepExecutionDetails.getData());
+			IBatchIdChunk nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, requestPartitionId, theStepExecutionDetails.getData());
 
 			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");

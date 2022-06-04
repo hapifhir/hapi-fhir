@@ -35,6 +35,6 @@ public interface IGoldenResourceSearchSvc {
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theResourceType the type of resource.
 	 */
-	BatchIdChunk fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
+	IBatchIdChunk fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
 
 }

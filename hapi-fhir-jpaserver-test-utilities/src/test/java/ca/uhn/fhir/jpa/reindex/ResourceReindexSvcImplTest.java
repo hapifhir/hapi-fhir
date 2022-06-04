@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.reindex;
 
-import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
+import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.MethodOrderer;
@@ -53,7 +53,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -83,7 +83,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -131,7 +131,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
+		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
 
 		// Verify
 

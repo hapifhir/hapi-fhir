@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
+import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -59,13 +59,13 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 
 	@Override
 	@Transactional
-	public BatchIdChunk fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType) {
+	public IBatchIdChunk fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType) {
 
 		int pageSize = 20000;
 		return fetchResourceIdsPageWithResourceType(theStart, theEnd, pageSize, theResourceType, theRequestPartitionId);
 	}
 
-	private BatchIdChunk fetchResourceIdsPageWithResourceType(Date theStart, Date theEnd, int thePageSize, String theResourceType, RequestPartitionId theRequestPartitionId) {
+	private IBatchIdChunk fetchResourceIdsPageWithResourceType(Date theStart, Date theEnd, int thePageSize, String theResourceType, RequestPartitionId theRequestPartitionId) {
 
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(theResourceType);
 
@@ -92,6 +92,6 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new BatchIdChunk(ids, resourceTypes, lastDate);
+		return new IBatchIdChunk(ids, resourceTypes, lastDate);
 	}
 }
