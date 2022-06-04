@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api.svc;
+package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
@@ -6,14 +6,17 @@ import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 
-public interface IBatchIdChunk {
+/**
+ * List of ResourcePersistentId along with a resource type each id
+ */
+public interface IResourcePidList {
 
 	Date getLastDate();
 
 	int size();
 
 	@Nonnull
-	List<BatchResourceId> getBatchResourceIds();
+	List<TypedResourcePid> getBatchResourceIds();
 
 	String getResourceType(int i);
 

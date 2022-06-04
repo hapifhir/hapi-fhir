@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api.svc;
+package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
@@ -7,7 +7,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class EmptyBatchIdChunk implements IBatchIdChunk {
+/**
+ * An empty resource pid list
+ */
+public class EmptyResourcePidList implements IResourcePidList {
 	@Override
 	public Date getLastDate() {
 		return null;
@@ -20,7 +23,7 @@ public class EmptyBatchIdChunk implements IBatchIdChunk {
 
 	@Nonnull
 	@Override
-	public List<BatchResourceId> getBatchResourceIds() {
+	public List<TypedResourcePid> getBatchResourceIds() {
 		return Collections.emptyList();
 	}
 

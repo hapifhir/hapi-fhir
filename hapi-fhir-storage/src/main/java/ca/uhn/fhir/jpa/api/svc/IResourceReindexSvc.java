@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.svc;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -40,6 +41,6 @@ public interface IResourceReindexSvc {
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
-	IBatchIdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
+	IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
 
 }

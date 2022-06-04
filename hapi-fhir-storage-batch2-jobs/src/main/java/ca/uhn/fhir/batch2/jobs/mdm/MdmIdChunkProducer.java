@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.jobs.mdm;
 
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ public class MdmIdChunkProducer implements IIdChunkProducer<MdmChunkRange> {
 	}
 
 	@Override
-	public IBatchIdChunk fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, MdmChunkRange theData) {
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, MdmChunkRange theData) {
 		String resourceType = theData.getResourceType();
 
 		ourLog.info("Fetching golden resource ID chunk for resource type {} - Range {} - {}", resourceType, theNextStart, theEnd);

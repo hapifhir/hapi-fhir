@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.api.svc;
+package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
@@ -9,15 +9,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-abstract public class BaseBatchIdChunk implements IBatchIdChunk {
-	private static final IBatchIdChunk EMPTY_CHUNK = new EmptyBatchIdChunk();
+abstract public class BaseResourcePidList implements IResourcePidList {
+	private static final IResourcePidList EMPTY_CHUNK = new EmptyResourcePidList();
 
 	final List<ResourcePersistentId> myIds;
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseBatchIdChunk(List<ResourcePersistentId> theIds, Date theLastDate) {
+	BaseResourcePidList(List<ResourcePersistentId> theIds, Date theLastDate) {
 		myIds = theIds;
 		myLastDate = theLastDate;
 	}
@@ -34,10 +34,10 @@ abstract public class BaseBatchIdChunk implements IBatchIdChunk {
 
 	@Override
 	@Nonnull
-	public List<BatchResourceId> getBatchResourceIds() {
-		List<BatchResourceId> retval = new ArrayList<>();
+	public List<TypedResourcePid> getBatchResourceIds() {
+		List<TypedResourcePid> retval = new ArrayList<>();
 		for (int i = 0; i < myIds.size(); ++i) {
-			retval.add(new BatchResourceId(getResourceType(i), myIds.get(i)));
+			retval.add(new TypedResourcePid(getResourceType(i), myIds.get(i)));
 		}
 		return Collections.unmodifiableList(retval);
 	}
@@ -53,43 +53,43 @@ abstract public class BaseBatchIdChunk implements IBatchIdChunk {
 	}
 
 	// FIXME KHS test
-	public static IBatchIdChunk fromChunksAndDate(List<IBatchIdChunk> theChunks, Date theEnd) {
+	public static IResourcePidList fromChunksAndDate(List<IResourcePidList> theChunks, Date theEnd) {
 		if (theChunks.isEmpty()) {
-			return BaseBatchIdChunk.empty();
+			return BaseResourcePidList.empty();
 		}
 
 		List<ResourcePersistentId> ids = new ArrayList<>();
 
 		Date endDate = null;
 		boolean containsMixed = false;
-		for (IBatchIdChunk chunk : theChunks) {
+		for (IResourcePidList chunk : theChunks) {
 			ids.addAll(chunk.getIds());
 			endDate = getLatestDate(chunk, endDate, theEnd);
-			if (chunk instanceof MixedBatchIdChunk) {
+			if (chunk instanceof MixedResourcePidList) {
 				containsMixed = true;
 			}
 		}
 
 		if (containsMixed) {
 			List<String> types = new ArrayList<>();
-			for (IBatchIdChunk chunk : theChunks) {
+			for (IResourcePidList chunk : theChunks) {
 				for (int i = 0; i < chunk.size(); ++i) {
 					types.add(chunk.getResourceType(i));
 				}
 			}
-			return new MixedBatchIdChunk(ids, types, endDate);
+			return new MixedResourcePidList(ids, types, endDate);
 		} else {
-			IBatchIdChunk firstChunk = theChunks.get(0);
+			IResourcePidList firstChunk = theChunks.get(0);
 			String onlyResourceType = firstChunk.getResourceType(0);
-			return new HomogeneousBatchIdChunk(ids, onlyResourceType, endDate);
+			return new HomogeneousResourcePidList(ids, onlyResourceType, endDate);
 		}
 	}
 
-	private static IBatchIdChunk empty() {
+	private static IResourcePidList empty() {
 		return EMPTY_CHUNK;
 	}
 
-	private static Date getLatestDate(IBatchIdChunk theChunk, Date theCurrentEndDate, Date thePassedInEndDate) {
+	private static Date getLatestDate(IResourcePidList theChunk, Date theCurrentEndDate, Date thePassedInEndDate) {
 		Date endDate = theCurrentEndDate;
 		if (theCurrentEndDate == null) {
 			endDate = theChunk.getLastDate();

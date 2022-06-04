@@ -25,11 +25,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.svc.EmptyBatchIdChunk;
-import ca.uhn.fhir.jpa.api.svc.HomogeneousBatchIdChunk;
-import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
+import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.jpa.api.svc.MixedBatchIdChunk;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -72,7 +72,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public IBatchIdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+	public IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 
 		int pageSize = 20000;
 		if (theUrl == null) {
@@ -82,7 +82,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 		}
 	}
 
-	private IBatchIdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private IResourcePidList fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
 
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
@@ -103,11 +103,11 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new HomogeneousBatchIdChunk(ids, resourceType, lastDate);
+		return new HomogeneousResourcePidList(ids, resourceType, lastDate);
 	}
 
 	@Nonnull
-	private IBatchIdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
+	private IResourcePidList fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
 		Pageable page = Pageable.ofSize(thePagesize);
 		Slice<Object[]> slice;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
@@ -120,7 +120,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		List<Object[]> content = slice.getContent();
 		if (content.isEmpty()) {
-			return new EmptyBatchIdChunk();
+			return new EmptyResourcePidList();
 		}
 
 		List<ResourcePersistentId> ids = content
@@ -135,6 +135,6 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		Date lastDate = (Date) content.get(content.size() - 1)[2];
 
-		return new MixedBatchIdChunk(ids, types, lastDate);
+		return new MixedResourcePidList(ids, types, lastDate);
 	}
 }

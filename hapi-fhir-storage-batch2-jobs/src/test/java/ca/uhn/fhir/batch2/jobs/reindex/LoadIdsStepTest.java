@@ -3,8 +3,8 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
-import ca.uhn.fhir.jpa.api.svc.HomogeneousBatchIdChunk;
-import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
+import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
@@ -86,13 +86,13 @@ public class LoadIdsStepTest {
 	}
 
 	@Nonnull
-	private IBatchIdChunk createIdChunk(long idLow, long idHigh, Date lastDate) {
+	private IResourcePidList createIdChunk(long idLow, long idHigh, Date lastDate) {
 		List<ResourcePersistentId> ids = new ArrayList<>();
 		List<String> resourceTypes = new ArrayList<>();
 		for (long i = idLow; i < idHigh; i++) {
 			ids.add(new ResourcePersistentId(i));
 		}
-		IBatchIdChunk chunk = new HomogeneousBatchIdChunk(ids, "Patient", lastDate);
+		IResourcePidList chunk = new HomogeneousResourcePidList(ids, "Patient", lastDate);
 		return chunk;
 	}
 

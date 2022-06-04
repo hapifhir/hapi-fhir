@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.reindex;
 
-import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
-import ca.uhn.fhir.jpa.api.svc.IBatchIdChunk;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.MethodOrderer;
@@ -53,12 +53,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
 		assertEquals(3, page.size());
-		assertThat(page.getBatchResourceIds(), contains(new BatchResourceId("Patient", id0), new BatchResourceId("Patient", id1), new BatchResourceId("Observation", id2)));
+		assertThat(page.getBatchResourceIds(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 
@@ -83,7 +83,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -131,13 +131,13 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IBatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
+		IResourcePidList page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
 
 		// Verify
 
 		assertEquals(2, page.size());
-		List<BatchResourceId> batchResourceIds = page.getBatchResourceIds();
-		assertThat(page.getBatchResourceIds(), contains(new BatchResourceId("Patient", id0), new BatchResourceId("Patient", id1)));
+		List<TypedResourcePid> typedResourcePids = page.getBatchResourceIds();
+		assertThat(page.getBatchResourceIds(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 

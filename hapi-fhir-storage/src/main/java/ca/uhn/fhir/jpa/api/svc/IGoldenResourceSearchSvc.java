@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.svc;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -35,6 +36,6 @@ public interface IGoldenResourceSearchSvc {
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theResourceType the type of resource.
 	 */
-	IBatchIdChunk fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
+	IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theResourceType);
 
 }
