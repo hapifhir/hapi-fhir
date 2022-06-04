@@ -20,16 +20,14 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,8 +37,13 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	@JsonProperty("ids")
 	private List<TypedPidJson> myTypedPids;
 
-	// FIXME KHS don't use this method.  Take an approach similar to the idchunks
-	public List<TypedPidJson> getTypedPids() {
+	public ResourceIdListWorkChunkJson() {}
+
+	public ResourceIdListWorkChunkJson(Collection<TypedPidJson> theTypedPids) {
+		getTypedPids().addAll(theTypedPids);
+	}
+
+	private List<TypedPidJson> getTypedPids() {
 		if (myTypedPids == null) {
 			myTypedPids = new ArrayList<>();
 		}
@@ -75,67 +78,6 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 
 	public String getResourceType(int index) {
 		return getTypedPids().get(index).getResourceType();
-	}
-
-	public static class TypedPidJson implements IModelJson {
-
-		@JsonProperty("type")
-		private String myResourceType;
-		@JsonProperty("id")
-		private String myPid;
-
-		public TypedPidJson() {}
-
-		public TypedPidJson(String theResourceType, String theId) {
-			myResourceType = theResourceType;
-			myPid = theId;
-		}
-
-		public TypedPidJson(TypedResourcePid theTypedResourcePid) {
-			myResourceType = theTypedResourcePid.resourceType;
-			myPid = theTypedResourcePid.id.toString();
-		}
-
-		@Override
-		public String toString() {
-			// We put a space in here and not a "/" since this is a PID, not
-			// a resource ID
-			return "[" + myResourceType + " " + myPid + "]";
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public TypedPidJson setResourceType(String theResourceType) {
-			myResourceType = theResourceType;
-			return this;
-		}
-
-		public String getPid() {
-			return myPid;
-		}
-
-		public TypedPidJson setPid(String thePid) {
-			myPid = thePid;
-			return this;
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) return true;
-
-			if (theO == null || getClass() != theO.getClass()) return false;
-
-			TypedPidJson id = (TypedPidJson) theO;
-
-			return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myPid, id.myPid).isEquals();
-		}
-
-		@Override
-		public int hashCode() {
-			return new HashCodeBuilder(17, 37).append(myResourceType).append(myPid).toHashCode();
-		}
 	}
 
 }

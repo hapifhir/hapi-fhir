@@ -23,7 +23,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Nonnull
 	@Override
-	public List<TypedResourcePid> getBatchResourceIds() {
+	public List<TypedResourcePid> getTypedResourcePids() {
 		return Collections.emptyList();
 	}
 

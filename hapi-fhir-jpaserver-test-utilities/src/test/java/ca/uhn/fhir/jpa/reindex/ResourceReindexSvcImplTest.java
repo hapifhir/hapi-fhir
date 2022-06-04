@@ -58,7 +58,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 
 		assertEquals(3, page.size());
-		assertThat(page.getBatchResourceIds(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
+		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 
@@ -136,8 +136,8 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 
 		assertEquals(2, page.size());
-		List<TypedResourcePid> typedResourcePids = page.getBatchResourceIds();
-		assertThat(page.getBatchResourceIds(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1)));
+		List<TypedResourcePid> typedResourcePids = page.getTypedResourcePids();
+		assertThat(page.getTypedResourcePids(), contains(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 

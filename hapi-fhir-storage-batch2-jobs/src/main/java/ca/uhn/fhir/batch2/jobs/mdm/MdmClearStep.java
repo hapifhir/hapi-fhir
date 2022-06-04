@@ -107,9 +107,8 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			// FIXME check that the batch size is configurable (for Oracle)
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
-			// FIXME KHS data should include resource type not buried in id
-			ResourceIdListWorkChunkJson.TypedPidJson firstPid = myData.getTypedPids().get(0);
-			String resourceName = firstPid.getResourceType();
+			// We know the list is not empty, and that all resource types are the same, so just use the first one
+			String resourceName  = myData.getResourceType(0);
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);

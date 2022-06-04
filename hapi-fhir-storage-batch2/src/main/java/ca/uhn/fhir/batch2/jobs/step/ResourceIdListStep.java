@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
@@ -44,7 +45,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		Date nextStart = start;
 		RequestPartitionId requestPartitionId = theStepExecutionDetails.getParameters().getRequestPartitionId();
-		Set<ResourceIdListWorkChunkJson.TypedPidJson> idBuffer = new LinkedHashSet<>();
+		Set<TypedPidJson> idBuffer = new LinkedHashSet<>();
 		long previousLastTime = 0L;
 		int totalIdsFound = 0;
 		int chunkCount = 0;
@@ -58,8 +59,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
 
-			for (TypedResourcePid typedResourcePid : nextChunk.getBatchResourceIds()) {
-				ResourceIdListWorkChunkJson.TypedPidJson nextId = new ResourceIdListWorkChunkJson.TypedPidJson(typedResourcePid);
+			for (TypedResourcePid typedResourcePid : nextChunk.getTypedResourcePids()) {
+				TypedPidJson nextId = new TypedPidJson(typedResourcePid);
 				idBuffer.add(nextId);
 			}
 
@@ -74,8 +75,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 			while (idBuffer.size() >= 1000) {
 
-				List<ResourceIdListWorkChunkJson.TypedPidJson> submissionIds = new ArrayList<>();
-				for (Iterator<ResourceIdListWorkChunkJson.TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
+				List<TypedPidJson> submissionIds = new ArrayList<>();
+				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
 					if (submissionIds.size() >= 1000) {
@@ -97,14 +98,14 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		return RunOutcome.SUCCESS;
 	}
 
-	private void submitWorkChunk(Collection<ResourceIdListWorkChunkJson.TypedPidJson> theIdBuffer, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
-		if (theIdBuffer.isEmpty()) {
+	// FIXME KHS move into producer?
+	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
+		if (theTypedPids.isEmpty()) {
 			return;
 		}
-		ourLog.info("Submitting work chunk with {} IDs", theIdBuffer.size());
+		ourLog.info("Submitting work chunk with {} IDs", theTypedPids.size());
 
-		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
-		data.getTypedPids().addAll(theIdBuffer);
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids);
 		theDataSink.accept(data);
 	}
 }

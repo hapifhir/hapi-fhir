@@ -34,7 +34,7 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 
 	@Override
 	@Nonnull
-	public List<TypedResourcePid> getBatchResourceIds() {
+	public List<TypedResourcePid> getTypedResourcePids() {
 		List<TypedResourcePid> retval = new ArrayList<>();
 		for (int i = 0; i < myIds.size(); ++i) {
 			retval.add(new TypedResourcePid(getResourceType(i), myIds.get(i)));

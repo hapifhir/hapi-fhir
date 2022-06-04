@@ -16,7 +16,7 @@ public interface IResourcePidList {
 	int size();
 
 	@Nonnull
-	List<TypedResourcePid> getBatchResourceIds();
+	List<TypedResourcePid> getTypedResourcePids();
 
 	String getResourceType(int i);
 
