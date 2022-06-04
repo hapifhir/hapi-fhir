@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
+import ca.uhn.fhir.jpa.batch.mdm.batch2.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
@@ -78,5 +80,11 @@ public class HapiJpaConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache(IFhirSystemDao<?, ?> theSystemDao) {
 		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
+	}
+
+	// FIXME KHS move this
+	@Bean
+	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
+		return new GoldenResourceSearchSvcImpl();
 	}
 }

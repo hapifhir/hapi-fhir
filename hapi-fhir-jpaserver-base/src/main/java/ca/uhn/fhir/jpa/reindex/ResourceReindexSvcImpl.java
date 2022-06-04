@@ -25,8 +25,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.jpa.api.svc.IdChunk;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -70,7 +70,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+	public BatchIdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 
 		int pageSize = 20000;
 		if (theUrl == null) {
@@ -80,7 +80,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 		}
 	}
 
-	private IdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private BatchIdChunk fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
 
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
@@ -107,11 +107,11 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new IdChunk(ids, resourceTypes, lastDate);
+		return new BatchIdChunk(ids, resourceTypes, lastDate);
 	}
 
 	@Nonnull
-	private IdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
+	private BatchIdChunk fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
 		Pageable page = Pageable.ofSize(thePagesize);
 		Slice<Object[]> slice;
 		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
@@ -124,7 +124,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		List<Object[]> content = slice.getContent();
 		if (content.isEmpty()) {
-			return new IdChunk(Collections.emptyList(), Collections.emptyList(), null);
+			return new BatchIdChunk(Collections.emptyList(), Collections.emptyList(), null);
 		}
 
 		List<ResourcePersistentId> ids = content
@@ -139,6 +139,6 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		Date lastDate = (Date) content.get(content.size() - 1)[2];
 
-		return new IdChunk(ids, types, lastDate);
+		return new BatchIdChunk(ids, types, lastDate);
 	}
 }

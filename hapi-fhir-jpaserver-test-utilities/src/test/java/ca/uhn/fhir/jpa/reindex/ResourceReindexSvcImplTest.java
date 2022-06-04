@@ -1,19 +1,22 @@
 package ca.uhn.fhir.jpa.reindex;
 
+import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
+import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.jpa.api.svc.IdChunk;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("unchecked")
 @TestMethodOrder(value = MethodOrderer.MethodName.class)
@@ -50,15 +53,12 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
 		assertEquals(3, page.size());
-		assertEquals("Patient", page.getResourceType(0));
-		assertEquals("Patient", page.getResourceType(1));
-		assertEquals("Observation", page.getResourceType(2));
-		assertThat(page.getIds(), contains(new ResourcePersistentId(id0), new ResourcePersistentId(id1), new ResourcePersistentId(id2)));
+		assertThat(page.getBatchResourceIds(), contains(new BatchResourceId("Patient", id0), new BatchResourceId("Patient", id1), new BatchResourceId("Observation", id2)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 
@@ -83,7 +83,7 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
+		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, null);
 
 		// Verify
 
@@ -131,14 +131,13 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		IdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
+		BatchIdChunk page = mySvc.fetchResourceIdsPage(start, end, null, "Patient?active=false");
 
 		// Verify
 
 		assertEquals(2, page.size());
-		assertEquals("Patient", page.getResourceType(0));
-		assertEquals("Patient", page.getResourceType(1));
-		assertThat(page.getIds(), contains(new ResourcePersistentId(id0), new ResourcePersistentId(id1)));
+		List<BatchResourceId> batchResourceIds = page.getBatchResourceIds();
+		assertThat(page.getBatchResourceIds(), contains(new BatchResourceId("Patient", id0), new BatchResourceId("Patient", id1)));
 		assertTrue(page.getLastDate().after(beforeLastInRange));
 		assertTrue(page.getLastDate().before(end));
 

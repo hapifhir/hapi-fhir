@@ -40,6 +40,6 @@ public interface IResourceReindexSvc {
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
-	IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
+	BatchIdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
 
 }

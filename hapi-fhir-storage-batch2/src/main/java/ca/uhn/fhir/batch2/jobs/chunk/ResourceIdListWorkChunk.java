@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -78,6 +79,11 @@ public class ResourceIdListWorkChunk implements IModelJson {
 		public Id(String theResourceType, String theId) {
 			myResourceType = theResourceType;
 			myId = theId;
+		}
+
+		public Id(BatchResourceId theBatchResourceId) {
+			myResourceType = theBatchResourceId.resourceType;
+			myId = theBatchResourceId.id.toString();
 		}
 
 		@Override

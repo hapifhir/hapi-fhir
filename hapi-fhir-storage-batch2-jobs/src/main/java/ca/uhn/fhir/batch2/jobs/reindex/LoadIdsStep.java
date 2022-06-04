@@ -29,9 +29,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.jpa.api.svc.IdChunk;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;

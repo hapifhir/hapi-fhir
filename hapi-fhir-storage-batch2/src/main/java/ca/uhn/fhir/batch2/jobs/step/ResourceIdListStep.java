@@ -9,7 +9,8 @@ import ca.uhn.fhir.batch2.jobs.chunk.ChunkRange;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedJobParameters;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.svc.IdChunk;
+import ca.uhn.fhir.jpa.api.svc.BatchIdChunk;
+import ca.uhn.fhir.jpa.api.svc.BatchResourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,19 +49,17 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		int totalIdsFound = 0;
 		int chunkCount = 0;
 		while (true) {
-			IdChunk nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, requestPartitionId, theStepExecutionDetails.getData());
+			BatchIdChunk nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, requestPartitionId, theStepExecutionDetails.getData());
 
-			if (nextChunk.getIds().isEmpty()) {
+			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");
 				break;
 			}
 
-			ourLog.info("Found {} IDs from {} to {}", nextChunk.getIds().size(), nextStart, nextChunk.getLastDate());
+			ourLog.info("Found {} IDs from {} to {}", nextChunk.size(), nextStart, nextChunk.getLastDate());
 
-			for (int i = 0; i < nextChunk.getIds().size(); i++) {
-				ResourceIdListWorkChunk.Id nextId = new ResourceIdListWorkChunk.Id();
-				nextId.setResourceType(nextChunk.getResourceType(i));
-				nextId.setId(nextChunk.getIds().get(i).toString());
+			for (BatchResourceId batchResourceId : nextChunk.getBatchResourceIds()) {
+				ResourceIdListWorkChunk.Id nextId = new ResourceIdListWorkChunk.Id(batchResourceId);
 				idBuffer.add(nextId);
 			}
 
