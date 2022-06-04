@@ -30,8 +30,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 public class ResourceIdListWorkChunk implements IModelJson {
 
@@ -53,6 +56,19 @@ public class ResourceIdListWorkChunk implements IModelJson {
 	}
 
 	public List<ResourcePersistentId> getResourcePersistentIds() {
+		if (myIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		String firstId = myIds.get(0).myId;
+		if (isNumeric(firstId)) {
+			return myIds
+				.stream()
+				.map(t -> new ResourcePersistentId(Long.valueOf(t.getId())))
+				.collect(Collectors.toList());
+
+		}
+
 		return myIds
 			.stream()
 			.map(t -> new ResourcePersistentId(t.getId()))

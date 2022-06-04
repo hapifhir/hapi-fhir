@@ -20,14 +20,11 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.IJobStepWorker;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunk;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -45,6 +42,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MDM_CLEAR;
 
 public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceIdListWorkChunk, VoidModel> {
 
@@ -100,7 +99,11 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			// FIXME check that the batch size is configurable (for Oracle)
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
-
+			// FIXME KHS replace with type from work
+			String resourceName = "Patient";
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
+			DeleteConflictList conflicts = new DeleteConflictList();
+			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
 			// FIXME KHS continue rewriting the code below
 			// FIXME KHS there is only one resource type here.  Change the api to reflect that
 			// grab the dao for that single resource type
