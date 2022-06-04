@@ -70,7 +70,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -684,7 +683,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 		for (ResourcePersistentId pid : theResourceIds) {
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, null, false);
