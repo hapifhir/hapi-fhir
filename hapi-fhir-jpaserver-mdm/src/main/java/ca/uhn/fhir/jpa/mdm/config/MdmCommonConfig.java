@@ -24,17 +24,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.mdm.batch.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
-import ca.uhn.fhir.jpa.mdm.batch2.config.MdmBatch2Config;
 import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
-@Import(MdmBatch2Config.class)
 public class MdmCommonConfig {
 	@Bean
 	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
