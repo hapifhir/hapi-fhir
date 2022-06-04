@@ -76,7 +76,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 
-		return new RunOutcome(data.getIds().size());
+		return new RunOutcome(data.size());
 	}
 
 	private class ReindexJob implements TransactionCallback<Void> {
@@ -112,7 +112,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 			// Reindex
 
 			sw.restart();
-			for (int i = 0; i < myData.getIds().size(); i++) {
+			for (int i = 0; i < myData.size(); i++) {
 
 				String nextResourceType = myData.getIds().get(i).getResourceType();
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);

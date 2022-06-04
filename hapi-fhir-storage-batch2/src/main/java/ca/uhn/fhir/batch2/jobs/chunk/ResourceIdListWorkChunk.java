@@ -39,6 +39,7 @@ public class ResourceIdListWorkChunk implements IModelJson {
 	@JsonProperty("ids")
 	private List<Id> myIds;
 
+	// FIXME KHS don't use this method.  Take an approach similar to the idchunks
 	public List<Id> getIds() {
 		if (myIds == null) {
 			myIds = new ArrayList<>();
