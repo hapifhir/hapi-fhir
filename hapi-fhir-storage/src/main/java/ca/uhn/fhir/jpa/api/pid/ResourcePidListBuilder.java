@@ -2,11 +2,7 @@ package ca.uhn.fhir.jpa.api.pid;
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ResourcePidListBuilder {
 	private static final IResourcePidList EMPTY_CHUNK = new EmptyResourcePidList();
@@ -20,16 +16,22 @@ public class ResourcePidListBuilder {
 		Set<ResourcePersistentId> ids = new LinkedHashSet<>();
 
 		Date endDate = null;
+		Set<String> resourceTypes = new HashSet<>();
 		boolean containsMixed = false;
 		for (IResourcePidList chunk : theChunks) {
+			if (chunk.isEmpty()) {
+				continue;
+			}
 			ids.addAll(chunk.getIds());
 			endDate = getLatestDate(chunk, endDate, theEnd);
 			if (chunk instanceof MixedResourcePidList) {
 				containsMixed = true;
+			} else {
+				resourceTypes.add(chunk.getResourceType(0));
 			}
 		}
 
-		if (containsMixed) {
+		if (containsMixed || resourceTypes.size() > 1) {
 			List<String> types = new ArrayList<>();
 			for (IResourcePidList chunk : theChunks) {
 				for (int i = 0; i < chunk.size(); ++i) {
