@@ -98,7 +98,6 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		return RunOutcome.SUCCESS;
 	}
 
-	// FIXME KHS move into producer?
 	private void submitWorkChunk(Collection<TypedPidJson> theTypedPids, IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) {
 		if (theTypedPids.isEmpty()) {
 			return;
