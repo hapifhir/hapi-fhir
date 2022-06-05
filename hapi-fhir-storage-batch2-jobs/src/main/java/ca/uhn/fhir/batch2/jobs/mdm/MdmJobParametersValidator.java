@@ -47,7 +47,6 @@ public class MdmJobParametersValidator implements IJobParametersValidator<MdmJob
 			return Collections.singletonList("Mdm is not enabled on this server");
 		}
 		List<String> retval = new ArrayList<>();
-		// FIXME KHS test
 		if (theParameters.getResourceType() == null || theParameters.getResourceType().isEmpty()) {
 			retval.add("Mdm Clear Job Parameters must define at least one resource type");
 		} else {
