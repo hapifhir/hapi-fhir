@@ -97,7 +97,7 @@ public class LoadIdsStepTest {
 		for (long i = idLow; i < idHigh; i++) {
 			ids.add(new ResourcePersistentId(i));
 		}
-		IResourcePidList chunk = new HomogeneousResourcePidList(ids, "Patient", lastDate);
+		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate);
 		return chunk;
 	}
 

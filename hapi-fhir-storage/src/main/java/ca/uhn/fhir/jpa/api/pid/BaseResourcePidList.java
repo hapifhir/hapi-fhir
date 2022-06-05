@@ -51,5 +51,8 @@ abstract public class BaseResourcePidList implements IResourcePidList {
 		return Collections.unmodifiableList(myIds);
 	}
 
+	public ResourcePersistentId getId(int theIndex) {
+		return myIds.get(theIndex);
+	}
 }
 

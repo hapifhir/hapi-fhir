@@ -103,7 +103,7 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new HomogeneousResourcePidList(ids, resourceType, lastDate);
+		return new HomogeneousResourcePidList(resourceType, ids, lastDate);
 	}
 
 	@Nonnull

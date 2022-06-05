@@ -13,7 +13,7 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 	@NonNull
 	final String myResourceType;
 
-	public HomogeneousResourcePidList(List<ResourcePersistentId> theIds, String theResourceType, Date theLastDate) {
+	public HomogeneousResourcePidList(String theResourceType, List<ResourcePersistentId> theIds, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceType = theResourceType;
 	}
@@ -21,5 +21,9 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 	@Override
 	public String getResourceType(int i) {
 			return myResourceType;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
 	}
 }

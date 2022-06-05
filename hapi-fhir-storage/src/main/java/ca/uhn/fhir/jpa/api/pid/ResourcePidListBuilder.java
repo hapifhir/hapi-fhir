@@ -38,7 +38,7 @@ public class ResourcePidListBuilder {
 		} else {
 			IResourcePidList firstChunk = theChunks.get(0);
 			String onlyResourceType = firstChunk.getResourceType(0);
-			return new HomogeneousResourcePidList(ids, onlyResourceType, endDate);
+			return new HomogeneousResourcePidList(onlyResourceType, ids, endDate);
 		}
 	}
 

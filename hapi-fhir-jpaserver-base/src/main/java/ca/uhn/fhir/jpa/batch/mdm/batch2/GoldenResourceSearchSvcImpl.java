@@ -86,6 +86,6 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 			lastDate = dao.readByPid(ids.get(ids.size() - 1)).getMeta().getLastUpdated();
 		}
 
-		return new HomogeneousResourcePidList(ids, theResourceType, lastDate);
+		return new HomogeneousResourcePidList(theResourceType, ids, lastDate);
 	}
 }
