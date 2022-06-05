@@ -11,10 +11,14 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import org.hl7.fhir.r4.model.IdType;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +27,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class MdmClearStepTest extends BaseMdmR4Test {
 	private static final String GOLDEN_ID = "Patient/GOLDEN-ID";
@@ -34,44 +39,81 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 	@Mock
 	IJobDataSink<VoidModel> myDataSink;
+	private Long mySourcePid;
+	private Long myGoldenPid;
+	private MdmLink myLink;
+	private String myGoldenId;
+	private String mySourceId;
 
-	@Test
-	public void testSimpleCase() {
+	@BeforeEach
+	public void before() {
 		Patient sourcePatient = new Patient();
-		String sourceId = SOURCE_ID + "1";
-		sourcePatient.setId(sourceId);
+		mySourceId = SOURCE_ID + "1";
+		sourcePatient.setId(mySourceId);
 		myPatientDao.update(sourcePatient);
 
 		Patient goldenPatient = myMdmHelperR4.buildGoldenPatient();
-		String goldenId = GOLDEN_ID + "1";
-		goldenPatient.setId(GOLDEN_ID);
+		myGoldenId = GOLDEN_ID + "1";
+		goldenPatient.setId(myGoldenId);
 		myPatientDao.update(goldenPatient);
 
-		Long sourcePid = myIdHelperService.getPidOrThrowException(sourcePatient);
-		Long goldenPid = myIdHelperService.getPidOrThrowException(goldenPatient);
+		mySourcePid = myIdHelperService.getPidOrThrowException(sourcePatient);
+		myGoldenPid = myIdHelperService.getPidOrThrowException(goldenPatient);
 
-		MdmLink link = buildMdmLink(sourcePid, goldenPid);
-		myMdmLinkDaoSvc.save(link);
+		myLink = buildMdmLink(mySourcePid, myGoldenPid);
+		myMdmLinkDaoSvc.save(myLink);
+	}
 
+	@Test
+	public void testSimpleCase() {
 		assertPatientCount(2);
 		assertLinkCount(1);
 
-		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
-		chunk.addTypedPid("Patient", goldenPid);
-
-		String instanceId = UUID.randomUUID().toString();
-		String chunkid = UUID.randomUUID().toString();
-		RequestDetails requestDetails = new SystemRequestDetails();
-		TransactionDetails transactionDetails = new TransactionDetails();
-		MdmJobParameters parms = new MdmJobParameters();
-
-		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
-
-		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
+		mdmClearGoldenResource();
 
 		assertLinkCount(0);
 		assertPatientCount(1);
-		assertPatientExists(sourcePatient.getIdElement());
+		assertPatientExists(mySourceId);
+	}
+
+	@Test
+	public void testWithReferenceToGoldenResource() {
+		Patient husband = new Patient();
+		husband.addLink().setOther(new Reference(myGoldenId));
+		String husbandId = myPatientDao.create(husband).getId().toUnqualifiedVersionless().getValue();
+
+		assertPatientCount(3);
+		assertLinkCount(1);
+
+		try {
+			mdmClearGoldenResource();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("HAPI-0550: HAPI-0515: Unable to delete " + myGoldenId +
+				" because at least one resource has a reference to this resource. First reference found was resource " +
+				husbandId + " in path Patient.link.other", e.getMessage());
+		}
+	}
+
+	private void mdmClearGoldenResource() {
+		ResourceIdListWorkChunkJson chunk = new ResourceIdListWorkChunkJson();
+		chunk.addTypedPid("Patient", myGoldenPid);
+
+		RequestDetails requestDetails = new SystemRequestDetails();
+		TransactionDetails transactionDetails = new TransactionDetails();
+		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = buildStepExecutionDetails(chunk);
+
+		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
+	}
+
+	@NotNull
+	private StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
+		String instanceId = UUID.randomUUID().toString();
+		String chunkid = UUID.randomUUID().toString();
+		MdmJobParameters parms = new MdmJobParameters();
+
+		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
+		return stepExecutionDetails;
 	}
 
 	private MdmLink buildMdmLink(Long sourcePid, Long goldenPid) {
@@ -83,17 +125,11 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			.setVersion("1");
 	}
 
-	private void assertPatientExists(IdType theSourceId) {
-		assertNotNull(myPatientDao.read(theSourceId));
+	private void assertPatientExists(String theSourceId) {
+		assertNotNull(myPatientDao.read(new IdDt(theSourceId)));
 	}
 
 	private void assertPatientCount(int theExpectedCount) {
 		assertEquals(theExpectedCount, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 	}
-
-	@Test
-	public void testMdmGoldenResourcesForSameLinkInTwoChunks() {
-		// FIXME KHS
-	}
-
 }

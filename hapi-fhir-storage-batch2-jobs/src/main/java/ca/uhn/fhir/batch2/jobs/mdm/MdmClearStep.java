@@ -27,11 +27,13 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -60,6 +62,8 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	IIdHelperService myIdHelperService;
+	@Autowired
+	FhirContext myFhirContext;
 	// FIXME KHS right solution?
 	@Autowired(required = false) // Not all systems enable mdm
 	IMdmLinkSvc myMdmLinkSvc;
@@ -110,8 +114,10 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 			// We know the list is not empty, and that all resource types are the same, so just use the first one
 			String resourceName  = myData.getResourceType(0);
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
+
 			DeleteConflictList conflicts = new DeleteConflictList();
 			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
 
