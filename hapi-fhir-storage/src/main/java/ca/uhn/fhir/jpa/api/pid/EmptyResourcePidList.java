@@ -29,7 +29,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-		throw new ArrayIndexOutOfBoundsException();
+		throw new ArrayIndexOutOfBoundsException("Attempting to get resource type from an empty resource pid list");
 	}
 
 	@Override
