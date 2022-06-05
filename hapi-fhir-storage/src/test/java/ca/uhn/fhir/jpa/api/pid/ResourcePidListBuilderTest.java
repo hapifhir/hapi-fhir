@@ -10,11 +10,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ResourcePidListBuilderTest {
 
@@ -77,7 +73,7 @@ class ResourcePidListBuilderTest {
 		assertTwoItems(list);
 	}
 
-	// FIXME KHS moar tests
+	// FIXME KHS moar tests.  e.g. different lists
 
 	private void assertTwoItems(HomogeneousResourcePidList list) {
 		assertThat(list.getIds(), contains(PID_1, PID_2));
