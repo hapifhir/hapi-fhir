@@ -5,19 +5,20 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 abstract public class BaseResourcePidList implements IResourcePidList {
 
-	final List<ResourcePersistentId> myIds;
+	final List<ResourcePersistentId> myIds = new ArrayList<>();
 
 	@Nullable
 	final Date myLastDate;
 
-	BaseResourcePidList(List<ResourcePersistentId> theIds, Date theLastDate) {
-		myIds = theIds;
+	BaseResourcePidList(Collection<ResourcePersistentId> theIds, Date theLastDate) {
+		myIds.addAll(theIds);
 		myLastDate = theLastDate;
 	}
 

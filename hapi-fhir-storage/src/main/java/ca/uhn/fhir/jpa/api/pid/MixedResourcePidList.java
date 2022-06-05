@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.api.pid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import io.micrometer.core.lang.NonNull;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class MixedResourcePidList extends BaseResourcePidList {
 	@NonNull
 	final List<String> myResourceTypes;
 
-	public MixedResourcePidList(List<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
+	public MixedResourcePidList(Collection<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceTypes = theResourceTypes;
 	}

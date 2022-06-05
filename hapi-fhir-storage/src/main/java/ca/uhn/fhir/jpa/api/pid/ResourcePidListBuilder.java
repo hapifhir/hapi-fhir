@@ -4,7 +4,9 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ResourcePidListBuilder {
 	private static final IResourcePidList EMPTY_CHUNK = new EmptyResourcePidList();
@@ -15,7 +17,7 @@ public class ResourcePidListBuilder {
 			return empty();
 		}
 
-		List<ResourcePersistentId> ids = new ArrayList<>();
+		Set<ResourcePersistentId> ids = new HashSet<>();
 
 		Date endDate = null;
 		boolean containsMixed = false;
