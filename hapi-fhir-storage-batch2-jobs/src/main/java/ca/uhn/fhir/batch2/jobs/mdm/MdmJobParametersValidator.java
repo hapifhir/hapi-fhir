@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.jobs.mdm;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,10 +32,13 @@ import java.util.List;
 
 public class MdmJobParametersValidator implements IJobParametersValidator<MdmJobParameters> {
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired(required=false)
-	private IMdmSettings myMdmSettings;
+	private final DaoRegistry myDaoRegistry;
+	private final IMdmSettings myMdmSettings;
+
+	public MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+		myDaoRegistry = theDaoRegistry;
+		myMdmSettings = theMdmSettings;
+	}
 
 	@Nullable
 	@Override

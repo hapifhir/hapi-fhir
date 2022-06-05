@@ -24,7 +24,9 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,14 +36,14 @@ public class MdmClearAppCtx {
 	public static final String JOB_Mdm = "Mdm";
 
 	@Bean
-	public JobDefinition<MdmJobParameters> mdmJobDefinition() {
+	public JobDefinition<MdmJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_Mdm)
 			.setJobDescription("Clear mdm links and golden resrouces")
 			.setJobDefinitionVersion(1)
 			.setParametersType(MdmJobParameters.class)
-			.setParametersValidator(MdmJobParametersValidator())
+			.setParametersValidator(MdmJobParametersValidator(theDaoRegistry, theMdmSettings))
 			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
@@ -61,8 +63,8 @@ public class MdmClearAppCtx {
 	}
 
 	@Bean
-	public MdmJobParametersValidator MdmJobParametersValidator() {
-		return new MdmJobParametersValidator();
+	public MdmJobParametersValidator MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+		return new MdmJobParametersValidator(theDaoRegistry, theMdmSettings);
 	}
 
 	@Bean
