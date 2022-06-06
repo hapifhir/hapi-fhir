@@ -12,7 +12,6 @@ import java.util.Set;
 public class ResourcePidListBuilder {
 	private static final IResourcePidList EMPTY_CHUNK = new EmptyResourcePidList();
 
-	// FIXME KHS test
 	public static IResourcePidList fromChunksAndDate(List<IResourcePidList> theChunks, Date theEnd) {
 		if (theChunks.isEmpty()) {
 			return empty();
