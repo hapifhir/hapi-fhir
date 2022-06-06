@@ -14,7 +14,7 @@ public class MixedResourcePidList extends BaseResourcePidList {
 	@NonNull
 	final List<String> myResourceTypes;
 
-	public MixedResourcePidList(Collection<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
+	public MixedResourcePidList(List<String> theResourceTypes, Collection<ResourcePersistentId> theIds, Date theLastDate) {
 		super(theIds, theLastDate);
 		myResourceTypes = theResourceTypes;
 	}

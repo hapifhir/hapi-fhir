@@ -127,7 +127,24 @@ class ResourcePidListBuilderTest {
 		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_2, TRP_5, TRP_6));
 	}
 
-	// FIXME KHS moar tests.  e.g. different lists
+	@Test
+	public void testMixedChunkDiftResourceType() {
+		// setup
+		IResourcePidList chunk = new MixedResourcePidList(List.of(RESOURCE_TYPE, OTHER_RESOURCE_TYPE), List.of(PID_1, PID_5), END);
+
+		List<IResourcePidList> chunks = List.of(chunk, chunk);
+
+		// execute
+		MixedResourcePidList list = (MixedResourcePidList) ResourcePidListBuilder.fromChunksAndDate(chunks, END);
+
+		// verify
+		assertFalse(list.isEmpty());
+		assertEquals(END, list.getLastDate());
+		assertEquals(RESOURCE_TYPE, list.getResourceType(0));
+		assertEquals(OTHER_RESOURCE_TYPE, list.getResourceType(1));
+		assertThat(list.getIds(), contains(PID_1, PID_5));
+		assertThat(list.getTypedResourcePids(), contains(TRP_1, TRP_5));
+	}
 
 	private void assertTwoItems(IResourcePidList list) {
 		assertFalse(list.isEmpty());

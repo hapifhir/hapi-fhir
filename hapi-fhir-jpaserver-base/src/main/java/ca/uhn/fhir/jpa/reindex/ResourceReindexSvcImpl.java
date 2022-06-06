@@ -135,6 +135,6 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 		Date lastDate = (Date) content.get(content.size() - 1)[2];
 
-		return new MixedResourcePidList(ids, types, lastDate);
+		return new MixedResourcePidList(types, ids, lastDate);
 	}
 }
