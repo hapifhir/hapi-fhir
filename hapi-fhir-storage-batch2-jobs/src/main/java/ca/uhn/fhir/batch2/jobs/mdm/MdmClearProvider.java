@@ -41,8 +41,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class MdmClearProvider {
-	// WIP KHS implement
-
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
@@ -90,6 +88,4 @@ public class MdmClearProvider {
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
 		return retVal;
 	}
-
-
 }

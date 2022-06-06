@@ -60,7 +60,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theString);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		// WIP KHS okay here?
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
 		myMdmResourceMatcherSvc.init();

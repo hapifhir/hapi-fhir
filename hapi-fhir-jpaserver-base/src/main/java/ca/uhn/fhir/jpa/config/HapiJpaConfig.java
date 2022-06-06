@@ -82,7 +82,6 @@ public class HapiJpaConfig {
 		return ResourceCountCacheUtil.newResourceCountCache(theSystemDao);
 	}
 
-	// WIP KHS move this
 	@Bean
 	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
 		return new GoldenResourceSearchSvcImpl();
