@@ -38,6 +38,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -186,6 +187,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk) {
+		myWorkChunkRepository.updateAllChunksForInstanceStatusAndClearDataForEndSuccess(theChunkIds, new Date(), StatusEnum.COMPLETED);
+
+		return storeWorkChunk(theNewChunk);
+	}
+
+	@Override
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
@@ -214,6 +222,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setErrorCount(theInstance.getErrorCount());
 		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
 		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		instance.setRecord(theInstance.getRecord());
 
 		myJobInstanceRepository.save(instance);
 	}

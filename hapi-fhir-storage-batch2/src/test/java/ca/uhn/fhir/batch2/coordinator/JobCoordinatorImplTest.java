@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -58,6 +60,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IJobPersistence myJobInstancePersister;
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
+
+	///TODO - change this to a mock
+	// and test it out itself
+	private JobStepExecutorSvc myJobStepExecutorSvc;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -73,7 +79,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry);
+		myJobStepExecutorSvc = new JobStepExecutorSvc(myJobInstancePersister, myBatchJobSender);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, myJobStepExecutorSvc);
 	}
 
 	@Test
@@ -274,6 +281,30 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myJobInstancePersister, times(1)).incrementWorkChunkErrorCount(eq(CHUNK_ID), eq(2));
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
+
+	}
+
+	@Test
+	public void test_() {
+		JobDefinition<TestJobParameters> jd = createJobDefinitionWithReduction();
+
+		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID)))
+			.thenReturn(Optional.of(createWorkChunkStep3(REDUCTION_JOB_ID)));
+
+		doReturn(jd).when(myJobDefinitionRegistry)
+			.getJobDefinitionOrThrowException(eq(REDUCTION_JOB_ID), eq(1));
+
+		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID)))
+			.thenReturn(Optional.of(createInstance(REDUCTION_JOB_ID)));
+		when(myReductionStepWorker.run(any(), any()))
+			.thenReturn(new RunOutcome(0));
+		mySvc.start();
+
+		// execute
+		myWorkChannelReceiver.send(
+			new JobWorkNotificationJsonMessage(createWorkNotification(REDUCTION_JOB_ID, STEP_3))
+		);
+
 
 	}
 
@@ -483,8 +514,13 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId) {
+		return createWorkNotification(JOB_DEFINITION_ID, theStepId);
+	}
+
+	@Nonnull
+	private JobWorkNotification createWorkNotification(String theJobId, String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
-		payload.setJobDefinitionId(JOB_DEFINITION_ID);
+		payload.setJobDefinitionId(theJobId);
 		payload.setJobDefinitionVersion(1);
 		payload.setInstanceId(INSTANCE_ID);
 		payload.setChunkId(BaseBatch2Test.CHUNK_ID);
@@ -494,9 +530,13 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@Nonnull
 	static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
+		return createWorkChunk(JOB_DEFINITION_ID, theTargetStepId, theData);
+	}
+
+	static WorkChunk createWorkChunk(String theJobId, String theTargetStepId, IModelJson theData) {
 		return new WorkChunk()
 			.setId(CHUNK_ID)
-			.setJobDefinitionId(JOB_DEFINITION_ID)
+			.setJobDefinitionId(theJobId)
 			.setJobDefinitionVersion(1)
 			.setTargetStepId(theTargetStepId)
 			.setData(theData)
@@ -509,14 +549,22 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		return createWorkChunk(STEP_1, null);
 	}
 
-	@Nonnull
 	static WorkChunk createWorkChunkStep2() {
-		return createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE));
+		return createWorkChunkStep2(JOB_DEFINITION_ID);
+	}
+
+	@Nonnull
+	static WorkChunk createWorkChunkStep2(String theJobId) {
+		return createWorkChunk(theJobId, STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE));
 	}
 
 	@Nonnull
 	static WorkChunk createWorkChunkStep3() {
-		return createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE));
+		return createWorkChunkStep3(JOB_DEFINITION_ID);
 	}
 
+	@Nonnull
+	static WorkChunk createWorkChunkStep3(String theJobId) {
+		return createWorkChunk(theJobId, STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE));
+	}
 }

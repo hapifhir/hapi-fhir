@@ -1,12 +1,13 @@
 package ca.uhn.fhir.batch2.maintenance;
 
-import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.coordinator.JobStepExecutorSvc;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,18 @@ public class JobInstanceProcessor {
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
+	private final JobStepExecutorSvc myJobExecutorSvc;
 
-	JobInstanceProcessor(IJobPersistence theJobPersistence, BatchJobSender theBatchJobSender, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
+	JobInstanceProcessor(IJobPersistence theJobPersistence,
+								BatchJobSender theBatchJobSender,
+								JobInstance theInstance,
+								JobChunkProgressAccumulator theProgressAccumulator,
+								JobStepExecutorSvc theExecutorSvc
+	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstance = theInstance;
+		myJobExecutorSvc = theExecutorSvc;
 		myProgressAccumulator = theProgressAccumulator;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theInstance, theProgressAccumulator);
 	}
@@ -102,6 +110,7 @@ public class JobInstanceProcessor {
 
 		JobWorkCursor<?,?,?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
 
+		// final step
 		if (jobWorkCursor.isFinalStep()) {
 			return;
 		}
@@ -109,21 +118,31 @@ public class JobInstanceProcessor {
 		String instanceId = myInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
 		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
+
 		if (incompleteChunks == 0) {
 
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
-			List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
-			for (String nextChunkId : chunksForNextStep) {
-				JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
-				myBatchJobSender.sendWorkChannelMessage(workNotification);
+
+			if (jobWorkCursor.nextStep.isReductionStep()) {
+					// do execution of the final step now
+					myJobExecutorSvc.doExecution(
+						JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
+						myInstance,
+						null,
+						myProgressAccumulator);
+			} else {
+				List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
+				for (String nextChunkId : chunksForNextStep) {
+					JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
+					myBatchJobSender.sendWorkChannelMessage(workNotification);
+				}
+
+				myInstance.setCurrentGatedStepId(nextStepId);
+				myJobPersistence.updateInstance(myInstance);
 			}
-
-			myInstance.setCurrentGatedStepId(nextStepId);
-			myJobPersistence.updateInstance(myInstance);
 		}
-
 	}
 
 	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
@@ -134,5 +153,4 @@ public class JobInstanceProcessor {
 		}
 		return false;
 	}
-
 }

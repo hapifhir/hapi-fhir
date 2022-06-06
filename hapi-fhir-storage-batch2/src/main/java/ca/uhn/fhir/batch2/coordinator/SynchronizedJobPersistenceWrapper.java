@@ -89,6 +89,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk) {
+		return myWrap.reduceWorkChunksToSingleChunk(theInstanceId, theChunkIds, theNewChunk);
+	}
+
+	@Override
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWrap.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}

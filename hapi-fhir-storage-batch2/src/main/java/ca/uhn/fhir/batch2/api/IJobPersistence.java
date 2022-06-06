@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IJobPersistence {
 
@@ -102,6 +103,14 @@ public interface IJobPersistence {
 	 * @param theRecordsProcessed The number of records completed during chunk processing
 	 */
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
+
+	/**
+	 * Reduce workchunks to a single chunk
+	 * @param  theInstanceId - the instance id
+	 * @param theChunkIds - the ids of workchunks being reduced to single chunk
+	 * @return - the id of a single workchunk
+	 */
+	String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk);
 
 	/**
 	 * Increments the work chunk error count by the given amount

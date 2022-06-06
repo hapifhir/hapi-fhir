@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.ListResult;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
@@ -33,7 +34,10 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final String myInstanceId;
 	private final String myChunkId;
 
-	public StepExecutionDetails(@Nonnull PT theParameters, @Nullable IT theData, @Nonnull String theInstanceId, @Nonnull String theChunkId) {
+	public StepExecutionDetails(@Nonnull PT theParameters,
+										 @Nullable IT theData,
+										 @Nonnull String theInstanceId,
+										 @Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;

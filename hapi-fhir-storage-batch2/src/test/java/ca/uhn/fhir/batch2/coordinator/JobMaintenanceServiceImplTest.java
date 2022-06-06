@@ -51,6 +51,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private ISchedulerService mySchedulerService;
 	@Mock
 	private IJobPersistence myJobPersistence;
+	@Mock
+	private JobStepExecutorSvc myJobExecutorSvc;
 	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;
@@ -66,7 +68,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void beforeEach() {
 		myJobDefinitionRegistry = new JobDefinitionRegistry();
 		BatchJobSender batchJobSender = new BatchJobSender(myWorkChannelProducer);
-		mySvc = new JobMaintenanceServiceImpl(mySchedulerService, myJobPersistence, myJobDefinitionRegistry, batchJobSender);
+		mySvc = new JobMaintenanceServiceImpl(mySchedulerService,
+			myJobPersistence,
+			myJobDefinitionRegistry,
+			batchJobSender,
+			myJobExecutorSvc
+		);
 	}
 
 	@Test

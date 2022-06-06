@@ -107,4 +107,11 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 		return (JobWorkCursor<PT,IT, VoidModel>)this;
 	}
 
+	public JobDefinition<PT> getJobDefinition() {
+		return jobDefinition;
+	}
+
+	public JobDefinitionStep<PT, IT, OT> getCurrentStep() {
+		return currentStep;
+	}
 }
