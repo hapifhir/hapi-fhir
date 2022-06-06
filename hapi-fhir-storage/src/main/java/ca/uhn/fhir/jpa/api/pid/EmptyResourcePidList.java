@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.api.pid;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ public class EmptyResourcePidList implements IResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-		throw new ArrayIndexOutOfBoundsException("Attempting to get resource type from an empty resource pid list");
+		throw new ArrayIndexOutOfBoundsException(Msg.code(2085) + "Attempting to get resource type from an empty resource pid list");
 	}
 
 	@Override
