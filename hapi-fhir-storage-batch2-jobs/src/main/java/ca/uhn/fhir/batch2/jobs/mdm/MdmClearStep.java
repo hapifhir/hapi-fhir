@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MDM_CLEAR;
 
-public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmClearStep.class);
 
@@ -70,7 +70,7 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
@@ -79,7 +79,7 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 		return new RunOutcome(theStepExecutionDetails.getData().size());
 	}
 
-	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+	MdmClearJob buildJob(RequestDetails requestDetails, TransactionDetails transactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 		return new MdmClearJob(requestDetails, transactionDetails, theStepExecutionDetails);
 	}
 
@@ -90,7 +90,7 @@ public class MdmClearStep implements IJobStepWorker<MdmJobParameters, ResourceId
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
+		public MdmClearJob(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails) {
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();

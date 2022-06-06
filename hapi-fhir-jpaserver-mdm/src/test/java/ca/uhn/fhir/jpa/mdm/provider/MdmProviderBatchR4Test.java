@@ -42,7 +42,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());

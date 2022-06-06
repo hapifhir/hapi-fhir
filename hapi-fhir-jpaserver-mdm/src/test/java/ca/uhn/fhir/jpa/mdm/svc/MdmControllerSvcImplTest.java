@@ -56,7 +56,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	private BatchJobHelper myBatchJobHelper;
 
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));

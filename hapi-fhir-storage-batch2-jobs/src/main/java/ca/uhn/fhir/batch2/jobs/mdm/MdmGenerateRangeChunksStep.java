@@ -33,13 +33,13 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmJobParameters, MdmChunkRangeJson> {
+public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJobParameters, MdmChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink) throws JobExecutionFailedException {
-		MdmJobParameters params = theStepExecutionDetails.getParameters();
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<MdmChunkRangeJson> theDataSink) throws JobExecutionFailedException {
+		MdmClearJobParameters params = theStepExecutionDetails.getParameters();
 
 		Date start = Batch2Constants.BATCH_START_DATE;
 		Date end = new Date();

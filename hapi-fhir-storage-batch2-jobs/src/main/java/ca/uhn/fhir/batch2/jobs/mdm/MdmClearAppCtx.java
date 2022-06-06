@@ -25,24 +25,26 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MdmClearAppCtx {
 
-	public static final String JOB_Mdm = "Mdm";
+	public static final String JOB_MDM_CLEAR = "Mdm Clear";
 
 	@Bean
-	public JobDefinition<MdmJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+	public JobDefinition<MdmClearJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId(JOB_Mdm)
+			.setJobDefinitionId(JOB_MDM_CLEAR)
 			.setJobDescription("Clear mdm links and golden resrouces")
 			.setJobDefinitionVersion(1)
-			.setParametersType(MdmJobParameters.class)
+			.setParametersType(MdmClearJobParameters.class)
 			.setParametersValidator(MdmJobParametersValidator(theDaoRegistry, theMdmSettings))
 			.gatedExecution()
 			.addFirstStep(
@@ -54,7 +56,7 @@ public class MdmClearAppCtx {
 				"find-golden-resource-ids",
 				"Load ids of golden resources to be cleared",
 				ResourceIdListWorkChunkJson.class,
-				loadGoldenIdsStep())
+				loadGoldenIdsStep(theGoldenResourceSearchSvc))
 			.addLastStep("Mdm",
 				"Remove golden resources and mdm links",
 				mdmClearStep()
@@ -78,13 +80,13 @@ public class MdmClearAppCtx {
 	}
 
 	@Bean
-	public LoadGoldenIdsStep loadGoldenIdsStep() {
-		return new LoadGoldenIdsStep();
+	public LoadGoldenIdsStep loadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
+		return new LoadGoldenIdsStep(theGoldenResourceSearchSvc);
 	}
 
 	@Bean
-	public MdmClearProvider MdmProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new MdmClearProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public MdmClearProvider MdmProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, MdmSettings theMdmSettings) {
+		return new MdmClearProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theMdmSettings);
 	}
 
 }

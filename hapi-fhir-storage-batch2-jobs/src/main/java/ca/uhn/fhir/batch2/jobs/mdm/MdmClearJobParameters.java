@@ -29,7 +29,7 @@ import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MdmJobParameters extends PartitionedJobParameters {
+public class MdmClearJobParameters extends PartitionedJobParameters {
 	@JsonProperty("resourceType")
 	@Nonnull
 	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String> myResourceType;
@@ -41,7 +41,7 @@ public class MdmJobParameters extends PartitionedJobParameters {
 		return myResourceType;
 	}
 
-	public MdmJobParameters addResourceType(@Nonnull String theResourceType) {
+	public MdmClearJobParameters addResourceType(@Nonnull String theResourceType) {
 		Validate.notNull(theResourceType);
 		getResourceType().add(theResourceType);
 		return this;

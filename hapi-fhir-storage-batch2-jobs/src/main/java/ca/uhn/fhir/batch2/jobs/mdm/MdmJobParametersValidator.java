@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MdmJobParametersValidator implements IJobParametersValidator<MdmJobParameters> {
+public class MdmJobParametersValidator implements IJobParametersValidator<MdmClearJobParameters> {
 
 	private final DaoRegistry myDaoRegistry;
 	private final IMdmSettings myMdmSettings;
@@ -42,7 +42,7 @@ public class MdmJobParametersValidator implements IJobParametersValidator<MdmJob
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull MdmJobParameters theParameters) {
+	public List<String> validate(@Nonnull MdmClearJobParameters theParameters) {
 		if (myMdmSettings == null || !myMdmSettings.isEnabled()) {
 			return Collections.singletonList("Mdm is not enabled on this server");
 		}

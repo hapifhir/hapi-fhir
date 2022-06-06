@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MdmJobParametersValidatorTest {
+class MdmClearJobParametersValidatorTest {
 
 	MdmJobParametersValidator myMdmJobParametersValidator;
 	@Mock
@@ -33,7 +33,7 @@ class MdmJobParametersValidatorTest {
 	@Test
 	public void testDisabled() {
 		// setup
-		MdmJobParameters parameters = new MdmJobParameters();
+		MdmClearJobParameters parameters = new MdmClearJobParameters();
 
 		// execute
 		List<String> result = myMdmJobParametersValidator.validate(parameters);
@@ -46,7 +46,7 @@ class MdmJobParametersValidatorTest {
 	@Test
 	public void testNoResourceType() {
 		// setup
-		MdmJobParameters parameters = new MdmJobParameters();
+		MdmClearJobParameters parameters = new MdmClearJobParameters();
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 
 		// execute
@@ -60,7 +60,7 @@ class MdmJobParametersValidatorTest {
 	@Test
 	public void testInvalidResourceType() {
 		// setup
-		MdmJobParameters parameters = new MdmJobParameters().addResourceType("Immunization");
+		MdmClearJobParameters parameters = new MdmClearJobParameters().addResourceType("Immunization");
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 		MdmRulesJson rules = new MdmRulesJson();
 		rules.setMdmTypes(List.of("Patient"));
@@ -78,7 +78,7 @@ class MdmJobParametersValidatorTest {
 	@Test
 	public void testSuccess() {
 		// setup
-		MdmJobParameters parameters = new MdmJobParameters().addResourceType("Patient");
+		MdmClearJobParameters parameters = new MdmClearJobParameters().addResourceType("Patient");
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 		MdmRulesJson rules = new MdmRulesJson();
 		rules.setMdmTypes(List.of("Patient"));

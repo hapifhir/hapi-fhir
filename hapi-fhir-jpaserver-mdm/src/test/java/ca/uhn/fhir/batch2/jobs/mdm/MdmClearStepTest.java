@@ -101,18 +101,18 @@ class MdmClearStepTest extends BaseMdmR4Test {
 
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = buildStepExecutionDetails(chunk);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = buildStepExecutionDetails(chunk);
 
 		myMdmClearStep.myHapiTransactionService.execute(requestDetails, transactionDetails, myMdmClearStep.buildJob(requestDetails, transactionDetails, stepExecutionDetails));
 	}
 
 	@NotNull
-	private StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
+	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
 		String instanceId = UUID.randomUUID().toString();
 		String chunkid = UUID.randomUUID().toString();
-		MdmJobParameters parms = new MdmJobParameters();
+		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
 		return stepExecutionDetails;
 	}
 
