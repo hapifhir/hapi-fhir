@@ -26,7 +26,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -105,7 +107,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testJobDefinitionWithReductionStep() throws InterruptedException {
+	public void testJobDefinitionWithReductionStepIT() throws InterruptedException {
+		// setup
+		String testInfo = "test";
+		AtomicInteger secondStepInt = new AtomicInteger();
+
+		// step 1
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
 			sink.accept(new FirstStepOutput());
@@ -113,13 +120,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			return RunOutcome.SUCCESS;
 		};
 
+		// step 2
 		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> second = (step, sink) -> {
 			SecondStepOutput output = new SecondStepOutput();
-			output.setValue("test");
+			output.setValue(testInfo + secondStepInt.getAndIncrement());
 			sink.accept(output);
 			return RunOutcome.SUCCESS;
 		};
 
+		// step 3
 		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = (step, sink) -> {
 			ListResult<SecondStepOutput> output = step.getData();
 			sink.accept(new ReductionStepOutput(output));
@@ -127,6 +136,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			return RunOutcome.SUCCESS;
 		};
 
+		// create job definition
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
 			.setJobDefinitionId(jobId)
@@ -153,6 +163,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 
+		// run test
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
 		String instanceId = myJobCoordinator.startInstance(request);
@@ -160,16 +171,25 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
+		// wait for last step to finish
 		myLastStepLatch.setExpectedCount(1);
 		myBatch2JobHelper.awaitMultipleChunkJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
-//		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
 
+		// verify
 		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
 		assertTrue(instanceOp.isPresent());
+		int secondStepCalls = secondStepInt.get();
+		assertEquals(2, secondStepCalls);
 		JobInstance instance = instanceOp.get();
 		ourLog.info(JsonUtil.serialize(instance, true));
 		assertNotNull(instance.getRecord());
+
+		for (int i = 0; i < secondStepInt.get(); i++) {
+			assertTrue(instance.getRecord().contains(
+				testInfo + i
+			));
+		}
 	}
 
 	@Test

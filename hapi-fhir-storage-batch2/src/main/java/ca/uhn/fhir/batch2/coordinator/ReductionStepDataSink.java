@@ -41,15 +41,16 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				OT data = theData.getData();
 				String dataString = JsonUtil.serialize(data, false);
 				instance.setRecord(dataString);
+				ourLog.debug(JsonUtil.serialize(instance));
 				myJobPersistence.updateInstance(instance);
 			} else {
 				String msg = "No instance found with Id " + instanceId;
 				ourLog.error(msg);
-				// TODO - the code could be wrong
+				// TODO - the code could be wrong - depending on when PR merges
 				throw new JobExecutionFailedException(Msg.code(2084) + msg);
 			}
 		} else {
-			// first in win?
+			// first in win - we won't throw
 			ourLog.error(
 				"Expected a single data sink for reduction step, but received {} instead. Only the first is accepted!",
 				count);

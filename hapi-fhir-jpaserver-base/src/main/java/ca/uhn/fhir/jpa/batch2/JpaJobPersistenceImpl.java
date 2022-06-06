@@ -38,7 +38,6 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -168,6 +167,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setParameters(theEntity.getParams());
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
+		retVal.setRecord(theEntity.getRecord());
 		return retVal;
 	}
 

@@ -86,7 +86,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
-	@JsonProperty(value = "record")
+	@JsonProperty(value = "record", access = JsonProperty.Access.READ_WRITE)
 	private String myRecord;
 
 	@JsonIgnore
