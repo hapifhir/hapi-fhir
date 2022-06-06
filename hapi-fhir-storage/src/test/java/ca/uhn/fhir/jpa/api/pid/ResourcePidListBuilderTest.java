@@ -53,7 +53,7 @@ class ResourcePidListBuilderTest {
 			emptyList.getResourceType(0);
 			fail();
 		} catch (ArrayIndexOutOfBoundsException e) {
-			assertEquals("Attempting to get resource type from an empty resource pid list", e.getMessage());
+			assertEquals("HAPI-2085: Attempting to get resource type from an empty resource pid list", e.getMessage());
 			// expected exception
 		}
 	}
