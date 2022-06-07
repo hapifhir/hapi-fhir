@@ -42,4 +42,7 @@ public interface IRuleApplier {
 
 	@Nullable
 	IValidationSupport getValidationSupport();
+
+	@Nullable
+	Void getFilterSupport();
 }
