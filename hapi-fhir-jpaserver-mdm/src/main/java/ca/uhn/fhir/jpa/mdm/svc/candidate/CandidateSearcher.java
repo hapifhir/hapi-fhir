@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,5 +83,12 @@ public class CandidateSearcher {
 	 */
 	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria) {
 		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions());
+	}
+
+	public static String idOrType(IAnyResource theResource, String theResourceType) {
+		if (theResource.getIdElement() == null) {
+			return theResourceType;
+		}
+		return theResource.getIdElement().toUnqualifiedVersionless().toString();
 	}
 }

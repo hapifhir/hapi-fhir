@@ -76,15 +76,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 
 		myFirstStepLatch.setExpectedCount(1);
+		myLastStepLatch.setExpectedCount(1);
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertNoGatedStep(instanceId);
 
-		myLastStepLatch.setExpectedCount(1);
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
-		myLastStepLatch.awaitExpected();
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
+		myLastStepLatch.awaitExpected();
 	}
 
 

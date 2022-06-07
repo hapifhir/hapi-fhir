@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 @Service
@@ -93,14 +94,16 @@ public class MdmCandidateSearchSvc {
 				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam, theRequestPartitionId);
 			}
 		}
-		//Obviously we don't want to consider the freshly added resource as a potential candidate.
-		//Sometimes, we are running this function on a resource that has not yet been persisted,
-		//so it may not have an ID yet, precluding the need to remove it.
+		// Obviously we don't want to consider the incoming resource as a potential candidate.
+		// Sometimes, we are running this function on a resource that has not yet been persisted,
+		// so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource));
+			if (matchedPidsToResources.remove(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource)) != null) {
+				ourLog.debug("Removing incoming resource {} from list of candidates.", theResource.getIdElement().toUnqualifiedVersionless());
+			}
 		}
 
-		ourLog.info("Found {} resources for {}", matchedPidsToResources.size(), theResourceType);
+		ourLog.info("Candidate search found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
 	}
 

@@ -157,7 +157,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(janePatient.getIdElement().getIdPartAsLong());
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(janePatient.getIdElement().getIdPartAsLong()));
 		assertThat(mdmLink.isPresent(), is(true));
 
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
@@ -170,7 +170,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDTheGoldenResourceGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong()).get();
+		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(patient.getIdElement().getIdPartAsLong())).get();
 
 		Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 		Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
@@ -182,7 +182,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientAttributesAreCopiedOverWhenGoldenResourceIsCreatedFromPatient() {
 		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong());
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(patient.getIdElement().getIdPartAsLong()));
 		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
 		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
@@ -368,7 +368,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(incomingJanePatient, is(possibleMatchWith(janePatient, janePatient2)));
 
 		//Ensure there is no successful MATCH links for incomingJanePatient
-		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient).getIdAsLong()));
+		Optional<? extends IMdmLink> matchedLinkForTargetPid = runInTransaction(()->myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), incomingJanePatient)));
 		assertThat(matchedLinkForTargetPid.isPresent(), is(false));
 
 		logAllLinks();

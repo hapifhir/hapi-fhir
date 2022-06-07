@@ -74,4 +74,6 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 	T validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
 	PageImpl<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+
+	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
 }

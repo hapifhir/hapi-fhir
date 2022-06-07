@@ -84,7 +84,7 @@ public class MdmLinkDaoSvc {
 			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
-		String message = String.format("Creating MdmLink from %s to %s.", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless());
+		String message = String.format("Creating %s link from %s to Golden Resource %s.", mdmLink.getMatchResult(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theGoldenResource.getIdElement().toUnqualifiedVersionless());
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -159,12 +159,8 @@ public class MdmLinkDaoSvc {
 	 */
 	@Deprecated
 	@Transactional
-	public Optional<? extends IMdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
-		IMdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setSourcePersistenceId(new ResourcePersistentId(theSourcePid));
-		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		Example<? extends IMdmLink> example = Example.of(exampleLink);
-		return myMdmLinkDao.findOne(example);
+	public Optional<? extends IMdmLink> getMatchedLinkForSourcePid(ResourcePersistentId theSourcePid) {
+		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid, MdmMatchResultEnum.MATCH);
 	}
 
 	/**
@@ -324,7 +320,7 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Finds all {@link MdmLink} entities in which theGoldenResource's PID is the source
+	 * Finds all {@link IMdmLink} entities in which theGoldenResource's PID is the source
 	 * of the relationship.
 	 *
 	 * @param theGoldenResource the source resource to find links for.

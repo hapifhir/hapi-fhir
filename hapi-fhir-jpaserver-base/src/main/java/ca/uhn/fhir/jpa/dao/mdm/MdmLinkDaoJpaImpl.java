@@ -222,4 +222,9 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 			PageRequest.of(thePageRequest.getPage(), thePageRequest.getCount()),
 			totalResults);
 	}
+
+	@Override
+	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
+		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMatch);
+	}
 }

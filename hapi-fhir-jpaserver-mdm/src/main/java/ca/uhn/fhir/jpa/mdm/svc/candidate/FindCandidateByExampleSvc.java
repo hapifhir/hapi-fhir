@@ -75,20 +75,40 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
+		List<String> skippedLogMessages = new ArrayList<>();
+		List<String> matchedLogMessages = new ArrayList<>();
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()).getIdAsLong());
 			if (!optionalMdmLink.isPresent()) {
+				if (ourLog.isDebugEnabled()) {
+					skippedLogMessages.add(String.format("%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.", match.getTarget().getIdElement().toUnqualifiedVersionless()));
+				}
 				continue;
 			}
 
+
 			IMdmLink matchMdmLink = optionalMdmLink.get();
 			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePersistenceId())) {
-				ourLog.info("Skipping MDM on candidate Golden Resource with PID {} due to manual NO_MATCH", matchMdmLink.getGoldenResourcePersistenceId());
+				skippedLogMessages.add(String.format("Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH", matchMdmLink.getGoldenResourcePersistenceId().toString()));
 				continue;
 			}
 
 			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(matchMdmLink.getGoldenResourcePersistenceId(), match.getMatchResult());
+
+			if (ourLog.isDebugEnabled()) {
+				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResource().getIdDt().toUnqualifiedVersionless()));
+			}
+
 			retval.add(candidate);
+		}
+
+		if (ourLog.isDebugEnabled()) {
+			for (String logMessage: skippedLogMessages) {
+				ourLog.debug(logMessage);
+			}
+			for (String logMessage: matchedLogMessages) {
+				ourLog.debug(logMessage);
+			}
 		}
 		return retval;
 	}
