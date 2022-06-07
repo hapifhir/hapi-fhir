@@ -133,14 +133,31 @@ that is passed into the method. For example:
 
 ## Update with History Rewrite
 
-If you wish to update a historical version of a resource without creating new versions, this can now be done with the
-Update operation. This operation not supported by the FHIR specs, it's an enhancement added to Hapi.
+If you wish to update a historical version of a resource without creating a new version, this can now be done with the
+Update operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
+specifically to HAPI-FHIR.
 
-In order to use this you will need to set the appropriate flag in DaoConfig to true. For
-example: `setUpdateWithHistoryRewriteEnabled(true)`
+In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `DaoConfig`
+to true.
 
-The api call would look like this: `PUT Patient/123/_history/3`, with the body of the request be the resource including
-the same version specified in the URL.
+The following API request shows an example of executing a PUT at the following endpoint.
+
+The body of the request must include the resource with the same ID and version as defined in the PUT request,
+
+```http
+PUT [serverBase]/Patient/123/_history/3
+Content-Type: application/fhir+json
+
+{ 
+   ..
+   id: "123",
+   meta: {
+      versionId: "3",
+      ..
+   }
+   ..
+}
+```
 
 <a name="instance_delete" />
 

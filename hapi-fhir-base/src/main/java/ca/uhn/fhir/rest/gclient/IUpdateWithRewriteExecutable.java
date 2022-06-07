@@ -30,7 +30,7 @@ public interface IUpdateWithRewriteExecutable extends IClientExecutable<IUpdateW
 	 * or suppress the resource body as a part of the result. If a resource is returned by the server
 	 * it will be parsed an accessible to the client via {@link MethodOutcome#getResource()}
 	 *
-	 * @since HAPI 6.0
+	 * @since HAPI 6.1.0
 	 */
 	IUpdateWithRewriteExecutable prefer(PreferReturnEnum theReturn);
 }

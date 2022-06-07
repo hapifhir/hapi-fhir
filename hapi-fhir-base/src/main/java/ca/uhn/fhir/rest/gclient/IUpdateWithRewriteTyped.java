@@ -24,7 +24,17 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IUpdateWithRewriteTyped extends IUpdateWithRewriteExecutable {
 
+	/**
+	 * Add a resource id to the request.
+	 *
+	 * @since HAPI 6.1.0
+	 */
 	IUpdateWithRewriteExecutable withId(IIdType theId);
 
+	/**
+	 * Add a resource id to the request.
+	 *
+	 * @since HAPI 6.1.0
+	 */
 	IUpdateWithRewriteExecutable withId(String theId);
 }

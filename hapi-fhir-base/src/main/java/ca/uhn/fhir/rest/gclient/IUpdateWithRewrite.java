@@ -24,7 +24,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IUpdateWithRewrite {
 
+	/**
+	 * Add a resource to the request.
+	 *
+	 * @since HAPI 6.1.0
+	 */
 	IUpdateWithRewriteTyped resource(IBaseResource theResource);
 
+	/**
+	 * Add a resource to the request.
+	 *
+	 * @since HAPI 6.1.0
+	 */
 	IUpdateWithRewriteTyped resource(String theResourceBody);
 }

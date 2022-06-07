@@ -131,7 +131,7 @@ public interface IAuthRuleBuilderRule {
 	/**
 	 * This rule specifically allows a user to perform a FHIR update on the historical version of a resource
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 */
 	IAuthRuleBuilderUpdateHistoryRewrite updateHistoryRewrite();
 }

@@ -88,6 +88,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1849,7 +1850,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
+	/**
+	 * Method for updating the historical version of the resource when a history version id is included in the request.
+	 *
+	 * @param theResource           to be saved
+	 * @param theRequest            details of the request
+	 * @param theTransactionDetails details of the transaction
+	 * @return the outcome of the operation
+	 */
 	private DaoMethodOutcome doUpdateWithHistoryRewrite(T theResource, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		if (theRequest == null || !"true".equals(theRequest.getHeader(JpaConstants.HEADER_REWRITE_HISTORY))) {
+			throw new ForbiddenOperationException(Msg.code(2093) + "The " + JpaConstants.HEADER_REWRITE_HISTORY + " header is not present on the request.");
+		}
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable

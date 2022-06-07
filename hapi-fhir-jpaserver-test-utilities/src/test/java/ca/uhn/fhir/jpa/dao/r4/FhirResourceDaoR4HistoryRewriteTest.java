@@ -1,23 +1,29 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 	private static final String TEST_SYSTEM_NAME = "testHistoryRewrite";
@@ -37,6 +43,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryRewriteNonCurrentVersion() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 		String systemNameModified = "testHistoryRewriteDiff";
 		String testFamilyNameModified = "Jackson";
 
@@ -74,11 +81,13 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryRewriteCurrentVersion() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 		String testFamilyNameModified = "Jackson";
 		String testGivenNameModified = "Randy";
 
 		// setup
 		IIdType id = createPatientWithHistory();
+		int resourceVersionsSizeInit = myResourceHistoryTableDao.findAll().size();
 
 		// execute update
 		Patient p = new Patient();
@@ -88,15 +97,39 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		myPatientDao.update(p, mySrd);
 
+		int resourceVersionsSizeAfterUpdate = myResourceHistoryTableDao.findAll().size();
+
 		Patient lPatient = myPatientDao.read(id.toVersionless(), mySrd);
 		assertEquals(testFamilyNameModified, lPatient.getName().get(0).getFamily());
 		assertEquals(testGivenNameModified, lPatient.getName().get(0).getGiven().get(0).getValue());
+		assertEquals(resourceVersionsSizeInit, resourceVersionsSizeAfterUpdate);
 		assertThat(lPatient.getIdElement().toString(), endsWith("/_history/3"));
 		assertTrue(Math.abs(lPatient.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 	}
 
+	@Test
+	public void testHistoryRewriteNoCustomHeader() {
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("");
+		String testFamilyNameModified = "Jackson";
 
-	@NotNull
+		// setup
+		IIdType id = createPatientWithHistory();
+
+		// execute update
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(testFamilyNameModified);
+		p.setId("Patient/" + id.getIdPart() + "/_history/2");
+
+		try {
+			myPatientDao.update(p, mySrd);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			assertThat(e.getMessage(), containsString("header is not present on the request"));
+		}
+	}
+
+	@Nonnull
 	private IIdType createPatientWithHistory() {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);

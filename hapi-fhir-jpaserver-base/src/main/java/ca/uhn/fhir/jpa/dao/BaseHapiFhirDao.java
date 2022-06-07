@@ -681,7 +681,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return retVal;
 	}
 
-	@NotNull
+	/**
+	 * helper for returning the encoded byte array of the input resource string based on the encoding.
+	 *
+	 * @param encoding        the encoding to used
+	 * @param encodedResource the resource to encode
+	 * @return byte array of the resource
+	 */
+	@Nonnull
 	private byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
 		byte[] resourceBinary;
 		switch (encoding) {
@@ -699,6 +706,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return resourceBinary;
 	}
 
+	/**
+	 * helper to format the meta element for serialization of the resource.
+	 *
+	 * @param theResourceType    the resource type of the resource
+	 * @param theExcludeElements list of extensions in the meta element to exclude from serialization
+	 * @param theMeta            the meta element of the resource
+	 * @return source extension if present in the meta element
+	 */
 	private IBaseExtension<?, ?> getExcludedElements(String theResourceType, List<String> theExcludeElements, IBaseMetaType theMeta) {
 		boolean hasExtensions = false;
 		IBaseExtension<?, ?> sourceExtension = null;
@@ -710,7 +725,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				/*
 				 * FHIR DSTU3 did not have the Resource.meta.source field, so we use a
 				 * custom HAPI FHIR extension in Resource.meta to store that field. However,
-				 * we put the value for that field in a separate table so we don't want to serialize
+				 * we put the value for that field in a separate table, so we don't want to serialize
 				 * it into the stored BLOB. Therefore: remove it from the resource temporarily
 				 * and restore it afterward.
 				 */

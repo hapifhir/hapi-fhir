@@ -315,7 +315,7 @@ public class DaoConfig {
 	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
-	 * Since 6.0.0
+	 * Since 6.1.0
 	 */
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
@@ -2894,7 +2894,7 @@ public class DaoConfig {
 	 * This setting indicates whether updating the history of a resource is allowed.
 	 * Default is false.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 */
 	public boolean isUpdateWithHistoryRewriteEnabled() {
 		return myUpdateWithHistoryRewriteEnabled;
@@ -2904,7 +2904,7 @@ public class DaoConfig {
 	 * This setting indicates whether updating the history of a resource is allowed.
 	 * Default is false.
 	 *
-	 * @since 6.0.0
+	 * @since 6.1.0
 	 */
 	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;

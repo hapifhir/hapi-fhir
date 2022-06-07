@@ -219,6 +219,11 @@ public interface IGenericClient extends IRestfulClient {
 	/**
 	 * Fluent method for the "update with history rewrite" operation, which updates a resource's historical version
 	 * instance on the server
+	 * <p>
+	 * Note that this is a proprietary HAPI FHIR operation that is not a part of the standard FHIR specification.
+	 * It is likely to be unavailable on many FHIR servers.
+	 *
+	 * @since HAPI 6.1.0
 	 */
 	IUpdateWithRewrite updateHistoryRewrite();
 
