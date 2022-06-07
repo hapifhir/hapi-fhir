@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class JobStepExecutorSvc {
-
-
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutorSvc.class);
 
 	private final IJobPersistence myJobPersistence;
@@ -45,6 +43,17 @@ public class JobStepExecutorSvc {
 		myBatchJobSender = theSender;
 	}
 
+	/**
+	 * Execute the work chunk
+	 * @param theCursor - work cursor
+	 * @param theInstance - the job instance
+	 * @param theWorkChunk - the work chunk (if available); can be null (for reduction steps)
+	 * @param theAccumulator - the job accumulator
+	 * @param <PT> - Job parameters Type
+	 * @param <IT> - Step input parameters Type
+	 * @param <OT> - Step output parameters Type
+	 * @return - JobStepExecution output. Contains the datasink and whether or not the execution had succeeded.
+	 */
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutorOutput<PT, IT, OT>
 	doExecution(
 		JobWorkCursor<PT, IT, OT> theCursor,
@@ -55,98 +64,20 @@ public class JobStepExecutorSvc {
 		JobDefinitionStep<PT, IT, OT> step = theCursor.getCurrentStep();
 		JobDefinition<PT> jobDefinition = theCursor.getJobDefinition();
 		String instanceId = theInstance.getInstanceId();
-		Class<OT> outputType = step.getOutputType();
 		Class<IT> inputType = step.getInputType();
-
 		PT parameters = theInstance.getParameters(jobDefinition.getParametersType());
+
 		IJobStepWorker<PT, IT, OT> worker = step.getJobStepWorker();
+		BaseDataSink<PT, IT, OT> dataSink = getDataSink(theCursor, jobDefinition, instanceId);
 
 		StepExecutionDetails<PT, IT> stepExecutionDetails;
-		BaseDataSink<PT, IT, OT> dataSink;
 		if (step.isReductionStep()) {
-			/*
-			 * Combine the outputs of all previous steps into
-			 * a list as input for the final step
-			 */
-			JobInstanceProgressCalculator calculator = new JobInstanceProgressCalculator(
-				myJobPersistence,
-				theInstance,
-				theAccumulator
-			);
-			calculator.calculateAndStoreInstanceProgress();
-			List<String> chunksForNextStep = theAccumulator.getChunkIdsWithStatus(instanceId,
-				step.getStepId(),
-				EnumSet.of(StatusEnum.QUEUED, StatusEnum.IN_PROGRESS));
-
-			List<IT> data = new ArrayList<>();
-			List<String> chunkIds = new ArrayList<>();
-			for (String nextChunk : chunksForNextStep) {
-				Optional<WorkChunk> chunkOp = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(nextChunk);
-
-				if (chunkOp.isPresent()) {
-					WorkChunk chunk = chunkOp.get();
-
-					data.add(chunk.getData(inputType));
-					chunkIds.add(chunk.getId());
-				}
-			}
-
-			// this is the data we'll store (which is a list of all the previous outputs)
-			ListResult<IT> listResult = new ListResult<>(data);
-
-			// reduce multiple work chunks -> single work chunk (for simpler processing)
-			BatchWorkChunk newWorkChunk = new BatchWorkChunk(
-				theInstance.getJobDefinitionId(),
-				theInstance.getJobDefinitionVersion(),
-				step.getStepId(),
-				instanceId,
-				0, // what is sequence? Does it matter here?
-				JsonUtil.serialize(listResult)
-			);
-			String newChunkId = myJobPersistence.reduceWorkChunksToSingleChunk(instanceId, chunkIds, newWorkChunk);
-
-			// create the details, worker, and datasink
-			ReductionStepExecutionDetails<PT, IT, OT> executionDetails = new ReductionStepExecutionDetails<>(
-				parameters,
-				listResult,
-				instanceId,
-				newChunkId
-			);
-			stepExecutionDetails = (StepExecutionDetails<PT, IT>) executionDetails;
-
-			dataSink = new ReductionStepDataSink<PT, IT, OT>(
-				instanceId,
-				theCursor,
-				jobDefinition,
-				myJobPersistence
-			);
+			// reduction step details
+			stepExecutionDetails = getExecutionDetailsForReductionStep(theInstance, theAccumulator, step, inputType, parameters);
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
-
-			if (theCursor.isFinalStep()) {
-				dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(jobDefinition.getJobDefinitionId(), instanceId, theCursor.asFinalCursor());
-			} else {
-				dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, jobDefinition, instanceId, theCursor);
-			}
-
-			JobDefinitionStep<PT, IT, OT> theTargetStep = dataSink.getTargetStep();
-
-			//Class<IT> inputType = theTargetStep.getInputType();
-
-			IT inputData = null;
-			if (!inputType.equals(VoidModel.class)) {
-				inputData = theWorkChunk.getData(inputType);
-			}
-
-			String chunkId = theWorkChunk.getId();
-
-			stepExecutionDetails = new StepExecutionDetails<>(
-				parameters,
-				inputData,
-				instanceId,
-				chunkId
-			);
+			stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, instanceId, inputType, parameters);
 		}
 
 		// execute the step
@@ -157,16 +88,132 @@ public class JobStepExecutorSvc {
 		return new JobStepExecutorOutput<>(succeed, dataSink);
 	}
 
+	protected  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
+		JobWorkCursor<PT, IT, OT> theCursor,
+		JobDefinition<PT> theJobDefinition,
+		String theInstanceId
+	) {
+		BaseDataSink<PT, IT, OT> dataSink;
+		if (theCursor.getCurrentStep().isReductionStep()) {
+			dataSink = new ReductionStepDataSink<>(
+				theInstanceId,
+				theCursor,
+				theJobDefinition,
+				myJobPersistence
+			);
+		}
+		else if (theCursor.isFinalStep()) {
+			dataSink = (BaseDataSink<PT, IT, OT>) new FinalStepDataSink<>(theJobDefinition.getJobDefinitionId(), theInstanceId, theCursor.asFinalCursor());
+		} else {
+			dataSink = new JobDataSink<>(myBatchJobSender, myJobPersistence, theJobDefinition, theInstanceId, theCursor);
+		}
+		return dataSink;
+	}
+
+	/**
+	 * Construct execution details for non-reduction step
+	 */
+	private <PT extends IModelJson, IT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForNonReductionStep(
+		WorkChunk theWorkChunk,
+		String theInstanceId,
+		Class<IT> theInputType,
+		PT theParameters
+	) {
+		StepExecutionDetails<PT, IT> stepExecutionDetails;
+		IT inputData = null;
+		if (!theInputType.equals(VoidModel.class)) {
+			inputData = theWorkChunk.getData(theInputType);
+		}
+
+		String chunkId = theWorkChunk.getId();
+
+		stepExecutionDetails = new StepExecutionDetails<>(
+			theParameters,
+			inputData,
+			theInstanceId,
+			chunkId
+		);
+		return stepExecutionDetails;
+	}
+
+	/**
+	 * Do work and construct execution details for job reduction step
+	 */
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForReductionStep(
+		JobInstance theInstance,
+		JobChunkProgressAccumulator theAccumulator,
+		JobDefinitionStep<PT, IT, OT> theStep,
+		Class<IT> theInputType,
+		PT theParameters
+	) {
+		StepExecutionDetails<PT, IT> stepExecutionDetails;
+		List<String> chunksForNextStep = getChunkIdsForNextStep(theInstance, theAccumulator, theStep);
+
+		/*
+		 * Combine the outputs of all previous steps into
+		 * a list as input for the final step
+		 */
+		List<IT> data = new ArrayList<>();
+		List<String> chunkIds = new ArrayList<>();
+		for (String nextChunk : chunksForNextStep) {
+			Optional<WorkChunk> chunkOp = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(nextChunk);
+
+			if (chunkOp.isPresent()) {
+				WorkChunk chunk = chunkOp.get();
+
+				data.add(chunk.getData(theInputType));
+				chunkIds.add(chunk.getId());
+			}
+		}
+
+		// this is the data we'll store (which is a list of all the previous outputs)
+		ListResult<IT> listResult = new ListResult<>(data);
+
+		// reduce multiple work chunks -> single work chunk (for simpler processing)
+		BatchWorkChunk newWorkChunk = new BatchWorkChunk(
+			theInstance.getJobDefinitionId(),
+			theInstance.getJobDefinitionVersion(),
+			theStep.getStepId(),
+			theInstance.getInstanceId(),
+			0, // what is sequence? Does it matter in reduction?
+			JsonUtil.serialize(listResult)
+		);
+		String newChunkId = myJobPersistence.reduceWorkChunksToSingleChunk(theInstance.getInstanceId(), chunkIds, newWorkChunk);
+
+		// create the details, and datasink
+		ReductionStepExecutionDetails<PT, IT, OT> executionDetails = new ReductionStepExecutionDetails<>(
+			theParameters,
+			listResult,
+			theInstance.getInstanceId(),
+			newChunkId
+		);
+		stepExecutionDetails = (StepExecutionDetails<PT, IT>) executionDetails;
+		return stepExecutionDetails;
+	}
+
+	private  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> List<String> getChunkIdsForNextStep(
+		JobInstance theInstance,
+		JobChunkProgressAccumulator theAccumulator,
+		JobDefinitionStep<PT, IT, OT> theStep
+	) {
+		JobInstanceProgressCalculator calculator = getProgressCalculator(theInstance, theAccumulator);
+		calculator.calculateAndStoreInstanceProgress();
+		List<String> chunksForNextStep = theAccumulator.getChunkIdsWithStatus(theInstance.getInstanceId(),
+			theStep.getStepId(),
+			EnumSet.of(StatusEnum.QUEUED));
+		return chunksForNextStep;
+	}
+
+	protected JobInstanceProgressCalculator getProgressCalculator(JobInstance theInstance, JobChunkProgressAccumulator theAccumulator) {
+		return new JobInstanceProgressCalculator(
+			myJobPersistence,
+			theInstance,
+			theAccumulator
+		);
+	}
+
 	/**
 	 * Calls the worker execution step, and performs error handling logic for jobs that failed.
-	 *
-	 * @param theStepExecutionDetails - the execution step details
-	 * @param theStepWorker - the worker
-	 * @param theDataSink - the data sink
-	 * @param <PT> - job parameters
-	 * @param <IT> - step input parameters
-	 * @param <OT> - expected step output parameters (VoidModel for all but Reduction steps)
-	 * @return - true if the job completed successfully, false otherwise.
 	 */
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeStep(
 		StepExecutionDetails<PT, IT> theStepExecutionDetails,
