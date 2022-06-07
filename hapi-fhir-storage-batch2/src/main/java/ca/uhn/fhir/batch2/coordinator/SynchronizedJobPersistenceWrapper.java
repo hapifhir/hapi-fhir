@@ -49,6 +49,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds) {
+		return myWrap.fetchWorkChunks(theInstanceId, theChunkIds);
+	}
+
+	@Override
 	public synchronized String storeNewInstance(JobInstance theInstance) {
 		return myWrap.storeNewInstance(theInstance);
 	}

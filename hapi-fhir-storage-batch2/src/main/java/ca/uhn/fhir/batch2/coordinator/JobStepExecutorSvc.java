@@ -29,7 +29,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Optional;
 
 public class JobStepExecutorSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutorSvc.class);
@@ -44,10 +43,11 @@ public class JobStepExecutorSvc {
 	}
 
 	/**
-	 * Execute the work chunk
+	 * Execute the work chunk.
+	 *
 	 * @param theCursor - work cursor
 	 * @param theInstance - the job instance
-	 * @param theWorkChunk - the work chunk (if available); can be null (for reduction steps)
+	 * @param theWorkChunk - the work chunk (if available); can be null (for reduction step only!)
 	 * @param theAccumulator - the job accumulator
 	 * @param <PT> - Job parameters Type
 	 * @param <IT> - Step input parameters Type
@@ -85,9 +85,14 @@ public class JobStepExecutorSvc {
 			worker,
 			dataSink);
 
+		// return results with data sink
 		return new JobStepExecutorOutput<>(succeed, dataSink);
 	}
 
+	/**
+	 * Get the correct datasink for the cursor/job provided.
+	 */
+	@SuppressWarnings("unchecked")
 	protected  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
 		JobWorkCursor<PT, IT, OT> theCursor,
 		JobDefinition<PT> theJobDefinition,
@@ -139,6 +144,7 @@ public class JobStepExecutorSvc {
 	/**
 	 * Do work and construct execution details for job reduction step
 	 */
+	@SuppressWarnings("unchecked")
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForReductionStep(
 		JobInstance theInstance,
 		JobChunkProgressAccumulator theAccumulator,
@@ -155,15 +161,10 @@ public class JobStepExecutorSvc {
 		 */
 		List<IT> data = new ArrayList<>();
 		List<String> chunkIds = new ArrayList<>();
-		for (String nextChunk : chunksForNextStep) {
-			Optional<WorkChunk> chunkOp = myJobPersistence.fetchWorkChunkSetStartTimeAndMarkInProgress(nextChunk);
-
-			if (chunkOp.isPresent()) {
-				WorkChunk chunk = chunkOp.get();
-
-				data.add(chunk.getData(theInputType));
-				chunkIds.add(chunk.getId());
-			}
+		List<WorkChunk> chunks = myJobPersistence.fetchWorkChunks(theInstance.getInstanceId(), chunksForNextStep);
+		for (WorkChunk chunk : chunks) {
+			data.add(chunk.getData(theInputType));
+			chunkIds.add(chunk.getId());
 		}
 
 		// this is the data we'll store (which is a list of all the previous outputs)
@@ -191,6 +192,9 @@ public class JobStepExecutorSvc {
 		return stepExecutionDetails;
 	}
 
+	/**
+	 * Get all chunk ids from current step that will be consumed by next (reduction) step
+	 */
 	private  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> List<String> getChunkIdsForNextStep(
 		JobInstance theInstance,
 		JobChunkProgressAccumulator theAccumulator,
@@ -204,6 +208,9 @@ public class JobStepExecutorSvc {
 		return chunksForNextStep;
 	}
 
+	/**
+	 * Return a new instance of the Progress Calculator.
+	 */
 	protected JobInstanceProgressCalculator getProgressCalculator(JobInstance theInstance, JobChunkProgressAccumulator theAccumulator) {
 		return new JobInstanceProgressCalculator(
 			myJobPersistence,

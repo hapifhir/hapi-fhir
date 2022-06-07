@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
 
-
 	public static final int TEST_JOB_VERSION = 1;
 	public static final String FIRST_STEP_ID = "first-step";
 	public static final String LAST_STEP_ID = "last-step";

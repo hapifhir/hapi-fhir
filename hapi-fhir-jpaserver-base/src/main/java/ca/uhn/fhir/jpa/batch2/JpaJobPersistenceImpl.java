@@ -35,6 +35,7 @@ import org.springframework.data.domain.Sort;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -80,6 +81,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
 		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
 		return chunk.map(t -> toChunk(t, true));
+	}
+
+	@Override
+	public List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds) {
+		Iterable<Batch2WorkChunkEntity> entities = myWorkChunkRepository.findAllById(theChunkIds);
+		List<WorkChunk> chunks = new ArrayList<>();
+		for (Batch2WorkChunkEntity entity : entities) {
+			chunks.add(toChunk(entity, true));
+		}
+		return chunks;
 	}
 
 	@Override

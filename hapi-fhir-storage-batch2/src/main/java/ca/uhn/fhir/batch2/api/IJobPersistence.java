@@ -51,6 +51,14 @@ public interface IJobPersistence {
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
 
 	/**
+	 * Fetches all workchunks specified either by the list of ids (JPA) or by the instance ID (mongo)
+	 * @param theInstanceId - job instance id
+	 * @param theChunkIds - the list of ids of workchunks to fetch
+	 * @return - list of work chunks (with data!)
+	 */
+	List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds);
+
+	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
 	 *
 	 * @param theInstance The details
