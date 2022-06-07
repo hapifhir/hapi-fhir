@@ -65,7 +65,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	@Autowired
 	FhirContext myFhirContext;
 	// WIP KHS right solution?
-	@Autowired(required = false) // Not all systems enable mdm
+	@Autowired// Not all systems enable mdm
 	IMdmLinkSvc myMdmLinkSvc;
 
 	@Nonnull

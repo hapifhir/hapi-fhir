@@ -171,7 +171,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myMdmClearProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
+			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("HAPI-2039: Failed to validate parameters for job of type Mdm Clear: \n" +

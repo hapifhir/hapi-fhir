@@ -47,10 +47,10 @@ public class MdmJobParametersValidator implements IJobParametersValidator<MdmCle
 			return Collections.singletonList("Mdm is not enabled on this server");
 		}
 		List<String> retval = new ArrayList<>();
-		if (theParameters.getResourceType() == null || theParameters.getResourceType().isEmpty()) {
+		if (theParameters.getResourceNames() == null || theParameters.getResourceNames().isEmpty()) {
 			retval.add("Mdm Clear Job Parameters must define at least one resource type");
 		} else {
-			for (String resourceType : theParameters.getResourceType()) {
+			for (String resourceType : theParameters.getResourceNames()) {
 				if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
 					retval.add("Resource type '" + resourceType + "' is not supported on this server.");
 				}

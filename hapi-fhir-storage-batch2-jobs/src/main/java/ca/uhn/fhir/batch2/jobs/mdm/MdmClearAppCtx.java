@@ -20,15 +20,11 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -38,7 +34,7 @@ public class MdmClearAppCtx {
 	public static final String JOB_MDM_CLEAR = "Mdm Clear";
 
 	@Bean
-	public JobDefinition<MdmClearJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
+	public JobDefinition<MdmClearJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IGoldenResourceSearchSvc theGoldenResourceSearchSvc, IMdmSettings theMdmSettings) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_MDM_CLEAR)
@@ -83,10 +79,4 @@ public class MdmClearAppCtx {
 	public LoadGoldenIdsStep loadGoldenIdsStep(IGoldenResourceSearchSvc theGoldenResourceSearchSvc) {
 		return new LoadGoldenIdsStep(theGoldenResourceSearchSvc);
 	}
-
-	@Bean
-	public MdmClearProvider MdmProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, MdmSettings theMdmSettings) {
-		return new MdmClearProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theMdmSettings);
-	}
-
 }

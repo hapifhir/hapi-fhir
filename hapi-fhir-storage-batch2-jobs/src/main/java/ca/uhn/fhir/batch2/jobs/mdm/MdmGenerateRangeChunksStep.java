@@ -44,7 +44,7 @@ public class MdmGenerateRangeChunksStep implements IFirstJobStepWorker<MdmClearJ
 		Date start = Batch2Constants.BATCH_START_DATE;
 		Date end = new Date();
 
-		for (String nextResourceType : params.getResourceType()) {
+		for (String nextResourceType : params.getResourceNames()) {
 			ourLog.info("Initiating mdm clear of [{}]] Golden Resources from {} to {}", nextResourceType, start, end);
 			MdmChunkRangeJson nextRange = new MdmChunkRangeJson();
 			nextRange.setResourceType(nextResourceType);

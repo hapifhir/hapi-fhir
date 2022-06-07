@@ -32,19 +32,22 @@ import java.util.List;
 public class MdmClearJobParameters extends PartitionedJobParameters {
 	@JsonProperty("resourceType")
 	@Nonnull
-	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String> myResourceType;
+	private List<@Pattern(regexp = "^[A-Z][A-Za-z]+$", message = "If populated, must be a valid resource type'") String> myResourceNames;
 
-	public List<String> getResourceType() {
-		if (myResourceType == null) {
-			myResourceType = new ArrayList<>();
+	public List<String> getResourceNames() {
+		if (myResourceNames == null) {
+			myResourceNames = new ArrayList<>();
 		}
-		return myResourceType;
+		return myResourceNames;
 	}
 
-	public MdmClearJobParameters addResourceType(@Nonnull String theResourceType) {
-		Validate.notNull(theResourceType);
-		getResourceType().add(theResourceType);
+	public MdmClearJobParameters addResourceType(@Nonnull String theResourceName) {
+		Validate.notNull(theResourceName);
+		getResourceNames().add(theResourceName);
 		return this;
 	}
 
+    public void setResourceNames(@Nonnull List<String> theResourceNames) {
+			myResourceNames = theResourceNames;
+    }
 }

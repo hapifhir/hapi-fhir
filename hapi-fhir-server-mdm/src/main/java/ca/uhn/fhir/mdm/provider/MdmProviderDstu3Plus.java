@@ -49,6 +49,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
@@ -139,6 +141,25 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.CREATE_LINK,
 				getResourceType(ProviderConstants.MDM_CREATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
+	})
+	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceNames,
+													 @OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+													 ServletRequestDetails theRequestDetails) {
+
+		List<String> resourceNames = new ArrayList<>();
+
+		if (theResourceNames != null) {
+			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).toList());
+			validateResourceNames(resourceNames);
+		} else {
+			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
+		}
+
+		return myMdmControllerSvc.submitMdmClearJob(resourceNames, theBatchSize, theRequestDetails);
 	}
 
 	private void validateResourceNames(List<String> theResourceNames) {

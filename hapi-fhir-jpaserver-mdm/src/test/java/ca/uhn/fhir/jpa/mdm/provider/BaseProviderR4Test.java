@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.mdm.MdmClearProvider;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -32,7 +31,6 @@ import java.util.List;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
-	protected MdmClearProvider myMdmClearProvider;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
@@ -69,7 +67,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	public void before() throws Exception {
 		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
 // FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc
-		myMdmClearProvider = new MdmClearProvider(myFhirContext, myJobCoordinator, myRequestPartitionHelperSvc, myMdmSettings);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
@@ -82,12 +79,12 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	}
 
 	protected void clearMdmLinks() {
-		Parameters result = (Parameters) myMdmClearProvider.clearMdmLinks(null, null, myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
 		myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 	}
 
 	protected void clearMdmLinks(String theResourceName) {
-		Parameters result = (Parameters) myMdmClearProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
 		myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 	}
 
