@@ -20,23 +20,22 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.HasOrListParam;
@@ -83,8 +82,6 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 	@Autowired
 	private IIdHelperService myIdHelperService;
-//	@Autowired
-//	private IMdmSubmitSvc myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
@@ -133,7 +130,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), srd);
 			ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
-			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull.getIdAsLong(), MdmMatchResultEnum.MATCH);
+			List<MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
 				addPersistentIdIfNotExist(resourcePersistentIds, new ResourcePersistentId(tuple.getGoldenPid()));
 				addPersistentIdIfNotExist(resourcePersistentIds, new ResourcePersistentId(tuple.getSourcePid()));
@@ -152,7 +149,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	/**
 	 * @param thePidTuples
 	 */
-	private void populateMdmResourceCache(List<IMdmLinkDao.MdmPidTuple> thePidTuples) {
+	private void populateMdmResourceCache(List<MdmPidTuple> thePidTuples) {
 		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
 			return;
 		}
@@ -200,7 +197,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 	/**
 	 * Given the local myGroupId, perform an expansion to retrieve all resource IDs of member patients.
-	 * if myMdmEnabled is set to true, we also reach out to the IMdmLinkDao to attempt to also expand it into matched
+	 * if myMdmEnabled is set to true, we also reach out to the IMdmLinkJpaRepository to attempt to also expand it into matched
 	 * patients.
 	 *
 	 * @return a Set of Strings representing the resource IDs of all members of a group.
@@ -213,12 +210,12 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {
-			List<IMdmLinkDao.MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull.getIdAsLong(), MdmMatchResultEnum.MATCH);
+			List<MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
 			Set<Long> uniquePids = new HashSet<>();
 			goldenPidTargetPidTuples.forEach(tuple -> {
-				uniquePids.add(tuple.getGoldenPid());
-				uniquePids.add(tuple.getSourcePid());
+				uniquePids.add(tuple.getGoldenPid().getIdAsLong());
+				uniquePids.add(tuple.getSourcePid().getIdAsLong());
 			});
 
 			Set<ResourcePersistentId> pids  = uniquePids.stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
@@ -243,10 +240,10 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		return expandedIds;
 	}
 
-	private void extract(List<IMdmLinkDao.MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
-		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
-			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
-			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
+	private void extract(List<MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
+		for (MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
+			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid().getIdAsLong();
+			Long sourcePid = goldenPidTargetPidTuple.getSourcePid().getIdAsLong();
 			theGoldenResourceToSourcePidMap.computeIfAbsent(goldenPid, key -> new HashSet<>()).add(sourcePid);
 		}
 	}

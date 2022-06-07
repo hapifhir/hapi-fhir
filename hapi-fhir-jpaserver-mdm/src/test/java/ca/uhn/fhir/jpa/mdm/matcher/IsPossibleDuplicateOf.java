@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
@@ -37,7 +37,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 		//Returns true if there is a POSSIBLE_DUPLICATE between the incoming resource, and all of the resources passed in via the constructor.
 		return goldenResourcePidsToMatch.stream()
 			.map(baseResourcePid -> {
-				Optional<MdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+				Optional<? extends IMdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				if (!duplicateLink.isPresent()) {
 					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				}

@@ -21,10 +21,10 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
  */
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,21 +65,21 @@ public class MdmLinkDeleter implements ItemProcessor<List<Long>, List<Long>> {
 	private void removeLinks(List<ResourcePersistentId> pidList, ConcurrentLinkedQueue<Long> theGoldenPidAggregator) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
-		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(deleteMdmLinksAndReturnGoldenResourcePids(ResourcePersistentId.toLongList(pidList))));
+		txTemplate.executeWithoutResult(t -> theGoldenPidAggregator.addAll(deleteMdmLinksAndReturnGoldenResourcePids(pidList)));
 	}
 
-	public List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<Long> thePids) {
-		List<MdmLink> links = myMdmLinkDao.findAllById(thePids);
-		Set<Long> goldenResources = links.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
+	public List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<ResourcePersistentId> thePids) {
+		List<? extends IMdmLink> links = myMdmLinkDao.findAllById(thePids);
+		Set<ResourcePersistentId> goldenResources = links.stream().map(IMdmLink::getSourcePersistenceId).collect(Collectors.toSet());
 		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
 		//and REDIRECT
 		goldenResources.addAll(links.stream()
 			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
 				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
-			.map(MdmLink::getSourcePid).collect(Collectors.toSet()));
+			.map(IMdmLink::getSourcePersistenceId).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} MDM link records...", links.size());
 		myMdmLinkDao.deleteAll(links);
 		ourLog.info("{} MDM link records deleted", links.size());
-		return new ArrayList<>(goldenResources);
+		return ResourcePersistentId.toLongList(goldenResources);
 	}
 }

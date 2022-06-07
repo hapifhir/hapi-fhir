@@ -131,8 +131,8 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 			return Optional.empty();
 		} else {
 			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource).getIdAsLong(),
-				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theCandidate).getIdAsLong()
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource),
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theCandidate)
 			);
 		}
 	}

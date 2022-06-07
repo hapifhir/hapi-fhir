@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -123,9 +124,9 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePid(myToGoldenPatientPid)
-			.setSourcePid(myFromGoldenPatientPid)
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
+			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
+			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
 			.setMdmSourceType("Patient")
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(MdmLinkSourceEnum.AUTO);

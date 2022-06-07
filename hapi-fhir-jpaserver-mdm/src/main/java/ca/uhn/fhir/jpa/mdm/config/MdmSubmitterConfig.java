@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
 import ca.uhn.fhir.jpa.mdm.svc.MdmChannelSubmitterSvcImpl;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -56,5 +58,10 @@ public class MdmSubmitterConfig {
 	@Bean
 	IMdmSubmitSvc mdmSubmitService() {
 		return new MdmSubmitSvcImpl();
+	}
+
+	@Bean
+	IMdmLinkDao mdmLinkDao(){
+		return new MdmLinkDaoJpaImpl();
 	}
 }

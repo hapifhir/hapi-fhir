@@ -37,7 +37,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 		assertEquals(MdmLinkSourceEnum.AUTO, links.get(1).getLinkSource());
@@ -51,7 +51,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(1);
 
-		List<MdmLink> links = getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
@@ -66,7 +66,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 		Patient sourcePatient = getGoldenResourceFromTargetResource(patient);
 		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
@@ -74,7 +74,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.updateLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 		assertNotNull(links.get(0).getPartitionId());

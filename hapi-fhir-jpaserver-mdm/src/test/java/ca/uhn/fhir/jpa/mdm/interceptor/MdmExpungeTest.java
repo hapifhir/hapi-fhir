@@ -43,7 +43,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		myTargetId = myTargetEntity.getIdDt().toVersionless();
 		mySourceEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setGoldenResourcePid(mySourceEntity.getId());

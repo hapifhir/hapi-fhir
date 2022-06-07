@@ -74,7 +74,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
@@ -102,7 +102,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());

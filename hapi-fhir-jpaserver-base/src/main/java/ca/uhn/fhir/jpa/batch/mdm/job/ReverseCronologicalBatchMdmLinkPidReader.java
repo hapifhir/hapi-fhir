@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.batch.mdm.job;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.reader.BaseReverseCronologicalBatchPidReader;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,15 +47,20 @@ public class ReverseCronologicalBatchMdmLinkPidReader extends BaseReverseCronolo
 		Pageable pageable = PageRequest.of(0, getBatchSize());
 		RequestPartitionId requestPartitionId = resourceSearch.getRequestPartitionId();
 		if (requestPartitionId.isAllPartitions()){
-			return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThreshold(resourceName, getCurrentHighThreshold(), pageable));
+			return new HashSet<>(ResourcePersistentId.toLongList(myMdmLinkDao.findPidByResourceNameAndThreshold(resourceName, getCurrentHighThreshold(), pageable)));
 		}
 		List<Integer> partitionIds = requestPartitionId.getPartitionIds();
 		//Expand out the list to handle the REDIRECT/POSSIBLE DUPLICATE ones.
-		return new HashSet<>(myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(resourceName, getCurrentHighThreshold(), partitionIds, pageable));
+		return new HashSet<>(ResourcePersistentId.toLongList(myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(resourceName, getCurrentHighThreshold(), partitionIds, pageable)));
 	}
 
 	@Override
 	protected void setDateFromPidFunction(ResourceSearch resourceSearch) {
-		setDateExtractorFunction(pid -> myMdmLinkDao.findById(pid).get().getCreated());
+		setDateExtractorFunction(pid ->
+		{
+			ResourcePersistentId resourcePersistentId = new ResourcePersistentId(pid);
+			return ((IMdmLink) myMdmLinkDao.findById(resourcePersistentId).get()).getCreated();
+		}
+		);
 	}
 }

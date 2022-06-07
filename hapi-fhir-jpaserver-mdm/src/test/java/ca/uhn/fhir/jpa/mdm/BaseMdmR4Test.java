@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -113,7 +113,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired
-	protected IMdmLinkDao myMdmLinkDao;
+	protected IMdmLinkJpaRepository myMdmLinkDao;
 	@Autowired
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
@@ -546,7 +546,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Patient sourcePatient = createGoldenPatient();
 		Patient patient = createPatient();
 
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setGoldenResourcePersistenceId(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient)));

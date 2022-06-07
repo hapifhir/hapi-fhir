@@ -121,7 +121,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	private void saveNoMatchLink(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theTargetPid) {
-		MdmLink noMatchLink = myMdmLinkDaoSvc.newMdmLink();
+		MdmLink noMatchLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		noMatchLink.setGoldenResourcePersistenceId(theGoldenResourcePid);
 		noMatchLink.setSourcePersistenceId(theTargetPid);
 		noMatchLink.setLinkSource(MdmLinkSourceEnum.MANUAL).setMatchResult(MdmMatchResultEnum.NO_MATCH);

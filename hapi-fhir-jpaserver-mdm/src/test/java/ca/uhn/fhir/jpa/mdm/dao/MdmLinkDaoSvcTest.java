@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -54,7 +54,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testNew() {
-		MdmLink newLink = myMdmLinkDaoSvc.newMdmLink();
+		IMdmLink newLink = myMdmLinkDaoSvc.newMdmLink();
 		MdmRulesJson rules = myMdmSettings.getMdmRules();
 		assertEquals("1", rules.getVersion());
 		assertEquals(rules.getVersion(), newLink.getVersion());
@@ -79,7 +79,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<IMdmLinkDao.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(mdmLinks.get(0).getSourcePid(), MdmMatchResultEnum.MATCH);
+		List<IMdmLinkJpaRepository.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(mdmLinks.get(0).getSourcePid(), MdmMatchResultEnum.MATCH);
 
 		assertThat(lists, hasSize(10));
 
@@ -93,7 +93,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	private MdmLink createPatientAndLinkTo(Long thePatientPid, MdmMatchResultEnum theMdmMatchResultEnum) {
 		Patient patient = createPatient();
 
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());

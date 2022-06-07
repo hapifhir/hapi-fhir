@@ -148,7 +148,7 @@ public class MdmSearchExpandingInterceptor {
 			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
 
 			if (expandedResourceIds.isEmpty()) {
-				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(id.getIdPartAsLong());
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId((IdDt) id);
 			}
 
 			//Rebuild

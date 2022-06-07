@@ -142,7 +142,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
 
-		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
+		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 
 		Patient finalPatient1 = patient1;
@@ -202,7 +202,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertThat(patient2, is(possibleMatchWith(patient1)));
 		assertThat(patient2, is(possibleMatchWith(patient3)));
 
-		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
+		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}

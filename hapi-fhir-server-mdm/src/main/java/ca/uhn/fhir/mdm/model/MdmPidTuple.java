@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.dao;
+package ca.uhn.fhir.mdm.model;
 
 /*-
  * #%L
@@ -20,15 +20,27 @@ package ca.uhn.fhir.mdm.dao;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmLink;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
-import javax.annotation.Nullable;
+public class MdmPidTuple {
+	private ResourcePersistentId myGoldenPid;
+	private ResourcePersistentId mySourcePid;
 
-public interface IMdmLinkDaoSvc {
-	public IMdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext);
+	public ResourcePersistentId getGoldenPid(){
+		return myGoldenPid;
+	}
 
+	public MdmPidTuple setGoldenPid(ResourcePersistentId theGoldenPid) {
+		myGoldenPid = theGoldenPid;
+		return this;
+	}
+
+	public MdmPidTuple setSourcePid(ResourcePersistentId theSourcePid) {
+		mySourcePid = theSourcePid;
+		return this;
+	}
+
+	public ResourcePersistentId getSourcePid(){
+		return mySourcePid;
+	}
 }

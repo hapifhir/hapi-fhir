@@ -271,7 +271,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient2 = addExternalEID(buildJanePatient(), "eid-2");
 		patient2 = createPatientAndUpdateLinks(patient2);
 
-		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
+		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 
 		Patient finalPatient1 = patient1;
@@ -591,7 +591,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	private void assertNoDuplicates() {
-		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
+		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(0));
 	}
 
@@ -626,7 +626,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		assertThat(patient2, is(sameGoldenResourceAs(patient1)));
 
-		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
+		List<MdmLink> possibleDuplicates = (List<MdmLink>) myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 	}
