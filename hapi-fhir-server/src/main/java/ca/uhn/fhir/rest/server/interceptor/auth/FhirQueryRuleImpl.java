@@ -8,7 +8,7 @@ public class FhirQueryRuleImpl extends RuleImplOp{
 	 *
 	 * @param theRuleName
 	 */
-	FhirQueryRuleImpl(String theRuleName) {
+	public FhirQueryRuleImpl(String theRuleName) {
 		super(theRuleName);
 	}
 
