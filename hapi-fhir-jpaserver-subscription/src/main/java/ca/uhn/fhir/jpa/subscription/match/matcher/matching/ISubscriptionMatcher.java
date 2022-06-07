@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.rest.server.interceptor.matching.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 
