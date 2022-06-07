@@ -1079,7 +1079,7 @@ public abstract class BaseTransactionProcessor {
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
-						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
+						DaoMethodOutcome outcome = dao.patch(patchId, url, patchType, patchBody, patchBodyParameters, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
