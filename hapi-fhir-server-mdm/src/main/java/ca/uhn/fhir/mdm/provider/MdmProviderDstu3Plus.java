@@ -52,6 +52,7 @@ import org.springframework.data.domain.Page;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -153,7 +154,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		List<String> resourceNames = new ArrayList<>();
 
 		if (theResourceNames != null) {
-			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).toList());
+			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 			validateResourceNames(resourceNames);
 		} else {
 			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
