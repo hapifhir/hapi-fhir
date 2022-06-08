@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.clear;
 
 /*-
  * #%L
@@ -39,6 +39,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_MDM_CLEAR;
 
 public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
@@ -65,7 +64,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	@Autowired
 	FhirContext myFhirContext;
 	// WIP KHS right solution?
-	@Autowired// Not all systems enable mdm
+	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 
 	@Nonnull
@@ -116,7 +115,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceName);
 
 			DeleteConflictList conflicts = new DeleteConflictList();
-			dao.deletePidList(OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
+			dao.deletePidList(ProviderConstants.OPERATION_MDM_CLEAR, persistentIds, conflicts, myRequestDetails);
 			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(myFhirContext, conflicts);
 
 			ourLog.info("Finished removing {} golden resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);

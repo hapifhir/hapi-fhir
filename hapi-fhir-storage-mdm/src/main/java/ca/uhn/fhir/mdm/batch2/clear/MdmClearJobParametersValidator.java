@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.clear;
 
 /*-
  * #%L
@@ -30,12 +30,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MdmJobParametersValidator implements IJobParametersValidator<MdmClearJobParameters> {
+public class MdmClearJobParametersValidator implements IJobParametersValidator<MdmClearJobParameters> {
 
 	private final DaoRegistry myDaoRegistry;
 	private final IMdmSettings myMdmSettings;
 
-	public MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+	public MdmClearJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
 		myDaoRegistry = theDaoRegistry;
 		myMdmSettings = theMdmSettings;
 	}

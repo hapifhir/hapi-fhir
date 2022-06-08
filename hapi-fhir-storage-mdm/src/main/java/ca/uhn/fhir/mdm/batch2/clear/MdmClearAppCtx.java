@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.clear;
 
 /*-
  * #%L
@@ -20,21 +20,36 @@ package ca.uhn.fhir.batch2.jobs.mdm;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.batch2.LoadGoldenIdsStep;
+import ca.uhn.fhir.mdm.batch2.MdmChunkRangeJson;
+import ca.uhn.fhir.mdm.batch2.MdmGenerateRangeChunksStep;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 @Configuration
 public class MdmClearAppCtx {
 
-	public static final String JOB_MDM_CLEAR = "Mdm Clear";
+	public static final String JOB_MDM_CLEAR = "MDM_CLEAR";
+	private static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
 
-	@Bean
-	public JobDefinition<MdmClearJobParameters> mdmJobDefinition(DaoRegistry theDaoRegistry, IGoldenResourceSearchSvc theGoldenResourceSearchSvc, IMdmSettings theMdmSettings) {
+	@Autowired
+	JobDefinitionRegistry myJobDefinitionRegistry;
+
+	@Autowired
+	ApplicationContext myApplicationContext;
+
+	@Bean(name = MDM_CLEAR_JOB_BEAN_NAME)
+	public JobDefinition<MdmClearJobParameters> mdmClearJobDefinition(DaoRegistry theDaoRegistry, IGoldenResourceSearchSvc theGoldenResourceSearchSvc, IMdmSettings theMdmSettings) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_MDM_CLEAR)
@@ -60,9 +75,15 @@ public class MdmClearAppCtx {
 			.build();
 	}
 
+	@PostConstruct
+	public void start() {
+		JobDefinition jobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
+		myJobDefinitionRegistry.addJobDefinition(jobDefinition);
+	}
+
 	@Bean
-	public MdmJobParametersValidator MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
-		return new MdmJobParametersValidator(theDaoRegistry, theMdmSettings);
+	public MdmClearJobParametersValidator MdmJobParametersValidator(DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings) {
+		return new MdmClearJobParametersValidator(theDaoRegistry, theMdmSettings);
 	}
 
 	@Bean

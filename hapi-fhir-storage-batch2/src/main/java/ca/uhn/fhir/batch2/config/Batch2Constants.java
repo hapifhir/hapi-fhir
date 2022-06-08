@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs;
+package ca.uhn.fhir.batch2.config;
 
 import org.hl7.fhir.r4.model.InstantType;
 

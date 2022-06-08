@@ -1,7 +1,9 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParametersValidator;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MdmClearJobParametersValidatorTest {
 
-	MdmJobParametersValidator myMdmJobParametersValidator;
+	MdmClearJobParametersValidator myMdmClearJobParametersValidator;
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock
@@ -27,7 +29,7 @@ class MdmClearJobParametersValidatorTest {
 
 	@BeforeEach
 	public void before() {
-		myMdmJobParametersValidator = new MdmJobParametersValidator(myDaoRegistry, myMdmSettings);
+		myMdmClearJobParametersValidator = new MdmClearJobParametersValidator(myDaoRegistry, myMdmSettings);
 	}
 
 	@Test
@@ -36,7 +38,7 @@ class MdmClearJobParametersValidatorTest {
 		MdmClearJobParameters parameters = new MdmClearJobParameters();
 
 		// execute
-		List<String> result = myMdmJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
 
 		// verify
 		assertThat(result, hasSize(1));
@@ -50,7 +52,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
 
 		// verify
 		assertThat(result, hasSize(1));
@@ -67,7 +69,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myMdmSettings.getMdmRules()).thenReturn(rules);
 
 		// execute
-		List<String> result = myMdmJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
 
 		// verify
 		assertThat(result, hasSize(2));
@@ -86,7 +88,7 @@ class MdmClearJobParametersValidatorTest {
 		when(myDaoRegistry.isResourceTypeSupported("Patient")).thenReturn(true);
 
 		// execute
-		List<String> result = myMdmJobParametersValidator.validate(parameters);
+		List<String> result = myMdmClearJobParametersValidator.validate(parameters);
 
 		// verify
 		assertThat(result, hasSize(0));

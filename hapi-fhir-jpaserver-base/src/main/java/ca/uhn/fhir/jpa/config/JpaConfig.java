@@ -9,14 +9,12 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.mdm.batch.MdmClearJobSubmitterImpl;
-import ca.uhn.fhir.jpa.batch.mdm.batch2.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -518,11 +516,6 @@ public class JpaConfig {
 	@Bean
 	public IResourceReindexSvc resourceReindexSvc() {
 		return new ResourceReindexSvcImpl();
-	}
-
-	@Bean
-	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
-		return new GoldenResourceSearchSvcImpl();
 	}
 
 	/* **************************************************************** *

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Date;
 
-import static ca.uhn.fhir.batch2.jobs.Batch2Constants.BATCH_START_DATE;
+import static ca.uhn.fhir.batch2.config.Batch2Constants.BATCH_START_DATE;
 
 public class GenerateRangeChunksStep implements IFirstJobStepWorker<ReindexJobParameters, ReindexChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateRangeChunksStep.class);

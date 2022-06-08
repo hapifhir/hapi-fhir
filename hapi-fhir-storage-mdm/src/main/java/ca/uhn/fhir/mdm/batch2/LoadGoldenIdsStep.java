@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2;
 
 /*-
  * #%L
@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
 import ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep;
 import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 
 import javax.annotation.Nonnull;
 

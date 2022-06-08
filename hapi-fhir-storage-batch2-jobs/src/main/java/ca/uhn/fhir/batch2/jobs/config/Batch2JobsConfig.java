@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.jobs.config;
  */
 
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
-import ca.uhn.fhir.batch2.jobs.mdm.MdmClearAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -30,8 +29,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
 	BulkImportAppCtx.class,
-	ReindexAppCtx.class,
-	MdmClearAppCtx.class
+	ReindexAppCtx.class
 })
 public class Batch2JobsConfig {
 	// nothing
