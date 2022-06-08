@@ -78,7 +78,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		List<String> skippedLogMessages = new ArrayList<>();
 		List<String> matchedLogMessages = new ArrayList<>();
 		for (MatchedTarget match : matchedCandidates) {
-			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()).getIdAsLong());
+			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
 				if (ourLog.isDebugEnabled()) {
 					skippedLogMessages.add(String.format("%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.", match.getTarget().getIdElement().toUnqualifiedVersionless()));
@@ -96,7 +96,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(matchMdmLink.getGoldenResourcePersistenceId(), match.getMatchResult());
 
 			if (ourLog.isDebugEnabled()) {
-				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResource().getIdDt().toUnqualifiedVersionless()));
+				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResourcePersistenceId().toString()));
 			}
 
 			retval.add(candidate);
