@@ -76,7 +76,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
 	}
 
-
 	@Test
 	public void testFirstStepToSecondStep_singleChunkFasttracks() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
