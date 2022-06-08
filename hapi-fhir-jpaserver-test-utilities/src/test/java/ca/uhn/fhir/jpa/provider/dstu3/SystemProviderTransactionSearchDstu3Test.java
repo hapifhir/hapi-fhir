@@ -42,11 +42,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -220,16 +224,14 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setResource(patch)
 			.getRequest().setUrl(pid1.getValue());
 
-		HttpPost post = new HttpPost(ourServerBase);
-		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-		ourLog.info("Requet:\n{}", encodedRequest);
-		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
-		}
+		Bundle bundle = ourClient.transaction().withBundle(input).execute();
+		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.TRANSACTIONRESPONSE)));
+		assertThat(bundle.getEntry(), hasSize(1));
+		Bundle.BundleEntryResponseComponent response = bundle.getEntry().get(0).getResponse();
+		assertThat(response.getStatus(), is(equalTo("200 OK")));
+		assertThat(response.getEtag(), is(notNullValue()));
+		assertThat(response.getLastModified(), is(notNullValue()));
+		assertThat(response.getLocation(), is(equalTo(pid1.getValue())));
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
