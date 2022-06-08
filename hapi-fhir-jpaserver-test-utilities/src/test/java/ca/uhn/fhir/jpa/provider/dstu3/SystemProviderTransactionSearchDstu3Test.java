@@ -212,11 +212,11 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		}
 
 		String patchString = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+
 		Binary patch = new Binary();
 		patch.setContentType(ca.uhn.fhir.rest.api.Constants.CT_JSON_PATCH);
 		patch.setContent(patchString.getBytes(Charsets.UTF_8));
 
-		// Note that we don't set the type
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
 		input.addEntry()
@@ -224,14 +224,23 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			.setResource(patch)
 			.getRequest().setUrl(pid1.getValue());
 
+		Bundle putBundle = new Bundle();
+		putBundle.setType(Bundle.BundleType.TRANSACTION);
+		putBundle.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(new Patient().setId(pid1.getIdPart()))
+			.getRequest().setUrl(pid1.getValue()).setMethod(HTTPVerb.PUT);
+
 		Bundle bundle = ourClient.transaction().withBundle(input).execute();
+
+		//Validate over all bundle response entry contents.
 		assertThat(bundle.getType(), is(equalTo(Bundle.BundleType.TRANSACTIONRESPONSE)));
 		assertThat(bundle.getEntry(), hasSize(1));
 		Bundle.BundleEntryResponseComponent response = bundle.getEntry().get(0).getResponse();
 		assertThat(response.getStatus(), is(equalTo("200 OK")));
 		assertThat(response.getEtag(), is(notNullValue()));
 		assertThat(response.getLastModified(), is(notNullValue()));
-		assertThat(response.getLocation(), is(equalTo(pid1.getValue())));
+		assertThat(response.getLocation(), is(equalTo(pid1.getValue() + "/_history/2")));
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());

@@ -281,13 +281,18 @@ public abstract class BaseTransactionProcessor {
 
 		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
 
+		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
+			theRes = idToPersistedOutcome.get(newId).getResource();
+			theResourceType = idToPersistedOutcome.get(newId).getResource().fhirType();
+		}
+
 		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
-		Date lastModifier = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModifier);
+		Date lastModified = getLastModified(theRes);
+		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
 
 		if (theRequestDetails != null) {
 			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
@@ -1085,6 +1090,10 @@ public abstract class BaseTransactionProcessor {
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
 						}
+						if (nextResourceId != null) {
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
+						}
+						entriesToProcess.put(nextRespEntry, outcome.getId());
 
 						break;
 					}
@@ -1181,6 +1190,14 @@ public abstract class BaseTransactionProcessor {
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
+		}
+	}
+
+	private boolean shouldSwapBinaryToActualResource(IBaseResource res, String resourceType, IIdType nextResourceId) {
+		if ("Binary".equalsIgnoreCase(resourceType) && nextResourceId.hasResourceType() && !nextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
