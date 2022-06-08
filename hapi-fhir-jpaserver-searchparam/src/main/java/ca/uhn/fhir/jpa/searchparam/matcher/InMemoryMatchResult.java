@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.interceptor.matching;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 /*-
  * #%L

@@ -4,10 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.auth.FhirQueryRuleImpl;
-import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
-import ca.uhn.fhir.rest.server.interceptor.auth.RuleOpEnum;
 import ca.uhn.fhir.rest.server.interceptor.matching.ISearchParamMatcher;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -28,7 +24,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
-	private FhirQueryRuleImpl myRule;
+	private IAuthRule myRule;
 	private IBaseResource myResource;
 	@Mock
 	private IRuleApplier myMockRuleApplier;
@@ -44,11 +40,11 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	@Test
 	public void simpleStringSearch_match_allow() {
+		// patient.r  patient/Patient.rs?name=smi
 		// given
 		myResource = buildResource("Patient", withFamily("Smith"), withId("some-id"));
-		myRule = new FhirQueryRuleImpl("hmm - what goes here?");
-		myRule.setOp(RuleOpEnum.READ);
-		myRule.setFilter("family=smith");
+		RuleBuilder b = new RuleBuilder();
+		myRule = b.allow().read().resourcesOfType("Patient").inCompartmentWithFilter("patient", myResource.getIdElement(), "name=smi").andThen().build().get(0);
 
 		// when
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, myResource, myMockRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);

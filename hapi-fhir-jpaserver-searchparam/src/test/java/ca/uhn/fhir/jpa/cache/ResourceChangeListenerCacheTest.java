@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.server.interceptor.matching.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.Patient;
