@@ -20,7 +20,6 @@ package ca.uhn.fhir.mdm.batch2.clear;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -29,24 +28,14 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.batch2.LoadGoldenIdsStep;
 import ca.uhn.fhir.mdm.batch2.MdmChunkRangeJson;
 import ca.uhn.fhir.mdm.batch2.MdmGenerateRangeChunksStep;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.annotation.PostConstruct;
 
 @Configuration
 public class MdmClearAppCtx {
 
 	public static final String JOB_MDM_CLEAR = "MDM_CLEAR";
-	private static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
-
-	@Autowired
-	JobDefinitionRegistry myJobDefinitionRegistry;
-
-	@Autowired
-	ApplicationContext myApplicationContext;
+	public static final String MDM_CLEAR_JOB_BEAN_NAME = "mdmClearJobDefinition";
 
 	@Bean(name = MDM_CLEAR_JOB_BEAN_NAME)
 	public JobDefinition<MdmClearJobParameters> mdmClearJobDefinition(DaoRegistry theDaoRegistry, IGoldenResourceSearchSvc theGoldenResourceSearchSvc, IMdmSettings theMdmSettings) {
@@ -73,12 +62,6 @@ public class MdmClearAppCtx {
 				mdmClearStep()
 			)
 			.build();
-	}
-
-	@PostConstruct
-	public void start() {
-		JobDefinition jobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
-		myJobDefinitionRegistry.addJobDefinition(jobDefinition);
 	}
 
 	@Bean

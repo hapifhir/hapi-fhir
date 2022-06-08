@@ -58,9 +58,10 @@ public class JobDefinitionRegistry {
 		}
 
 		TreeMap<Integer, JobDefinition<?>> versionMap = myJobs.computeIfAbsent(theDefinition.getJobDefinitionId(), t -> new TreeMap<>());
-		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
-			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
-		}
+		// TODO KHS confirm James is okay with removing this
+//		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
+//			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + theDefinition.getJobDefinitionId() + "] version: " + theDefinition.getJobDefinitionVersion());
+//		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
 	}
 
