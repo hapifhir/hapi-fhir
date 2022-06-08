@@ -178,6 +178,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
+	 * Sets a matching criteria support to allow...
+	 *
+	 * //fixme: what do I write here? This is an internal change for smile that actually provides no real benefit to HAPI
+	 */
+
+	/**
 	 * Subclasses should override this method to supply the set of rules to be applied to
 	 * this individual request.
 	 * <p>

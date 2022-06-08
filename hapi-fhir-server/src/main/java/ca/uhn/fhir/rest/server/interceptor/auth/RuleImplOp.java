@@ -94,7 +94,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
-		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
 

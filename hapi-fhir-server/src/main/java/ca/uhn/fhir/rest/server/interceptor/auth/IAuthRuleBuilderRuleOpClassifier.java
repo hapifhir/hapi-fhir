@@ -134,4 +134,6 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * @since 6.0.0
 	 */
 	IAuthRuleFinished withCodeNotInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
+
+    IAuthRuleFinished inCompartmentWithFilter(String theCompartment, IIdType idElement, String theFilter);
 }
