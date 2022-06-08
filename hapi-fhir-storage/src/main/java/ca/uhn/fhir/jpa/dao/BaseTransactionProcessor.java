@@ -1081,7 +1081,7 @@ public abstract class BaseTransactionProcessor {
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
 
-						String conditionalUrl = isNull(patchId) ? url : matchUrl;
+						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
 
 						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, patchType, patchBody, patchBodyParameters, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
