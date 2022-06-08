@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3673
+title: "A change in H2's new version caused resources >1mb in size to fail to correctly store. This has been corrected.
+ Thanks to Patrick Werner for the report and pull request!"
