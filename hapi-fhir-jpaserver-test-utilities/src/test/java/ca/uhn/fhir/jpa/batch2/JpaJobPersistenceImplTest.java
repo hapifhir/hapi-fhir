@@ -115,6 +115,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
 		assertEquals(CHUNK_DATA, foundInstance.getParameters());
+		assertEquals(instance.getRecord(), foundInstance.getRecord());
 
 		runInTransaction(() -> {
 			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(() -> new IllegalStateException());
@@ -264,8 +265,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
-
-
 	}
 
 	@Test
@@ -367,8 +366,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
-
-
 	}
 
 	@Test
@@ -414,6 +411,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(0.5d, finalInstance.getProgress());
 		assertTrue(finalInstance.isWorkChunksPurged());
 		assertEquals(3, finalInstance.getErrorCount());
+		assertEquals(instance.getRecord(), finalInstance.getRecord());
 		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
 	}
 
@@ -424,6 +422,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance.setStatus(StatusEnum.QUEUED);
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
+		instance.setRecord("TEST");
 		return instance;
 	}
 

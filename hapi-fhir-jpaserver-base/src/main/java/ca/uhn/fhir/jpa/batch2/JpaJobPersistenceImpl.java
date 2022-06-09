@@ -105,6 +105,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		entity.setCreateTime(new Date());
+		entity.setRecord(theInstance.getRecord());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
