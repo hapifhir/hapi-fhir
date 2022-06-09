@@ -2,13 +2,15 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.util.ForceSynchronousSearchInterceptor;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
@@ -39,7 +41,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,6 +56,7 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -70,13 +76,14 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	private static final List<Patient> ourUpdatedPatients = Collections.synchronizedList(Lists.newArrayList());
 	private static final List<String> ourContentTypes = Collections.synchronizedList(Lists.newArrayList());
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(Lists.newArrayList());
-
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private IInterceptorService myInterceptorService;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -269,14 +276,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String payload = "application/fhir+json";
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
-		// Create lots
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.setId("P" + i);
-			p.addName().setFamily("P" + i);
-			ourClient.update().resource(p).execute();
-		}
-		waitForSize(10, ourUpdatedPatients);
+		createPatientsAndWait(10);
 
 		// Use multiple strings
 		beforeReset();
@@ -316,13 +316,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
 
 		// Create lots
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.setId("P" + i);
-			p.addName().setFamily("P" + i);
-			ourClient.update().resource(p).execute();
-		}
-		waitForSize(10, ourUpdatedPatients);
+		createPatientsAndWait(10);
 
 		// Use a single
 		beforeReset();
@@ -335,6 +329,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		String responseValue = response.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForSize(0, ourCreatedPatients);
@@ -494,6 +489,97 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	}
 
 
+	@Nested
+	@DisplayName("Testing subscription triggering in synchronous query mode")
+	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+	class TestSubscriptionTriggeringInSynchronousQueryMode{
+		ForceSynchronousSearchInterceptor forceSynchronousSearchInterceptor = new ForceSynchronousSearchInterceptor();
+		@BeforeAll
+		public void beforeAllTests(){
+			myInterceptorService.registerInterceptor(forceSynchronousSearchInterceptor);
+		}
+
+		@AfterAll
+		public void afterAllTests(){
+			myInterceptorService.unregisterInterceptor(forceSynchronousSearchInterceptor);
+		}
+
+		@Test
+		public void testTriggerSubscriptionInSynchronousQueryMode() throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+
+			String payload = "application/fhir+json";
+			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+			int numberOfPatient = 15;
+
+			// Create lots
+			createPatientsAndWait(numberOfPatient);
+
+			List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			// Use a trigger subscription
+			beforeReset();
+			Parameters response = ourClient
+				.operation()
+				.onInstance(sub2id)
+				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?"))
+				.execute();
+
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+
+			waitForSize(0, ourCreatedPatients);
+			waitForSize(numberOfPatient, ourUpdatedPatients);
+
+			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			assertTrue(resubmittedPatientIds.size() == submittedPatientIds.size());
+			assertTrue(resubmittedPatientIds.containsAll(submittedPatientIds));
+
+		}
+
+		@Test
+		public void testTriggerSubscriptionInSynchronousQueryModeWithOffset() throws Exception {
+			((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).setMaxSubmitPerPass(10);
+			ForceSynchronousSearchInterceptor forceSynchronousSearchInterceptor = new ForceSynchronousSearchInterceptor();
+
+			String payload = "application/fhir+json";
+			IdType sub2id = createSubscription("Patient?", payload, ourListenerServerBase).getIdElement();
+
+			int numberOfPatient = 15;
+			int offset = 5;
+			// Create lots
+			createPatientsAndWait(numberOfPatient);
+
+			List<String> submittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+			List<String> expectedPatientIds = submittedPatientIds.subList(offset, submittedPatientIds.size());
+
+			// Use a trigger subscription
+			beforeReset();
+			Parameters response = ourClient
+				.operation()
+				.onInstance(sub2id)
+				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
+				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Patient?_offset=" + offset))
+				.execute();
+
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+			mySubscriptionTriggeringSvc.runDeliveryPass();
+
+			waitForSize(0, ourCreatedPatients);
+			waitForSize(numberOfPatient - offset, ourUpdatedPatients);
+
+			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
+
+			assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
+			assertTrue(resubmittedPatientIds.containsAll(expectedPatientIds));
+		}
+	}
+
 	@Override
 	protected boolean shouldLogClient() {
 		return false;
@@ -580,5 +666,17 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 	public static void stopListenerServer() throws Exception {
 		JettyUtil.closeServer(ourListenerServer);
 	}
+
+	private void createPatientsAndWait(int numberOfPatient) {
+		for (int i = 0; i < numberOfPatient; i++) {
+			Patient p = new Patient();
+			p.setId("P" + i);
+			p.addName().setFamily("P" + i);
+			ourClient.update().resource(p).execute();
+		}
+		waitForSize(numberOfPatient, ourUpdatedPatients);
+
+	}
+
 
 }
