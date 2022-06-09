@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Date;
 
 public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRangeJson> {
@@ -18,10 +20,10 @@ public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRang
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, RequestPartitionId theRequestPartitionId, ReindexChunkRangeJson theData) {
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, ReindexChunkRangeJson theData) {
 		String url = theData.getUrl();
 
 		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);
-		return myResourceReindexSvc.fetchResourceIdsPage(theNextStart, theEnd, theRequestPartitionId, url);
+		return myResourceReindexSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, url);
 	}
 }

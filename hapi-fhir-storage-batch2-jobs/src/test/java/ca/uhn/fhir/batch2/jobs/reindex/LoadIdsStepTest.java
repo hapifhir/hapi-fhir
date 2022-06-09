@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.step.ResourceIdListStep.DEFAULT_PAGE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -64,11 +65,11 @@ public class LoadIdsStepTest {
 
 		// First Execution
 
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), isNull(), isNull()))
+		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), DEFAULT_PAGE_SIZE, isNull(), isNull()))
 			.thenReturn(createIdChunk(0L, 20000L, DATE_2));
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), isNull(), isNull()))
+		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), DEFAULT_PAGE_SIZE, isNull(), isNull()))
 			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), isNull(), isNull()))
+		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), DEFAULT_PAGE_SIZE, isNull(), isNull()))
 			.thenReturn(createIdChunk(40000L, 40040L, DATE_3));
 
 		mySvc.run(details, mySink);

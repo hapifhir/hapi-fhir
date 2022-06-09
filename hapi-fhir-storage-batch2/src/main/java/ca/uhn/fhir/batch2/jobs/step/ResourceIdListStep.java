@@ -26,6 +26,7 @@ import java.util.Set;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdListStep.class);
+	public static final Integer DEFAULT_PAGE_SIZE = 20000;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -40,6 +41,10 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 
 		Date start = data.getStart();
 		Date end = data.getEnd();
+		Integer pageSize = theStepExecutionDetails.getParameters().getBatchSize();
+		if (pageSize == null) {
+			pageSize = DEFAULT_PAGE_SIZE;
+		}
 
 		ourLog.info("Beginning scan for reindex IDs in range {} to {}", start, end);
 
@@ -50,7 +55,7 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 		int totalIdsFound = 0;
 		int chunkCount = 0;
 		while (true) {
-			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, requestPartitionId, theStepExecutionDetails.getData());
+			IResourcePidList nextChunk = myIdChunkProducer.fetchResourceIdsPage(nextStart, end, pageSize, requestPartitionId, theStepExecutionDetails.getData());
 
 			if (nextChunk.isEmpty()) {
 				ourLog.info("No data returned");

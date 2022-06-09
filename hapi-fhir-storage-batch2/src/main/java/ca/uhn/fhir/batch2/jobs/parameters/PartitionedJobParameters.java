@@ -10,6 +10,9 @@ public class PartitionedJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
 	@Nullable
 	private RequestPartitionId myRequestPartitionId;
+	@JsonProperty("batchSize")
+	@Nullable
+	private Integer myBatchSize;
 
 	@Nullable
 	public RequestPartitionId getRequestPartitionId() {
@@ -18,5 +21,14 @@ public class PartitionedJobParameters implements IModelJson {
 
 	public void setRequestPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
 		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	public void setBatchSize(int theBatchSize) {
+		myBatchSize = theBatchSize;
+	}
+
+	@Nullable
+	public Integer getBatchSize() {
+		return myBatchSize;
 	}
 }

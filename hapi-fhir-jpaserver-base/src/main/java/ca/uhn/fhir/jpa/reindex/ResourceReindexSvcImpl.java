@@ -72,13 +72,12 @@ public class ResourceReindexSvcImpl implements IResourceReindexSvc {
 
 	@Override
 	@Transactional
-	public IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+	public IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
 
-		int pageSize = 20000;
 		if (theUrl == null) {
-			return fetchResourceIdsPageNoUrl(theStart, theEnd, pageSize, theRequestPartitionId);
+			return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
 		} else {
-			return fetchResourceIdsPageWithUrl(theStart, theEnd, pageSize, theUrl, theRequestPartitionId);
+			return fetchResourceIdsPageWithUrl(theStart, theEnd, thePageSize, theUrl, theRequestPartitionId);
 		}
 	}
 

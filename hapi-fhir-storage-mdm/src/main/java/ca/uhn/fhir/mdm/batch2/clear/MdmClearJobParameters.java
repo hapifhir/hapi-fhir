@@ -47,7 +47,7 @@ public class MdmClearJobParameters extends PartitionedJobParameters {
 		return this;
 	}
 
-    public void setResourceNames(@Nonnull List<String> theResourceNames) {
-			myResourceNames = theResourceNames;
-    }
+	public void setResourceNames(@Nonnull List<String> theResourceNames) {
+		myResourceNames = theResourceNames;
+	}
 }

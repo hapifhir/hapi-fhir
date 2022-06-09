@@ -59,10 +59,8 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 
 	@Override
 	@Transactional
-	public IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType) {
-
-		int pageSize = 20000;
-		return fetchResourceIdsPageWithResourceType(theStart, theEnd, pageSize, theResourceType, theRequestPartitionId);
+	public IResourcePidList fetchGoldenResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType) {
+		return fetchResourceIdsPageWithResourceType(theStart, theEnd, thePageSize, theResourceType, theRequestPartitionId);
 	}
 
 	private IResourcePidList fetchResourceIdsPageWithResourceType(Date theStart, Date theEnd, int thePageSize, String theResourceType, RequestPartitionId theRequestPartitionId) {
