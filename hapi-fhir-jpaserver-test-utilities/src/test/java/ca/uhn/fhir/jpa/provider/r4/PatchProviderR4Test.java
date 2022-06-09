@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -10,6 +14,7 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -119,14 +124,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			patient.setActive(true);
 			patient.addIdentifier().setSystem("urn:system").setValue("0");
 			patient.addName().setFamily(methodName).addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			pid1 = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 		}
-
 		Parameters patch = new Parameters();
-		Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
-		op.addPart().setName("type").setValue(new CodeType("replace"));
-		op.addPart().setName("path").setValue(new CodeType("Patient.active"));
-		op.addPart().setName("value").setValue(new BooleanType(false));
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation.addPart().setName("type").setValue(new CodeType("replace"));
+		operation.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		operation.addPart().setName("value").setValue(new BooleanType(false));
 
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.TRANSACTION);
@@ -136,16 +141,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.getRequest().setUrl(String.format("Patient?name=%s", methodName))
 			.setMethod(Bundle.HTTPVerb.PATCH);
 
-		HttpPost post = new HttpPost(ourServerBase);
-		String encodedRequest = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
-		ourLog.info("Request:\n{}", encodedRequest);
-
-		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
-		}
+		myClient.transaction().withBundle(input).execute();
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
