@@ -23,8 +23,12 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -36,6 +40,7 @@ import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
@@ -52,12 +57,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ca.uhn.fhir.rest.param.TokenParamModifier.IN;
+import static ca.uhn.fhir.rest.param.TokenParamModifier.NOT_IN;
+
 public class InMemoryResourceMatcher {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	IValidationSupport myValidationSupport;
 	@Autowired
 	ModelConfig myModelConfig;
 	@Autowired
@@ -139,25 +149,19 @@ public class InMemoryResourceMatcher {
 			return InMemoryMatchResult.successfulMatch();
 		}
 
-		if (hasQualifiers(theAndOrParams)) {
-			Optional<IQueryParameterType> optionalParameter = theAndOrParams.stream().flatMap(List::stream).filter(param -> param.getQueryParameterQualifier() != null).findAny();
-			if (optionalParameter.isPresent()) {
-				IQueryParameterType parameter = optionalParameter.get();
-				if (parameter instanceof ReferenceParam) {
-					ReferenceParam referenceParam = (ReferenceParam) parameter;
-					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
-				}
-				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + parameter.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
-			}
+		String resourceName = theResourceDefinition.getName();
+		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
+		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, paramDef, theAndOrParams);
+
+		if (!checkUnsupportedResult.supported()) {
+			return checkUnsupportedResult;
 		}
 
 		if (hasChain(theAndOrParams)) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
 		}
 
-		String resourceName = theResourceDefinition.getName();
-		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
-		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
+		checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
 
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
@@ -249,7 +253,39 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
-		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, paramDef, token));
+		return theNextAnd.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, paramDef, theSearchParams, token));
+	}
+
+	private boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
+		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
+			return matchTokenParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, (TokenParam) theToken);
+		} else {
+			return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theToken);
+		}
+	}
+
+	private boolean matchTokenParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
+		switch (theQueryParam.getModifier()) {
+			case IN:
+				return theSearchParams.myTokenParams.stream()
+					.filter(t -> t.getParamName().equals(theParamName))
+					.anyMatch(t -> systemContainsCode(theQueryParam, t));
+			case NOT_IN:
+				return theSearchParams.myTokenParams.stream()
+					.filter(t -> t.getParamName().equals(theParamName))
+					.noneMatch(t -> systemContainsCode(theQueryParam, t));
+			default:
+				return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+		}
+	}
+
+	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
+		IValidationSupport.CodeValidationResult codeValidationResult = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
+		if (codeValidationResult != null) {
+			return codeValidationResult.isOk();
+		} else {
+			return false;
+		}
 	}
 
 	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {
@@ -298,4 +334,39 @@ public class InMemoryResourceMatcher {
 		}
 		return false;
 	}
+
+	private InMemoryMatchResult checkUnsupportedQualifiers(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
+		if (hasQualifiers(theAndOrParams)) {
+			Optional<IQueryParameterType> optionalParameter = theAndOrParams.stream().flatMap(List::stream).filter(param -> !supportedQualifier(theParamDef, param)).findAny();
+			if (optionalParameter.isPresent()) {
+				IQueryParameterType parameter = optionalParameter.get();
+				if (parameter instanceof ReferenceParam) {
+					ReferenceParam referenceParam = (ReferenceParam) parameter;
+					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
+				}
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + parameter.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
+			}
+		}
+		return InMemoryMatchResult.successfulMatch();
+	}
+
+	private boolean supportedQualifier(RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		if (theParamDef == null || theParam == null) {
+			return true;
+		}
+		switch (theParamDef.getParamType()) {
+			case TOKEN:
+				TokenParam tokenParam = (TokenParam) theParam;
+				switch (tokenParam.getModifier()) {
+					case IN:
+					case NOT_IN:
+						return true;
+					default:
+						return false;
+				}
+			default:
+				return false;
+		}
+	}
+
 }
