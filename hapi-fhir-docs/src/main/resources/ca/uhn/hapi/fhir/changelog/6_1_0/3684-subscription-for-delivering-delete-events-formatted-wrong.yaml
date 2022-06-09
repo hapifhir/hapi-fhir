@@ -1,0 +1,4 @@
+---
+type: fix
+title: "Previously, the working format for the Delivering Delete Events had the extension and extension value outside the
+the channel, that has been fixed to now be inside of the channel."
