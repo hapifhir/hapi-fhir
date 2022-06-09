@@ -63,7 +63,6 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	IIdHelperService myIdHelperService;
 	@Autowired
 	FhirContext myFhirContext;
-	// WIP KHS right solution?
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 
@@ -107,7 +106,6 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
-			// WIP KHS check that the batch size is configurable (for Oracle)
 			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
 
 			// We know the list is not empty, and that all resource types are the same, so just use the first one

@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -389,6 +390,11 @@ public class MdmLinkDaoSvc {
 
 	@Transactional(propagation = Propagation.MANDATORY)
 	public void deleteLinksWithAnyReferenceToPids(List<Long> theGoldenResourcePids) {
-		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
+		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
+		// method uses the list twice in the sql predicate)
+		List<List<Long>> chunks = ListUtils.partition(theGoldenResourcePids, 500);
+		for (List<Long> chunk : chunks) {
+			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+		}
 	}
 }
