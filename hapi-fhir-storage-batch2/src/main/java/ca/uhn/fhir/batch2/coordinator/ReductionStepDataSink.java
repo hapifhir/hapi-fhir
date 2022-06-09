@@ -53,7 +53,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			// first in win - we won't throw
 			ourLog.error(
 				"Expected a single data sink for reduction step, but received {} instead. Only the first is accepted!",
-				count);
+				count + 1); // +1 since 0 indexed
 		}
 	}
 

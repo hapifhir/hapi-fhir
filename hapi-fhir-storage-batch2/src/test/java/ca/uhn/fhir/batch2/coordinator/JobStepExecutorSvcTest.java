@@ -5,6 +5,8 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.ReductionStepExecutionDetails;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -34,12 +36,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -197,7 +202,7 @@ public class JobStepExecutorSvcTest {
 		)).thenReturn(RunOutcome.SUCCESS);
 
 		// test
-		myExecutorSvc.doExecution(
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
 			null,
@@ -205,6 +210,7 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
+		assertTrue(result.isIsSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof ReductionStepDataSink);
 		verify(myCalculator).calculateAndStoreInstanceProgress();
 		ArgumentCaptor<StepExecutionDetails> executionDetsCaptor = ArgumentCaptor.forClass(StepExecutionDetails.class);
@@ -222,13 +228,22 @@ public class JobStepExecutorSvcTest {
 			eq(0));
 
 		// nevers
-		verifyNoErrors();
+		verifyNoErrors(0);
 		verify(myNonReductionStep, never()).run(any(), any());
 		verify(myLastStep, never()).run(any(), any());
 	}
 
 	@Test
 	public void doExecution_nonReductionIntermediateStepWithValidInput_executesAsExpected() {
+		doExecution_nonReductionStep(0);
+	}
+
+	@Test
+	public void doExecution_withRecoveredErrors_marksThoseErrorsToChunks() {
+		doExecution_nonReductionStep(3);
+	}
+
+	private void doExecution_nonReductionStep(int theRecoveredErrorsForDataSink) {
 		// setup
 		JobInstance jobInstance = getTestJobInstance();
 		WorkChunk chunk = new WorkChunk();
@@ -243,9 +258,11 @@ public class JobStepExecutorSvcTest {
 		when(myNonReductionStep.run(
 			any(StepExecutionDetails.class), any(IJobDataSink.class)
 		)).thenReturn(RunOutcome.SUCCESS);
+		when(myDataSink.getRecoveredErrorCount())
+			.thenReturn(theRecoveredErrorsForDataSink);
 
 		// test
-		myExecutorSvc.doExecution(
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
 			chunk,
@@ -253,12 +270,18 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
+		assertTrue(result.isIsSuccessful());
 		verify(myJobPersistence)
 			.markWorkChunkAsCompletedAndClearData(eq(chunk.getId()), anyInt());
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
+		if (theRecoveredErrorsForDataSink > 0) {
+			verify(myJobPersistence)
+				.incrementWorkChunkErrorCount(anyString(), eq(theRecoveredErrorsForDataSink));
+		}
+
 		// nevers
-		verifyNoErrors();
+		verifyNoErrors(theRecoveredErrorsForDataSink);
 		verifyNonReductionStep();
 		verify(myLastStep, never()).run(any(), any());
 		verify(myReductionStep, never()).run(any(), any());
@@ -286,7 +309,7 @@ public class JobStepExecutorSvcTest {
 			.thenReturn(RunOutcome.SUCCESS);
 
 		// test
-		myExecutorSvc.doExecution(
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
 			chunk,
@@ -294,20 +317,71 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
+		assertTrue(result.isIsSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof FinalStepDataSink);
 
 		// nevers
-		verifyNoErrors();
+		verifyNoErrors(0);
 		verifyNonReductionStep();
 		verify(myReductionStep, never()).run(any(), any());
 		verify(myNonReductionStep, never()).run(any(), any());
 	}
 
+	@Test
+	public void doExecute_stepWorkerThrowsJobExecutionException_marksWorkChunkAsFailed() {
+		runExceptionThrowingTest(new JobExecutionFailedException("Failure"));
+
+		verify(myJobPersistence)
+			.markWorkChunkAsFailed(anyString(), anyString());
+	}
+
+	@Test
+	public void doExecution_stepWorkerThrowsRandomException_rethrowsJobStepFailedException() {
+		String msg = "failure";
+		try {
+			runExceptionThrowingTest(new RuntimeException(msg));
+			fail("Expected Exception to be thrown");
+		} catch (JobStepFailedException jobStepFailedException) {
+			assertTrue(jobStepFailedException.getMessage().contains(msg));
+		} catch (Exception anythingElse) {
+			fail(anythingElse.getMessage());
+		}
+	}
+
+	private void runExceptionThrowingTest(Exception theExceptionToThrow) {
+		// setup
+		JobInstance jobInstance = getTestJobInstance();
+		WorkChunk chunk = new WorkChunk();
+		chunk.setId("chunkId");
+		chunk.setData(new StepInputData());
+
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor);
+
+		// when
+		when(myNonReductionStep.run(any(), any()))
+			.thenThrow(theExceptionToThrow);
+
+		// test
+		JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			chunk,
+			myAccumulator
+		);
+
+		// verify
+		assertFalse(output.isIsSuccessful());
+	}
+
 	/**********************/
 
-	private void verifyNoErrors() {
-		verify(myJobPersistence, never())
-			.incrementWorkChunkErrorCount(anyString(), anyInt());
+	private void verifyNoErrors(int theRecoveredErrorCount) {
+		if (theRecoveredErrorCount == 0) {
+			verify(myJobPersistence, never())
+				.incrementWorkChunkErrorCount(anyString(), anyInt());
+		}
 		verify(myJobPersistence, never())
 			.markWorkChunkAsFailed(anyString(), anyString());
 		verify(myJobPersistence, never())
