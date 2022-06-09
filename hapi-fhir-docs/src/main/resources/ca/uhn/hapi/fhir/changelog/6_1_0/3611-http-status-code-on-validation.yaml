@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3673
+title: "The $validate operation returned a 412 status code if one of the issues was error or fatal. According to the FHIR spec validation should return 200 if the validation itself could be performed. 
+ Thanks to Patrick Werner for the report and pull request!"
