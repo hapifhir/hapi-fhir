@@ -46,8 +46,8 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			} else {
 				String msg = "No instance found with Id " + instanceId;
 				ourLog.error(msg);
-				// TODO - the code could be wrong - depending on when PR merges
-				throw new JobExecutionFailedException(Msg.code(2084) + msg);
+
+				throw new JobExecutionFailedException(Msg.code(2085) + msg);
 			}
 		} else {
 			// first in win - we won't throw
