@@ -70,7 +70,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -1902,15 +1901,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			result = validator.validateWithResult(theResource, options);
 		}
-
-		if (result.isSuccessful()) {
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setOperationOutcome(result.toOperationOutcome());
 			return retVal;
-		} else {
-			throw new PreconditionFailedException(Msg.code(993) + "Validation failed", result.toOperationOutcome());
-		}
-
 	}
 
 	/**
