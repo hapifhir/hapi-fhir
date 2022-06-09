@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -413,6 +415,46 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(3, finalInstance.getErrorCount());
 		assertEquals(instance.getRecord(), finalInstance.getRecord());
 		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
+	}
+
+	@Test
+	public void reduceWorkChunksToSingleChunk_reducesMultipleChunks_andStores() {
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+		ArrayList<String> chunkIds = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			BatchWorkChunk chunk = new BatchWorkChunk(
+				"defId",
+				1,
+				"stepId",
+				instanceId,
+				0,
+				"{}"
+			);
+			String id = mySvc.storeWorkChunk(chunk);
+			chunkIds.add(id);
+		}
+
+		List<WorkChunk> chunks = mySvc.fetchWorkChunks(instance.getInstanceId(), chunkIds);
+
+		BatchWorkChunk newChunk = new BatchWorkChunk(
+			"defId",
+			1,
+			"step2",
+			instanceId,
+			0,
+			"{}"
+		);
+		String newChunkId = mySvc.reduceWorkChunksToSingleChunk(instance.getInstanceId(), chunkIds, newChunk);
+
+		List<WorkChunk> reducedChunks = mySvc.fetchWorkChunks(instance.getInstanceId(), chunkIds);
+		WorkChunk newChunkFound = mySvc.fetchWorkChunks(instance.getInstanceId(), Collections.singletonList(newChunkId)).stream().findFirst().get();
+
+		for (WorkChunk reducedChunk : reducedChunks) {
+			assertTrue(chunkIds.contains(reducedChunk.getId()));
+			assertEquals(StatusEnum.COMPLETED, reducedChunk.getStatus());
+		}
+		assertEquals(StatusEnum.QUEUED, newChunkFound.getStatus());
 	}
 
 	@Nonnull
