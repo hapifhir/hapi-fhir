@@ -28,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
@@ -41,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
@@ -61,8 +59,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
-	///TODO - change this to a mock
-	// and test it out itself
+	// The code refactored to keep the same functionality,
+	// but in this service (so it's a real service here!)
 	private JobStepExecutorSvc myJobStepExecutorSvc;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -281,31 +279,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		verify(myJobInstancePersister, times(1)).incrementWorkChunkErrorCount(eq(CHUNK_ID), eq(2));
 		verify(myJobInstancePersister, times(1)).markWorkChunkAsCompletedAndClearData(eq(CHUNK_ID), eq(50));
-
-	}
-
-	@Test
-	public void test_() {
-		JobDefinition<TestJobParameters> jd = createJobDefinitionWithReduction();
-
-		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID)))
-			.thenReturn(Optional.of(createWorkChunkStep3(REDUCTION_JOB_ID)));
-
-		doReturn(jd).when(myJobDefinitionRegistry)
-			.getJobDefinitionOrThrowException(eq(REDUCTION_JOB_ID), eq(1));
-
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(createInstance(REDUCTION_JOB_ID)));
-		when(myReductionStepWorker.run(any(), any()))
-			.thenReturn(new RunOutcome(0));
-		mySvc.start();
-
-		// execute
-		myWorkChannelReceiver.send(
-			new JobWorkNotificationJsonMessage(createWorkNotification(REDUCTION_JOB_ID, STEP_3))
-		);
-
-
 	}
 
 	@Test

@@ -57,7 +57,7 @@ public class JobInstanceProcessor {
 
 	private String buildCancelledMessage() {
 		String msg = "Job instance cancelled";
-			if (myInstance.hasGatedStep()) {
+		if (myInstance.hasGatedStep()) {
 			msg += " while running step " + myInstance.getCurrentGatedStepId();
 		}
 		return msg;
@@ -108,7 +108,7 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		JobWorkCursor<?,?,?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
+		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
 
 		// final step
 		if (jobWorkCursor.isFinalStep()) {
@@ -120,19 +120,20 @@ public class JobInstanceProcessor {
 		int incompleteChunks = myProgressAccumulator.countChunksWithStatus(instanceId, currentStepId, StatusEnum.getIncompleteStatuses());
 
 		if (incompleteChunks == 0) {
-
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
-					// do execution of the final step now
-					myJobExecutorSvc.doExecution(
-						JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
-						myInstance,
-						null,
-						myProgressAccumulator);
+				// do execution of the final step now
+				// (ie, we won't send to job workers)
+				myJobExecutorSvc.doExecution(
+					JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
+					myInstance,
+					null,
+					myProgressAccumulator);
 			} else {
+				// otherwise, continue processing as expected
 				List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
 				for (String nextChunkId : chunksForNextStep) {
 					JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
