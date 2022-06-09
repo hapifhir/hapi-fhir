@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.mdm.api;
 
 /*-
  * #%L

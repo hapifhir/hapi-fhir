@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.mdm;
+package ca.uhn.fhir.mdm.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -42,7 +41,7 @@ public class MdmLinkDeleteSvc {
 	private IIdHelperService myIdHelperService;
 
 	/**
-	 * Delete all {@link ca.uhn.fhir.jpa.entity.MdmLink} records with any reference to this resource.  (Used by Expunge.)
+	 * Delete all {@link ca.uhn.fhir.mdm.api.IMdmLink} records that implements this interface.  (Used by Expunge.)
 	 *
 	 * @param theResource
 	 * @return the number of records deleted
