@@ -22,7 +22,12 @@ package ca.uhn.fhir.rest.api;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
@@ -293,6 +298,12 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
 	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
+
+	/**
+	 * AWS subscription channel rest delivery class uri
+	 */
+	public static final String AWS_HEALTH_LAKE_SUBSCRIPTION_DELIVERER = "ca.cdr.awshl.out.deliverer.OutboundAwsHealthlakeSubscriptionDeliverer";
+
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
