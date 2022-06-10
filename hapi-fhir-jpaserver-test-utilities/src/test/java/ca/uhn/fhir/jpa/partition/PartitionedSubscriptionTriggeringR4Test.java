@@ -89,7 +89,11 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		myDaoConfig.setTriggerSubscriptionsForNonVersioningChanges(new DaoConfig().isTriggerSubscriptionsForNonVersioningChanges());
 
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoRegistry.getSystemDao().expunge(new ExpungeOptions().setExpungeEverything(true), null);
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
 		myPartitionSettings.setUnnamedPartitionMode(false);
 

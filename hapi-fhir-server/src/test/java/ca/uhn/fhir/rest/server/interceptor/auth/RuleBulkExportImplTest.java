@@ -73,7 +73,7 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testDenyBulkRequestWithInvalidGroupId() {
+	public void testWrongGroupIdDelegatesToNextRule() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
 		myRule.setAppliesToGroupExportOnGroup("invalid group");
 		myRule.setMode(PolicyEnum.ALLOW);
@@ -85,7 +85,7 @@ public class RuleBulkExportImplTest {
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
-		assertEquals(PolicyEnum.DENY, verdict.getDecision());
+		assertEquals(null, verdict);
 	}
 
 	@Test

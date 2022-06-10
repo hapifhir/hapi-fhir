@@ -4,6 +4,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
@@ -47,6 +48,19 @@ public class RuleBuilderTest {
 			new IdDt("Patient/WRITE-3"),
 			new IdDt("Patient/WRITE-4")
 		));
+	}
+
+	@Test
+	public void testBulkExportPermitsIfASingleGroupMatches() {
+		RuleBuilder builder = new RuleBuilder();
+		List<String> resourceTypes = new ArrayList<>();
+		resourceTypes.add("Patient");
+		resourceTypes.add("Organization");
+
+		builder.allow().bulkExport().groupExportOnGroup("group1").withResourceTypes(resourceTypes);
+		builder.allow().bulkExport().groupExportOnGroup("group2").withResourceTypes(resourceTypes);
+		List<IAuthRule> build = builder.build();
+
 	}
 
 	@Test

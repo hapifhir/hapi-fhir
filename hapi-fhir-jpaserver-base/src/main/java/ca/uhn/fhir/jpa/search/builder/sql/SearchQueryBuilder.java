@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -34,8 +34,8 @@ import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -45,9 +45,10 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -69,17 +70,16 @@ import org.hibernate.engine.spi.RowSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
@@ -556,19 +556,38 @@ public class SearchQueryBuilder {
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
 		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
-
 		List<Condition> conditions = new ArrayList<>(2);
+		BinaryCondition condition;
+
+		if (isNotEqualsComparator(theDateRange)) {
+			condition = createConditionForValueWithComparator(LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			conditions.add(condition);
+			condition = createConditionForValueWithComparator(GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			conditions.add(condition);
+			return ComboCondition.or(conditions.toArray(new Condition[0]));
+		}
+
 		if (theDateRange.getLowerBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			condition = createConditionForValueWithComparator(GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		if (theDateRange.getUpperBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			condition = createConditionForValueWithComparator(LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
+	}
+
+	private boolean isNotEqualsComparator(DateRangeParam theDateRange) {
+		if (theDateRange != null) {
+			DateParam lb = theDateRange.getLowerBound();
+			DateParam ub = theDateRange.getUpperBound();
+
+			return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL);
+		}
+		return false;
 	}
 
 
@@ -604,6 +623,8 @@ public class SearchQueryBuilder {
 				return BinaryCondition.greaterThan(theColumn, generatePlaceholder(theValue));
 			case GREATERTHAN_OR_EQUALS:
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
+			case NOT_EQUAL:
+				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
 			default:
 				throw new IllegalArgumentException(Msg.code(1263));
 		}

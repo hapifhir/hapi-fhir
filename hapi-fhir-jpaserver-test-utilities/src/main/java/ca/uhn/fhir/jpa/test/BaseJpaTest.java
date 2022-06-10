@@ -767,7 +767,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		boolean multiDeleteEnabled = theDaoConfig.isAllowMultipleDelete();
 		theDaoConfig.setExpungeEnabled(true);
+		theDaoConfig.setAllowMultipleDelete(true);
 
 		for (int count = 0; ; count++) {
 			try {
@@ -787,6 +789,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			}
 		}
 		theDaoConfig.setExpungeEnabled(expungeEnabled);
+		theDaoConfig.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
 	}
