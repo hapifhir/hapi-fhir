@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -284,6 +285,11 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	@Override
 	public String getResourceType() {
 		return myResourceType;
+	}
+
+	@Override
+	public boolean isResourceType(@Nonnull String theResourceType) {
+		return theResourceType.equalsIgnoreCase(getResourceType());
 	}
 
 	/**
