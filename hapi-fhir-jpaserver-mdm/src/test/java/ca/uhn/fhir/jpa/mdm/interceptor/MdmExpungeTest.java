@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Patient;
@@ -15,8 +16,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
@@ -28,7 +27,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
-	IMdmStorageInterceptor myMdmStorageInterceptor;
+    IMdmStorageInterceptor myMdmStorageInterceptor;
 	@Autowired
 	DaoConfig myDaoConfig;
 	private ResourceTable myTargetEntity;

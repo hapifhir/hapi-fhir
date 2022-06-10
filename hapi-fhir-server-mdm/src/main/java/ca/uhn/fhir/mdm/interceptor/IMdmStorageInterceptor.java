@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.interceptor;
+package ca.uhn.fhir.mdm.interceptor;
 
 /*-
  * #%L
