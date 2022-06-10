@@ -113,8 +113,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	 */
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "RECORD", nullable = true, length = Integer.MAX_VALUE - 1)
-	private String myRecord;
+	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
+	private String myReport;
 
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
@@ -269,12 +269,12 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
 	}
 
-	public String getRecord() {
-		return myRecord;
+	public String getReport() {
+		return myReport;
 	}
 
-	public void setRecord(String theRecord) {
-		myRecord = theRecord;
+	public void setReport(String theReport) {
+		myReport = theReport;
 	}
 
 	@Override
@@ -296,7 +296,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("progress", myProgress)
 			.append("errorMessage", myErrorMessage)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("record", myRecord)
+			.append("report", myReport)
 			.toString();
 	}
 }

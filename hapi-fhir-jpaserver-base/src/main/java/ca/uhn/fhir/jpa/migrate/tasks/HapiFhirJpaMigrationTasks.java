@@ -93,7 +93,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// add new RECORD column to BATCH2 tables
 		version
 			.onTable("BT2_JOB_INSTANCE")
-			.addColumn("20220601.1", "RECORD")
+			.addColumn("20220601.1", "REPORT")
 			.nullable()
 			.type(ColumnTypeEnum.CLOB);
 	}
