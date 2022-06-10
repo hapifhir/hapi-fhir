@@ -99,6 +99,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		StringIndexFieldTypeOptionsStep<?> keywordFieldType = indexFieldTypeFactory.asString()
 		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
 			.projectable(Projectable.NO)
+			.sortable(Sortable.YES)
 			.aggregable(Aggregable.YES);
 
 		StandardIndexFieldTypeOptionsStep<?, Instant> dateTimeFieldType = indexFieldTypeFactory.asInstant()

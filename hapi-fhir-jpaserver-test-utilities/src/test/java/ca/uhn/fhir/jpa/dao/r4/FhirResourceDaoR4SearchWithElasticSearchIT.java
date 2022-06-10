@@ -55,6 +55,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
@@ -66,6 +67,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -1833,6 +1835,47 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(resultIds, containsInAnyOrder(idCode2.getIdPart()));
 			// also validate no extra SQL queries were executed
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
+	}
+
+	@Nested
+	public class SortParameter {
+
+		@BeforeEach
+		public void enableContainsAndLucene() {
+			myDaoConfig.setAllowContainsSearches(true);
+			myDaoConfig.setAdvancedLuceneIndexing(true);
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+		@AfterEach
+		public void restoreContains() {
+			DaoConfig defaultConfig = new DaoConfig();
+			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+			myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+			myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+		}
+
+		@Test
+		public void sortedSearch() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+				myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+				myTestDataBuilder.withTag("http://example.org", "aTag"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
+				myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
+				myTestDataBuilder.withTag("http://example.org", "aTag"))).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-date");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(2, result.getAllResources().size());
+			DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
+			DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
+			// requested date descending so first result should be the one with the latest effective date: id2
+			assertTrue(effectiveFirst.after(effectiveSecond));
 		}
 	}
 

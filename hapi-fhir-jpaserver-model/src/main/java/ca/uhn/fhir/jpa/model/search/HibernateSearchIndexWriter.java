@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.Pair;
 import org.hibernate.search.engine.backend.document.DocumentElement;
@@ -55,20 +56,28 @@ public class HibernateSearchIndexWriter {
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
+	private final ExtendedLuceneSearchParamRegistry myFulltextParameterRegistry;
 
-	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
+	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig,
+			DocumentElement theRoot, ExtendedLuceneSearchParamRegistry theFulltextParameterRegistry) {
+		
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myNodeCache = new HibernateSearchElementCache(theRoot);
+		myFulltextParameterRegistry = theFulltextParameterRegistry;
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HibernateSearchIndexWriter forRoot(
-			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
+	public String getSearchParamIndexKey(String theSearchParamName, String theIndexType) {
+		return myNodeCache.getObjectPath(theSearchParamName, theIndexType);
+	}
+
+	public static HibernateSearchIndexWriter forRoot(FhirContext theFhirContext, ModelConfig theModelConfig, 
+			DocumentElement theDocument, ExtendedLuceneSearchParamRegistry theFulltextParameterRegistry) {
+		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument, theFulltextParameterRegistry);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -85,9 +94,15 @@ public class HibernateSearchIndexWriter {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
+
 		nestedTokenNode.addValue("code", theValue.getCode());
 		nestedTokenNode.addValue("system", theValue.getSystem());
 		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+
+		String parentIndexKey = String.join(".", NESTED_SEARCH_PARAM_ROOT, theSearchParam, "token");
+		myFulltextParameterRegistry.put(parentIndexKey + "." + "system", RestSearchParameterTypeEnum.TOKEN);
+		myFulltextParameterRegistry.put(parentIndexKey + "." + "code", RestSearchParameterTypeEnum.TOKEN);
+
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
 			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
 			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
@@ -116,7 +131,11 @@ public class HibernateSearchIndexWriter {
 		// Upper bound
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
-		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+
+//		fixme jm: which sub-field?
+		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "dt", "lower-ord");
+		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.DATE);
+		ourLog.trace("Adding Search Param Date. param: {} -- node: {}, {}", theSearchParam, indexKey, theValue);
 	}
 
 
@@ -158,4 +177,5 @@ public class HibernateSearchIndexWriter {
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
 		}
 	}
+
 }

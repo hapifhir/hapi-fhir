@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -636,4 +637,6 @@ public class ExtendedLuceneClauseBuilder {
 			myRootClause.must(orTermPredicate);
 		}
 	}
+
+
 }

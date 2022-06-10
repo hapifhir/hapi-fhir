@@ -57,6 +57,7 @@ public class ExtendedLuceneSearchBuilder {
 	 */
 	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
 		return
+			myParams.getSort() != null ||
 			myParams.getLastUpdated() != null ||
 			myParams.entrySet().stream()
 				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))

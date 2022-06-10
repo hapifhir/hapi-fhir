@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Provide a lookup of created Hibernate Search DocumentElement entries.
@@ -59,6 +60,10 @@ public class HibernateSearchElementCache {
 		return getObjectElement(Arrays.asList(thePath));
 	}
 
+	public String getObjectPath(@Nonnull String... thePath) {
+		return String.join(".", thePath);
+	}
+
 	/**
 	 * Fetch or create an Object DocumentElement with thePath from the root element.
 	 *
@@ -70,7 +75,7 @@ public class HibernateSearchElementCache {
 			return myRoot;
 		}
 		String key = String.join(".", thePath);
-		// re-implement computeIfAbsent since we're recursive, and it isn't rentrant.
+		// re-implement computeIfAbsent since we're recursive, and it isn't reentrant.
 		DocumentElement result = myCache.get(key);
 		if (result == null) {
 			DocumentElement parent = getObjectElement(thePath.subList(0, thePath.size() - 1));
@@ -82,4 +87,6 @@ public class HibernateSearchElementCache {
 		ourLog.trace("getNode {}: {}", key, result);
 		return result;
 	}
+
+
 }
