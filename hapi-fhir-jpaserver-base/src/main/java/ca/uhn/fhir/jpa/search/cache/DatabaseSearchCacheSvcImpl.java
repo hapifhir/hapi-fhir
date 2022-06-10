@@ -27,10 +27,8 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
@@ -47,7 +45,6 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
@@ -56,12 +53,10 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	 * DELETE FROM foo WHERE params IN (term,term,term...)
 	 * type query and this can fail if we have 1000s of params
 	 */
-	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
 	public static final long SEARCH_CLEANUP_JOB_INTERVAL_MILLIS = 10 * DateUtils.MILLIS_PER_SECOND;
 	public static final int DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND = 2000;
 	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
-	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
 	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
 	private static int ourMaximumSearchesToCheckForDeletionCandidacy = DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
 	private static Long ourNowForUnitTests;
@@ -93,9 +88,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		Search newSearch;
 		if (theSearch.getId() == null) {
 			newSearch = mySearchDao.save(theSearch);
-			for (SearchInclude next : theSearch.getIncludes()) {
-				mySearchIncludeDao.save(next);
-			}
+			mySearchIncludeDao.saveAll(theSearch.getIncludes());
 		} else {
 			newSearch = mySearchDao.save(theSearch);
 		}
@@ -208,11 +201,10 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		}
 
 		int count = toDelete.getContent().size();
-		if (count > 0) {
-			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
-				Long total = tt.execute(t -> mySearchDao.count());
-				ourLog.debug("Deleted {} searches, {} remaining", count, total);
-			}
+		if (count > 0
+			&& (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test")))) {
+			Long total = tt.execute(t -> mySearchDao.count());
+			ourLog.debug("Deleted {} searches, {} remaining", count, total);
 		}
 	}
 
@@ -229,21 +221,21 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 			 * eventually
 			 */
 			int max = ourMaximumResultsToDeleteInOnePass;
-			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
-			if (resultPids.hasContent()) {
-				List<List<Long>> partitions = Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
-				for (List<Long> nextPartition : partitions) {
-					mySearchResultDao.deleteByIds(nextPartition);
-				}
-
+			Integer minOrder = mySearchResultDao.findFirstOrder(searchToDelete.getId());
+			int deletedCount;
+			if (minOrder == null) {
+				// no rows, we're done
+				deletedCount = 0;
+			} else {
+				deletedCount = mySearchResultDao.deleteForParentWithLimit(searchToDelete.getId(), minOrder, max);
 			}
 
 			// Only delete if we don't have results left in this search
-			if (resultPids.getNumberOfElements() < max) {
+			if (deletedCount  < max) {
 				ourLog.debug("Deleting search {}/{} - Created[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
 			} else {
-				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
+				ourLog.debug("Purged {} search results for deleted search {}/{}", deletedCount, searchToDelete.getId(), searchToDelete.getUuid());
 			}
 		});
 	}
@@ -256,11 +248,6 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@VisibleForTesting
 	public static void setMaximumResultsToDeleteInOnePassForUnitTest(int theMaximumResultsToDeleteInOnePass) {
 		ourMaximumResultsToDeleteInOnePass = theMaximumResultsToDeleteInOnePass;
-	}
-
-	@VisibleForTesting
-	public static void setMaximumResultsToDeleteForUnitTest(int theMaximumResultsToDelete) {
-		ourMaximumResultsToDeleteInOneStatement = theMaximumResultsToDelete;
 	}
 
 	/**

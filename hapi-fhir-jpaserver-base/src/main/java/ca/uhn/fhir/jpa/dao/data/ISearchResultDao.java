@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -39,13 +38,13 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long>, IHa
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
 	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
-	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
-	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
-
-	@Modifying
-	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
-	void deleteByIds(@Param("ids") List<Long> theContent);
-
 	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
 	int countForSearch(@Param("search") Long theSearchPid);
+
+	@Query(value="SELECT min(r.myOrder) FROM SearchResult r WHERE r.mySearchPid = :search")
+	Integer findFirstOrder(@Param("search") Long theSearchPid);
+
+	@Modifying
+	@Query("DELETE FROM SearchResult r WHERE r.mySearchPid = :search and  r.myOrder >= :rangeStart and r.myOrder < :rangeStart + :maxCount")
+	int deleteForParentWithLimit(@Param("search") Long theSearchPid, @Param("rangeStart") int theStart, @Param("maxCount") int theCount);
 }

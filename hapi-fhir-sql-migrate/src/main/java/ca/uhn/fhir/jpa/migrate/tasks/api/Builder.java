@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.AddPrimaryKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableByColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
@@ -245,6 +246,10 @@ public class Builder {
 			return new BuilderWithTableName.BuilderAddIndexWithName(theVersion, theIndexName);
 		}
 
+		public BuilderWithTableName.BuilderAddConstraintWithName addConstraint(String theVersion, String theIndexName) {
+			return new BuilderWithTableName.BuilderAddConstraintWithName(theVersion, theIndexName);
+		}
+
 		public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
 			return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
 		}
@@ -373,6 +378,31 @@ public class Builder {
 					return this;
 				}
 			}
+		}
+
+		public class BuilderAddConstraintWithName {
+			private final String myVersion;
+			private final String myConstraintName;
+
+			public BuilderAddConstraintWithName(String theVersion, String theConstraintName) {
+				myVersion = theVersion;
+				myConstraintName = theConstraintName;
+			}
+
+			public BuilderPrimaryKey primaryKey() {
+				return new BuilderPrimaryKey();
+			}
+
+			public class BuilderPrimaryKey {
+				public AddPrimaryKeyTask withColumns(String... theColumnNames) {
+					AddPrimaryKeyTask task = new AddPrimaryKeyTask(myRelease, myVersion, myTableName, myConstraintName);
+					task.setColumns(Arrays.asList(theColumnNames));
+					task.setDoNothing(false);
+					addTask(task);
+					return task;
+				}
+			}
+
 		}
 
 		public class BuilderModifyColumnWithName {

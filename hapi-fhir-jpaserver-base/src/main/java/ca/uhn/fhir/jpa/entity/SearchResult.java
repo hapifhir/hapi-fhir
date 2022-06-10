@@ -28,23 +28,28 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "HFJ_SEARCH_RESULT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_SEARCHRES_ORDER", columnNames = {"SEARCH_PID", "SEARCH_ORDER"})
+	@UniqueConstraint(name = "HFJ_SEARCH_RESULT_PKEY", columnNames = {"SEARCH_PID", "SEARCH_ORDER"})
 })
+@IdClass(SearchResult.PrimaryKey.class)
 public class SearchResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH_RES")
-	@SequenceGenerator(name = "SEQ_SEARCH_RES", sequenceName = "SEQ_SEARCH_RES")
+
+	// TODO delete in 6.2
+	@Deprecated(forRemoval = true)
+	@Column(name = "PID", updatable = false, nullable = true)
+	private Long myPidUnused;
+
 	@Id
-	@Column(name = "PID")
-	private Long myId;
-	@Column(name = "SEARCH_ORDER", nullable = false, insertable = true, updatable = false)
-	private int myOrder;
-	@Column(name = "RESOURCE_PID", insertable = true, updatable = false, nullable = false)
-	private Long myResourcePid;
-	@Column(name = "SEARCH_PID", insertable = true, updatable = false, nullable = false)
+	@Column(name = "SEARCH_PID", updatable = false, nullable = false)
 	private Long mySearchPid;
+	@Id
+	@Column(name = "SEARCH_ORDER", updatable = false, nullable = false)
+	private int myOrder;
+	@Column(name = "RESOURCE_PID", updatable = false, nullable = false)
+	private Long myResourcePid;
+
 
 	/**
 	 * Constructor
@@ -90,13 +95,35 @@ public class SearchResult implements Serializable {
 		return myResourcePid;
 	}
 
-	public SearchResult setResourcePid(Long theResourcePid) {
+	public void setResourcePid(Long theResourcePid) {
 		myResourcePid = theResourcePid;
-		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		return myResourcePid.hashCode();
 	}
+
+	public static class PrimaryKey implements Serializable {
+		private static final long serialVersionUID = 1L;
+		private Long mySearchPid;
+		private int myOrder;
+
+		public Long getSearchPid() {
+			return mySearchPid;
+		}
+
+		public void setSearchPid(Long theSearchPid) {
+			mySearchPid = theSearchPid;
+		}
+
+		public int getOrder() {
+			return myOrder;
+		}
+
+		public void setOrder(int theOrder) {
+			myOrder = theOrder;
+		}
+	}
+
 }

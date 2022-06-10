@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -20,9 +19,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_MAX_DELETE_CANDIDATES_TO_FIND;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 
@@ -34,9 +31,6 @@ public class SearchCoordinatorSvcImplTest extends BaseJpaR4Test {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private ISearchIncludeDao mySearchIncludeDao;
-
-	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinator;
 
 	@Autowired
 	private ISearchCacheSvc myDatabaseCacheSvc;
