@@ -60,7 +60,7 @@ public interface IJobPersistence {
 	 * @param theChunkIds - the list of ids of work chunks to fetch
 	 * @return - list of work chunks (with data!)
 	 */
-	List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds);
+	List<WorkChunk> fetchWorkChunks(List<String> theChunkIds);
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.

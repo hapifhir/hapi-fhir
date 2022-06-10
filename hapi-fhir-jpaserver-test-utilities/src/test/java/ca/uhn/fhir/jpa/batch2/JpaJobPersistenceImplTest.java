@@ -435,7 +435,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			chunkIds.add(id);
 		}
 
-		List<WorkChunk> chunks = mySvc.fetchWorkChunks(instance.getInstanceId(), chunkIds);
+		List<WorkChunk> chunks = mySvc.fetchWorkChunks(chunkIds);
 
 		BatchWorkChunk newChunk = new BatchWorkChunk(
 			"defId",
@@ -447,8 +447,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		);
 		String newChunkId = mySvc.reduceWorkChunksToSingleChunk(instance.getInstanceId(), chunkIds, newChunk);
 
-		List<WorkChunk> reducedChunks = mySvc.fetchWorkChunks(instance.getInstanceId(), chunkIds);
-		WorkChunk newChunkFound = mySvc.fetchWorkChunks(instance.getInstanceId(), Collections.singletonList(newChunkId)).stream().findFirst().get();
+		List<WorkChunk> reducedChunks = mySvc.fetchWorkChunks(chunkIds);
+		WorkChunk newChunkFound = mySvc.fetchWorkChunks(Collections.singletonList(newChunkId)).stream().findFirst().get();
 
 		for (WorkChunk reducedChunk : reducedChunks) {
 			assertTrue(chunkIds.contains(reducedChunk.getId()));

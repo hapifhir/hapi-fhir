@@ -49,8 +49,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds) {
-		return myWrap.fetchWorkChunks(theInstanceId, theChunkIds);
+	public List<WorkChunk> fetchWorkChunks(List<String> theChunkIds) {
+		return myWrap.fetchWorkChunks(theChunkIds);
 	}
 
 	@Override

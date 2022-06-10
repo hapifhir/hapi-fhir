@@ -84,7 +84,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<WorkChunk> fetchWorkChunks(String theInstanceId, List<String> theChunkIds) {
+	public List<WorkChunk> fetchWorkChunks(List<String> theChunkIds) {
 		Iterable<Batch2WorkChunkEntity> entities = myWorkChunkRepository.findAllById(theChunkIds);
 		List<WorkChunk> chunks = new ArrayList<>();
 		for (Batch2WorkChunkEntity entity : entities) {
