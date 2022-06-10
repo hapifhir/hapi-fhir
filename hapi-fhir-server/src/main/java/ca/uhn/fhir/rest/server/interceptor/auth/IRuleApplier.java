@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.server.interceptor.matching.ISearchParamMatcher;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -45,7 +44,7 @@ public interface IRuleApplier {
 	IValidationSupport getValidationSupport();
 
 	@Nullable
-	default ISearchParamMatcher getSearchParamMatcher() {
+	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
 		// provide default null for backward compat.
 		return null;
 	};
