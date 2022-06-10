@@ -26,6 +26,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * Table for individual results in a cached search.
+ *
+ * We use a composite PK to avoid the traffic of fetching the sequence since we insert 250 at a time.
+ */
 @Entity
 @Table(name = "HFJ_SEARCH_RESULT", uniqueConstraints = {
 	@UniqueConstraint(name = "HFJ_SEARCH_RESULT_PKEY", columnNames = {"SEARCH_PID", "SEARCH_ORDER"})
