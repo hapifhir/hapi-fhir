@@ -25,17 +25,10 @@ public class JobInstanceProgressCalculator {
 	public void calculateAndStoreInstanceProgress() {
 		InstanceProgress instanceProgress = new InstanceProgress();
 
-		for (int page = 0; ; page++) {
-			List<WorkChunk> chunks = myJobPersistence.fetchWorkChunksWithoutData(myInstance.getInstanceId(), JobMaintenanceServiceImpl.INSTANCES_PER_PASS, page);
-
-			for (WorkChunk chunk : chunks) {
-				myProgressAccumulator.addChunk(chunk);
-				instanceProgress.addChunk(chunk);
-			}
-
-			if (chunks.size() < JobMaintenanceServiceImpl.INSTANCES_PER_PASS) {
-				break;
-			}
+		List<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunks(myInstance.getInstanceId(), false);
+		for (WorkChunk chunk : chunks) {
+			myProgressAccumulator.addChunk(chunk);
+			instanceProgress.addChunk(chunk);
 		}
 
 		instanceProgress.updateInstance(myInstance);

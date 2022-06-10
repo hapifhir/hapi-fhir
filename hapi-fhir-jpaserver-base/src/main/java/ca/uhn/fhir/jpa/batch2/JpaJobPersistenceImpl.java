@@ -212,8 +212,29 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
+		ArrayList<WorkChunk> chunks = new ArrayList<>();
+		fetchChunks(theInstanceId, false, thePageSize, thePageIndex, chunks::add);
+		return chunks;
+	}
+
+	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, IChunkProcessor theProcessor) {
 		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());
+		for (Batch2WorkChunkEntity chunk : chunks) {
+			theProcessor.addChunk(toChunk(chunk, theIncludeData));
+		}
+	}
+
+	@Override
+	public List<WorkChunk> fetchAllWorkChunks(String theInstanceId, boolean theWithData) {
+		int fetchAmounts = 100;
+		ArrayList<WorkChunk> chunks = new ArrayList<>();
+		for (int page = 0; ; page++) {
+			fetchChunks(theInstanceId, theWithData, fetchAmounts, page, chunks::add);
+			if (chunks.size() < fetchAmounts) {
+				break;
+			}
+		}
+		return chunks;
 	}
 
 	@Override

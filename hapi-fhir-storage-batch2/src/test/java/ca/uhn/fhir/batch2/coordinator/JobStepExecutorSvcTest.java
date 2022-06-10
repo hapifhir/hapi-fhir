@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -106,11 +107,6 @@ public class JobStepExecutorSvcTest {
 		}
 
 		@Override
-		protected JobInstanceProgressCalculator getProgressCalculator(JobInstance theInstance, JobChunkProgressAccumulator theAccumulator) {
-			return myCalculator;
-		}
-
-		@Override
 		protected  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> BaseDataSink<PT, IT, OT> getDataSink(
 			JobWorkCursor<PT, IT, OT> theCursor,
 			JobDefinition<PT> theJobDefinition,
@@ -123,12 +119,8 @@ public class JobStepExecutorSvcTest {
 	}
 
 	// general mocks
-	@Mock
-	private JobInstanceProgressCalculator myCalculator;
 
 	private TestDataSink myDataSink;
-
-	private final JobChunkProgressAccumulator myAccumulator = mock(JobChunkProgressAccumulator.class);
 
 	// step worker mocks
 	private final IJobStepWorker<TestJobParameters, StepInputData, StepOutputData> myNonReductionStep = mock(IJobStepWorker.class);
@@ -189,11 +181,7 @@ public class JobStepExecutorSvcTest {
 		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor);
 
 		// when
-		when(myAccumulator.getChunkIdsWithStatus(eq(jobInstance.getInstanceId()),
-			eq(step.getStepId()),
-			any())
-		).thenReturn(chunkIds);
-		when(myJobPersistence.fetchWorkChunks(eq(INSTANCE_ID), anyList()))
+		when(myJobPersistence.fetchAllWorkChunks(eq(INSTANCE_ID), eq(true)))
 			.thenReturn(chunks);
 		when(myJobPersistence.reduceWorkChunksToSingleChunk(eq(jobInstance.getInstanceId()), anyList(), any(BatchWorkChunk.class)))
 			.thenReturn(newChunkId);
@@ -205,14 +193,12 @@ public class JobStepExecutorSvcTest {
 		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
-			null,
-			myAccumulator
+			null
 		);
 
 		// verify
 		assertTrue(result.isIsSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof ReductionStepDataSink);
-		verify(myCalculator).calculateAndStoreInstanceProgress();
 		ArgumentCaptor<StepExecutionDetails> executionDetsCaptor = ArgumentCaptor.forClass(StepExecutionDetails.class);
 		verify(myReductionStep).run(executionDetsCaptor.capture(), eq(myDataSink));
 		assertTrue(executionDetsCaptor.getValue() instanceof ReductionStepExecutionDetails);
@@ -265,8 +251,7 @@ public class JobStepExecutorSvcTest {
 		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
-			chunk,
-			myAccumulator
+			chunk
 		);
 
 		// verify
@@ -285,9 +270,6 @@ public class JobStepExecutorSvcTest {
 		verifyNonReductionStep();
 		verify(myLastStep, never()).run(any(), any());
 		verify(myReductionStep, never()).run(any(), any());
-
-		verify(myAccumulator, never())
-			.getChunkIdsWithStatus(anyString(), anyString(), any());
 	}
 
 	@Test
@@ -312,8 +294,7 @@ public class JobStepExecutorSvcTest {
 		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
-			chunk,
-			myAccumulator
+			chunk
 		);
 
 		// verify
@@ -367,8 +348,7 @@ public class JobStepExecutorSvcTest {
 		JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
 			workCursor,
 			jobInstance,
-			chunk,
-			myAccumulator
+			chunk
 		);
 
 		// verify
@@ -393,6 +373,8 @@ public class JobStepExecutorSvcTest {
 			.fetchWorkChunkSetStartTimeAndMarkInProgress(anyString());
 		verify(myJobPersistence, never())
 			.reduceWorkChunksToSingleChunk(anyString(), anyList(), any());
+		verify(myJobPersistence, never())
+			.fetchAllWorkChunks(anyString(), anyBoolean());
 	}
 
 	private JobInstance getTestJobInstance() {

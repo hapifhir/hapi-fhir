@@ -9,15 +9,12 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.ListResult;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -27,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 
 public class JobStepExecutorSvc {
@@ -48,7 +44,6 @@ public class JobStepExecutorSvc {
 	 * @param theCursor - work cursor
 	 * @param theInstance - the job instance
 	 * @param theWorkChunk - the work chunk (if available); can be null (for reduction step only!)
-	 * @param theAccumulator - the job accumulator
 	 * @param <PT> - Job parameters Type
 	 * @param <IT> - Step input parameters Type
 	 * @param <OT> - Step output parameters Type
@@ -58,8 +53,7 @@ public class JobStepExecutorSvc {
 	doExecution(
 		JobWorkCursor<PT, IT, OT> theCursor,
 		JobInstance theInstance,
-		@Nullable WorkChunk theWorkChunk,
-		JobChunkProgressAccumulator theAccumulator
+		@Nullable WorkChunk theWorkChunk
 	) {
 		JobDefinitionStep<PT, IT, OT> step = theCursor.getCurrentStep();
 		JobDefinition<PT> jobDefinition = theCursor.getJobDefinition();
@@ -73,7 +67,7 @@ public class JobStepExecutorSvc {
 		StepExecutionDetails<PT, IT> stepExecutionDetails;
 		if (step.isReductionStep()) {
 			// reduction step details
-			stepExecutionDetails = getExecutionDetailsForReductionStep(theInstance, theAccumulator, step, inputType, parameters);
+			stepExecutionDetails = getExecutionDetailsForReductionStep(theInstance, step, inputType, parameters);
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
@@ -147,13 +141,11 @@ public class JobStepExecutorSvc {
 	@SuppressWarnings("unchecked")
 	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForReductionStep(
 		JobInstance theInstance,
-		JobChunkProgressAccumulator theAccumulator,
 		JobDefinitionStep<PT, IT, OT> theStep,
 		Class<IT> theInputType,
 		PT theParameters
 	) {
 		StepExecutionDetails<PT, IT> stepExecutionDetails;
-		List<String> chunksForNextStep = getChunkIdsForNextStep(theInstance, theAccumulator, theStep);
 
 		/*
 		 * Combine the outputs of all previous steps into
@@ -161,7 +153,7 @@ public class JobStepExecutorSvc {
 		 */
 		List<IT> data = new ArrayList<>();
 		List<String> chunkIds = new ArrayList<>();
-		List<WorkChunk> chunks = myJobPersistence.fetchWorkChunks(theInstance.getInstanceId(), chunksForNextStep);
+		List<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunks(theInstance.getInstanceId(), true);
 		for (WorkChunk chunk : chunks) {
 			data.add(chunk.getData(theInputType));
 			chunkIds.add(chunk.getId());
@@ -190,33 +182,6 @@ public class JobStepExecutorSvc {
 		);
 		stepExecutionDetails = (StepExecutionDetails<PT, IT>) executionDetails;
 		return stepExecutionDetails;
-	}
-
-	/**
-	 * Get all chunk ids from current step that will be consumed by next (reduction) step
-	 */
-	private  <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> List<String> getChunkIdsForNextStep(
-		JobInstance theInstance,
-		JobChunkProgressAccumulator theAccumulator,
-		JobDefinitionStep<PT, IT, OT> theStep
-	) {
-		JobInstanceProgressCalculator calculator = getProgressCalculator(theInstance, theAccumulator);
-		calculator.calculateAndStoreInstanceProgress();
-		List<String> chunksForNextStep = theAccumulator.getChunkIdsWithStatus(theInstance.getInstanceId(),
-			theStep.getStepId(),
-			EnumSet.of(StatusEnum.QUEUED));
-		return chunksForNextStep;
-	}
-
-	/**
-	 * Return a new instance of the Progress Calculator.
-	 */
-	protected JobInstanceProgressCalculator getProgressCalculator(JobInstance theInstance, JobChunkProgressAccumulator theAccumulator) {
-		return new JobInstanceProgressCalculator(
-			myJobPersistence,
-			theInstance,
-			theAccumulator
-		);
 	}
 
 	/**

@@ -130,8 +130,7 @@ public class JobInstanceProcessor {
 				myJobExecutorSvc.doExecution(
 					JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
 					myInstance,
-					null,
-					myProgressAccumulator);
+					null);
 			} else {
 				// otherwise, continue processing as expected
 				List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));

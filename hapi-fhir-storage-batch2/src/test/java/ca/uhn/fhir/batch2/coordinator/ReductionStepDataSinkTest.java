@@ -123,7 +123,7 @@ public class ReductionStepDataSinkTest {
 		assertEquals(1, logCaptor.getAllValues().size());
 		ILoggingEvent log = logCaptor.getValue();
 		assertTrue(log.getFormattedMessage().contains(
-			"Expected a single data sink for reduction step, but received 2 instead. Only the first is accepted!"
+			"Expected a single work chunk for reduction step, but received 2 instead. Only the first is accepted!"
 		));
 	}
 

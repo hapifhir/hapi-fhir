@@ -69,13 +69,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 	@SuppressWarnings("unchecked")
 	void executeStep() {
-		JobChunkProgressAccumulator accumulator = new JobChunkProgressAccumulator();
-
 		JobStepExecutorOutput<PT, IT, OT> successOutput = myJobExecutorSvc.doExecution(
 			myCursor,
 			myInstance,
-			myWorkChunk,
-			accumulator
+			myWorkChunk
 		);
 
 		if (!successOutput.isIsSuccessful()) {

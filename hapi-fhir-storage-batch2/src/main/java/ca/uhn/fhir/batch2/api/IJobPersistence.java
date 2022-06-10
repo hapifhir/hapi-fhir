@@ -30,6 +30,10 @@ import java.util.Set;
 
 public interface IJobPersistence {
 
+	interface IChunkProcessor {
+		void addChunk(WorkChunk theChunk);
+	}
+
 	/**
 	 * Stores a chunk of work for later retrieval. This method should be atomic and should only
 	 * return when the chunk has been successfully stored in the database.
@@ -136,6 +140,14 @@ public interface IJobPersistence {
 	 * @param thePageIndex  The page index
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetch all chunks for a given instance.
+	 * @param theInstanceId - instance id
+	 * @param theWithData - whether or not to include the data
+	 * @return - a list of all WorkChunk objs
+	 */
+	List<WorkChunk> fetchAllWorkChunks(String theInstanceId, boolean theWithData);
 
 	/**
 	 * Update the stored instance
