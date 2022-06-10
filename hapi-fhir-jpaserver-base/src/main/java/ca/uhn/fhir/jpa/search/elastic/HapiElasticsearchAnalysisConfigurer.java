@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  */
 
 import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
+import org.apache.jena.sparql.function.library.context;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
@@ -89,5 +90,9 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 
 		theConfigCtx.analyzer("termConceptPropertyAnalyzer").custom()
 			.tokenizer("whitespace");
+
+		theConfigCtx.normalizer( "lowercase" ).custom()
+			.tokenFilters( "lowercase" );
+
 	}
 }

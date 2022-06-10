@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
@@ -86,6 +87,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		StringIndexFieldTypeOptionsStep<?> standardAnalyzer = indexFieldTypeFactory.asString()
 			.analyzer("standardAnalyzer")
 			.projectable(Projectable.NO);
+
+		StringIndexFieldTypeOptionsStep<?> lowerCaseNormalizer =
+			indexFieldTypeFactory.asString()
+				.normalizer("lowercase")
+				.sortable(Sortable.YES)
+				.projectable(Projectable.YES);
 
 		StringIndexFieldTypeOptionsStep<?> exactAnalyzer =
 			indexFieldTypeFactory.asString()
@@ -153,6 +160,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
 			spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
 			spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
+			spfield.fieldTemplate("string-lower", lowerCaseNormalizer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_LOWER).multiValued();
 
 			nestedSpField.objectFieldTemplate("nestedStringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
 			nestedSpField.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();

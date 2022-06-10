@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -243,7 +244,6 @@ public interface ITestDataBuilder {
 			withPrimitiveAttribute("code", theCode)
 		);
 	}
-
 
 	/**
 	 * Create an Element and apply modifiers

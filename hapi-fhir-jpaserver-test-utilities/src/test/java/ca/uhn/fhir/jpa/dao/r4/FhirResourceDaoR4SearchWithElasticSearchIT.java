@@ -1842,10 +1842,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public class SortParameter {
 
 		@BeforeEach
+		void setUp() {
+			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		}
+
+		@BeforeEach
 		public void enableContainsAndLucene() {
 			myDaoConfig.setAllowContainsSearches(true);
 			myDaoConfig.setAdvancedLuceneIndexing(true);
 			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
 
 		@AfterEach
@@ -1854,18 +1862,22 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 			myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
 			myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
 		}
 
 		@Test
-		public void sortedSearch() {
+		public void sortedSearchTokenAndDate() {
 			String id1 = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
 				myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag"))).getIdPart();
+				myTestDataBuilder.withTag("http://example.org", "aTag")
+			)).getIdPart();
 			String id2 = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
 				myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag"))).getIdPart();
+				myTestDataBuilder.withTag("http://example.org", "aTag")
+			)).getIdPart();
 
 			myCaptureQueriesListener.clear();
 			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-date");
@@ -1876,6 +1888,55 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
 			// requested date descending so first result should be the one with the latest effective date: id2
 			assertTrue(effectiveFirst.after(effectiveSecond));
+		}
+
+		@Test
+		public void sortedSearchTokenAndValueString() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+				myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+				myTestDataBuilder.withTag("http://example.org", "aTag"),
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
+			)).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
+				myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
+				myTestDataBuilder.withTag("http://example.org", "aTag"),
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+			)).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-string");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(2, result.getAllResources().size());
+			DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
+			DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
+			// requested date descending so first result should be the one with the latest effective date: id2
+			assertTrue(effectiveFirst.after(effectiveSecond));
+		}
+
+		@Test
+		public void sortedSearchTokenAndQuantity() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withTag("http://example.org", "aTag"),
+				myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
+			)).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withTag("http://example.org", "aTag"),
+				myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
+			)).getIdPart();
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-quantity");
+
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			// requested qty descending so order should be id2, id1
+			assertThat(getResultIds(result), contains(id2, id1));
+		}
+
+		private List<String> getResultIds(IBundleProvider theResult) {
+			return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
 		}
 	}
 

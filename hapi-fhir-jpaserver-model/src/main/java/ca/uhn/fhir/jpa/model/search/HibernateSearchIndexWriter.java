@@ -39,6 +39,7 @@ public class HibernateSearchIndexWriter {
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
+	public static final String IDX_STRING_LOWER = "lower";
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
@@ -87,6 +88,11 @@ public class HibernateSearchIndexWriter {
 		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
+		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
+
+		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "string", IDX_STRING_LOWER);
+		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.STRING);
+
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
@@ -151,6 +157,11 @@ public class HibernateSearchIndexWriter {
 			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
 			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
 
+			String indexKey = String.join(".", NESTED_SEARCH_PARAM_ROOT, theSearchParam, QTY_PARAM_NAME);
+			myFulltextParameterRegistry.put(indexKey + "." + QTY_SYSTEM, RestSearchParameterTypeEnum.QUANTITY);
+			myFulltextParameterRegistry.put(indexKey + "." + QTY_CODE, RestSearchParameterTypeEnum.QUANTITY);
+			myFulltextParameterRegistry.put(indexKey + "." + QTY_VALUE, RestSearchParameterTypeEnum.QUANTITY);
+
 			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
 
 			//-- convert the value/unit to the canonical form if any
@@ -165,6 +176,8 @@ public class HibernateSearchIndexWriter {
 
 			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
 			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
+
+			myFulltextParameterRegistry.put(indexKey + "." + QTY_VALUE_NORM, RestSearchParameterTypeEnum.QUANTITY);
 		}
 
 	}
