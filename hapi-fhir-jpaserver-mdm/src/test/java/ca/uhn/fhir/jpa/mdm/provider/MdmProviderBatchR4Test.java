@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
-
 	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
