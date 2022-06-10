@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
@@ -53,6 +54,9 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaR
 			"AND hrl.myTargetResourceType='Patient'" +
 		")")
 	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
+
+	@Query("SELECT ml FROM MdmLink ml WHERE ml.mySourcePid = :sourcePid AND ml.myMatchResult = :matchResult")
+	Optional<MdmLink> findBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMatch);
 
 	interface MdmPidTuple {
 		Long getGoldenPid();

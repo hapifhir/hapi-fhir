@@ -32,6 +32,12 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.r4</artifactId>
+			<version>${fhir_core_version}</version>
+		</dependency>
+
 		<!-- General -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -156,7 +162,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

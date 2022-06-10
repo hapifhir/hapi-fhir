@@ -246,6 +246,42 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	}
 
 	@Test
+	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
+
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
+		mySubscriptionResourceNotMatched.awaitExpected();
+	}
+
+	@Test
+	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch() throws InterruptedException {
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
+
+		mySubscriptionResourceNotMatched.setExpectedCount(1);
+		sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
+		mySubscriptionResourceNotMatched.awaitExpected();
+	}
+
+	@Test
 	public void testSubscriptionOnOnePartitionMatchResourceOnMultiplePartitions() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		String payload = "application/fhir+json";
