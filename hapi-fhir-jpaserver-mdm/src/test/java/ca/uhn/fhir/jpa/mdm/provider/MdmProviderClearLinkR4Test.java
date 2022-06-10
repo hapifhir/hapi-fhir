@@ -174,8 +174,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("HAPI-2039: Failed to validate parameters for job of type Mdm Clear: \n" +
-				" * There are no mdm rules for resource type 'Observation'")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
 		}
 	}
 
