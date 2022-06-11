@@ -83,7 +83,8 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 					}
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
+						boolean filterDeleted = true;
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart(), filterDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches

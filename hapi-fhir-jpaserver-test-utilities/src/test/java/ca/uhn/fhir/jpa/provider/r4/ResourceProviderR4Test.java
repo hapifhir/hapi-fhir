@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -3984,6 +3985,70 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(toUnqualifiedVersionlessIds(found), empty());
 
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithClientAssignedId() throws IOException {
+		// Create with client assigned ID
+		Patient p = new Patient();
+		p.setId("AAA");
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
+		HttpPut httpPut = new HttpPut(ourServerBase + "/Patient/AAA");
+		httpPut.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(201, status.getStatusLine().getStatusCode());
+		}
+
+		// Delete
+		HttpDelete httpDelete = new HttpDelete(ourServerBase + "/Patient/AAA");
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpDelete)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		}
+
+		// Search
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient?_id=AAA");
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, responseContent);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertTrue(CollectionUtils.isEmpty(bundle.getEntry()));
+			assertEquals(0, bundle.getTotal());
+		}
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithServerAssignedId() throws IOException {
+		// Create with client assigned ID
+		Patient p = new Patient();
+		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
+		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient");
+		httpPost.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+
+		String id = null;
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertEquals(201, status.getStatusLine().getStatusCode());
+			String newIdString = status.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			id = new IdType(newIdString).getIdPart();
+			assertNotNull(id);
+		}
+
+		// Delete
+		HttpDelete httpDelete = new HttpDelete(ourServerBase + "/Patient/"+id);
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpDelete)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		}
+
+		// Search
+		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient?_id="+id);
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, responseContent);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertTrue(CollectionUtils.isEmpty(bundle.getEntry()));
+			assertEquals(0, bundle.getTotal());
+		}
 	}
 
 	@Test

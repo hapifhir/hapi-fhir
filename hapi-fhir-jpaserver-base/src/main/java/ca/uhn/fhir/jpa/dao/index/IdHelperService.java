@@ -128,12 +128,26 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nonnull
 	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
+		return resolveResourceIdentity(theRequestPartitionId, theResourceType, theResourceId, false);
+	}
+
+	/**
+	 * Given a forced ID, convert it to its Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
+	 * Optionally filters out deleted resources.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Override
+	@Nonnull
+	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theFilterDeleted) throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		assert theRequestPartitionId != null;
 
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
-			Collections.singletonList(id));
+			Collections.singletonList(id),
+			theFilterDeleted);
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
@@ -155,14 +169,27 @@ public class IdHelperService implements IIdHelperService {
 
 	/**
 	 * Returns a mapping of Id -> ResourcePersistentId.
-	 * If any resource is not found, it will throw ResourceNotFound exception
-	 * (and no map will be returned)
+	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
 	 */
 	@Override
 	@Nonnull
 	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
 																								 String theResourceType,
 																								 List<String> theIds) {
+		return resolveResourcePersistentIds(theRequestPartitionId, theResourceType, theIds, false);
+	}
+
+	/**
+	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
+	 * Optionally filters out deleted resources.
+	 */
+	@Override
+	@Nonnull
+	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
+																								 String theResourceType,
+																								 List<String> theIds,
+																								 boolean theFilterDeleted) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		Validate.notNull(theIds, "theIds cannot be null");
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
@@ -179,7 +206,7 @@ public class IdHelperService implements IIdHelperService {
 				// is a forced id
 				// we must resolve!
 				if (myDaoConfig.isDeleteEnabled()) {
-					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id).getResourceId());
+					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theFilterDeleted).getResourceId());
 					retVals.put(id, retVal);
 				} else {
 					// fetch from cache... adding to cache if not available
@@ -209,11 +236,22 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nonnull
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId) {
+		return resolveResourcePersistentIds(theRequestPartitionId, theResourceType, theId, false);
+	}
+
+	/**
+	 * Given a resource type and ID, determines the internal persistent ID for the resource.
+	 * Optionally filters out deleted resources.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theFilterDeleted){
 		Validate.notNull(theId, "theId must not be null");
 
 		Map<String, ResourcePersistentId> retVal = resolveResourcePersistentIds(theRequestPartitionId,
 			theResourceType,
-			Collections.singletonList(theId));
+			Collections.singletonList(theId),
+			theFilterDeleted);
 		return retVal.get(theId); // should be only one
 	}
 
@@ -406,7 +444,7 @@ public class IdHelperService implements IIdHelperService {
 		return typeToIds;
 	}
 
-	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
+	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theFilterDeleted) {
 		assert theRequestPartitionId != null;
 
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
@@ -471,6 +509,12 @@ public class IdHelperService implements IIdHelperService {
 					Long resourcePid = (Long) next[1];
 					String forcedId = (String) next[2];
 					Date deletedAt = (Date) next[3];
+
+					boolean isResourceDeleted = deletedAt != null;
+					if(theFilterDeleted && isResourceDeleted){
+						continue;
+					}
+
 					ResourceLookup lookup = new ResourceLookup(resourceType, resourcePid, deletedAt);
 					if (!retVal.containsKey(forcedId)) {
 						retVal.put(forcedId, new ArrayList<>());
