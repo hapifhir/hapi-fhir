@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.interceptor;
+package ca.uhn.fhir.mdm.interceptor;
 
 /*-
  * #%L
@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -216,7 +214,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllMdmLinks(AtomicInteger theCounter) {
 		ourLog.debug("Expunging all MdmLink records");
-		theCounter.addAndGet(((ExpungeEverythingService)myExpungeEverythingService).expungeEverythingByType(MdmLink.class));
+		theCounter.addAndGet(myExpungeEverythingService.expungeEverythingMdmLinks());
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
