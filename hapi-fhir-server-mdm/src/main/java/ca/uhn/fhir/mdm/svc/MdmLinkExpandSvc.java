@@ -136,8 +136,7 @@ public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 			flattenedPids.add(tuple.getSourcePid());
 			flattenedPids.add(tuple.getGoldenPid());
 		});
-		Set<ResourcePersistentId> pids  = flattenedPids.stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
-		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(pids);
+		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(flattenedPids);
 		ourLog.debug("Pid {} has been expanded to [{}]", initialPid, String.join(",", resourceIds));
 		return resourceIds;
 	}
