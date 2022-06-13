@@ -929,7 +929,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 		@Test
-		public void sortStillRequiresSql() {
+		public void sortDoesntRequireSqlAnymore() {
 
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
@@ -940,7 +940,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
 		}
 
 		@Test
@@ -1494,21 +1494,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			}
 
 			/**
-			 * Sorting is not implemented for normalized quantities, so quantities will be sorted
-			 * by their absolute values (with no unit conversions)
+			 * Sorting is now implemented for normalized quantities
 			 */
 			@Nested
 			public class Sorting {
 
 				@Test
 				public void sortByNumeric() {
-					String idAlpha6 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();
-					String idAlpha5 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();
-					String idAlpha7 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();
+					String idAlpha1 = withObservationWithQuantity(0.06, UCUM_CODESYSTEM_URL, "10*6/L" ).getIdPart();   		// 60,000
+					String idAlpha2 = withObservationWithQuantity(50, UCUM_CODESYSTEM_URL, "10*3/L" ).getIdPart();			// 50,000
+					String idAlpha3 = withObservationWithQuantity(0.000070, UCUM_CODESYSTEM_URL, "10*9/L" ).getIdPart();	// 70_000
 
 					// this search is not freetext because there is no freetext-known parameter name
 					List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_sort=value-quantity");
-					assertThat(allIds, contains(idAlpha7, idAlpha6, idAlpha5));
+					assertThat(allIds, contains(idAlpha2, idAlpha1, idAlpha3));
 				}
 			}
 
@@ -1866,74 +1865,325 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
 		}
 
-		@Test
-		public void sortedSearchTokenAndDate() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
-				myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag")
-			)).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
-				myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag")
-			)).getIdPart();
+		@Nested
+		public class OneProperty {
 
-			myCaptureQueriesListener.clear();
-			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-date");
+			@Nested
+			public class NotIncludingNulls {
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			assertEquals(2, result.getAllResources().size());
-			DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
-			DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
-			// requested date descending so first result should be the one with the latest effective date: id2
-			assertTrue(effectiveFirst.after(effectiveSecond));
+				@Test
+				public void byToken() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTagA")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTagB")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// asked _tag (token) descending so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byTokenSystemFirst() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.orgA", "aTagD")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.orgB", "aTagC")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// asked _tag (token) descending using system then code so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byDate() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-date");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requesteddate descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byValueString() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-string");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested value-string descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byQuantity() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-quantity");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested qty descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byUri() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTag")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withProfile("http://example.com/theProfile2")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_profile");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byReference() {
+					Patient patient1 = new Patient();
+					IIdType patId1 = myPatientDao.create(patient1, mySrd).getId();
+
+					Observation obs1 = new Observation();
+					obs1.setSubject(new Reference(patId1.toString()));
+					String obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+
+					Patient patient2 = new Patient();
+					IIdType patId2 = myPatientDao.create(patient2, mySrd).getId();
+
+					Observation obs2 = new Observation();
+					obs2.setSubject(new Reference(patId2.toString()));
+					String obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-subject");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested reference descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(obsId2, obsId1));
+				}
+
+			}
+
+			@Nested
+			public class IncludingNulls {
+
+				@Test
+				public void byToken() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTag")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// should use nulls last so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byDate() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-date");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// should use nulls last so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byValueString() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-string");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// should use nulls last so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byQuantity() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-quantity");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested qty descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byUri() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withProfile("http://example.com/theProfile2")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_profile");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested nulls last so order should be id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byReference() {
+					Observation obs1 = new Observation();
+					String obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+
+					Patient patient2 = new Patient();
+					IIdType patId2 = myPatientDao.create(patient2, mySrd).getId();
+
+					Observation obs2 = new Observation();
+					obs2.setSubject(new Reference(patId2.toString()));
+					String obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless().getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-subject");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested reference with nulls last so order should be: obsId2, obsId1
+					assertThat(getResultIds(result), contains(obsId2, obsId1));
+				}
+			}
+
 		}
 
-		@Test
-		public void sortedSearchTokenAndValueString() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
-				myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag"),
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
-			)).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
-				myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
-				myTestDataBuilder.withTag("http://example.org", "aTag"),
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
-			)).getIdPart();
+		@Nested
+		public class CombinedProperties {
 
-			myCaptureQueriesListener.clear();
-			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-string");
+			@Test
+			public void byTokenAndDate() {
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag")
+				)).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
+					myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag")
+				)).getIdPart();
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			assertEquals(2, result.getAllResources().size());
-			DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
-			DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
-			// requested date descending so first result should be the one with the latest effective date: id2
-			assertTrue(effectiveFirst.after(effectiveSecond));
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-date");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertEquals(2, result.getAllResources().size());
+				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
+				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
+				// requested date descending so first result should be the one with the latest effective date: id2
+				assertTrue(effectiveFirst.after(effectiveSecond));
+			}
+
+			@Test
+			public void byTokenAndValueString() {
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-1")
+				)).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-2"),
+					myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "a-string-value-2")
+				)).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-string");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertEquals(2, result.getAllResources().size());
+				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
+				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
+				// requested date descending so first result should be the one with the latest effective date: id2
+				assertTrue(effectiveFirst.after(effectiveSecond));
+			}
+
+			@Test
+			public void byTokenAndQuantity() {
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
+				)).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
+				)).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-quantity");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				// requested qty descending so order should be id2, id1
+				assertThat(getResultIds(result), contains(id2, id1));
+			}
+
 		}
 
-		@Test
-		public void sortedSearchTokenAndQuantity() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withTag("http://example.org", "aTag"),
-				myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
-			)).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withTag("http://example.org", "aTag"),
-				myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
-			)).getIdPart();
-
-			myCaptureQueriesListener.clear();
-			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-quantity");
-
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			// requested qty descending so order should be id2, id1
-			assertThat(getResultIds(result), contains(id2, id1));
-		}
 
 		private List<String> getResultIds(IBundleProvider theResult) {
 			return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());

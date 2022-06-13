@@ -257,7 +257,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private Optional<SortFinalStep> getSortClause(SearchSortFactory theF, SortSpec theSortSpec) {
-		List<String> paramNodeNameList = getParamNodeName(theSortSpec.getParamName());
+		List<String> paramNodeNameList = myFulltextParameterRegistry.getTypeAndFieldPaths(theSortSpec.getParamName());
 		if (paramNodeNameList.isEmpty()) {
 			ourLog.warn("Unable to sort by parameter '" + theSortSpec.getParamName() + "'. Sort parameter ignored.");
 			return Optional.empty();
@@ -278,14 +278,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		return Optional.of(sortFinalStep);
-	}
-
-
-	private List<String> getParamNodeName(String theParamName) {
-//		fixme jm: if not using key no need map.entry
-		Map.Entry<RestSearchParameterTypeEnum, List<String>> paramTypeAndFieldPaths =
-			myFulltextParameterRegistry.getTypeAndFieldPaths(theParamName);
-		return paramTypeAndFieldPaths.getValue();
 	}
 
 

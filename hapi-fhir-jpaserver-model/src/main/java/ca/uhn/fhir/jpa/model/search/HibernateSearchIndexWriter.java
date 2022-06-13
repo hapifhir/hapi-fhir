@@ -127,6 +127,10 @@ public class HibernateSearchIndexWriter {
 		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
 		referenceIndexNode.addValue("value", theValue);
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+
+		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "reference", "value");
+		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.REFERENCE);
+
 	}
 
 	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
@@ -188,6 +192,10 @@ public class HibernateSearchIndexWriter {
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+
+			String indexKey = String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE);
+			myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.URI);
+
 		}
 	}
 
