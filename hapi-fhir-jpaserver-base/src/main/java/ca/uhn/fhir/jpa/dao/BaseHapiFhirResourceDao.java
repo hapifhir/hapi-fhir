@@ -1882,11 +1882,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			currentEntity = readEntityLatestVersion(resourceId.toVersionless(), theRequest, theTransactionDetails);
 			validateResourceType(entity);
 		} catch (ResourceNotFoundException e) {
-			throw new ResourceNotFoundException(Msg.code(2085) + "Resource not found [" + resourceId + "] - Doesn't exist");
+			throw new ResourceNotFoundException(Msg.code(2087) + "Resource not found [" + resourceId + "] - Doesn't exist");
 		}
 
 		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
-			throw new UnprocessableEntityException(Msg.code(2086) + "Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
+			throw new UnprocessableEntityException(Msg.code(2088) + "Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
 
 		boolean wasDeleted = entity.getDeleted() != null;

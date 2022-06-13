@@ -2375,11 +2375,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 
 			if (myId == null || !myId.hasIdPart()) {
-				throw new InvalidRequestException(Msg.code(2087) + "No ID supplied for resource to update, can not invoke server");
+				throw new InvalidRequestException(Msg.code(2089) + "No ID supplied for resource to update, can not invoke server");
 			}
 
 			if (!myId.hasVersionIdPart()) {
-				throw new InvalidRequestException(Msg.code(2088) + "ID must contain a history version, found: " + myId.getVersionIdPart());
+				throw new InvalidRequestException(Msg.code(2090) + "ID must contain a history version, found: " + myId.getVersionIdPart());
 			}
 			invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
 
@@ -2414,10 +2414,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IUpdateWithRewriteExecutable withId(IIdType theId) {
 			if (theId == null) {
-				throw new NullPointerException(Msg.code(2089) + "theId can not be null");
+				throw new NullPointerException(Msg.code(2091) + "theId can not be null");
 			}
 			if (!theId.hasIdPart()) {
-				throw new NullPointerException(Msg.code(2090) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
+				throw new NullPointerException(Msg.code(2092) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
 			}
 			myId = theId;
 			return this;
@@ -2426,10 +2426,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IUpdateWithRewriteExecutable withId(String theId) {
 			if (theId == null) {
-				throw new NullPointerException(Msg.code(2091) + "theId can not be null");
+				throw new NullPointerException(Msg.code(2093) + "theId can not be null");
 			}
 			if (isBlank(theId)) {
-				throw new NullPointerException(Msg.code(2092) + "theId must not be blank and must contain an ID, found: " + theId);
+				throw new NullPointerException(Msg.code(2094) + "theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
 			return this;
