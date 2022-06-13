@@ -1,4 +1,6 @@
 ---
 type: fix
+issue: 3684
+jira: SMILE-4398
 title: "Previously, the working format for the Delivering Delete Events had the extension and extension value outside the
 the channel, that has been fixed to now be inside of the channel."
