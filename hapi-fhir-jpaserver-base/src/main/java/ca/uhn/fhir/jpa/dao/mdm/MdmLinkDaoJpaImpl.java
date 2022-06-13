@@ -174,10 +174,10 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 		if (theMdmLink instanceof MdmLink){
 			return  (MdmLink) theMdmLink;
 		}
-			else {
-				throw new UnprocessableEntityException(Msg.code(2082) + "Unprocessable MdmLink implementation");
-			}
+		else {
+			throw new UnprocessableEntityException(Msg.code(2082) + "Unprocessable MdmLink implementation");
 		}
+	}
 
 	@Override
 	public PageImpl<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {

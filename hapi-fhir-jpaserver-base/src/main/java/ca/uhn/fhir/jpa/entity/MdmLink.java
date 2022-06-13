@@ -136,13 +136,13 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	private String myMdmSourceType;
 
 	@Override
-	public Long getId() {
-		return myId;
+	public ResourcePersistentId getId() {
+		return new ResourcePersistentId(myId);
 	}
 
 	@Override
-	public MdmLink setId(Long theId) {
-		myId = theId;
+	public MdmLink setId(ResourcePersistentId theId) {
+		myId = theId.getIdAsLong();
 		return this;
 	}
 

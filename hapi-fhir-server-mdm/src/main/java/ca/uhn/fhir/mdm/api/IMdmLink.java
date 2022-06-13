@@ -26,9 +26,9 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import java.util.Date;
 
 public interface IMdmLink {
-	Long getId();
+	ResourcePersistentId getId();
 
-	IMdmLink setId(Long theId);
+	IMdmLink setId(ResourcePersistentId theId);
 
 	ResourcePersistentId getGoldenResourcePersistenceId();
 
