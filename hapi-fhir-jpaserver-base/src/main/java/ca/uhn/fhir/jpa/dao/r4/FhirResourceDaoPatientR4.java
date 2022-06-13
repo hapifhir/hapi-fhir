@@ -74,15 +74,7 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
-		if (theIds != null) {
-			if (theRequest.getParameters().containsKey("_mdm")) {
-				String[] paramVal = theRequest.getParameters().get("_mdm");
-				if (Arrays.asList(paramVal).contains("true")) {
-					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
-				}
-			}
-			paramMap.add("_id", theIds);
-		}
+		addMdmExpansionParamIfNecessary(theIds, theRequest, paramMap);
 
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
 			paramMap.setLoadSynchronous(true);
@@ -95,6 +87,22 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 			new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
 			theRequest,
 			requestPartitionId);
+	}
+
+	/**
+	 * If the request includes _mdm=true as a parameter, the ID parameter will be converted from, for example:
+	 * subject=Patient/123 to subject:mdm=Patient//123
+	 */
+	private void addMdmExpansionParamIfNecessary(TokenOrListParam theIds, RequestDetails theRequest, SearchParameterMap paramMap) {
+		if (theIds != null) {
+			if (theRequest.getParameters().containsKey("_mdm")) {
+				String[] paramVal = theRequest.getParameters().get("_mdm");
+				if (Arrays.asList(paramVal).contains("true")) {
+					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
+				}
+			}
+			paramMap.add("_id", theIds);
+		}
 	}
 
 	@Override
