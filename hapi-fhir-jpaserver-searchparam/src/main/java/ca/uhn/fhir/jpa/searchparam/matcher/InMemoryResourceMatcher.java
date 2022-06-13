@@ -265,17 +265,21 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchTokenParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
-		switch (theQueryParam.getModifier()) {
-			case IN:
-				return theSearchParams.myTokenParams.stream()
-					.filter(t -> t.getParamName().equals(theParamName))
-					.anyMatch(t -> systemContainsCode(theQueryParam, t));
-			case NOT_IN:
-				return theSearchParams.myTokenParams.stream()
-					.filter(t -> t.getParamName().equals(theParamName))
-					.noneMatch(t -> systemContainsCode(theQueryParam, t));
-			default:
-				return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+		if (theQueryParam.getModifier() != null) {
+			switch (theQueryParam.getModifier()) {
+				case IN:
+					return theSearchParams.myTokenParams.stream()
+						.filter(t -> t.getParamName().equals(theParamName))
+						.anyMatch(t -> systemContainsCode(theQueryParam, t));
+				case NOT_IN:
+					return theSearchParams.myTokenParams.stream()
+						.filter(t -> t.getParamName().equals(theParamName))
+						.noneMatch(t -> systemContainsCode(theQueryParam, t));
+				default:
+					return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
+			}
+		} else {
+			return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
 		}
 	}
 
