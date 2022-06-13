@@ -40,6 +40,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -296,7 +297,7 @@ public class MdmLinkDaoSvc {
 	 * @param thePartitionId      List of partitions ID being searched, where the link's partition must be in the list.
 	 * @return a list of {@link IMdmLink} entities which match the example.
 	 */
-	public PageImpl<? extends IMdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+	public Page<? extends IMdmLink> executeTypedQuery(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
 		return myMdmLinkDao.search(theGoldenResourceId, theSourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
 	}
 

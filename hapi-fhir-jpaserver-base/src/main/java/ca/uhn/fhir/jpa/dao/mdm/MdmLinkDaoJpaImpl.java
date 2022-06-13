@@ -37,6 +37,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -180,7 +181,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	}
 
 	@Override
-	public PageImpl<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
+	public Page<MdmLink> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<MdmLink> criteriaQuery = criteriaBuilder.createQuery(MdmLink.class);
 		Root<MdmLink> from = criteriaQuery.from(MdmLink.class);

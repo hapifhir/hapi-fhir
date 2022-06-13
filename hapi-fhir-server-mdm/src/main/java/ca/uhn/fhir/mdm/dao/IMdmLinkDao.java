@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -73,7 +74,7 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 
 	T validateMdmLink(IMdmLink theMdmLink) throws UnprocessableEntityException;
 
-	PageImpl<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
+	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
 	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
 }
