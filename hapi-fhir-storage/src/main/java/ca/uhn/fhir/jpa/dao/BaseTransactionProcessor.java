@@ -1193,8 +1193,8 @@ public abstract class BaseTransactionProcessor {
 		}
 	}
 
-	private boolean shouldSwapBinaryToActualResource(IBaseResource res, String resourceType, IIdType nextResourceId) {
-		if ("Binary".equalsIgnoreCase(resourceType) && nextResourceId.getResourceType() != null && nextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
+	private boolean shouldSwapBinaryToActualResource(IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
+		if ("Binary".equalsIgnoreCase(theResourceType) && theNextResourceId.getResourceType() != null && !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
 			return true;
 		} else {
 			return false;
