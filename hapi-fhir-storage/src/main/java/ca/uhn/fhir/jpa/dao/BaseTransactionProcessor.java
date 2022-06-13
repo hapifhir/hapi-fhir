@@ -1194,7 +1194,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private boolean shouldSwapBinaryToActualResource(IBaseResource res, String resourceType, IIdType nextResourceId) {
-		if ("Binary".equalsIgnoreCase(resourceType) && !nextResourceId.isResourceType("Binary")) {
+		if ("Binary".equalsIgnoreCase(resourceType) && nextResourceId.getResourceType() != null && nextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
 			return true;
 		} else {
 			return false;

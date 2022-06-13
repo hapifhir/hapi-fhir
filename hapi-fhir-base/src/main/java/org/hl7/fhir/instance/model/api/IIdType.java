@@ -59,12 +59,6 @@ public interface IIdType extends IPrimitiveType<String> {
 
 	String getResourceType();
 
-	/**
-	 * Returns a boolean indicating whether this ID is of the given type.
-	 * @param theResourceType The resource type to compare against.
-	 * @return True if resource type matches, false otherwise.
-	 */
-	boolean isResourceType(String theResourceType);
 
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
