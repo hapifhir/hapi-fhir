@@ -142,11 +142,13 @@ to true.
 
 The following API request shows an example of executing a PUT at the following endpoint.
 
-The body of the request must include the resource with the same ID and version as defined in the PUT request,
+The request must include the header `X-Rewrite-History`, and should be set to true. The body of the request must include
+the resource with the same ID and version as defined in the PUT request,
 
 ```http
 PUT [serverBase]/Patient/123/_history/3
 Content-Type: application/fhir+json
+X-Rewrite-History: true
 
 { 
    ..

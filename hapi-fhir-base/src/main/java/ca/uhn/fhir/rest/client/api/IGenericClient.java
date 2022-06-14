@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.gclient.IRead;
 import ca.uhn.fhir.rest.gclient.ITransaction;
 import ca.uhn.fhir.rest.gclient.IUntypedQuery;
 import ca.uhn.fhir.rest.gclient.IUpdate;
-import ca.uhn.fhir.rest.gclient.IUpdateWithRewrite;
 import ca.uhn.fhir.rest.gclient.IValidate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -225,7 +224,7 @@ public interface IGenericClient extends IRestfulClient {
 	 *
 	 * @since HAPI 6.1.0
 	 */
-	IUpdateWithRewrite updateHistoryRewrite();
+	IUpdate updateHistoryRewrite();
 
 	/**
 	 * Validate a resource

@@ -88,7 +88,6 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1713,7 +1712,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
 		// Execute the update in a retryable transaction
-		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theResource.getIdElement().hasVersionIdPart()) {
+		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && "true".equals(theRequest.getHeader(JpaConstants.HEADER_REWRITE_HISTORY))) {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
 		} else {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
@@ -1859,9 +1858,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @return the outcome of the operation
 	 */
 	private DaoMethodOutcome doUpdateWithHistoryRewrite(T theResource, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		if (theRequest == null || !"true".equals(theRequest.getHeader(JpaConstants.HEADER_REWRITE_HISTORY))) {
-			throw new ForbiddenOperationException(Msg.code(2093) + "The " + JpaConstants.HEADER_REWRITE_HISTORY + " header is not present on the request.");
-		}
 		StopWatch w = new StopWatch();
 
 		// No need for indexing as this will update a non-current version of the resource which will not be searchable
@@ -1875,11 +1871,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		resourceId = theResource.getIdElement();
 		assert resourceId != null;
 		assert resourceId.hasIdPart();
-		assert resourceId.hasVersionIdPart();
 
 		try {
-			entity = readEntity(resourceId, theRequest);
 			currentEntity = readEntityLatestVersion(resourceId.toVersionless(), theRequest, theTransactionDetails);
+
+			if (!resourceId.hasVersionIdPart()) {
+				throw new InvalidRequestException(Msg.code(2093) + "Invalid resource ID, ID must contain a history version");
+			}
+			entity = readEntity(resourceId, theRequest);
 			validateResourceType(entity);
 		} catch (ResourceNotFoundException e) {
 			throw new ResourceNotFoundException(Msg.code(2087) + "Resource not found [" + resourceId + "] - Doesn't exist");
@@ -1888,6 +1887,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
 			throw new UnprocessableEntityException(Msg.code(2088) + "Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
 		}
+		assert resourceId.hasVersionIdPart();
 
 		boolean wasDeleted = entity.getDeleted() != null;
 		entity.setDeleted(null);

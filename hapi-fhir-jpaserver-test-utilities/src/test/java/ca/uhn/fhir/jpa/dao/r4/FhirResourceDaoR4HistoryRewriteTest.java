@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -20,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,11 +42,11 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 	@AfterEach
 	public void tearDown() {
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("");
 	}
 
 	@Test
 	public void testHistoryRewriteNonCurrentVersion() {
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 		String systemNameModified = "testHistoryRewriteDiff";
 		String testFamilyNameModified = "Jackson";
 
@@ -51,14 +54,19 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute updates
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
 		p.addName().setFamily(testFamilyNameModified);
 		p.setId("Patient/" + id.getIdPart() + "/_history/2");
 
 		Patient history2 = myPatientDao.read(id.withVersion("2"));
+		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		ourLog.debug("Patient history 2: {}", history2);
 		myPatientDao.update(p, mySrd);
+		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(systemNameModified);
@@ -66,7 +74,10 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 		Patient history1 = myPatientDao.read(id.withVersion("1"));
 		ourLog.debug("Patient history 1: {}", history1);
+		versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
+		versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		Patient h2 = myPatientDao.read(id.withVersion("2"), mySrd);
 		assertEquals(testFamilyNameModified, h2.getName().get(0).getFamily());
@@ -81,7 +92,6 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryRewriteCurrentVersion() {
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 		String testFamilyNameModified = "Jackson";
 		String testGivenNameModified = "Randy";
 
@@ -90,12 +100,17 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		int resourceVersionsSizeInit = myResourceHistoryTableDao.findAll().size();
 
 		// execute update
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
 		p.addName().setFamily(testFamilyNameModified).setGiven(List.of(new StringType(testGivenNameModified)));
 		p.setId("Patient/" + id.getIdPart() + "/_history/3");
 
+		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
+		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		int resourceVersionsSizeAfterUpdate = myResourceHistoryTableDao.findAll().size();
 
@@ -109,7 +124,6 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 
 	@Test
 	public void testHistoryRewriteNoCustomHeader() {
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("");
 		String testFamilyNameModified = "Jackson";
 
 		// setup
@@ -124,8 +138,77 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.update(p, mySrd);
 			fail();
-		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), containsString("header is not present on the request"));
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("but this is not the current version"));
+		}
+	}
+
+	@Test
+	public void testHistoryRewriteNonExistingId() {
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		IIdType id = createPatientWithHistory();
+
+		// execute update
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(testFamilyNameModified);
+		p.setId("Patient/WrongId");
+
+		try {
+			myPatientDao.update(p, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), containsString("Doesn't exist"));
+		}
+	}
+
+	@Test
+	public void testHistoryRewriteNonExistingVersion() {
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		IIdType id = createPatientWithHistory();
+
+		// execute update
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(testFamilyNameModified);
+		p.setId("Patient/" + id.getIdPart() + "/_history/4");
+
+		try {
+			myPatientDao.update(p, mySrd);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), containsString("Doesn't exist"));
+		}
+	}
+
+	@Test
+	public void testHistoryRewriteNoHistoryVersion() {
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		IIdType id = createPatientWithHistory();
+
+		// execute update
+		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(testFamilyNameModified);
+		p.setId("Patient/" + id.getIdPart());
+
+		try {
+			myPatientDao.update(p, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Invalid resource ID, ID must contain a history version"));
 		}
 	}
 
@@ -141,14 +224,20 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		p.addName().setFamily(TEST_FAMILY_NAME);
 		p.setId("Patient/" + id.getIdPart());
 
+		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
+		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		assertNotEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
 		p.addName().setFamily(TEST_FAMILY_NAME).setGiven(List.of(new StringType(TEST_GIVEN_NAME)));
 		p.setId("Patient/" + id.getIdPart());
 
+		versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
+		versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
+		assertNotEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertEquals(TEST_FAMILY_NAME, p.getName().get(0).getFamily());

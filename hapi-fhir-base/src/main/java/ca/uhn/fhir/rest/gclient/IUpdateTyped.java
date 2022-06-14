@@ -43,4 +43,11 @@ public interface IUpdateTyped extends IUpdateExecutable {
 	 */
 	IUpdateWithQuery conditional();
 
+	/**
+	 * Specifies that the update should be a history rewrite update, which modifies
+	 * the historical version of a resource.
+	 *
+	 * @since HAPI 6.1.0
+	 */
+	IUpdateExecutable historyRewrite();
 }

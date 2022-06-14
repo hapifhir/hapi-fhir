@@ -121,9 +121,6 @@ import ca.uhn.fhir.rest.gclient.IUpdateExecutable;
 import ca.uhn.fhir.rest.gclient.IUpdateTyped;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQuery;
 import ca.uhn.fhir.rest.gclient.IUpdateWithQueryTyped;
-import ca.uhn.fhir.rest.gclient.IUpdateWithRewrite;
-import ca.uhn.fhir.rest.gclient.IUpdateWithRewriteExecutable;
-import ca.uhn.fhir.rest.gclient.IUpdateWithRewriteTyped;
 import ca.uhn.fhir.rest.gclient.IValidate;
 import ca.uhn.fhir.rest.gclient.IValidateUntyped;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -396,8 +393,8 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public IUpdateWithRewrite updateHistoryRewrite() {
-		return new UpdateHistoryRewriteInternal();
+	public IUpdate updateHistoryRewrite() {
+		return new UpdateInternal();
 	}
 
 	@Override
@@ -2253,6 +2250,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
+		private boolean myIsHistoryRewrite;
+
+		@Override
+		public IUpdateExecutable historyRewrite() {
+			myIsHistoryRewrite = true;
+			return this;
+		}
 
 		@Override
 		public IUpdateWithQuery conditional() {
@@ -2290,7 +2294,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				if (myId == null || myId.hasIdPart() == false) {
 					throw new InvalidRequestException(Msg.code(1396) + "No ID supplied for resource to update, can not invoke server");
 				}
-				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+
+				if (myIsHistoryRewrite) {
+					if (!myId.hasVersionIdPart()) {
+						throw new InvalidRequestException(Msg.code(2090) + "ID must contain a history version, found: " + myId.getVersionIdPart());
+					}
+					invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
+					invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+				} else {
+					invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+				}
 			}
 
 			addPreferHeader(myPrefer, invocation);
@@ -2341,95 +2354,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			}
 			if (isBlank(theId)) {
 				throw new NullPointerException(Msg.code(1400) + "theId must not be blank and must contain an ID, found: " + theId);
-			}
-			myId = new IdDt(theId);
-			return this;
-		}
-
-	}
-
-	private class UpdateHistoryRewriteInternal extends BaseClientExecutable<IUpdateWithRewriteExecutable, MethodOutcome>
-		implements IUpdateWithRewrite, IUpdateWithRewriteTyped, IUpdateWithRewriteExecutable {
-
-		private IIdType myId;
-		private PreferReturnEnum myPrefer;
-		private IBaseResource myResource;
-		private String myResourceBody;
-
-		@Override
-		public MethodOutcome execute() {
-
-			if (myResource == null) {
-				myResource = parseResourceBody(myResourceBody);
-			}
-
-			// If an explicit encoding is chosen, we will re-serialize to ensure the right encoding
-			if (getParamEncoding() != null) {
-				myResourceBody = null;
-			}
-
-			BaseHttpClientInvocation invocation;
-
-			if (myId == null) {
-				myId = myResource.getIdElement();
-			}
-
-			if (myId == null || !myId.hasIdPart()) {
-				throw new InvalidRequestException(Msg.code(2089) + "No ID supplied for resource to update, can not invoke server");
-			}
-
-			if (!myId.hasVersionIdPart()) {
-				throw new InvalidRequestException(Msg.code(2090) + "ID must contain a history version, found: " + myId.getVersionIdPart());
-			}
-			invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
-
-			addPreferHeader(myPrefer, invocation);
-			invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
-
-			OutcomeResponseHandler binding = new OutcomeResponseHandler(myPrefer);
-
-			return invoke(null, binding, invocation);
-		}
-
-		@Override
-		public IUpdateWithRewriteExecutable prefer(PreferReturnEnum theReturn) {
-			myPrefer = theReturn;
-			return this;
-		}
-
-		@Override
-		public IUpdateWithRewriteTyped resource(IBaseResource theResource) {
-			Validate.notNull(theResource, "Resource can not be null");
-			myResource = theResource;
-			return this;
-		}
-
-		@Override
-		public IUpdateWithRewriteTyped resource(String theResourceBody) {
-			Validate.notBlank(theResourceBody, "Body can not be null or blank");
-			myResourceBody = theResourceBody;
-			return this;
-		}
-
-		@Override
-		public IUpdateWithRewriteExecutable withId(IIdType theId) {
-			if (theId == null) {
-				throw new NullPointerException(Msg.code(2091) + "theId can not be null");
-			}
-			if (!theId.hasIdPart()) {
-				throw new NullPointerException(Msg.code(2092) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
-			}
-			myId = theId;
-			return this;
-		}
-
-		@Override
-		public IUpdateWithRewriteExecutable withId(String theId) {
-			if (theId == null) {
-				throw new NullPointerException(Msg.code(2093) + "theId can not be null");
-			}
-			if (isBlank(theId)) {
-				throw new NullPointerException(Msg.code(2094) + "theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
 			return this;
