@@ -1550,13 +1550,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 
 			if (getConfig().getInlineResourceTextBelowSize() > 0 && encodedResourceString.length() < getConfig().getInlineResourceTextBelowSize()) {
-				encodedResource.setResourceText(encodedResourceString);
-				encodedResource.setResourceBinary(null);
-				encodedResource.setEncoding(ResourceEncodingEnum.JSON);
+				populateEncodedResource(encodedResource, encodedResourceString, null, ResourceEncodingEnum.JSON);
 			} else {
-				encodedResource.setResourceText(null);
-				encodedResource.setResourceBinary(getResourceBinary(encoding, encodedResourceString));
-				encodedResource.setEncoding(encoding);
+				populateEncodedResource(encodedResource, null, resourceBinary, encoding);
 			}
 		}
 		/*
@@ -1571,6 +1567,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		updateResourceMetadata(historyEntity, theResource);
 
 		return historyEntity;
+	}
+
+	private void populateEncodedResource(EncodedResource encodedResource, String encodedResourceString, byte[] theResourceBinary, ResourceEncodingEnum theEncoding) {
+		encodedResource.setResourceText(encodedResourceString);
+		encodedResource.setResourceBinary(theResourceBinary);
+		encodedResource.setEncoding(theEncoding);
 	}
 
 	@NotNull
