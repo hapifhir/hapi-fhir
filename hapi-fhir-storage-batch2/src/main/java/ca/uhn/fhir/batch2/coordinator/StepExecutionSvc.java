@@ -163,7 +163,8 @@ public class StepExecutionSvc {
 		for (WorkChunk chunk : chunks) {
 			if (chunk.getStatus() != StatusEnum.QUEUED) {
 				// we are currently fetching all statuses from the db
-				// completed/errored/etc workchunks are propbably not useful here
+				// we will ignore non-completed steps.
+				// should we throw for errored values we find here?
 				continue;
 			}
 

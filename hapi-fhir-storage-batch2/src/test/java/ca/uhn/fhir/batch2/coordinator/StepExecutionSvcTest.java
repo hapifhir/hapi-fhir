@@ -44,9 +44,11 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -141,7 +143,8 @@ public class StepExecutionSvcTest {
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
 		StepType theStepType,
-		JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor
+		JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor,
+		boolean theMockOutTargetStep
 	) {
 		myDataSink = spy(new TestDataSink<>(theWorkCursor));
 		JobDefinition<TestJobParameters> jobDefinition = createTestJobDefinition(
@@ -157,8 +160,10 @@ public class StepExecutionSvcTest {
 			.thenReturn(jobDefinition);
 		when(theWorkCursor.getCurrentStep())
 			.thenReturn(step);
-		when(myDataSink.getTargetStep())
-			.thenReturn(step);
+		if (theMockOutTargetStep) {
+			when(myDataSink.getTargetStep())
+				.thenReturn(step);
+		}
 
 		return step;
 	}
@@ -173,7 +178,7 @@ public class StepExecutionSvcTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true);
 
 		// when
 		when(workCursor.isReductionStep())
@@ -192,6 +197,15 @@ public class StepExecutionSvcTest {
 		);
 
 		// verify
+		ArgumentCaptor<WorkChunk> chunkCaptor = ArgumentCaptor.forClass(WorkChunk.class);
+		verify(myReductionStep, times(chunks.size()))
+			.addChunk(chunkCaptor.capture(), any(Class.class));
+		List<WorkChunk> chunksSubmitted = chunkCaptor.getAllValues();
+		assertEquals(chunks.size(), chunksSubmitted.size());
+		for (WorkChunk submitted : chunksSubmitted) {
+			assertTrue(chunkIds.contains(submitted.getId()));
+		}
+
 		assertTrue(result.isSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof ReductionStepDataSink);
 		ArgumentCaptor<StepExecutionDetails> executionDetsCaptor = ArgumentCaptor.forClass(StepExecutionDetails.class);
@@ -213,6 +227,55 @@ public class StepExecutionSvcTest {
 	}
 
 	@Test
+	public void doExecution_reductionStepWithErrors_returnsFalseAndMarksPreviousChunksFailed() {
+		// setup
+		String errorMsg = "Exceptional!";
+		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
+		List<WorkChunk> chunks = new ArrayList<>();
+		for (String id : chunkIds) {
+			chunks.add(createWorkChunk(id));
+		}
+		JobInstance jobInstance = getTestJobInstance();
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false);
+
+		// when
+		when(workCursor.isReductionStep())
+			.thenReturn(true);
+		when(myJobPersistence.fetchAllWorkChunks(eq(INSTANCE_ID), eq(true)))
+			.thenReturn(chunks);
+		doThrow(new RuntimeException(errorMsg))
+			.when(myReductionStep).addChunk(any(WorkChunk.class), any(Class.class));
+
+		// test
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			null
+		);
+
+		// verify
+		assertFalse(result.isSuccessful());
+		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<List<String>> idCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myJobPersistence)
+			.markWorkChunksWithStatusAndWipeData(
+				eq(INSTANCE_ID),
+				idCaptor.capture(),
+				eq(StatusEnum.FAILED),
+				errorCaptor.capture()
+			);
+		List<String> capturedIds = idCaptor.getValue();
+		assertEquals(chunkIds.size(), capturedIds.size());
+		for (String chunkId : chunkIds) {
+			assertTrue(capturedIds.contains(chunkId));
+		}
+		assertTrue(errorCaptor.getValue().contains(errorMsg));
+		verify(myReductionStep, never())
+			.run(any(), any());
+	}
+
+	@Test
 	public void doExecution_nonReductionIntermediateStepWithValidInput_executesAsExpected() {
 		doExecution_nonReductionStep(0);
 	}
@@ -231,7 +294,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true);
 
 		// when
 		when(myNonReductionStep.run(
@@ -275,7 +338,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, VoidModel> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor);
+		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, true);
 
 		// when
 		when(workCursor.isFinalStep())
@@ -331,7 +394,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true);
 
 		// when
 		when(myNonReductionStep.run(any(), any()))
