@@ -28,7 +28,8 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneSearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.search.IExtendedFulltextSortHelper;
+import ca.uhn.fhir.jpa.model.search.ExtendedFulltextSearchParamRegistry;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -44,9 +45,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
-import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
@@ -75,8 +74,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -103,18 +100,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	ModelConfig myModelConfig;
 
+	@Autowired
+	private ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
+
+	@Autowired
+	private IExtendedFulltextSortHelper myExtendedFulltextSortHelper;
+
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
 	private Boolean ourDisabled;
-
-	private final ExtendedLuceneSearchParamRegistry myFulltextParameterRegistry;
 
 	/**
 	 * Constructor
 	 */
 	public FulltextSearchSvcImpl() {
 		super();
-		myFulltextParameterRegistry = new ExtendedLuceneSearchParamRegistry();
 	}
 
 	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
@@ -229,55 +229,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			);
 
 		if (theParams.getSort() != null) {
-			query.sort( f -> getSortClauses(f, theParams.getSort()) );
+			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort()) );
 
 			// indicate parameter was processed
 			theParams.setSort(null);
 		}
 
 		return query;
-	}
-
-
-	private SortFinalStep getSortClauses(SearchSortFactory theF, SortSpec theSortParams) {
-		var sortStep = theF.composite();
-		Optional<SortFinalStep> sortClauseOpt = getSortClause(theF, theSortParams);
-		sortClauseOpt.ifPresent(sortStep::add);
-
-		SortSpec nextParam = theSortParams.getChain();
-		while( nextParam != null ) {
-			sortClauseOpt = getSortClause(theF, nextParam);
-			sortClauseOpt.ifPresent(sortStep::add);
-
-			nextParam = nextParam.getChain();
-		}
-
-		return sortStep;
-	}
-
-
-	private Optional<SortFinalStep> getSortClause(SearchSortFactory theF, SortSpec theSortSpec) {
-		List<String> paramNodeNameList = myFulltextParameterRegistry.getTypeAndFieldPaths(theSortSpec.getParamName());
-		if (paramNodeNameList.isEmpty()) {
-			ourLog.warn("Unable to sort by parameter '" + theSortSpec.getParamName() + "'. Sort parameter ignored.");
-			return Optional.empty();
-		}
-
-		var sortFinalStep = theF.composite();
-		for (String s : paramNodeNameList) {
-			var sortStep = theF.field(s);
-
-			if (theSortSpec.getOrder().equals(SortOrderEnum.DESC)) {
-				sortStep.desc();
-			} else {
-				sortStep.asc();
-			}
-
-			// field could have no value
-			sortFinalStep.add( sortStep.missing().last() );
-		}
-
-		return Optional.of(sortFinalStep);
 	}
 
 

@@ -53,10 +53,10 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
-	private final ExtendedLuceneSearchParamRegistry myFulltextParameterRegistry;
+	private final ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
 
 	public ExtendedLuceneIndexData(FhirContext theFhirContext,
-			ModelConfig theModelConfig, ExtendedLuceneSearchParamRegistry theFulltextParameterRegistry) {
+			ModelConfig theModelConfig, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
 		this.myFhirContext = theFhirContext;
 		this.myModelConfig = theModelConfig;
 		this.myFulltextParameterRegistry = theFulltextParameterRegistry;

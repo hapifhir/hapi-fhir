@@ -9,7 +9,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 
 /**
- * Filters (chooses which set of properties to return) based on the registered properties
+ * Selects which set of properties to return based on the registered properties
  * for QUANTITY type parameter
  */
 public class FreetextSortPropertyFilterQuantity implements IFreetextSortPropertyFilter {

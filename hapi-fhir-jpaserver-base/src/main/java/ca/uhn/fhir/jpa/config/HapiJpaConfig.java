@@ -27,6 +27,12 @@ import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.search.ExtendedFulltextSortHelperImpl;
+import ca.uhn.fhir.jpa.dao.search.IExtendedFulltextSortHelper;
+import ca.uhn.fhir.jpa.model.search.ExtendedFulltextSearchParamRegistry;
+import ca.uhn.fhir.jpa.model.search.FreetextSortPropertyFilterHelper;
+import ca.uhn.fhir.jpa.model.search.FreetextSortPropertyFilterQuantity;
+import ca.uhn.fhir.jpa.model.search.IFreetextSortPropertyFilter;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -44,6 +50,27 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @Import({JpaConfig.class})
 public class HapiJpaConfig {
+
+	@Bean
+	public IExtendedFulltextSortHelper extendedFulltextSortHelper() {
+		return new ExtendedFulltextSortHelperImpl(extendedFulltextSearchParamRegistry());
+	}
+
+	@Bean
+	public IFreetextSortPropertyFilter freetextSortPropertyFilterQuantity() {
+		return new FreetextSortPropertyFilterQuantity();
+	}
+
+	@Bean
+	public FreetextSortPropertyFilterHelper mySortPropertyFilterHelper() {
+		return new FreetextSortPropertyFilterHelper();
+	}
+
+	@Bean
+	public ExtendedFulltextSearchParamRegistry extendedFulltextSearchParamRegistry() {
+		return new ExtendedFulltextSearchParamRegistry(mySortPropertyFilterHelper());
+	}
+
 	@Bean
 	public IFulltextSearchSvc fullTextSearchSvc() {
 		return new FulltextSearchSvcImpl();

@@ -7,7 +7,7 @@
  * This package extends this search to support token, string, and reference parameters via {@link ca.uhn.fhir.jpa.model.entity.ResourceTable#myLuceneIndexData}.
  * When active, the extracted search parameters which are written to the HFJ_SPIDX_* tables are also written to the Lucene index document.
  * For now, we use the existing JPA index entities to populate the {@link ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData}
- * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor#extract(org.hl7.fhir.instance.model.api.IBaseResource, ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams, ExtendedLuceneSearchParamRegistry)} ()}
+ * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor#extract(org.hl7.fhir.instance.model.api.IBaseResource, ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams, ExtendedFulltextSearchParamRegistry)} ()}
  *
  * <h2>Implementation</h2>
  * Both {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} and {@link ca.uhn.fhir.jpa.dao.LegacySearchBuilder} delegate the
@@ -55,4 +55,4 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneSearchParamRegistry;
+import ca.uhn.fhir.jpa.model.search.ExtendedFulltextSearchParamRegistry;

@@ -57,10 +57,10 @@ public class HibernateSearchIndexWriter {
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
-	private final ExtendedLuceneSearchParamRegistry myFulltextParameterRegistry;
+	private final ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
 
 	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig,
-			DocumentElement theRoot, ExtendedLuceneSearchParamRegistry theFulltextParameterRegistry) {
+			DocumentElement theRoot, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
 		
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
@@ -77,7 +77,7 @@ public class HibernateSearchIndexWriter {
 	}
 
 	public static HibernateSearchIndexWriter forRoot(FhirContext theFhirContext, ModelConfig theModelConfig, 
-			DocumentElement theDocument, ExtendedLuceneSearchParamRegistry theFulltextParameterRegistry) {
+			DocumentElement theDocument, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
 		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument, theFulltextParameterRegistry);
 	}
 
@@ -142,7 +142,6 @@ public class HibernateSearchIndexWriter {
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
 
-//		fixme jm: which sub-field?
 		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "dt", "lower-ord");
 		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.DATE);
 		ourLog.trace("Adding Search Param Date. param: {} -- node: {}, {}", theSearchParam, indexKey, theValue);
