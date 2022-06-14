@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3696
+title: "HEAD operations are now supported on searches and the /metadata endpoint."

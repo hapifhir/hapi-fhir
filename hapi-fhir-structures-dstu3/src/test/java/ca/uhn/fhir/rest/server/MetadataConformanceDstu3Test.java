@@ -15,6 +15,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -110,6 +111,11 @@ public class MetadataConformanceDstu3Test {
 			assertThat(output, containsString("<CapabilityStatement"));
 			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
 			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
+		}
+
+		HttpRequestBase httpHead = new HttpHead("http://localhost:" + ourPort + "/metadata");
+		try (CloseableHttpResponse status = ourClient.execute(httpHead)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
 		}
 
 		httpOperation = new HttpOptions("http://localhost:" + ourPort);

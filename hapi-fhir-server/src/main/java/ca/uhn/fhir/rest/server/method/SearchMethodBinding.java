@@ -276,7 +276,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theRequest.getRequestType() == RequestTypeEnum.POST && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
 			return false;
 		}
-		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
+		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST && theRequest.getRequestType() != RequestTypeEnum.HEAD) {
 			return false;
 		}
 		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {

@@ -53,6 +53,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -278,6 +279,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(output, containsString("Unknown search parameter &quot;a&quot;"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
+	public void testHttpHeadIsPermittedWhereGetsAre() throws IOException {
+		HttpHead httpHead = new HttpHead(ourServerBase + "/CodeSystem");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(httpHead)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
+
+		MethodOutcome methodOutcome = myClient.create().resource(new CodeSystem()).execute();
+		httpHead = new HttpHead(ourServerBase + "/CodeSystem/" + methodOutcome.getId().getIdPart());
+		try (CloseableHttpResponse resp = ourHttpClient.execute(httpHead)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
 

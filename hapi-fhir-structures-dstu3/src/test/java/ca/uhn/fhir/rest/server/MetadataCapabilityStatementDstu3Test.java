@@ -15,6 +15,7 @@ import ca.uhn.fhir.util.VersionUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -40,6 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MetadataCapabilityStatementDstu3Test {
 
@@ -92,13 +94,21 @@ public class MetadataCapabilityStatementDstu3Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
+		HttpRequestBase httpHead = new HttpHead("http://localhost:" + ourPort + "/metadata");
+		try {
+			status = ourClient.execute(httpHead);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		} catch (Exception e) {
+			fail();
+		}
+
 		try {
 			httpPost = new HttpPost("http://localhost:" + ourPort + "/metadata");
 			status = ourClient.execute(httpPost);
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
 			assertEquals(
-				"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>",
+				"<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>",
 				output);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
