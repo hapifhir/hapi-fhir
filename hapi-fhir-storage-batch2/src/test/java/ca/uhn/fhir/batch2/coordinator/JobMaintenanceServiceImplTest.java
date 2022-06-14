@@ -13,7 +13,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import com.google.common.collect.Lists;
-import org.hibernate.jdbc.Work;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -58,7 +57,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Mock
 	private IJobPersistence myJobPersistence;
 	@Mock
-	private JobStepExecutorSvc myJobExecutorSvc;
+	private StepExecutionSvc myJobExecutorSvc;
 	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;

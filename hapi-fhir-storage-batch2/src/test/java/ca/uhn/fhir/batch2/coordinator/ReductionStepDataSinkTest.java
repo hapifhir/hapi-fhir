@@ -96,7 +96,7 @@ public class ReductionStepDataSinkTest {
 		verify(myJobPersistence)
 			.updateInstance(instanceCaptor.capture());
 
-		assertEquals(JsonUtil.serialize(stepData, false), instanceCaptor.getValue().getRecord());
+		assertEquals(JsonUtil.serialize(stepData, false), instanceCaptor.getValue().getReport());
 	}
 
 	@Test

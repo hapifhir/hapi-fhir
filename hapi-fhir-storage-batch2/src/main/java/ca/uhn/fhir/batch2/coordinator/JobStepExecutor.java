@@ -41,7 +41,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-	private final JobStepExecutorSvc myJobExecutorSvc;
+	private final StepExecutionSvc myJobExecutorSvc;
 
 	private final JobDefinition<PT> myDefinition;
 	private final JobInstance myInstance;
@@ -55,7 +55,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 						 @Nonnull JobInstance theInstance,
 						 @Nonnull WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull JobStepExecutorSvc theExecutor) {
+						 @Nonnull StepExecutionSvc theExecutor) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
@@ -75,7 +75,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			myWorkChunk
 		);
 
-		if (!successOutput.isIsSuccessful()) {
+		if (!successOutput.isSuccessful()) {
 			return;
 		}
 

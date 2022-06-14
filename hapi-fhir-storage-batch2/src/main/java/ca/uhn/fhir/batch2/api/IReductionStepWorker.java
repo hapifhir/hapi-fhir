@@ -20,16 +20,17 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.ListResult;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.model.api.IModelJson;
 
 /**
  * Reduction step worker.
  * @param <PT> Job Parameter Type
  * @param <IT> Input Parameter type (real input for step is ListResult of IT
- * @param <OT> Output Parameter Type
+ * @param <OT> Output Job Report Type
  */
 public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends IJobStepWorker<PT, ListResult<IT>, OT> {
+	extends IJobStepWorker<PT, IT, OT> {
 
+	void addChunk(WorkChunk theChunk, Class<IT> theInputType);
 }

@@ -24,7 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.coordinator.JobStepExecutorSvc;
+import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -72,7 +72,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
-	private final JobStepExecutorSvc myJobExecutorSvc;
+	private final StepExecutionSvc myJobExecutorSvc;
 
 	/**
 	 * Constructor
@@ -81,7 +81,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 												@Nonnull IJobPersistence theJobPersistence,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
-												@Nonnull JobStepExecutorSvc theExecutor
+												@Nonnull StepExecutionSvc theExecutor
 	) {
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);

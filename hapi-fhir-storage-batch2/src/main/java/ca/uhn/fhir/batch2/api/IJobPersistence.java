@@ -22,17 +22,13 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface IJobPersistence {
-
-	interface IChunkProcessor {
-		void addChunk(WorkChunk theChunk);
-	}
 
 	/**
 	 * Stores a chunk of work for later retrieval. This method should be atomic and should only
@@ -56,7 +52,6 @@ public interface IJobPersistence {
 
 	/**
 	 * Fetch all work chunks specified either by the list of ids or by the instance ID
-	 * @param theInstanceId - job instance id
 	 * @param theChunkIds - the list of ids of work chunks to fetch
 	 * @return - list of work chunks (with data!)
 	 */
@@ -117,12 +112,13 @@ public interface IJobPersistence {
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
 
 	/**
-	 * Reduce workchunks to a single chunk
+	 * Marks all work chunks with the provided status and erases the data
 	 * @param  theInstanceId - the instance id
-	 * @param theChunkIds - the ids of workchunks being reduced to single chunk
-	 * @return - the id of a single workchunk
+	 * @param theChunkIds - the ids of work chunks being reduced to single chunk
+	 * @param theStatus - the status to mark
+	 * @param theErrorMsg  - error message (if status warrants it)
 	 */
-	String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk);
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
 
 	/**
 	 * Increments the work chunk error count by the given amount

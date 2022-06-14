@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -117,7 +115,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
 		assertEquals(CHUNK_DATA, foundInstance.getParameters());
-		assertEquals(instance.getRecord(), foundInstance.getRecord());
+		assertEquals(instance.getReport(), foundInstance.getReport());
 
 		runInTransaction(() -> {
 			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(() -> new IllegalStateException());
@@ -413,12 +411,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(0.5d, finalInstance.getProgress());
 		assertTrue(finalInstance.isWorkChunksPurged());
 		assertEquals(3, finalInstance.getErrorCount());
-		assertEquals(instance.getRecord(), finalInstance.getRecord());
+		assertEquals(instance.getReport(), finalInstance.getReport());
 		assertEquals(instance.getEstimatedTimeRemaining(), finalInstance.getEstimatedTimeRemaining());
 	}
 
 	@Test
-	public void reduceWorkChunksToSingleChunk_reducesMultipleChunks_andStores() {
+	public void reduceWorkChunks_reducesMultipleChunks_andStores() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		ArrayList<String> chunkIds = new ArrayList<>();
@@ -435,26 +433,14 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			chunkIds.add(id);
 		}
 
-		List<WorkChunk> chunks = mySvc.fetchWorkChunks(chunkIds);
-
-		BatchWorkChunk newChunk = new BatchWorkChunk(
-			"defId",
-			1,
-			"step2",
-			instanceId,
-			0,
-			"{}"
-		);
-		String newChunkId = mySvc.reduceWorkChunksToSingleChunk(instance.getInstanceId(), chunkIds, newChunk);
+		mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, StatusEnum.COMPLETED, null);
 
 		List<WorkChunk> reducedChunks = mySvc.fetchWorkChunks(chunkIds);
-		WorkChunk newChunkFound = mySvc.fetchWorkChunks(Collections.singletonList(newChunkId)).stream().findFirst().get();
 
 		for (WorkChunk reducedChunk : reducedChunks) {
 			assertTrue(chunkIds.contains(reducedChunk.getId()));
 			assertEquals(StatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
-		assertEquals(StatusEnum.QUEUED, newChunkFound.getStatus());
 	}
 
 	@Nonnull
@@ -464,7 +450,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance.setStatus(StatusEnum.QUEUED);
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
-		instance.setRecord("TEST");
+		instance.setReport("TEST");
 		return instance;
 	}
 

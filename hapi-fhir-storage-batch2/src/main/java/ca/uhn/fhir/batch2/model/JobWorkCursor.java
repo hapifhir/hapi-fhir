@@ -114,4 +114,8 @@ public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT exte
 	public JobDefinitionStep<PT, IT, OT> getCurrentStep() {
 		return currentStep;
 	}
+
+	public boolean isReductionStep() {
+		return currentStep.isReductionStep();
+	}
 }

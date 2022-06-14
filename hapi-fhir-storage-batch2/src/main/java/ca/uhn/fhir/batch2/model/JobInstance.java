@@ -86,8 +86,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
 
-	@JsonProperty(value = "record", access = JsonProperty.Access.READ_WRITE)
-	private String myRecord;
+	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
+	private String myReport;
 
 	@JsonIgnore
 	private JobDefinition<?> myJobDefinition;
@@ -120,7 +120,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
-		setRecord(theJobInstance.getRecord());
+		setReport(theJobInstance.getReport());
 		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
@@ -275,12 +275,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCancelled = theCancelled;
 	}
 
-	public String getRecord() {
-		return myRecord;
+	public String getReport() {
+		return myReport;
 	}
 
-	public void setRecord(String theRecord) {
-		myRecord = theRecord;
+	public void setReport(String theReport) {
+		myReport = theReport;
 	}
 
 	@Override
@@ -300,7 +300,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 			.append("errorMessage", myErrorMessage)
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-			.append("record", myRecord)
+			.append("record", myReport)
 			.toString();
 	}
 

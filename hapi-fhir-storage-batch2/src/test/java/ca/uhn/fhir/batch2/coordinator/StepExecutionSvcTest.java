@@ -12,15 +12,14 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
-import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,18 +43,16 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
-public class JobStepExecutorSvcTest {
+public class StepExecutionSvcTest {
 	private static final String INSTANCE_ID = "instanceId";
 	private static final String JOB_DEFINITION_ID = "jobDefId";
 
@@ -100,9 +96,9 @@ public class JobStepExecutorSvcTest {
 	}
 
 	// our test class
-	private class TestJobStepExecutorSvc extends JobStepExecutorSvc {
+	private class TestStepExecutionSvc extends StepExecutionSvc {
 
-		public TestJobStepExecutorSvc(IJobPersistence thePersistence, BatchJobSender theSender) {
+		public TestStepExecutionSvc(IJobPersistence thePersistence, BatchJobSender theSender) {
 			super(thePersistence, theSender);
 		}
 
@@ -136,11 +132,11 @@ public class JobStepExecutorSvcTest {
 	@Mock
 	private BatchJobSender myJobSender;
 
-	private TestJobStepExecutorSvc myExecutorSvc;
+	private TestStepExecutionSvc myExecutorSvc;
 
 	@BeforeEach
 	public void init() {
-		myExecutorSvc = new TestJobStepExecutorSvc(myJobPersistence, myJobSender);
+		myExecutorSvc = new TestStepExecutionSvc(myJobPersistence, myJobSender);
 	}
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
@@ -175,16 +171,15 @@ public class JobStepExecutorSvcTest {
 		for (String id : chunkIds) {
 			chunks.add(createWorkChunk(id));
 		}
-		String newChunkId = "newChunk";
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor);
 
 		// when
+		when(workCursor.isReductionStep())
+			.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunks(eq(INSTANCE_ID), eq(true)))
 			.thenReturn(chunks);
-		when(myJobPersistence.reduceWorkChunksToSingleChunk(eq(jobInstance.getInstanceId()), anyList(), any(BatchWorkChunk.class)))
-			.thenReturn(newChunkId);
 		when(myReductionStep.run(
 			any(StepExecutionDetails.class), any(IJobDataSink.class)
 		)).thenReturn(RunOutcome.SUCCESS);
@@ -197,21 +192,19 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
-		assertTrue(result.isIsSuccessful());
+		assertTrue(result.isSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof ReductionStepDataSink);
 		ArgumentCaptor<StepExecutionDetails> executionDetsCaptor = ArgumentCaptor.forClass(StepExecutionDetails.class);
 		verify(myReductionStep).run(executionDetsCaptor.capture(), eq(myDataSink));
 		assertTrue(executionDetsCaptor.getValue() instanceof ReductionStepExecutionDetails);
 		ArgumentCaptor<List<String>> chunkIdCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myJobPersistence).reduceWorkChunksToSingleChunk(eq(INSTANCE_ID),
-			chunkIdCaptor.capture(), any(BatchWorkChunk.class));
+		verify(myJobPersistence).markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
+			chunkIdCaptor.capture(), eq(StatusEnum.COMPLETED), eq(null));
 		List<String> capturedIds = chunkIdCaptor.getValue();
 		assertEquals(chunkIds.size(), capturedIds.size());
 		for (String chunkId : chunkIds) {
 			assertTrue(capturedIds.contains(chunkId));
 		}
-		verify(myJobPersistence).markWorkChunkAsCompletedAndClearData(eq(newChunkId),
-			eq(0));
 
 		// nevers
 		verifyNoErrors(0);
@@ -255,7 +248,7 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
-		assertTrue(result.isIsSuccessful());
+		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
 			.markWorkChunkAsCompletedAndClearData(eq(chunk.getId()), anyInt());
 		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
@@ -298,7 +291,7 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
-		assertTrue(result.isIsSuccessful());
+		assertTrue(result.isSuccessful());
 		assertTrue(myDataSink.myActualDataSink instanceof FinalStepDataSink);
 
 		// nevers
@@ -352,7 +345,7 @@ public class JobStepExecutorSvcTest {
 		);
 
 		// verify
-		assertFalse(output.isIsSuccessful());
+		assertFalse(output.isSuccessful());
 	}
 
 	/**********************/
@@ -372,7 +365,7 @@ public class JobStepExecutorSvcTest {
 		verify(myJobPersistence, never())
 			.fetchWorkChunkSetStartTimeAndMarkInProgress(anyString());
 		verify(myJobPersistence, never())
-			.reduceWorkChunksToSingleChunk(anyString(), anyList(), any());
+			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
 			.fetchAllWorkChunks(anyString(), anyBoolean());
 	}
@@ -389,6 +382,7 @@ public class JobStepExecutorSvcTest {
 		WorkChunk chunk = new WorkChunk();
 		chunk.setInstanceId(INSTANCE_ID);
 		chunk.setId(theId);
+		chunk.setStatus(StatusEnum.QUEUED);
 		chunk.setData(JsonUtil.serialize(
 			new StepInputData()
 		));

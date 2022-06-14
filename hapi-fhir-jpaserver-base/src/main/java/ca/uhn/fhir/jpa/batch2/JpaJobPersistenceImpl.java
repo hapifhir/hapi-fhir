@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.util.ArrayUtil;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -40,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -85,11 +87,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<WorkChunk> fetchWorkChunks(List<String> theChunkIds) {
-		Iterable<Batch2WorkChunkEntity> entities = myWorkChunkRepository.findAllById(theChunkIds);
 		List<WorkChunk> chunks = new ArrayList<>();
-		for (Batch2WorkChunkEntity entity : entities) {
-			chunks.add(toChunk(entity, true));
+
+		List<List<String>> listOfListOfIds = ArrayUtil.subdivideListIntoListOfLists(theChunkIds, 100);
+		for (List<String> idList : listOfListOfIds) {
+			Iterable<Batch2WorkChunkEntity> entities = myWorkChunkRepository.findAllById(idList);
+			for (Batch2WorkChunkEntity entity : entities) {
+				chunks.add(toChunk(entity, true));
+			}
 		}
+
 		return chunks;
 	}
 
@@ -105,7 +112,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		entity.setCreateTime(new Date());
-		entity.setReport(theInstance.getRecord());
+		entity.setReport(theInstance.getReport());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -179,7 +186,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setParameters(theEntity.getParams());
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
-		retVal.setRecord(theEntity.getReport());
+		retVal.setReport(theEntity.getReport());
 		return retVal;
 	}
 
@@ -199,10 +206,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk) {
-		myWorkChunkRepository.updateAllChunksForInstanceStatusAndClearDataForEndSuccess(theChunkIds, new Date(), StatusEnum.COMPLETED);
-
-		return storeWorkChunk(theNewChunk);
+	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
+		List<List<String>> listOfListOfIds = ArrayUtil.subdivideListIntoListOfLists(theChunkIds, 100);
+		for (List<String> idList : listOfListOfIds) {
+			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, theErrorMsg);
+		}
 	}
 
 	@Override
@@ -217,10 +225,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return chunks;
 	}
 
-	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, IChunkProcessor theProcessor) {
+	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
 		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
 		for (Batch2WorkChunkEntity chunk : chunks) {
-			theProcessor.addChunk(toChunk(chunk, theIncludeData));
+			theConsumer.accept(toChunk(chunk, theIncludeData));
 		}
 	}
 
@@ -255,7 +263,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setErrorCount(theInstance.getErrorCount());
 		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
 		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
-		instance.setReport(theInstance.getRecord());
+		instance.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instance);
 	}

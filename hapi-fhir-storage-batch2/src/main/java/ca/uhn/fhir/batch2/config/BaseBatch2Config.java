@@ -24,7 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.JobStepExecutorSvc;
+import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -55,8 +55,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public JobStepExecutorSvc jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new JobStepExecutorSvc(myPersistence, theBatchJobSender);
+	public StepExecutionSvc jobStepExecutorService(BatchJobSender theBatchJobSender) {
+		return new StepExecutionSvc(myPersistence, theBatchJobSender);
 	}
 
 	@Bean
@@ -67,7 +67,7 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
 															  BatchJobSender theBatchJobSender,
-															  JobStepExecutorSvc theExecutor) {
+															  StepExecutionSvc theExecutor) {
 		return new JobCoordinatorImpl(
 			theBatchJobSender,
 			batch2ProcessingChannelReceiver(myChannelFactory),
@@ -81,7 +81,7 @@ public abstract class BaseBatch2Config {
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
 																				 BatchJobSender theBatchJobSender,
-																				 JobStepExecutorSvc theExecutor
+																				 StepExecutionSvc theExecutor
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,
