@@ -45,6 +45,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -55,13 +56,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import static ca.uhn.fhir.rest.param.TokenParamModifier.IN;
-import static ca.uhn.fhir.rest.param.TokenParamModifier.NOT_IN;
+import java.util.Set;
 
 public class InMemoryResourceMatcher {
 
+	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS, Constants.PARAM_TAG, Constants.PARAM_PROFILE, Constants.PARAM_SECURITY);
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -151,18 +150,7 @@ public class InMemoryResourceMatcher {
 
 		String resourceName = theResourceDefinition.getName();
 		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
-		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, paramDef, theAndOrParams);
-
-		if (!checkUnsupportedResult.supported()) {
-			return checkUnsupportedResult;
-		}
-
-		if (hasChain(theAndOrParams)) {
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
-		}
-
-		checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
-
+		InMemoryMatchResult checkUnsupportedResult = checkForUnsupportedParameters(theParamName, paramDef, theAndOrParams);
 		if (!checkUnsupportedResult.supported()) {
 			return checkUnsupportedResult;
 		}
@@ -170,17 +158,45 @@ public class InMemoryResourceMatcher {
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
 				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
-
-			case Constants.PARAM_HAS:
-			case Constants.PARAM_TAG:
-			case Constants.PARAM_PROFILE:
-			case Constants.PARAM_SECURITY:
-				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			case Constants.PARAM_SOURCE:
 				return InMemoryMatchResult.fromBoolean(matchSourcesAndOr(theAndOrParams, theResource));
 			default:
 				return matchResourceParam(myModelConfig, theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
+	}
+
+	private InMemoryMatchResult checkForUnsupportedParameters(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
+
+		if (UNSUPPORTED_PARAMETER_NAMES.contains(theParamName)) {
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
+		}
+
+		for (List<IQueryParameterType> orParams : theAndOrParams) {
+			// The list should never be empty, but better safe than sorry
+			if (orParams.size() > 0) {
+				// The params in each OR list all share the same qualifier, prefix, etc., so we only need to check the first one
+				InMemoryMatchResult checkUnsupportedResult = checkOneParameterForUnsupportedModifiers(theParamName, theParamDef, orParams.get(0));
+				if (!checkUnsupportedResult.supported()) {
+					return checkUnsupportedResult;
+				}
+			}
+		}
+
+		return InMemoryMatchResult.successfulMatch();
+	}
+
+	private InMemoryMatchResult checkOneParameterForUnsupportedModifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, theParamDef, theParam);
+
+		if (checkUnsupportedResult.supported() && hasChain(theParam)) {
+			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
+		}
+
+		if (checkUnsupportedResult.supported()) {
+			checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, theParamDef, theParam);
+		}
+
+		return checkUnsupportedResult;
 	}
 
 	private boolean matchSourcesAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
@@ -264,6 +280,18 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
+	/**
+	 * Checks whether a query parameter of type token matches one of the search parameters of an in-memory resource.
+	 * Only the :in and :not-in qualifiers are supported. Any other qualifier will be ignored and the match will be
+	 * treated as unqualified.
+	 * @param theModelConfig a model configuration
+	 * @param theResourceName the name of the resource type being matched
+	 * @param theParamName the name of the parameter
+	 * @param theParamDef the definition of the search parameter
+	 * @param theSearchParams the search parameters derived from the target resource
+	 * @param theQueryParam the query parameter to compare with theSearchParams
+	 * @return true if theQueryParam matches the collection of theSearchParams, otherwise false
+	 */
 	private boolean matchTokenParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, TokenParam theQueryParam) {
 		if (theQueryParam.getModifier() != null) {
 			switch (theQueryParam.getModifier()) {
@@ -292,26 +320,20 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {
-		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param instanceof ReferenceParam && ((ReferenceParam) param).getChain() != null);
+	private boolean hasChain(IQueryParameterType theParam) {
+		return theParam instanceof ReferenceParam && ((ReferenceParam) theParam).getChain() != null;
 	}
 
-	private boolean hasQualifiers(List<List<IQueryParameterType>> theAndOrParams) {
-		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param.getQueryParameterQualifier() != null);
+	private boolean hasQualifiers(IQueryParameterType theParam) {
+		return theParam.getQueryParameterQualifier() != null;
 	}
 
-	private InMemoryMatchResult checkUnsupportedPrefixes(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
-		if (theParamDef != null) {
-			for (List<IQueryParameterType> theAndOrParam : theAndOrParams) {
-				for (IQueryParameterType param : theAndOrParam) {
-					if (param instanceof BaseParamWithPrefix) {
-						ParamPrefixEnum prefix = ((BaseParamWithPrefix<?>) param).getPrefix();
-						RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
-						if (!supportedPrefix(prefix, paramType)) {
-							return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, String.format("The prefix %s is not supported for param type %s", prefix, paramType));
-						}
-					}
-				}
+	private InMemoryMatchResult checkUnsupportedPrefixes(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		if (theParamDef != null && theParam instanceof BaseParamWithPrefix) {
+			ParamPrefixEnum prefix = ((BaseParamWithPrefix<?>) theParam).getPrefix();
+			RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
+			if (!supportedPrefix(prefix, paramType)) {
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, String.format("The prefix %s is not supported for param type %s", prefix, paramType));
 			}
 		}
 		return InMemoryMatchResult.successfulMatch();
@@ -339,17 +361,13 @@ public class InMemoryResourceMatcher {
 		return false;
 	}
 
-	private InMemoryMatchResult checkUnsupportedQualifiers(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
-		if (hasQualifiers(theAndOrParams)) {
-			Optional<IQueryParameterType> optionalParameter = theAndOrParams.stream().flatMap(List::stream).filter(param -> !supportedQualifier(theParamDef, param)).findAny();
-			if (optionalParameter.isPresent()) {
-				IQueryParameterType parameter = optionalParameter.get();
-				if (parameter instanceof ReferenceParam) {
-					ReferenceParam referenceParam = (ReferenceParam) parameter;
-					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
-				}
-				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + parameter.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
+	private InMemoryMatchResult checkUnsupportedQualifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		if (hasQualifiers(theParam) && !supportedQualifier(theParamDef, theParam)) {
+			if (theParam instanceof ReferenceParam) {
+				ReferenceParam referenceParam = (ReferenceParam) theParam;
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
 			}
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + theParam.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
 		}
 		return InMemoryMatchResult.successfulMatch();
 	}
