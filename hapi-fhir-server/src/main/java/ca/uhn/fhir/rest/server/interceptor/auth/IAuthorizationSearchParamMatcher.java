@@ -33,7 +33,7 @@ public interface IAuthorizationSearchParamMatcher {
 			return new MatchResult(Match.UNSUPPORTED, theReason);
 		}
 
-		private MatchResult(Match myMatch, String myUnsupportedReason) {
+		public MatchResult(Match myMatch, String myUnsupportedReason) {
 			this.myMatch = myMatch;
 			this.myUnsupportedReason = myUnsupportedReason;
 		}
@@ -45,5 +45,6 @@ public interface IAuthorizationSearchParamMatcher {
 		public String getUnsupportedReason() {
 			return myUnsupportedReason;
 		}
+
 	}
 }

@@ -40,7 +40,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	@RegisterExtension
 	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(FhirQueryRuleImplTest.class.getName());
 
-
 	private FhirQueryRuleImpl myRule;
 	private IBaseResource myResource;
 	@Mock

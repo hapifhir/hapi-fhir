@@ -22,6 +22,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -47,42 +48,83 @@ public class SmartV2AuthServiceTest implements ITestDataBuilder, IRuleApplier {
 	DaoTestDataBuilder myDaoTestDataBuilder;
 	@Autowired
 	FhirContext myFhirContext;
+
+
 	private AuthorizationSearchParamMatcher myMatcher;
 	private IBaseResource myResource;
 	private IAuthorizationSearchParamMatcher.MatchResult result;
 	private SystemRequestDetails mySrd = new SystemRequestDetails();
 
-	@Test
-	public void basicMatch_matches() {
-	    // given
-		myResource = buildResource("Patient", withId("anId"), withFamily("Smith"));
-
-	    // when
-		result = myMatcher.match("Patient?family=Smith", myResource);
-		// then
-		assertThat(result, notNullValue());
-		assertThat(result.getMatch(), equalTo(IAuthorizationSearchParamMatcher.Match.MATCH));
-	}
-
 	@BeforeEach
-	 void setUp() {
+	void setUp() {
 		// fixme should we add this to the context and autowire it?  publish it to the AuthInterceptor?
 		myMatcher = new AuthorizationSearchParamMatcher(mySearchParamMatcher);
 	}
 
+	@Nested
+	public class BasicMatches {
+		public void createPatient() {
+			myResource = buildResource("Patient", withId("anId"), withFamily("Smith"));
+		}
+
+		@Test
+		public void basicMatch_matches() {
+			// given
+			createPatient();
+
+			// when
+			result = myMatcher.match("Patient?family=Smith", myResource);
+
+			// then
+			assertThat(result, notNullValue());
+			assertThat(result.getMatch(), equalTo(IAuthorizationSearchParamMatcher.Match.MATCH));
+		}
+
+		@Test
+		public void basicMatch_noMatch() {
+			// given
+			createPatient();
+
+			// when
+			result = myMatcher.match("Patient?family=Jones", myResource);
+
+			// then
+			assertThat(result, notNullValue());
+			assertThat(result.getMatch(), equalTo(IAuthorizationSearchParamMatcher.Match.NO_MATCH));
+		}
+
+		@Test
+		public void basicMatch_unsupported() {
+			// given
+			createPatient();
+
+			// when
+			result = myMatcher.match("Patient?birthDate=ap2020", myResource);
+
+			// then
+			assertThat(result, notNullValue());
+			assertThat(result.getMatch(), equalTo(IAuthorizationSearchParamMatcher.Match.UNSUPPORTED));
+		}
+	}
+
 	@Test
 	public void fullRule_match_allow() {
-	    // given
+	   // given
 		myResource = buildResource("Patient", withId("anId"), withFamily("Smith"));
 		FhirQueryRuleImpl rule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 			.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
 
-	    // when
+	   // when
 		AuthorizationInterceptor.Verdict verdict = rule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, myResource, this, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);
-	    // then
+
+		// then
 		assertThat(verdict, notNullValue());
 		assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
 	}
+
+
+
+	// Inherited convenience methods
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myDaoTestDataBuilder.doCreateResource(theResource);
@@ -113,5 +155,9 @@ public class SmartV2AuthServiceTest implements ITestDataBuilder, IRuleApplier {
 	@Override
 	public IValidationSupport getValidationSupport() {
 		return null;
+	}
+	@Override
+	public AuthorizationSearchParamMatcher getSearchParamMatcher() {
+		return myMatcher;
 	}
 }

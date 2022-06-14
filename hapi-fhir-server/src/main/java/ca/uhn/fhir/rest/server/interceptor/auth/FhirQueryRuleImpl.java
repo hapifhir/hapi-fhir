@@ -11,6 +11,9 @@ import java.util.Set;
 public class FhirQueryRuleImpl extends RuleImplOp {
 	private String myFilter;
 
+	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
+
+
 	/**
 	 * Constructor
 	 *

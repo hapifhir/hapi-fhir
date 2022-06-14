@@ -12,7 +12,14 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 
 	@Override
 	public MatchResult match(String theCriteria, IBaseResource theResource) {
-		mySearchParamMatcher.match(theCriteria, theResource, null);
-		return null;
+		InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(theCriteria, theResource, null);
+		if (!inMemoryMatchResult.supported()) {
+			return new MatchResult(Match.UNSUPPORTED, inMemoryMatchResult.getUnsupportedReason());
+		}
+		if (inMemoryMatchResult.matched()) {
+			return new MatchResult(Match.MATCH, null);
+		} else {
+			return new MatchResult(Match.NO_MATCH, null);
+		}
 	}
 }
