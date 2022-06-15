@@ -37,14 +37,14 @@ public class Icd10CmLoader {
 
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private int myConceptCount;
-	private String SEVEN_CHR_DEF = "sevenChrDef";
-	private String VERSION = "version";
-	private String EXTENSION = "extension";
-	private String CHAPTER = "chapter";
-	private String SECTION = "section";
-	private String DIAG = "diag";
-	private String NAME = "name";
-	private String DESC = "desc";
+	private static final String SEVEN_CHR_DEF = "sevenChrDef";
+	private static final String VERSION = "version";
+	private static final String EXTENSION = "extension";
+	private static final String CHAPTER = "chapter";
+	private static final String SECTION = "section";
+	private static final String DIAG = "diag";
+	private static final String NAME = "name";
+	private static final String DESC = "desc";
 
 	/**
 	 * Constructor
@@ -97,7 +97,7 @@ public class Icd10CmLoader {
 		for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
 			extractCode(nextChildDiag, concept);
 			if (XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).size() != 0){
-				extractExtension(theDiagElement,nextChildDiag, concept);
+				extractExtension(theDiagElement, nextChildDiag, concept);
 			}
 		}
 
