@@ -318,6 +318,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return new RuleBuilderBulkExport();
 		}
 
+		@Override
+		public IAuthRuleBuilderUpdateHistoryRewrite updateHistoryRewrite() {
+			return new UpdateHistoryRewriteBuilder();
+		}
+
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
 
 			private AppliesTypeEnum myAppliesTo;
@@ -744,6 +749,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleFinished allRequests() {
 				BaseRule rule = new RuleImplPatch(myRuleName)
+					.setAllRequests(true)
+					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class UpdateHistoryRewriteBuilder implements IAuthRuleBuilderUpdateHistoryRewrite {
+
+			UpdateHistoryRewriteBuilder() {
+				super();
+			}
+
+			@Override
+			public IAuthRuleFinished allRequests() {
+				BaseRule rule = new RuleImplUpdateHistoryRewrite(myRuleName)
 					.setAllRequests(true)
 					.setMode(myRuleMode);
 				myRules.add(rule);
