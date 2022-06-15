@@ -53,14 +53,10 @@ public class ExtendedLuceneIndexData {
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
-	private final ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext,
-			ModelConfig theModelConfig, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
+	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
 		this.myFhirContext = theFhirContext;
 		this.myModelConfig = theModelConfig;
-		this.myFulltextParameterRegistry = theFulltextParameterRegistry;
-		
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -81,8 +77,7 @@ public class ExtendedLuceneIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(
-			myFhirContext, myModelConfig, theDocument, myFulltextParameterRegistry);
+		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 

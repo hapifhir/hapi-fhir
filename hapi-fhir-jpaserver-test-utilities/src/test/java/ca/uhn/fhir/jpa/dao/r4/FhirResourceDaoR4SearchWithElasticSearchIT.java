@@ -1872,23 +1872,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			public class NotIncludingNulls {
 
 				@Test
-				public void byToken() {
-					String id1 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withTag("http://example.org", "aTagA")
-					)).getIdPart();
-					String id2 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withTag("http://example.org", "aTagB")
-					)).getIdPart();
-
-					myCaptureQueriesListener.clear();
-					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
-
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-					// asked _tag (token) descending so order must be: id2, id1
-					assertThat(getResultIds(result), contains(id2, id1));
-				}
-
-				@Test
 				public void byTokenSystemFirst() {
 					String id1 = myTestDataBuilder.createObservation(List.of(
 						myTestDataBuilder.withTag("http://example.orgA", "aTagD")
@@ -1902,6 +1885,23 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 					// asked _tag (token) descending using system then code so order must be: id2, id1
+					assertThat(getResultIds(result), contains(id2, id1));
+				}
+
+				@Test
+				public void byTokenCode() {
+					String id1 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTagA")
+					)).getIdPart();
+					String id2 = myTestDataBuilder.createObservation(List.of(
+						myTestDataBuilder.withTag("http://example.org", "aTagB")
+					)).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// asked _tag (token) descending so order must be: id2, id1
 					assertThat(getResultIds(result), contains(id2, id1));
 				}
 
@@ -2106,6 +2106,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					// requested reference with nulls last so order should be: obsId2, obsId1
 					assertThat(getResultIds(result), contains(obsId2, obsId1));
 				}
+
 			}
 
 		}
@@ -2179,6 +2180,29 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 				// requested qty descending so order should be id2, id1
+				assertThat(getResultIds(result), contains(id2, id1));
+			}
+
+			@Test
+			public void allTogetherNow() {
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withQuantityAtPath("valueQuantity", 50, UCUM_CODESYSTEM_URL, "10*3/L")
+				)).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withObservationCode("http://example.com/", "the-code-1"),
+					myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47"),
+					myTestDataBuilder.withTag("http://example.org", "aTag"),
+					myTestDataBuilder.withQuantityAtPath("valueQuantity", 60, UCUM_CODESYSTEM_URL, "10*3/L")
+				)).getIdPart();
+
+				myCaptureQueriesListener.clear();
+				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=code,date,_tag,_tag,-value-quantity");
+
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				// all sorted values are the same except the last (value-quantity)  so order should be id2, id1
 				assertThat(getResultIds(result), contains(id2, id1));
 			}
 

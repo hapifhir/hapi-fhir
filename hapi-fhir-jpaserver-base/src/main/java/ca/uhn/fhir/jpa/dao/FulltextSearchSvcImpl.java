@@ -28,8 +28,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
-import ca.uhn.fhir.jpa.dao.search.IExtendedFulltextSortHelper;
-import ca.uhn.fhir.jpa.model.search.ExtendedFulltextSearchParamRegistry;
+import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -101,10 +100,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	ModelConfig myModelConfig;
 
 	@Autowired
-	private ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
-
-	@Autowired
-	private IExtendedFulltextSortHelper myExtendedFulltextSortHelper;
+	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 
@@ -122,7 +118,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
 		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(
 			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
-		return extractor.extract(theResource,theNewParams, myFulltextParameterRegistry);
+		return extractor.extract(theResource,theNewParams);
 	}
 
 	@Override
@@ -229,7 +225,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			);
 
 		if (theParams.getSort() != null) {
-			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort()) );
+			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
 
 			// indicate parameter was processed
 			theParams.setSort(null);

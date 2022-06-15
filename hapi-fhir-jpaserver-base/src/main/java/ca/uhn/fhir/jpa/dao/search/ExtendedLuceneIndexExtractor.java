@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
-import ca.uhn.fhir.jpa.model.search.ExtendedFulltextSearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -71,9 +70,8 @@ public class ExtendedLuceneIndexExtractor {
 	}
 
 	@NotNull
-	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams,
-														ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig, theFulltextParameterRegistry);
+	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
 
 		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));

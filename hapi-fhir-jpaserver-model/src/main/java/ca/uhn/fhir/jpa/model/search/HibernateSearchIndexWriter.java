@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.Pair;
 import org.hibernate.search.engine.backend.document.DocumentElement;
@@ -57,28 +56,20 @@ public class HibernateSearchIndexWriter {
 	final HibernateSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
-	private final ExtendedFulltextSearchParamRegistry myFulltextParameterRegistry;
 
-	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig,
-			DocumentElement theRoot, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
-		
+	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		myNodeCache = new HibernateSearchElementCache(theRoot);
-		myFulltextParameterRegistry = theFulltextParameterRegistry;
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public String getSearchParamIndexKey(String theSearchParamName, String theIndexType) {
-		return myNodeCache.getObjectPath(theSearchParamName, theIndexType);
-	}
-
-	public static HibernateSearchIndexWriter forRoot(FhirContext theFhirContext, ModelConfig theModelConfig, 
-			DocumentElement theDocument, ExtendedFulltextSearchParamRegistry theFulltextParameterRegistry) {
-		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument, theFulltextParameterRegistry);
+	public static HibernateSearchIndexWriter forRoot(
+			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
+		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -89,9 +80,6 @@ public class HibernateSearchIndexWriter {
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
 		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
-
-		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "string", IDX_STRING_LOWER);
-		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.STRING);
 
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
@@ -104,10 +92,6 @@ public class HibernateSearchIndexWriter {
 		nestedTokenNode.addValue("code", theValue.getCode());
 		nestedTokenNode.addValue("system", theValue.getSystem());
 		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
-
-		String parentIndexKey = String.join(".", NESTED_SEARCH_PARAM_ROOT, theSearchParam, "token");
-		myFulltextParameterRegistry.put(parentIndexKey + "." + "system", RestSearchParameterTypeEnum.TOKEN);
-		myFulltextParameterRegistry.put(parentIndexKey + "." + "code", RestSearchParameterTypeEnum.TOKEN);
 
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
 			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
@@ -127,10 +111,6 @@ public class HibernateSearchIndexWriter {
 		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
 		referenceIndexNode.addValue("value", theValue);
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
-
-		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "reference", "value");
-		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.REFERENCE);
-
 	}
 
 	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
@@ -142,10 +122,9 @@ public class HibernateSearchIndexWriter {
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
 
-		String indexKey = String.join(".", SEARCH_PARAM_ROOT, theSearchParam, "dt", "lower-ord");
-		myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.DATE);
-		ourLog.trace("Adding Search Param Date. param: {} -- node: {}, {}", theSearchParam, indexKey, theValue);
+		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
 	}
+
 
 
 	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
@@ -159,11 +138,6 @@ public class HibernateSearchIndexWriter {
 			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
 			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
 			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
-
-			String indexKey = String.join(".", NESTED_SEARCH_PARAM_ROOT, theSearchParam, QTY_PARAM_NAME);
-			myFulltextParameterRegistry.put(indexKey + "." + QTY_SYSTEM, RestSearchParameterTypeEnum.QUANTITY);
-			myFulltextParameterRegistry.put(indexKey + "." + QTY_CODE, RestSearchParameterTypeEnum.QUANTITY);
-			myFulltextParameterRegistry.put(indexKey + "." + QTY_VALUE, RestSearchParameterTypeEnum.QUANTITY);
 
 			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
 
@@ -179,8 +153,6 @@ public class HibernateSearchIndexWriter {
 
 			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
 			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
-
-			myFulltextParameterRegistry.put(indexKey + "." + QTY_VALUE_NORM, RestSearchParameterTypeEnum.QUANTITY);
 		}
 
 	}
@@ -191,10 +163,6 @@ public class HibernateSearchIndexWriter {
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
-
-			String indexKey = String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE);
-			myFulltextParameterRegistry.put(indexKey, RestSearchParameterTypeEnum.URI);
-
 		}
 	}
 
