@@ -20,13 +20,13 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ArrayUtil {
 
@@ -45,21 +45,4 @@ public class ArrayUtil {
 		return resourceTypes;
 	}
 
-	/**
-	 * Takes in a List of T type objects and returns a list of list of T type objects
-	 * @param theInput - the "big list" of objects
-	 * @param theSize - the size of sublists desired
-	 * @param <T> - the type of objects
-	 * @return - a list of list of T objects
-	 */
-	public static <T> List<List<T>> subdivideListIntoListOfLists(List<T> theInput, int theSize) {
-		List<List<T>> output = new ArrayList<>();
-		int size = theInput.size();
-		List<T> sublist;
-		for (int i = 0; i < size; i += theSize) {
-			sublist = new ArrayList<>(theInput.subList(i, Math.min(i + theSize, size)));
-			output.add(sublist);
-		}
-		return output;
-	}
 }

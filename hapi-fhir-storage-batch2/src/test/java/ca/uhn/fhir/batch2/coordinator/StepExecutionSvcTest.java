@@ -183,8 +183,8 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunks(eq(INSTANCE_ID), eq(true)))
-			.thenReturn(chunks);
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+			.thenReturn(chunks.iterator());
 		when(myReductionStep.run(
 			any(StepExecutionDetails.class), any(IJobDataSink.class)
 		)).thenReturn(RunOutcome.SUCCESS);
@@ -242,8 +242,8 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunks(eq(INSTANCE_ID), eq(true)))
-			.thenReturn(chunks);
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+			.thenReturn(chunks.iterator());
 		doThrow(new RuntimeException(errorMsg))
 			.when(myReductionStep).addChunk(any(WorkChunk.class), any(Class.class));
 
@@ -430,7 +430,7 @@ public class StepExecutionSvcTest {
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
-			.fetchAllWorkChunks(anyString(), anyBoolean());
+			.fetchAllWorkChunksIterator(anyString(), anyBoolean());
 	}
 
 	private JobInstance getTestJobInstance() {

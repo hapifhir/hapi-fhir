@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,11 +48,6 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
 		return myWrap.fetchWorkChunkSetStartTimeAndMarkInProgress(theChunkId);
-	}
-
-	@Override
-	public List<WorkChunk> fetchWorkChunks(List<String> theChunkIds) {
-		return myWrap.fetchWorkChunks(theChunkIds);
 	}
 
 	@Override
@@ -110,9 +106,10 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public List<WorkChunk> fetchAllWorkChunks(String theInstanceId, boolean theWithData) {
-		return myWrap.fetchAllWorkChunks(theInstanceId, theWithData);
+	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		return myWrap.fetchAllWorkChunksIterator(theInstanceId, theWithData);
 	}
+
 
 	@Override
 	public synchronized void updateInstance(JobInstance theInstance) {

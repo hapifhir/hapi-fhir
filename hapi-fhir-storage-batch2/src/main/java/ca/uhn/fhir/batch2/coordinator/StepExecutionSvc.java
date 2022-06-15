@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 public class StepExecutionSvc {
@@ -156,11 +157,12 @@ public class StepExecutionSvc {
 		IReductionStepWorker<PT, IT, OT> theWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
 		// We fetch all chunks first...
-		List<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunks(theInstance.getInstanceId(), true);
+		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), true);
 
 		List<String> chunkIds = new ArrayList<>();
 		HashSet<String> errors = new HashSet<>();
-		for (WorkChunk chunk : chunks) {
+		while (chunkIterator.hasNext()) {
+			WorkChunk chunk = chunkIterator.next();
 			if (chunk.getStatus() != StatusEnum.QUEUED) {
 				// we are currently fetching all statuses from the db
 				// we will ignore non-completed steps.

@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,13 +50,6 @@ public interface IJobPersistence {
 	 * @return The chunk of work
 	 */
 	Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId);
-
-	/**
-	 * Fetch all work chunks specified either by the list of ids or by the instance ID
-	 * @param theChunkIds - the list of ids of work chunks to fetch
-	 * @return - list of work chunks (with data!)
-	 */
-	List<WorkChunk> fetchWorkChunks(List<String> theChunkIds);
 
 	/**
 	 * Store a new job instance. This will be called when a new job instance is being kicked off.
@@ -141,9 +135,9 @@ public interface IJobPersistence {
 	 * Fetch all chunks for a given instance.
 	 * @param theInstanceId - instance id
 	 * @param theWithData - whether or not to include the data
-	 * @return - a list of all WorkChunk objs
+	 * @return - an iterator for fetching work chunks
 	 */
-	List<WorkChunk> fetchAllWorkChunks(String theInstanceId, boolean theWithData);
+	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
 	 * Update the stored instance

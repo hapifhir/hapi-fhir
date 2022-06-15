@@ -29,7 +29,8 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
-import ca.uhn.fhir.util.ArrayUtil;
+import ca.uhn.fhir.model.api.PagingIterator;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -38,6 +39,7 @@ import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,21 +85,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
 		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
 		return chunk.map(t -> toChunk(t, true));
-	}
-
-	@Override
-	public List<WorkChunk> fetchWorkChunks(List<String> theChunkIds) {
-		List<WorkChunk> chunks = new ArrayList<>();
-
-		List<List<String>> listOfListOfIds = ArrayUtil.subdivideListIntoListOfLists(theChunkIds, 100);
-		for (List<String> idList : listOfListOfIds) {
-			Iterable<Batch2WorkChunkEntity> entities = myWorkChunkRepository.findAllById(idList);
-			for (Batch2WorkChunkEntity entity : entities) {
-				chunks.add(toChunk(entity, true));
-			}
-		}
-
-		return chunks;
 	}
 
 	@Override
@@ -207,7 +194,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
-		List<List<String>> listOfListOfIds = ArrayUtil.subdivideListIntoListOfLists(theChunkIds, 100);
+		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {
 			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, theErrorMsg);
 		}
@@ -233,16 +220,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<WorkChunk> fetchAllWorkChunks(String theInstanceId, boolean theWithData) {
-		int fetchAmounts = 100;
-		ArrayList<WorkChunk> chunks = new ArrayList<>();
-		for (int page = 0; ; page++) {
-			fetchChunks(theInstanceId, theWithData, fetchAmounts, page, chunks::add);
-			if (chunks.size() < fetchAmounts) {
-				break;
-			}
-		}
-		return chunks;
+	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
 	@Override

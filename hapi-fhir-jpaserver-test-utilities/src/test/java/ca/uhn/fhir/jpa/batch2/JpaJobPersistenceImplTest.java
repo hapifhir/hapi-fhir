@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -416,7 +417,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void reduceWorkChunks_reducesMultipleChunks_andStores() {
+	public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 		ArrayList<String> chunkIds = new ArrayList<>();
@@ -435,9 +436,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, StatusEnum.COMPLETED, null);
 
-		List<WorkChunk> reducedChunks = mySvc.fetchWorkChunks(chunkIds);
+		Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
 
-		for (WorkChunk reducedChunk : reducedChunks) {
+		while (reducedChunks.hasNext()) {
+			WorkChunk reducedChunk = reducedChunks.next();
 			assertTrue(chunkIds.contains(reducedChunk.getId()));
 			assertEquals(StatusEnum.COMPLETED, reducedChunk.getStatus());
 		}

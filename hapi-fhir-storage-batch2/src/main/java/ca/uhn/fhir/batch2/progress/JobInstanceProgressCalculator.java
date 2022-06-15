@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
@@ -24,10 +25,12 @@ public class JobInstanceProgressCalculator {
 	public void calculateAndStoreInstanceProgress() {
 		InstanceProgress instanceProgress = new InstanceProgress();
 
-		List<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunks(myInstance.getInstanceId(), false);
-		for (WorkChunk chunk : chunks) {
-			myProgressAccumulator.addChunk(chunk);
-			instanceProgress.addChunk(chunk);
+		Iterator<WorkChunk> workChunkIterator = myJobPersistence.fetchAllWorkChunksIterator(myInstance.getInstanceId(), false);
+
+		while (workChunkIterator.hasNext()) {
+			WorkChunk next = workChunkIterator.next();
+			myProgressAccumulator.addChunk(next);
+			instanceProgress.addChunk(next);
 		}
 
 		instanceProgress.updateInstance(myInstance);
