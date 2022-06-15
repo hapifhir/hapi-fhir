@@ -37,6 +37,14 @@ public class Icd10CmLoader {
 
 	private final TermCodeSystemVersion myCodeSystemVersion;
 	private int myConceptCount;
+	private String SEVEN_CHR_DEF = "sevenChrDef";
+	private String VERSION = "version";
+	private String EXTENSION = "extension";
+	private String CHAPTER = "chapter";
+	private String SECTION = "section";
+	private String DIAG = "diag";
+	private String NAME = "name";
+	private String DESC = "desc";
 
 	/**
 	 * Constructor
@@ -73,8 +81,8 @@ public class Icd10CmLoader {
 
 
 	private void extractCode(Element theDiagElement, TermConcept theParentConcept) {
-		String code = theDiagElement.getElementsByTagName("name").item(0).getTextContent();
-		String display = theDiagElement.getElementsByTagName("desc").item(0).getTextContent();
+		String code = theDiagElement.getElementsByTagName(NAME).item(0).getTextContent();
+		String display = theDiagElement.getElementsByTagName(DESC).item(0).getTextContent();
 
 		TermConcept concept;
 		if (theParentConcept == null) {
@@ -86,13 +94,50 @@ public class Icd10CmLoader {
 		concept.setCode(code);
 		concept.setDisplay(display);
 
-		for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, "diag")) {
+		for (Element nextChildDiag : XmlUtil.getChildrenByTagName(theDiagElement, DIAG)) {
 			extractCode(nextChildDiag, concept);
+			if (XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF).size() != 0){
+				extractExtension(theDiagElement,nextChildDiag, concept);
+			}
 		}
 
 		myConceptCount++;
 	}
 
+	private void extractExtension(Element theDiagElement, Element theChildDiag, TermConcept theParentConcept) {
+		for (Element nextChrNote : XmlUtil.getChildrenByTagName(theDiagElement, SEVEN_CHR_DEF)){
+			for (Element nextExtension : XmlUtil.getChildrenByTagName(nextChrNote, EXTENSION)){
+				String baseCode = theChildDiag.getElementsByTagName(NAME).item(0).getTextContent();
+				String sevenChar = nextExtension.getAttributes().item(0).getNodeValue();
+				String baseDef = theChildDiag.getElementsByTagName(DESC).item(0).getTextContent();
+				String sevenCharDef = nextExtension.getTextContent();
+
+				TermConcept concept = theParentConcept.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+				concept.setCode(getExtendedCode(baseCode, sevenChar));
+				concept.setDisplay(getExtendedDisplay(baseDef, sevenCharDef));
+			}
+
+		}
+	}
+
+	private String getExtendedDisplay(String theBaseDef, String theSevenCharDef) {
+		return theBaseDef + ", " + theSevenCharDef;
+	}
+
+	/**
+	 * The Seventh Character must be placed at the seventh position of the code
+	 * If the base code only has five characters, "X" will be used as a placeholder
+	 */
+	private String getExtendedCode(String theBaseCode, String theSevenChar) {
+		String placeholder = "X";
+		String code = theBaseCode;
+		for (int i = code.length(); i < 7; i++){
+			code += placeholder;
+		}
+		code += theSevenChar;
+		return code;
+	}
 
 	public int getConceptCount() {
 		return myConceptCount;
