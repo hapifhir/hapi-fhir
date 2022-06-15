@@ -2,7 +2,6 @@ package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;

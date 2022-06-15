@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.List;
@@ -94,8 +95,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public String reduceWorkChunksToSingleChunk(String theInstanceId, List<String> theChunkIds, BatchWorkChunk theNewChunk) {
-		return myWrap.reduceWorkChunksToSingleChunk(theInstanceId, theChunkIds, theNewChunk);
+	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
+		myWrap.markWorkChunksWithStatusAndWipeData(theInstanceId, theChunkIds, theStatus, theErrorMsg);
 	}
 
 	@Override

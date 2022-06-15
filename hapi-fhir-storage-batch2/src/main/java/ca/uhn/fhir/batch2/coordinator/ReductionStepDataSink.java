@@ -40,7 +40,7 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 				JobInstance instance = instanceOp.get();
 				OT data = theData.getData();
 				String dataString = JsonUtil.serialize(data, false);
-				instance.setRecord(dataString);
+				instance.setReport(dataString);
 				ourLog.debug(JsonUtil.serialize(instance));
 				myJobPersistence.updateInstance(instance);
 			} else {

@@ -2,7 +2,8 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.coordinator.JobStepExecutorSvc;
+import ca.uhn.fhir.batch2.coordinator.JobStepExecutorOutput;
+import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -25,13 +26,13 @@ public class JobInstanceProcessor {
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
-	private final JobStepExecutorSvc myJobExecutorSvc;
+	private final StepExecutionSvc myJobExecutorSvc;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								JobInstance theInstance,
 								JobChunkProgressAccumulator theProgressAccumulator,
-								JobStepExecutorSvc theExecutorSvc
+								StepExecutionSvc theExecutorSvc
 	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
@@ -127,10 +128,14 @@ public class JobInstanceProcessor {
 			if (jobWorkCursor.nextStep.isReductionStep()) {
 				// do execution of the final step now
 				// (ie, we won't send to job workers)
-				myJobExecutorSvc.doExecution(
+				JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
 					JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
 					myInstance,
 					null);
+				if (!result.isSuccessful()) {
+					myInstance.setStatus(StatusEnum.FAILED);
+					myJobPersistence.updateInstance(myInstance);
+				}
 			} else {
 				// otherwise, continue processing as expected
 				List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));

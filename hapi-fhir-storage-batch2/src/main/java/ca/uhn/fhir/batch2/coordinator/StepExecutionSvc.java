@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
 import ca.uhn.fhir.batch2.api.ReductionStepExecutionDetails;
@@ -13,27 +14,27 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.ListResult;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
-public class JobStepExecutorSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutorSvc.class);
+public class StepExecutionSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(StepExecutionSvc.class);
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 
-	public JobStepExecutorSvc(IJobPersistence thePersistence,
-									  BatchJobSender theSender) {
+	public StepExecutionSvc(IJobPersistence thePersistence,
+									BatchJobSender theSender) {
 		myJobPersistence = thePersistence;
 		myBatchJobSender = theSender;
 	}
@@ -67,20 +68,26 @@ public class JobStepExecutorSvc {
 		StepExecutionDetails<PT, IT> stepExecutionDetails;
 		if (step.isReductionStep()) {
 			// reduction step details
-			stepExecutionDetails = getExecutionDetailsForReductionStep(theInstance, step, inputType, parameters);
+			boolean success = executeReductionStep(theInstance,
+				step,
+				inputType,
+				parameters,
+				dataSink);
+
+			return new JobStepExecutorOutput<>(success, dataSink);
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
 			stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, instanceId, inputType, parameters);
+
+			// execute the step
+			boolean success = executeStep(stepExecutionDetails,
+				worker,
+				dataSink);
+
+			// return results with data sink
+			return new JobStepExecutorOutput<>(success, dataSink);
 		}
-
-		// execute the step
-		boolean succeed = executeStep(stepExecutionDetails,
-			worker,
-			dataSink);
-
-		// return results with data sink
-		return new JobStepExecutorOutput<>(succeed, dataSink);
 	}
 
 	/**
@@ -93,7 +100,7 @@ public class JobStepExecutorSvc {
 		String theInstanceId
 	) {
 		BaseDataSink<PT, IT, OT> dataSink;
-		if (theCursor.getCurrentStep().isReductionStep()) {
+		if (theCursor.isReductionStep()) {
 			dataSink = new ReductionStepDataSink<>(
 				theInstanceId,
 				theCursor,
@@ -135,53 +142,84 @@ public class JobStepExecutorSvc {
 		return stepExecutionDetails;
 	}
 
+
 	/**
 	 * Do work and construct execution details for job reduction step
 	 */
-	@SuppressWarnings("unchecked")
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForReductionStep(
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> boolean executeReductionStep(
 		JobInstance theInstance,
 		JobDefinitionStep<PT, IT, OT> theStep,
 		Class<IT> theInputType,
-		PT theParameters
+		PT theParameters,
+		BaseDataSink<PT, IT, OT> theDataSink
 	) {
-		StepExecutionDetails<PT, IT> stepExecutionDetails;
+		IReductionStepWorker<PT, IT, OT> theWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
-		/*
-		 * Combine the outputs of all previous steps into
-		 * a list as input for the final step
-		 */
-		List<IT> data = new ArrayList<>();
-		List<String> chunkIds = new ArrayList<>();
+		// We fetch all chunks first...
 		List<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunks(theInstance.getInstanceId(), true);
+
+		List<String> chunkIds = new ArrayList<>();
+		HashSet<String> errors = new HashSet<>();
 		for (WorkChunk chunk : chunks) {
-			data.add(chunk.getData(theInputType));
+			if (chunk.getStatus() != StatusEnum.QUEUED) {
+				// we are currently fetching all statuses from the db
+				// we will ignore non-completed steps.
+				// should we throw for errored values we find here?
+				continue;
+			}
+
 			chunkIds.add(chunk.getId());
+			try {
+				// feed them into our reduction worker
+				// this is the most likely area to throw,
+				// as this is where db actions and processing is likely to happen
+				theWorker.addChunk(chunk, theInputType);
+			} catch (Exception e) {
+				// we got a failure in a reduction
+				ourLog.error("Reduction step failed to execute chunk reduction for chunk {} with exception {}.",
+					chunk.getId(),
+					e.getMessage());
+
+				// we add the error
+				// and continue to loop (should we just exit now?)
+				errors.add(e.getMessage());
+			}
 		}
 
-		// this is the data we'll store (which is a list of all the previous outputs)
-		ListResult<IT> listResult = new ListResult<>(data);
+		if (errors.isEmpty()) {
+			// complete the steps without making a new work chunk
+			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
+				chunkIds,
+				StatusEnum.COMPLETED,
+				null // error message (none = clear data)
+			);
+		} else {
+			// we couldn't reduce.... mark all chunks as failed.
+			// we'll just concatenate the error msgs (they are likely going to have
+			// the same error, but if they don't this isn't harmful)
+			String errorMsg = errors.stream().reduce("", (a, b) -> a + ", " + b);
+			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
+				chunkIds,
+				StatusEnum.FAILED,
+				errorMsg
+			);
 
-		// reduce multiple work chunks -> single work chunk (for simpler processing)
-		BatchWorkChunk newWorkChunk = new BatchWorkChunk(
-			theInstance.getJobDefinitionId(),
-			theInstance.getJobDefinitionVersion(),
-			theStep.getStepId(),
-			theInstance.getInstanceId(),
-			0, // what is sequence? Does it matter in reduction?
-			JsonUtil.serialize(listResult)
-		);
-		String newChunkId = myJobPersistence.reduceWorkChunksToSingleChunk(theInstance.getInstanceId(), chunkIds, newWorkChunk);
+			// no need to generate report - the job has failed
+			return false;
+		}
 
-		// create the details, and datasink
+		// we'll call execute (to reuse existing architecture)
+		// the data sink will do the storing to the instance (and not the chunks).
+		// it is assumed the OT (report) data is smaller than the list of all IT data
 		ReductionStepExecutionDetails<PT, IT, OT> executionDetails = new ReductionStepExecutionDetails<>(
 			theParameters,
-			listResult,
-			theInstance.getInstanceId(),
-			newChunkId
+			null,
+			theInstance.getInstanceId()
 		);
-		stepExecutionDetails = (StepExecutionDetails<PT, IT>) executionDetails;
-		return stepExecutionDetails;
+
+		return executeStep(executionDetails,
+			theWorker,
+			theDataSink);
 	}
 
 	/**
@@ -205,24 +243,32 @@ public class JobStepExecutorSvc {
 				jobDefinitionId,
 				targetStepId,
 				e);
-			myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
+			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+				myJobPersistence.markWorkChunkAsFailed(chunkId, e.toString());
+			}
 			return false;
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
-			myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
+			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+				myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
+			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {
 			ourLog.error("Unexpected failure executing job {} step {}", jobDefinitionId, targetStepId, t);
-			myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
+			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+				myJobPersistence.markWorkChunkAsFailed(chunkId, t.toString());
+			}
 			return false;
 		}
 
-		int recordsProcessed = outcome.getRecordsProcessed();
-		int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
+		if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
+			int recordsProcessed = outcome.getRecordsProcessed();
+			int recoveredErrorCount = theDataSink.getRecoveredErrorCount();
 
-		myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
-		if (recoveredErrorCount > 0) {
-			myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
+			myJobPersistence.markWorkChunkAsCompletedAndClearData(chunkId, recordsProcessed);
+			if (recoveredErrorCount > 0) {
+				myJobPersistence.incrementWorkChunkErrorCount(chunkId, recoveredErrorCount);
+			}
 		}
 
 		return true;

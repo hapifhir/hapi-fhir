@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ListResult;
 import ca.uhn.fhir.model.api.IModelJson;
+import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,12 +34,22 @@ import javax.annotation.Nullable;
  * @param <OT> - Output data type. Output will actually be a ListResult of these objects.
  */
 public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>
-	extends StepExecutionDetails<PT, ListResult<IT>> {
+	extends StepExecutionDetails<PT, IT> {
 
 	public ReductionStepExecutionDetails(@Nonnull PT theParameters,
-													 @Nullable ListResult<IT> theData,
-													 @Nonnull String theInstanceId,
-													 @Nonnull String theChunkId) {
-		super(theParameters, theData, theInstanceId, theChunkId);
+													 @Nullable IT theData,
+													 @Nonnull String theInstanceId) {
+		super(theParameters, theData, theInstanceId, "VOID");
+	}
+
+	@Override
+	@Nonnull
+	public final IT getData() {
+		throw new UnsupportedOperationException("Reduction steps should have all data by the time execution is called.");
+	}
+
+	@Override
+	public boolean hasAssociatedWorkChunk() {
+		return false;
 	}
 }

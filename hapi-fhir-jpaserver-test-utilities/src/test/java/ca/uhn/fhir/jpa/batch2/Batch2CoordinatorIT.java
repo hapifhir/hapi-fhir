@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -12,19 +13,22 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.ListResult;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -127,11 +131,24 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 
 		// step 3
-		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = (step, sink) -> {
-			ListResult<SecondStepOutput> output = step.getData();
-			sink.accept(new ReductionStepOutput(output));
-			callLatch(myLastStepLatch, step);
-			return RunOutcome.SUCCESS;
+		IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput> last = new IReductionStepWorker<TestJobParameters, SecondStepOutput, ReductionStepOutput>() {
+
+			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
+
+			@Override
+			public void addChunk(WorkChunk theChunk, Class<SecondStepOutput> theInputType) {
+				SecondStepOutput data = theChunk.getData(theInputType);
+				myOutput.add(data);
+			}
+
+			@NotNull
+			@Override
+			public RunOutcome run(@NotNull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+										 @NotNull IJobDataSink<ReductionStepOutput> theDataSink) throws JobExecutionFailedException {
+				theDataSink.accept(new ReductionStepOutput(myOutput));
+				callLatch(myLastStepLatch, theStepExecutionDetails);
+				return RunOutcome.SUCCESS;
+			}
 		};
 
 		// create job definition
@@ -181,10 +198,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertEquals(2, secondStepCalls);
 		JobInstance instance = instanceOp.get();
 		ourLog.info(JsonUtil.serialize(instance, true));
-		assertNotNull(instance.getRecord());
+		assertNotNull(instance.getReport());
 
 		for (int i = 0; i < secondStepInt.get(); i++) {
-			assertTrue(instance.getRecord().contains(
+			assertTrue(instance.getReport().contains(
 				testInfo + i
 			));
 		}
@@ -327,9 +344,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	static class ReductionStepOutput implements IModelJson {
 		@JsonProperty("result")
-		private ListResult<?> myResult;
+		private List<?> myResult;
 
-		ReductionStepOutput(ListResult<?> theResult) {
+		ReductionStepOutput(List<?> theResult) {
 			myResult = theResult;
 		}
 	}

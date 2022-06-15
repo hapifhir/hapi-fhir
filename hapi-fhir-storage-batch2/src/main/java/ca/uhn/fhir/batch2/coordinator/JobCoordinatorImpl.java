@@ -59,7 +59,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IChannelReceiver theWorkChannelReceiver,
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-									  @Nonnull JobStepExecutorSvc theExecutorSvc
+									  @Nonnull StepExecutionSvc theExecutorSvc
 	) {
 		Validate.notNull(theJobPersistence);
 
