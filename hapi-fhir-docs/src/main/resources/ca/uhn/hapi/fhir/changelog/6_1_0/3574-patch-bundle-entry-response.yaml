@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3574
+title: "Previously, PATCH operations that were contained in a transaction bundle would not return response entries. This has been corrected."
+

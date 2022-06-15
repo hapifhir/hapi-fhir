@@ -275,7 +275,7 @@ public class SubscriptionCanonicalizer {
 			}
 		}
 
-		Extension extension = subscription.getExtensionByUrl(EX_SEND_DELETE_MESSAGES);
+		Extension extension = subscription.getChannel().getExtensionByUrl(EX_SEND_DELETE_MESSAGES);
 		if (extension != null && extension.hasValue() && extension.getValue() instanceof BooleanType) {
 			retVal.setSendDeleteMessages(((BooleanType) extension.getValue()).booleanValue());
 		}
