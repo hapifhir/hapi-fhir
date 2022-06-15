@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Icd10CmLoaderTest {
 
@@ -28,11 +29,11 @@ public class Icd10CmLoaderTest {
 		assertEquals("2021", codeSystemVersion.getCodeSystemVersionId());
 
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertEquals(2, rootConcepts.size());
+		assertEquals(4, rootConcepts.size());
 		assertEquals("A00", rootConcepts.get(0).getCode());
 		assertEquals("Cholera", rootConcepts.get(0).getDisplay());
 		List<String> conceptNames = rootConcepts.stream().map(t -> t.getCode()).collect(Collectors.toList());
-		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00", "A01"));
+		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00", "A01","H40","R40"));
 
 		assertEquals(3, rootConcepts.get(0).getChildCodes().size());
 		TermConcept firstChildCode = rootConcepts.get(0).getChildCodes().get(0);
@@ -41,6 +42,15 @@ public class Icd10CmLoaderTest {
 		conceptNames = rootConcepts.get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
 		assertThat(conceptNames.toString(), conceptNames, Matchers.contains("A00.0", "A00.1", "A00.9"));
 
+		List<String> conceptNames2 = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		TermConcept ExtendedChildCode = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().get(1);
+		assertEquals("H40.40X0", ExtendedChildCode.getCode());
+		assertEquals("Glaucoma secondary to eye inflammation, unspecified eye, stage unspecified", ExtendedChildCode.getDisplay());
+
+		List<String> conceptNames3 = rootConcepts.get(3).getChildCodes().get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		ExtendedChildCode = rootConcepts.get(3).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(3);
+		assertEquals("R40.2112",ExtendedChildCode.getCode());
+		assertEquals("Coma scale, eyes open, never, at arrival to emergency department", ExtendedChildCode.getDisplay());
 	}
 
 }
