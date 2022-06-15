@@ -393,11 +393,6 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	@Override
-	public IUpdate updateHistoryRewrite() {
-		return new UpdateInternal();
-	}
-
-	@Override
 	public IValidate validate() {
 		return new ValidateInternal();
 	}
@@ -2253,7 +2248,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private boolean myIsHistoryRewrite;
 
 		@Override
-		public IUpdateExecutable historyRewrite() {
+		public IUpdateTyped historyRewrite() {
 			myIsHistoryRewrite = true;
 			return this;
 		}

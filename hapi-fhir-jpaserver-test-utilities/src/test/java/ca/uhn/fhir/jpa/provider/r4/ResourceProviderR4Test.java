@@ -6707,14 +6707,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.addName().setFamily(testFamilyNameModified);
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId(id).execute();
+			myClient.update().resource(p).historyRewrite().withId(id).execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("ID must contain a history version"));
 		}
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId("1234").execute();
+			myClient.update().resource(p).historyRewrite().withId("1234").execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("ID must contain a history version"));
@@ -6722,7 +6722,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		p.setId(id);
 		try {
-			myClient.updateHistoryRewrite().resource(p).execute();
+			myClient.update().resource(p).historyRewrite().execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("ID must contain a history version"));
@@ -6743,21 +6743,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.addName().setFamily(testFamilyNameModified);
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId((IIdType) null).execute();
+			myClient.update().resource(p).historyRewrite().withId((IIdType) null).execute();
 			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsString("can not be null"));
 		}
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId((String) null).execute();
+			myClient.update().resource(p).historyRewrite().withId((String) null).execute();
 			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsString("can not be null"));
 		}
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).execute();
+			myClient.update().resource(p).historyRewrite().execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
@@ -6779,14 +6779,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		IIdType noIdPartId = new IdDt();
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId(noIdPartId).execute();
+			myClient.update().resource(p).historyRewrite().withId(noIdPartId).execute();
 			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
 		}
 
 		try {
-			myClient.updateHistoryRewrite().resource(p).withId("").execute();
+			myClient.update().resource(p).historyRewrite().withId("").execute();
 			fail();
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
@@ -6794,7 +6794,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		p.setId(noIdPartId);
 		try {
-			myClient.updateHistoryRewrite().resource(p).execute();
+			myClient.update().resource(p).historyRewrite().execute();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
