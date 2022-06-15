@@ -65,7 +65,7 @@ public class InMemoryResourceMatcher {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
+	@Autowired(required = false)
 	IValidationSupport myValidationSupport;
 	@Autowired
 	ModelConfig myModelConfig;
@@ -282,8 +282,8 @@ public class InMemoryResourceMatcher {
 
 	/**
 	 * Checks whether a query parameter of type token matches one of the search parameters of an in-memory resource.
-	 * Only the :in and :not-in qualifiers are supported. Any other qualifier will be ignored and the match will be
-	 * treated as unqualified.
+	 * The :in and :not-in qualifiers are supported only if a bean implementing IValidationSupport is available.
+	 * Any other qualifier will be ignored and the match will be treated as unqualified.
 	 * @param theModelConfig a model configuration
 	 * @param theResourceName the name of the resource type being matched
 	 * @param theParamName the name of the parameter
@@ -312,6 +312,10 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
+		if (myValidationSupport == null) {
+			return false;
+		}
+
 		IValidationSupport.CodeValidationResult codeValidationResult = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
 		if (codeValidationResult != null) {
 			return codeValidationResult.isOk();
@@ -382,7 +386,8 @@ public class InMemoryResourceMatcher {
 				switch (tokenParam.getModifier()) {
 					case IN:
 					case NOT_IN:
-						return true;
+						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
+						return myValidationSupport != null;
 					default:
 						return false;
 				}
