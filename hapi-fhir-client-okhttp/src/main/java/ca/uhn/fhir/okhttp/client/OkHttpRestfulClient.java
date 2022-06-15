@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import okhttp3.*;
-import okhttp3.internal.Version;
 
 /**
  * A Http Request based on OkHttp. This is an adapter around the class
@@ -127,7 +126,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
-        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, Version.userAgent()));
+        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
     }
 
     private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {
