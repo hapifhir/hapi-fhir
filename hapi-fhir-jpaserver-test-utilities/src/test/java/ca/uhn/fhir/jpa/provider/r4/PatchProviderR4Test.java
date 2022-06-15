@@ -110,6 +110,38 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(false, newPt.getActive());
 	}
 
+	@Test
+	public void testFhirPatch_TransactionWithSearchParameter() throws Exception {
+		String methodName = "testFhirPatch_Transaction";
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier().setSystem("urn:system").setValue("0");
+			patient.addName().setFamily(methodName).addGiven("Joe");
+			pid1 = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+		}
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation.addPart().setName("type").setValue(new CodeType("replace"));
+		operation.addPart().setName("path").setValue(new CodeType("Patient.active"));
+		operation.addPart().setName("value").setValue(new BooleanType(false));
+
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest().setUrl(String.format("Patient?name=%s", methodName))
+			.setMethod(Bundle.HTTPVerb.PATCH);
+
+		myClient.transaction().withBundle(input).execute();
+
+		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
 
 	@Test
 	public void testPatchAddArray() throws IOException {
