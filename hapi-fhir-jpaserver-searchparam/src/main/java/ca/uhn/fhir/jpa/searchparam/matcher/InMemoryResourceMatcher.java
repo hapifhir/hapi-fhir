@@ -83,7 +83,7 @@ public class InMemoryResourceMatcher {
 	/**
 	 * Lazy loads a {@link IValidationSupport} implementation just-in-time.
 	 * If no suitable bean is available, or if a {@link ca.uhn.fhir.context.ConfigurationException} is thrown, matching
-	 * can proceed with only the qualifiers that depend on the validation support being disabled.
+	 * can proceed, but the qualifiers that depend on the validation support will be disabled.
 	 *
 	 * @return A bean implementing {@link IValidationSupport} if one is available, otherwise null
 	 */
@@ -209,10 +209,15 @@ public class InMemoryResourceMatcher {
 	}
 
 	private InMemoryMatchResult checkOneParameterForUnsupportedModifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
-		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, theParamDef, theParam);
+		// Assume we're ok until we find evidence we aren't
+		InMemoryMatchResult checkUnsupportedResult = InMemoryMatchResult.successfulMatch();
 
-		if (checkUnsupportedResult.supported() && hasChain(theParam)) {
-			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
+		if (hasChain(theParam)) {
+			checkUnsupportedResult = InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + ((ReferenceParam)theParam).getChain(), InMemoryMatchResult.CHAIN);
+		}
+
+		if (checkUnsupportedResult.supported()) {
+			checkUnsupportedResult = checkUnsupportedQualifiers(theParamName, theParamDef, theParam);
 		}
 
 		if (checkUnsupportedResult.supported()) {
@@ -392,10 +397,6 @@ public class InMemoryResourceMatcher {
 
 	private InMemoryMatchResult checkUnsupportedQualifiers(String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
 		if (hasQualifiers(theParam) && !supportedQualifier(theParamDef, theParam)) {
-			if (theParam instanceof ReferenceParam) {
-				ReferenceParam referenceParam = (ReferenceParam) theParam;
-				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
-			}
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + theParam.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
 		}
 		return InMemoryMatchResult.successfulMatch();
