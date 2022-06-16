@@ -91,7 +91,7 @@ public class InMemoryResourceMatcher {
 	 *
 	 * @return A bean implementing {@link IValidationSupport} if one is available, otherwise null
 	 */
-	private IValidationSupport getValidationSupport() {
+	private IValidationSupport getValidationSupportOrNull() {
 		if (validationSupportState == ValidationSupportInitializationState.NOT_INITIALIZED) {
 			try {
 				myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
