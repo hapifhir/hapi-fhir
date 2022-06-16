@@ -386,6 +386,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("NPM_PACKAGE_VER_RES")
 			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
+		version.onTable("MPI_LINK")
+			.addIndex("20220613.1", "IDX_EMPI_MATCH_TGT_VER")
+			.unique(false)
+			.online(true)
+			.withColumns("MATCH_RESULT", "TARGET_PID", "VERSION");
 	}
 
 	/**
