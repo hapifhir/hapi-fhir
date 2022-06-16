@@ -747,6 +747,11 @@
 			<name>Joe Shook</name>
 			<organization>Surescripts LLC</organization>
 		</developer>
+		<developer>
+			<id>vilaug</id>
+			<name>Augustas Vilčinskas</name>
+			<organization>Ivido</organization>
+		</developer>
 	</developers>
 
 	<licenses>
