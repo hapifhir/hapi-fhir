@@ -348,7 +348,7 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
-		IValidationSupport validationSupport = getValidationSupport();
+		IValidationSupport validationSupport = getValidationSupportOrNull();
 		if (validationSupport == null) {
 			ourLog.error(Msg.code(2096) + "Attempting to evaluate an unsupported qualifier. This should not happen.");
 			return false;
@@ -421,7 +421,7 @@ public class InMemoryResourceMatcher {
 					case IN:
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
-						return getValidationSupport() != null;
+						return getValidationSupportOrNull() != null;
 					default:
 						return false;
 				}
