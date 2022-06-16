@@ -261,6 +261,11 @@ public class JpaConstants {
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
 
 	/**
+	 * Parameters for the rewrite history operation
+	 */
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {
