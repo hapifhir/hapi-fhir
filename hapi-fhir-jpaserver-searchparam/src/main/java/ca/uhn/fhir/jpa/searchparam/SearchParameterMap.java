@@ -21,6 +21,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -822,36 +823,15 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	private static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
-		int retVal;
-		if (theO1.getMissing() == null && theO2.getMissing() == null) {
-			retVal = 0;
-		} else if (theO1.getMissing() == null) {
-			retVal = -1;
-		} else if (theO2.getMissing() == null) {
-			retVal = 1;
-		} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
-			retVal = 0;
-		} else {
-			if (theO1.getMissing()) {
-				retVal = 1;
-			} else {
-				retVal = -1;
-			}
+	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+		CompareToBuilder b = new CompareToBuilder();
+		b.append(theO1.getMissing(), theO2.getMissing());
+		b.append(theO1.getQueryParameterQualifier(), theO2.getQueryParameterQualifier());
+		if (b.toComparison() == 0) {
+			b.append(theO1.getValueAsQueryToken(theCtx), theO2.getValueAsQueryToken(theCtx));
 		}
 
-		if (retVal == 0) {
-			String q1 = theO1.getQueryParameterQualifier();
-			String q2 = theO2.getQueryParameterQualifier();
-			retVal = StringUtils.compare(q1, q2);
-		}
-
-		if (retVal == 0) {
-			String v1 = theO1.getValueAsQueryToken(theCtx);
-			String v2 = theO2.getValueAsQueryToken(theCtx);
-			retVal = StringUtils.compare(v1, v2);
-		}
-		return retVal;
+		return b.toComparison();
 	}
 
 	public static SearchParameterMap newSynchronous() {
