@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3620
+title: "Add support for the `:in` and `:not-in` qualifiers for use in SMART on FHIR v2 granular scope definition."
