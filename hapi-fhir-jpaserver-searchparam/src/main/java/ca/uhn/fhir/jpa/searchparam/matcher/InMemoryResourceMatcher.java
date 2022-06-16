@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -52,27 +53,49 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class InMemoryResourceMatcher {
 
 	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS, Constants.PARAM_TAG, Constants.PARAM_PROFILE, Constants.PARAM_SECURITY);
 	@Autowired
+	private ApplicationContext myApplicationContext;
+	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
-	@Autowired(required = false)
-	IValidationSupport myValidationSupport;
 	@Autowired
 	ModelConfig myModelConfig;
 	@Autowired
 	FhirContext myFhirContext;
 
+	private boolean isValidationSupportInitialized = false;
+	private Optional<IValidationSupport> myValidationSupport = Optional.empty();
+
 	public InMemoryResourceMatcher() {}
+
+	/**
+	 * Lazy loads a {@link IValidationSupport} implementation just-in-time.
+	 * If no suitable bean is available, or if a {@link ca.uhn.fhir.context.ConfigurationException} is thrown, matching
+	 * can proceed with only the qualifiers that depend on the validation support being disabled.
+	 *
+	 * @return A bean implementing {@link IValidationSupport} if one is available, otherwise null
+	 */
+	private Optional<IValidationSupport> getValidationSupport() {
+		if (!isValidationSupportInitialized) {
+			try {
+				myValidationSupport = Optional.of(myApplicationContext.getBean(IValidationSupport.class));
+			} catch (ConfigurationException ignore) {}
+			isValidationSupportInitialized = true;
+		}
+		return myValidationSupport;
+	}
 
 	/**
 	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
@@ -312,11 +335,13 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
-		if (myValidationSupport == null) {
+		Optional<IValidationSupport> validationSupportOptional = getValidationSupport();
+		if (validationSupportOptional.isEmpty()) {
 			return false;
 		}
+		IValidationSupport validationSupport = validationSupportOptional.get();
 
-		IValidationSupport.CodeValidationResult codeValidationResult = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
+		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(new ValidationSupportContext(validationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
 		if (codeValidationResult != null) {
 			return codeValidationResult.isOk();
 		} else {
@@ -387,7 +412,7 @@ public class InMemoryResourceMatcher {
 					case IN:
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
-						return myValidationSupport != null;
+						return getValidationSupport().isPresent();
 					default:
 						return false;
 				}
