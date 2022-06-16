@@ -50,7 +50,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 					@Nonnull JobDefinition<?> theDefinition,
 					@Nonnull String theInstanceId,
 					@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
-		super(theInstanceId, theJobWorkCursor, theDefinition.getJobDefinitionId());
+		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionId = theDefinition.getJobDefinitionId();

@@ -78,8 +78,7 @@ public class StepExecutionSvcTest {
 
 		TestDataSink(JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor) {
 			super(INSTANCE_ID,
-				theWorkCursor,
-				JOB_DEFINITION_ID);
+				theWorkCursor);
 		}
 
 		public void setDataSink(BaseDataSink<?, ?, ?> theSink) {

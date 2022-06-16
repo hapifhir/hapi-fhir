@@ -20,40 +20,38 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	private static final Logger ourLog = LoggerFactory.getLogger(ReductionStepDataSink.class);
 
 	private final IJobPersistence myJobPersistence;
-	private final AtomicInteger myCounter = new AtomicInteger();
 
 	protected ReductionStepDataSink(String theInstanceId,
 											  JobWorkCursor<PT, IT, OT> theJobWorkCursor,
 											  JobDefinition<PT> theDefinition,
 											  IJobPersistence thePersistence) {
-		super(theInstanceId, theJobWorkCursor, theDefinition.getJobDefinitionId());
+		super(theInstanceId, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 	}
 
 	@Override
 	public void accept(WorkChunkData<OT> theData) {
-		int count = myCounter.getAndIncrement();
-		if (count == 0) {
-			String instanceId = getInstanceId();
-			Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-			if (instanceOp.isPresent()) {
-				JobInstance instance = instanceOp.get();
-				OT data = theData.getData();
-				String dataString = JsonUtil.serialize(data, false);
-				instance.setReport(dataString);
-				ourLog.debug(JsonUtil.serialize(instance));
-				myJobPersistence.updateInstance(instance);
-			} else {
-				String msg = "No instance found with Id " + instanceId;
-				ourLog.error(msg);
+		String instanceId = getInstanceId();
+		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
+		if (instanceOp.isPresent()) {
+			JobInstance instance = instanceOp.get();
 
-				throw new JobExecutionFailedException(Msg.code(2095) + msg);
+			if (instance.getReport() != null) {
+				// last in wins - so we won't throw
+				ourLog.error(
+					"Report has already been set. Now it is being overwritten. Last in will win!");
 			}
+
+			OT data = theData.getData();
+			String dataString = JsonUtil.serialize(data, false);
+			instance.setReport(dataString);
+			ourLog.debug(JsonUtil.serialize(instance));
+			myJobPersistence.updateInstance(instance);
 		} else {
-			// first in win - we won't throw
-			ourLog.error(
-				"Expected a single work chunk for reduction step, but received {} instead. Only the first is accepted!",
-				count + 1); // +1 since 0 indexed
+			String msg = "No instance found with Id " + instanceId;
+			ourLog.error(msg);
+
+			throw new JobExecutionFailedException(Msg.code(2095) + msg);
 		}
 	}
 

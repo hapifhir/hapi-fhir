@@ -154,7 +154,7 @@ public class StepExecutionSvc {
 		PT theParameters,
 		BaseDataSink<PT, IT, OT> theDataSink
 	) {
-		IReductionStepWorker<PT, IT, OT> theWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
+		IReductionStepWorker<PT, IT, OT> theReductionWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
 		// We fetch all chunks first...
 		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), true);
@@ -175,7 +175,7 @@ public class StepExecutionSvc {
 				// feed them into our reduction worker
 				// this is the most likely area to throw,
 				// as this is where db actions and processing is likely to happen
-				theWorker.addChunk(chunk, theInputType);
+				theReductionWorker.addChunk(chunk, theInputType);
 			} catch (Exception e) {
 				// we got a failure in a reduction
 				ourLog.error("Reduction step failed to execute chunk reduction for chunk {} with exception {}.",
@@ -220,7 +220,7 @@ public class StepExecutionSvc {
 		);
 
 		return executeStep(executionDetails,
-			theWorker,
+			theReductionWorker,
 			theDataSink);
 	}
 

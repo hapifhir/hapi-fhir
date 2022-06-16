@@ -69,23 +69,23 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 	@SuppressWarnings("unchecked")
 	void executeStep() {
-		JobStepExecutorOutput<PT, IT, OT> successOutput = myJobExecutorSvc.doExecution(
+		JobStepExecutorOutput<PT, IT, OT> stepExecutorOutput = myJobExecutorSvc.doExecution(
 			myCursor,
 			myInstance,
 			myWorkChunk
 		);
 
-		if (!successOutput.isSuccessful()) {
+		if (!stepExecutorOutput.isSuccessful()) {
 			return;
 		}
 
-		if (successOutput.getDataSink().firstStepProducedNothing()) {
+		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
 			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", myInstanceId);
 			myJobPersistence.markInstanceAsCompleted(myInstanceId);
 		}
 
 		if (myDefinition.isGatedExecution()) {
-			handleGatedExecution(successOutput.getDataSink());
+			handleGatedExecution(stepExecutorOutput.getDataSink());
 		}
 	}
 

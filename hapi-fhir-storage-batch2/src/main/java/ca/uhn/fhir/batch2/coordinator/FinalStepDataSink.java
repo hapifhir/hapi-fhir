@@ -38,7 +38,7 @@ class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends Ba
 	 * Constructor
 	 */
 	FinalStepDataSink(@Nonnull String theJobDefinitionId, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
-		super(theInstanceId, theJobWorkCursor, theJobDefinitionId);
+		super(theInstanceId, theJobWorkCursor);
 	}
 
 	@Override
