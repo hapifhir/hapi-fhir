@@ -43,4 +43,5 @@ public interface IUpdateTyped extends IUpdateExecutable {
 	 */
 	IUpdateWithQuery conditional();
 
+	IUpdateTyped historyRewrite();
 }

@@ -54,4 +54,6 @@ public interface IMdmSettings {
 	}
 
 	int getCandidateSearchLimit();
+
+	Class<? extends IMdmLink> getMdmLInkImpl();
 }

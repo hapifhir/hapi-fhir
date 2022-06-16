@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.config;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -132,6 +133,11 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public int getCandidateSearchLimit() {
 		return myCandidateSearchLimit;
+	}
+
+	@Override
+	public Class<? extends IMdmLink> getMdmLInkImpl() {
+		return null;
 	}
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {

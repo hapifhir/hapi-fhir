@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmLinkFactory {
@@ -37,8 +38,15 @@ public class MdmLinkFactory {
 	 *
 	 * @return the new {@link MdmLink}
 	 */
-	public MdmLink newMdmLink() {
+	public IMdmLink newMdmLink() {
 		// TODO check if mongo or jpa, return MDMLinkDocument or MDMLink accordingly
-		return new MdmLink(myMdmSettings.getRuleVersion());
+		try {
+			IMdmLink mdmLink = myMdmSettings.getMdmLInkImpl().getDeclaredConstructor().newInstance();
+			mdmLink.setVersion(myMdmSettings.getRuleVersion());
+			return mdmLink;
+		}
+		catch (Exception e){
+			return null;
+		}
 	}
 }
