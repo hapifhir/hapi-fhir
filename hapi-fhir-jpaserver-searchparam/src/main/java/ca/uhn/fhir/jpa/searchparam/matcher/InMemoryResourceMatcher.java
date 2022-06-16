@@ -52,20 +52,24 @@ import org.hl7.fhir.dstu3.model.Location;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class InMemoryResourceMatcher {
 
+	private enum ValidationSupportInitializationState {NOT_INITIALIZED, INITIALIZED, FAILED}
+
 	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS, Constants.PARAM_TAG, Constants.PARAM_PROFILE, Constants.PARAM_SECURITY);
+	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(InMemoryResourceMatcher.class);
 	@Autowired
-	private ApplicationContext myApplicationContext;
+	ApplicationContext myApplicationContext;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -75,8 +79,8 @@ public class InMemoryResourceMatcher {
 	@Autowired
 	FhirContext myFhirContext;
 
-	private boolean isValidationSupportInitialized = false;
-	private Optional<IValidationSupport> myValidationSupport = Optional.empty();
+	private ValidationSupportInitializationState validationSupportState = ValidationSupportInitializationState.NOT_INITIALIZED;
+	private IValidationSupport myValidationSupport = null;
 
 	public InMemoryResourceMatcher() {}
 
@@ -87,12 +91,16 @@ public class InMemoryResourceMatcher {
 	 *
 	 * @return A bean implementing {@link IValidationSupport} if one is available, otherwise null
 	 */
-	private Optional<IValidationSupport> getValidationSupport() {
-		if (!isValidationSupportInitialized) {
+	private IValidationSupport getValidationSupport() {
+		if (validationSupportState == ValidationSupportInitializationState.NOT_INITIALIZED) {
 			try {
-				myValidationSupport = Optional.of(myApplicationContext.getBean(IValidationSupport.class));
-			} catch (ConfigurationException ignore) {}
-			isValidationSupportInitialized = true;
+				myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+				validationSupportState = ValidationSupportInitializationState.INITIALIZED;
+			} catch (BeansException | ConfigurationException ignore) {
+				// We couldn't get a validation support bean, and we don't want to waste cycles trying again
+				ourLog.warn(Msg.code(2085) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
+				validationSupportState = ValidationSupportInitializationState.FAILED;
+			}
 		}
 		return myValidationSupport;
 	}
@@ -340,11 +348,11 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
-		Optional<IValidationSupport> validationSupportOptional = getValidationSupport();
-		if (validationSupportOptional.isEmpty()) {
+		IValidationSupport validationSupport = getValidationSupport();
+		if (validationSupport == null) {
+			ourLog.error(Msg.code(2086) + "Attempting to evaluate an unsupported qualifier. This should not happen.");
 			return false;
 		}
-		IValidationSupport validationSupport = validationSupportOptional.get();
 
 		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(new ValidationSupportContext(validationSupport), new ConceptValidationOptions(), theSearchParamToken.getSystem(), theSearchParamToken.getValue(), null, theQueryParam.getValue());
 		if (codeValidationResult != null) {
@@ -413,7 +421,7 @@ public class InMemoryResourceMatcher {
 					case IN:
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
-						return getValidationSupport().isPresent();
+						return getValidationSupport() != null;
 					default:
 						return false;
 				}
