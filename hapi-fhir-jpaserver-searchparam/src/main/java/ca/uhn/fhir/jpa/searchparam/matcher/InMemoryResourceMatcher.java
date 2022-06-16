@@ -98,7 +98,7 @@ public class InMemoryResourceMatcher {
 				validationSupportState = ValidationSupportInitializationState.INITIALIZED;
 			} catch (BeansException | ConfigurationException ignore) {
 				// We couldn't get a validation support bean, and we don't want to waste cycles trying again
-				ourLog.warn(Msg.code(2085) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
+				ourLog.warn(Msg.code(2095) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
 				validationSupportState = ValidationSupportInitializationState.FAILED;
 			}
 		}
@@ -350,7 +350,7 @@ public class InMemoryResourceMatcher {
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
 		IValidationSupport validationSupport = getValidationSupport();
 		if (validationSupport == null) {
-			ourLog.error(Msg.code(2086) + "Attempting to evaluate an unsupported qualifier. This should not happen.");
+			ourLog.error(Msg.code(2096) + "Attempting to evaluate an unsupported qualifier. This should not happen.");
 			return false;
 		}
 
