@@ -51,6 +51,8 @@ public class HibernateSearchIndexWriter {
 
 	public static final String URI_VALUE = "uri-value";
 
+	public static final String NUMBER_VALUE = "number-value";
+
 
 
 	final HibernateSearchElementCache myNodeCache;
@@ -163,6 +165,15 @@ public class HibernateSearchIndexWriter {
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+		}
+	}
+
+
+	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
+		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
+		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {
+			ourLog.trace("Adding Search Param Number: {} -- {}", theParamName, numberSearchIndexValue);
+			numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
 		}
 	}
 

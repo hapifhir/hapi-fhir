@@ -56,6 +56,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Meta;
@@ -66,8 +67,8 @@ import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,8 +94,11 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -165,6 +169,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myEncounterDaoR4")
 	private IFhirResourceDao<Encounter> myEncounterDao;
+
+	@Autowired
+	@Qualifier("myRiskAssessmentDaoR4")
+	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
+
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
@@ -2209,9 +2218,159 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 
 
-		private List<String> getResultIds(IBundleProvider theResult) {
-			return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
+	}
+
+	@Nested
+	public class NumberParameter {
+
+		@BeforeEach
+		public void enableContainsAndLucene() {
+			myDaoConfig.setAllowContainsSearches(true);
+			myDaoConfig.setAdvancedLuceneIndexing(true);
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
+
+		@AfterEach
+		public void restoreContains() {
+			DaoConfig defaultConfig = new DaoConfig();
+			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
+			myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+			myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
+				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
+		}
+
+		@Test
+		public void noExtraSql() {
+			IIdType raId1 = createRiskAssessmentWithPredictionProbability(.25);
+
+			myCaptureQueriesListener.clear();
+			assertFindId("when exact", raId1, "/RiskAssessment?probability=0.25");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+
+		/**
+		 * The following tests are to validate the specification implementation, but they don't work because we save parameters as BigInteger
+		 * which invalidates the possibility to differentiate requested significant figures, which are needed to define precision ranges
+		 * Leaving them here in case some day we fix the implementations
+		 * We copy the JPA implementation here, which ignores precision requests and treats all numbers using default ranges
+		 * @see TestSpecCasesNotUsingSignificantFigures
+		 */
+		@Disabled
+		@Nested
+		public class TestSpecCasesUsingSignificantFigures {
+
+			@Test
+			void specCase1() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
+				// [parameter]=100	Values that equal 100, to 3 significant figures precision, so this is actually searching for values in the range [99.5 ... 100.5)
+				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=100");
+			}
+
+			@Test
+			void specCase2() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99.994).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(99.996).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(100.004).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(100.006).getIdPart();
+				//	[parameter]=100.00	Values that equal 100, to 5 significant figures precision, so this is actually searching for values in the range [99.995 ... 100.005)
+				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=100.00");
+			}
+
+			@Test
+			void specCase3() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(94).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(96).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(104).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(106).getIdPart();
+				// [parameter]=1e2	Values that equal 100, to 1 significant figures precision, so this is actually searching for values in the range [95 ... 105)
+				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=1e2");
+			}
+
+		}
+
+		@Nested
+		public class TestSpecCasesNotUsingSignificantFigures {
+
+			@Test
+			void specCase4() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				// [parameter]=lt100	Values that are less than exactly 100
+				assertFindIds("when le", Set.of(raId1), "/RiskAssessment?probability=lt100");
+			}
+
+			@Test
+			void specCase5() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
+				// [parameter]=le100	Values that are less or equal to exactly 100
+				assertFindIds("when le", Set.of(raId1, raId2), "/RiskAssessment?probability=le100");
+			}
+
+			@Test
+			void specCase6() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
+				// [parameter]=gt100	Values that are greater than exactly 100
+				assertFindIds("when le", Set.of(raId2), "/RiskAssessment?probability=gt100");
+			}
+
+			@Test
+			void specCase7() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
+				// [parameter]=ge100	Values that are greater or equal to exactly 100
+				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=ge100");
+			}
+
+			@Test
+			void specCase8() {
+				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
+				String raId5 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 99.5 to 100.5)
+				assertFindIds("when le", Set.of(raId1, raId2, raId3, raId4), "/RiskAssessment?probability=ne100");
+			}
+		}
+
+		@Test
+		void andClauses() {
+			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
+			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
+			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
+			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
+			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
+			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
+			assertFindIds("when le", Set.of(raId2, raId3, raId4), "/RiskAssessment?probability=ge0.2&probability=lt0.45");
+		}
+
+		@Test
+		void orClauses() {
+			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
+			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
+			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
+			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
+			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
+			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
+			assertFindIds("when le", Set.of(raId1, raId2, raId3, raId6), "/RiskAssessment?probability=le0.25,gt0.50");
+		}
+	}
+
+	private IIdType createRiskAssessmentWithPredictionProbability(double theProbability) {
+		RiskAssessment ra1 = new RiskAssessment();
+		RiskAssessment.RiskAssessmentPredictionComponent component = ra1.addPrediction();
+		component.setProbability(new DecimalType(theProbability));
+		return myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless();
 	}
 
 
@@ -2258,6 +2417,25 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				super.beforeOrAfterTestClass(testContext, requiredClassMode);
 			}
 		}
+	}
+
+	private List<String> getResultIds(IBundleProvider theResult) {
+		return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
+	}
+
+	private void assertFindId(String theMessage, IIdType theResourceId, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, hasItem(equalTo(theResourceId.getIdPart())));
+	}
+
+	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
+	}
+
+	private void assertNotFindId(String theMessage, IIdType theResourceId, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, not(hasItem(equalTo(theResourceId.getIdPart()))));
 	}
 
 

@@ -44,6 +44,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
@@ -187,6 +188,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			// uri
 			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
+
+			// number
+			spfield.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
 
 			//quantity
 			String quantityPathGlob = "*.quantity";

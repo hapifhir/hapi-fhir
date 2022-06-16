@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -46,12 +48,12 @@ import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.util.common.data.RangeBoundInclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +67,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
@@ -73,6 +76,7 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedLuceneClauseBuilder {
@@ -635,6 +639,61 @@ public class ExtendedLuceneClauseBuilder {
 				.matchingAny(orTerms);
 
 			myRootClause.must(orTermPredicate);
+		}
+	}
+
+
+	public void addNumberUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theNumberUnmodifiedAndOrTerms) {
+		String fieldPath = String.join(".", SEARCH_PARAM_ROOT, theParamName, NUMBER_VALUE);
+
+		for (List<IQueryParameterType> nextAnd : theNumberUnmodifiedAndOrTerms) {
+			List<NumberParam> orTerms = nextAnd.stream().map(NumberParam.class::cast).collect(Collectors.toList());
+
+			BooleanPredicateClausesStep<?> numberPredicateStep = myPredicateFactory.bool();
+			numberPredicateStep.minimumShouldMatchNumber(1);
+
+			for (NumberParam orTerm : orTerms) {
+				double value = orTerm.getValue().doubleValue();
+				double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
+				double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
+
+				ParamPrefixEnum activePrefix = orTerm.getPrefix() == null ? ParamPrefixEnum.EQUAL : orTerm.getPrefix();
+				switch (activePrefix) {
+					case APPROXIMATE:
+						numberPredicateStep.should(myPredicateFactory.range()
+							.field(fieldPath).between(value - approxTolerance, value + approxTolerance));
+						break;
+
+					case EQUAL:
+						numberPredicateStep.should(myPredicateFactory.range()
+							.field(fieldPath).between(value - defaultTolerance, value + defaultTolerance));
+						break;
+
+					case STARTS_AFTER:
+					case GREATERTHAN:
+						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).greaterThan(value));
+						break;
+
+					case GREATERTHAN_OR_EQUALS:
+						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).atLeast(value));
+						break;
+
+					case ENDS_BEFORE:
+					case LESSTHAN:
+						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).lessThan(value));
+						break;
+
+					case LESSTHAN_OR_EQUALS:
+						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).atMost(value));
+						break;
+
+					case NOT_EQUAL:
+						numberPredicateStep.mustNot(myPredicateFactory.match().field(fieldPath).matching(value));
+						break;
+				}
+			}
+
+			myRootClause.must(numberPredicateStep);
 		}
 	}
 
