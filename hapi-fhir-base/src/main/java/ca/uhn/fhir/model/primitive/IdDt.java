@@ -15,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -285,6 +286,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	public String getResourceType() {
 		return myResourceType;
 	}
+
 
 	/**
 	 * Returns the value of this ID. Note that this value may be a fully qualified URL, a relative/partial URL, or a simple ID. Use {@link #getIdPart()} to get just the ID portion.
