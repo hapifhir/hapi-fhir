@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -42,7 +42,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 	@AfterEach
 	public void tearDown() {
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("");
 	}
 
 	@Test
@@ -54,7 +54,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute updates
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -100,7 +100,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		int resourceVersionsSizeInit = myResourceHistoryTableDao.findAll().size();
 
 		// execute update
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -151,7 +151,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -174,7 +174,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -197,7 +197,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(JpaConstants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
