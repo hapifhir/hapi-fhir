@@ -20,13 +20,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,7 +37,6 @@ class HSearchSortHelperImplTest {
 	@Spy private HSearchSortHelperImpl tested;
 
 	@Mock private ISearchParamRegistry mockSearchParamRegistry;
-	@Mock private Map mockSortPropertyListMap;
 	@Mock private ResourceSearchParams mockResourceSearchParams;
 	@Mock private RuntimeSearchParam mockRuntimeSearchParam;
 
@@ -58,13 +55,10 @@ class HSearchSortHelperImplTest {
 	void testGetSortPropertyList() {
 		SortSpec sortSpec = new SortSpec();
 		sortSpec.setParamName("_tag");
-		when(mockSortPropertyListMap.get(RestSearchParameterTypeEnum.TOKEN))
-			.thenReturn(List.of("aaa.*.bbb.ccc", "ddd.*.eee.fff"));
 
 		List<String> sortPropertyList = tested.getSortPropertyList(RestSearchParameterTypeEnum.TOKEN, "the-param-name");
 
-		verify(mockSortPropertyListMap, only()).get(RestSearchParameterTypeEnum.TOKEN);
-		assertThat(sortPropertyList, Matchers.contains("aaa.the-param-name.bbb.ccc", "ddd.the-param-name.eee.fff"));
+		assertThat(sortPropertyList, Matchers.contains("nsp.the-param-name.token.system", "nsp.the-param-name.token.code"));
 	}
 
 	/**

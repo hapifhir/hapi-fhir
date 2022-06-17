@@ -2006,6 +2006,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					assertThat(getResultIds(result), contains(obsId2, obsId1));
 				}
 
+				@Test
+				public void byNumber() {
+					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
+					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
+					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(raId3, raId2, raId1));
+				}
+
 			}
 
 			@Nested
@@ -2114,6 +2128,19 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 					// requested reference with nulls last so order should be: obsId2, obsId1
 					assertThat(getResultIds(result), contains(obsId2, obsId1));
+				}
+
+				@Test
+				public void byNumber() {
+					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
+					String raId2 = createRiskAssessment().getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=probability");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(raId1, raId2));
 				}
 
 			}
@@ -2366,10 +2393,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 	}
 
-	private IIdType createRiskAssessmentWithPredictionProbability(double theProbability) {
+	private IIdType createRiskAssessment() {
+		return (createRiskAssessmentWithPredictionProbability(null));
+	}
+
+	private IIdType createRiskAssessmentWithPredictionProbability(Number theProbability) {
 		RiskAssessment ra1 = new RiskAssessment();
-		RiskAssessment.RiskAssessmentPredictionComponent component = ra1.addPrediction();
-		component.setProbability(new DecimalType(theProbability));
+		if (theProbability != null) {
+			RiskAssessment.RiskAssessmentPredictionComponent component = ra1.addPrediction();
+			component.setProbability(new DecimalType(theProbability.doubleValue()));
+		}
 		return myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless();
 	}
 

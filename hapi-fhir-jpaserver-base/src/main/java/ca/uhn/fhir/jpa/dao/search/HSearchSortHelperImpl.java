@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
@@ -32,7 +33,7 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchSortHelperImpl.class);
 
 	/** Indicates which HSearch properties must be sorted for each RestSearchParameterTypeEnum **/
-	private final Map<RestSearchParameterTypeEnum, List<String>> mySortPropertyListMap = Map.of(
+	private Map<RestSearchParameterTypeEnum, List<String>> mySortPropertyListMap = Map.of(
 		RestSearchParameterTypeEnum.STRING, 	List.of(SEARCH_PARAM_ROOT + ".*.string." + IDX_STRING_LOWER),
 		RestSearchParameterTypeEnum.TOKEN, 		List.of(
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", "token", "system"),
@@ -42,7 +43,8 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 		RestSearchParameterTypeEnum.QUANTITY, 	List.of(
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE_NORM),
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE) ),
-		RestSearchParameterTypeEnum.URI, 		List.of(SEARCH_PARAM_ROOT + ".*." + URI_VALUE)
+		RestSearchParameterTypeEnum.URI, 		List.of(SEARCH_PARAM_ROOT + ".*." + URI_VALUE),
+		RestSearchParameterTypeEnum.NUMBER, 	List.of(SEARCH_PARAM_ROOT + ".*." + NUMBER_VALUE)
 	);
 
 	private final ISearchParamRegistry mySearchParamRegistry;

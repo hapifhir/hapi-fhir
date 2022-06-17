@@ -182,10 +182,12 @@ public class ExtendedLuceneSearchBuilder {
 				case URI:
 					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
+					break;
 
 				case NUMBER:
 					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = theParams.remove(nextParam);
 					builder.addNumberUnmodifiedSearch(nextParam, numberUnmodifiedAndOrTerms);
+					break;
 
 				default:
 					// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
