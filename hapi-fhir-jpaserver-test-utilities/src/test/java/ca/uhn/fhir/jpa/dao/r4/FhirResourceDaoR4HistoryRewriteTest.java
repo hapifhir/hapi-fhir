@@ -54,7 +54,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute updates
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.isRewriteHistory()).thenReturn(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -100,7 +100,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		int resourceVersionsSizeInit = myResourceHistoryTableDao.findAll().size();
 
 		// execute update
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.isRewriteHistory()).thenReturn(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -151,7 +151,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.isRewriteHistory()).thenReturn(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -174,7 +174,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.isRewriteHistory()).thenReturn(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
@@ -197,7 +197,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		IIdType id = createPatientWithHistory();
 
 		// execute update
-		when(mySrd.getHeader(eq(Constants.HEADER_REWRITE_HISTORY))).thenReturn("true");
+		when(mySrd.isRewriteHistory()).thenReturn(true);
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
