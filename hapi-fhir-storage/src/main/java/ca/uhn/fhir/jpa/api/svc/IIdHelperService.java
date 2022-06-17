@@ -61,7 +61,7 @@ public interface IIdHelperService {
 	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
-	 * Given a resource type and ID, determines the internal persistent ID for a resource. Excludes deleted resources if filterDeleted is set to true.
+	 * Given a resource type and ID, determines the internal persistent ID for a resource.
 	 * Optionally filters out deleted resources.
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found

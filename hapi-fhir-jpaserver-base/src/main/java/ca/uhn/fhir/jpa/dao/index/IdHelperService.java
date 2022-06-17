@@ -505,15 +505,15 @@ public class IdHelperService implements IIdHelperService {
 				}
 
 				for (Object[] next : views) {
-					String resourceType = (String) next[0];
-					Long resourcePid = (Long) next[1];
-					String forcedId = (String) next[2];
 					Date deletedAt = (Date) next[3];
-
 					boolean isResourceDeleted = deletedAt != null;
 					if(theFilterDeleted && isResourceDeleted){
 						continue;
 					}
+
+					String resourceType = (String) next[0];
+					Long resourcePid = (Long) next[1];
+					String forcedId = (String) next[2];
 
 					ResourceLookup lookup = new ResourceLookup(resourceType, resourcePid, deletedAt);
 					if (!retVal.containsKey(forcedId)) {

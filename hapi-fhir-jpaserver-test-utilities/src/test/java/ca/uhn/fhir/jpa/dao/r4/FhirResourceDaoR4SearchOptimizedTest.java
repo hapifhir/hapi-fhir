@@ -877,8 +877,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
 		}
 
-		// Delete the resource - The searches should generate similar SQL now, but
-		// not actually return the result
+		// Delete the resource - There should only be one search performed because deleted resources will
+		//		be filtered out in the query that resolves forced ids to persistent ids
 		myObservationDao.delete(new IdType("Observation/A"));
 		myObservationDao.delete(new IdType("Observation/" + obs2id));
 
