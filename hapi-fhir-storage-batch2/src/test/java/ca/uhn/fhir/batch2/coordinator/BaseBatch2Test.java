@@ -93,7 +93,7 @@ public abstract class BaseBatch2Test {
 			.setParametersType(TestJobParameters.class)
 			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
 			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
-			.addLastReducerStep(STEP_3, "Step 3", TestJobReductionOutputType.class, myReductionStepWorker);
+			.addFinalReducerStep(STEP_3, "Step 3", TestJobReductionOutputType.class, myReductionStepWorker);
 
 		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
 			next.accept(builder);

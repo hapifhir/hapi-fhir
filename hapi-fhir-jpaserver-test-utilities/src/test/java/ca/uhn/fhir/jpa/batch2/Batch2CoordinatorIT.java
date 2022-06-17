@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -136,9 +138,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			private final ArrayList<SecondStepOutput> myOutput = new ArrayList<>();
 
 			@Override
-			public void addChunk(WorkChunk theChunk, Class<SecondStepOutput> theInputType) {
-				SecondStepOutput data = theChunk.getData(theInputType);
-				myOutput.add(data);
+			public ChunkOutcome consume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails) {
+				myOutput.add(theChunkDetails.getData());
+				return ChunkOutcome.SUCCESS();
 			}
 
 			@NotNull
@@ -169,7 +171,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				"Second step",
 				SecondStepOutput.class,
 				second)
-			.addLastReducerStep(
+			.addFinalReducerStep(
 				LAST_STEP_ID,
 				"Test last step",
 				ReductionStepOutput.class,

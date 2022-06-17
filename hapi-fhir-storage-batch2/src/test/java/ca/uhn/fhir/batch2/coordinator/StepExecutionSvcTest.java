@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -43,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -143,9 +144,9 @@ public class StepExecutionSvcTest {
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
 		StepType theStepType,
 		JobWorkCursor<TestJobParameters, StepInputData, OT> theWorkCursor,
-		boolean theMockOutTargetStep
+		boolean theMockOutTargetStep,
+		boolean mockFinalWorkCursor
 	) {
-		myDataSink = spy(new TestDataSink<>(theWorkCursor));
 		JobDefinition<TestJobParameters> jobDefinition = createTestJobDefinition(
 			theStepType == StepType.REDUCTION
 		);
@@ -159,9 +160,19 @@ public class StepExecutionSvcTest {
 			.thenReturn(jobDefinition);
 		when(theWorkCursor.getCurrentStep())
 			.thenReturn(step);
+
+		myDataSink = spy(new TestDataSink<>(theWorkCursor));
 		if (theMockOutTargetStep) {
 			when(myDataSink.getTargetStep())
 				.thenReturn(step);
+		}
+		if (mockFinalWorkCursor) {
+			JobWorkCursor<TestJobParameters, StepInputData, VoidModel> finalWorkCursor = mock(JobWorkCursor.class);
+
+			when(finalWorkCursor.getJobDefinition())
+				.thenReturn(jobDefinition);
+			when(theWorkCursor.asFinalCursor())
+				.thenReturn(finalWorkCursor);
 		}
 
 		return step;
@@ -177,13 +188,15 @@ public class StepExecutionSvcTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
 
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
 			.thenReturn(chunks.iterator());
+		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
+			.thenReturn(ChunkOutcome.SUCCESS());
 		when(myReductionStep.run(
 			any(StepExecutionDetails.class), any(IJobDataSink.class)
 		)).thenReturn(RunOutcome.SUCCESS);
@@ -196,13 +209,13 @@ public class StepExecutionSvcTest {
 		);
 
 		// verify
-		ArgumentCaptor<WorkChunk> chunkCaptor = ArgumentCaptor.forClass(WorkChunk.class);
+		ArgumentCaptor<ChunkExecutionDetails> chunkCaptor = ArgumentCaptor.forClass(ChunkExecutionDetails.class);
 		verify(myReductionStep, times(chunks.size()))
-			.addChunk(chunkCaptor.capture(), any(Class.class));
-		List<WorkChunk> chunksSubmitted = chunkCaptor.getAllValues();
+			.consume(chunkCaptor.capture());
+		List<ChunkExecutionDetails> chunksSubmitted = chunkCaptor.getAllValues();
 		assertEquals(chunks.size(), chunksSubmitted.size());
-		for (WorkChunk submitted : chunksSubmitted) {
-			assertTrue(chunkIds.contains(submitted.getId()));
+		for (ChunkExecutionDetails submitted : chunksSubmitted) {
+			assertTrue(chunkIds.contains(submitted.getChunkId()));
 		}
 
 		assertTrue(result.isSuccessful());
@@ -236,7 +249,7 @@ public class StepExecutionSvcTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
 
 		// when
 		when(workCursor.isReductionStep())
@@ -244,7 +257,7 @@ public class StepExecutionSvcTest {
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
 			.thenReturn(chunks.iterator());
 		doThrow(new RuntimeException(errorMsg))
-			.when(myReductionStep).addChunk(any(WorkChunk.class), any(Class.class));
+			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
 
 		// test
 		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
@@ -255,23 +268,123 @@ public class StepExecutionSvcTest {
 
 		// verify
 		assertFalse(result.isSuccessful());
+		ArgumentCaptor<String> chunkIdCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> errorCaptor = ArgumentCaptor.forClass(String.class);
-		ArgumentCaptor<List<String>> idCaptor = ArgumentCaptor.forClass(List.class);
-		verify(myJobPersistence)
-			.markWorkChunksWithStatusAndWipeData(
-				eq(INSTANCE_ID),
-				idCaptor.capture(),
-				eq(StatusEnum.FAILED),
-				errorCaptor.capture()
-			);
-		List<String> capturedIds = idCaptor.getValue();
-		assertEquals(chunkIds.size(), capturedIds.size());
-		for (String chunkId : chunkIds) {
-			assertTrue(capturedIds.contains(chunkId));
+		verify(myJobPersistence, times(chunkIds.size()))
+			.markWorkChunkAsFailed(chunkIdCaptor.capture(), errorCaptor.capture());
+		List<String> chunkIdsCaptured = chunkIdCaptor.getAllValues();
+		List<String> errorsCaptured = errorCaptor.getAllValues();
+		for (int i = 0; i < chunkIds.size(); i++) {
+			String cId = chunkIdsCaptured.get(i);
+			String error = errorsCaptured.get(i);
+
+			assertTrue(chunkIds.contains(cId));
+			assertTrue(error.contains("Reduction step failed to execute chunk reduction for chunk"));
 		}
-		assertTrue(errorCaptor.getValue().contains(errorMsg));
+		verify(myJobPersistence, never())
+			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), anyString());
 		verify(myReductionStep, never())
 			.run(any(), any());
+	}
+
+	@Test
+	public void doExecution_reductionStepWithChunkFailures_marksChunkAsFailedButExecutesRestAsSuccess() {
+		// setup
+		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
+		List<WorkChunk> chunks = new ArrayList<>();
+		for (String id : chunkIds) {
+			chunks.add(createWorkChunk(id));
+		}
+		JobInstance jobInstance = getTestJobInstance();
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
+
+		// when
+		when(workCursor.isReductionStep())
+			.thenReturn(true);
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+			.thenReturn(chunks.iterator());
+		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
+			.thenReturn(ChunkOutcome.SUCCESS())
+			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.FAIL));
+		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
+			.thenReturn(RunOutcome.SUCCESS);
+
+		// test
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			null
+		);
+
+		// verify
+		assertFalse(result.isSuccessful());
+		verify(myJobPersistence)
+			.markWorkChunkAsFailed(eq(chunkIds.get(1)), anyString());
+		ArgumentCaptor<List> chunkListCaptor = ArgumentCaptor.forClass(List.class);
+		verify(myJobPersistence)
+			.markWorkChunksWithStatusAndWipeData(eq(INSTANCE_ID),
+				chunkListCaptor.capture(),
+				eq(StatusEnum.COMPLETED),
+				any());
+		List<String> completedIds = chunkListCaptor.getValue();
+		assertEquals(1, completedIds.size());
+		assertEquals(chunkIds.get(0), completedIds.get(0));
+	}
+
+	@Test
+	public void doExecution_reductionWithChunkAbort_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
+		// setup
+		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
+		List<WorkChunk> chunks = new ArrayList<>();
+		for (String id : chunkIds) {
+			chunks.add(createWorkChunk(id));
+		}
+		JobInstance jobInstance = getTestJobInstance();
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
+
+		// when
+		when(workCursor.isReductionStep())
+			.thenReturn(true);
+		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+			.thenReturn(chunks.iterator());
+		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
+			.thenReturn(ChunkOutcome.SUCCESS())
+			.thenReturn(new ChunkOutcome(ChunkOutcome.Status.ABORT));
+		when(myReductionStep.run(any(StepExecutionDetails.class), any(BaseDataSink.class)))
+			.thenReturn(RunOutcome.SUCCESS);
+
+		// test
+		JobStepExecutorOutput<?, ?, ?> result = myExecutorSvc.doExecution(
+			workCursor,
+			jobInstance,
+			null
+		);
+
+		// verification
+		assertFalse(result.isSuccessful());
+		ArgumentCaptor<List> submittedListIds = ArgumentCaptor.forClass(List.class);
+		ArgumentCaptor<StatusEnum> statusCaptor = ArgumentCaptor.forClass(StatusEnum.class);
+		verify(myJobPersistence, times(chunkIds.size()))
+			.markWorkChunksWithStatusAndWipeData(
+				eq(INSTANCE_ID),
+				submittedListIds.capture(),
+				statusCaptor.capture(),
+				any()
+			);
+		assertEquals(2, submittedListIds.getAllValues().size());
+		List<String> list1 = submittedListIds.getAllValues().get(0);
+		List<String> list2 = submittedListIds.getAllValues().get(1);
+		assertTrue(list1.contains(chunkIds.get(0)));
+		assertTrue(list2.contains(chunkIds.get(1)));
+
+		// assumes the order of which is called first
+		// successes, then failures
+		assertEquals(2, statusCaptor.getAllValues().size());
+		List<StatusEnum> statuses = statusCaptor.getAllValues();
+		assertEquals(StatusEnum.COMPLETED, statuses.get(0));
+		assertEquals(StatusEnum.FAILED, statuses.get(1));
 	}
 
 	@Test
@@ -293,7 +406,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
 
 		// when
 		when(myNonReductionStep.run(
@@ -337,7 +450,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, VoidModel> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, VoidModel> step = mockOutWorkCursor(StepType.FINAL, workCursor, true, true);
 
 		// when
 		when(workCursor.isFinalStep())
@@ -393,7 +506,7 @@ public class StepExecutionSvcTest {
 
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
 
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
 
 		// when
 		when(myNonReductionStep.run(any(), any()))
@@ -466,7 +579,7 @@ public class StepExecutionSvcTest {
 					VoidModel.class,
 					mock(IJobStepWorker.class) // we don't care about this step - we just need it
 				)
-				.addLastReducerStep(
+				.addFinalReducerStep(
 					"step last",
 					"description 2",
 					StepOutputData.class,

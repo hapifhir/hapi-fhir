@@ -146,27 +146,35 @@ public class JobInstanceProcessor {
 			ourLog.info("All processing is complete for gated execution of instance {} step {}. Proceeding to step {}", instanceId, currentStepId, nextStepId);
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
-				// do execution of the final step now
-				// (ie, we won't send to job workers)
-				JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
-					JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
-					myInstance,
-					null);
-				if (!result.isSuccessful()) {
-					myInstance.setStatus(StatusEnum.FAILED);
-					myJobPersistence.updateInstance(myInstance);
-				}
+				processReductionStep(jobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
-				List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
-				for (String nextChunkId : chunksForNextStep) {
-					JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
-					myBatchJobSender.sendWorkChannelMessage(workNotification);
-				}
-
-				myInstance.setCurrentGatedStepId(nextStepId);
-				myJobPersistence.updateInstance(myInstance);
+				processChunksForNextSteps(instanceId, nextStepId);
 			}
+		}
+	}
+
+	private void processChunksForNextSteps(String instanceId, String nextStepId) {
+		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
+		for (String nextChunkId : chunksForNextStep) {
+			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
+			myBatchJobSender.sendWorkChannelMessage(workNotification);
+		}
+
+		myInstance.setCurrentGatedStepId(nextStepId);
+		myJobPersistence.updateInstance(myInstance);
+	}
+
+	private void processReductionStep(JobWorkCursor<?, ?, ?> jobWorkCursor) {
+		// do execution of the final step now
+		// (ie, we won't send to job workers)
+		JobStepExecutorOutput<?, ?, ?> result = myJobExecutorSvc.doExecution(
+			JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), jobWorkCursor.nextStep.getStepId()),
+			myInstance,
+			null);
+		if (!result.isSuccessful()) {
+			myInstance.setStatus(StatusEnum.FAILED);
+			myJobPersistence.updateInstance(myInstance);
 		}
 	}
 

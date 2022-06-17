@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -10,6 +11,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -159,8 +161,9 @@ public class StepExecutionSvc {
 		// We fetch all chunks first...
 		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), true);
 
-		List<String> chunkIds = new ArrayList<>();
-		HashSet<String> errors = new HashSet<>();
+		List<String> failedChunks = new ArrayList<>();
+		List<String> successfulChunkIds = new ArrayList<>();
+		boolean jobFailed = false;
 		while (chunkIterator.hasNext()) {
 			WorkChunk chunk = chunkIterator.next();
 			if (chunk.getStatus() != StatusEnum.QUEUED) {
@@ -170,43 +173,72 @@ public class StepExecutionSvc {
 				continue;
 			}
 
-			chunkIds.add(chunk.getId());
-			try {
-				// feed them into our reduction worker
-				// this is the most likely area to throw,
-				// as this is where db actions and processing is likely to happen
-				theReductionWorker.addChunk(chunk, theInputType);
-			} catch (Exception e) {
-				// we got a failure in a reduction
-				ourLog.error("Reduction step failed to execute chunk reduction for chunk {} with exception {}.",
-					chunk.getId(),
-					e.getMessage());
+			if (!failedChunks.isEmpty()) {
+				// we are going to fail all future chunks now
+				failedChunks.add(chunk.getId());
+			} else {
+				try {
+					// feed them into our reduction worker
+					// this is the most likely area to throw,
+					// as this is where db actions and processing is likely to happen
+					ChunkOutcome outcome = theReductionWorker.consume(new ChunkExecutionDetails<>(
+						chunk.getData(theInputType),
+						theParameters,
+						theInstance.getInstanceId(),
+						chunk.getId()
+					));
 
-				// we add the error
-				// and continue to loop (should we just exit now?)
-				errors.add(e.getMessage());
+					switch (outcome.getStatuss()) {
+						case SUCCESS:
+							successfulChunkIds.add(chunk.getId());
+							break;
+						case ABORT:
+							ourLog.error("Processing of work chunk {} resulted in aborting job.", chunk.getId());
+
+							// fail entire job - including all future workchunks
+							failedChunks.add(chunk.getId());
+							jobFailed = true;
+							break;
+						case FAIL:
+							myJobPersistence.markWorkChunkAsFailed(chunk.getId(),
+								"Step worker failed to process work chunk " + chunk.getId());
+							jobFailed = true;
+							break;
+					}
+				} catch (Exception e) {
+					String msg = String.format(
+						"Reduction step failed to execute chunk reduction for chunk %s with exception: %s.",
+						chunk.getId(),
+						e.getMessage()
+					);
+					// we got a failure in a reduction
+					ourLog.error(msg);
+					jobFailed = true;
+
+					myJobPersistence.markWorkChunkAsFailed(chunk.getId(), msg);
+				}
 			}
 		}
 
-		if (errors.isEmpty()) {
+		if (!successfulChunkIds.isEmpty()) {
 			// complete the steps without making a new work chunk
 			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
-				chunkIds,
+				successfulChunkIds,
 				StatusEnum.COMPLETED,
-				null // error message (none = clear data)
+				null // error message - none
 			);
-		} else {
-			// we couldn't reduce.... mark all chunks as failed.
-			// we'll just concatenate the error msgs (they are likely going to have
-			// the same error, but if they don't this isn't harmful)
-			String errorMsg = errors.stream().reduce("", (a, b) -> a + ", " + b);
-			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
-				chunkIds,
-				StatusEnum.FAILED,
-				errorMsg
-			);
+		}
 
-			// no need to generate report - the job has failed
+		if (!failedChunks.isEmpty()) {
+			// mark any failed chunks as failed for aborting
+			myJobPersistence.markWorkChunksWithStatusAndWipeData(theInstance.getInstanceId(),
+				failedChunks,
+				StatusEnum.FAILED,
+				"JOB ABORTED");
+		}
+
+		// if no successful chunks, return false
+		if (successfulChunkIds.isEmpty()) {
 			return false;
 		}
 
@@ -221,7 +253,7 @@ public class StepExecutionSvc {
 
 		return executeStep(executionDetails,
 			theReductionWorker,
-			theDataSink);
+			theDataSink) && !jobFailed;
 	}
 
 	/**
