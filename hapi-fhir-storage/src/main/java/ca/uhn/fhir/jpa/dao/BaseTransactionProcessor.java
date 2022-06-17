@@ -133,6 +133,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -281,13 +282,18 @@ public abstract class BaseTransactionProcessor {
 
 		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
 
+		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
+			theRes = idToPersistedOutcome.get(newId).getResource();
+			theResourceType = idToPersistedOutcome.get(newId).getResource().fhirType();
+		}
+
 		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
-		Date lastModifier = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModifier);
+		Date lastModified = getLastModified(theRes);
+		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
 
 		if (theRequestDetails != null) {
 			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
@@ -1079,12 +1085,19 @@ public abstract class BaseTransactionProcessor {
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
-						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
+
+						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
+
+						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, patchType, patchBody, patchBodyParameters, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
 						}
+						if (nextResourceId != null) {
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
+						}
+						entriesToProcess.put(nextRespEntry, outcome.getId());
 
 						break;
 					}
@@ -1181,6 +1194,14 @@ public abstract class BaseTransactionProcessor {
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
+		}
+	}
+
+	private boolean shouldSwapBinaryToActualResource(IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
+		if ("Binary".equalsIgnoreCase(theResourceType) && theNextResourceId.getResourceType() != null && !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 

@@ -2389,7 +2389,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nonnull
-	private IValidationSupport provideValidationSupport() {
+	protected IValidationSupport provideValidationSupport() {
 		IValidationSupport validationSupport = myValidationSupport;
 		if (validationSupport == null) {
 			validationSupport = myApplicationContext.getBean(IValidationSupport.class);

@@ -967,7 +967,54 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("CT5")));
 		assertThat(nextContents, is(containsString("CT7")));
 		assertThat(nextContents, is(containsString("CT9")));
+	}
 
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/issues/3700
+	 */
+	@Test
+	public void testGroupBatchJobDoesNotExpandOtherGroups() {
+		//Given there are two groups, and they each contain the same member
+		Patient patient = new Patient();
+		patient.setId("patient1");
+		IIdType id = myPatientDao.update(patient).getId();
+
+		Group g1 = new Group();
+		g1.setId("group1");
+		g1.addMember().setEntity(new Reference(id));
+
+		Group g2 = new Group();
+		g2.setId("group2");
+		g2.addMember().setEntity(new Reference(id));
+
+		IIdType group1Id = myGroupDao.update(g1).getId();
+		IIdType group2Id = myGroupDao.update(g2).getId();
+
+		//When we attempt to export one of those groups
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Group"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(group1Id);
+		bulkDataExportOptions.setExpandMdm(false);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, null);
+
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Group")));
+
+		//Then only the requested group should be exported.
+		String nextContents = getBinaryContents(jobInfo, 0);
+		assertThat(nextContents, is(containsString("group1")));
+		assertThat(nextContents, is(not(containsString("group2"))));
 	}
 
 

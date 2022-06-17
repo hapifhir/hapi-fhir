@@ -1,8 +1,8 @@
-package ca.uhn.fhir.i18n;
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,17 +20,7 @@ package ca.uhn.fhir.i18n;
  * #L%
  */
 
-public final class Msg {
-	private static final String ERROR_CODE_PREFIX = "HAPI";
+public interface IAuthRuleBuilderUpdateHistoryRewrite {
 
-	/**
-	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last code value: 2096
-	 */
-
-	private Msg() {}
-
-	public static String code(int theCode) {
-		return String.format("%s-%04d: ", ERROR_CODE_PREFIX, theCode);
-	}
+	IAuthRuleFinished allRequests();
 }
