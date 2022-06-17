@@ -27,6 +27,7 @@ import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -174,8 +175,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public IPackageLoadingTracker getPackageTracker() {
+		throw new UnsupportedOperationException(Msg.code(2100));
+	}
+
+	@Override
+	public IWorkerContext setPackageTracker(
+		IPackageLoadingTracker packageTracker) {
+		throw new UnsupportedOperationException(Msg.code(2101));
+	}
+
+	@Override
 	public PackageVersion getPackageForUrl(String s) {
-		return null;
+		throw new UnsupportedOperationException(Msg.code(2102));
 	}
 
 	@Override
@@ -415,7 +427,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException(Msg.code(2081));
+		throw new UnsupportedOperationException(Msg.code(2103));
 	}
 
 	@Override
@@ -517,6 +529,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public String oid2Uri(String code) {
 		throw new UnsupportedOperationException(Msg.code(686));
+	}
+
+	@Override
+	public Map<String, NamingSystem> getNSUrlMap() {
+		throw new UnsupportedOperationException(Msg.code(2104));
 	}
 
 	@Override
