@@ -1,16 +1,7 @@
-package ca.uhn.fhir.jpa.dao.data;
-
-import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdDaoCustom;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
+package ca.uhn.fhir.jpa.dao.data.custom;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /*
  * #%L
@@ -31,18 +22,8 @@ import java.util.Optional;
  * limitations under the License.
  * #L%
  */
-@Repository
-public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdDaoCustom {
 
-	@Query("SELECT f FROM ForcedId f WHERE myResourcePid IN (:resource_pids)")
-	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
-
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	Optional<ForcedId> findByResourcePid(@Param("resource_pid") Long theResourcePid);
-
-	@Modifying
-	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
+public interface IForcedIdDaoCustom {
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
@@ -65,7 +46,6 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJp
 	 */
 	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(String theResourceType, Collection<String> theForcedIds, Collection<Integer> thePartitionId, boolean theFilterDeleted);
 
-
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query).
@@ -79,6 +59,5 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJp
 	 * Deleted resources are optionally filtered.
 	 */
 	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(String theNextResourceType, Collection<String> theNextIds, List<Integer> thePartitionIdsWithoutDefault, boolean theFilterDeleted);
-
 
 }

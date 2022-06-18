@@ -493,27 +493,22 @@ public class IdHelperService implements IIdHelperService {
 				assert isNotBlank(nextResourceType);
 
 				if (requestPartitionId.isAllPartitions()) {
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theFilterDeleted);
 				} else {
 					if (requestPartitionId.isDefaultPartition()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theFilterDeleted);
 					} else if (requestPartitionId.hasDefaultPartitionId()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault());
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theFilterDeleted);
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds());
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theFilterDeleted);
 					}
 				}
 
 				for (Object[] next : views) {
-					Date deletedAt = (Date) next[3];
-					boolean isResourceDeleted = deletedAt != null;
-					if(theFilterDeleted && isResourceDeleted){
-						continue;
-					}
-
 					String resourceType = (String) next[0];
 					Long resourcePid = (Long) next[1];
 					String forcedId = (String) next[2];
+					Date deletedAt = (Date) next[3];
 
 					ResourceLookup lookup = new ResourceLookup(resourceType, resourcePid, deletedAt);
 					if (!retVal.containsKey(forcedId)) {
