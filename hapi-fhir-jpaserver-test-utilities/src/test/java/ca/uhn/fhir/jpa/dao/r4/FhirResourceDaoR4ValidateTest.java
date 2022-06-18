@@ -753,7 +753,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/123"));
 		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		Coding expectedIssueCode = new Coding();
+		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode("Reference_REF_CantResolve");
+		assertTrue(expectedIssueCode.equalsDeep(oo.getIssueFirstRep().getDetails().getCodingFirstRep()), encode(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString(obs.getSubject().getReference()));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
@@ -889,7 +892,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.setSubject(new Reference("Group/123"));
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
-		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
+		Coding expectedIssueCode = new Coding();
+		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode("Reference_REF_CantResolve");
+		assertTrue(expectedIssueCode.equalsDeep(oo.getIssueFirstRep().getDetails().getCodingFirstRep()), encode(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString(obs.getSubject().getReference()));
 
 		// Target of wrong type
 		obs.setSubject(new Reference("Group/ABC"));
