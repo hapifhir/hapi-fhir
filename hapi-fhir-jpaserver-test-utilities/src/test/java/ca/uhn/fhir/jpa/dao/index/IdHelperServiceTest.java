@@ -91,7 +91,7 @@ public class IdHelperServiceTest {
 		Mockito.when(myDaoConfig.isDeleteEnabled())
 			.thenReturn(true);
 		Mockito.when(myForcedIdDao.findAndResolveByForcedIdWithNoType(Mockito.anyString(),
-			Mockito.anyList()))
+			Mockito.anyList(), Mockito.anyBoolean()))
 			.thenReturn(Collections.singletonList(redView))
 			.thenReturn(Collections.singletonList(blueView));
 
