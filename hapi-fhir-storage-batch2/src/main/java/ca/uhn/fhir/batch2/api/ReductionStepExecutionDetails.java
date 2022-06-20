@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ListResult;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
@@ -45,7 +46,7 @@ public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IMo
 	@Override
 	@Nonnull
 	public final IT getData() {
-		throw new UnsupportedOperationException("Reduction steps should have all data by the time execution is called.");
+		throw new UnsupportedOperationException(Msg.code(2099) + " Reduction steps should have all data by the time execution is called.");
 	}
 
 	@Override
