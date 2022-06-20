@@ -37,6 +37,7 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 		if (matcher == null) {
 			 return null;
 		}
+
 		// fixme myFilter needs to turn into a proper FHIR expression
 		// fixme check in vs out resource
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(myFilter, theOutputResource);

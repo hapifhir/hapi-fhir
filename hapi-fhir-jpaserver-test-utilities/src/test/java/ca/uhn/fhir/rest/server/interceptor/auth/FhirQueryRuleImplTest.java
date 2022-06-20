@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
@@ -19,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
 
@@ -46,10 +49,9 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	private IRuleApplier myMockRuleApplier;
 	private SystemRequestDetails mySrd = new SystemRequestDetails();
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-
-
-	@Mock
-	private IAuthorizationSearchParamMatcher myMockSearchParamMatcher;
+	@Autowired
+	private SearchParamMatcher mySpMatcher;
+	private IAuthorizationSearchParamMatcher myMatcher = new AuthorizationSearchParamMatcher(mySpMatcher);
 
 	@BeforeEach
 	public void setUp() {
@@ -58,7 +60,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	}
 
 	void withSearchParamMatcherPresent() {
-		when(myMockRuleApplier.getSearchParamMatcher()).thenReturn(myMockSearchParamMatcher);
+		when(myMockRuleApplier.getSearchParamMatcher()).thenReturn(myMatcher);
 	}
 
 	@Nested
@@ -81,7 +83,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi")
 				.andThen().build().get(0);
 
-			when(myMockSearchParamMatcher.match(anyString(), ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+			when(myMatcher.match(anyString(), ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
@@ -99,7 +101,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
 			// fixme validate the various translations of scope to query string.
-			when(myMockSearchParamMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=smi"), ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
@@ -114,15 +116,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		public void observation_notInCompartmentMatchFilter_noVerdict() {
 		}
 
-	}
-
-	private AuthorizationInterceptor.Verdict applyRuleToResource() {
-		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, myResource, myMockRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);
-		return verdict;
-	}
-
-	private void withPatientWithNameAndId() {
-		myResource = buildResource("Patient", withFamily("Smith"), withId("some-id"));
 	}
 
 	@Nested
@@ -141,7 +134,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			withPatientWithNameAndId();
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMockSearchParamMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+			when(myMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
@@ -161,7 +154,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			withPatientWithNameAndId();
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMockSearchParamMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+			when(myMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
@@ -175,6 +168,15 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	}
 	// fixme how to test the difference between patient/*.rs?code=foo and patient/Observation.rs?code=foo?
 	// We need the builder to set AppliesTypeEnum, and the use that to build the matcher expression.
+
+	private AuthorizationInterceptor.Verdict applyRuleToResource() {
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, myResource, myMockRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);
+		return verdict;
+	}
+
+	private void withPatientWithNameAndId() {
+		myResource = buildResource("Patient", withFamily("Smith"), withId("some-id"));
+	}
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
