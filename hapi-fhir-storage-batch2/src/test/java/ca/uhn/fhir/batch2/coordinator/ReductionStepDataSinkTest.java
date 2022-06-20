@@ -67,6 +67,11 @@ public class ReductionStepDataSinkTest {
 
 	@BeforeEach
 	private void init() {
+		when(myJobDefinition.getJobDefinitionId())
+			.thenReturn("jobDefinition");
+		when(myWorkCursor.getJobDefinition())
+			.thenReturn(myJobDefinition);
+
 		myDataSink = new ReductionStepDataSink<>(
 			INSTANCE_ID,
 			myWorkCursor,
@@ -123,7 +128,7 @@ public class ReductionStepDataSinkTest {
 		assertEquals(1, logCaptor.getAllValues().size());
 		ILoggingEvent log = logCaptor.getValue();
 		assertTrue(log.getFormattedMessage().contains(
-			"Expected a single work chunk for reduction step, but received 2 instead. Only the first is accepted!"
+			"Report has already been set. Now it is being overwritten. Last in will win!"
 		));
 	}
 
