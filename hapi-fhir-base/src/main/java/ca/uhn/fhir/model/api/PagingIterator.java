@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import ca.uhn.fhir.i18n.Msg;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -37,7 +39,7 @@ public class PagingIterator<T> implements Iterator<T> {
 		fetchNextBatch();
 
 		if (myCurrentBatch.isEmpty()) {
-			throw new NoSuchElementException("Nothing to fetch");
+			throw new NoSuchElementException(Msg.code(2098) + " Nothing to fetch");
 		}
 
 		return myCurrentBatch.remove(0);
