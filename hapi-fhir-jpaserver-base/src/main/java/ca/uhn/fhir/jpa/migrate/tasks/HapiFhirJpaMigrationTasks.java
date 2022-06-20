@@ -84,6 +84,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init560(); // 20211027 -
 		init570(); // 20211102 -
 		init600(); // 20211102 -
+		init610();
+		init620();
+	}
+
+	private void init620() {
+		// Changes for the next release
+		// We stage these over two releases to avoid breaking clustered servers during upgrades.
+//		Builder version = forVersion(VersionEnum.V6_2_0);
+
+		// followup for 20220609 changes
+//		version.onTable("HFJ_SEARCH_RESULT")
+//			.dropColumn("202208xx.1", "PID");
+
+	}
+
+	private void init610() {
+		Builder version = forVersion(VersionEnum.V6_1_0);
+
+		// use composite PK to avoid sequence traffic in hot path during query.
+		Builder.BuilderWithTableName searchResultTable = version.onTable("HFJ_SEARCH_RESULT");
+		version.executeRawSql("20220609.1", "ALTER TABLE HFJ_SEARCH_RESULT DROP PRIMARY KEY");
+		searchResultTable.modifyColumn("20220609.2", "PID")
+				.nullable().withType(ColumnTypeEnum.LONG);
+		version.executeRawSql("20220609.3", "ALTER TABLE HFJ_SEARCH_RESULT ADD PRIMARY KEY (SEARCH_PID, SEARCH_ORDER)");
+		searchResultTable
+			.dropIndex("20220609.4","IDX_SEARCHRES_ORDER");
+		version.dropIdGenerator("20220609.5", "SEQ_SEARCH_RES");
 	}
 
 	private void init600() {

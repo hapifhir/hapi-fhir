@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3664
+title: "Reduce database traffic during query caching by using composite PK instead of sequence."

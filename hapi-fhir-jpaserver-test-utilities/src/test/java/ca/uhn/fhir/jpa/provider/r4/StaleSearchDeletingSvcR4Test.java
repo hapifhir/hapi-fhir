@@ -51,7 +51,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		super.after();
 		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS);
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(DatabaseSearchCacheSvcImpl.DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS);
 	}
 
@@ -111,7 +110,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteVeryLargeSearch() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteInOnePassForUnitTest(10);
 
 		runInTransaction(() -> {
@@ -153,7 +151,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteVerySmallSearch() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 
 		runInTransaction(() -> {
 			Search search = new Search();
@@ -179,7 +176,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDontDeleteSearchBeforeExpiry() {
-		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 
 		runInTransaction(() -> {
 			Search search = new Search();
