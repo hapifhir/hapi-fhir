@@ -57,7 +57,7 @@ public class IForcedIdDaoImpl implements IForcedIdDaoCustom {
 			"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
 			"FROM ForcedId f " +
 			"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
-			"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue IN :partition_id";
+			"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND f.myPartitionIdValue IN ( :partition_id )";
 
 
 		if(theFilterDeleted){
@@ -107,7 +107,7 @@ public class IForcedIdDaoImpl implements IForcedIdDaoCustom {
 			"   f.myResourceType, f.myResourcePid, f.myForcedId, t.myDeleted " +
 			"FROM ForcedId f " +
 			"JOIN ResourceTable t ON t.myId = f.myResourcePid " +
-			"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND (f.myPartitionIdValue IS NULL OR f.myPartitionIdValue IN :partition_id)";
+			"WHERE f.myResourceType = :resource_type AND f.myForcedId IN ( :forced_id ) AND (f.myPartitionIdValue IS NULL OR f.myPartitionIdValue IN ( :partition_id ))";
 
 		if(theFilterDeleted){
 			query += " AND t.myDeleted IS NULL";
