@@ -51,7 +51,7 @@ public class JobChunkProgressAccumulator {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
 	}
 
-	List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
+	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
 		return getChunkStatuses(theInstanceId).stream().filter(t -> t.myStepId.equals(theStepId)).filter(t -> theStatuses.contains(t.myStatus)).map(t -> t.myChunkId).collect(Collectors.toList());
 	}
 
