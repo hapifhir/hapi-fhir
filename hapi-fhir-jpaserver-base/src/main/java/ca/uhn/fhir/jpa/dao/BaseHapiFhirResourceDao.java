@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -70,7 +71,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -1712,7 +1712,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
 		// Execute the update in a retryable transaction
-		return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
+		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theRequest.isRewriteHistory()) {
+			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
+		} else {
+			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
+		}
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
@@ -1837,6 +1841,59 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			id.setValue(entity.getIdDt().getValue());
 			outcome.setId(id);
 		}
+
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
+		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
+
+		ourLog.debug(msg);
+		return outcome;
+	}
+
+	/**
+	 * Method for updating the historical version of the resource when a history version id is included in the request.
+	 *
+	 * @param theResource           to be saved
+	 * @param theRequest            details of the request
+	 * @param theTransactionDetails details of the transaction
+	 * @return the outcome of the operation
+	 */
+	private DaoMethodOutcome doUpdateWithHistoryRewrite(T theResource, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		StopWatch w = new StopWatch();
+
+		// No need for indexing as this will update a non-current version of the resource which will not be searchable
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, false);
+
+		BaseHasResource entity = null;
+		BaseHasResource currentEntity = null;
+
+		IIdType resourceId;
+
+		resourceId = theResource.getIdElement();
+		assert resourceId != null;
+		assert resourceId.hasIdPart();
+
+		try {
+			currentEntity = readEntityLatestVersion(resourceId.toVersionless(), theRequest, theTransactionDetails);
+
+			if (!resourceId.hasVersionIdPart()) {
+				throw new InvalidRequestException(Msg.code(2093) + "Invalid resource ID, ID must contain a history version");
+			}
+			entity = readEntity(resourceId, theRequest);
+			validateResourceType(entity);
+		} catch (ResourceNotFoundException e) {
+			throw new ResourceNotFoundException(Msg.code(2087) + "Resource not found [" + resourceId + "] - Doesn't exist");
+		}
+
+		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
+			throw new UnprocessableEntityException(Msg.code(2088) + "Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
+		}
+		assert resourceId.hasVersionIdPart();
+
+		boolean wasDeleted = entity.getDeleted() != null;
+		entity.setDeleted(null);
+		boolean isUpdatingCurrent = resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
+		IBasePersistedResource savedEntity = updateHistoryEntity(theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, theResource).setCreated(wasDeleted);
 
 		String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));

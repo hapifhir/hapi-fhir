@@ -55,7 +55,12 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	/**
 	 * Constructor
 	 */
-	public JobCoordinatorImpl(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IChannelReceiver theWorkChannelReceiver, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry) {
+	public JobCoordinatorImpl(@Nonnull BatchJobSender theBatchJobSender,
+									  @Nonnull IChannelReceiver theWorkChannelReceiver,
+									  @Nonnull IJobPersistence theJobPersistence,
+									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+									  @Nonnull StepExecutionSvc theExecutorSvc
+	) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -63,7 +68,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender);
+		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 	}

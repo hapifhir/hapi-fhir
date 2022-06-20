@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.searchparam.SearchParameterMap.compare;
 import static ca.uhn.fhir.rest.param.TokenParamModifier.TEXT;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -180,4 +181,32 @@ class SearchParameterMapTest {
 		Assertions.assertEquals(orig.get("datetime"), clone.get("datetime"));
 		Assertions.assertEquals(orig.get("int"), clone.get("int"));
 	}
+
+
+	@Test
+	public void testCompareParameters() {
+
+		// Missing
+		assertEquals(0, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam().setMissing(true)));
+		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam().setMissing(true)));
+		assertEquals(1, compare(ourFhirContext, new StringParam().setMissing(true), new StringParam("A")));
+
+		// Qualifier
+		assertEquals(0, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A").setContains(true)));
+		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("A")));
+		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("A").setContains(true)));
+
+		// Value
+		assertEquals(0, compare(ourFhirContext, new StringParam("A"), new StringParam("A")));
+		assertEquals(-1, compare(ourFhirContext, new StringParam("A"), new StringParam("B")));
+		assertEquals(1, compare(ourFhirContext, new StringParam("B"), new StringParam("A")));
+
+		// Value + Comparator (value should have no effect if comparator is changed)
+		assertEquals(1, compare(ourFhirContext, new StringParam("B").setContains(true), new StringParam("A")));
+		assertEquals(1, compare(ourFhirContext, new StringParam("A").setContains(true), new StringParam("B")));
+
+	}
+
+
+
 }

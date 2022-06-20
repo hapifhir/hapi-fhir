@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
@@ -33,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -223,6 +225,11 @@ public class JobDefinition<PT extends IModelJson> {
 		public Builder<PT, VoidModel> addLastStep(String theStepId, String theStepDescription, IJobStepWorker<PT, NIT, VoidModel> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
 			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution, myCompletionHandler);
+		}
+
+		public <OT extends IModelJson> Builder<PT, OT> addFinalReducerStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IReductionStepWorker<PT, NIT, OT> theStepWorker) {
+			mySteps.add(new JobDefinitionReductionStep<PT, NIT, OT>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
+			return new Builder<PT, OT>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
 		}
 
 		public JobDefinition<PT> build() {

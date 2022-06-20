@@ -1,38 +1,30 @@
 package ca.uhn.fhir.okhttp.client;
 
-import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.HttpClientUtil;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
+import ca.uhn.fhir.rest.client.method.MethodUtil;
+import okhttp3.Call;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
 
 import java.util.List;
 import java.util.Map;
 
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-
-/*
- * #%L
- * HAPI FHIR OkHttp Client
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
-import ca.uhn.fhir.rest.client.method.MethodUtil;
-import okhttp3.*;
-import okhttp3.internal.Version;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.deleteLastCharacter;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.endsWith;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.everythingAfterFirstQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.hasQuestionMark;
+import static ca.uhn.fhir.okhttp.utils.UrlStringUtils.withTrailingQuestionMarkRemoved;
 
 /**
  * A Http Request based on OkHttp. This is an adapter around the class
@@ -127,7 +119,7 @@ public class OkHttpRestfulClient implements IHttpClient {
     }
 
     private void addUserAgentHeader(OkHttpRestfulRequest theHttpRequest, FhirContext theContext) {
-        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, Version.userAgent()));
+        theHttpRequest.addHeader("User-Agent", HttpClientUtil.createUserAgentString(theContext, "okhttp"));
     }
 
     private void addAcceptCharsetHeader(OkHttpRestfulRequest theHttpRequest) {

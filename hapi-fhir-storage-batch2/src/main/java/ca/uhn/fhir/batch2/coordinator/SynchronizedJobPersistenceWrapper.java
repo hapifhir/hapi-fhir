@@ -22,8 +22,10 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +91,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
+		myWrap.markWorkChunksWithStatusAndWipeData(theInstanceId, theChunkIds, theStatus, theErrorMsg);
+	}
+
+	@Override
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWrap.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
@@ -97,6 +104,12 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	public synchronized List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		return myWrap.fetchWorkChunksWithoutData(theInstanceId, thePageSize, thePageIndex);
 	}
+
+	@Override
+	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		return myWrap.fetchAllWorkChunksIterator(theInstanceId, theWithData);
+	}
+
 
 	@Override
 	public synchronized void updateInstance(JobInstance theInstance) {
