@@ -98,6 +98,10 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return only resource types matching the given _type filter")
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
+		List<StringType> theTypes,
+
 		@Sort
 			SortSpec theSortSpec,
 

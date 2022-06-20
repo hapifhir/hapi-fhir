@@ -2040,6 +2040,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(ids.size(), greaterThan(10));
 		}
 	}
+
 	@Test
 	public void testEverythingSupportsTypeParameter() {
 		Patient p = new Patient();
@@ -2058,7 +2059,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		{
 			Parameters parameters = new Parameters();
 			parameters.addParameter("_type", new StringType("Observation,Patient"));
-			Parameters output = myClient.operation().onInstance(p.getId()).named("everything").withNoParameters(Parameters.class).execute();
+			Parameters output = myClient.operation().onInstance(p.getId()).named("everything").withParameters(parameters).execute();
 			Bundle bundle = (Bundle) output.getParameter().get(0).getResource();
 			assertThat(bundle.getEntry(), hasSize(2));
 		}
