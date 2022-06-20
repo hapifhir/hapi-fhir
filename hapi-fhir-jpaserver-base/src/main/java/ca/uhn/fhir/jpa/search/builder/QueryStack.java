@@ -933,7 +933,7 @@ public class QueryStack {
 		EnumSet<PredicateBuilderTypeEnum> cachedReusePredicateBuilderTypes = EnumSet.copyOf(myReusePredicateBuilderTypes);
 		myReusePredicateBuilderTypes.clear();
 
-		UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION);
+		UnionQuery union = new UnionQuery(SetOperationQuery.Type.UNION_ALL);
 
 		ReferenceChainExtractor chainExtractor = new ReferenceChainExtractor();
 		chainExtractor.deriveChains(theResourceName, theSearchParam, theList);
