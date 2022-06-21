@@ -45,7 +45,6 @@ public interface IRuleApplier {
 
 	@Nullable
 	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
-		// fixme implement this method somewhere. provide default null for backward compat.
 		return null;
 	};
 }
