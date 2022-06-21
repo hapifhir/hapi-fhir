@@ -1749,4 +1749,22 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
 			.execute();
 	}
+
+	@Test
+	public void testSmartFilterSearch() {
+		// fixme flesh out unit tests for new rule type here.
+	   // given
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().allResources().inCompartmentWithFilter("Patient", new IdType("Patient/bob"), "date=gt2022-01-01").andThen()
+					.denyAll()
+					.build();
+			}
+		});
+
+	   // when
+		myClient.search().byUrl("/Observation?code=foo&patient=Patient/bob").returnBundle(Bundle.class).execute();
+	}
 }
