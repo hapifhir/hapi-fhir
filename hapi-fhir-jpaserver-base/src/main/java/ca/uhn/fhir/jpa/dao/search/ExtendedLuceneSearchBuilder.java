@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.dao.search;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -57,6 +57,7 @@ public class ExtendedLuceneSearchBuilder {
 	 */
 	public boolean isSupportsSomeOf(SearchParameterMap myParams) {
 		return
+			myParams.getSort() != null ||
 			myParams.getLastUpdated() != null ||
 			myParams.entrySet().stream()
 				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
@@ -115,6 +116,9 @@ public class ExtendedLuceneSearchBuilder {
 			}
 			return false;
 		} else if (param instanceof UriParam) {
+			return modifier.equals(EMPTY_MODIFIER);
+
+		} else if (param instanceof NumberParam) {
 			return modifier.equals(EMPTY_MODIFIER);
 
 		} else {
@@ -178,6 +182,12 @@ public class ExtendedLuceneSearchBuilder {
 				case URI:
 					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
 					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
+					break;
+
+				case NUMBER:
+					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = theParams.remove(nextParam);
+					builder.addNumberUnmodifiedSearch(nextParam, numberUnmodifiedAndOrTerms);
+					break;
 
 				default:
 					// ignore unsupported param types/modifiers.  They will be processed up in SearchBuilder.
@@ -190,8 +200,6 @@ public class ExtendedLuceneSearchBuilder {
 		DateParam activeBound = theParams.getLastUpdated().getLowerBound() != null
 			? theParams.getLastUpdated().getLowerBound()
 			: theParams.getLastUpdated().getUpperBound();
-
-		TemporalPrecisionEnum precision = activeBound.getPrecision();
 
 		List<List<IQueryParameterType>> result = List.of( List.of(activeBound) );
 

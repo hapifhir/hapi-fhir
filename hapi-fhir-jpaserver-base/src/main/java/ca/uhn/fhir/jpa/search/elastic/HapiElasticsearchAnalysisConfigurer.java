@@ -89,5 +89,9 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 
 		theConfigCtx.analyzer("termConceptPropertyAnalyzer").custom()
 			.tokenizer("whitespace");
+
+		theConfigCtx.normalizer( "lowercase" ).custom()
+			.tokenFilters( "lowercase", "asciifolding" );
+
 	}
 }
