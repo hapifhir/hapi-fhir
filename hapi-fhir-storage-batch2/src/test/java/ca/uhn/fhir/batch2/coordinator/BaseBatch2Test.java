@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -30,6 +31,8 @@ public abstract class BaseBatch2Test {
 	public static final String DATA_3_VALUE = "data 3 value";
 	public static final String DATA_4_VALUE = "data 4 value";
 
+	public static final String REDUCTION_JOB_ID = "REDUCTION_JOB_ID";
+
 	@Mock
 	protected IJobStepWorker<TestJobParameters, VoidModel, TestJobStep2InputType> myStep1Worker;
 	@Mock
@@ -37,12 +40,19 @@ public abstract class BaseBatch2Test {
 	@Mock
 	protected IJobStepWorker<TestJobParameters, TestJobStep3InputType, VoidModel> myStep3Worker;
 
+	@Mock
+	protected IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestJobReductionOutputType> myReductionStepWorker;
+
 	@Nonnull
 	static JobInstance createInstance() {
+		return createInstance(JOB_DEFINITION_ID);
+	}
+
+	static JobInstance createInstance(String theJobId) {
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
+		instance.setJobDefinitionId(theJobId);
 		instance.setJobDefinitionVersion(1);
 		instance.setParameters(new TestJobParameters()
 			.setParam1(PARAM_1_VALUE)
@@ -63,6 +73,27 @@ public abstract class BaseBatch2Test {
 			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
 			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
 			.addLastStep(STEP_3, "Step 3", myStep3Worker);
+
+		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
+			next.accept(builder);
+		}
+
+		return builder.build();
+	}
+
+	@SafeVarargs
+	protected final JobDefinition<TestJobParameters> createJobDefinitionWithReduction(Consumer<JobDefinition.Builder<TestJobParameters, ?>>... theModifiers) {
+		// create a job reduction
+		JobDefinition.Builder<TestJobParameters, TestJobReductionOutputType> builder = JobDefinition
+			.newBuilder()
+			.setJobDefinitionId(REDUCTION_JOB_ID)
+			.setJobDescription("Some description")
+			.setJobDefinitionVersion(1)
+			.gatedExecution()
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(STEP_1, "Step 1", TestJobStep2InputType.class, myStep1Worker)
+			.addIntermediateStep(STEP_2, "Step 2", TestJobStep3InputType.class, myStep2Worker)
+			.addFinalReducerStep(STEP_3, "Step 3", TestJobReductionOutputType.class, myReductionStepWorker);
 
 		for (Consumer<JobDefinition.Builder<TestJobParameters, ?>> next : theModifiers) {
 			next.accept(builder);

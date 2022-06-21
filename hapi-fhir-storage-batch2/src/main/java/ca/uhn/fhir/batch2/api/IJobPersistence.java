@@ -22,8 +22,10 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -104,6 +106,15 @@ public interface IJobPersistence {
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
 
 	/**
+	 * Marks all work chunks with the provided status and erases the data
+	 * @param  theInstanceId - the instance id
+	 * @param theChunkIds - the ids of work chunks being reduced to single chunk
+	 * @param theStatus - the status to mark
+	 * @param theErrorMsg  - error message (if status warrants it)
+	 */
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
+
+	/**
 	 * Increments the work chunk error count by the given amount
 	 *
 	 * @param theChunkId     The chunk ID
@@ -119,6 +130,14 @@ public interface IJobPersistence {
 	 * @param thePageIndex  The page index
 	 */
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetch all chunks for a given instance.
+	 * @param theInstanceId - instance id
+	 * @param theWithData - whether or not to include the data
+	 * @return - an iterator for fetching work chunks
+	 */
+	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
 	 * Update the stored instance

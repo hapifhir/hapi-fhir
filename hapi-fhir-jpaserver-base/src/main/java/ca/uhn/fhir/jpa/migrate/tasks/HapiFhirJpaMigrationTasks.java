@@ -84,6 +84,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init560(); // 20211027 -
 		init570(); // 20211102 -
 		init600(); // 20211102 -
+		init610();
+	}
+
+	private void init610() {
+		Builder version = forVersion(VersionEnum.V6_1_0);
+
+		// add new REPORT column to BATCH2 tables
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220601.1", "REPORT")
+			.nullable()
+			.type(ColumnTypeEnum.CLOB);
 	}
 
 	private void init600() {
@@ -386,6 +398,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.onTable("NPM_PACKAGE_VER_RES")
 			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
+		version.onTable("MPI_LINK")
+			.addIndex("20220613.1", "IDX_EMPI_MATCH_TGT_VER")
+			.unique(false)
+			.online(true)
+			.withColumns("MATCH_RESULT", "TARGET_PID", "VERSION");
 	}
 
 	/**
