@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3693
+jira: SMILE-4185
+title: "Previously, deleted resources with client generated ids were being included in the 
+bundle total when searching by _id. This has been corrected by adding functionality to optionally filter
+out deleted resources when resolving forced ids to persistent ids."

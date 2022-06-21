@@ -19,7 +19,7 @@ public class IForcedIdDaoImpl implements IForcedIdDaoCustom {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are not filtered.
 	 */
-	public Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds){
+	public Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(String theResourceType, Collection<String> theForcedIds){
 		return findAndResolveByForcedIdWithNoType(theResourceType, theForcedIds, false);
 	}
 

@@ -161,7 +161,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
 			verifySingleForcedIdFound(forcedIds, patientId);
@@ -180,7 +180,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Search and include deleted
 		runInTransaction(() -> {
-			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
 			verifySingleForcedIdFound(forcedIds, patientId);

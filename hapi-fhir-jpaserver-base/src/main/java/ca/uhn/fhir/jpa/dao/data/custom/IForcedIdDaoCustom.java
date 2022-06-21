@@ -30,7 +30,7 @@ public interface IForcedIdDaoCustom {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources should not be filtered.
 	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds);
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(String theResourceType, Collection<String> theForcedIds);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
