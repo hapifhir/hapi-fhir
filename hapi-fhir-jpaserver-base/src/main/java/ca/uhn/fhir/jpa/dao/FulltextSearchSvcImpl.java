@@ -348,4 +348,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		return queryOptionsStep.fetchTotalHitCount();
 	}
+
+	@Override
+	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
+		// fixme do a sync search, but fetch the resource json instead of just the ids.
+		return null;
+	}
 }

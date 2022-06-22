@@ -924,6 +924,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 			assertThat(ids, hasSize(1));
 			assertThat(ids, contains(id.getIdPart()));
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			// fixme Juan - how can we test that we only make one call to Elastic here?
+			//assertEquals(1, myElasticsearchQueryCount);
+
 		}
 
 		@Test
