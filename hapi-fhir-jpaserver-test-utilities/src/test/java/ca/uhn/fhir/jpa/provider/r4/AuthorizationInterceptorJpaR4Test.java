@@ -1752,7 +1752,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSmartFilterSearch() {
-		// fixme flesh out unit tests for new rule type here.
+		// wipjv flesh out unit tests for new rule type here.
 	   // given
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

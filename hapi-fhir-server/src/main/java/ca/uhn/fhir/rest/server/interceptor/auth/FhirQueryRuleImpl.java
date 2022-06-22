@@ -50,9 +50,9 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 			return null;
 		}
 
-		// fixme myFilter needs to turn into a proper FHIR expression
-		// fixme check in vs out resource
-		// fixme has the logic already considered theOutputResource.fhirType() vs myTypes?
+		// wipjv myFilter needs to turn into a proper FHIR expression
+		// wipjv check in vs out resource
+		// wipjv has the logic already considered theOutputResource.fhirType() vs myTypes?
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(theOutputResource.fhirType() + "?" + myFilter, theOutputResource);
 
 		AuthorizationInterceptor.Verdict result;
@@ -61,8 +61,8 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 				result = this.newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
 				break;
 			case UNSUPPORTED:
-				// fixme log a warning to the troubleshooting log
-				// fixme if deny mode, we should deny here.
+				// wipjv log a warning to the troubleshooting log
+				// wipjv if deny mode, we should deny here.
 				theRuleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.  Abstaining.", myFilter, mr.getUnsupportedReason());
 				if ( PolicyEnum.DENY.equals(getMode())) {
 					result = new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);

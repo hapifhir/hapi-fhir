@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Adapt our InMemoryMatcher to our auth rules.
- * fixme do we like this name, or this package?
+ * wipjv do we like this name, or this package?
  */
 public interface IAuthorizationSearchParamMatcher {
 	MatchResult match(String theCriteria, IBaseResource theResource);

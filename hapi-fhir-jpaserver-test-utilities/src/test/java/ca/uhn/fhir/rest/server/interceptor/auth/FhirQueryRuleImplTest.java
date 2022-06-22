@@ -29,8 +29,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-// fixme where should this test live?
-// fixme can we mock the resource?  We just use it for stubbing here. If so, move this back to hapi-fhir-server ca.uhn.fhir.rest.server.interceptor.auth
+// wipjv where should this test live?
+// wipjv can we mock the resource?  We just use it for stubbing here. If so, move this back to hapi-fhir-server ca.uhn.fhir.rest.server.interceptor.auth
 @MockitoSettings(strictness= Strictness.LENIENT)
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
@@ -166,13 +166,32 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			assertThat(verdict, nullValue());
 		}
 
+		@Test
+		public void observation_denyInCompartmentMatchingFilter_deny() {
+			// given
+			withPatientWithNameAndId();
+			withObservationWithSubjectAndCode(myResource.getIdElement());
+
+			myRule = (FhirQueryRuleImpl) new RuleBuilder().deny().read().resourcesOfType("Observation")
+				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "code=28521000087105")
+				.andThen().build().get(0);
+			when(myMatcher.match("Observation?code=28521000087105", myResource2))
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
+
+			// then
+			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
+		}
+
 	}
 
 	@Nested
 	public class MisconfigurationChecks {
 
 
-		// fixme check for unsupported params during CdrAuthInterceptor scopes->perms translation.
+		// wipjv check for unsupported params during CdrAuthInterceptor scopes->perms translation.
 
 		/**
 		 * in case an unsupported perm snuck through the front door.
@@ -234,7 +253,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		}
 
 	}
-	// fixme how to test the difference between patient/*.rs?code=foo and patient/Observation.rs?code=foo?
+	// wipjv how to test the difference between patient/*.rs?code=foo and patient/Observation.rs?code=foo?
 	// We need the builder to set AppliesTypeEnum, and the use that to build the matcher expression.
 
 	private AuthorizationInterceptor.Verdict applyRuleToResource(IBaseResource theResource) {
