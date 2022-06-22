@@ -60,9 +60,10 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
  * Identifier.type.text
  */
 public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedLuceneIndexData> {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
 
 	public static final String SEARCH_PARAM_TEXT_PREFIX = "text-";
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
+	public static final String LOWERCASE_ASCIIFOLDING_NORMALIZER = "lowercaseAsciifoldingNormalizer";
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
@@ -91,7 +92,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		StringIndexFieldTypeOptionsStep<?> lowerCaseNormalizer =
 			indexFieldTypeFactory.asString()
-				.normalizer("lowercase")
+				.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER)
 				.sortable(Sortable.YES)
 				.projectable(Projectable.YES);
 
