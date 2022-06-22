@@ -315,6 +315,11 @@ public class DaoConfig {
 	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
+	 * Since 6.1.0
+	 */
+	private boolean myUpdateWithHistoryRewriteEnabled = false;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2873,7 +2878,7 @@ public class DaoConfig {
 	 */
     public int getBulkExportFileRetentionPeriodHours() {
         return myBulkExportFileRetentionPeriodHours;
-    }
+	 }
 
 	/**
 	 * This setting controls how long Bulk Export collection entities will be retained after job start.
@@ -2881,11 +2886,32 @@ public class DaoConfig {
 	 *
 	 * @since 6.0.0
 	 */
-    public void setBulkExportFileRetentionPeriodHours(int theBulkExportFileRetentionPeriodHours) {
-        myBulkExportFileRetentionPeriodHours = theBulkExportFileRetentionPeriodHours;
-    }
+	public void setBulkExportFileRetentionPeriodHours(int theBulkExportFileRetentionPeriodHours) {
+		myBulkExportFileRetentionPeriodHours = theBulkExportFileRetentionPeriodHours;
+	}
 
-    public enum StoreMetaSourceInformationEnum {
+	/**
+	 * This setting indicates whether updating the history of a resource is allowed.
+	 * Default is false.
+	 *
+	 * @since 6.1.0
+	 */
+	public boolean isUpdateWithHistoryRewriteEnabled() {
+		return myUpdateWithHistoryRewriteEnabled;
+	}
+
+	/**
+	 * This setting indicates whether updating the history of a resource is allowed.
+	 * Default is false.
+	 *
+	 * @since 6.1.0
+	 */
+	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
+		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
+	}
+
+
+	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),

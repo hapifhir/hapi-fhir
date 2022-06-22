@@ -29,16 +29,21 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.model.api.PagingIterator;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -94,6 +99,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		entity.setCreateTime(new Date());
+		entity.setReport(theInstance.getReport());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
@@ -167,6 +173,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		retVal.setParameters(theEntity.getParams());
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
+		retVal.setReport(theEntity.getReport());
 		return retVal;
 	}
 
@@ -186,14 +193,35 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
+		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
+		for (List<String> idList : listOfListOfIds) {
+			myWorkChunkRepository.updateAllChunksForInstanceStatusClearDataAndSetError(idList, new Date(), theStatus, theErrorMsg);
+		}
+	}
+
+	@Override
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
 
 	@Override
 	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
+		ArrayList<WorkChunk> chunks = new ArrayList<>();
+		fetchChunks(theInstanceId, false, thePageSize, thePageIndex, chunks::add);
+		return chunks;
+	}
+
+	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
 		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-		return chunks.stream().map(t -> toChunk(t, false)).collect(Collectors.toList());
+		for (Batch2WorkChunkEntity chunk : chunks) {
+			theConsumer.accept(toChunk(chunk, theIncludeData));
+		}
+	}
+
+	@Override
+	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
+		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
 	@Override
@@ -214,6 +242,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setErrorCount(theInstance.getErrorCount());
 		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
 		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		instance.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instance);
 	}

@@ -24,6 +24,9 @@ import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
+import static ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder.LOWERCASE_ASCIIFOLDING_NORMALIZER;
+
+
 public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysisConfigurer{
 
 	@Override
@@ -89,5 +92,9 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 
 		theConfigCtx.analyzer("termConceptPropertyAnalyzer").custom()
 			.tokenizer("whitespace");
+
+		theConfigCtx.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER).custom()
+			.tokenFilters("lowercase", "asciifolding");
+
 	}
 }

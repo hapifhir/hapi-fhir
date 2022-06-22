@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -71,12 +72,17 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
-
+	private final StepExecutionSvc myJobExecutorSvc;
 
 	/**
 	 * Constructor
 	 */
-	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry, @Nonnull BatchJobSender theBatchJobSender) {
+	public JobMaintenanceServiceImpl(@Nonnull ISchedulerService theSchedulerService,
+												@Nonnull IJobPersistence theJobPersistence,
+												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+												@Nonnull BatchJobSender theBatchJobSender,
+												@Nonnull StepExecutionSvc theExecutor
+	) {
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
 		Validate.notNull(theJobDefinitionRegistry);
@@ -86,6 +92,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		mySchedulerService = theSchedulerService;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
+		myJobExecutorSvc = theExecutor;
 	}
 
 	@PostConstruct
@@ -109,7 +116,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 			for (JobInstance instance : instances) {
 				if (processedInstanceIds.add(instance.getInstanceId())) {
 					myJobDefinitionRegistry.setJobDefinition(instance);
-					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence, myBatchJobSender, instance, progressAccumulator);
+					JobInstanceProcessor jobInstanceProcessor = new JobInstanceProcessor(myJobPersistence,
+						myBatchJobSender, instance, progressAccumulator, myJobExecutorSvc);
 					jobInstanceProcessor.process();
 				}
 			}

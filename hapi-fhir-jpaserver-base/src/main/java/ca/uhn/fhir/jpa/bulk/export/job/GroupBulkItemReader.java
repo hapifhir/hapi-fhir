@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -91,12 +92,15 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
+		//Short circuit out if we detect we are attempting to export groups.
+		if (myResourceType.equalsIgnoreCase("Group")) {
+			return getSingletonGroupIterator();
+		}
 
 		//Short circuit out if we detect we are attempting to extract patients
 		if (myResourceType.equalsIgnoreCase("Patient")) {
 			return getExpandedPatientIterator();
 		}
-
 
 
 		//First lets expand the group so we get a list of all patient IDs of the group, and MDM-matched patient IDs of the group.
@@ -117,6 +121,18 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			ourLog.debug("Resource PIDs to be Bulk Exported: {}", myExpandedMemberPids);
 		}
 		return myExpandedMemberPids.iterator();
+	}
+
+	/**
+	 * If we are exporting a group during group export, we intentionally do not expand to other groups the member might be part of.
+	 * This code short-circuits the standard "expand group into its members then check the search compartment" logic.
+	 *
+	 * @return An iterator containing a single Group ID.
+	 */
+	private Iterator<ResourcePersistentId> getSingletonGroupIterator() {
+		String stringedId = new IdDt(myGroupId).getIdPart();
+		ResourcePersistentId groupId = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), myResourceType, stringedId);
+		return Collections.singletonList(groupId).iterator();
 	}
 
 	/**

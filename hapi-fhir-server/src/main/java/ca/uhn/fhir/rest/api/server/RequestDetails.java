@@ -76,6 +76,7 @@ public abstract class RequestDetails {
 	private String myRequestId;
 	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
+	private boolean myRewriteHistory;
 
 	/**
 	 * Constructor
@@ -534,4 +535,11 @@ public abstract class RequestDetails {
 	}
 
 
+	public boolean isRewriteHistory() {
+		return myRewriteHistory;
+	}
+
+	public void setRewriteHistory(boolean theRewriteHistory) {
+		myRewriteHistory = theRewriteHistory;
+	}
 }

@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -173,6 +173,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case WRITE:
 				if (theInputResource == null && theInputResourceId == null) {
+					return null;
+				}
+				if (theRequestDetails.isRewriteHistory() && theRequestDetails.getId() != null && theRequestDetails.getId().hasVersionIdPart() && theOperation == RestOperationTypeEnum.UPDATE) {
 					return null;
 				}
 				switch (theOperation) {

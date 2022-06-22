@@ -33,9 +33,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.InstantType;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -157,6 +159,14 @@ public interface ITestDataBuilder {
 
 	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
 		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
+	}
+
+	default Consumer<IBaseResource> withLastUpdated(Date theLastUpdated) {
+		return t -> t.getMeta().setLastUpdated(theLastUpdated);
+	}
+
+	default Consumer<IBaseResource> withLastUpdated(String theIsoDate) {
+		return t -> t.getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {

@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
@@ -15,6 +17,7 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +30,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -35,6 +39,10 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -42,6 +50,9 @@ public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
 	public static final String OBSERVATION_DATETIME = OBSERVATION_DATE + "T01:00:00-08:30";
 	public static final String OBSERVATION_CODE = "MATCH";
+	public static final String OBSERVATION_CODE_SYSTEM = "http://hl7.org/some-cs";
+	public static final String OBSERVATION_CODE_DISPLAY = "Match";
+	public static final String OBSERVATION_CODE_VALUE_SET_URI = "http://hl7.org/some-vs";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
 	private static final String EARLY_DATETIME = EARLY_DATE + "T12:00:00Z";
@@ -52,6 +63,8 @@ public class InMemoryResourceMatcherR5Test {
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+	@MockBean
+	IValidationSupport myValidationSupport;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	private Observation myObservation;
@@ -72,9 +85,10 @@ public class InMemoryResourceMatcherR5Test {
 		myObservation.getMeta().setSource(TEST_SOURCE);
 		myObservation.setEffective(new DateTimeType(OBSERVATION_DATETIME));
 		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setCode(OBSERVATION_CODE);
+		codeableConcept.addCoding().setCode(OBSERVATION_CODE)
+			.setSystem(OBSERVATION_CODE_SYSTEM).setDisplay(OBSERVATION_CODE_DISPLAY);
 		myObservation.setCode(codeableConcept);
-		mySearchParams = extractDateSearchParam(myObservation);
+		mySearchParams = extractSearchParams(myObservation);
 	}
 
 	@Test
@@ -130,6 +144,54 @@ public class InMemoryResourceMatcherR5Test {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE, myObservation, mySearchParams);
 		assertFalse(result.supported());
 		assertEquals("Parameter: <code:not> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+	}
+
+	@Test
+	public void testSupportedIn() {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult().setCode(OBSERVATION_CODE);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertTrue(result.matched());
+
+		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
+	}
+
+	@Test
+	public void testSupportedIn_NoMatch() {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult();
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertFalse(result.matched());
+
+		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
+	}
+
+	@Test
+	public void testSupportedNotIn() {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult();
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertTrue(result.matched());
+
+		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
+	}
+
+	@Test
+	public void testSupportedNotIn_NoMatch() {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult().setCode(OBSERVATION_CODE);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertFalse(result.matched());
+
+		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
 	}
 
 	@Test
@@ -204,7 +266,7 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextWeek = Instant.now().plus(Duration.ofDays(7));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
-		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -218,7 +280,7 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
-		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -237,7 +299,7 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextWeek = Instant.now().plus(Duration.ofDays(7));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
-		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -249,7 +311,7 @@ public class InMemoryResourceMatcherR5Test {
 		Observation futureObservation = new Observation();
 		Instant nextWeek = Instant.now().minus(Duration.ofDays(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
-		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -269,7 +331,7 @@ public class InMemoryResourceMatcherR5Test {
 		}
 		Instant nextMinute = now.toInstant().plus(Duration.ofMinutes(1));
 		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
-		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+		ResourceIndexedSearchParams searchParams = extractSearchParams(futureObservation);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -280,11 +342,11 @@ public class InMemoryResourceMatcherR5Test {
 	public void testInPeriod() {
 		Observation insidePeriodObservation = new Observation();
 		insidePeriodObservation.setEffective(new DateTimeType("1985-01-01T00:00:00Z"));
-		ResourceIndexedSearchParams insidePeriodSearchParams = extractDateSearchParam(insidePeriodObservation);
+		ResourceIndexedSearchParams insidePeriodSearchParams = extractSearchParams(insidePeriodObservation);
 
 		Observation outsidePeriodObservation = new Observation();
 		outsidePeriodObservation.setEffective(new DateTimeType("2010-01-01T00:00:00Z"));
-		ResourceIndexedSearchParams outsidePeriodSearchParams = extractDateSearchParam(outsidePeriodObservation);
+		ResourceIndexedSearchParams outsidePeriodSearchParams = extractSearchParams(outsidePeriodObservation);
 
 		String search = "date=gt" + EARLY_DATE + "&date=le" + LATE_DATE;
 
@@ -298,12 +360,22 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 
-	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
+	private ResourceIndexedSearchParams extractSearchParams(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
-		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
-		retval.myDateParams.add(dateParam);
+		retval.myDateParams.add(extractEffectiveDateParam(theObservation));
+		retval.myTokenParams.add(extractCodeTokenParam(theObservation));
 		return retval;
+	}
+
+	@Nonnull
+	private ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
+		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
+		return new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
+	}
+
+	private ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
+		Coding coding = theObservation.getCode().getCodingFirstRep();
+		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
 	}
 
 	@Configuration

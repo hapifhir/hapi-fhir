@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -86,6 +87,9 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myTokenParams.forEach(nextParam ->
 			retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
+		theNewParams.myNumberParams.forEach(nextParam ->
+			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
+
 		theNewParams.myDateParams.forEach(nextParam ->
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
@@ -105,6 +109,12 @@ public class ExtendedLuceneIndexExtractor {
 		String source = MetaUtil.getSource(myContext, theResource.getMeta());
 		if (isNotBlank(source)) {
 			retVal.addUriIndexData("_source", source);
+		}
+
+		if (theResource.getMeta().getLastUpdated() != null) {
+			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
+				retVal.addDateIndexData("_lastUpdated", theResource.getMeta().getLastUpdated(), ordinal,
+					theResource.getMeta().getLastUpdated(), ordinal);
 		}
 
 

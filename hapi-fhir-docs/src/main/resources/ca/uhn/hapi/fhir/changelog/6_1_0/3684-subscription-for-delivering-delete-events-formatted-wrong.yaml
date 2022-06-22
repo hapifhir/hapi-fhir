@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3684
+jira: SMILE-4398
+title: "Moved the `http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages` from the Subscription
+to the Subscription's Channel element."
