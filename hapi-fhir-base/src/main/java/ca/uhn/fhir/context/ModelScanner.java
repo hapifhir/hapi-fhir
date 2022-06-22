@@ -341,6 +341,10 @@ class ModelScanner {
 			if (resourceDef.getStructureVersion() == myVersion) {
 				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
 			}
+			// TODO: Address this when core lib version is bumped
+			if (resourceDef.getStructureVersion() == FhirVersionEnum.R5 && myVersion == FhirVersionEnum.R4B) {
+				myNameToResourceDefinitions.put(resourceNameLowerCase, resourceDef);
+			}
 		}
 
 		myIdToResourceDefinition.put(resourceId, resourceDef);

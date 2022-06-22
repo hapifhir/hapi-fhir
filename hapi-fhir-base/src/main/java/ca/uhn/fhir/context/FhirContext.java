@@ -252,6 +252,13 @@ public class FhirContext {
 	}
 
 	/**
+	 * @since 6.1.0
+	 */
+	public static FhirContext forR4BCached() {
+		return forCached(FhirVersionEnum.R4B);
+	}
+
+	/**
 	 * @since 5.5.0
 	 */
 	public static FhirContext forR5Cached() {
@@ -1177,6 +1184,15 @@ public class FhirContext {
 	 */
 	public static FhirContext forR4() {
 		return new FhirContext(FhirVersionEnum.R4);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R4B R4B}
+	 *
+	 * @since 6.1.0
+	 */
+	public static FhirContext forR4B() {
+		return new FhirContext(FhirVersionEnum.R4B);
 	}
 
 	/**

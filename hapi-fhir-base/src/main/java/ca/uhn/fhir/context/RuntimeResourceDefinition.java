@@ -65,7 +65,14 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 		}
 		myStructureVersion = instance.getStructureFhirVersionEnum();
 		if (myStructureVersion != theContext.getVersion().getVersion()) {
-			throw new ConfigurationException(Msg.code(1731) + myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
+			if (myStructureVersion == FhirVersionEnum.R5 && theContext.getVersion().getVersion() == FhirVersionEnum.R4B) {
+				// TODO: remove this exception once we've bumped FHIR core to a new version
+				// TODO: also fix the TODO in ModelScanner
+				// TODO: also fix the TODO in RestfulServerUtils
+				// TODO: also fix the TODO in BaseParser
+			} else {
+				throw new ConfigurationException(Msg.code(1731) + myContext.getLocalizer().getMessage(getClass(), "typeWrongVersion", theContext.getVersion().getVersion(), theClass.getName(), myStructureVersion));
+			}
 		}
 
 	}

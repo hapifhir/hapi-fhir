@@ -288,6 +288,9 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theWriter, "theWriter can not be null");
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
+		if (myContext.getVersion().getVersion() == FhirVersionEnum.R4B && theResource.getStructureFhirVersionEnum() == FhirVersionEnum.R5) {
+			// TODO: remove once we've bumped the core lib version
+		} else
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
 			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}

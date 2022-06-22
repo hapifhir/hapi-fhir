@@ -24,6 +24,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceType;
@@ -152,6 +153,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public String oid2Uri(String theCode) {
 		throw new UnsupportedOperationException(Msg.code(208));
+	}
+
+	@Override
+	public Map<String, NamingSystem> getNSUrlMap() {
+		return null;
 	}
 
 	@Override
@@ -431,12 +437,17 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void cachePackage(PackageDetails packageDetails, List<PackageVersion> list) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
 		return myCtx.getResourceTypes();
+	}
+
+	@Override
+	public List<String> getCanonicalResourceNames() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -498,6 +509,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public TimeTracker clock() {
 		return null;
+	}
+
+	@Override
+	public IPackageLoadingTracker getPackageTracker() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IWorkerContext setPackageTracker(IPackageLoadingTracker packageTracker) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

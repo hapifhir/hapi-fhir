@@ -763,7 +763,8 @@
 
     <properties>
 
-        <fhir_core_version>5.6.36</fhir_core_version>
+        <fhir_core_version>5.6.48<!-- *****Address the version exception marked with a to-do in RuntimeResourceDefinition when this is updated --></fhir_core_version>
+
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -2804,6 +2805,8 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-structures-r4b</module>
+				<module>hapi-fhir-validation-resources-r4b</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
