@@ -157,7 +157,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		throw new UnsupportedOperationException(Msg.code(2097));
+		throw new UnsupportedOperationException(Msg.code(2107));
 	}
 
 	@Override
@@ -447,7 +447,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException(Msg.code(2098));
+		throw new UnsupportedOperationException(Msg.code(2106));
 	}
 
 	@Override
@@ -513,7 +513,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public IPackageLoadingTracker getPackageTracker() {
-		throw new UnsupportedOperationException(Msg.code(2099));
+		throw new UnsupportedOperationException(Msg.code(2105));
 	}
 
 	@Override
