@@ -37,6 +37,7 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 
 	@Override
 	protected AuthorizationInterceptor.Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
+		ourLog.trace("applyRuleLogic {} {}", theOperation, theRuleTarget);
 		if (theOutputResource == null) {
 			return super.applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget, theRuleApplier);
 		}

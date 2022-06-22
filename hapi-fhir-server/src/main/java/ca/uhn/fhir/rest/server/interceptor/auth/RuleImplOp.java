@@ -24,6 +24,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -61,6 +63,7 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
+	private static final Logger ourLog = LoggerFactory.getLogger(RuleImplOp.class);
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<String> myAppliesToTypes;
@@ -308,6 +311,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 * TODO: At this point {@link RuleImplOp} handles "any ID" and "in compartment" logic - It would be nice to split these into separate classes.
 	 */
 	protected Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
+		ourLog.trace("applyRuleLogic {} {}", theOperation, theRuleTarget);
 		switch (myClassifierType) {
 			case ANY_ID:
 				break;
