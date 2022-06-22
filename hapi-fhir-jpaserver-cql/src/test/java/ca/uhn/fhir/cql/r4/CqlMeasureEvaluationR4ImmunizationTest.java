@@ -180,22 +180,34 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
     }
 
 
+	@Test
+	public void test_Immunization_MMR_Individual_Vaccinated() throws IOException {
+		Map<String, Double> expectedScoresByIdentifier = new HashedMap();
+
+		//expected result: individual should be in numerator because Patient is MMR vaccinated
+		expectedScoresByIdentifier.put("measureReportIndividualVaccinatedPatient", 1.0);
+		//expected result: individual should not be in numerator because Patient is not MMR vaccinated (only Pertussis)
+		expectedScoresByIdentifier.put("measureReportIndividualNotMMRVaccinatedPatient", 0.0);
+		//expected result: individual should not be in numerator because Patient is not at all vaccinated (no associated Immmunization resource)
+		expectedScoresByIdentifier.put("measureReportIndividualNotAtAllVaccinatedPatient", 0.0);
+		//expected result: summary confirms that 1 out of all 3 patients are MMR immunized
+		expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 3.0);
+
+		//note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql");
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql");
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql");
+	}
+
     @Test
-    public void test_Immunization_MMR_Individual_Vaccinated() throws IOException {
+    public void test_Immunization_ByPractitioner_MMR_Summary() throws IOException {
         Map<String, Double> expectedScoresByIdentifier = new HashedMap();
 
-        //expected result: individual should be in numerator because Patient is MMR vaccinated
-        expectedScoresByIdentifier.put("measureReportIndividualVaccinatedPatient", 1.0);
-        //expected result: individual should not be in numerator because Patient is not MMR vaccinated (only Pertussis)
-        expectedScoresByIdentifier.put("measureReportIndividualNotMMRVaccinatedPatient", 0.0);
-        //expected result: individual should not be in numerator because Patient is not at all vaccinated (no associated Immmunization resource)
-        expectedScoresByIdentifier.put("measureReportIndividualNotAtAllVaccinatedPatient", 0.0);
-        //expected result: summary confirms that 1 out of all 3 patients are MMR immunized
-        expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 3.0);
+        //expected result: summary confirms that 1 out of all 2 patients are MMR immunized
+		 //the sample value set contains 3 patients, but only 2 make it to the criteria of the initial population
+        expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 2.0);
 
         //note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
-        this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql");
-        this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql");
-        this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql");
+       this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/4-Patients-Of-One-Practitioner.cql");
     }
 }
