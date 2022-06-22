@@ -43,7 +43,7 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 		}
 		IAuthorizationSearchParamMatcher matcher = theRuleApplier.getSearchParamMatcher();
 		if (matcher == null) {
-			ourLog.warn("No matcher provided.  Can't apply filter permission.");
+			theRuleApplier.getTroubleshootingLog().warn("No matcher provided.  Can't apply filter permission.");
 			if ( PolicyEnum.DENY.equals(getMode())) {
 				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 			}
@@ -64,7 +64,11 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 				// fixme log a warning to the troubleshooting log
 				// fixme if deny mode, we should deny here.
 				theRuleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.  Abstaining.", myFilter, mr.getUnsupportedReason());
-				result = null;
+				if ( PolicyEnum.DENY.equals(getMode())) {
+					result = new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
+				} else {
+					result = null;
+				}
 				break;
 			case NO_MATCH:
 			default:

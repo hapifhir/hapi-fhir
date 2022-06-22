@@ -72,7 +72,7 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		@Override
 		protected boolean matchesSafely(ILoggingEvent item) {
 			return (myLevel == null || item.getLevel().isGreaterOrEqual(myLevel)) &&
-				item.getMessage().contains(myString);
+				item.getFormattedMessage().contains(myString);
 		}
 	}
 }

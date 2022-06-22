@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -38,10 +39,10 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness= Strictness.LENIENT)
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleImplTest.class);
+	private static final Logger ourTargetLog = LoggerFactory.getLogger(FhirQueryRuleImpl.class);
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(FhirQueryRuleImplTest.class.getName());
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(FhirQueryRuleImpl.class.getName());
 
 	private FhirQueryRuleImpl myRule;
 	private IBaseResource myResource;
@@ -49,13 +50,12 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	private IRuleApplier myMockRuleApplier;
 	private SystemRequestDetails mySrd = new SystemRequestDetails();
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
-	@Autowired
-	private SearchParamMatcher mySpMatcher;
-	private IAuthorizationSearchParamMatcher myMatcher = new AuthorizationSearchParamMatcher(mySpMatcher);
+	@Mock
+	private IAuthorizationSearchParamMatcher myMatcher;
 
 	@BeforeEach
 	public void setUp() {
-		when(myMockRuleApplier.getTroubleshootingLog()).thenReturn(ourLog);
+		when(myMockRuleApplier.getTroubleshootingLog()).thenReturn(ourTargetLog);
 		mySrd.setFhirContext(myFhirContext);
 	}
 
@@ -95,12 +95,10 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 		@Test
 		public void simpleStringSearch_noMatch_noVerdict() {
-			// patient.r  patient/Patient.rs?name=smi
 			// given
 			withPatientWithNameAndId();
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			// fixme validate the various translations of scope to query string.
 			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=smi"), ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
 
 			// when
@@ -129,18 +127,37 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		 * Each scope provides positive perm, so unsupported means we can't vote yes.  Abstain.
 		 */
 		@Test
-		public void observation_unsupportedChain_noVerdict() {
+		public void givenAllowRule_whenUnsupportedQuery_noVerdict() {
 			withSearchParamMatcherPresent();
 			withPatientWithNameAndId();
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+			when(myMatcher.match("Patient?family=smi", myResource))
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
 
 			// then
 			assertThat(verdict, nullValue());
+			assertThat(myLogCapture.getLogEvents(),
+				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+		}
+
+		@Test
+		public void givenDenyRule_whenUnsupportedQuery_reject() {
+			withSearchParamMatcherPresent();
+			withPatientWithNameAndId();
+			myRule = (FhirQueryRuleImpl) new RuleBuilder().deny().read().resourcesOfType("Patient")
+				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
+			when(myMatcher.match("Patient?family=smi", myResource))
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
+
+			// then
+			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
 			assertThat(myLogCapture.getLogEvents(),
 				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
@@ -153,8 +170,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		public void noMatcherService_unsupportedPerm_noVerdict() {
 			withPatientWithNameAndId();
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMatcher.match(anyString()/*ArgumentMatchers.eq("Patient?family=smi")*/, ArgumentMatchers.same(myResource))).thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Observation"), "code:in=foo").andThen().build().get(0);
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource();
@@ -162,7 +178,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			// then
 			assertThat(verdict, nullValue());
 			assertThat(myLogCapture.getLogEvents(),
-				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "no matcher configured")));
+				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
 		}
 
 	}
