@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -30,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -521,6 +521,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
+	}
+
+	@Test
+	public void testExpungeSystemEverythingDeletedResourceCount() {
+		createStandardPatients();
+
+		ExpungeOutcome outcome = mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true), null);
+
+		// Make sure the deleted resource entities count is correct
+		assertEquals(8, outcome.getDeletedCount());
 	}
 
 	@Test

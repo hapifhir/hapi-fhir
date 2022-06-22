@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.server.servlet;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -37,7 +38,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -54,7 +60,7 @@ public class ServletRequestDetails extends RequestDetails {
 	 * Constructor for testing only
 	 */
 	public ServletRequestDetails() {
-		this((IInterceptorBroadcaster)null);
+		this((IInterceptorBroadcaster) null);
 	}
 
 	/**
@@ -171,8 +177,13 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServer = theServer;
 	}
 
-	public ServletRequestDetails setServletRequest(HttpServletRequest myServletRequest) {
+	public ServletRequestDetails setServletRequest(@Nonnull HttpServletRequest myServletRequest) {
 		this.myServletRequest = myServletRequest;
+
+		// TODO KHS move a bunch of other initialization from RestfulServer into this method
+		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
+			setRewriteHistory(true);
+		}
 		return this;
 	}
 
@@ -180,7 +191,7 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletResponse = myServletResponse;
 	}
 
-	public Map<String,List<String>> getHeaders() {
+	public Map<String, List<String>> getHeaders() {
 		Map<String, List<String>> retVal = new HashMap<>();
 		Enumeration<String> names = myServletRequest.getHeaderNames();
 		while (names.hasMoreElements()) {
@@ -194,4 +205,5 @@ public class ServletRequestDetails extends RequestDetails {
 		}
 		return Collections.unmodifiableMap(retVal);
 	}
+
 }
