@@ -44,13 +44,6 @@ public class BulkExportParameters extends StartNewJobParameters {
 	private String myOutputFormat;
 
 	/**
-	 * The bulk export job id.
-	 * Job ID is used to track export work/status
-	 * (including where to find the resulting binaries)
-	 */
-	private String myJobId;
-
-	/**
 	 * For group export;
 	 * whether or not to expand mdm
 	 */
@@ -64,13 +57,8 @@ public class BulkExportParameters extends StartNewJobParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
-	public BulkExportParameters(@Nonnull String theJobDefinitionId,
-										 boolean theStartImmediatelyBoolean) {
-		super(theJobDefinitionId, theStartImmediatelyBoolean);
-	}
-
 	public BulkExportParameters(@Nonnull String theJobDefinitionId) {
-		this(theJobDefinitionId, true);
+		super(theJobDefinitionId);
 	}
 
 	public List<String> getResourceTypes() {
@@ -114,14 +102,6 @@ public class BulkExportParameters extends StartNewJobParameters {
 
 	public void setGroupId(String theGroupId) {
 		myGroupId = theGroupId;
-	}
-
-	public String getJobId() {
-		return myJobId;
-	}
-
-	public void setJobId(String theJobId) {
-		myJobId = theJobId;
 	}
 
 	public String getOutputFormat() {

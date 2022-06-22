@@ -66,7 +66,6 @@ public class FetchResourceIdsStepTest {
 
 	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters jobParameters = new BulkExportJobParameters();
-		jobParameters.setJobId("jobId");
 		jobParameters.setStartDate(new Date());
 		jobParameters.setOutputFormat("json");
 		jobParameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
@@ -126,7 +125,6 @@ public class FetchResourceIdsStepTest {
 		assertEquals(parameters.getResourceTypes().size(), results.size());
 		for (int i = 0; i < results.size(); i++) {
 			BulkExportIdList idList = results.get(i);
-			assertEquals(parameters.getJobId(), idList.getJobId());
 
 			String resourceType = idList.getResourceType();
 			assertTrue(parameters.getResourceTypes().contains(resourceType));

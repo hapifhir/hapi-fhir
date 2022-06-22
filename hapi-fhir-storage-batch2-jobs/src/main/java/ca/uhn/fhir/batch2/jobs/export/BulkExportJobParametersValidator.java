@@ -15,45 +15,21 @@ import java.util.List;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
 
-	@Autowired
-	private IBulkExportProcessor myBulkExportProcessor;
-
 	@Nullable
 	@Override
 	public List<String> validate(@Nonnull BulkExportJobParameters theParameters) {
 		List<String> errorMsgs = new ArrayList<>();
 
 		// initial validation
-		String jobUUID = theParameters.getJobId();
-		if (jobUUID == null || jobUUID.isBlank()) {
-			errorMsgs.add("JobId is required to start an export job.");
-		}
+
 		if (theParameters.getResourceTypes() == null || theParameters.getResourceTypes().isEmpty()) {
 			errorMsgs.add("Resource Types are required for an export job.");
 		}
-
-		if (!errorMsgs.isEmpty()) {
-			// we can't do the rest of the validation, so return now
-			return errorMsgs;
-		}
-
-		// fetch info
-		BulkExportJobInfo info = myBulkExportProcessor.getJobInfo(jobUUID);
-		if (info == null || info.getJobId() == null || info.getResourceTypes() == null) {
-			errorMsgs.add("Invalid jobId " + jobUUID);
-			return errorMsgs;
-		}
-
-		// validate the resource types
-		if (theParameters.getResourceTypes().size() != info.getResourceTypes().size()) {
-			errorMsgs.add("Resource types for job " + jobUUID + " do not match input parameters.");
-		}
-		for (String resourceType : theParameters.getResourceTypes()) {
-			if (resourceType.equalsIgnoreCase("Binary")) {
-				errorMsgs.add("Bulk export of Binary resources is verboten");
-			}
-			if (!info.getResourceTypes().contains(resourceType)) {
-				errorMsgs.add("Job must include resource type " + resourceType);
+		else {
+			for (String resourceType : theParameters.getResourceTypes()) {
+				if (resourceType.equalsIgnoreCase("Binary")) {
+					errorMsgs.add("Bulk export of Binary resources is verboten");
+				}
 			}
 		}
 
@@ -71,7 +47,7 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			switch (style) {
 				case GROUP:
 					if (theParameters.getGroupId() == null || theParameters.getGroupId().isEmpty()) {
-						errorMsgs.add("Group export requires a group id, but none provided for job " + jobUUID);
+						errorMsgs.add("Group export requires a group id, but none provided.");
 					}
 					break;
 				case SYSTEM:

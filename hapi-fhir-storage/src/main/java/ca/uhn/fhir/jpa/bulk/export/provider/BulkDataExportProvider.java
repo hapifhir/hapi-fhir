@@ -22,8 +22,11 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
@@ -44,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,32 +101,14 @@ public class BulkDataExportProvider {
 								 BulkDataExportOptions theOptions) {
 		Boolean useCache = shouldUseCache(theRequestDetails);
 
-		//TODO - changes
-		/**
-		 * the 2 jobids are different
-		 * JobInfo.jobId <- id of db record storing metadata about the job
-		 *
-		 * jobId from start job (batch2JobId) <- id of the actual batch2 job used for status and verification
-		 *
-		 * We need to resave the batch2 jobid to jobinfo metadata
-		 */
-		// TODO
-		/**
-		 * Problem to solve:
-		 * -saving the metadata is done first. But the job run is done second
-		 * -job start verifies parameters by verifying it has metadata job id
-		 * -even if we do not verify that the saved metadata exists when the job starts,
-		 * we need a way to tie the metadata -> running job. And we don't get that id in the actual
-		 * job run
-		 */
-		// store the job
-		String batch2JobId = myJobRunner.startNewJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions, false));
+		// start job
+		String batch2JobId = myJobRunner.startNewJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions));
 
-		// submit the job
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(theOptions, batch2JobId, useCache, theRequestDetails);
+		IBulkDataExportSvc.JobInfo info = new IBulkDataExportSvc.JobInfo();
+		info.setJobMetadataId(batch2JobId);
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 
-		outcome.setJobMetadataId(batch2JobId); // we set it to the job id from the runner
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+		writePollingLocationToResponseHeaders(theRequestDetails, info);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -169,11 +155,6 @@ public class BulkDataExportProvider {
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
 		startJob(theRequestDetails, bulkDataExportOptions);
-
-//		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
-//
-//		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-//		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
@@ -205,14 +186,6 @@ public class BulkDataExportProvider {
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
 
 		startJob(theRequestDetails, bulkDataExportOptions);
-//		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-
-//		String jobId = myJobRunner.startJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(bulkDataExportOptions));
-//
-//		// outcome and jobId are different
-//		// we want the outcomeid for finding the job
-//		// we wont hte jobId for finding the binary records...
-//		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
 	}
 
 	/**
@@ -223,56 +196,99 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
 	) throws IOException {
-
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
-		// we have the job instance id -> need to transfer to the actual id of the record
-		// (should we maybe index it?)
-		// alternatively - we can use the same id when we save it
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
+		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
 
-		switch (status.getStatus()) {
-			case SUBMITTED:
-			case BUILDING:
-
-				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to " + status.getStatus() + " at " + new InstantType(status.getStatusTime()).getValueAsString());
-				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				break;
-
+		switch (info.getStatus()) {
 			case COMPLETE:
-
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
 				response.setContentType(Constants.CT_JSON);
 
 				// Create a JSON response
 				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-				bulkResponseDocument.setTransactionTime(status.getStatusTime());
-				bulkResponseDocument.setRequest(status.getRequest());
-				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
-					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
-					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
+				bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
+
+				String report = info.getReport();
+				BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+				String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+				String resourceType = results.getResourceType();
+				for (String binaryId : results.getBinaryIds()) {
+					IIdType iId = new IdType(binaryId);
+					String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
 					bulkResponseDocument
 						.addOutput()
-						.setType(nextFile.getResourceType())
+						.setType(resourceType)
 						.setUrl(nextUrl);
 				}
 				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
 				response.getWriter().close();
 				break;
-
 			case ERROR:
-
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 				response.setContentType(Constants.CT_FHIR_JSON);
 
 				// Create an OperationOutcome response
 				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
+
+				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", info.getErrorMsg(), null, null);
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
+				break;
+			case BUILDING:
+			case SUBMITTED:
+			default:
+				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+				String dateString = info.getEndTime() != null ? new InstantType(info.getEndTime()).getValueAsString() : "";
+				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to "
+					+ info.getStatus()
+					+ " at "
+					+ dateString);
+				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				break;
 		}
+
+		// we have the job instance id -> need to transfer to the actual id of the record
+		// (should we maybe index it?)
+		// alternatively - we can use the same id when we save it
+//		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
+//		switch (status.getStatus()) {
+//			case SUBMITTED:
+//			case BUILDING:
+//				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+//				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to " + status.getStatus() + " at " + new InstantType(status.getStatusTime()).getValueAsString());
+//				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+//				break;
+//			case COMPLETE:
+//				response.setStatus(Constants.STATUS_HTTP_200_OK);
+//				response.setContentType(Constants.CT_JSON);
+//
+//				// Create a JSON response
+//				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
+//				bulkResponseDocument.setTransactionTime(status.getStatusTime());
+//				bulkResponseDocument.setRequest(status.getRequest());
+//				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
+//					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+//					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
+//					bulkResponseDocument
+//						.addOutput()
+//						.setType(nextFile.getResourceType())
+//						.setUrl(nextUrl);
+//				}
+//				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
+//				response.getWriter().close();
+//				break;
+//			case ERROR:
+//				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
+//				response.setContentType(Constants.CT_FHIR_JSON);
+//
+//				// Create an OperationOutcome response
+//				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+//				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
+//				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
+//				response.getWriter().close();
+//		}
 	}
 
 	private BulkDataExportOptions buildSystemBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter) {

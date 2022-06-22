@@ -37,6 +37,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLFILE")
+@Deprecated
 public class BulkExportCollectionFileEntity implements Serializable {
 
 	@Id

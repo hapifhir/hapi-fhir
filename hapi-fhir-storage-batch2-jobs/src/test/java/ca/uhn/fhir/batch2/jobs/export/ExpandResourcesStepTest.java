@@ -60,7 +60,6 @@ public class ExpandResourcesStepTest {
 
 	private BulkExportJobParameters createParameters() {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
-		parameters.setJobId("jobId");
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		parameters.setOutputFormat("json");
@@ -117,7 +116,7 @@ public class ExpandResourcesStepTest {
 		// when
 		when(bundleProvider.getAllResources())
 			.thenReturn(resources);
-		when(patientDao.search(any(SearchParameterMap.class)))
+		when(patientDao.search(any(SearchParameterMap.class), any()))
 			.thenReturn(bundleProvider);
 
 		// test
@@ -129,7 +128,7 @@ public class ExpandResourcesStepTest {
 		// search parameters
 		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
 		verify(patientDao)
-			.search(captor.capture());
+			.search(captor.capture(), any());
 		assertEquals(1, captor.getAllValues().size());
 		SearchParameterMap map = captor.getValue();
 		Collection<List<List<IQueryParameterType>>> values = map.values();

@@ -38,17 +38,4 @@ public enum BulkExportJobStatusEnum {
 	COMPLETE,
 	ERROR;
 
-	public static BulkExportJobStatusEnum fromBatchStatus(BatchStatus status) {
-		switch (status) {
-			case STARTING :
-				return BulkExportJobStatusEnum.SUBMITTED;
-			case COMPLETED :
-				return BulkExportJobStatusEnum.COMPLETE;
-			case STARTED :
-				return BulkExportJobStatusEnum.BUILDING;
-			default :
-				return BulkExportJobStatusEnum.ERROR;
-		}
-	}
-
 }

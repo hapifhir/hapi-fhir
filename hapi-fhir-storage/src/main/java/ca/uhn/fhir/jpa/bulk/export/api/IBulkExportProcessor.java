@@ -20,12 +20,12 @@ public interface IBulkExportProcessor {
 	 */
 	Iterator<ResourcePersistentId> getResourcePidIterator(ExportPIDIteratorParameters theParams);
 
-	/**
-	 * Returns the basics of a started (and persisted) job.
-	 * @param theJobId - the id of the job
-	 * @return - job info
-	 */
-	BulkExportJobInfo getJobInfo(String theJobId);
+//	/**
+//	 * Returns the basics of a started (and persisted) job.
+//	 * @param theJobId - the id of the job
+//	 * @return - job info
+//	 */
+//	BulkExportJobInfo getJobInfo(String theJobId);
 
 	/**
 	 * Sets the job status
@@ -33,21 +33,21 @@ public interface IBulkExportProcessor {
 	 * @param theStatus - the status to set
 	 * @param theMessage - status message (if any)
 	 */
-	void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus, String theMessage);
+//	void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus, String theMessage);
 
 	/**
 	 * Returns the current job status.
 	 * @param theJobId
 	 * @return
 	 */
-	BulkExportJobStatusEnum getJobStatus(String theJobId);
+//	BulkExportJobStatusEnum getJobStatus(String theJobId);
 
 	/**
 	 * Adds binary to job for resource type
 	 * @param theJobId
 	 * @param theBinaryId
 	 */
-	void addFileToCollection(String theJobId, String theResourceType, IIdType theBinaryId);
+//	void addFileToCollection(String theJobId, String theResourceType, IIdType theBinaryId);
 
 	/**
 	 * Does the MDM expansion of resources if necessary

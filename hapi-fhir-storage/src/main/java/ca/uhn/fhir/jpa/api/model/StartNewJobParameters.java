@@ -9,26 +9,11 @@ public class StartNewJobParameters {
 	 */
 	private final String myJobDefinitionId;
 
-	/**
-	 * Whether or not to start the job immediately.
-	 */
-	private final boolean myStartJobImmediately;
-
 	public StartNewJobParameters(@Nonnull String theJobDefinitionId) {
-		this(theJobDefinitionId, true);
-	}
-
-	public StartNewJobParameters(@Nonnull String theJobDefinitionId,
-										  boolean theStartJobImmediately) {
 		myJobDefinitionId = theJobDefinitionId;
-		myStartJobImmediately = theStartJobImmediately;
 	}
 
 	public String getJobDefinitionId() {
 		return myJobDefinitionId;
-	}
-
-	public boolean isStartJobImmediately() {
-		return myStartJobImmediately;
 	}
 }

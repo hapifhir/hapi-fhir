@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.model.StartNewJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import ca.uhn.fhir.util.JsonUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -92,10 +93,8 @@ public class Batch2JobRunnerImplTest {
 	@Test
 	public void startJob_bulkExport_callsAsExpected() {
 		// setup
-		String jobId = "someJobId";
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		parameters.setJobId(jobId);
 
 		// test
 		myJobRunner.startNewJob(parameters);
@@ -105,6 +104,8 @@ public class Batch2JobRunnerImplTest {
 		verify(myJobCoordinator)
 			.startInstance(captor.capture());
 		JobInstanceStartRequest val = captor.getValue();
-		assertTrue(val.getParameters().contains(jobId));
+		// we need to verify something in the parameters
+		ourLog.info(val.getParameters());
+		assertTrue(val.getParameters().contains("Patient"));
 	}
 }

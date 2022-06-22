@@ -87,127 +87,122 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	@Override
-	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions, Boolean useCache, RequestDetails theRequestDetails) {
-		return null;
-	}
 
-	@Transactional
-	@Override
-	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
-									 String theBatch2JobId,
-									 Boolean useCache,
-									 RequestDetails theRequestDetails) {
-		String outputFormat = Constants.CT_FHIR_NDJSON;
-		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
-			outputFormat = theBulkDataExportOptions.getOutputFormat();
-		}
-		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
-			throw new InvalidRequestException(Msg.code(786) + "Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
-		}
-
-		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
-		HookParams params = new HookParams()
-			.add(BulkDataExportOptions.class, theBulkDataExportOptions)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
-
-		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
-		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
-		StringBuilder requestBuilder = new StringBuilder();
-		requestBuilder.append("/");
-
-		//Prefix the export url with Group/[id]/ or /Patient/ depending on what type of request it is.
-		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
-			requestBuilder.append(theBulkDataExportOptions.getGroupId().toVersionless()).append("/");
-		} else if (theBulkDataExportOptions.getExportStyle().equals(PATIENT)) {
-			requestBuilder.append("Patient/");
-		}
-
-		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
-		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
-		if (resourceTypes != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
-		}
-		Date since = theBulkDataExportOptions.getSince();
-		if (since != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
-		}
-		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
-			theBulkDataExportOptions.getFilters().stream()
-				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
-		}
-
-		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(theBulkDataExportOptions.getGroupId().getValue());
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
-		}
-
-		// do we really need a stringified request in the db?
-		String request = requestBuilder.toString();
-
-		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
-		if (useCache) {
-			Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
-			Pageable page = PageRequest.of(0, 10);
-			Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkExportJobStatusEnum.ERROR);
-			if (!existing.isEmpty()) {
-				return toSubmittedJobInfo(existing.iterator().next());
-			}
-		}
-
-		if (resourceTypes != null && resourceTypes.contains("Binary")) {
-			String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "onlyBinarySelected");
-			throw new InvalidRequestException(Msg.code(787) + msg);
-		}
-
-		if (resourceTypes == null || resourceTypes.isEmpty()) {
-			// This is probably not a useful default, but having the default be "download the whole
-			// server" seems like a risky default too. We'll deal with that by having the default involve
-			// only returning a small time span
-			resourceTypes = getAllowedResourceTypesForBulkExportStyle(theBulkDataExportOptions.getExportStyle());
-			if (since == null) {
-				since = DateUtils.addDays(new Date(), -1);
-			}
-		}
-
-		resourceTypes =
-			resourceTypes
-				.stream()
-				.filter(t -> !"Binary".equals(t))
-				.collect(Collectors.toSet());
-
-		BulkExportJobEntity jobEntity = new BulkExportJobEntity();
-		//TODO
-		// no jobid yet
-		jobEntity.setJobId(UUID.randomUUID().toString());
-		jobEntity.setStatus(BulkExportJobStatusEnum.SUBMITTED);
-		jobEntity.setSince(since);
-		jobEntity.setCreated(new Date());
-		jobEntity.setRequest(request);
-
-		// Validate types
-		validateTypes(resourceTypes);
-		validateTypeFilters(theBulkDataExportOptions.getFilters(), resourceTypes);
-
-		updateExpiry(jobEntity);
-		myBulkExportJobDao.save(jobEntity);
-
-		for (String nextType : resourceTypes) {
-			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
-			collection.setJob(jobEntity);
-			collection.setResourceType(nextType);
-			jobEntity.getCollections().add(collection);
-			myBulkExportCollectionDao.save(collection);
-		}
-
-		ourLog.info("Bulk export job submitted: {}", jobEntity.toString());
-
-		// TODO - wire in new steps (kick off batch job)
-		return toSubmittedJobInfo(jobEntity);
-	}
+//	@Transactional
+//	@Override
+//	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
+//									 String theBatch2JobId,
+//									 Boolean useCache,
+//									 RequestDetails theRequestDetails) {
+//		String outputFormat = Constants.CT_FHIR_NDJSON;
+//		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
+//			outputFormat = theBulkDataExportOptions.getOutputFormat();
+//		}
+//		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
+//			throw new InvalidRequestException(Msg.code(786) + "Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
+//		}
+//
+//		// Interceptor call: STORAGE_INITIATE_BULK_EXPORT
+//		HookParams params = new HookParams()
+//			.add(BulkDataExportOptions.class, theBulkDataExportOptions)
+//			.add(RequestDetails.class, theRequestDetails)
+//			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+//		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+//
+//		// TODO GGG KS can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
+//		//Probably yes, but this will all need to be rebuilt when we remove this bridge entity
+//		StringBuilder requestBuilder = new StringBuilder();
+//		requestBuilder.append("/");
+//
+//		//Prefix the export url with Group/[id]/ or /Patient/ depending on what type of request it is.
+//		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
+//			requestBuilder.append(theBulkDataExportOptions.getGroupId().toVersionless()).append("/");
+//		} else if (theBulkDataExportOptions.getExportStyle().equals(PATIENT)) {
+//			requestBuilder.append("Patient/");
+//		}
+//
+//		requestBuilder.append(JpaConstants.OPERATION_EXPORT);
+//		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
+//		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
+//		if (resourceTypes != null) {
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
+//		}
+//		Date since = theBulkDataExportOptions.getSince();
+//		if (since != null) {
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
+//		}
+//		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
+//			theBulkDataExportOptions.getFilters().stream()
+//				.forEach(filter -> requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(escapeUrlParam(filter)));
+//		}
+//
+//		if (theBulkDataExportOptions.getExportStyle().equals(GROUP)) {
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(theBulkDataExportOptions.getGroupId().getValue());
+//			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(theBulkDataExportOptions.isExpandMdm());
+//		}
+//
+//		// do we really need a stringified request in the db?
+//		String request = requestBuilder.toString();
+//
+//		//If we are using the cache, then attempt to retrieve a matching job based on the Request String, otherwise just make a new one.
+//		if (useCache) {
+//			Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
+//			Pageable page = PageRequest.of(0, 10);
+//			Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkExportJobStatusEnum.ERROR);
+//			if (!existing.isEmpty()) {
+//				return toSubmittedJobInfo(existing.iterator().next());
+//			}
+//		}
+//
+//		if (resourceTypes != null && resourceTypes.contains("Binary")) {
+//			String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "onlyBinarySelected");
+//			throw new InvalidRequestException(Msg.code(787) + msg);
+//		}
+//
+//		if (resourceTypes == null || resourceTypes.isEmpty()) {
+//			// This is probably not a useful default, but having the default be "download the whole
+//			// server" seems like a risky default too. We'll deal with that by having the default involve
+//			// only returning a small time span
+//			resourceTypes = getAllowedResourceTypesForBulkExportStyle(theBulkDataExportOptions.getExportStyle());
+//			if (since == null) {
+//				since = DateUtils.addDays(new Date(), -1);
+//			}
+//		}
+//
+//		resourceTypes =
+//			resourceTypes
+//				.stream()
+//				.filter(t -> !"Binary".equals(t))
+//				.collect(Collectors.toSet());
+//
+////		BulkExportJobEntity jobEntity = new BulkExportJobEntity();
+//
+////		jobEntity.setJobId(UUID.randomUUID().toString());
+////		jobEntity.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+////		jobEntity.setSince(since);
+////		jobEntity.setCreated(new Date());
+////		jobEntity.setRequest(request);
+//
+//		// Validate types
+//		validateTypes(resourceTypes);
+//		validateTypeFilters(theBulkDataExportOptions.getFilters(), resourceTypes);
+//
+////		updateExpiry(jobEntity);
+////		myBulkExportJobDao.save(jobEntity);
+//
+////		for (String nextType : resourceTypes) {
+////			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
+////			collection.setJob(jobEntity);
+////			collection.setResourceType(nextType);
+////			jobEntity.getCollections().add(collection);
+////			myBulkExportCollectionDao.save(collection);
+////		}
+//
+////		ourLog.info("Bulk export job submitted: {}", jobEntity.toString());
+//
+//		// TODO - wire in new steps (kick off batch job)
+//		return toSubmittedJobInfo(null);
+//	}
 
 //	@Deprecated
 //	@Override
@@ -260,33 +255,33 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 	}
 
-	@Transactional
-	@Override
-	public JobInfo getJobInfoOrThrowResourceNotFound(String theJobId) {
-		BulkExportJobEntity job = myBulkExportJobDao
-			.findByJobId(theJobId)
-			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
-
-		JobInfo retVal = new JobInfo();
-		retVal.setJobMetadataId(theJobId);
-		retVal.setStatus(job.getStatus());
-		retVal.setStatus(job.getStatus());
-		retVal.setStatusTime(job.getStatusTime());
-		retVal.setStatusMessage(job.getStatusMessage());
-		retVal.setRequest(job.getRequest());
-
-		if (job.getStatus() == BulkExportJobStatusEnum.COMPLETE) {
-			for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
-				for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
-					retVal.addFile()
-						.setResourceType(nextCollection.getResourceType())
-						.setResourceId(toQualifiedBinaryId(nextFile.getResourceId()));
-				}
-			}
-		}
-
-		return retVal;
-	}
+//	@Transactional
+//	@Override
+//	public JobInfo getJobInfoOrThrowResourceNotFound(String theJobId) {
+//		BulkExportJobEntity job = myBulkExportJobDao
+//			.findByJobId(theJobId)
+//			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
+//
+//		JobInfo retVal = new JobInfo();
+//		retVal.setJobMetadataId(theJobId);
+//		retVal.setStatus(job.getStatus());
+//		retVal.setStatus(job.getStatus());
+//		retVal.setStatusTime(job.getStatusTime());
+//		retVal.setStatusMessage(job.getStatusMessage());
+//		retVal.setRequest(job.getRequest());
+//
+//		if (job.getStatus() == BulkExportJobStatusEnum.COMPLETE) {
+//			for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
+//				for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
+//					retVal.addFile()
+//						.setResourceType(nextCollection.getResourceType())
+//						.setResourceId(toQualifiedBinaryId(nextFile.getResourceId()));
+//				}
+//			}
+//		}
+//
+//		return retVal;
+//	}
 
 	@Override
 	public Set<String> getPatientCompartmentResources() {

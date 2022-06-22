@@ -55,6 +55,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 }, indexes = {
 		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
+@Deprecated
 public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 1024;

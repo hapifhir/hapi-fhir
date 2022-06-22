@@ -207,74 +207,74 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return searchParam;
 	}
 
-	@Transactional
-	@Override
-	public BulkExportJobInfo getJobInfo(String theJobId) {
-		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
+//	@Transactional
+//	@Override
+//	public BulkExportJobInfo getJobInfo(String theJobId) {
+//		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
+//
+//		if (jobOp.isPresent()) {
+//			BulkExportJobEntity jobEntity = jobOp.get();
+//			BulkExportJobInfo jobInfo = new BulkExportJobInfo();
+//
+//			jobInfo.setJobId(jobEntity.getJobId());
+//			Set<String> resourceTypes = new HashSet<>();
+//			for (BulkExportCollectionEntity collection : jobEntity.getCollections()) {
+//				resourceTypes.add(collection.getResourceType());
+//			}
+//			jobInfo.setResourceTypes(resourceTypes);
+//			return jobInfo;
+//		} else {
+//			return null;
+//		}
+//	}
 
-		if (jobOp.isPresent()) {
-			BulkExportJobEntity jobEntity = jobOp.get();
-			BulkExportJobInfo jobInfo = new BulkExportJobInfo();
+//	@Transactional
+//	@Override
+//	public void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus, String theMessage) {
+//		myBulkExportDaoSvc.setJobToStatus(theJobId, theStatus, theMessage);
+//	}
 
-			jobInfo.setJobId(jobEntity.getJobId());
-			Set<String> resourceTypes = new HashSet<>();
-			for (BulkExportCollectionEntity collection : jobEntity.getCollections()) {
-				resourceTypes.add(collection.getResourceType());
-			}
-			jobInfo.setResourceTypes(resourceTypes);
-			return jobInfo;
-		} else {
-			return null;
-		}
-	}
+//	@Transactional
+//	@Override
+//	public BulkExportJobStatusEnum getJobStatus(String theJobId) {
+//		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
+//
+//		if (jobOp.isPresent()) {
+//			return jobOp.get().getStatus();
+//		} else {
+//			String msg = "Invalid id. No such job : " + theJobId;
+//			ourLog.error(msg);
+//			throw new ResourceNotFoundException(theJobId);
+//		}
+//	}
 
-	@Transactional
-	@Override
-	public void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus, String theMessage) {
-		myBulkExportDaoSvc.setJobToStatus(theJobId, theStatus, theMessage);
-	}
-
-	@Transactional
-	@Override
-	public BulkExportJobStatusEnum getJobStatus(String theJobId) {
-		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
-
-		if (jobOp.isPresent()) {
-			return jobOp.get().getStatus();
-		} else {
-			String msg = "Invalid id. No such job : " + theJobId;
-			ourLog.error(msg);
-			throw new ResourceNotFoundException(theJobId);
-		}
-	}
-
-	@Override
-	public void addFileToCollection(String theJobId, String theResourceType, IIdType theBinaryId) {
-		Map<Long, String> collectionMap = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(theJobId);
-
-		Long collectionId = null;
-		for (Map.Entry<Long, String> entrySet : collectionMap.entrySet()) {
-			if (entrySet.getValue().equals(theResourceType)) {
-				collectionId = entrySet.getKey();
-				break;
-			}
-		}
-
-		if (collectionId == null) {
-			String msg = "No matching collection for resource type "
-				+ theResourceType
-				+ " for job "
-				+ theJobId;
-			ourLog.error(msg);
-
-			throw new InvalidRequestException(msg);
-		}
-
-		BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
-		file.setResource(theBinaryId.getIdPart());
-
-		myBulkExportDaoSvc.addFileToCollectionWithId(collectionId, file);
-	}
+//	@Override
+//	public void addFileToCollection(String theJobId, String theResourceType, IIdType theBinaryId) {
+//		Map<Long, String> collectionMap = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(theJobId);
+//
+//		Long collectionId = null;
+//		for (Map.Entry<Long, String> entrySet : collectionMap.entrySet()) {
+//			if (entrySet.getValue().equals(theResourceType)) {
+//				collectionId = entrySet.getKey();
+//				break;
+//			}
+//		}
+//
+//		if (collectionId == null) {
+//			String msg = "No matching collection for resource type "
+//				+ theResourceType
+//				+ " for job "
+//				+ theJobId;
+//			ourLog.error(msg);
+//
+//			throw new InvalidRequestException(msg);
+//		}
+//
+//		BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
+//		file.setResource(theBinaryId.getIdPart());
+//
+//		myBulkExportDaoSvc.addFileToCollectionWithId(collectionId, file);
+//	}
 
 	@Override
 	public void expandMdmResources(List<IBaseResource> theResources) {

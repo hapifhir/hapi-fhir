@@ -10,7 +10,6 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.slf4j.Logger;
@@ -37,13 +36,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
 		ourLog.info("Starting BatchExport job");
 
-		// set job status to building
-		myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.BUILDING, null);
-
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
 		providerParams.setFilters(params.getFilters());
 		providerParams.setStartDate(params.getStartDate());
-		providerParams.setJobId(params.getJobId());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setExpandMdm(params.isExpandMdm());
@@ -80,7 +75,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		} catch (Exception ex) {
 			ourLog.error(ex.getMessage());
 
-			myBulkExportProcessor.setJobStatus(params.getJobId(), BulkExportJobStatusEnum.ERROR, ex.getMessage());
 			theDataSink.recoveredError(ex.getMessage());
 
 			throw new JobExecutionFailedException(ex.getMessage());
@@ -97,7 +91,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		BulkExportIdList idList = new BulkExportIdList();
 
 		idList.setIds(theIds);
-		idList.setJobId(theParams.getJobId());
+
 		idList.setResourceType(theResourceType);
 
 		theDataSink.accept(idList);

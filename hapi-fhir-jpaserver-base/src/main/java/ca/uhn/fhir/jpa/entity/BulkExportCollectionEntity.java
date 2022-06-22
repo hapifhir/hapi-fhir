@@ -29,6 +29,7 @@ import java.util.Collection;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLLECTION")
+@Deprecated
 public class BulkExportCollectionEntity implements Serializable {
 
 	@Id

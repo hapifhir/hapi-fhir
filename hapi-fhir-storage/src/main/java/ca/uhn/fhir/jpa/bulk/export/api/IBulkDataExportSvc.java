@@ -32,18 +32,7 @@ import java.util.Set;
 
 public interface IBulkDataExportSvc {
 
-	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
-							Boolean useCache,
-							RequestDetails theRequestDetails);
-
-	/// save jobs metadata
-	JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions,
-							String theBatch2JobId,
-							Boolean useCache,
-							RequestDetails theRequestDetails);
-
-
-	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
+//	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);
 
 	/**
 	 * Return a set of all resource types which contain search parameters which have Patient as a target.

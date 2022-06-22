@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.context.FhirContext;
@@ -82,9 +83,6 @@ public class WriteBinaryStepTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
-	@Mock
-	private IBulkExportProcessor myBulkExportProcessor;
-
 	@InjectMocks
 	private TestWriteBinaryStep myFinalStep;
 
@@ -101,7 +99,6 @@ public class WriteBinaryStepTest {
 	private StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> createInput(BulkExportExpandedResources theData) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setStartDate(new Date());
-		parameters.setJobId("jobId");
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = new StepExecutionDetails<>(
 			parameters,
@@ -116,12 +113,11 @@ public class WriteBinaryStepTest {
 	public void run_validInputNoErrors_succeeds() {
 		// setup
 		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
-		expandedResources.setJobId("jobId");
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
 		expandedResources.setStringifiedResources(stringified);
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
-		IJobDataSink<VoidModel> sink = mock(IJobDataSink.class);
+		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
 		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources);
 		IIdType binaryId = new IdType("Binary/123");
 		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
@@ -151,13 +147,10 @@ public class WriteBinaryStepTest {
 			outputString + " != " + expected
 		);
 
-		verify(myBulkExportProcessor)
-			.addFileToCollection(eq(expandedResources.getJobId()),
-				eq(expandedResources.getResourceType()),
-				any(IIdType.class));
-
-		verify(myBulkExportProcessor, never())
-			.setJobStatus(any(), any(), any());
+		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
+		verify(sink)
+			.accept(fileIdArgumentCaptor.capture());
+		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
 	@Test
@@ -165,12 +158,11 @@ public class WriteBinaryStepTest {
 		// setup
 		String testException = "I am an exceptional exception.";
 		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
-		expandedResources.setJobId("jobId");
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
 		expandedResources.setStringifiedResources(stringified);
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
-		IJobDataSink<VoidModel> sink = mock(IJobDataSink.class);
+		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
 		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources);
 
 		ourLog.setLevel(Level.ERROR);
@@ -190,12 +182,6 @@ public class WriteBinaryStepTest {
 		// verify
 		assertEquals(-1, outcome.getRecordsProcessed());
 
-		ArgumentCaptor<BulkExportJobStatusEnum> statusCaptor = ArgumentCaptor.forClass(BulkExportJobStatusEnum.class);
-		verify(myBulkExportProcessor).setJobStatus(eq(expandedResources.getJobId()),
-			statusCaptor.capture(),
-			anyString());
-		assertEquals(BulkExportJobStatusEnum.ERROR, statusCaptor.getValue());
-
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
 		assertTrue(logCaptor.getValue().getFormattedMessage()
@@ -206,7 +192,7 @@ public class WriteBinaryStepTest {
 				+ testException
 			));
 
-		verify(myBulkExportProcessor, never())
-			.addFileToCollection(anyString(), anyString(), any(IIdType.class));
+		verify(sink, never())
+			.accept(any(BulkExportBinaryFileId.class));
 	}
 }

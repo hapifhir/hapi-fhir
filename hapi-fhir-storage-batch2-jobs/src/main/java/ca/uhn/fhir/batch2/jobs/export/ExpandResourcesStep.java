@@ -20,11 +20,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.ExtensionUtil;
-import ca.uhn.fhir.util.HapiExtensions;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, BulkExportIdList, BulkExportExpandedResources> {
@@ -56,7 +49,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		BulkExportIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
-		ourLog.info(jobParameters.getJobId() + " step 2 started");
+		ourLog.info("Step 2 for bulk export - Expand resources");
 
 		// search the resources
 		IBundleProvider bundle = fetchAllResources(idList);
@@ -73,7 +66,6 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 		// set to datasink
 		BulkExportExpandedResources output = new BulkExportExpandedResources();
-		output.setJobId(idList.getJobId());
 		output.setStringifiedResources(resources);
 		output.setResourceType(idList.getResourceType());
 		theDataSink.accept(output);

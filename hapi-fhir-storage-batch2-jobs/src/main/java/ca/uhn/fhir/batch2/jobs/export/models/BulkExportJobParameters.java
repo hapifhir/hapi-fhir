@@ -109,7 +109,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setExportStyle(theParameters.getExportStyle());
 		params.setFilters(theParameters.getFilters());
 		params.setGroupId(theParameters.getGroupId());
-		params.setJobId(theParameters.getJobId());
+//		params.setJobId(theParameters.getJobId());
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());
 		params.setExpandMdm(theParameters.isExpandMdm());
