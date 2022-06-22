@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
@@ -103,7 +102,7 @@ public class ObservationLastNIndexPersistSvc {
 
 		indexedObservation.setEffectiveDtm(theEffectiveDtm);
 		indexedObservation.setIdentifier(resourcePID);
-		if (myConfig.isStoreResourceInLuceneIndex()) {
+		if (myConfig.isStoreResourceInHSearchIndex()) {
 			indexedObservation.setResource(encodeResource(theResource));
 		}
 		indexedObservation.setSubject(theSubjectId);

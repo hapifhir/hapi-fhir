@@ -272,14 +272,14 @@ public class DaoConfig {
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
 	/**
-	 * Activates the new Lucene/Elasticsearch indexing of search parameters.
+	 * Activates the new HSearch indexing of search parameters.
 	 * When active, string, token, and reference parameters will be indexed and
 	 * queried within Hibernate Search.
 	 *
 	 * @since 5.6.0
 	 * TODO mb test more with this true
 	 */
-	private boolean myAdvancedLuceneIndexing = false;
+	private boolean myAdvancedHSearchIndexing = false;
 	/**
 	 * If set to a positive number, any resources with a character length at or below the given number
 	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
@@ -292,7 +292,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.7.0
 	 */
-	private boolean myStoreResourceInLuceneIndex;
+	private boolean myStoreResourceInHSearchIndex;
 
 	/**
 	 * @see FhirValidator#isConcurrentBundleValidation()
@@ -2736,51 +2736,51 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
+	 * Is HSearch indexing enabled beyond _contains or _text?
 	 *
 	 * @since 5.6.0
 	 */
-	public boolean isAdvancedLuceneIndexing() {
-		return myAdvancedLuceneIndexing;
+	public boolean isAdvancedHSearchIndexing() {
+		return myAdvancedHSearchIndexing;
 	}
 
 	/**
-	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
+	 * Enable/disable HSearch indexing enabled beyond _contains or _text.
 	 * <p>
-	 * String, token, and reference parameters can be indexed in Lucene.
+	 * String, token, and reference parameters can be indexed in HSearch.
 	 * This extends token search to support :text searches, as well as supporting
 	 * :contains and :text on string parameters.
 	 *
 	 * @since 5.6.0
 	 */
-	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
-		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
+	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
+		this.myAdvancedHSearchIndexing = theAdvancedHSearchIndexing;
 	}
 
 	/**
-	 * Is storing of Resource in Lucene index enabled?
+	 * Is storing of Resource in HSearch index enabled?
 	 *
 	 * @since 5.7.0
 	 */
-	public boolean isStoreResourceInLuceneIndex() {
-		return myStoreResourceInLuceneIndex;
+	public boolean isStoreResourceInHSearchIndex() {
+		return myStoreResourceInHSearchIndex;
 	}
 
 	/**
 	 * <p>
-	 * Enable Resource to be stored inline with Lucene index mappings.
+	 * Enable Resource to be stored inline with HSearch index mappings.
 	 * This is useful in cases where after performing a search operation the resulting resource identifiers don't have to be
 	 * looked up in the persistent storage, but rather the inline stored resource can be used instead.
 	 * </p>
 	 * <p>
-	 * For e.g - Storing Observation resource in lucene index would be useful when performing
+	 * For e.g - Storing Observation resource in HSearch index would be useful when performing
 	 * <a href="https://www.hl7.org/fhir/observation-operation-lastn.html">$lastn</a> operation.
 	 * </p>
 	 *
 	 * @since 5.7.0
 	 */
-	public void setStoreResourceInLuceneIndex(boolean theStoreResourceInLuceneIndex) {
-		myStoreResourceInLuceneIndex = theStoreResourceInLuceneIndex;
+	public void setStoreResourceInHSearchIndex(boolean theStoreResourceInHSearchIndex) {
+		myStoreResourceInHSearchIndex = theStoreResourceInHSearchIndex;
 	}
 
 	/**

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-class HibernateSearchElementCacheTest {
+class HSearchElementCacheTest {
 	static class TestDocumentElement implements DocumentElement {
 		final TestDocumentElement myParent;
 
@@ -49,7 +49,7 @@ class HibernateSearchElementCacheTest {
 	}
 
 	TestDocumentElement myRoot = new TestDocumentElement(null);
-	HibernateSearchElementCache mySvc = new HibernateSearchElementCache(myRoot);
+	HSearchElementCache mySvc = new HSearchElementCache(myRoot);
 
 	@Test
 	public void emptyPathReturnsRoot() {

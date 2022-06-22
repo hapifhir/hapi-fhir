@@ -21,6 +21,8 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -44,12 +46,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -87,10 +92,10 @@ import static org.mockito.Mockito.when;
  * and remove the abstract qualifier
  */
 //@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-//@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-public abstract class AbstractValueSetFreeTextExpansionR4Test extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetFreeTextExpansionR4Test.class);
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetHSearchExpansionR4Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";

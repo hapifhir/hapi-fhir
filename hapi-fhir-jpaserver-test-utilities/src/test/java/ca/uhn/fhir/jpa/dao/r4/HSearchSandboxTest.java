@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -46,11 +46,11 @@ import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -60,12 +60,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @RequiresDocker
 @ContextConfiguration(classes = {
 	TestR4Config.class,
-	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	TestHSearchAddInConfig.Elasticsearch.class,
 	DaoTestDataBuilder.Config.class,
 	TestDaoSearch.Config.class
 })
 @Disabled
-public class HibernateSearchSandboxTest extends BaseJpaTest {
+public class HSearchSandboxTest extends BaseJpaTest {
 
 	@Autowired
 	private EntityManager myEntityManager;
@@ -104,7 +104,7 @@ public class HibernateSearchSandboxTest extends BaseJpaTest {
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 

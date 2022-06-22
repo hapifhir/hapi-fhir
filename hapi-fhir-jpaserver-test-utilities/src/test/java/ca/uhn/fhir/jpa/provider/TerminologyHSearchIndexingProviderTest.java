@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class TerminologyFreetextIndexingProviderTest {
+public class TerminologyHSearchIndexingProviderTest {
 
 	private final FhirContext  myContext = FhirContext.forR4();
 

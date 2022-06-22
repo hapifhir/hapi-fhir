@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -54,7 +54,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
 abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
@@ -117,7 +117,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 		if (!dataLoaded || patient0Id == null) {
 			// enabled to also create extended lucene index during creation of test data
-			myDaoConfig.setAdvancedLuceneIndexing(true);
+			myDaoConfig.setAdvancedHSearchIndexing(true);
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
 			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
@@ -135,7 +135,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 			// turn off the setting enabled earlier
-			myDaoConfig.setAdvancedLuceneIndexing(false);
+			myDaoConfig.setAdvancedHSearchIndexing(false);
 		}
 
 	}

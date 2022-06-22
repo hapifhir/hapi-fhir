@@ -10,15 +10,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 
-class ExtendedLuceneResourceProjectionTest {
+class ExtendedHSearchResourceProjectionTest {
 	final FhirContext myFhirContext = FhirContext.forR4();
 	final IParser myParser = myFhirContext.newJsonParser();
-	ExtendedLuceneResourceProjection myProjection;
+	ExtendedHSearchResourceProjection myProjection;
 	IBaseResource myResource;
 
 	@Test
 	public void basicBodyReceivesId() {
-		myProjection = new ExtendedLuceneResourceProjection(22, null, "{ \"resourceType\":\"Observation\"}");
+		myProjection = new ExtendedHSearchResourceProjection(22, null, "{ \"resourceType\":\"Observation\"}");
 
 		myResource = myProjection.toResource(myParser);
 
@@ -28,7 +28,7 @@ class ExtendedLuceneResourceProjectionTest {
 
 	@Test
 	public void forcedIdOverridesPid() {
-		myProjection = new ExtendedLuceneResourceProjection(22, "force-id", "{ \"resourceType\":\"Observation\"}");
+		myProjection = new ExtendedHSearchResourceProjection(22, "force-id", "{ \"resourceType\":\"Observation\"}");
 
 		myResource = myProjection.toResource(myParser);
 

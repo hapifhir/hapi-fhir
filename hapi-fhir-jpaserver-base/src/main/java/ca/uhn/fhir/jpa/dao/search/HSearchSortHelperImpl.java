@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_LOWER;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
 
 /**
  * Used to build HSearch sort clauses.

@@ -8,19 +8,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * Run entire @see {@link FhirResourceDaoR4SearchLastNAsyncIT} test suite this time
- * using Extended Lucene index as search target
+ * using Extended HSearch index as search target
  */
 @ExtendWith(SpringExtension.class)
-public class FhirResourceDaoR4SearchLastNUsingExtendedLuceneIndexAsyncIT extends FhirResourceDaoR4SearchLastNAsyncIT {
+public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT extends FhirResourceDaoR4SearchLastNAsyncIT {
 
 	@BeforeEach
-	public void enableAdvancedLuceneIndexing() {
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
-	public void disableAdvancedLuceneIndex() {
-		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
+	public void disableAdvancedHSearchIndex() {
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 	}
 
 }

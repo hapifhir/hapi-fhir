@@ -55,13 +55,13 @@ import java.util.Properties;
  * Turn off by adding {@link NoFT} to the test Contexts.
  * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
  */
-public class TestHibernateSearchAddInConfig {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestHibernateSearchAddInConfig.class);
+public class TestHSearchAddInConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(TestHSearchAddInConfig.class);
 
 	/**
 	 * Add Hibernate Search config to JPA properties.
 	 */
-	public interface IHibernateSearchConfigurer {
+	public interface IHSearchConfigurer {
 		void apply(Properties theJPAProperties);
 	}
 
@@ -74,7 +74,7 @@ public class TestHibernateSearchAddInConfig {
 
 		@Bean
 		@Primary
-		IHibernateSearchConfigurer hibernateSearchConfigurer() throws IOException {
+		IHSearchConfigurer hibernateSearchConfigurer() throws IOException {
 			ourLog.warn("Hibernate Search: using lucene - filesystem");
 
 			// replace by existing directory for debugging purposes
@@ -112,7 +112,7 @@ public class TestHibernateSearchAddInConfig {
 	public static class DefaultLuceneHeap {
 
 		@Bean
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHSearchConfigurer hibernateSearchConfigurer() {
 			ourLog.warn("Hibernate Search: using lucene - local-heap");
 
 			Map<String, String> luceneHeapProperties = new HashMap<>();
@@ -140,7 +140,7 @@ public class TestHibernateSearchAddInConfig {
 	@Configuration
 	public static class NoFT {
 		@Bean
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHSearchConfigurer hibernateSearchConfigurer() {
 			ourLog.info("Hibernate Search is disabled");
 			return (theProperties) -> theProperties.put("hibernate.search.enabled", "false");
 		}
@@ -164,7 +164,7 @@ public class TestHibernateSearchAddInConfig {
 	public static class Elasticsearch {
 		@Bean
 		@Primary // override the default
-		IHibernateSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
+		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
 			return (theProperties) -> {
 				int httpPort = theContainer.getMappedPort(9200);//9200 is the HTTP port
 				String host = theContainer.getHost();
