@@ -753,9 +753,6 @@ public class JpaConfig {
 
 	@Bean
 	public SearchStrategyFactory searchStrategyFactory(@Autowired(required = false) IFulltextSearchSvc theFulltextSvc) {
-		if (theFulltextSvc == null) {
-			 return null;
-		}
 		return new SearchStrategyFactory(myDaoConfig, theFulltextSvc);
 	}
 

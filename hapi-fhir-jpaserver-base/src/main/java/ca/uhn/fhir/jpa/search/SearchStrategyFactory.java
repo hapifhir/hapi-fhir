@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -16,6 +17,7 @@ import java.util.function.Supplier;
  */
 public class SearchStrategyFactory {
 	private final DaoConfig myDaoConfig;
+	@Nullable
 	private final IFulltextSearchSvc myFulltextSearchSvc;
 
 	public interface ISearchStrategy extends Supplier<IBundleProvider> {
@@ -29,13 +31,15 @@ public class SearchStrategyFactory {
 //	public class JPAHybridHSearchSavedSearch implements  ISearchStrategy {};
 //	public class SavedSearchAdaptorStrategy implements  ISearchStrategy {};
 
-	public SearchStrategyFactory(DaoConfig theDaoConfig, IFulltextSearchSvc theFulltextSearchSvc) {
+	public SearchStrategyFactory(DaoConfig theDaoConfig, @Nullable IFulltextSearchSvc theFulltextSearchSvc) {
 		myDaoConfig = theDaoConfig;
 		myFulltextSearchSvc = theFulltextSearchSvc;
 	}
 
 	public boolean isSupportsHSearchDirect(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
-		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+		return
+			myFulltextSearchSvc != null &&
+			myDaoConfig.isStoreResourceInLuceneIndex() &&
 			myDaoConfig.isAdvancedLuceneIndexing() &&
 			// fixme - we need "supportsAllOf(theResourceType, theParams)" for this.
 			myFulltextSearchSvc.supportsSomeOf(theParams);
