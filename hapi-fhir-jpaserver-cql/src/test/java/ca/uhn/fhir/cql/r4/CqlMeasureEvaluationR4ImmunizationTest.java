@@ -34,6 +34,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 
     //overall testing function including bundle manipulation and evaluation and assertion
     protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, String theCQLMeasureLocation, String thePractitionerRef, Map<String, Double> theExpectedScores) throws IOException {
+
         //load provided bundle and replace placeholder CQL content of Library with CQL content of provided file location
         Bundle bundle = loadBundleFromFileLocationAndManipulate(theBundleLocation, theCQLMeasureLocation);
         //we require at least one MeasureReport in the bundle
@@ -64,7 +65,6 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		ourLog.info("Score of evaluation: {}", actualEvaluatedReport.getGroupFirstRep().getMeasureScore().getValue());
 		assertMeasureScore(actualEvaluatedReport, theExpectedScore);
 	}
-
     //double compare to assert no difference between expected and actual measure score
     protected void assertMeasureScore(MeasureReport theReport, double theExpectedScore) {
         //find the predefined expected score by looking up the report identifier
