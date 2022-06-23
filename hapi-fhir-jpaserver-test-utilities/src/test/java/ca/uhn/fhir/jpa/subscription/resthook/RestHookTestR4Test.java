@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -521,17 +523,17 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	}
 
 
-	@Test
-	public void RestHookSubscriptionWithPayloadSendsDeleteRequest() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
+	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
 		String payload = "application/json";
-		String criteria1 = "[*]";
 
 		Extension sendDeleteMessagesExtension = new Extension()
 			.setUrl(EX_SEND_DELETE_MESSAGES)
 			.setValue(new BooleanType(true));
 
 		waitForActivatedSubscriptionCount(0);
-		createSubscription(criteria1, payload, sendDeleteMessagesExtension);
+		createSubscription(theCriteria, payload, sendDeleteMessagesExtension);
 		waitForActivatedSubscriptionCount(1);
 
 		ourLog.info("** About to send observation");

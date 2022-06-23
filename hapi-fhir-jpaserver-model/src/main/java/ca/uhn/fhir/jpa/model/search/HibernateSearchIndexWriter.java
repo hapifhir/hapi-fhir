@@ -38,6 +38,7 @@ public class HibernateSearchIndexWriter {
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
+	public static final String IDX_STRING_LOWER = "lower";
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
@@ -49,6 +50,8 @@ public class HibernateSearchIndexWriter {
 	public static final String QTY_VALUE_NORM = "value-norm";
 
 	public static final String URI_VALUE = "uri-value";
+
+	public static final String NUMBER_VALUE = "number-value";
 
 
 
@@ -78,6 +81,8 @@ public class HibernateSearchIndexWriter {
 		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
+		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
+
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
@@ -85,9 +90,11 @@ public class HibernateSearchIndexWriter {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
+
 		nestedTokenNode.addValue("code", theValue.getCode());
 		nestedTokenNode.addValue("system", theValue.getSystem());
 		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
 			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
 			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
@@ -116,8 +123,10 @@ public class HibernateSearchIndexWriter {
 		// Upper bound
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
-		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
+
+		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
 	}
+
 
 
 	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
@@ -158,4 +167,14 @@ public class HibernateSearchIndexWriter {
 			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
 		}
 	}
+
+
+	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
+		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
+		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {
+			ourLog.trace("Adding Search Param Number: {} -- {}", theParamName, numberSearchIndexValue);
+			numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
+		}
+	}
+
 }

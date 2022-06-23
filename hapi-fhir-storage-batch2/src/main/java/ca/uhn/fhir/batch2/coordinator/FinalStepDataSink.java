@@ -34,14 +34,11 @@ import javax.annotation.Nonnull;
 class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT,IT,VoidModel> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FinalStepDataSink.class);
 
-	private final String myJobDefinitionId;
-
 	/**
 	 * Constructor
 	 */
 	FinalStepDataSink(@Nonnull String theJobDefinitionId, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT,IT,VoidModel> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
-		myJobDefinitionId = theJobDefinitionId;
 	}
 
 	@Override

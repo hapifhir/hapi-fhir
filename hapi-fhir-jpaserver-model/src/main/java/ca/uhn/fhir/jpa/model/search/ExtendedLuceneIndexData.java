@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -47,6 +48,7 @@ public class ExtendedLuceneIndexData {
 
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
+	final SetMultimap<String, BigDecimal> mySearchParamNumbers = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamLinks = HashMultimap.create();
 	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
@@ -93,6 +95,7 @@ public class ExtendedLuceneIndexData {
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
 		// we want to receive the whole entry collection for each invocation
 		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
+		Multimaps.asMap(mySearchParamNumbers).forEach(ifNotContained(indexWriter::writeNumberIndex));
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
@@ -127,6 +130,10 @@ public class ExtendedLuceneIndexData {
 
 	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
 		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	}
+
+	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {
+		mySearchParamNumbers.put(theParamName, theValue);
 	}
 
 	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
