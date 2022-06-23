@@ -10,9 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-public class
 // wipjv Ken - Should we complicate RuleImplOp instead?  Or enhance the testers?
-FhirQueryRuleImpl extends RuleImplOp {
+public class FhirQueryRuleImpl extends RuleImplOp {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleImpl.class);
 
 	private String myFilter;
@@ -52,9 +51,9 @@ FhirQueryRuleImpl extends RuleImplOp {
 			return null;
 		}
 
-		// wipjv myFilter needs to turn into a proper FHIR expression
-		// wipjv check in vs out resource
+		// wipjv check in vs out resource - write will need to check write.
 		// wipjv has the logic already considered theOutputResource.fhirType() vs myTypes?
+		// wipjv what about the id case - does that path doesn't call applyRuleLogic()
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(theOutputResource.fhirType() + "?" + myFilter, theOutputResource);
 
 		AuthorizationInterceptor.Verdict result;
