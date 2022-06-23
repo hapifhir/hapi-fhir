@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3719
+title: "Added support for Bulk Export for FHIR Response Terminology Enhancement"
