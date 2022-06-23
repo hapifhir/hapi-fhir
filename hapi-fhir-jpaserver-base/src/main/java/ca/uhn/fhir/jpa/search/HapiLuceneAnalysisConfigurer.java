@@ -36,6 +36,8 @@ import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurationC
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurer;
 import org.springframework.stereotype.Component;
 
+import static ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder.LOWERCASE_ASCIIFOLDING_NORMALIZER;
+
 /**
  * Factory for defining the analysers.
  */
@@ -96,5 +98,10 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 		theLuceneCtx.analyzer("termConceptPropertyAnalyzer").custom()
 			.tokenizer(WhitespaceTokenizerFactory.class);
+
+		theLuceneCtx.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER).custom()
+			.tokenFilter(LowerCaseFilterFactory.class)
+			.tokenFilter(ASCIIFoldingFilterFactory.class);
+
 	}
 }

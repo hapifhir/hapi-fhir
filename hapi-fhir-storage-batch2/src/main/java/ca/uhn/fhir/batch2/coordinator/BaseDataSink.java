@@ -33,10 +33,13 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 	private final String myInstanceId;
 	private final JobWorkCursor<PT,IT,OT> myJobWorkCursor;
 	private int myRecoveredErrorCount;
+	protected final String myJobDefinitionId;
 
-	protected BaseDataSink(String theInstanceId, JobWorkCursor<PT,IT,OT> theJobWorkCursor) {
+	protected BaseDataSink(String theInstanceId,
+								  JobWorkCursor<PT,IT,OT> theJobWorkCursor) {
 		myInstanceId = theInstanceId;
 		myJobWorkCursor = theJobWorkCursor;
+		myJobDefinitionId = theJobWorkCursor.getJobDefinition().getJobDefinitionId();
 	}
 
 	public String getInstanceId() {
@@ -61,5 +64,9 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 
 	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
 		return myJobWorkCursor.currentStep;
+	}
+
+	public String getJobDefinitionId() {
+		return myJobDefinitionId;
 	}
 }

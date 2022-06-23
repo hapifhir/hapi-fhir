@@ -87,6 +87,9 @@ public class ExtendedLuceneIndexExtractor {
 		theNewParams.myTokenParams.forEach(nextParam ->
 			retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
+		theNewParams.myNumberParams.forEach(nextParam ->
+			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
+
 		theNewParams.myDateParams.forEach(nextParam ->
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
