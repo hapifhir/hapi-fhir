@@ -117,7 +117,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
-				ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
+				ResourceSearchParams searchParams = constructCompleteSearchParamList(resourceName);
 				for (RuntimeSearchParam runtimeSp : searchParams.values()) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
@@ -173,6 +173,39 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
+	}
+
+	private ResourceSearchParams constructCompleteSearchParamList(String theResourceName) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+
+		ISearchParamRegistry serverConfiguration = myRestfulServer.createConfiguration();
+
+		/*
+		 * If we have an explicit registry (which will be the case in the JPA server) we use it as priority,
+		 * but also fill in any gaps using params from the server itself. This makes sure we include
+		 * global params like _lastUpdated
+		 */
+		ResourceSearchParams searchParams;
+		ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(theResourceName);
+		if (mySearchParamRegistry != null) {
+			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
+				if (nextBuiltInSpName.startsWith("_") &&
+					!searchParams.containsParamName(nextBuiltInSpName) &&
+					searchParamEnabled(nextBuiltInSpName)) {
+					searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
+				}
+			}
+		} else {
+			searchParams = serverConfigurationActiveSearchParams;
+		}
+
+		return searchParams;
+	}
+
+	protected boolean searchParamEnabled(String theSearchParam) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
 	}
 
 	public boolean isIncludeResourceCounts() {
