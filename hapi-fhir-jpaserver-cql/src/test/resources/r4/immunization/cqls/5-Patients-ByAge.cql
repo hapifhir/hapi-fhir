@@ -10,7 +10,7 @@ define "InitialPopulation":
 	[Patient]
 
 define "Denominator":
-	[Patient] myPatient where (myPatient.generalPractitioner[0].reference=('Practitioner/dreric'))
+	[Patient] myPatient where (myPatient.birthDate before (Today() - 1 year))
 
 define "Numerator":
  	"QualifyingImmunizations"

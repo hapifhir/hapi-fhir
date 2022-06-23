@@ -256,7 +256,7 @@
             }
           ],
           "gender": "female",
-          "birthDate": "1993-12-08",
+          "birthDate": "2021-12-08",
 			"generalPractitioner":  {
 				"reference": "Practitioner/dreric"
 			}
@@ -290,7 +290,7 @@
 								},
 								"criteria": {
 									"language": "text/cql",
-									"expression": "Initial Population"
+									"expression": "InitialPopulation"
 								}
 							},
 							{
@@ -393,25 +393,25 @@
 				},
 				"parameter": [
 					{
-						"name": "Initial Population",
+						"name": "InitialPopulation",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					},
 					{
 						"name": "Denominator",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					},
 					{
 						"name": "Numerator",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					}
 				],
 				"dataRequirement": [

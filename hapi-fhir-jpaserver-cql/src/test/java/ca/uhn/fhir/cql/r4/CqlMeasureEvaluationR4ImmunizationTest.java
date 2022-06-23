@@ -208,6 +208,10 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
         expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 2.0);
 
         //note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
-       this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/4-Patients-Of-One-Practitioner.cql");
+       //this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/4-Patients-Of-One-Practitioner.cql");
+
+		 //be aware that this test will fail, because eventually this patient will become one year old (today - birthdate > 1 year)
+		 //this patient is not yet immunized, because too young. so it won't be counted as a denominator patient
+		 this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/5-Patients-ByAge.cql");
     }
 }

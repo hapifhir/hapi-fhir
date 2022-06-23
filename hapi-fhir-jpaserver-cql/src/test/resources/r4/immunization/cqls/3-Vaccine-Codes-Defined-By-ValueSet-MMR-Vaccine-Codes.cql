@@ -6,7 +6,7 @@ valueset "MMR Vaccinated": 'http://hl7.org/fhir/ValueSet/mmr-vaccine-codes'
 
 context Patient
 
-define "Initial Population":
+define "InitialPopulation":
 	[Patient]
 
 define "Denominator":
