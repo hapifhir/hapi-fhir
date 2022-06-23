@@ -47,9 +47,14 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.projection.dsl.CompositeProjectionOptionsStep;
+import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
@@ -163,6 +168,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
+
 		return getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
@@ -172,49 +178,52 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					f.documentReference())
 			)
 			.where(
-				f -> f.bool(b -> {
-					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
-
-					/*
-					 * Handle _content parameter (resource body content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _content parameter, so we remove it from the map here
-					 */
-					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
-
-					/*
-					 * Handle _text parameter (resource narrative content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _text parameter, so we remove it from the map here
-					 */
-					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
-
-					if (theReferencingPid != null) {
-						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
-					}
-
-					if (isNotBlank(theResourceType)) {
-						builder.addResourceTypeClause(theResourceType);
-					}
-
-					/*
-					 * Handle other supported parameters
-					 */
-					if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
-						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
-					}
-					//DROP EARLY HERE IF BOOL IS EMPTY?
-
-				})
+				f -> buildWhereClause(theResourceType, theParams, theReferencingPid, f)
 			);
 	}
 
+	private PredicateFinalStep buildWhereClause(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid, SearchPredicateFactory f) {
+		return f.bool(b -> {
+			ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
+
+			/*
+			 * Handle _content parameter (resource body content)
+			 *
+			 * Posterity:
+			 * We do not want the HAPI-FHIR dao's to process the
+			 * _content parameter, so we remove it from the map here
+			 */
+			List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+			builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+
+			/*
+			 * Handle _text parameter (resource narrative content)
+			 *
+			 * Posterity:
+			 * We do not want the HAPI-FHIR dao's to process the
+			 * _text parameter, so we remove it from the map here
+			 */
+			List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+			builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
+
+			if (theReferencingPid != null) {
+				b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
+			}
+
+			if (isNotBlank(theResourceType)) {
+				builder.addResourceTypeClause(theResourceType);
+			}
+
+			/*
+			 * Handle other supported parameters
+			 */
+			if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
+			}
+			//DROP EARLY HERE IF BOOL IS EMPTY?
+
+		});
+	}
 
 
 	@Nonnull
@@ -324,21 +333,29 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		SearchSession session = getSearchSession();
 		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
-				f -> f.composite(
-					ExtendedLuceneResourceProjection::new,
-					f.field("myId", Long.class),
-					f.field("myForcedId", String.class),
-					f.field("myRawResource", String.class))
+				f -> buildResourceSelectClause(f)
 			)
 			.where(
 				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
 			).fetchAllHits();
+		return resourceProjectionsToResources(rawResourceDataList);
+	}
+
+	@Nonnull
+	private List<IBaseResource> resourceProjectionsToResources(List<ExtendedLuceneResourceProjection> rawResourceDataList) {
 		IParser parser = myFhirContext.newJsonParser();
 		return rawResourceDataList.stream()
 			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
 	}
 
+	private CompositeProjectionOptionsStep<?, ExtendedLuceneResourceProjection> buildResourceSelectClause(SearchProjectionFactory<EntityReference, ResourceTable> f) {
+		return f.composite(
+			ExtendedLuceneResourceProjection::new,
+			f.field("myId", Long.class),
+			f.field("myForcedId", String.class),
+			f.field("myRawResource", String.class));
+	}
 
 
 	@Override
@@ -351,7 +368,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
-		// fixme do a sync search, but fetch the resource json instead of just the ids.
-		return null;
+		List<ExtendedLuceneResourceProjection> extendedLuceneResourceProjections =
+			getSearchSession().search(ResourceTable.class)
+				.select(f -> buildResourceSelectClause(f))
+				.where(f -> buildWhereClause(theResourceType, theParams, null, f))
+				// fixme
+				.fetchHits(0, 50);
+
+		return resourceProjectionsToResources(extendedLuceneResourceProjections);
 	}
 }
