@@ -19,7 +19,7 @@ define "MMR Vaccinated MMR":
 define "MMR Vaccinated MMRCSL":
 [Immunization: Code 'MMRCSL' from VaccineOID] Immu where Immu.status in {'completed'}
 
-define "Initial Population":
+define "InitialPopulation":
 	true
 
 define "Denominator":

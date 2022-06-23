@@ -174,13 +174,13 @@
 										{
 											"system": "http://terminology.hl7.org/CodeSystem/measure-population",
 											"code": "initial-population",
-											"display": "Initial Population"
+											"display": "InitialPopulation"
 										}
 									]
 								},
 								"criteria": {
 									"language": "text/cql",
-									"expression": "Initial Population"
+									"expression": "InitialPopulation"
 								}
 							},
 							{
@@ -361,25 +361,25 @@
 				},
 				"parameter": [
 					{
-						"name": "Initial Population",
+						"name": "InitialPopulation",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					},
 					{
 						"name": "Denominator",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					},
 					{
 						"name": "Numerator",
 						"use": "out",
 						"min": 0,
 						"max": "*",
-						"type": "Encounter"
+						"type": "Patient"
 					}
 				],
 				"dataRequirement": [

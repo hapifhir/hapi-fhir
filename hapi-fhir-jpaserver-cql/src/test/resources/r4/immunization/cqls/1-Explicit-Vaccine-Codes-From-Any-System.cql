@@ -12,7 +12,7 @@ define "MMR Vaccinated":
 (Immu.vaccineCode.coding[0].code=('MMRV')) or
 (Immu.vaccineCode.coding[0].code=('MMRCSL'))
 
-define "Initial Population":
+define "InitialPopulation":
 	true
 
 define "Denominator":
