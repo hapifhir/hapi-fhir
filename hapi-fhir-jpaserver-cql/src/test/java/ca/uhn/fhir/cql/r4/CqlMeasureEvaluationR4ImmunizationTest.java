@@ -207,9 +207,10 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 3.0);
 
 		//note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
+		//TODO: tests are dependent and will fail if the order is incorrect. --> clean up tests
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", null, expectedScoresByIdentifier);
 		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql", null, expectedScoresByIdentifier);
 		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql", null, expectedScoresByIdentifier);
-		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", null, expectedScoresByIdentifier);
 	}
 
 
