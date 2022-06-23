@@ -268,7 +268,7 @@ public class ExtendedHSearchClauseBuilder {
 
 	/**
 	 * Normalize the string to match our standardAnalyzer.
-	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 * @see ca.uhn.fhir.jpa.search.HSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
 	 *
 	 * @param theString the raw string
 	 * @return a case and accent normalized version of the input
