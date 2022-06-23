@@ -96,4 +96,11 @@ public class BaseResponseTerminologyInterceptor {
 		return resources;
 	}
 
+	public FhirContext getContext() {
+		return myContext;
+	}
+
+	public IValidationSupport getValidationSupport() {
+		return myValidationSupport;
+	}
 }

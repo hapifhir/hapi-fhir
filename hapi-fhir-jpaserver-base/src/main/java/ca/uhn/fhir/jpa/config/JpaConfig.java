@@ -144,6 +144,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
@@ -152,6 +153,7 @@ import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValid
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -225,6 +227,12 @@ public class JpaConfig {
 	@Bean
 	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationInterceptor(theValidationSupport);
+	}
+
+	@Lazy
+	@Bean
+	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(@Autowired ResponseTerminologyTranslationInterceptor theResponseTerminologyTranslationInterceptor) {
+		return new ResponseTerminologyTranslationSvc(theResponseTerminologyTranslationInterceptor);
 	}
 
 	@Bean

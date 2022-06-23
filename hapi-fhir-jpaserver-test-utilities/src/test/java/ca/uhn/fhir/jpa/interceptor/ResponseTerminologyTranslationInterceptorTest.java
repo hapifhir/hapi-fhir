@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,7 +68,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation			.getCode()
+		observation.getCode()
 			.addCoding(new Coding(CS_URL, "12345", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
@@ -85,7 +87,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation			.getCode()
+		observation.getCode()
 			.addCoding(new Coding(CS_URL, "12345", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
@@ -108,7 +110,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation			.getCode()
+		observation.getCode()
 			.addCoding(new Coding(CS_URL, "12345", null))
 			.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
 		IIdType id = myObservationDao.create(observation).getId();
@@ -128,7 +130,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation			.getCode()
+		observation.getCode()
 			.addCoding(new Coding(CS_URL, "FOO", null));
 		IIdType id = myObservationDao.create(observation).getId();
 
@@ -139,7 +141,6 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 			"[system=http://example.com/my_code_system, code=FOO, display=null]"
 		));
 	}
-
 
 	@Test
 	public void testBulkExport_TerminologyTranslation_MappingFound() {
@@ -152,7 +153,48 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 
 		// set mapping specs
 		myResponseTerminologyTranslationInterceptor.addMappingSpecification(CS_URL, CS_URL_2);
+		List<String> codingList = Arrays.asList(
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
+			"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"34567\",\"display\":\"Target Code 34567\"}");
 
+		createBulkJobAndCheckCodingList(codingList);
+	}
+
+	@Test
+	public void testBulkExport_TerminologyTranslation_MappingNotNeeded() {
+		// Create some resources to load
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null))
+			.addCoding(new Coding(CS_URL_2, "9999", "Display 9999"));
+		myObservationDao.create(observation);
+
+		// set mapping specs
+		myResponseTerminologyTranslationInterceptor.addMappingSpecification(CS_URL, CS_URL_2);
+		List<String> codingList = Arrays.asList(
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
+			"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"9999\",\"display\":\"Display 9999\"}");
+
+		createBulkJobAndCheckCodingList(codingList);
+	}
+
+	@Test
+	public void testBulkExport_TerminologyTranslation_NoMapping() {
+		// Create some resources to load
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
+		myObservationDao.create(observation);
+
+		List<String> codingList = List.of(
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}");
+
+		createBulkJobAndCheckCodingList(codingList);
+	}
+
+	private void createBulkJobAndCheckCodingList(List<String> codingList) {
 		// Create a bulk job
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Observation"));
@@ -182,12 +224,9 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
 			if ("Observation".equals(next.getResourceType())) {
-				assertThat(nextContents, containsString(
-					"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}"
-				));
-				assertThat(nextContents, containsString(
-					"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"34567\",\"display\":\"Target Code 34567\"}"
-				));
+				for (String coding : codingList) {
+					assertThat(nextContents, containsString(coding));
+				}
 			} else {
 				fail(next.getResourceType());
 			}

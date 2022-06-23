@@ -1,0 +1,129 @@
+package ca.uhn.fhir.rest.server.interceptor;
+
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.IModelVisitor;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class ResponseTerminologyTranslationSvc {
+	private final ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
+	private final BaseRuntimeChildDefinition myCodingSystemChild;
+	private final BaseRuntimeChildDefinition myCodingCodeChild;
+	private final BaseRuntimeElementDefinition<IPrimitiveType<?>> myUriDefinition;
+	private final BaseRuntimeElementDefinition<IPrimitiveType<?>> myCodeDefinition;
+	private final Class<? extends IBase> myCodeableConceptType;
+	private final Class<? extends IBase> myCodingType;
+	private final BaseRuntimeChildDefinition myCodeableConceptCodingChild;
+	private final BaseRuntimeElementCompositeDefinition<?> myCodingDefinition;
+	private final RuntimePrimitiveDatatypeDefinition myStringDefinition;
+	private final BaseRuntimeChildDefinition myCodingDisplayChild;
+
+	public ResponseTerminologyTranslationSvc(ResponseTerminologyTranslationInterceptor theMyResponseTerminologyTranslationInterceptor) {
+		myResponseTerminologyTranslationInterceptor = theMyResponseTerminologyTranslationInterceptor;
+		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("CodeableConcept"));
+
+		myCodeableConceptType = codeableConceptDef.getImplementingClass();
+		myCodeableConceptCodingChild = codeableConceptDef.getChildByName("coding");
+
+		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("Coding"));
+		myCodingType = myCodingDefinition.getImplementingClass();
+		myCodingSystemChild = myCodingDefinition.getChildByName("system");
+		myCodingCodeChild = myCodingDefinition.getChildByName("code");
+		myCodingDisplayChild = myCodingDefinition.getChildByName("display");
+
+		myUriDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("uri");
+		myCodeDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("code");
+		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("string");
+	}
+
+	public void processResourcesForTerminologyTranslation(List<IBaseResource> resources) {
+		FhirTerser terser = myResponseTerminologyTranslationInterceptor.getContext().newTerser();
+		for (IBaseResource nextResource : resources) {
+			terser.visit(nextResource, new MappingVisitor());
+		}
+	}
+
+	private class MappingVisitor implements IModelVisitor {
+
+		@Override
+		public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+			if (myCodeableConceptType.isAssignableFrom(theElement.getClass())) {
+
+				// Find all existing Codings
+				Multimap<String, String> foundSystemsToCodes = ArrayListMultimap.create();
+				List<IBase> nextCodeableConceptCodings = myCodeableConceptCodingChild.getAccessor().getValues(theElement);
+				for (IBase nextCodeableConceptCoding : nextCodeableConceptCodings) {
+					String system = myCodingSystemChild.getAccessor().getFirstValueOrNull(nextCodeableConceptCoding).map(t -> (IPrimitiveType<?>) t).map(IPrimitiveType::getValueAsString).orElse(null);
+					String code = myCodingCodeChild.getAccessor().getFirstValueOrNull(nextCodeableConceptCoding).map(t -> (IPrimitiveType<?>) t).map(IPrimitiveType::getValueAsString).orElse(null);
+					if (StringUtils.isNotBlank(system) && StringUtils.isNotBlank(code) && !foundSystemsToCodes.containsKey(system)) {
+						foundSystemsToCodes.put(system, code);
+					}
+				}
+
+				// Look for mappings
+				for (String nextSourceSystem : foundSystemsToCodes.keySet()) {
+					String wantTargetSystem = myResponseTerminologyTranslationInterceptor.getMappingSpecifications().get(nextSourceSystem);
+					if (wantTargetSystem != null) {
+						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
+
+							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
+								List<IBaseCoding> codings = new ArrayList<>();
+								codings.add(createCodingFromPrimitives(nextSourceSystem, code, null));
+								TranslateConceptResults translateConceptResults = myResponseTerminologyTranslationInterceptor.getValidationSupport().translateConcept(new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
+								if (translateConceptResults != null) {
+									List<TranslateConceptResult> mappings = translateConceptResults.getResults();
+									for (TranslateConceptResult nextMapping : mappings) {
+
+										IBase newCoding = createCodingFromPrimitives(
+											nextMapping.getSystem(),
+											nextMapping.getCode(),
+											nextMapping.getDisplay());
+
+										// Add coding to existing CodeableConcept
+										myCodeableConceptCodingChild.getMutator().addValue(theElement, newCoding);
+
+									}
+								}
+							}
+						}
+					}
+				}
+
+			}
+
+		}
+
+		private IBaseCoding createCodingFromPrimitives(String system, String code, String display) {
+			assert myUriDefinition != null;
+			assert myCodeDefinition != null;
+			IBaseCoding newCoding = (IBaseCoding) myCodingDefinition.newInstance();
+			IPrimitiveType<?> newSystem = myUriDefinition.newInstance(system);
+			myCodingSystemChild.getMutator().addValue(newCoding, newSystem);
+			IPrimitiveType<?> newCode = myCodeDefinition.newInstance(code);
+			myCodingCodeChild.getMutator().addValue(newCoding, newCode);
+			if (StringUtils.isNotBlank(display)) {
+				assert myStringDefinition != null;
+				IPrimitiveType<?> newDisplay = myStringDefinition.newInstance(display);
+				myCodingDisplayChild.getMutator().addValue(newCoding, newDisplay);
+			}
+			return newCoding;
+		}
+
+	}
+}
