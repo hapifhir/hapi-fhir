@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
-public class FhirQueryRuleImpl extends RuleImplOp {
+public class
+// wipjv Ken - Should we complicate RuleImplOp instead?  Or enhance the testers?
+FhirQueryRuleImpl extends RuleImplOp {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleImpl.class);
 
 	private String myFilter;

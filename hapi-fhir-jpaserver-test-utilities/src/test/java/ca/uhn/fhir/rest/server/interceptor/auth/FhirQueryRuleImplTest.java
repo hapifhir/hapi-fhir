@@ -29,7 +29,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-// wipjv where should this test live?
+// wipjv where should this test live? -
 // wipjv can we mock the resource?  We just use it for stubbing here. If so, move this back to hapi-fhir-server ca.uhn.fhir.rest.server.interceptor.auth
 @MockitoSettings(strictness= Strictness.LENIENT)
 class FhirQueryRuleImplTest implements ITestDataBuilder {

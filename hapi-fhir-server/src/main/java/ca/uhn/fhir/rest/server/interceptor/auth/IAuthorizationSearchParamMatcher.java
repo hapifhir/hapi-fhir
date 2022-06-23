@@ -5,8 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 
 /**
- * Adapt our InMemoryMatcher to our auth rules.
- * wipjv do we like this name, or this package?
+ * wipjv Ken do we like this name, or this package?
  */
 public interface IAuthorizationSearchParamMatcher {
 	MatchResult match(String theCriteria, IBaseResource theResource);
