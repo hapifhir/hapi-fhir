@@ -83,6 +83,12 @@ Note that the path and exact filename of the terminology files will likely need 
 ./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org
 ```
 
+### ICD-10 (International Version)
+
+```
+./hapi-fhir-cli upload-terminology -d Downloads/icdClaML2019ens.zip -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10
+```
+
 ### ICD-10-CM
 
 ```

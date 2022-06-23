@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.term.icd10.Icd10Loader;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
@@ -298,6 +299,39 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			return processSnomedCtFiles(descriptors, theRequestDetails);
 		}
+	}
+
+	@Override
+	public UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		ourLog.info("Beginning ICD-10 processing");
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(ICD10_URI);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		int count = 0;
+
+		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
+			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
+				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
+					try (InputStream inputStream = nextDescriptor.getInputStream();
+						  InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8) ) {
+						Icd10Loader loader = new Icd10Loader(codeSystem, codeSystemVersion);
+						loader.load(reader);
+						count += loader.getConceptCount();
+					}
+				}
+			}
+		} catch (IOException | SAXException e) {
+			throw new InternalErrorException(Msg.code(865) + e);
+		}
+
+		codeSystem.setVersion(codeSystemVersion.getCodeSystemVersionId());
+
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, codeSystem, null, null);
+		return new UploadStatistics(count, target);
 	}
 
 	@Override
