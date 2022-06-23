@@ -32,6 +32,10 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
     @Autowired
 	 MeasureOperationsProvider myMeasureOperationsProvider;
 
+	 private static final String MY_TESTBUNDLE_MMR_SIMPLE = "r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json";
+	 private static final String MY_TESTBUNDLE_MMR_INCL_PRACTITIONER = "r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json";
+
+
     //overall testing function including bundle manipulation and evaluation and assertion
     protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, String theCQLMeasureLocation, String thePractitionerRef, Map<String, Double> theExpectedScores) throws IOException {
 
@@ -203,18 +207,18 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 3.0);
 
 		//note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", null, expectedScoresByIdentifier);
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql", null, expectedScoresByIdentifier);
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql", null, expectedScoresByIdentifier);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql", null, expectedScoresByIdentifier);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql", null, expectedScoresByIdentifier);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_SIMPLE, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", null, expectedScoresByIdentifier);
 	}
 
 
 	@Test
 	public void test_Immunization_ByPractitioner_MMR_Summary() throws IOException {
 		//half of dreric' s patients (total of 2) are vaccinated, so 1/2 is vaccinated.
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/dreric", 1.0/2.0);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_INCL_PRACTITIONER, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/dreric", 1.0/2.0);
 		//of drfrank's patients (total of 1), none are vaccinated
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/drfrank", 0.0/1.0);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_INCL_PRACTITIONER, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/drfrank", 0.0/1.0);
 	}
 
 	@Test
@@ -222,6 +226,6 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		//be aware that this test will fail eventually, because this patient will at some point become one years old (today - birthdate > 1 year)
 		//this patient is not yet immunized, because too young. so it won't be counted as a denominator patient and therefore the measure score is corrected to have a higher percentage
 		//of dreric' s patients, all are vaccinated, because the second patient who is not vaccinated yet doesn't meet the age criteria (denominator), so 1/1 is vaccinated.
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/4-Patients-ByAge.cql", "Practitioner/dreric", 1.0/1.0);
+		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_INCL_PRACTITIONER, "r4/immunization/cqls/4-Patients-ByAge.cql", "Practitioner/dreric", 1.0/1.0);
 	 }
 }
