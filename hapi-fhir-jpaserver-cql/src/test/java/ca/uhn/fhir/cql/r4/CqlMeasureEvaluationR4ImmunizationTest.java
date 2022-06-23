@@ -33,7 +33,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 	 MeasureOperationsProvider myMeasureOperationsProvider;
 
     //overall testing function including bundle manipulation and evaluation and assertion
-    protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, Map<String, Double> theExpectedScores, String theCQLMeasureLocation) throws IOException {
+    protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, String theCQLMeasureLocation, String thePractitionerRef, Map<String, Double> theExpectedScores) throws IOException {
         //load provided bundle and replace placeholder CQL content of Library with CQL content of provided file location
         Bundle bundle = loadBundleFromFileLocationAndManipulate(theBundleLocation, theCQLMeasureLocation);
         //we require at least one MeasureReport in the bundle
@@ -41,12 +41,29 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 
         //evaluate each measure report of the provided bundle
         for (MeasureReport report : measureReports) {
-            MeasureReport actualEvaluatedReport = this.evaluateMeasure(report);
-            ourLog.info("Score of evaluation: {}", actualEvaluatedReport.getGroupFirstRep().getMeasureScore().getValue());
-            double expectedScore = theExpectedScores.get(report.getIdentifierFirstRep().getValue());
-            assertMeasureScore(actualEvaluatedReport, expectedScore);
+			  double expectedScore = theExpectedScores.get(report.getIdentifierFirstRep().getValue());
+			  evaluateSingleReport(report, thePractitionerRef, expectedScore);
         }
     }
+
+	//overall testing function including bundle manipulation and evaluation and assertion
+	protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, String theCQLMeasureLocation, String thePractitionerRef, double theExpectedScore) throws IOException {
+		//load provided bundle and replace placeholder CQL content of Library with CQL content of provided file location
+		Bundle bundle = loadBundleFromFileLocationAndManipulate(theBundleLocation, theCQLMeasureLocation);
+		//we require at least one MeasureReport in the bundle
+		List<MeasureReport> measureReports = findMeasureReportsOrThrowException(bundle);
+
+		//evaluate each measure report of the provided bundle
+		for (MeasureReport report : measureReports) {
+			evaluateSingleReport(report, thePractitionerRef, theExpectedScore);
+		}
+	}
+
+	protected void evaluateSingleReport (MeasureReport theReport, String thePractitionerRef, double theExpectedScore) {
+		MeasureReport actualEvaluatedReport = this.evaluateMeasure(theReport, thePractitionerRef);
+		ourLog.info("Score of evaluation: {}", actualEvaluatedReport.getGroupFirstRep().getMeasureScore().getValue());
+		assertMeasureScore(actualEvaluatedReport, theExpectedScore);
+	}
 
     //double compare to assert no difference between expected and actual measure score
     protected void assertMeasureScore(MeasureReport theReport, double theExpectedScore) {
@@ -57,7 +74,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
     }
 
     //evaluates a Measure to produce one certain MeasureReport
-    protected MeasureReport evaluateMeasure(MeasureReport theMeasureReport) {
+    protected MeasureReport evaluateMeasure(MeasureReport theMeasureReport, String thePractitionerRef) {
         String measureId = this.getMeasureId(theMeasureReport);
         String patientId = null;
         //only when the type of the MeasureReport is set to 'individual', there is a patient required as a subject (i.e. not for a 'summary' report)
@@ -81,7 +98,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 
                 "patient", patientId,
 
-                null, null, null, null, null, null, myRequestDetails);
+                null, thePractitionerRef, null, null, null, null, myRequestDetails);
     }
 
     //helper function to manipulate a test bundle
@@ -119,18 +136,10 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
         return reports;
     }
 
-    //TODO: rework and look if there is anything that works provided by Bundle.Utils
     //returns a Library resource of a bundle by a given ID
     protected Library findLibraryById(Bundle theBundle, String theLibraryId) {
-        List<IBaseResource> resourceList = BundleUtil.toListOfResources(myFhirContext, theBundle);
-        for (IBaseResource resource : resourceList) {
-            if (resource instanceof Library) {
-                if (resource.getIdElement().toUnqualifiedVersionless().getValue().equals(theLibraryId)) {
-                    return (Library) resource;
-                }
-            }
-        }
-        return null;
+		 List<Library> libraries = BundleUtil.toListOfResourcesOfType(myFhirContext, theBundle, Library.class);
+		 return libraries.stream().filter(lib -> lib.getId().equals(theLibraryId)).findFirst().orElse(null);
     }
 
     //the provided Library resource only contains a placeholder CQL
@@ -194,24 +203,25 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 3.0);
 
 		//note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql");
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql");
-		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", expectedScoresByIdentifier, "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql");
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", null, expectedScoresByIdentifier);
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/1-Explicit-Vaccine-Codes-From-Any-System.cql", null, expectedScoresByIdentifier);
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json", "r4/immunization/cqls/2-Explicit-Vaccine-Codes-And-Systems.cql", null, expectedScoresByIdentifier);
 	}
 
-    @Test
-    public void test_Immunization_ByPractitioner_MMR_Summary() throws IOException {
-        Map<String, Double> expectedScoresByIdentifier = new HashedMap();
 
-        //expected result: summary confirms that 1 out of all 2 patients are MMR immunized
-		 //the sample value set contains 3 patients, but only 2 make it to the criteria of the initial population
-        expectedScoresByIdentifier.put("measureReportSummary", 1.0 / 2.0);
+	@Test
+	public void test_Immunization_ByPractitioner_MMR_Summary() throws IOException {
+		//half of dreric' s patients (total of 2) are vaccinated, so 1/2 is vaccinated.
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/dreric", 1.0/2.0);
+		//of drfrank's patients (total of 1), none are vaccinated
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/3-Vaccine-Codes-Defined-By-ValueSet-MMR-Vaccine-Codes.cql", "Practitioner/drfrank", 0.0/1.0);
+	}
 
-        //note: all those CQL files specified as the second parameter produce the exact same outcome with the given test resources provided by the first parameter.
-       //this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/4-Patients-Of-One-Practitioner.cql");
-
-		 //be aware that this test will fail, because eventually this patient will become one year old (today - birthdate > 1 year)
-		 //this patient is not yet immunized, because too young. so it won't be counted as a denominator patient
-		 this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", expectedScoresByIdentifier, "r4/immunization/cqls/5-Patients-ByAge.cql");
-    }
+	@Test
+	public void test_Immunization_ByAge() throws IOException {
+		//be aware that this test will fail eventually, because this patient will at some point become one years old (today - birthdate > 1 year)
+		//this patient is not yet immunized, because too young. so it won't be counted as a denominator patient and therefore the measure score is corrected to have a higher percentage
+		//of dreric' s patients, all are vaccinated, because the second patient who is not vaccinated yet doesn't meet the age criteria (denominator), so 1/1 is vaccinated.
+		this.testMeasureScoresByBundleAndCQLLocation("r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json", "r4/immunization/cqls/4-Patients-ByAge.cql", "Practitioner/dreric", 1.0/1.0);
+	 }
 }
