@@ -161,7 +161,7 @@ public class HSearchAnalysisConfigurers {
 			theConfigCtx.analyzer("termConceptPropertyAnalyzer").custom()
 				.tokenizer("whitespace");
 
-			theConfigCtx.normalizer( "lowercase" ).custom()
+			theConfigCtx.normalizer( LOWERCASE_ASCIIFOLDING_NORMALIZER ).custom()
 				.tokenFilters( "lowercase", "asciifolding" );
 
 		}
