@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -135,5 +134,7 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 */
 	IAuthRuleFinished withCodeNotInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
 
-    IAuthRuleFinished inCompartmentWithFilter(String theCompartment, IIdType idElement, String theFilter);
+	IAuthRuleFinished inCompartmentWithFilter(String theCompartment, IIdType theIdElement, String theFilter);
+
+	IAuthRuleFinished withFilter(String theFilter);
 }
