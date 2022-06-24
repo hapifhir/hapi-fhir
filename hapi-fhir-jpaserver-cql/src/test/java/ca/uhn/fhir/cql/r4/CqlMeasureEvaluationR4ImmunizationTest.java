@@ -26,6 +26,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * This testing class and the used resources are work in progress and will likely be subject to change.
+ */
 public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
     Logger ourLog = LoggerFactory.getLogger(CqlMeasureEvaluationR4ImmunizationTest.class);
 
