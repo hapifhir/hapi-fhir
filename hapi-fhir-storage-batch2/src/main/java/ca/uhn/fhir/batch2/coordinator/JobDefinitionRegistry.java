@@ -106,4 +106,8 @@ public class JobDefinitionRegistry {
 			.sorted()
 			.collect(Collectors.toList());
 	}
+
+	public boolean isEmpty() {
+		return myJobs.isEmpty();
+	}
 }

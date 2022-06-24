@@ -84,6 +84,13 @@ public interface IJobPersistence {
 	Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId);
 
 	/**
+	 * Fetch all running job instances for the given job definition
+	 * @param theJobDefinitionId
+	 * @return
+	 */
+	List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId);
+
+	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)
 	 *
 	 * @param theChunkId The chunk ID
@@ -173,5 +180,4 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	void cancelInstance(String theInstanceId);
-
 }

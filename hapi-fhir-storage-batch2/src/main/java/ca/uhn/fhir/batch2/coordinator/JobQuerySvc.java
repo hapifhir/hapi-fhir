@@ -107,4 +107,8 @@ class JobQuerySvc {
 			}
 		}
 	}
+
+    public List<JobInstance> getIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
+		return myJobPersistence.fetchIncompleteInstancesByJobDefinitionId(theJobDefinitionId);
+    }
 }

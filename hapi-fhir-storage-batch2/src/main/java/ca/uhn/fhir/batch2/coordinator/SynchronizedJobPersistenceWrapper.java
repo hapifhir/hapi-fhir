@@ -76,6 +76,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
+		return myWrap.fetchIncompleteInstancesByJobDefinitionId(theJobDefinitionId);
+	}
+
+	@Override
 	public synchronized void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
 		myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theChunkId, theErrorMessage);
 	}

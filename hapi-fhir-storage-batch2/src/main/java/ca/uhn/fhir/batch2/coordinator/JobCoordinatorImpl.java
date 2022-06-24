@@ -114,6 +114,11 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	public List<JobInstance> getIncompleteInstances(String theJobDefinitionId) {
+		return myJobQuerySvc.getIncompleteInstancesByJobDefinitionId(theJobDefinitionId);
+	}
+
+	@Override
 	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
 		myJobPersistence.cancelInstance(theInstanceId);
 	}
