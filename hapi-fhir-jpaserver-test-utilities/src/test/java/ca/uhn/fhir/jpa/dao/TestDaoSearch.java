@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.method.SortParameter;
@@ -17,6 +18,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -45,6 +47,9 @@ public class TestDaoSearch {
 			return new TestDaoSearch(theFhirContext, theDaoRegistry, theMatchUrlService);
 		}
 	}
+
+	@Autowired
+	private IFulltextSearchSvc myFulltextSearchSvc;
 
 	final MatchUrlService myMatchUrlService;
 	final DaoRegistry myDaoRegistry;
@@ -109,6 +114,25 @@ public class TestDaoSearch {
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 		return result.getAllResources();
 	}
+
+
+	/**
+	 * Search for resources in the first query, instead of searching for IDs first
+	 */
+	@Transactional
+	public List<IBaseResource> searchForFastResources(String theQueryUrl) {
+		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
+
+		SearchParameterMap map = search.getSearchParameterMap();
+		map.setLoadSynchronous(true);
+		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		if (sort != null) {
+			map.setSort(sort);
+		}
+
+		return myFulltextSearchSvc.searchForResources(search.getResourceName(), map);
+	}
+
 
 	public List<String>  searchForIds(String theQueryUrl) {
 		// fake out the server url parsing

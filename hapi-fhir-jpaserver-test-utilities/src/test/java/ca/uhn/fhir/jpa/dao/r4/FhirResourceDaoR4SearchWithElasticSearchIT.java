@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -186,6 +187,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@RegisterExtension
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
+
+	@Autowired
+	private IFulltextSearchSvc myIFulltextSearchSvc;
 
 
 	@BeforeEach
@@ -914,20 +918,19 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@Test
 		public void simpleTokenSkipsSql() {
-
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
 
-			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
+			List<IBaseResource> result = myTestDaoSearch.searchForFastResources("Observation?code=theCode");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertThat(ids, hasSize(1));
-			assertThat(ids, contains(id.getIdPart()));
+			assertThat(result, hasSize(1));
+			assertEquals( ((Observation) result.get(0)).getId(), id.getIdPart() );
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-			// fixme Juan - how can we test that we only make one call to Elastic here?
-			//assertEquals(1, myElasticsearchQueryCount);
 
+			assertEquals(1, myIFulltextSearchSvc.getSearchCount());
 		}
+
 
 		@Test
 		public void sortStillRequiresSql() {

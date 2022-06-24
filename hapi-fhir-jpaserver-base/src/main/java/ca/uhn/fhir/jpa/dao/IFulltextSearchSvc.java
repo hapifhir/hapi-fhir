@@ -97,4 +97,13 @@ public interface IFulltextSearchSvc {
 	long count(String theResourceName, SearchParameterMap theParams);
 
 	List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams);
+
+	boolean supportsAllOf(SearchParameterMap theParams);
+
+	/**
+	 * Required for testing
+	 */
+	public int getSearchCount();
+	public void resetSearchCount();
+
 }

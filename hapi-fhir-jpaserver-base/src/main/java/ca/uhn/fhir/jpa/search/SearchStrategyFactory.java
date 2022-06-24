@@ -41,9 +41,7 @@ public class SearchStrategyFactory {
 			myFulltextSearchSvc != null &&
 			myDaoConfig.isStoreResourceInLuceneIndex() &&
 			myDaoConfig.isAdvancedLuceneIndexing() &&
-			// fixme - we need "supportsAllOf(theResourceType, theParams)" for this.
-			myFulltextSearchSvc.supportsSomeOf(theParams);
-		// make sure all params are supported
+			myFulltextSearchSvc.supportsAllOf(theParams);
 	}
 
 	public ISearchStrategy makeDirectStrategy(String theSearchUUID, String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {

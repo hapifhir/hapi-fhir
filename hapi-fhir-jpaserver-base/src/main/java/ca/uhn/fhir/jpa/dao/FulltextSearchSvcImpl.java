@@ -80,6 +80,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+
+	public static final int RSRC_SEARCH_LIMIT_DEFAULT = 50;
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
@@ -99,8 +102,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	ModelConfig myModelConfig;
 
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
-
 	private Boolean ourDisabled;
+	private int mySearchCount = 0;
 
 	/**
 	 * Constructor
@@ -143,7 +146,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			// perform an offset search instead of a scroll one, which doesn't allow for offset
 			List<Long> queryFetchResult = getSearchQueryOptionsStep(
-				theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
+					theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 			return SearchQueryExecutors.from(queryFetchResult);
@@ -168,7 +171,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-
+		mySearchCount++;
 		return getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
@@ -178,11 +181,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					f.documentReference())
 			)
 			.where(
-				f -> buildWhereClause(theResourceType, theParams, theReferencingPid, f)
+				f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid)
 			);
 	}
 
-	private PredicateFinalStep buildWhereClause(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid, SearchPredicateFactory f) {
+	private PredicateFinalStep buildWhereClause(SearchPredicateFactory f, String theResourceType,
+															  SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		return f.bool(b -> {
 			ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
 
@@ -295,6 +299,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
 
+		mySearchCount++;
 		return autocomplete.search(theOptions);
 	}
 
@@ -320,6 +325,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
+		mySearchCount++;
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
@@ -331,6 +337,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return Collections.emptyList();
 		}
 		SearchSession session = getSearchSession();
+		mySearchCount++;
 		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> buildResourceSelectClause(f)
@@ -368,13 +375,33 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
+		int offset = 0; int limit = RSRC_SEARCH_LIMIT_DEFAULT;
+		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
+			offset = theParams.getOffset();
+			limit = theParams.getCount();
+			// indicate param was already processed, otherwise queries DB to process it
+			theParams.setOffset(null);
+		}
+
+		mySearchCount++;
 		List<ExtendedLuceneResourceProjection> extendedLuceneResourceProjections =
 			getSearchSession().search(ResourceTable.class)
-				.select(f -> buildResourceSelectClause(f))
-				.where(f -> buildWhereClause(theResourceType, theParams, null, f))
-				// fixme
-				.fetchHits(0, 50);
+				.select(this::buildResourceSelectClause)
+				.where(f -> buildWhereClause(f, theResourceType, theParams, null))
+				.fetchHits(offset, limit);
 
 		return resourceProjectionsToResources(extendedLuceneResourceProjections);
 	}
+
+	@Override
+	public boolean supportsAllOf(SearchParameterMap theParams) {
+		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
+
+	@Override
+	public int getSearchCount() { return mySearchCount; }
+
+	@Override
+	public void resetSearchCount() { mySearchCount = 0; }
+
 }
