@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term.freetext;
+package ca.uhn.fhir.jpa.term.hsearch;
 
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
