@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3729
+title: "The subject-list type was still named patient-list for a CQL measure."
