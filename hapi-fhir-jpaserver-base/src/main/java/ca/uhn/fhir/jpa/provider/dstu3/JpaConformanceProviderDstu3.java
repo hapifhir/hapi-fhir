@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -45,7 +46,10 @@ import org.hl7.fhir.dstu3.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -156,6 +160,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				}
 
+				updateIncludesList(nextResource, searchParams);
+
 			}
 		}
 
@@ -206,6 +212,24 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	protected boolean searchParamEnabled(String theSearchParam) {
 		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+	}
+
+	private void updateIncludesList(CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+		String resourceName = theResource.getType();
+		if (theResource.getSearchInclude().isEmpty()) {
+			List<String> includes = theSearchParams
+				.values()
+				.stream()
+				.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.map(t -> resourceName + ":" + t.getName())
+				.sorted()
+				.collect(Collectors.toList());
+			theResource.addSearchInclude("*");
+			for (String nextInclude : includes) {
+				theResource.addSearchInclude(nextInclude);
+			}
+		}
 	}
 
 	public boolean isIncludeResourceCounts() {
