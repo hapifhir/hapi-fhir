@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.search.elastic;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.search.HSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
@@ -83,7 +83,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		// the below properties are used for ElasticSearch integration
 		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
 		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER),
-			HSearchAnalysisConfigurers.HapiElasticsearchAnalysisConfigurer.class.getName());
+			HapiHSearchAnalysisConfigurers.HapiElasticsearchAnalysisConfigurer.class.getName());
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myHosts);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
 

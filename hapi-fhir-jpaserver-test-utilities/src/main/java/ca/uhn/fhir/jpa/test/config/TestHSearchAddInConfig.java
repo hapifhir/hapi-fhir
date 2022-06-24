@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.test.config;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.HSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
@@ -85,7 +85,7 @@ public class TestHSearchAddInConfig {
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-				HSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), dirPath);
 			ourLog.info("Using lucene root dir: {}", dirPath);
@@ -119,7 +119,7 @@ public class TestHSearchAddInConfig {
 			Map<String, String> luceneHeapProperties = new HashMap<>();
 			luceneHeapProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
-				HSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");

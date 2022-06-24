@@ -25,7 +25,7 @@ import static ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder.LOWERCA
  * simultaneously, and otherwise is very easy to miss the second
  */
 @Component
-public class HSearchAnalysisConfigurers {
+public class HapiHSearchAnalysisConfigurers {
 
 	/**
 	 * Factory for defining the analysers.
