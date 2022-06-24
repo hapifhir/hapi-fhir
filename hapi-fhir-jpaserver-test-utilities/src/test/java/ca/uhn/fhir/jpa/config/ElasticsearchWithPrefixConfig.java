@@ -47,7 +47,7 @@ public class ElasticsearchWithPrefixConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setElasticSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
+		daoConfig.setHSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
 		return daoConfig;
 	}
 

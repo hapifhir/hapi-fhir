@@ -59,9 +59,9 @@ public class DaoConfig {
 	 */
 	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
-	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 * Default value for {@link #myTranslationCachesExpireAfterWriteInMinutes}: 60 minutes
 	 *
-	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 * @see #myTranslationCachesExpireAfterWriteInMinutes
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
@@ -267,7 +267,7 @@ public class DaoConfig {
 	/**
 	 * @since 5.6.0
 	 */
-	private String myElasicSearchIndexPrefix;
+	private String myHSearchIndexPrefix;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
@@ -474,7 +474,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
-	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * indexing Observation resources. This operation involves creating a special set of tables in hsearch for
 	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
 	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
 	 *
@@ -486,7 +486,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
-	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * indexing Observation resources. This operation involves creating a special set of tables in hsearch for
 	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
 	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
 	 *
@@ -2716,23 +2716,23 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * Sets a prefix for any indexes created when interacting with hsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
 	 * @since 5.6.0
 	 */
-	public String getElasticSearchIndexPrefix() {
-		return myElasicSearchIndexPrefix;
+	public String getHSearchIndexPrefix() {
+		return myHSearchIndexPrefix;
 	}
 
 	/**
-	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * Sets a prefix for any indexes created when interacting with hsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
 	 * @since 5.6.0
 	 */
-	public void setElasticSearchIndexPrefix(String thePrefix) {
-		myElasicSearchIndexPrefix = thePrefix;
+	public void setHSearchIndexPrefix(String thePrefix) {
+		myHSearchIndexPrefix = thePrefix;
 	}
 
 	/**
