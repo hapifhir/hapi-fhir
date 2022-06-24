@@ -34,10 +34,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class JobDefinitionRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinitionRegistry.class);
@@ -93,5 +95,15 @@ public class JobDefinitionRegistry {
 	public void setJobDefinition(JobInstance theInstance) {
 		JobDefinition<?> jobDefinition = getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
 		theInstance.setJobDefinition(jobDefinition);
+	}
+
+	/**
+	 * @return a list of Job Definition Ids in alphabetical order
+	 */
+	public List<String> getJobDefinitionIds() {
+		return myJobs.keySet()
+			.stream()
+			.sorted()
+			.collect(Collectors.toList());
 	}
 }
