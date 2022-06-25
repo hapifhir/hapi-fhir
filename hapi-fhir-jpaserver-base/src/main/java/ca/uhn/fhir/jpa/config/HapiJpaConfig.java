@@ -27,6 +27,16 @@ import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelper;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperNumber;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperProviderImpl;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperQuantity;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperReference;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperToken;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperUri;
+import ca.uhn.fhir.jpa.dao.search.IHSearchParamHelperProvider;
+import ca.uhn.fhir.jpa.dao.search.IPrefixedNumberPredicateHelperImpl;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
@@ -37,6 +47,7 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -67,6 +78,30 @@ public class HapiJpaConfig {
 	@Bean
 	public IHSearchSortHelper extendedFulltextSortHelper() {
 		return new HSearchSortHelperImpl(mySearchParamRegistry);
+	}
+
+	@Autowired
+	private ModelConfig myModelConfig;
+
+	@Bean
+	public IPrefixedNumberPredicateHelperImpl prefixedNumberPredicateHelper() {
+		return new IPrefixedNumberPredicateHelperImpl();
+	}
+
+	@Bean
+	public IHSearchParamHelperProvider hSearchParamHelperProvider() {
+
+		IPrefixedNumberPredicateHelperImpl prefixedNumberPredicateHelper = prefixedNumberPredicateHelper();
+
+		// register specific parameter helpers in parent map
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperToken() ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperNumber( prefixedNumberPredicateHelper ) ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperUri() ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperReference() ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperQuantity( prefixedNumberPredicateHelper, myModelConfig ) ) ;
+//		HSearchParamHelper.registerChildHelper( new HSearchParamHelperDate() ) ;
+
+		return new HSearchParamHelperProviderImpl();
 	}
 
 	@Bean
