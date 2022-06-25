@@ -49,5 +49,9 @@ public interface IMdmLinkSvc {
 	 */
 	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext);
 
+	/**
+	 * Delete all link records whose source or target points to the provided pids.
+	 * @param thePersistentIds
+	 */
 	void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> thePersistentIds);
 }

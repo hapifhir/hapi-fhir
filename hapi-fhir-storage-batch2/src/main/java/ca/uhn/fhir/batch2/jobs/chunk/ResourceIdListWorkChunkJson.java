@@ -69,7 +69,7 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	}
 
 	public int size() {
-		return myTypedPids.size();
+		return getTypedPids().size();
 	}
 
 	public void addTypedPid(String theResourceType, Long thePid) {

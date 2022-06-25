@@ -20,7 +20,7 @@ public class HomogeneousResourcePidList extends BaseResourcePidList {
 
 	@Override
 	public String getResourceType(int i) {
-			return myResourceType;
+			return getResourceType();
 	}
 
 	public String getResourceType() {

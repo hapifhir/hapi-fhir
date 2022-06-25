@@ -71,7 +71,7 @@ public class GoldenResourceSearchSvcImpl implements IGoldenResourceSearchSvc {
 		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		DateRangeParam chunkDateRange = DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
 		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize);
+		searchParamMap.setCount(thePageSize); // request this many pids
 		searchParamMap.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
