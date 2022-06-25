@@ -53,11 +53,22 @@ public interface IJobCoordinator {
 	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
 	/**
-	 * Fetch job instances
+	 * Fetch all job instances for this jobDefinitionId
+	 *
+	 * @param theJobDefinitionId
+	 * @param theCount
+	 * @param theStart
+	 * @return
+	 */
+	List<JobInstance> getInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	/**
+	 * Fetch recent job instances
 	 */
 	List<JobInstance> getRecentInstances(int theCount, int theStart);
 
 	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
 	List<JobInstance> getIncompleteInstances(String theJobDefinitionId);
+
 }

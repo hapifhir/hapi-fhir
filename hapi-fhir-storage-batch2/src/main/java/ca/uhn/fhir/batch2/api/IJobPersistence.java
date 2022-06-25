@@ -91,6 +91,15 @@ public interface IJobPersistence {
 	List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId);
 
 	/**
+	 * Fetch all job instances for a given job definition id
+	 * @param theJobDefinitionId
+	 * @param theCount
+	 * @param theStart
+	 * @return
+	 */
+	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)
 	 *
 	 * @param theChunkId The chunk ID

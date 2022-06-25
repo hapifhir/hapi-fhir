@@ -109,6 +109,11 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
+	public List<JobInstance> getInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return myJobQuerySvc.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
+	}
+
+	@Override
 	public List<JobInstance> getRecentInstances(int theCount, int theStart) {
 		return myJobQuerySvc.fetchRecentInstances(theCount, theStart);
 	}

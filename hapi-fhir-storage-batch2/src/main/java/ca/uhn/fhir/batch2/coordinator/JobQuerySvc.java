@@ -62,9 +62,17 @@ class JobQuerySvc {
 	}
 
 	public List<JobInstance> fetchRecentInstances(int theCount, int theStart) {
-		return myJobPersistence.fetchRecentInstances(theCount, theStart)
-			.stream().map(this::massageInstanceForUserAccess)
+		return massageInstancesForUserAccess(myJobPersistence.fetchRecentInstances(theCount, theStart));
+	}
+
+	private List<JobInstance> massageInstancesForUserAccess(List<JobInstance> theFetchRecentInstances) {
+		return theFetchRecentInstances.stream()
+			.map(this::massageInstanceForUserAccess)
 			.collect(Collectors.toList());
+	}
+
+	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return massageInstancesForUserAccess(myJobPersistence.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart));
 	}
 
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
@@ -111,4 +119,5 @@ class JobQuerySvc {
     public List<JobInstance> getIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
 		return myJobPersistence.fetchIncompleteInstancesByJobDefinitionId(theJobDefinitionId);
     }
+
 }

@@ -113,7 +113,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
-		return myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, StatusEnum.getIncompleteStatuses());
+		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, StatusEnum.getIncompleteStatuses()));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
+	}
+
+	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {
+		return theInstancesByJobDefinitionId.stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
 	@Override

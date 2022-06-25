@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -46,7 +46,10 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	void updateInstanceCurrentGatedStepId(@Param("id") String theInstanceId, @Param("currentGatedStepId") String theCurrentGatedStepId);
 
 	// FIXME KHS test
-	@Query("SELECT e FROM Batch2JobInstanceEntity WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
-	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses);
+	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
+	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses);
 
+	// FIXME KHS test
+	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
+	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(@Param("jobDefinitionId") String theJobDefinitionId, PageRequest thePageRequest);
 }
