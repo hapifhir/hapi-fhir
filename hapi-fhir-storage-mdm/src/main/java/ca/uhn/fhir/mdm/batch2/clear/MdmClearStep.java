@@ -70,7 +70,8 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
-		RequestDetails requestDetails = new SystemRequestDetails();
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(theStepExecutionDetails.getParameters().getRequestPartitionId());
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, buildJob(requestDetails, transactionDetails, theStepExecutionDetails));
 
