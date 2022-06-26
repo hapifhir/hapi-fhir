@@ -33,13 +33,14 @@ import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperNumber;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperProviderImpl;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperQuantity;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperReference;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperString;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperToken;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperUri;
+import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
 import ca.uhn.fhir.jpa.dao.search.IHSearchParamHelperProvider;
+import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.IPrefixedNumberPredicateHelperImpl;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
-import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -47,8 +48,6 @@ import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
@@ -57,17 +56,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-
-import java.util.List;
-import java.util.Map;
-
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
 
 @Configuration
 @Import({JpaConfig.class})
@@ -101,6 +89,7 @@ public class HapiJpaConfig {
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperReference() ) ;
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperQuantity( prefixedNumberPredicateHelper, myModelConfig ) ) ;
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperDate() ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperString() ) ;
 
 		return new HSearchParamHelperProviderImpl();
 	}

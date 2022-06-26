@@ -5,11 +5,11 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.StringUtil;
-import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.search.engine.search.common.BooleanOperator;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -33,23 +33,131 @@ public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 	private static final String LOWER_PATH = String.join(".", SEARCH_PARAM_ROOT, "*", "string", IDX_STRING_LOWER );
 
 	private static final List<String> mySearchProperties = List.of( NORM_PATH, EXACT_PATH, TEXT_PATH, LOWER_PATH );
+	private static final List<String> mySkipParamNames = List.of( "myContentText", "myNarrativeText" );
 
+
+	@Override
+	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool,
+				List<IQueryParameterType> theOrTerms, String theParamName, HSearchParamHelper<?> theParamHelper) {
+
+		if (theOrTerms.isEmpty()) { return; }
+
+		StringParam stringParam = (StringParam) theOrTerms.iterator().next();
+		if ( stringParam.getQueryParameterQualifier() != null &&
+				stringParam.getQueryParameterQualifier().equals(Constants.PARAMQUALIFIER_TOKEN_TEXT) &&
+				mySkipParamNames.contains(theParamName)) {
+			return;
+		}
+
+		Set<String> terms = extractOrStringParams(theOrTerms);
+		if (terms.isEmpty()) {
+			ourLog.warn("No Terms found in query parameter {}", theParamName);
+			return;
+		}
+
+		PredicateFinalStep predicates = null;
+
+		if (stringParam.getQueryParameterQualifier() == null) {
+			ourLog.debug("addStringUnmodifiedSearch {} {}", theParamName, terms);
+			predicates = getPredicatesNoQualifier(theFactory, terms);
+
+		} else if ( stringParam.getQueryParameterQualifier().equals(Constants.PARAMQUALIFIER_TOKEN_TEXT) ) {
+			ourLog.debug("addStringTextSearch {}, {}", theParamName, terms);
+			predicates = getPredicatesForTextQualifier(theFactory, terms);
+
+		} else if ( stringParam.getQueryParameterQualifier().equals(Constants.PARAMQUALIFIER_STRING_EXACT) ) {
+			ourLog.debug("addStringExactSearch {} {}", theParamName, terms);
+			predicates = getPredicatesForExactQualifier(theFactory, terms);
+
+		} else if ( stringParam.getQueryParameterQualifier().equals(Constants.PARAMQUALIFIER_STRING_CONTAINS) ) {
+			ourLog.debug("addStringContainsSearch {} {}", theParamName, terms);
+			predicates = getPredicatesForContainsQualifier(theFactory, terms);
+		}
+
+		theBool.must(predicates);
+	}
+
+
+	private PredicateFinalStep getPredicatesForContainsQualifier(SearchPredicateFactory theFactory, Set<String> terms) {
+		List<? extends PredicateFinalStep> orTerms = terms.stream()
+			// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
+			.map(this::normalize)
+			.map(s -> theFactory
+				.wildcard().field(NORM_PATH)
+				.matching("*" + s + "*"))
+			.collect(Collectors.toList());
+		return orPredicateOrSingle(orTerms, theFactory);
+	}
+
+
+	private PredicateFinalStep getPredicatesForExactQualifier(SearchPredicateFactory theFactory, Set<String> terms) {
+		List<? extends PredicateFinalStep> orTerms = terms.stream()
+			.map(s -> theFactory.match().field(EXACT_PATH).matching(s))
+			.collect(Collectors.toList());
+		return orPredicateOrSingle(orTerms, theFactory);
+	}
+
+
+	private PredicateFinalStep getPredicatesForTextQualifier(SearchPredicateFactory theFactory, Set<String> terms) {
+		String query = terms.stream() .map(s -> "( " + s + " )") .collect(Collectors.joining(" | "));
+		return theFactory.simpleQueryString().field(TEXT_PATH).matching(query);
+	}
+
+
+	private PredicateFinalStep getPredicatesNoQualifier(SearchPredicateFactory theFactory, Set<String> terms) {
+		List<? extends PredicateFinalStep> orTerms = terms.stream()
+			.map( s -> theFactory.wildcard() .field(NORM_PATH)
+				// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+				.matching(normalize(s) + "*"))
+			.collect(Collectors.toList());
+		return  orPredicateOrSingle(orTerms, theFactory);
+	}
+
+
+	private Set<String> extractOrStringParams(List<IQueryParameterType> theOrTerms) {
+		return theOrTerms.stream()
+			.map( StringParam.class::cast )
+			.map( p -> StringUtils.defaultString(p.getValue()) )
+			.map( String::trim )
+			.collect(Collectors.toSet());
+	}
+
+
+	/**
+	 * Normalize the string to match our standardAnalyzer.
+	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 *
+	 * @param theString the raw string
+	 * @return a case and accent normalized version of the input
+	 */
+	@Nonnull
+	private String normalize(String theString) {
+		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
+	}
+
+	/**
+	 * Provide an OR wrapper around a list of predicates.
+	 * Returns the sole predicate if it solo, or wrap as a bool/should for OR semantics.
+	 *
+	 * @param theOrList a list containing at least 1 predicate
+	 * @return a predicate providing or-sematics over the list.
+	 */
+	private PredicateFinalStep orPredicateOrSingle(List<? extends PredicateFinalStep> theOrList, SearchPredicateFactory theFactory) {
+		if (theOrList.size() == 1) {
+			return theOrList.get(0);
+		}
+
+		PredicateFinalStep finalClause;
+		BooleanPredicateClausesStep<?> orClause = theFactory.bool();
+		theOrList.forEach(orClause::should);
+		return orClause;
+	}
 
 
 	@Override
 	public <P extends IQueryParameterType> Optional<Object> getParamPropertyValue(P theParam, String thePropName) {
-		StringParam stringParam = (StringParam) theParam;
-
-//		switch (thePropName) {
-//			case IDX_STRING_NORMALIZED:
-//			case IDX_STRING_EXACT:
-//			case IDX_STRING_TEXT:
-//			case IDX_STRING_LOWER:
-//		}
-
 		return Optional.empty();
 	}
-
 
 	@Override
 	protected RestSearchParameterTypeEnum getParamEnumType() { return RestSearchParameterTypeEnum.STRING; }
@@ -59,105 +167,6 @@ public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 
 	@Override
 	public boolean isNested() { return NORM_PATH.startsWith(NESTED_SEARCH_PARAM_ROOT); }
-
-
-//	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
-//		if (CollectionUtils.isEmpty(stringAndOrTerms)) {
-//			return;
-//		}
-//		String fieldName;
-//		switch (theSearchParamName) {
-//			// _content and _text were here first, and don't obey our mapping.
-//			// Leave them as-is for backwards compatibility.
-//			case Constants.PARAM_CONTENT:
-//				fieldName = "myContentText";
-//				break;
-//			case Constants.PARAM_TEXT:
-//				fieldName = "myNarrativeText";
-//				break;
-//			default:
-//				fieldName = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_TEXT;
-//				break;
-//		}
-//
-//		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
-//			Set<String> terms = extractOrStringParams(nextAnd);
-//			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
-//			if (!terms.isEmpty()) {
-//				String query = terms.stream()
-//					.map(s -> "( " + s + " )")
-//					.collect(Collectors.joining(" | "));
-//				myRootClause.must(myPredicateFactory
-//					.simpleQueryString()
-//					.field(fieldName)
-//					.matching(query)
-//					.defaultOperator(BooleanOperator.AND)); // term value may contain multiple tokens.  Require all of them to be present.
-//			} else {
-//				ourLog.warn("No Terms found in query parameter {}", nextAnd);
-//			}
-//		}
-//	}
-//
-//	public void addStringExactSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-//		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_EXACT;
-//
-//		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
-//			Set<String> terms = extractOrStringParams(nextAnd);
-//			ourLog.debug("addStringExactSearch {} {}", theSearchParamName, terms);
-//			List<? extends PredicateFinalStep> orTerms = terms.stream()
-//				.map(s -> myPredicateFactory.match().field(fieldPath).matching(s))
-//				.collect(Collectors.toList());
-//
-//			myRootClause.must(orPredicateOrSingle(orTerms));
-//		}
-//	}
-//
-//	public void addStringContainsSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-//		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
-//		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
-//			Set<String> terms = extractOrStringParams(nextAnd);
-//			ourLog.debug("addStringContainsSearch {} {}", theSearchParamName, terms);
-//			List<? extends PredicateFinalStep> orTerms = terms.stream()
-//				// wildcard is a term-level query, so queries aren't analyzed.  Do our own normalization first.
-//				.map(s-> normalize(s))
-//				.map(s -> myPredicateFactory
-//					.wildcard().field(fieldPath)
-//					.matching("*" + s + "*"))
-//				.collect(Collectors.toList());
-//
-//			myRootClause.must(orPredicateOrSingle(orTerms));
-//		}
-//	}
-//
-//	/**
-//	 * Normalize the string to match our standardAnalyzer.
-//	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
-//	 *
-//	 * @param theString the raw string
-//	 * @return a case and accent normalized version of the input
-//	 */
-//	@Nonnull
-//	private String normalize(String theString) {
-//		return StringUtil.normalizeStringForSearchIndexing(theString).toLowerCase(Locale.ROOT);
-//	}
-//
-//	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-//		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
-//		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
-//			Set<String> terms = extractOrStringParams(nextAnd);
-//			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
-//			List<? extends PredicateFinalStep> orTerms = terms.stream()
-//				.map(s ->
-//					myPredicateFactory.wildcard()
-//						.field(fieldPath)
-//						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
-//						.matching(normalize(s) + "*"))
-//				.collect(Collectors.toList());
-//
-//			myRootClause.must(orPredicateOrSingle(orTerms));
-//		}
-//	}
-
 
 
 }

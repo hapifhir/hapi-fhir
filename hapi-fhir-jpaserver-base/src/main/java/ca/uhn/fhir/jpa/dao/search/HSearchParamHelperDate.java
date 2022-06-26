@@ -64,12 +64,21 @@ public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
 
 
 	@Override
+	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool, List<IQueryParameterType> theOrTerms, String theParamName, HSearchParamHelper<?> theParamHelper) {
+		if (theOrTerms.size() > 1) {
+			throw new IllegalArgumentException(Msg.code(2032) +
+				"OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
+		}
+
+		theParamHelper.addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
+	}
+
+
+	@Override
 	public <P extends IQueryParameterType> Optional<Object> getParamPropertyValue(P theParam, String thePropName) {
 		return Optional.empty();
 	}
 
-
-	//	fixme jm: refactor following two ugly methods
 
 	private PredicateFinalStep generateDateOrdinalSearchTerms(DateParam theDateParam, SearchPredicateFactory theFactory,
 					String theLowerOrdPathForParam, String theUpperOrdPathForParam) {
@@ -119,6 +128,7 @@ public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
 		throw new IllegalArgumentException(Msg.code(2025) + "Date search param does not support prefix of type: " + prefix);
 	}
 
+
 	private PredicateFinalStep generateDateInstantSearchTerms(DateParam theDateParam, SearchPredicateFactory theFactory,
 					String theLowerPathForParam, String theUpperPathForParam) {
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
@@ -161,8 +171,6 @@ public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
 
 		throw new IllegalArgumentException(Msg.code(2026) + "Date search param does not support prefix of type: " + prefix);
 	}
-
-
 
 
 	@Override

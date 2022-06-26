@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Component
 public abstract class HSearchParamHelper<T extends IQueryParameterType> {
+	protected final Logger ourLog = LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -66,5 +69,24 @@ public abstract class HSearchParamHelper<T extends IQueryParameterType> {
 		}
 	}
 
+	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool,
+					List<IQueryParameterType> theOrTerms, String theParamName, HSearchParamHelper<?> theParamHelper) {
 
+		if (theOrTerms.size() == 1) {
+			theParamHelper.addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
+			return;
+		}
+
+		// multiple or predicates must be in must group with multiple should(s) with a minimumShouldMatchNumber(1)
+		theBool.must(theFactory.bool(b2 -> {
+			b2.minimumShouldMatchNumber(1);
+
+			for (IQueryParameterType orTerm : theOrTerms) {
+				var paramBool = theFactory.bool();
+				theParamHelper.addOrClauses(theFactory, paramBool, theParamName, orTerm);
+				b2.should(paramBool);
+			}
+		}));
+
+	}
 }
