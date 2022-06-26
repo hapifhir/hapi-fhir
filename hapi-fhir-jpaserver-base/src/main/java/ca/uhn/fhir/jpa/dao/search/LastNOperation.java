@@ -42,13 +42,15 @@ public class LastNOperation {
 	private final ModelConfig myModelConfig;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final ExtendedLuceneSearchBuilder myExtendedLuceneSearchBuilder = new ExtendedLuceneSearchBuilder();
+	private final IHSearchParamHelperProvider myHSearchParamHelperProvider;
 
 	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, ModelConfig theModelConfig,
-			ISearchParamRegistry theSearchParamRegistry) {
+								 ISearchParamRegistry theSearchParamRegistry, IHSearchParamHelperProvider theHSearchParamHelperProvider) {
 		mySession = theSession;
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
 		mySearchParamRegistry = theSearchParamRegistry;
+		myHSearchParamHelperProvider = theHSearchParamHelperProvider;
 	}
 
 	public List<Long> executeLastN(SearchParameterMap theParams, Integer theMaximumResults) {
@@ -61,8 +63,9 @@ public class LastNOperation {
 			.where(f -> f.bool(b -> {
 				// Must match observation type
 				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
-				myExtendedLuceneSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
+//				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
+				HSearchClauseProvider clauseProvider = new HSearchClauseProvider(myHSearchParamHelperProvider, f, b);
+				myExtendedLuceneSearchBuilder.addAndConsumeAdvancedQueryClauses(clauseProvider, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
 			}))
 			.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
 			.fetch(0);

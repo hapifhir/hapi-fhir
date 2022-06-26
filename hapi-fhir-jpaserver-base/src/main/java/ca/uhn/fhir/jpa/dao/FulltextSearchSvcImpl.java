@@ -28,6 +28,8 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.HSearchClauseProvider;
+import ca.uhn.fhir.jpa.dao.search.IHSearchParamHelperProvider;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
@@ -95,6 +97,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	ISearchParamExtractor mySearchParamExtractor;
 	@Autowired
 	IIdHelperService myIdHelperService;
+
+	@Autowired
+	private IHSearchParamHelperProvider myHSearchParamHelperProvider;
 
 	@Autowired
 	ModelConfig myModelConfig;
@@ -182,7 +187,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
-					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
+					HSearchClauseProvider clauseProvider = new HSearchClauseProvider(myHSearchParamHelperProvider, f, b);
 
 					/*
 					 * Handle _content parameter (resource body content)
@@ -191,8 +196,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 * We do not want the HAPI-FHIR dao's to process the
 					 * _content parameter, so we remove it from the map here
 					 */
-					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+					// fixme jm: how is this different than rest of params? Think not
+//					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+//					clauseProvider.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
 
 					/*
 					 * Handle _text parameter (resource narrative content)
@@ -201,22 +207,23 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					 * We do not want the HAPI-FHIR dao's to process the
 					 * _text parameter, so we remove it from the map here
 					 */
-					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
+					// fixme jm: how is this different than rest of params? Think not
+//					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+//					clauseProvider.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
 					}
 
 					if (isNotBlank(theResourceType)) {
-						builder.addResourceTypeClause(theResourceType);
+						clauseProvider.addResourceTypeClause(theResourceType);
 					}
 
 					/*
 					 * Handle other supported parameters
 					 */
 					if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
-						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
+						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(clauseProvider, theResourceType, theParams, mySearchParamRegistry);
 					}
 
 					//DROP EARLY HERE IF BOOL IS EMPTY?
@@ -329,7 +336,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
-		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
+		List<Long> pidList = new LastNOperation(
+				getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry, myHSearchParamHelperProvider)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
 	}

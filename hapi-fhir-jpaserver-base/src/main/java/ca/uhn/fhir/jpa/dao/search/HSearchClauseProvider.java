@@ -1,17 +1,13 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.DateParam;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
-import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Optional;
 
 public class HSearchClauseProvider {
 
@@ -23,47 +19,62 @@ public class HSearchClauseProvider {
 
 
 	public HSearchClauseProvider(IHSearchParamHelperProvider theHSearchParamHelperProvider,
-			SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theRootBoolean) {
+										  SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theRootBoolean) {
 		myFactory = theFactory;
 		myRootBool = theRootBoolean;
 		myHSearchParamHelperProvider = theHSearchParamHelperProvider;
 	}
 
 
-	public PredicateFinalStep getAndPlusOrClauses(String theResourceTypeName, 
-			String theParamName, List<List<IQueryParameterType>> theAndOrTerms) {
+	public void addAndConsumeAndPlusOrClauses(String theResourceTypeName,
+															String theParamName, List<List<IQueryParameterType>> theAndOrTerms) {
 
 		HSearchParamHelper<?> paramHelper = getParamHelper(theResourceTypeName, theParamName);
 		boolean isPropertyNested = paramHelper.isNested();
 
 		BooleanPredicateClausesStep<?> topBool = myFactory.bool();
-		// need an extra bool level for nested properties (embedding it under topBool before leaving method)
-		BooleanPredicateClausesStep<?> activeBool = isPropertyNested ? myFactory.bool()  : topBool;
 
 		for (List<IQueryParameterType> orTerms : theAndOrTerms) {
-			if (orTerms.size() == 1) {
-				paramHelper.addOrClauses(myFactory, activeBool, theParamName, orTerms.get(0));
-				continue;
+			// need an extra bool level for nested properties (embedding it under topBool before leaving loop)
+			BooleanPredicateClausesStep<?> activeBool = isPropertyNested ? myFactory.bool()  : topBool;
+
+			processOrTerms(orTerms, activeBool, theParamName, paramHelper);
+
+			if ( isPropertyNested ) {
+				topBool.must(myFactory.nested().objectField(NESTED_PREFIX + theParamName).nest(activeBool));
 			}
-
-			// multiple or predicates must be in must group with multiple should(s) with a minimumShouldMatchNumber(1)
-			activeBool.must(myFactory.bool(b2 -> {
-				b2.minimumShouldMatchNumber(1);
-
-				for (IQueryParameterType orTerm : orTerms) {
-					var paramBool = myFactory.bool();
-					paramHelper.addOrClauses(myFactory, paramBool, theParamName, orTerm);
-					b2.should(paramBool);
-				}
-			}));
 		}
 
-		if ( isPropertyNested ) {
-			topBool.must(myFactory.nested().objectField(NESTED_PREFIX + theParamName).nest(activeBool));
-		}
-
-		return topBool;
+		myRootBool.must(topBool);
 	}
+
+
+ 	private void processOrTerms(List<IQueryParameterType> theOrTerms, BooleanPredicateClausesStep<?> theBool,
+										 String theParamName, HSearchParamHelper<?> theParamHelper) {
+
+		if (theOrTerms.size() == 1) {
+			theParamHelper.addOrClauses(myFactory, theBool, theParamName, theOrTerms.get(0));
+			return;
+		}
+
+		// comma separated list of dates(OR list) on a date param is not applicable
+		if (theOrTerms.get(0) instanceof DateParam) {
+			throw new IllegalArgumentException(Msg.code(2032) +
+				"OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
+		}
+
+		// multiple or predicates must be in must group with multiple should(s) with a minimumShouldMatchNumber(1)
+		theBool.must(myFactory.bool(b2 -> {
+			b2.minimumShouldMatchNumber(1);
+
+			for (IQueryParameterType orTerm : theOrTerms) {
+				var paramBool = myFactory.bool();
+				theParamHelper.addOrClauses(myFactory, paramBool, theParamName, orTerm);
+				b2.should(paramBool);
+			}
+		}));
+	}
+
 
 
 	/**
@@ -82,5 +93,8 @@ public class HSearchClauseProvider {
 	}
 
 
+	public void addResourceTypeClause(String theResourceType) {
+		myRootBool.must(myFactory.match().field("myResourceType").matching(theResourceType));
 
+	}
 }

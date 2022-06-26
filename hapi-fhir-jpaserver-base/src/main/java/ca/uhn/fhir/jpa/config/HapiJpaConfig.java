@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelper;
+import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperDate;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperNumber;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperProviderImpl;
 import ca.uhn.fhir.jpa.dao.search.HSearchParamHelperQuantity;
@@ -99,7 +100,7 @@ public class HapiJpaConfig {
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperUri() ) ;
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperReference() ) ;
 		HSearchParamHelper.registerChildHelper( new HSearchParamHelperQuantity( prefixedNumberPredicateHelper, myModelConfig ) ) ;
-//		HSearchParamHelper.registerChildHelper( new HSearchParamHelperDate() ) ;
+		HSearchParamHelper.registerChildHelper( new HSearchParamHelperDate() ) ;
 
 		return new HSearchParamHelperProviderImpl();
 	}

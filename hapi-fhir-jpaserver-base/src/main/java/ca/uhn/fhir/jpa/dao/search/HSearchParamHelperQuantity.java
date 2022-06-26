@@ -101,7 +101,8 @@ public class HSearchParamHelperQuantity extends HSearchParamHelper<QuantityParam
 		QuantityParam qtyParam = (QuantityParam) theParam;
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
 
-		if (propertyPaths.contains(CODE_NORM_PATH)) {
+		String codeNormParamPath = mergeParamIntoProperty(CODE_NORM_PATH, theParamName);
+		if (propertyPaths.contains(codeNormParamPath)) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty == null) {
 //				fixme jm: code
