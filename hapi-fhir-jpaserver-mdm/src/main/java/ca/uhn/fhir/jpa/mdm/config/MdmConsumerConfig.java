@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IGoldenResourceSearchSvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
@@ -30,6 +31,7 @@ import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmControllerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmEidUpdateService;
@@ -62,6 +64,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
@@ -76,7 +79,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(MdmCommonConfig.class)
+@Import({MdmCommonConfig.class, MdmBatch2Config.class})
 public class MdmConsumerConfig {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
@@ -263,4 +266,9 @@ public class MdmConsumerConfig {
 
 	@Bean
 	MdmPartitionHelper mdmPartitionHelper() {return new MdmPartitionHelper();}
+
+	@Bean
+	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
+		return new GoldenResourceSearchSvcImpl();
+	}
 }

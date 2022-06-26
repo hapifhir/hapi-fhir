@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.mdm.job;
+package ca.uhn.fhir.jpa.batch.mdm.batch.job;
 
 /*-
  * #%L
@@ -30,7 +30,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
