@@ -24,6 +24,6 @@ public class MdmBatch2Config {
 	@PostConstruct
 	public void start() {
 		JobDefinition jobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
-		myJobDefinitionRegistry.addJobDefinition(jobDefinition);
+		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(jobDefinition);
 	}
 }
