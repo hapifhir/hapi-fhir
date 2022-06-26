@@ -44,6 +44,21 @@ public class JobDefinitionRegistry {
 
 	private final Map<String, TreeMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
+	/**
+	 * Add a job definition only if it is not registered
+	 * @param theDefinition
+	 * @return true if it did not already exist and was registered
+	 * @param <PT> the job parameter type for the definition
+	 */
+	public <PT extends IModelJson> boolean addJobDefinitionIfNotRegistered(@Nonnull JobDefinition<PT> theDefinition) {
+		Optional<JobDefinition<?>> orig = getJobDefinition(theDefinition.getJobDefinitionId(), theDefinition.getJobDefinitionVersion());
+		if (orig.isPresent()) {
+			return false;
+		}
+		addJobDefinition(theDefinition);
+		return true;
+	}
+
 	public <PT extends IModelJson> void addJobDefinition(@Nonnull JobDefinition<PT> theDefinition) {
 		Validate.notNull(theDefinition);
 		String jobDefinitionId = theDefinition.getJobDefinitionId();
