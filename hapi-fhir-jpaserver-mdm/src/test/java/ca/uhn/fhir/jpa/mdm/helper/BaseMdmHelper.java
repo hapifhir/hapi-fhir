@@ -108,5 +108,4 @@ public abstract class BaseMdmHelper implements BeforeEachCallback, AfterEachCall
 	public PointcutLatch getAfterMdmLatch() {
 		return myAfterMdmLatch;
 	}
-
 }
