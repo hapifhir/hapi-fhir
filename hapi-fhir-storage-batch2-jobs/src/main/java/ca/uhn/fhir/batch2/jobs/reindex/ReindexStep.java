@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -47,9 +48,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ReindexChunkIds, VoidModel> {
+public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
@@ -63,31 +63,31 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ReindexChunkIds> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails, @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
-		ReindexChunkIds data = theStepExecutionDetails.getData();
+		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
 		return doReindex(data, theDataSink, theStepExecutionDetails.getInstanceId(), theStepExecutionDetails.getChunkId());
 	}
 
 	@Nonnull
-	public RunOutcome doReindex(ReindexChunkIds data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 
-		return new RunOutcome(data.getIds().size());
+		return new RunOutcome(data.size());
 	}
 
 	private class ReindexJob implements TransactionCallback<Void> {
-		private final ReindexChunkIds myData;
+		private final ResourceIdListWorkChunkJson myData;
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
 		private final IJobDataSink<VoidModel> myDataSink;
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public ReindexJob(ReindexChunkIds theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+		public ReindexJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
@@ -99,11 +99,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 		@Override
 		public Void doInTransaction(@Nonnull TransactionStatus theStatus) {
 
-			List<ResourcePersistentId> persistentIds = myData
-				.getIds()
-				.stream()
-				.map(t -> new ResourcePersistentId(t.getId()))
-				.collect(Collectors.toList());
+			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
 
 			ourLog.info("Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
@@ -116,9 +112,9 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Reindex
 			// Reindex
 
 			sw.restart();
-			for (int i = 0; i < myData.getIds().size(); i++) {
+			for (int i = 0; i < myData.size(); i++) {
 
-				String nextResourceType = myData.getIds().get(i).getResourceType();
+				String nextResourceType = myData.getResourceType(i);
 				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
 				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
 				try {

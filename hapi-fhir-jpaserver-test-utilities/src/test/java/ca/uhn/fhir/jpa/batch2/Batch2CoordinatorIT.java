@@ -15,7 +15,6 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -190,7 +189,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// wait for last step to finish
 		myLastStepLatch.setExpectedCount(1);
-		myBatch2JobHelper.awaitMultipleChunkJobCompletion(instanceId);
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
 
 		// verify
@@ -233,7 +232,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
 		myLastStepLatch.setExpectedCount(2);
-		myBatch2JobHelper.awaitMultipleChunkJobCompletion(instanceId);
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
 	}
 
