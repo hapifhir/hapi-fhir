@@ -286,7 +286,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		String operationString = "Cancel job instance " + theInstanceId;
 
 		if (recordsChanged > 0) {
-			return JobOperationResultJson.newSuccess(operationString, "Job Instance <" + theInstanceId + "> successfully stopped.");
+			return JobOperationResultJson.newSuccess(operationString, "Job instance <" + theInstanceId + "> successfully cancelled.");
 		} else {
 			Optional<JobInstance> instance = fetchInstance(theInstanceId);
 			if (instance.isPresent()) {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -136,7 +137,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			myJobInstanceRepository.save(instanceEntity);
 		});
 
-		mySvc.cancelInstance(instanceId);
+		JobOperationResultJson result = mySvc.cancelInstance(instanceId);
+		assertTrue(result.getSuccess());
+		assertEquals("Job instance <" + instanceId + "> successfully cancelled.", result.getMessage());
 
 		JobInstance foundInstance = mySvc.fetchInstanceAndMarkInProgress(instanceId).orElseThrow(() -> new IllegalStateException());
 		assertEquals(instanceId, foundInstance.getInstanceId());

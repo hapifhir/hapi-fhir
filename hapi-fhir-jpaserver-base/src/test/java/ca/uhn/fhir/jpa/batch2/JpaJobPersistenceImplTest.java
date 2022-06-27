@@ -37,7 +37,7 @@ class JpaJobPersistenceImplTest {
 
 		// validate
 		assertTrue(result.getSuccess());
-		assertEquals("Job Instance <test-instance-id> successfully stopped.", result.getMessage());
+		assertEquals("Job instance <test-instance-id> successfully cancelled.", result.getMessage());
 	}
 
 	@Test
