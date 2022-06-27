@@ -192,7 +192,18 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.where(
 				f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid)
 			);
+
+		if (theParams.getSort() != null) {
+			query.sort(
+				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+
+			// indicate parameter was processed
+			theParams.setSort(null);
+		}
+
+		return query;
 	}
+
 
 	private PredicateFinalStep buildWhereClause(SearchPredicateFactory f, String theResourceType,
 															  SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
@@ -234,18 +245,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
 			}
 			//DROP EARLY HERE IF BOOL IS EMPTY?
-
-			})
-		);
-
-		if (theParams.getSort() != null) {
-			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
-
-			// indicate parameter was processed
-			theParams.setSort(null);
-		}
-
-		return query;
+		});
 	}
 
 
@@ -365,8 +365,15 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.where(
 				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
 			).fetchAllHits();
-		return resourceProjectionsToResources(rawResourceDataList);
+
+		// order resource projections as per thePids
+		ArrayList<Long> pidList = new ArrayList<>(thePids);
+		List<ExtendedLuceneResourceProjection> orderedResourceDataList = rawResourceDataList.stream()
+			.sorted( Ordering.explicit(pidList).onResultOf(ExtendedLuceneResourceProjection::getPid) ).collect( Collectors.toList() );
+
+		return resourceProjectionsToResources(orderedResourceDataList);
 	}
+
 
 	@Nonnull
 	private List<IBaseResource> resourceProjectionsToResources(List<ExtendedLuceneResourceProjection> rawResourceDataList) {
@@ -414,11 +421,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		mySearchCount++;
-		List<ExtendedLuceneResourceProjection> extendedLuceneResourceProjections =
-			getSearchSession().search(ResourceTable.class)
+
+		var query = getSearchSession().search(ResourceTable.class)
 				.select(this::buildResourceSelectClause)
-				.where(f -> buildWhereClause(f, theResourceType, theParams, null))
-				.fetchHits(offset, limit);
+				.where(f -> buildWhereClause(f, theResourceType, theParams, null));
+
+		if (theParams.getSort() != null && offset == 0) {
+			query.sort(
+				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+		}
+
+		List<ExtendedLuceneResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
 
 		return resourceProjectionsToResources(extendedLuceneResourceProjections);
 	}

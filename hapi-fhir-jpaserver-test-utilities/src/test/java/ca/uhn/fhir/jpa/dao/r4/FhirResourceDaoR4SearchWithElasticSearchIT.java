@@ -931,6 +931,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void simpleTokenSkipsSql() {
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
+			myIFulltextSearchSvc.resetSearchCount();
 
 			List<IBaseResource> result = myTestDaoSearch.searchForFastResources("Observation?code=theCode");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
