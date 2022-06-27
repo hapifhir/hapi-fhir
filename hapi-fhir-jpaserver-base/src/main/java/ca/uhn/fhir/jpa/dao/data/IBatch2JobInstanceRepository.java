@@ -45,11 +45,9 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myCurrentGatedStepId = :currentGatedStepId WHERE e.myId = :id")
 	void updateInstanceCurrentGatedStepId(@Param("id") String theInstanceId, @Param("currentGatedStepId") String theCurrentGatedStepId);
 
-	// FIXME KHS test
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);
 
-	// FIXME KHS test
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId")
 	List<Batch2JobInstanceEntity> findInstancesByJobDefinitionId(@Param("jobDefinitionId") String theJobDefinitionId, Pageable thePageRequest);
 }

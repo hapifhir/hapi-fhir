@@ -21,13 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -162,6 +165,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.IN_PROGRESS, foundInstance.getStatus());
 		assertEquals(CHUNK_DATA, foundInstance.getParameters());
+	}
+
+	@Test
+	void testFetchInstancesByJobDefinitionId() {
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+
+		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionId(JOB_DEFINITION_ID, 10, 0);
+		assertThat(foundInstances, hasSize(1));
+		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
+	}
+
+	@Test
+	void testFetchInstancesByJobDefinitionIdAndStatus() {
+		JobInstance instance = createInstance();
+		String instanceId = mySvc.storeNewInstance(instance);
+
+		Set<StatusEnum> statuses = new HashSet<>();
+		statuses.add(StatusEnum.QUEUED);
+		statuses.add(StatusEnum.COMPLETED);
+		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionIdAndStatus(JOB_DEFINITION_ID, statuses, 10, 0);
+		assertThat(foundInstances, hasSize(1));
+		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
 	@Test
