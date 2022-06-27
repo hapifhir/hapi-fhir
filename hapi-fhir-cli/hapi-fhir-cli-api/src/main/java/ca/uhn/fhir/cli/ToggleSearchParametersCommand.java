@@ -46,6 +46,7 @@ public class ToggleSearchParametersCommand extends BaseCommand {
 		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addBasicAuthOption(options);
+		addHttpsAuthOption(options);
 		return options;
 	}
 

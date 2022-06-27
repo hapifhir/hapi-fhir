@@ -1,38 +1,20 @@
 package ca.uhn.fhir.okhttp.client;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-/*
- * #%L
- * HAPI FHIR OkHttp Client
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import ca.uhn.fhir.rest.https.TlsAuthentication;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A Restful client factory based on OkHttp.
@@ -41,7 +23,7 @@ import okhttp3.OkHttpClient;
  */
 public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
-    private Call.Factory myNativeClient;
+	private Call.Factory myNativeClient;
 
     public OkHttpRestfulClientFactory() {
         super();
@@ -53,15 +35,25 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     @Override
     protected IHttpClient getHttpClient(String theServerBase) {
-        return new OkHttpRestfulClient(getNativeClient(), new StringBuilder(theServerBase), null, null, null, null);
+        return getHttpClient(theServerBase, Optional.empty());
     }
 
-    @Override
+	@Override
+	protected IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
+	}
+
+	@Override
     protected void resetHttpClient() {
         myNativeClient = null;
     }
 
-    public synchronized Call.Factory getNativeClient() {
+	public synchronized Call.Factory getNativeClient() {
+		return getNativeClient(Optional.empty());
+	}
+
+	 // FIXME ND add authentication
+    public synchronized Call.Factory getNativeClient(Optional<TlsAuthentication> theTlsAuthentication) {
         if (myNativeClient == null) {
             myNativeClient = new OkHttpClient()
 				.newBuilder()

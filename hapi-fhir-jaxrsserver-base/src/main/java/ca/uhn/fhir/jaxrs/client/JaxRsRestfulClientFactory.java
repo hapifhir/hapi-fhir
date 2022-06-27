@@ -3,6 +3,7 @@ package ca.uhn.fhir.jaxrs.client;
 import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import ca.uhn.fhir.rest.https.TlsAuthentication;
 
 /**
  * A Restful Client Factory, based on Jax Rs
@@ -62,6 +64,11 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	public synchronized Client getNativeClientClient() {
+		return getNativeClientClient(Optional.empty());
+	}
+
+	public synchronized Client getNativeClientClient(Optional<TlsAuthentication> theTlsAuthentication) {
+		//FIXME - add HTTPS
 		if (myNativeClient == null) {
 			ClientBuilder builder = ClientBuilder.newBuilder();
 			myNativeClient = builder.build();
@@ -114,10 +121,15 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	@Override
 	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
-		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
+		return getHttpClient(theServerBase, Optional.empty());
 	}
-  
-  @Override
+
+	@Override
+	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+		return new JaxRsHttpClient(getNativeClientClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
+	}
+
+	@Override
   protected void resetHttpClient() {
     if (myNativeClient != null) 
       myNativeClient.close(); // close client to avoid memory leak

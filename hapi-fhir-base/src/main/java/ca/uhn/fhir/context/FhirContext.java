@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.https.TlsAuthentication;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -53,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -895,7 +897,23 @@ public class FhirContext {
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
 	 */
 	public IGenericClient newRestfulGenericClient(final String theServerBase) {
-		return getRestfulClientFactory().newGenericClient(theServerBase);
+		return newRestfulGenericClient(theServerBase, Optional.empty());
+	}
+
+	/**
+	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against
+	 * a compliant server, but does not have methods defining the specific functionality required (as is the case with
+	 * {@link #newRestfulClient(Class, String) non-generic clients}).
+	 *
+	 * <p>
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
+	 * without incurring any performance penalty
+	 * </p>
+	 *
+	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
+	 */
+	public IGenericClient newRestfulGenericClient(final String theServerBase, final Optional<TlsAuthentication> theTlsAuthentication) {
+		return getRestfulClientFactory().newGenericClient(theServerBase, theTlsAuthentication);
 	}
 
 	public FhirTerser newTerser() {
