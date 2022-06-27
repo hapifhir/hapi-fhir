@@ -93,6 +93,7 @@ public enum StatusEnum {
 	 * Statuses that represent a job that has ended. I.e.
 	 * all statuses except {@link #QUEUED and #COMPLETED}
 	 */
+	@Nonnull
 	public static Set<StatusEnum> getEndedStatuses() {
 		Set<StatusEnum> retVal = ourEndedStatuses;
 		if (retVal == null) {
@@ -102,7 +103,11 @@ public enum StatusEnum {
 		return retVal;
 	}
 
-	// FIXME KHS test
+	/**
+	 * Statuses that represent a job that has not ended. I.e.
+	 * {@link #QUEUED and #COMPLETED}
+	 */
+	@Nonnull
 	public static Set<StatusEnum> getNotEndedStatuses() {
 		Set<StatusEnum> retVal = ourNotEndedStatuses;
 		if (retVal == null) {
