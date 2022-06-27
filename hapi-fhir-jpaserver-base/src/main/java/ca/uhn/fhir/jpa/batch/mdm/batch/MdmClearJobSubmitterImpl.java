@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.mdm;
+package ca.uhn.fhir.jpa.batch.mdm.batch;
 
 /*-
  * #%L
@@ -29,7 +29,7 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
 import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
-import ca.uhn.fhir.jpa.batch.mdm.job.ReverseCronologicalBatchMdmLinkPidReader;
+import ca.uhn.fhir.jpa.batch.mdm.batch.job.ReverseCronologicalBatchMdmLinkPidReader;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
