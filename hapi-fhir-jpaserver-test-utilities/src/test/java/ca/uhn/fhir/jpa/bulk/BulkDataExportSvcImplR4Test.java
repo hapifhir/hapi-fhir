@@ -17,12 +17,12 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -36,7 +36,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -80,7 +79,6 @@ import java.util.stream.Stream;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -967,7 +965,54 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		assertThat(nextContents, is(containsString("CT5")));
 		assertThat(nextContents, is(containsString("CT7")));
 		assertThat(nextContents, is(containsString("CT9")));
+	}
 
+	/**
+	 * See https://github.com/hapifhir/hapi-fhir/issues/3700
+	 */
+	@Test
+	public void testGroupBatchJobDoesNotExpandOtherGroups() {
+		//Given there are two groups, and they each contain the same member
+		Patient patient = new Patient();
+		patient.setId("patient1");
+		IIdType id = myPatientDao.update(patient).getId();
+
+		Group g1 = new Group();
+		g1.setId("group1");
+		g1.addMember().setEntity(new Reference(id));
+
+		Group g2 = new Group();
+		g2.setId("group2");
+		g2.addMember().setEntity(new Reference(id));
+
+		IIdType group1Id = myGroupDao.update(g1).getId();
+		IIdType group2Id = myGroupDao.update(g2).getId();
+
+		//When we attempt to export one of those groups
+		BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
+		bulkDataExportOptions.setOutputFormat(null);
+		bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Group"));
+		bulkDataExportOptions.setSince(null);
+		bulkDataExportOptions.setFilters(null);
+		bulkDataExportOptions.setGroupId(group1Id);
+		bulkDataExportOptions.setExpandMdm(false);
+		bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, null);
+
+		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
+		awaitAllBulkJobCompletions();
+
+		IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+
+		assertThat(jobInfo.getStatus(), equalTo(BulkExportJobStatusEnum.COMPLETE));
+		assertThat(jobInfo.getFiles().size(), equalTo(1));
+		assertThat(jobInfo.getFiles().get(0).getResourceType(), is(equalTo("Group")));
+
+		//Then only the requested group should be exported.
+		String nextContents = getBinaryContents(jobInfo, 0);
+		assertThat(nextContents, is(containsString("group1")));
+		assertThat(nextContents, is(not(containsString("group2"))));
 	}
 
 

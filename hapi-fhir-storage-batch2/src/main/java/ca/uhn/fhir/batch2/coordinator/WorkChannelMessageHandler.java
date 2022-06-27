@@ -49,10 +49,14 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 
-	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinitionRegistry theJobDefinitionRegistry, @Nonnull BatchJobSender theBatchJobSender) {
+	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
+									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+									  @Nonnull BatchJobSender theBatchJobSender,
+									  @Nonnull StepExecutionSvc theExecutorSvc
+	) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender);
+		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc);
 	}
 
 	@Override

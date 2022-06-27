@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -43,9 +44,11 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import com.google.common.collect.Ordering;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
@@ -53,6 +56,8 @@ import org.hibernate.search.engine.search.projection.dsl.CompositeProjectionOpti
 import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
+import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
+import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
@@ -69,6 +74,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -100,6 +106,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Autowired
 	ModelConfig myModelConfig;
+
+	@Autowired
+	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 	private Boolean ourDisabled;
@@ -146,7 +155,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			// perform an offset search instead of a scroll one, which doesn't allow for offset
 			List<Long> queryFetchResult = getSearchQueryOptionsStep(
-					theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
+				theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 			return SearchQueryExecutors.from(queryFetchResult);
@@ -172,7 +181,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
 		mySearchCount++;
-		return getSearchSession().search(ResourceTable.class)
+		var query= getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
 				// adapt the String docRef.id() to the Long that it really is.
@@ -226,7 +235,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			}
 			//DROP EARLY HERE IF BOOL IS EMPTY?
 
-		});
+			})
+		);
+
+		if (theParams.getSort() != null) {
+			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+
+			// indicate parameter was processed
+			theParams.setSort(null);
+		}
+
+		return query;
 	}
 
 
@@ -336,6 +355,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (thePids.isEmpty()) {
 			return Collections.emptyList();
 		}
+
 		SearchSession session = getSearchSession();
 		mySearchCount++;
 		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
@@ -362,6 +382,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			f.field("myId", Long.class),
 			f.field("myForcedId", String.class),
 			f.field("myRawResource", String.class));
+	}
+
+	private SortFinalStep getSortOrder(SearchSortFactory theF, SortOrderEnum theOrder) {
+		var finalSortStep = theF.field("myId");
+		if (theOrder == SortOrderEnum.DESC) {
+			finalSortStep.desc();
+		} else {
+			finalSortStep.asc();
+		}
+		return finalSortStep;
 	}
 
 

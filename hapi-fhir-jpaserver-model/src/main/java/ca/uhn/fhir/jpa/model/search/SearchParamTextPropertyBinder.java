@@ -41,8 +41,10 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
@@ -58,9 +60,10 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
  * Identifier.type.text
  */
 public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedLuceneIndexData> {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
 
 	public static final String SEARCH_PARAM_TEXT_PREFIX = "text-";
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
+	public static final String LOWERCASE_ASCIIFOLDING_NORMALIZER = "lowercaseAsciifoldingNormalizer";
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
@@ -87,6 +90,12 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			.analyzer("standardAnalyzer")
 			.projectable(Projectable.NO);
 
+		StringIndexFieldTypeOptionsStep<?> lowerCaseNormalizer =
+			indexFieldTypeFactory.asString()
+				.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER)
+				.sortable(Sortable.YES)
+				.projectable(Projectable.YES);
+
 		StringIndexFieldTypeOptionsStep<?> exactAnalyzer =
 			indexFieldTypeFactory.asString()
 				.analyzer("exactAnalyzer") // default max-length is 256.  Is that enough for code system uris?
@@ -99,6 +108,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 		StringIndexFieldTypeOptionsStep<?> keywordFieldType = indexFieldTypeFactory.asString()
 		// TODO JB: may have to add normalizer to support case insensitive searches depending on token flags
 			.projectable(Projectable.NO)
+			.sortable(Sortable.YES)
 			.aggregable(Aggregable.YES);
 
 		StandardIndexFieldTypeOptionsStep<?, Instant> dateTimeFieldType = indexFieldTypeFactory.asInstant()
@@ -152,6 +162,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
 			spfield.fieldTemplate("string-exact", exactAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_EXACT).multiValued();
 			spfield.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
+			spfield.fieldTemplate("string-lower", lowerCaseNormalizer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_LOWER).multiValued();
 
 			nestedSpField.objectFieldTemplate("nestedStringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
 			nestedSpField.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
@@ -178,6 +189,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			// uri
 			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
+
+			// number
+			spfield.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
 
 			//quantity
 			String quantityPathGlob = "*.quantity";

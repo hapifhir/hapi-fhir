@@ -371,9 +371,10 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.getNearDistanceParam() == null &&
 						theParams.getLastUpdated() == null &&
 						theParams.getEverythingMode() == null &&
-						theParams.getOffset() == null &&
-						// or sorting?
-						theParams.getSort() == null
+						theParams.getOffset() == null
+//						&&
+//						// or sorting?
+//						theParams.getSort() == null
 					);
 
 			if (canSkipDatabase) {

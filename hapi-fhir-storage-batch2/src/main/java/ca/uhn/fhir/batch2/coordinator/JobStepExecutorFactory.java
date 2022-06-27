@@ -32,13 +32,17 @@ import javax.annotation.Nonnull;
 public class JobStepExecutorFactory {
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
+	private final StepExecutionSvc myJobStepExecutorSvc;
 
-	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence, @Nonnull BatchJobSender theBatchJobSender) {
+	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence,
+											@Nonnull BatchJobSender theBatchJobSender,
+											@Nonnull StepExecutionSvc theExecutorSvc) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
+		myJobStepExecutorSvc = theExecutorSvc;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor);
+		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc);
 	}
 }
