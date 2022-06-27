@@ -22,9 +22,11 @@ package ca.uhn.fhir.rest.client.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.https.TlsAuthentication;
 
 public interface IRestfulClientFactory {
 
@@ -156,6 +158,15 @@ public interface IRestfulClientFactory {
 	 * @return A newly created client
 	 */
 	IGenericClient newGenericClient(String theServerBase);
+
+	/**
+	 * Instantiates a new generic client instance
+	 *
+	 * @param theServerBase
+	 *            The URL of the base for the restful FHIR server to connect to
+	 * @return A newly created client
+	 */
+	IGenericClient newGenericClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);
 
 	/**
 	 * Sets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection

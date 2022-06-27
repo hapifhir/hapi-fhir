@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.*;
 import java.util.*;
 
+import ca.uhn.fhir.rest.https.TlsAuthentication;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,8 +37,6 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
 import ca.uhn.fhir.util.FhirTerser;
-
-import javax.annotation.concurrent.GuardedBy;
 
 /**
  * Base class for a REST client factory implementation
@@ -174,8 +173,13 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 
 	@Override
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
+		return newGenericClient(theServerBase, Optional.empty());
+	}
+
+	@Override
+	public synchronized IGenericClient newGenericClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
 		validateConfigured();
-		IHttpClient httpClient = getHttpClient(theServerBase);
+		IHttpClient httpClient = getHttpClient(theServerBase, theTlsAuthentication);
 
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
@@ -375,6 +379,15 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * @return the http client
 	 */
 	protected abstract IHttpClient getHttpClient(String theServerBase);
+
+	/**
+	 * Get the http client for the given server base
+	 *
+	 * @param theServerBase
+	 *           the server base
+	 * @return the http client
+	 */
+	protected abstract IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);
 
 	/**
 	 * Reset the http client. This method is used when parameters have been set and a
