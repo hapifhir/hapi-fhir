@@ -6,7 +6,8 @@ variables:
    NEW_RELEASE_VERSION:
    BRANCH:
 
-trigger: none
+trigger: 
+  - none
 
 pool:
    vmImage: ubuntu-latest
