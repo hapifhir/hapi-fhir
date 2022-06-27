@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.model.api.annotation.PasswordField;
@@ -33,8 +34,10 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -69,10 +72,6 @@ class JobQuerySvc {
 		return theFetchRecentInstances.stream()
 			.map(this::massageInstanceForUserAccess)
 			.collect(Collectors.toList());
-	}
-
-	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
-		return massageInstancesForUserAccess(myJobPersistence.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart));
 	}
 
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
@@ -116,8 +115,18 @@ class JobQuerySvc {
 		}
 	}
 
-    public List<JobInstance> getIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
-		return myJobPersistence.fetchIncompleteInstancesByJobDefinitionId(theJobDefinitionId);
+    public List<JobInstance> getInstancesByJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
+		 if (theEnded == null) {
+			 return myJobPersistence.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
+		 }
+
+		 Set<StatusEnum> requestedStatus;
+		 if (theEnded) {
+			 requestedStatus = StatusEnum.getEndedStatuses();
+		 } else {
+			 requestedStatus = StatusEnum.getNotEndedStatuses();
+		 }
+		return myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, requestedStatus, theCount, theStart);
     }
 
 }

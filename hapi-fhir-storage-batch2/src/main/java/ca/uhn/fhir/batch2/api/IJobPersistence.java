@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IJobPersistence {
 
@@ -83,12 +84,7 @@ public interface IJobPersistence {
 	 */
 	Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId);
 
-	/**
-	 * Fetch all running job instances for the given job definition
-	 * @param theJobDefinitionId
-	 * @return
-	 */
-	List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId);
+	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
 	/**
 	 * Fetch all job instances for a given job definition id
@@ -188,5 +184,5 @@ public interface IJobPersistence {
 	 *
 	 * @param theInstanceId The instance ID
 	 */
-	void cancelInstance(String theInstanceId);
+	JobOperationResultJson cancelInstance(String theInstanceId);
 }

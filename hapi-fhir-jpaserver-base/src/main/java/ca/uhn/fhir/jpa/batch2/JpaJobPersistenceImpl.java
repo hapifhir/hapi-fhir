@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -111,9 +113,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return fetchInstance(theInstanceId);
 	}
 
-	@Override
-	public List<JobInstance> fetchIncompleteInstancesByJobDefinitionId(String theJobDefinitionId) {
-		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, StatusEnum.getIncompleteStatuses()));
+	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));
 	}
 
 	@Override
@@ -278,8 +280,21 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
 	}
 
+// FIXME KHS test
 	@Override
-	public void cancelInstance(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
+	public JobOperationResultJson cancelInstance(String theInstanceId) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
+		String operationString = "Cancel job instance " + theInstanceId;
+
+		if (recordsChanged > 0) {
+			return JobOperationResultJson.newSuccess(operationString, "Job Instance <" + theInstanceId + "> successfully stopped.");
+		} else {
+			Optional<JobInstance> instance = fetchInstance(theInstanceId);
+			if (instance.isPresent()) {
+				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> was already cancelled.  Nothing to do.");
+			} else {
+				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
+			}
+		}
 	}
 }
