@@ -16,7 +16,9 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -76,10 +78,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 
 		myFirstStepLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
 	}
 
 	@Test
@@ -100,13 +102,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.assertNoGatedStep(instanceId);
+		myBatch2JobHelper.assertNoGatedStep(startResponse.getJobId());
 
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
 		myLastStepLatch.awaitExpected();
 	}
 
@@ -183,8 +185,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// run test
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
+
 
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
@@ -227,7 +231,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 
 		myFirstStepLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
@@ -254,7 +259,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 
 		// execute
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 
 		// validate
 		myBatch2JobHelper.awaitJobFailure(instanceId);
@@ -278,7 +284,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// execute
 		myFirstStepLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
 
 		// validate

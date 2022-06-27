@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.api.model;
 
+import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 
 import javax.annotation.Nonnull;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class BulkExportParameters extends StartNewJobParameters {
+public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	/**
 	 * List of resource types to export.

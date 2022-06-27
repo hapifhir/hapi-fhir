@@ -21,10 +21,14 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
@@ -58,10 +62,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -69,8 +75,10 @@ public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
-	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+//	@Autowired
+//	private IBulkDataExportSvc myBulkDataExportSvc;
+
+	private Set<String> myCompartmentResources;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -99,13 +107,16 @@ public class BulkDataExportProvider {
 
 	private void startJob(ServletRequestDetails theRequestDetails,
 								 BulkDataExportOptions theOptions) {
-		Boolean useCache = shouldUseCache(theRequestDetails);
+		boolean useCache = shouldUseCache(theRequestDetails);
+
+		BulkExportParameters parameters = BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions);
+		parameters.setUseExistingJobsFirst(useCache);
 
 		// start job
-		String batch2JobId = myJobRunner.startNewJob(BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions));
+		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
 		IBulkDataExportSvc.JobInfo info = new IBulkDataExportSvc.JobInfo();
-		info.setJobMetadataId(batch2JobId);
+		info.setJobMetadataId(response.getJobId());
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 
 		writePollingLocationToResponseHeaders(theRequestDetails, info);
@@ -161,13 +172,28 @@ public class BulkDataExportProvider {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
 				.filter(resourceType -> !PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
-				.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
+				.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
 				.collect(Collectors.toList());
 
 			if (!badResourceTypes.isEmpty()) {
 				throw new InvalidRequestException(Msg.code(512) + String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
 			}
 		}
+	}
+
+	private Set<String> getPatientCompartmentResources() {
+		if (myCompartmentResources == null) {
+			myCompartmentResources = myFhirContext.getResourceTypes().stream()
+				.filter(this::resourceTypeIsInPatientCompartment)
+				.collect(Collectors.toSet());
+		}
+		return myCompartmentResources;
+	}
+
+	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return searchParams != null && searchParams.size() >= 1;
 	}
 
 	/**
@@ -211,19 +237,28 @@ public class BulkDataExportProvider {
 				bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
 
 				String report = info.getReport();
-				BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-				String serverBase = getDefaultPartitionServerBase(theRequestDetails);
-				String resourceType = results.getResourceType();
-				for (String binaryId : results.getBinaryIds()) {
-					IIdType iId = new IdType(binaryId);
-					String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
-					bulkResponseDocument
-						.addOutput()
-						.setType(resourceType)
-						.setUrl(nextUrl);
+				if (isEmpty(report)) {
+					ourLog.error("No report for completed bulk export job.");
+					response.getWriter().close();
+				} else {
+					BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+
+					for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
+						String resourceType = entrySet.getKey();
+						List<String> binaryIds = entrySet.getValue();
+						for (String binaryId : binaryIds) {
+							IIdType iId = new IdType(binaryId);
+							String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
+							bulkResponseDocument
+								.addOutput()
+								.setType(resourceType)
+								.setUrl(nextUrl);
+						}
+					}
+					JsonUtil.serialize(bulkResponseDocument, response.getWriter());
+					response.getWriter().close();
 				}
-				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
-				response.getWriter().close();
 				break;
 			case ERROR:
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);

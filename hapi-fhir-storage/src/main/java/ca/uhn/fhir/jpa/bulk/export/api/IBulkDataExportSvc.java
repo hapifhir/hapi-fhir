@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public interface IBulkDataExportSvc {
 
 //	JobInfo getJobInfoOrThrowResourceNotFound(String theJobId);

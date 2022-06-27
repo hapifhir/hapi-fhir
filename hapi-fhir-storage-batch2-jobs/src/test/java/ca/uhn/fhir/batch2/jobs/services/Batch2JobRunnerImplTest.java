@@ -3,10 +3,9 @@ package ca.uhn.fhir.batch2.jobs.services;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
-import ca.uhn.fhir.jpa.api.model.StartNewJobParameters;
+import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
-import ca.uhn.fhir.util.JsonUtil;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -59,7 +58,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startNewJob(new StartNewJobParameters(jobId));
+		myJobRunner.startNewJob(new Batch2BaseJobParameters(jobId));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -76,7 +75,7 @@ public class Batch2JobRunnerImplTest {
 		ourLog.setLevel(Level.ERROR);
 
 		// test
-		myJobRunner.startNewJob(new StartNewJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
+		myJobRunner.startNewJob(new Batch2BaseJobParameters(Batch2JobDefinitionConstants.BULK_EXPORT));
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);

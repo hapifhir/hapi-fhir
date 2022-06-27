@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -91,7 +92,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		// Execute
 
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		assertThat(instanceId, not(blankOrNullString()));
 		ourLog.info("Execution got ID: {}", instanceId);
 
@@ -144,7 +146,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 			// Execute
 
-			String instanceId = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			String instanceId = startResponse.getJobId();
 			assertThat(instanceId, not(blankOrNullString()));
 			ourLog.info("Execution got ID: {}", instanceId);
 
@@ -215,8 +218,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		request.setParameters(parameters);
 
 		// Execute
-
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		assertThat(instanceId, not(blankOrNullString()));
 		ourLog.info("Execution got ID: {}", instanceId);
 
@@ -258,8 +261,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		try {
 
 			// Execute
-
-			String instanceId = myJobCoordinator.startInstance(request);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+			String instanceId = startResponse.getJobId();
 			assertThat(instanceId, not(blankOrNullString()));
 			ourLog.info("Execution got ID: {}", instanceId);
 

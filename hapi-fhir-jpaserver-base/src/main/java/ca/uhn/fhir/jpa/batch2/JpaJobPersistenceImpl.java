@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -32,16 +33,21 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.model.api.PagingIterator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -115,6 +121,29 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
 		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+		String definitionId = theRequest.getJobDefinition();
+		String params = theRequest.getParameters();
+
+		Set<StatusEnum> statuses = theRequest.getStatuses();
+		if (statuses.isEmpty()) {
+			statuses.addAll(Arrays.stream(StatusEnum.values()).toList());
+		}
+
+		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
+
+		// TODO - consider adding a new index... on the JobDefinitionId (and possibly Status)
+		Page<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+			definitionId,
+			params,
+			statuses,
+			pageable
+		);
+
+		return instances == null ? new ArrayList<>() : instances.stream().toList();
 	}
 
 	@Override

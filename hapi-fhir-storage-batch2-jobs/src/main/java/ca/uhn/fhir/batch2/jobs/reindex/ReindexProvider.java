@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -76,10 +77,10 @@ public class ReindexProvider {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		request.setParameters(params);
-		String id = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, response.getJobId());
 		return retVal;
 	}
 

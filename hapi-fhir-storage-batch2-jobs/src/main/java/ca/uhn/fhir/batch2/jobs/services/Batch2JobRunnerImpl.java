@@ -7,8 +7,9 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
-import ca.uhn.fhir.jpa.api.model.StartNewJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
@@ -26,7 +27,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private IJobCoordinator myJobCoordinator;
 
 	@Override
-	public String startNewJob(StartNewJobParameters theParameters) {
+	public Batch2JobStartResponse startNewJob(Batch2BaseJobParameters theParameters) {
 		switch (theParameters.getJobDefinitionId()) {
 			case Batch2JobDefinitionConstants.BULK_EXPORT:
 				if (theParameters instanceof BulkExportParameters) {
@@ -81,15 +82,14 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		}
 	}
 
-
-	private String startBatch2BulkExportJob(BulkExportParameters theParameters) {
+	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
 		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
 
 		return myJobCoordinator.startInstance(request);
 	}
 
-	private JobInstanceStartRequest createStartRequest(StartNewJobParameters theParameters) {
+	private JobInstanceStartRequest createStartRequest(Batch2BaseJobParameters theParameters) {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(theParameters.getJobDefinitionId());
 		return request;

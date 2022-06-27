@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -61,8 +62,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		String id = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(id);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(res.getJobId());
 
 		// validate
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
@@ -94,8 +95,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
 
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
@@ -123,8 +124,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse.getJobId());
 
 		// Verify
 
@@ -151,8 +152,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse.getJobId());
 
 		// Verify
 

@@ -385,8 +385,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Setup
 
-		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID))).thenReturn(Optional.of(createJobDefinition()));
-		when(myJobInstancePersister.storeNewInstance(any())).thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
+			.thenReturn(Optional.of(createJobDefinition()));
+		when(myJobInstancePersister.storeNewInstance(any()))
+			.thenReturn(INSTANCE_ID).thenReturn(INSTANCE_ID);
 
 		// Execute
 
@@ -397,7 +399,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// Verify
 
-		verify(myJobInstancePersister, times(1)).storeNewInstance(myJobInstanceCaptor.capture());
+		verify(myJobInstancePersister, times(1))
+			.storeNewInstance(myJobInstanceCaptor.capture());
 		assertNull(myJobInstanceCaptor.getValue().getInstanceId());
 		assertEquals(JOB_DEFINITION_ID, myJobInstanceCaptor.getValue().getJobDefinitionId());
 		assertEquals(1, myJobInstanceCaptor.getValue().getJobDefinitionVersion());
