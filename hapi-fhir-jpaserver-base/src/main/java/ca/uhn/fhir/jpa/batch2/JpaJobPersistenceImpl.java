@@ -280,7 +280,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
 	}
 
-// FIXME KHS test
 	@Override
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
