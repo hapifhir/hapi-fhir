@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -51,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -223,13 +223,23 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private void updateRevIncludesList(CapabilityStatementRestResourceComponent theNextResource, ResourceSearchParams theSearchParams) {
 		// Add RevInclude to CapabilityStatement.rest.resource
-		String resourcename = theNextResource.getType();
 		if (theNextResource.getSearchRevInclude().isEmpty()) {
-			theSearchParams.values()
-				.stream()
-				.filter(t -> t.getTargets().contains(resourcename) || t.getTargets().isEmpty())
-				.forEach(t -> theNextResource.addSearchRevInclude("zoop:" + t.getName()));
+			String resourcename = theNextResource.getType();
+			Set<String> allResourceTypes = myServerConfiguration.collectMethodBindings().keySet();
+			for (String otherResourceType : allResourceTypes) {
+				if (isBlank(otherResourceType)) {
+					continue;
+				}
+				ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(otherResourceType);
+				activeSearchParams.values()
+					.stream()
+					.filter(t -> isNotBlank(t.getName()))
+					.filter(t -> t.getTargets().contains(resourcename))
+					.forEach(t -> theNextResource.addSearchRevInclude(otherResourceType + ":" + t.getName()));
+			}
 		}
+
+
 	}
 
 	private void updateIncludesList(CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {

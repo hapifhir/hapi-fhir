@@ -4,9 +4,16 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,9 +42,17 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 	}
 
 	@Test
-	public void testConformance() {
-		ourClient.meta().get()
+	public void testConformanceContainsIncludesAndRevIncludes() {
+		CapabilityStatement execute = ourClient.capabilities().ofType(CapabilityStatement.class).execute();
+		Optional<CapabilityStatement.CapabilityStatementRestResourceComponent> patient = execute.getRestFirstRep().getResource().stream().filter(resource -> resource.getType().equalsIgnoreCase("Patient")).findFirst();
+		if (patient.isEmpty()) {
+			fail("No Patient resource found in conformance statement");
+		} else {
+			List<StringType> searchInclude = patient.get().getSearchInclude();
+			List<StringType> searchRevInclude = patient.get().getSearchRevInclude();
+
+		}
+
+
 	}
-
-
 }
