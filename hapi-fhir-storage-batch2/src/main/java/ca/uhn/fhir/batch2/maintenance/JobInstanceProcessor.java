@@ -132,7 +132,7 @@ public class JobInstanceProcessor {
 		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
 
 		// final step
-		if (jobWorkCursor.isFinalStep()) {
+		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
 			return;
 		}
 

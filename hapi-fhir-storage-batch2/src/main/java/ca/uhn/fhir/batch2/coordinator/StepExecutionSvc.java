@@ -166,7 +166,7 @@ public class StepExecutionSvc {
 		boolean jobFailed = false;
 		while (chunkIterator.hasNext()) {
 			WorkChunk chunk = chunkIterator.next();
-			if (chunk.getStatus() != StatusEnum.QUEUED) {
+			if (!StatusEnum.getIncompleteStatuses().contains(chunk.getStatus())) {
 				// we are currently fetching all statuses from the db
 				// we will ignore non-completed steps.
 				// should we throw for errored values we find here?

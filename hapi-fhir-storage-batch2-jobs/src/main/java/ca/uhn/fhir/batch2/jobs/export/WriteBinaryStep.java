@@ -82,11 +82,12 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.defaultPartition()));
 		IIdType id = outcome.getId();
 
-		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId(id.getValueAsString());
+		BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
+		bulkExportBinaryFileId.setBinaryId(id.getValueAsString());
 		bulkExportBinaryFileId.setResourceType(expandedResources.getResourceType());
 		theDataSink.accept(bulkExportBinaryFileId);
 
-		ourLog.trace("Binary writing complete for {} resources of type {}.",
+		ourLog.info("Binary writing complete for {} resources of type {}.",
 			processedRecordsCount,
 			expandedResources.getResourceType());
 

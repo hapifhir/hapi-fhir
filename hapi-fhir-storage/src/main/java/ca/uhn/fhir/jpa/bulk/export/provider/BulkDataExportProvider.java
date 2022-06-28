@@ -53,6 +53,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -161,9 +162,14 @@ public class BulkDataExportProvider {
 
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
-		// TODO - if type is null, does that mean all types?
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
-		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+
+		if (bulkDataExportOptions.getResourceTypes() != null && !bulkDataExportOptions.getResourceTypes().isEmpty()) {
+			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+		} else {
+			// all patient resource types
+			bulkDataExportOptions.setResourceTypes(getPatientCompartmentResources());
+		}
 
 		startJob(theRequestDetails, bulkDataExportOptions);
 	}
