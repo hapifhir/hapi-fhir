@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,7 +47,8 @@ import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TER
  */
 public class ResponseTerminologyTranslationInterceptor extends BaseResponseTerminologyInterceptor {
 
-	private final ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc = new ResponseTerminologyTranslationSvc(this);
+	@Autowired
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 	private final Map<String, String> myMappingSpecifications = new HashMap<>();
 
 	/**

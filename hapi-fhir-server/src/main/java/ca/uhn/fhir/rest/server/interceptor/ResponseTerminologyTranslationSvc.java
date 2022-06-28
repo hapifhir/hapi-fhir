@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
@@ -16,44 +17,74 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ResponseTerminologyTranslationSvc {
-	private final ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
-	private final BaseRuntimeChildDefinition myCodingSystemChild;
-	private final BaseRuntimeChildDefinition myCodingCodeChild;
-	private final BaseRuntimeElementDefinition<IPrimitiveType<?>> myUriDefinition;
-	private final BaseRuntimeElementDefinition<IPrimitiveType<?>> myCodeDefinition;
-	private final Class<? extends IBase> myCodeableConceptType;
-	private final Class<? extends IBase> myCodingType;
-	private final BaseRuntimeChildDefinition myCodeableConceptCodingChild;
-	private final BaseRuntimeElementCompositeDefinition<?> myCodingDefinition;
-	private final RuntimePrimitiveDatatypeDefinition myStringDefinition;
-	private final BaseRuntimeChildDefinition myCodingDisplayChild;
+	private BaseRuntimeChildDefinition myCodingSystemChild;
+	private BaseRuntimeChildDefinition myCodingCodeChild;
+	private BaseRuntimeElementDefinition<IPrimitiveType<?>> myUriDefinition;
+	private BaseRuntimeElementDefinition<IPrimitiveType<?>> myCodeDefinition;
+	private Class<? extends IBase> myCodeableConceptType;
+	private Class<? extends IBase> myCodingType;
+	private BaseRuntimeChildDefinition myCodeableConceptCodingChild;
+	private BaseRuntimeElementCompositeDefinition<?> myCodingDefinition;
+	private RuntimePrimitiveDatatypeDefinition myStringDefinition;
+	private BaseRuntimeChildDefinition myCodingDisplayChild;
+	private Map<String, String> myMappingSpec;
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
-	public ResponseTerminologyTranslationSvc(ResponseTerminologyTranslationInterceptor theMyResponseTerminologyTranslationInterceptor) {
-		myResponseTerminologyTranslationInterceptor = theMyResponseTerminologyTranslationInterceptor;
-		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("CodeableConcept"));
+
+	public ResponseTerminologyTranslationSvc(Map<String, String> theMappingSpec) {
+		myMappingSpec = theMappingSpec;
+	}
+
+	@PostConstruct
+	public void setup() {
+		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
 
 		myCodeableConceptType = codeableConceptDef.getImplementingClass();
 		myCodeableConceptCodingChild = codeableConceptDef.getChildByName("coding");
 
-		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("Coding"));
+		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("Coding"));
 		myCodingType = myCodingDefinition.getImplementingClass();
 		myCodingSystemChild = myCodingDefinition.getChildByName("system");
 		myCodingCodeChild = myCodingDefinition.getChildByName("code");
 		myCodingDisplayChild = myCodingDefinition.getChildByName("display");
 
-		myUriDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("uri");
-		myCodeDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("code");
-		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myResponseTerminologyTranslationInterceptor.getContext().getElementDefinition("string");
+		myUriDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("uri");
+		myCodeDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("code");
+		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("string");
 	}
 
+//	public ResponseTerminologyTranslationSvc(ResponseTerminologyTranslationInterceptor theResponseTerminologyTranslationInterceptor) {
+//		myResponseTerminologyTranslationInterceptor = theResponseTerminologyTranslationInterceptor;
+//		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
+//
+//		myCodeableConceptType = codeableConceptDef.getImplementingClass();
+//		myCodeableConceptCodingChild = codeableConceptDef.getChildByName("coding");
+//
+//		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("Coding"));
+//		myCodingType = myCodingDefinition.getImplementingClass();
+//		myCodingSystemChild = myCodingDefinition.getChildByName("system");
+//		myCodingCodeChild = myCodingDefinition.getChildByName("code");
+//		myCodingDisplayChild = myCodingDefinition.getChildByName("display");
+//
+//		myUriDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("uri");
+//		myCodeDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("code");
+//		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("string");
+//	}
+
 	public void processResourcesForTerminologyTranslation(List<IBaseResource> resources) {
-		FhirTerser terser = myResponseTerminologyTranslationInterceptor.getContext().newTerser();
+		FhirTerser terser = myFhirContext.newTerser();
 		for (IBaseResource nextResource : resources) {
 			terser.visit(nextResource, new MappingVisitor());
 		}
@@ -78,14 +109,14 @@ public class ResponseTerminologyTranslationSvc {
 
 				// Look for mappings
 				for (String nextSourceSystem : foundSystemsToCodes.keySet()) {
-					String wantTargetSystem = myResponseTerminologyTranslationInterceptor.getMappingSpecifications().get(nextSourceSystem);
+					String wantTargetSystem = myMappingSpec.get(nextSourceSystem);
 					if (wantTargetSystem != null) {
 						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
 
 							for (String code : foundSystemsToCodes.get(nextSourceSystem)) {
 								List<IBaseCoding> codings = new ArrayList<>();
 								codings.add(createCodingFromPrimitives(nextSourceSystem, code, null));
-								TranslateConceptResults translateConceptResults = myResponseTerminologyTranslationInterceptor.getValidationSupport().translateConcept(new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
+								TranslateConceptResults translateConceptResults = myValidationSupport.translateConcept(new IValidationSupport.TranslateCodeRequest(codings, wantTargetSystem));
 								if (translateConceptResults != null) {
 									List<TranslateConceptResult> mappings = translateConceptResults.getResults();
 									for (TranslateConceptResult nextMapping : mappings) {

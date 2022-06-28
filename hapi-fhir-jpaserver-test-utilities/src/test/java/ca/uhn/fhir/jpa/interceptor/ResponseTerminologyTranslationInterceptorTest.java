@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
@@ -49,6 +50,9 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
+
+	@Autowired
+	private FhirContext myFhirContext;
 
 	@BeforeEach
 	public void beforeEach() {

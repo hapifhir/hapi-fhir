@@ -232,7 +232,7 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(@Autowired ResponseTerminologyTranslationInterceptor theResponseTerminologyTranslationInterceptor) {
-		return new ResponseTerminologyTranslationSvc(theResponseTerminologyTranslationInterceptor);
+		return new ResponseTerminologyTranslationSvc(theResponseTerminologyTranslationInterceptor.getMappingSpecifications());
 	}
 
 	@Bean
