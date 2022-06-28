@@ -22,25 +22,25 @@ import static org.mockito.Mockito.verify;
 
 /**
  * Run entire @see {@link FhirResourceDaoR4SearchLastNIT} test suite this time
- * using Extended Lucene index as search target.
+ * using Extended HSearch index as search target.
  *
  * The other implementation is obsolete, and we can merge these someday.
  */
 @ExtendWith(SpringExtension.class)
-public class FhirResourceDaoR4SearchLastNUsingExtendedLuceneIndexIT extends FhirResourceDaoR4SearchLastNIT {
+public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends FhirResourceDaoR4SearchLastNIT {
 	// awkward override so we can spy
 	@SpyBean
 	@Autowired(required = false)
 	IFulltextSearchSvc myFulltestSearchSvc;
 
 	@BeforeEach
-	public void enableAdvancedLuceneIndexing() {
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
-	public void disableAdvancedLuceneIndex() {
-		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
+	public void disableAdvancedHSearchIndex() {
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 	}
 
 	/**

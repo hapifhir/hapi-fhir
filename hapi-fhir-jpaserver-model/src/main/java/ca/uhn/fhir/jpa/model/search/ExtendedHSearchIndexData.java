@@ -37,11 +37,11 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 
 /**
- * Collects our lucene extended indexing data.
+ * Collects our HSearch extended indexing data.
  *
  */
-public class ExtendedLuceneIndexData {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneIndexData.class);
+public class ExtendedHSearchIndexData {
+	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedHSearchIndexData.class);
 
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
@@ -56,7 +56,7 @@ public class ExtendedLuceneIndexData {
 	private String myForcedId;
 	private String myResourceJSON;
 
-	public ExtendedLuceneIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
+	public ExtendedHSearchIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
 		this.myFhirContext = theFhirContext;
 		this.myModelConfig = theModelConfig;
 	}
@@ -79,7 +79,7 @@ public class ExtendedLuceneIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HibernateSearchIndexWriter indexWriter = HibernateSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
+		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 

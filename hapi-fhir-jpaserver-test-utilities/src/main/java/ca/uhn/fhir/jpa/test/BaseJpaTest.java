@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -270,7 +269,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			myFhirInstanceValidator.invalidateCaches();
 		}
 		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 
 

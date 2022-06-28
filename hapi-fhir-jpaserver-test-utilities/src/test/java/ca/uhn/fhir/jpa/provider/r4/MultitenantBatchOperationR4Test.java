@@ -54,7 +54,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 	@BeforeEach
 	public void disableAdvanceIndexing() {
 		// advanced indexing doesn't support partitions
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 	}
 
 

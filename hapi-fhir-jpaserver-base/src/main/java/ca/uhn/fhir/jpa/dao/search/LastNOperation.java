@@ -41,7 +41,7 @@ public class LastNOperation {
 	private final FhirContext myFhirContext;
 	private final ModelConfig myModelConfig;
 	private final ISearchParamRegistry mySearchParamRegistry;
-	private final ExtendedLuceneSearchBuilder myExtendedLuceneSearchBuilder = new ExtendedLuceneSearchBuilder();
+	private final ExtendedHSearchSearchBuilder myExtendedHSearchSearchBuilder = new ExtendedHSearchSearchBuilder();
 
 	public LastNOperation(SearchSession theSession, FhirContext theFhirContext, ModelConfig theModelConfig,
 			ISearchParamRegistry theSearchParamRegistry) {
@@ -61,8 +61,8 @@ public class LastNOperation {
 			.where(f -> f.bool(b -> {
 				// Must match observation type
 				b.must(f.match().field("myResourceType").matching(OBSERVATION_RES_TYPE));
-				ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
-				myExtendedLuceneSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
+				ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
+				myExtendedHSearchSearchBuilder.addAndConsumeAdvancedQueryClauses(builder, OBSERVATION_RES_TYPE, theParams.clone(), mySearchParamRegistry);
 			}))
 			.aggregation(observationsByCodeKey, f -> f.fromJson(lastNAggregation.toAggregation()))
 			.fetch(0);

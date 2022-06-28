@@ -26,14 +26,14 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * Query result when fetching full resources from Hibernate Search.
+ * Query result when fetching full resources from HSearch.
  */
-public class ExtendedLuceneResourceProjection {
+public class ExtendedHSearchResourceProjection {
 	final long myPid;
 	final String myForcedId;
 	final String myResourceString;
 
-	public ExtendedLuceneResourceProjection(long thePid, String theForcedId, String theResourceString) {
+	public ExtendedHSearchResourceProjection(long thePid, String theForcedId, String theResourceString) {
 		Validate.notEmpty(theResourceString, "Resource not stored in search index: " + thePid);
 		myPid = thePid;
 		myForcedId = theForcedId;
