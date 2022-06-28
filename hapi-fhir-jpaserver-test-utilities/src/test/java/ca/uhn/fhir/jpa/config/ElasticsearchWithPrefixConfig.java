@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
-import ca.uhn.fhir.jpa.search.elastic.HapiElasticsearchAnalysisConfigurer;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
@@ -47,7 +47,7 @@ public class ElasticsearchWithPrefixConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setElasticSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
+		daoConfig.setHSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
 		return daoConfig;
 	}
 
@@ -105,7 +105,8 @@ public class ElasticsearchWithPrefixConfig {
 		String host = elasticContainer().getHost();
 		// the below properties are used for ElasticSearch integration
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
-		extraProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER),
+			HapiHSearchAnalysisConfigurers.HapiElasticsearchAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), host + ":" + httpPort);
 		extraProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), "http");
 		extraProperties.put(HibernateOrmMapperSettings.SCHEMA_MANAGEMENT_STRATEGY, SchemaManagementStrategyName.CREATE.externalRepresentation());
