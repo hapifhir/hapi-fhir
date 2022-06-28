@@ -43,7 +43,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -130,7 +129,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		Set<StatusEnum> statuses = theRequest.getStatuses();
 		if (statuses.isEmpty()) {
-			statuses.addAll(Arrays.stream(StatusEnum.values()).toList());
+			statuses.addAll(Arrays.asList(StatusEnum.values()));
 		}
 
 		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
@@ -143,7 +142,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			pageable
 		);
 
-		return instances == null ? new ArrayList<>() : instances.stream().toList();
+		return instances == null ? new ArrayList<>() : instances.stream().collect(Collectors.toList());
 	}
 
 	@Override

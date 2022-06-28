@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import org.jboss.jdeparser.FormatPreferences;
 
 import java.util.Iterator;
 import java.util.List;
