@@ -2276,6 +2276,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		}
 
+		@Nested
+		public class NoIdsQuery {
+
+			@Test
+			public void simpleTokenSkipsSql() {
+				String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
+				String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
+				String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
+				myCaptureQueriesListener.clear();
+
+				List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
+				myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+				assertThat( result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA) );
+				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertEquals(1, hSearchCount);
+			}
+
+		}
+
 
 	}
 
