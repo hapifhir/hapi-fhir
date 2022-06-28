@@ -27,7 +27,6 @@ import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
@@ -49,7 +48,6 @@ public class BaseResponseTerminologyInterceptor {
 		myContext = theValidationSupport.getFhirContext();
 		Validate.notNull(myContext, "The validation support must not return a null context");
 	}
-
 
 	@Nonnull
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {

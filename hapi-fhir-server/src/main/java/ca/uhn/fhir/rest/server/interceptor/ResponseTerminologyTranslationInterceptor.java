@@ -49,7 +49,6 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 
 	@Autowired
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
-	private final Map<String, String> myMappingSpecifications = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -68,27 +67,23 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 	 * @param theTargetCodeSystemUrl The target CodeSystem URL
 	 */
 	public void addMappingSpecification(String theSourceCodeSystemUrl, String theTargetCodeSystemUrl) {
-		Validate.notBlank(theSourceCodeSystemUrl, "theSourceCodeSystemUrl must not be null or blank");
-		Validate.notBlank(theTargetCodeSystemUrl, "theTargetCodeSystemUrl must not be null or blank");
-
-		myMappingSpecifications.put(theSourceCodeSystemUrl, theTargetCodeSystemUrl);
+		myResponseTerminologyTranslationSvc.addMappingSpecification(theSourceCodeSystemUrl, theTargetCodeSystemUrl);
 	}
 
 	/**
 	 * Clear all mapping specifications
 	 */
 	public void clearMappingSpecifications() {
-		myMappingSpecifications.clear();
+		myResponseTerminologyTranslationSvc.clearMappingSpecifications();
 	}
 
 	public Map<String, String> getMappingSpecifications() {
-		return myMappingSpecifications;
+		return myResponseTerminologyTranslationSvc.getMappingSpecifications();
 	}
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR)
 	public void handleResource(RequestDetails theRequestDetails, IBaseResource theResource) {
 		List<IBaseResource> resources = toListForProcessing(theRequestDetails, theResource);
-
 		myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(resources);
 	}
 }

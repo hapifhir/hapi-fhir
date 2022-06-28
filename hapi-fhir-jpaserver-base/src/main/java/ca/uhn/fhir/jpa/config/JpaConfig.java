@@ -231,8 +231,8 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(ResponseTerminologyTranslationInterceptor theResponseTerminologyTranslationInterceptor) {
-		return new ResponseTerminologyTranslationSvc(theResponseTerminologyTranslationInterceptor.getMappingSpecifications());
+	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc() {
+		return new ResponseTerminologyTranslationSvc();
 	}
 
 	@Bean

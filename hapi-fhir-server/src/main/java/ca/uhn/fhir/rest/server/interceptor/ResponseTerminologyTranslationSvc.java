@@ -44,10 +44,6 @@ public class ResponseTerminologyTranslationSvc {
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
-	public ResponseTerminologyTranslationSvc(Map<String, String> theMappingSpec) {
-		myMappingSpec = theMappingSpec;
-	}
-
 	@PostConstruct
 	public void setup() {
 		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
