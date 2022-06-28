@@ -62,6 +62,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+@Deprecated
 public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 	public static final String TEST_FILTER = "Patient?gender=female";

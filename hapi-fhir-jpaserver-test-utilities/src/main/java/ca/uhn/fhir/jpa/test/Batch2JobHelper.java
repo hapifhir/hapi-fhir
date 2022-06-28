@@ -50,10 +50,6 @@ public class Batch2JobHelper {
 		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
 	}
 
-	public void awaitJobCompletion(String theId) {
-		awaitSingleChunkJobCompletion(theId);
-	}
-
 	public JobInstance awaitJobFailure(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();

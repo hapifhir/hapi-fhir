@@ -3,8 +3,6 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.models.Id;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexChunkIds;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;

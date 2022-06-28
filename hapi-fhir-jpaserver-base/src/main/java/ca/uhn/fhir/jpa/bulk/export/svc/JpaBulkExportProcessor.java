@@ -9,10 +9,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -22,9 +20,6 @@ import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
-import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
-import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -37,8 +32,6 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -206,75 +199,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		}
 		return searchParam;
 	}
-
-//	@Transactional
-//	@Override
-//	public BulkExportJobInfo getJobInfo(String theJobId) {
-//		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
-//
-//		if (jobOp.isPresent()) {
-//			BulkExportJobEntity jobEntity = jobOp.get();
-//			BulkExportJobInfo jobInfo = new BulkExportJobInfo();
-//
-//			jobInfo.setJobId(jobEntity.getJobId());
-//			Set<String> resourceTypes = new HashSet<>();
-//			for (BulkExportCollectionEntity collection : jobEntity.getCollections()) {
-//				resourceTypes.add(collection.getResourceType());
-//			}
-//			jobInfo.setResourceTypes(resourceTypes);
-//			return jobInfo;
-//		} else {
-//			return null;
-//		}
-//	}
-
-//	@Transactional
-//	@Override
-//	public void setJobStatus(String theJobId, BulkExportJobStatusEnum theStatus, String theMessage) {
-//		myBulkExportDaoSvc.setJobToStatus(theJobId, theStatus, theMessage);
-//	}
-
-//	@Transactional
-//	@Override
-//	public BulkExportJobStatusEnum getJobStatus(String theJobId) {
-//		Optional<BulkExportJobEntity> jobOp = myBulkExportJobDao.findByJobId(theJobId);
-//
-//		if (jobOp.isPresent()) {
-//			return jobOp.get().getStatus();
-//		} else {
-//			String msg = "Invalid id. No such job : " + theJobId;
-//			ourLog.error(msg);
-//			throw new ResourceNotFoundException(theJobId);
-//		}
-//	}
-
-//	@Override
-//	public void addFileToCollection(String theJobId, String theResourceType, IIdType theBinaryId) {
-//		Map<Long, String> collectionMap = myBulkExportDaoSvc.getBulkJobCollectionIdToResourceTypeMap(theJobId);
-//
-//		Long collectionId = null;
-//		for (Map.Entry<Long, String> entrySet : collectionMap.entrySet()) {
-//			if (entrySet.getValue().equals(theResourceType)) {
-//				collectionId = entrySet.getKey();
-//				break;
-//			}
-//		}
-//
-//		if (collectionId == null) {
-//			String msg = "No matching collection for resource type "
-//				+ theResourceType
-//				+ " for job "
-//				+ theJobId;
-//			ourLog.error(msg);
-//
-//			throw new InvalidRequestException(msg);
-//		}
-//
-//		BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
-//		file.setResource(theBinaryId.getIdPart());
-//
-//		myBulkExportDaoSvc.addFileToCollectionWithId(collectionId, file);
-//	}
 
 	@Override
 	public void expandMdmResources(List<IBaseResource> theResources) {

@@ -66,6 +66,7 @@ import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Deprecated
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);

@@ -9,13 +9,6 @@ import java.util.Map;
 
 public class BulkExportJobResults implements IModelJson {
 
-//	@JsonProperty("binaryIds")
-//	private List<String> myBinaryIds;
-//
-//	// the resource type of the resources written into the binary
-//	@JsonProperty("resourceType")
-//	private String myResourceType;
-
 	@JsonProperty("resourceType2BinaryIds")
 	private Map<String, List<String>> myResourceTypeToBinaryIds;
 

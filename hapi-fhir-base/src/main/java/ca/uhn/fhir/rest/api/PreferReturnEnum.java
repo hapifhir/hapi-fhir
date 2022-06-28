@@ -33,7 +33,7 @@ public enum PreferReturnEnum {
 	OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 	private static HashMap<String, PreferReturnEnum> ourValues;
-	private String myHeaderValue;
+	private final String myHeaderValue;
 
 	PreferReturnEnum(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;

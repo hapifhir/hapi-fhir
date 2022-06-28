@@ -23,10 +23,6 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExportJobParameters, BulkExportBinaryFileId, BulkExportJobResults> {
 	private static final Logger ourLog = getLogger(BulkExportCreateReportStep.class);
 
-	public BulkExportCreateReportStep() {
-		ourLog.info("\n\nBULKEXPORTCREATERPORT STEP CONSTRUTOR\n\n");
-	}
-
 	private Map<String, List<String>> myResourceToBinaryIds;
 
 	@NotNull
