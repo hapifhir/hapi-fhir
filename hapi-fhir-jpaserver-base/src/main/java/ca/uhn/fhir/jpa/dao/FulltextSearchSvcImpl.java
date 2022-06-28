@@ -82,12 +82,11 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
-
-	public static final int RSRC_SEARCH_LIMIT_DEFAULT = 50;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -110,9 +109,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
+	@Autowired
+	private IHSearchEventListener myHSearchEventListener;
+
 	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
 	private Boolean ourDisabled;
-	private int mySearchCount = 0;
 
 	/**
 	 * Constructor
@@ -180,7 +181,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-		mySearchCount++;
+		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		var query= getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
@@ -318,7 +319,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
 
-		mySearchCount++;
+		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		return autocomplete.search(theOptions);
 	}
 
@@ -344,7 +345,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
-		mySearchCount++;
+		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
@@ -357,7 +358,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		SearchSession session = getSearchSession();
-		mySearchCount++;
+		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> buildResourceSelectClause(f)
@@ -412,7 +413,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
-		int offset = 0; int limit = RSRC_SEARCH_LIMIT_DEFAULT;
+		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			offset = theParams.getOffset();
 			limit = theParams.getCount();
@@ -420,7 +421,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			theParams.setOffset(null);
 		}
 
-		mySearchCount++;
+		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 
 		var query = getSearchSession().search(ResourceTable.class)
 				.select(this::buildResourceSelectClause)
@@ -441,10 +442,5 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
 	}
 
-	@Override
-	public int getSearchCount() { return mySearchCount; }
-
-	@Override
-	public void resetSearchCount() { mySearchCount = 0; }
 
 }

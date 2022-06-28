@@ -115,25 +115,6 @@ public class TestDaoSearch {
 		return result.getAllResources();
 	}
 
-
-	/**
-	 * Search for resources in the first query, instead of searching for IDs first
-	 */
-	@Transactional
-	public List<IBaseResource> searchForFastResources(String theQueryUrl) {
-		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
-
-		SearchParameterMap map = search.getSearchParameterMap();
-		map.setLoadSynchronous(true);
-		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
-		if (sort != null) {
-			map.setSort(sort);
-		}
-
-		return myFulltextSearchSvc.searchForResources(search.getResourceName(), map);
-	}
-
-
 	public List<String>  searchForIds(String theQueryUrl) {
 		// fake out the server url parsing
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);

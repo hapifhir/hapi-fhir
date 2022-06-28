@@ -100,10 +100,5 @@ public interface IFulltextSearchSvc {
 
 	boolean supportsAllOf(SearchParameterMap theParams);
 
-	/**
-	 * Required for testing
-	 */
-	public int getSearchCount();
-	public void resetSearchCount();
 
 }

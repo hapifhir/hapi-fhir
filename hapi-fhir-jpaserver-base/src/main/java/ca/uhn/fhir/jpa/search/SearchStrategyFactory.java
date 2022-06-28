@@ -41,7 +41,9 @@ public class SearchStrategyFactory {
 			myFulltextSearchSvc != null &&
 			myDaoConfig.isStoreResourceInLuceneIndex() &&
 			myDaoConfig.isAdvancedLuceneIndexing() &&
-			myFulltextSearchSvc.supportsAllOf(theParams);
+			myFulltextSearchSvc.supportsAllOf(theParams) &&
+			theParams.getSummaryMode() == null &&
+			theParams.getSearchTotalMode() == null;
 	}
 
 	public ISearchStrategy makeDirectStrategy(String theSearchUUID, String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {

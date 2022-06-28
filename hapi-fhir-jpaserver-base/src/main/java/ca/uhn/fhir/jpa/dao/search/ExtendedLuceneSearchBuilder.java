@@ -72,22 +72,10 @@ public class ExtendedLuceneSearchBuilder {
 	 */
 	public boolean isSupportsAllOf(SearchParameterMap myParams) {
 		return
-//			fixme jm: confirm
-			myParams.getSummaryMode() == null &&
-			myParams.getSearchTotalMode() == null &&  // ???
 			myParams.getRevIncludes() == null && // ???
 			myParams.getIncludes() == null && // ???
 			myParams.getEverythingMode() == null && // ???
 			! myParams.isDeleteExpunge() && // ???
-
-			// this works. doesn't it?
-//			! myParams.isLastN() && // ???
-
-//			// how about this?
-//			myParams.getLastNMax() != 0  && // ???
-
-			! myParams.isLoadSynchronous()  && // ???
-			myParams.getLoadSynchronousUpTo() == null && // ???
 
 			// not yet supported in HSearch
 			myParams.getNearDistanceParam() == null && // ???
