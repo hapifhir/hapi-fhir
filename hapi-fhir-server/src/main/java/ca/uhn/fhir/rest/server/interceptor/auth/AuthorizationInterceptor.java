@@ -182,11 +182,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	/**
 	 * Sets a search parameter matcher for use in handling SMART v2 filter scopes
 	 *
-	 * @param myAuthorizationSearchParamMatcher The search parameter matcher. Null is also acceptable and is used as the
+	 * @param theAuthorizationSearchParamMatcher The search parameter matcher. Null is also acceptable and is used as the
 	 *                                          default.   
 	 */
-	public void setMyAuthorizationSearchParamMatcher(IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher) {
-		this.myAuthorizationSearchParamMatcher = myAuthorizationSearchParamMatcher;
+	public void setMyAuthorizationSearchParamMatcher(IAuthorizationSearchParamMatcher theAuthorizationSearchParamMatcher) {
+		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
 	}
 
 	/**
