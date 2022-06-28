@@ -13,6 +13,7 @@ import ca.uhn.fhir.util.IModelVisitor;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,7 +43,6 @@ public class ResponseTerminologyTranslationSvc {
 	private FhirContext myFhirContext;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-
 
 	public ResponseTerminologyTranslationSvc(Map<String, String> theMappingSpec) {
 		myMappingSpec = theMappingSpec;
@@ -72,6 +73,24 @@ public class ResponseTerminologyTranslationSvc {
 		}
 	}
 
+	public void addMappingSpecification(String theSourceCodeSystemUrl, String theTargetCodeSystemUrl) {
+		Validate.notBlank(theSourceCodeSystemUrl, "theSourceCodeSystemUrl must not be null or blank");
+		Validate.notBlank(theTargetCodeSystemUrl, "theTargetCodeSystemUrl must not be null or blank");
+
+		getMappingSpecifications().put(theSourceCodeSystemUrl, theTargetCodeSystemUrl);
+	}
+
+	public void clearMappingSpecifications() {
+		myMappingSpec.clear();
+	}
+
+	public Map<String, String> getMappingSpecifications() {
+		if (myMappingSpec == null) {
+			myMappingSpec = new HashMap<>();
+		}
+		return myMappingSpec;
+	}
+
 	private class MappingVisitor implements IModelVisitor {
 
 		@Override
@@ -91,7 +110,7 @@ public class ResponseTerminologyTranslationSvc {
 
 				// Look for mappings
 				for (String nextSourceSystem : foundSystemsToCodes.keySet()) {
-					String wantTargetSystem = myMappingSpec.get(nextSourceSystem);
+					String wantTargetSystem = getMappingSpecifications().get(nextSourceSystem);
 					if (wantTargetSystem != null) {
 						if (!foundSystemsToCodes.containsKey(wantTargetSystem)) {
 

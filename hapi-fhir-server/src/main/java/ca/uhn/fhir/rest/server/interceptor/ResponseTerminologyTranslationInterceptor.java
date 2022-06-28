@@ -81,14 +81,14 @@ public class ResponseTerminologyTranslationInterceptor extends BaseResponseTermi
 		myMappingSpecifications.clear();
 	}
 
+	public Map<String, String> getMappingSpecifications() {
+		return myMappingSpecifications;
+	}
+
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = RESPONSE_TERMINOLOGY_TRANSLATION_INTERCEPTOR)
 	public void handleResource(RequestDetails theRequestDetails, IBaseResource theResource) {
 		List<IBaseResource> resources = toListForProcessing(theRequestDetails, theResource);
 
 		myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(resources);
-	}
-
-	public Map<String, String> getMappingSpecifications() {
-		return myMappingSpecifications;
 	}
 }
