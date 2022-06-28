@@ -285,9 +285,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<fork>true</fork>
-                    <source>16</source>
-                    <target>16</target>
-                </configuration>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.felix</groupId>

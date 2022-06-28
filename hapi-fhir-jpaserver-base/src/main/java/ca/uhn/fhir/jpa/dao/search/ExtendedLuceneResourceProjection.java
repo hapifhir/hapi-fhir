@@ -53,4 +53,8 @@ public class ExtendedLuceneResourceProjection {
 
 		return result;
 	}
+
+	public long getPid() {
+		return myPid;
+	}
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.mdm.job;
+package ca.uhn.fhir.jpa.batch.mdm.batch.job;
 
 /*-
  * #%L

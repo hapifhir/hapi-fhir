@@ -31,6 +31,11 @@
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-storage-mdm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- test -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -125,14 +130,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>16</source>
-                    <target>16</target>
-                </configuration>
-            </plugin>
-        </plugins>
+		</plugins>
 	</build>
 </project>
