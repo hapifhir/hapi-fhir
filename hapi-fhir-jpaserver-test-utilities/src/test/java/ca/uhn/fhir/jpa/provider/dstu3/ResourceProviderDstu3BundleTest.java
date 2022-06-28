@@ -6,6 +6,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Test {
@@ -51,6 +55,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			List<StringType> searchInclude = patient.get().getSearchInclude();
 			List<StringType> searchRevInclude = patient.get().getSearchRevInclude();
 
+			assertTrue(searchRevInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject")));
+			assertEquals(searchRevInclude.size(), 152);
+
+			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
+			assertEquals(searchInclude.size(), 4);
 		}
 
 
