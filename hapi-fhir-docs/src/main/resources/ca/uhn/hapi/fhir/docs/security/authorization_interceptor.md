@@ -19,6 +19,15 @@ The AuthorizationInterceptor is used by subclassing it and then registering your
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|patientAndAdmin}}
 ``` 
 
+The core rules support restricting access by resource type, resource instance, and compartment.
+The rules also support fhir-query filters expressed by fhir queries - e.g. `code:above=http://loinc.org|55399-0` to restrict Observations to just the diabetes panel.
+To use the fhir-query filters, you must activate the [RuleFilteringConsentService](/apidocs/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/consent/RuleFilteringConsentService.java)
+like the
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|ruleFiltering}}
+``` 
+
+
 ## Using AuthorizationInterceptor in a REST Server
 
 The AuthorizationInterceptor works by examining the client request in order to determine whether "write" operations are legal, and looks at the response from the server in order to determine whether "read" operations are legal.
