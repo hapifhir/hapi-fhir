@@ -27,6 +27,8 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -48,10 +50,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
@@ -63,6 +67,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+
+	private RestfulServerConfiguration myServerConfiguration;
 
 	/**
 	 * Constructor
@@ -82,6 +88,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
+		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
 		setIncludeResourceCounts(true);
@@ -161,7 +168,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				}
 
 				updateIncludesList(nextResource, searchParams);
-
+				updateRevIncludesList(nextResource, searchParams);
 			}
 		}
 
@@ -184,7 +191,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	private ResourceSearchParams constructCompleteSearchParamList(String theResourceName) {
 		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 
-		ISearchParamRegistry serverConfiguration = myRestfulServer.createConfiguration();
 
 		/*
 		 * If we have an explicit registry (which will be the case in the JPA server) we use it as priority,
@@ -192,7 +198,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		 * global params like _lastUpdated
 		 */
 		ResourceSearchParams searchParams;
-		ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(theResourceName);
+		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(theResourceName);
 		if (mySearchParamRegistry != null) {
 			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
 			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
@@ -214,6 +220,18 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
 	}
 
+
+	private void updateRevIncludesList(CapabilityStatementRestResourceComponent theNextResource, ResourceSearchParams theSearchParams) {
+		// Add RevInclude to CapabilityStatement.rest.resource
+		String resourcename = theNextResource.getType();
+		if (theNextResource.getSearchRevInclude().isEmpty()) {
+			theSearchParams.values()
+				.stream()
+				.filter(t -> t.getTargets().contains(resourcename) || t.getTargets().isEmpty())
+				.forEach(t -> theNextResource.addSearchRevInclude("zoop:" + t.getName()));
+		}
+	}
+
 	private void updateIncludesList(CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {
 		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
 		String resourceName = theResource.getType();
@@ -223,8 +241,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				.stream()
 				.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
 				.map(t -> resourceName + ":" + t.getName())
-				.sorted()
-				.collect(Collectors.toList());
+				.sorted().toList();
 			theResource.addSearchInclude("*");
 			for (String nextInclude : includes) {
 				theResource.addSearchInclude(nextInclude);

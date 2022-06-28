@@ -32,7 +32,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
 		}
+	}
 
+	@Test
+	public void testConformance() {
+		ourClient.meta().get()
 	}
 
 
