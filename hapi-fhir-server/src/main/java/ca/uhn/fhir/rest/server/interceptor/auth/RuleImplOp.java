@@ -27,6 +27,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -673,6 +674,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	@Override
 	public String toString() {
+		ToStringBuilder builder = toStringBuilder();
+		return builder.toString();
+	}
+
+	@Nonnull
+	protected ToStringBuilder toStringBuilder() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("op", myOp);
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
@@ -681,7 +688,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("classifierCompartmentName", myClassifierCompartmentName);
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);
-		return builder.toString();
+		return builder;
 	}
 
 	void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {

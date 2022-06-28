@@ -3,11 +3,13 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 
 // wipjv Ken - Should we complicate RuleImplOp instead?  Or enhance the testers?
@@ -60,7 +62,7 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 		AuthorizationInterceptor.Verdict result;
 		switch (mr.getMatch()) {
 			case MATCH:
-				result = this.newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				result = super.applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget, theRuleApplier);
 				break;
 			case UNSUPPORTED:
 				// wipjv log a warning to the troubleshooting log
@@ -78,5 +80,12 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 				break;
 		}
 		return result;
+	}
+
+	@Nonnull
+	@Override
+	protected ToStringBuilder toStringBuilder() {
+		return super.toStringBuilder()
+			.append("filter", myFilter);
 	}
 }
