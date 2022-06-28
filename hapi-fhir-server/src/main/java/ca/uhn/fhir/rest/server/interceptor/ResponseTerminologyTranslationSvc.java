@@ -65,24 +65,6 @@ public class ResponseTerminologyTranslationSvc {
 		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("string");
 	}
 
-//	public ResponseTerminologyTranslationSvc(ResponseTerminologyTranslationInterceptor theResponseTerminologyTranslationInterceptor) {
-//		myResponseTerminologyTranslationInterceptor = theResponseTerminologyTranslationInterceptor;
-//		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
-//
-//		myCodeableConceptType = codeableConceptDef.getImplementingClass();
-//		myCodeableConceptCodingChild = codeableConceptDef.getChildByName("coding");
-//
-//		myCodingDefinition = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("Coding"));
-//		myCodingType = myCodingDefinition.getImplementingClass();
-//		myCodingSystemChild = myCodingDefinition.getChildByName("system");
-//		myCodingCodeChild = myCodingDefinition.getChildByName("code");
-//		myCodingDisplayChild = myCodingDefinition.getChildByName("display");
-//
-//		myUriDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("uri");
-//		myCodeDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("code");
-//		myStringDefinition = (RuntimePrimitiveDatatypeDefinition) myFhirContext.getElementDefinition("string");
-//	}
-
 	public void processResourcesForTerminologyTranslation(List<IBaseResource> resources) {
 		FhirTerser terser = myFhirContext.newTerser();
 		for (IBaseResource nextResource : resources) {
