@@ -133,6 +133,13 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
+	public void testUnrecognizedParam() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("foo=bar", myObservation, mySearchParams);
+		assertFalse(result.supported());
+		assertEquals("Parameter not supported", result.getUnsupportedReason());
+	}
+
+	@Test
 	public void testDateUnsupportedDateOps() {
 		testDateUnsupportedDateOp(ParamPrefixEnum.APPROXIMATE);
 		testDateUnsupportedDateOp(ParamPrefixEnum.STARTS_AFTER);

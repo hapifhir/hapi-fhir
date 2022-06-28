@@ -152,7 +152,7 @@ public class MatchUrlService {
 			} else {
 				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(theResourceDefinition.getName(), nextParamName);
 				if (paramDef == null) {
-					throw new InvalidRequestException(Msg.code(488) + "Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName);
+					throw throwUnrecognizedParamException(theMatchUrl, theResourceDefinition, nextParamName);
 				}
 
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(mySearchParamRegistry, myFhirContext, paramDef, nextParamName, paramList);
@@ -160,6 +160,29 @@ public class MatchUrlService {
 			}
 		}
 		return paramMap;
+	}
+
+	public static class UnrecognizedSearchParameterException extends InvalidRequestException {
+
+		private final String myResourceName;
+		private final String myParamName;
+
+		UnrecognizedSearchParameterException(String theMessage, String theResourceName, String theParamName) {
+			super(theMessage);
+			myResourceName = theResourceName;
+			myParamName = theParamName;
+		}
+
+		public String getResourceName() {
+			return myResourceName;
+		}
+
+		public String getParamName() {
+			return myParamName;
+		}
+	}
+	private InvalidRequestException throwUnrecognizedParamException(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, String nextParamName) {
+		return new UnrecognizedSearchParameterException(Msg.code(488) + "Failed to parse match URL[" + theMatchUrl + "] - Resource type " + theResourceDefinition.getName() + " does not have a parameter with name: " + nextParamName, theResourceDefinition.getName(), nextParamName);
 	}
 
 	private IQueryParameterAnd<?> newInstanceAnd(String theParamType) {
