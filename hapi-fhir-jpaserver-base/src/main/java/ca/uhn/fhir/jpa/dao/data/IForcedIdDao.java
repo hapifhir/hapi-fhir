@@ -33,7 +33,7 @@ import java.util.Optional;
 @Repository
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
-	@Query("SELECT f FROM ForcedId f WHERE myResourcePid IN (:resource_pids)")
+	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid IN (:resource_pids)")
 	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
