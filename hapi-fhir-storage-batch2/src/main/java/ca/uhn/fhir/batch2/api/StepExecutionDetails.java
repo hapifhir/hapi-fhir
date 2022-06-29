@@ -33,7 +33,10 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final String myInstanceId;
 	private final String myChunkId;
 
-	public StepExecutionDetails(@Nonnull PT theParameters, @Nullable IT theData, @Nonnull String theInstanceId, @Nonnull String theChunkId) {
+	public StepExecutionDetails(@Nonnull PT theParameters,
+										 @Nullable IT theData,
+										 @Nonnull String theInstanceId,
+										 @Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;
@@ -42,9 +45,10 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	}
 
 	/**
-	 * Returns the data associated with this step execution. This method should never be
-	 * called during the first step of a job, and will never return <code>null</code> during
-	 * any subsequent steps.
+	 * Returns the data associated with this step execution.
+	 * This method should never be called during the first step of a job,
+	 * or in a reduction step, and will never return <code>null</code> during
+	 * any other steps.
 	 *
 	 * @throws NullPointerException If this method is called during the first step of a job
 	 */
@@ -79,4 +83,13 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		return myChunkId;
 	}
 
+	/**
+	 * Returns true if there's a workchunk to store data to.
+	 * If false, failures and data storage go straight to the jobinstance instead
+	 * @return - true if there's a workchunk in the db to store to.
+	 * 			false if the output goes to the jobinstance instead
+	 */
+	public boolean hasAssociatedWorkChunk() {
+		return true;
+	}
 }

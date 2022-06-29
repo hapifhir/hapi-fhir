@@ -22,7 +22,11 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.model.*;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobDefinitionStep;
+import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
@@ -41,7 +45,11 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
 	private final boolean myGatedExecution;
 
-	JobDataSink(@Nonnull BatchJobSender theBatchJobSender, @Nonnull IJobPersistence theJobPersistence, @Nonnull JobDefinition<?> theDefinition, @Nonnull String theInstanceId, @Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
+	JobDataSink(@Nonnull BatchJobSender theBatchJobSender,
+					@Nonnull IJobPersistence theJobPersistence,
+					@Nonnull JobDefinition<?> theDefinition,
+					@Nonnull String theInstanceId,
+					@Nonnull JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 		super(theInstanceId, theJobWorkCursor);
 		myBatchJobSender = theBatchJobSender;
 		myJobPersistence = theJobPersistence;
@@ -55,6 +63,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	public void accept(WorkChunkData<OT> theData) {
 		String instanceId = getInstanceId();
 		String targetStepId = myTargetStep.getStepId();
+
 		int sequence = myChunkCounter.getAndIncrement();
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);

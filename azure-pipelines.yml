@@ -60,7 +60,7 @@ jobs:
             condition: always()
             inputs:
                targetPath: '$(Build.ArtifactStagingDirectory)/'
-               artifactName: 'full_logs.zip'
+               artifactName: 'full_logs_$(Build.BuildId)_$(Build.BuildNumber).zip'
          -  script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
             displayName: 'codecov'
          -  task: PublishTestResults@2

@@ -24,15 +24,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchIndexExtractor;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
@@ -43,12 +44,16 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
+import com.google.common.collect.Ordering;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
+import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
+import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -64,6 +69,7 @@ import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -93,7 +99,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	ModelConfig myModelConfig;
 
-	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
+	@Autowired
+	private IHSearchSortHelper myExtendedFulltextSortHelper;
+
+	final private ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
 
 	private Boolean ourDisabled;
 
@@ -104,10 +113,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+	public ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(
+		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
 		return extractor.extract(theResource,theNewParams);
 	}
@@ -117,7 +126,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedLuceneIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
+		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedHSearchIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
 
 		return requiresHibernateSearchAccess;
 	}
@@ -163,7 +172,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-		return getSearchSession().search(ResourceTable.class)
+		var query= getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
 				// adapt the String docRef.id() to the Long that it really is.
@@ -173,7 +182,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			)
 			.where(
 				f -> f.bool(b -> {
-					ExtendedLuceneClauseBuilder builder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, b, f);
+					ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
 
 					/*
 					 * Handle _content parameter (resource body content)
@@ -206,15 +215,24 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle other supported parameters
 					 */
-					if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
+					if (myDaoConfig.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
 						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
 					}
+
 					//DROP EARLY HERE IF BOOL IS EMPTY?
 
 				})
 			);
-	}
 
+		if (theParams.getSort() != null) {
+			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+
+			// indicate parameter was processed
+			theParams.setSort(null);
+		}
+
+		return query;
+	}
 
 
 	@Nonnull
@@ -321,24 +339,40 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (thePids.isEmpty()) {
 			return Collections.emptyList();
 		}
+
 		SearchSession session = getSearchSession();
-		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
+		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> f.composite(
-					ExtendedLuceneResourceProjection::new,
+					ExtendedHSearchResourceProjection::new,
 					f.field("myId", Long.class),
 					f.field("myForcedId", String.class),
 					f.field("myRawResource", String.class))
 			)
 			.where(
-				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
-			).fetchAllHits();
+				f -> f.id().matchingAny(thePids))
+			.fetchAllHits(); // matches '_id' from resource index
+
+		ArrayList<Long> pidList = new ArrayList<>(thePids);
+		List<ExtendedHSearchResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
+			.sorted( Ordering.explicit(pidList).onResultOf(ExtendedHSearchResourceProjection::getPid) ).collect( Collectors.toList() );
+
 		IParser parser = myFhirContext.newJsonParser();
-		return rawResourceDataList.stream()
+		return orderedAsPidsResourceDataList.stream()
 			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
 	}
 
+
+	private SortFinalStep getSortOrder(SearchSortFactory theF, SortOrderEnum theOrder) {
+		var finalSortStep = theF.field("myId");
+		if (theOrder == SortOrderEnum.DESC) {
+			finalSortStep.desc();
+		} else {
+			finalSortStep.asc();
+		}
+		return finalSortStep;
+	}
 
 
 	@Override

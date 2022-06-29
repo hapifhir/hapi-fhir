@@ -1,0 +1,4 @@
+---
+issue: 3662
+type: add
+title: "Added support to batch2 jobs to allow for final reduction step for gated jobs."

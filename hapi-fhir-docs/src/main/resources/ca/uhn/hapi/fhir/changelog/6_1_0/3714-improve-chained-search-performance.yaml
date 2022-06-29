@@ -1,0 +1,4 @@
+type: perf
+issue: 3714
+jira: SMILE-4484
+title: "Chained searches have been sped up for configurations where the `Index Contained Resources` feature is enabled."

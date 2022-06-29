@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -138,7 +138,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
-	private ExtendedLuceneIndexData myLuceneIndexData;
+	private ExtendedHSearchIndexData myLuceneIndexData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -772,7 +772,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myCreatedByMatchUrl;
 	}
 
-	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
+	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
 	}
 
