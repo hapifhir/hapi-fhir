@@ -3993,6 +3993,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient p = new Patient();
 		p.setId("AAA");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
+		// FIXME ND please switch to using myFhirClient here.  Distinguish between 200 and 201 by checking methodOutcome.getCreated()
 		HttpPut httpPut = new HttpPut(ourServerBase + "/Patient/AAA");
 		httpPut.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {

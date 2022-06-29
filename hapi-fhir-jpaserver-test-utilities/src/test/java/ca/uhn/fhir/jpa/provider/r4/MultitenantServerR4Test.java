@@ -164,7 +164,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -172,7 +172,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
 				"Patient", Arrays.asList(patientId), true
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Delete resource
@@ -183,7 +183,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
 				"Patient", Arrays.asList(patientId)
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -191,7 +191,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
 				"Patient", Arrays.asList(patientId), true
 			);
-			assertEquals(0, forcedIds.size());
+			assertThat(forcedIds, hasSize(0));
 		});
 	}
 
@@ -206,7 +206,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -214,7 +214,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), true
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Delete resource
@@ -225,7 +225,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
 				"Patient", Arrays.asList(patientId), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -250,7 +250,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -258,7 +258,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		deletePatient(TENANT_A, idA);
@@ -268,7 +268,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -293,7 +293,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -301,7 +301,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		deletePatient(TENANT_A, idA);
@@ -311,7 +311,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
 				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
 			);
-			verifySingleForcedIdFound(forcedIds, patientId);
+			assertContainsSingleForcedId(forcedIds, patientId);
 		});
 
 		// Search and filter deleted
@@ -323,7 +323,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		});
 	}
 
-	private void verifySingleForcedIdFound(Collection<Object[]> forcedIds, String patientId){
+	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
 		assertEquals(1, forcedIds.size());
 		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
 	}
