@@ -3991,65 +3991,68 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void testSearchByIdForDeletedResourceWithClientAssignedId() throws IOException {
 		// Create with client assigned ID
 		Patient p = new Patient();
-		p.setId("AAA");
-		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
-		// FIXME ND please switch to using myFhirClient here.  Distinguish between 200 and 201 by checking methodOutcome.getCreated()
-		HttpPut httpPut = new HttpPut(ourServerBase + "/Patient/AAA");
-		httpPut.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(201, status.getStatusLine().getStatusCode());
-		}
+		String patientId = "AAA";
+		p.setId(patientId);
 
-		// Delete
-		HttpDelete httpDelete = new HttpDelete(ourServerBase + "/Patient/AAA");
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpDelete)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		}
+		MethodOutcome outcome = myClient.update().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
 
 		// Search
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient?_id=AAA");
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertTrue(CollectionUtils.isEmpty(bundle.getEntry()));
-			assertEquals(0, bundle.getTotal());
-		}
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
 	}
 
 	@Test
 	public void testSearchByIdForDeletedResourceWithServerAssignedId() throws IOException {
-		// Create with client assigned ID
+		// Create with server assigned ID
 		Patient p = new Patient();
-		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p);
-		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient");
-		httpPost.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		MethodOutcome outcome = myClient.create().resource(p).execute();
+		assertTrue(outcome.getCreated());
 
-		String id = null;
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpPost)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			String newIdString = status.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			id = new IdType(newIdString).getIdPart();
-			assertNotNull(id);
-		}
-
-		// Delete
-		HttpDelete httpDelete = new HttpDelete(ourServerBase + "/Patient/"+id);
-		try (CloseableHttpResponse status = ourHttpClient.execute(httpDelete)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-		}
+		Patient createdPatient = (Patient) outcome.getResource();
+		String patientId = createdPatient.getIdElement().getIdPart();
 
 		// Search
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient?_id="+id);
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertTrue(CollectionUtils.isEmpty(bundle.getEntry()));
-			assertEquals(0, bundle.getTotal());
-		}
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
 	}
 
 	@Test

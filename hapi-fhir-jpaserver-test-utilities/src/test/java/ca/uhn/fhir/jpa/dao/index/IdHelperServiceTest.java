@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -30,9 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -151,18 +149,26 @@ public class IdHelperServiceTest {
 		Assertions.assertEquals(blue, map.get("BLUE"));
 	}
 
-	// FIXME ND fix broken tests in this class (per the one we fixed together)
 	@Test
 	public void testResolveResourceIdentity_defaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
-		String resourceId = "AAA";
+		String resourceForcedId = "AAA";
 
-		IResourceLookup testResult = new ResourceTable();
-		doReturn(testResult).when(myHelperService).resolveResourceIdentity(partitionId, resourceType, resourceId, false);
-		IResourceLookup result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceId);
-		verify(myHelperService, times(1)).resolveResourceIdentity(partitionId, resourceType, resourceId, false);
-		assertEquals(result, testResult);
+		Object[] forcedIdView = new Object[4];
+		forcedIdView[0] = resourceType;
+		forcedIdView[1] = 1L;
+		forcedIdView[2] = resourceForcedId;
+		forcedIdView[3] = null;
+
+		Collection<Object[]> testForcedIdViews = new ArrayList<>();
+		testForcedIdViews.add(forcedIdView);
+		when(myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
+
+		IResourceLookup result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
+		assertEquals(forcedIdView[0], result.getResourceType());
+		assertEquals(forcedIdView[1], result.getResourceId());
+		assertEquals(forcedIdView[3], result.getDeleted());
 	}
 
 	@Test
@@ -171,13 +177,13 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		List<String> ids = Arrays.asList("A", "B", "C");
 
-		ResourcePersistentId resourcePersitentId1 = new ResourcePersistentId("TEST1");
-		ResourcePersistentId resourcePersitentId2 = new ResourcePersistentId("TEST2");
-		ResourcePersistentId resourcePersitentId3 = new ResourcePersistentId("TEST3");
+		ResourcePersistentId resourcePersistentId1 = new ResourcePersistentId("TEST1");
+		ResourcePersistentId resourcePersistentId2 = new ResourcePersistentId("TEST2");
+		ResourcePersistentId resourcePersistentId3 = new ResourcePersistentId("TEST3");
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
-			.thenReturn(resourcePersitentId1)
-			.thenReturn(resourcePersitentId2)
-			.thenReturn(resourcePersitentId3);
+			.thenReturn(resourcePersistentId1)
+			.thenReturn(resourcePersistentId2)
+			.thenReturn(resourcePersistentId3);
 		Map<String, ResourcePersistentId> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids);
 		assertThat(result.keySet(), hasSize(3));
 		assertEquals("TEST1", result.get("A").getId());
@@ -191,10 +197,9 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		String id = "A";
 
-		ResourcePersistentId testResult = new ResourcePersistentId(new Object(), 1L);
-		doReturn(testResult).when(myHelperService).resolveResourcePersistentIds(partitionId, resourceType, id, false);
+		ResourcePersistentId resourcePersistentId1 = new ResourcePersistentId(id);
+		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(resourcePersistentId1);
 		ResourcePersistentId result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id);
-		verify(myHelperService, times(1)).resolveResourcePersistentIds(partitionId, resourceType, id, false);
-		assertEquals(result, testResult);
+		assertEquals(id, result.getId());
 	}
 }
