@@ -105,6 +105,12 @@ public class TestHSearchAddInConfig {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
+
+		@Bean
+		public IHSearchEventListener testHSearchEventDispatcher() {
+			return new TestHSearchEventDispatcher();
+		}
+
 	}
 
 
@@ -136,6 +142,12 @@ public class TestHSearchAddInConfig {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
+
+		@Bean
+		public IHSearchEventListener testHSearchEventDispatcher() {
+			return new TestHSearchEventDispatcher();
+		}
+
 	}
 
 	/**

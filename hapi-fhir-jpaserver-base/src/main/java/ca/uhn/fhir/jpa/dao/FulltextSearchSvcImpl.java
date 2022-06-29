@@ -108,7 +108,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	final private ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
 
-	@Autowired
+	@Autowired(required = false)
 	private IHSearchEventListener myHSearchEventListener;
 
 	private Boolean ourDisabled;
@@ -179,7 +179,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		var query= getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
@@ -317,7 +317,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
 
-		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		return autocomplete.search(theOptions);
 	}
 
@@ -343,7 +343,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
-		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
@@ -356,7 +356,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		SearchSession session = getSearchSession();
-		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> buildResourceSelectClause(f)
@@ -412,7 +412,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			theParams.setOffset(null);
 		}
 
-		myHSearchEventListener.hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 
 		var query = getSearchSession().search(ResourceTable.class)
 				.select(this::buildResourceSelectClause)
@@ -432,6 +432,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public boolean supportsAllOf(SearchParameterMap theParams) {
 		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
+
+
+	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {
+		if (myHSearchEventListener != null) {
+			myHSearchEventListener.hsearchEvent(theEventType);
+		}
 	}
 
 
