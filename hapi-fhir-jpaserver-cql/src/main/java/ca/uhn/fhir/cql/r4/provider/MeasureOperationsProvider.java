@@ -103,7 +103,7 @@ public class MeasureOperationsProvider {
 			seed.getMeasurementPeriod());
 		if (reportType != null) {
 			switch (reportType) {
-				case "patient":
+				case "subject":
 					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
@@ -114,7 +114,7 @@ public class MeasureOperationsProvider {
 			}
 		}
 
-		// default report type is patient
+		// default report type is subject
 		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
 		if (productLine != null) {
 			Extension ext = new Extension();
