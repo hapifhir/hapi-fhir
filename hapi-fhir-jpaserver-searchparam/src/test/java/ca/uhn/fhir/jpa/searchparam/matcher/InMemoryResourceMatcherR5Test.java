@@ -194,11 +194,13 @@ public class InMemoryResourceMatcherR5Test {
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
   }
   
-  @Test
+   @Test
 	public void testUnrecognizedParam() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("foo=bar", myObservation, mySearchParams);
-		assertFalse(result.supported());
-		assertEquals("Parameter not supported", result.getUnsupportedReason());
+		try {
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match("foo=bar", myObservation, mySearchParams);
+		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+			// expected
+		}
 	}
 
 	@Test
