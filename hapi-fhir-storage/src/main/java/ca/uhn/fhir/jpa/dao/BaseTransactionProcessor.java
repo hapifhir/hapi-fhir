@@ -804,16 +804,18 @@ public abstract class BaseTransactionProcessor {
 	private void replaceReferencesInEntriesWithConsolidatedUUID(List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
 			IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-			for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
-				// We're interested in any references directly to the placeholder ID, but also
-				// references that have a resource target that has the placeholder ID.
-				String nextReferenceId = nextReference.getReferenceElement().getValue();
-				if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
-					nextReferenceId = nextReference.getResource().getIdElement().getValue();
-				}
-				if (theEntryFullUrl.equals(nextReferenceId)) {
-					nextReference.setReference(existingUuid);
-					nextReference.setResource(null);
+			if (nextResource != null) {
+				for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
+					// We're interested in any references directly to the placeholder ID, but also
+					// references that have a resource target that has the placeholder ID.
+					String nextReferenceId = nextReference.getReferenceElement().getValue();
+					if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+						nextReferenceId = nextReference.getResource().getIdElement().getValue();
+					}
+					if (theEntryFullUrl.equals(nextReferenceId)) {
+						nextReference.setReference(existingUuid);
+						nextReference.setResource(null);
+					}
 				}
 			}
 		}
