@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdDaoCustom;
+import ca.uhn.fhir.jpa.dao.data.custom.IForcedIdQueries;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +31,7 @@ import java.util.Optional;
  * #L%
  */
 @Repository
-public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdDaoCustom {
+public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJpaRepository, IForcedIdQueries {
 
 	@Query("SELECT f FROM ForcedId f WHERE myResourcePid IN (:resource_pids)")
 	List<ForcedId> findAllByResourcePid(@Param("resource_pids") List<Long> theResourcePids);
@@ -43,42 +42,4 @@ public interface IForcedIdDao extends JpaRepository<ForcedId, Long>, IHapiFhirJp
 	@Modifying
 	@Query("DELETE FROM ForcedId t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
-
-	/**
-	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
-	 * is an object array, where the order matters (the array represents columns returned by the query).
-	 * Deleted resources should not be filtered.
-	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeIncludeDeleted(String theResourceType, Collection<String> theForcedIds);
-
-	/**
-	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
-	 * is an object array, where the order matters (the array represents columns returned by the query).
-	 * Deleted resources are optionally filtered.
-	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds, boolean theFilterDeleted);
-
-	/**
-	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
-	 * is an object array, where the order matters (the array represents columns returned by the query).
-	 * Deleted resources are optionally filtered.
-	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(String theResourceType, Collection<String> theForcedIds, Collection<Integer> thePartitionId, boolean theFilterDeleted);
-
-
-	/**
-	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
-	 * is an object array, where the order matters (the array represents columns returned by the query).
-	 * Deleted resources are optionally filtered.
-	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(String theResourceType, Collection<String> theForcedIds, boolean theFilterDeleted);
-
-	/**
-	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
-	 * is an object array, where the order matters (the array represents columns returned by the query).
-	 * Deleted resources are optionally filtered.
-	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(String theNextResourceType, Collection<String> theNextIds, List<Integer> thePartitionIdsWithoutDefault, boolean theFilterDeleted);
-
-
 }

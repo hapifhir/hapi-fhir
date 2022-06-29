@@ -23,7 +23,7 @@ import java.util.List;
  * #L%
  */
 
-public interface IForcedIdDaoCustom {
+public interface IForcedIdQueries {
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection

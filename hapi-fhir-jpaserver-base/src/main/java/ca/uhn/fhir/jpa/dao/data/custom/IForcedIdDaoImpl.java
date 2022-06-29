@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Component
-public class IForcedIdDaoImpl implements IForcedIdDaoCustom {
+public class IForcedIdDaoImpl implements IForcedIdQueries {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
