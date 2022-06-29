@@ -24,7 +24,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,6 +64,7 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
+	private static final Logger ourLog = LoggerFactory.getLogger(RuleImplOp.class);
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<String> myAppliesToTypes;
@@ -94,7 +98,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
-		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
 
@@ -311,6 +315,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 * TODO: At this point {@link RuleImplOp} handles "any ID" and "in compartment" logic - It would be nice to split these into separate classes.
 	 */
 	protected Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
+		ourLog.trace("applyRuleLogic {} {}", theOperation, theRuleTarget);
 		switch (myClassifierType) {
 			case ANY_ID:
 				break;
@@ -672,6 +677,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	@Override
 	public String toString() {
+		ToStringBuilder builder = toStringBuilder();
+		return builder.toString();
+	}
+
+	@Nonnull
+	protected ToStringBuilder toStringBuilder() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("op", myOp);
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
@@ -680,7 +691,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("classifierCompartmentName", myClassifierCompartmentName);
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);
-		return builder.toString();
+		return builder;
 	}
 
 	void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
