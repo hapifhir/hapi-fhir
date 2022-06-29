@@ -371,9 +371,10 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.getNearDistanceParam() == null &&
 						theParams.getLastUpdated() == null &&
 						theParams.getEverythingMode() == null &&
-						theParams.getOffset() == null &&
-						// or sorting?
-						theParams.getSort() == null
+						theParams.getOffset() == null
+//						&&
+//						// or sorting?
+//						theParams.getSort() == null
 					);
 
 			if (canSkipDatabase) {
@@ -425,7 +426,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
 			}
@@ -939,7 +940,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
 
 		// is storage enabled?
-		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+		return myDaoConfig.isStoreResourceInHSearchIndex() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
@@ -949,7 +950,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
 			// wipmb standardize on ResourcePersistentId

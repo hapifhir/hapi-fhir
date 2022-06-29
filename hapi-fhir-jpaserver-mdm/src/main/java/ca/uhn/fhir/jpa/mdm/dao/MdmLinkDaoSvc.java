@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,7 +42,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -365,5 +365,15 @@ public class MdmLinkDaoSvc {
 		return getLinkByGoldenResourcePidAndSourceResourcePid(
 			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theGoldenResource),
 			myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theSourceResource));
+	}
+
+	@Transactional(propagation = Propagation.MANDATORY)
+	public void deleteLinksWithAnyReferenceToPids(List<Long> theGoldenResourcePids) {
+		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
+		// method uses the list twice in the sql predicate)
+		List<List<Long>> chunks = ListUtils.partition(theGoldenResourcePids, 500);
+		for (List<Long> chunk : chunks) {
+			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+		}
 	}
 }

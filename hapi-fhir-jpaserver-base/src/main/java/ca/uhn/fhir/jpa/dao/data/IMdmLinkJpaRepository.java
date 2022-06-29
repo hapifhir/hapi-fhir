@@ -43,15 +43,19 @@ public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHa
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
+	@Modifying
+	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) OR mySourcePid IN (:goldenPids)")
+	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
+
 	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
 		"WHERE ml2.myMatchResult=:matchResult " +
 		"AND ml2.myGoldenResourcePid IN (" +
-			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
-			"INNER JOIN ResourceLink hrl " +
-			"ON hrl.myTargetResourcePid=ml.mySourcePid " +
-			"AND hrl.mySourceResourcePid=:groupPid " +
-			"AND hrl.mySourcePath='Group.member.entity' " +
-			"AND hrl.myTargetResourceType='Patient'" +
+		"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
+		"INNER JOIN ResourceLink hrl " +
+		"ON hrl.myTargetResourcePid=ml.mySourcePid " +
+		"AND hrl.mySourceResourcePid=:groupPid " +
+		"AND hrl.mySourcePath='Group.member.entity' " +
+		"AND hrl.myTargetResourceType='Patient'" +
 		")")
 	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
@@ -60,6 +64,7 @@ public interface IMdmLinkJpaRepository extends JpaRepository<MdmLink, Long>, IHa
 
 	interface MdmPidTuple {
 		Long getGoldenPid();
+
 		Long getSourcePid();
 	}
 

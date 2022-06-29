@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.batch.mdm.job;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.mdm.batch.job.MdmLinkDeleter;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

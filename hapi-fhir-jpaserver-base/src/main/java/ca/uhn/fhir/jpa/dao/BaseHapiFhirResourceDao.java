@@ -684,7 +684,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionDetails transactionDetails = new TransactionDetails();
 		List<ResourceTable> deletedResources = new ArrayList<>();
 		for (ResourcePersistentId pid : theResourceIds) {
-			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getId());
+			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
 			deletedResources.add(entity);
 
 			T resourceToDelete = toResource(myResourceType, entity, null, false);
@@ -1712,7 +1712,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
 
 		// Execute the update in a retryable transaction
-		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && "true".equals(theRequest.getHeader(JpaConstants.HEADER_REWRITE_HISTORY))) {
+		if (myDaoConfig.isUpdateWithHistoryRewriteEnabled() && theRequest.isRewriteHistory()) {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdateWithHistoryRewrite(theResource, theRequest, theTransactionDetails), onRollback);
 		} else {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);

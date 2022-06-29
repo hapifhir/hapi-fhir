@@ -24,19 +24,16 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_HAPI_MDM_MANAGED;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
@@ -112,8 +109,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testCreatePatientWithGoldenRecordTagForbidden() throws InterruptedException {
-		Patient patient = new Patient();
-		patient.getMeta().addTag(SYSTEM_GOLDEN_RECORD_STATUS, CODE_GOLDEN_RECORD, "Golden Record");
+		Patient patient = myMdmHelper.buildGoldenPatient();
 		try {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();

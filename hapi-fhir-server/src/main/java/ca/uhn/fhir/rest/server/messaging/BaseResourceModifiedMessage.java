@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.server.messaging;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -57,11 +57,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
 		setOperationType(theOperationType);
-		if (theOperationType != OperationTypeEnum.DELETE) {
-			setNewPayload(theFhirContext, theResource);
-		} else {
-			setPayloadIdFromPayload(theFhirContext, theResource);
-		}
+		setNewPayload(theFhirContext, theResource);
 	}
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {

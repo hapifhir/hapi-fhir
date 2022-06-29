@@ -105,9 +105,9 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -681,7 +681,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			.stream()
 			.filter(t -> t instanceof IServerInterceptor)
 			.map(t -> (IServerInterceptor) t)
-			.collect(Collectors.toList());
+			.collect(toList());
 		return Collections.unmodifiableList(retVal);
 	}
 
@@ -1904,7 +1904,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
-		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+		List<String> knownResourceTypes = myResourceProviders.stream()
+			.map(t -> t.getResourceType().getSimpleName())
+			.collect(toList());
+		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownResourceTypes);
 	}
 
 	/**

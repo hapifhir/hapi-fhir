@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexChunkIds;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -50,9 +50,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.addTypedPid("Patient", id0);
+		data.addTypedPid("Patient", id1);
 
 		// Execute
 
@@ -80,9 +80,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.addTypedPid("Patient", id0);
+		data.addTypedPid("Patient", id1);
 
 		// Execute
 
@@ -108,9 +108,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON")).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS")).getIdPartAsLong();
 
-		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.addTypedPid("Patient", id0);
+		data.addTypedPid("Patient", id1);
 
 		runInTransaction(() -> {
 			myResourceIndexedSearchParamStringDao.deleteByResourceId(id0);
@@ -145,9 +145,9 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
 		Long id1 = createPatient(withActiveTrue(), withFamily("FLANDERS"), withOrganization(orgId)).getIdPartAsLong();
 
-		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.addTypedPid("Patient", id0);
+		data.addTypedPid("Patient", id1);
 
 		SearchParameter sp = new SearchParameter();
 		sp.setType(Enumerations.SearchParamType.STRING);
@@ -208,11 +208,11 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		Long idPatientToInvalidate = createPatient().getIdPartAsLong();
 		Long idObservation = createObservation(withSubject(new IdType("Patient/" + idPatientToInvalidate))).getIdPartAsLong();
 
-		ReindexChunkIds data = new ReindexChunkIds();
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id0.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(id1.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Patient").setId(idPatientToInvalidate.toString()));
-		data.getIds().add(new ReindexChunkIds.Id().setResourceType("Observation").setId(idObservation.toString()));
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		data.addTypedPid("Patient", id0);
+		data.addTypedPid("Patient", id1);
+		data.addTypedPid("Patient", idPatientToInvalidate);
+		data.addTypedPid("Observation", idObservation);
 
 		runInTransaction(() -> {
 			// Swap in some invalid text, which will cause an error when we go to reindex

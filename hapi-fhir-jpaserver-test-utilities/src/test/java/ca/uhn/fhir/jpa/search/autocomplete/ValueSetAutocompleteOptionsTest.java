@@ -39,7 +39,7 @@ class ValueSetAutocompleteOptionsTest {
 	final private DaoConfig myDaoConfig = new DaoConfig();
 
 	{
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 	@Test
@@ -170,7 +170,7 @@ class ValueSetAutocompleteOptionsTest {
 		@Test
 		public void whenAdvancedIndexingOff() {
 		    // given
-			myDaoConfig.setAdvancedLuceneIndexing(false);
+			myDaoConfig.setAdvancedHSearchIndexing(false);
 
 			assertParseThrowsInvalidRequestWithErrorCode(ERROR_REQUIRES_EXTENDED_INDEXING);
 		}

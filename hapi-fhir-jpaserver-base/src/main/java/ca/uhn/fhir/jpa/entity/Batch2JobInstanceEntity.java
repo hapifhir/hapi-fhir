@@ -25,10 +25,12 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;
@@ -104,6 +106,15 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private String myEstimatedTimeRemaining;
 	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
 	private String myCurrentGatedStepId;
+
+	/**
+	 * Any output from the job can be held in this column
+	 * Even serialized json
+	 */
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
+	private String myReport;
 
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
@@ -258,6 +269,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
 	}
 
+	public String getReport() {
+		return myReport;
+	}
+
+	public void setReport(String theReport) {
+		myReport = theReport;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -277,6 +296,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("progress", myProgress)
 			.append("errorMessage", myErrorMessage)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+			.append("report", myReport)
 			.toString();
 	}
 }

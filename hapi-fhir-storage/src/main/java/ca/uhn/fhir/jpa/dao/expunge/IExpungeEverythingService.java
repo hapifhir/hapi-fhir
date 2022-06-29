@@ -27,5 +27,7 @@ import javax.annotation.Nullable;
 public interface IExpungeEverythingService {
 	void expungeEverything(@Nullable RequestDetails theRequest);
 
+	int getExpungeDeletedEntityCount();
+
     int expungeEverythingMdmLinks();
 }

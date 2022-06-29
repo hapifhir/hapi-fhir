@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3702
+title: "Added index for table MPI_LINK on attributes MATCH_RESULT, TARGET_PID and VERSION"

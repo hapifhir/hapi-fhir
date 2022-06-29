@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -52,7 +52,7 @@ import static org.hamcrest.Matchers.not;
 @RequiresDocker
 @ContextConfiguration(classes = {
 	TestR4Config.class,
-	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	TestHSearchAddInConfig.Elasticsearch.class,
 	DaoTestDataBuilder.Config.class
 })
 public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
@@ -94,7 +94,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	@BeforeEach
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 	@Override

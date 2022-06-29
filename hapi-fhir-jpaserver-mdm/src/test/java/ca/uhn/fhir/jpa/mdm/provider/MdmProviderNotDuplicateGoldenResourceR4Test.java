@@ -34,7 +34,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		myGoldenPatient = createGoldenPatient();
