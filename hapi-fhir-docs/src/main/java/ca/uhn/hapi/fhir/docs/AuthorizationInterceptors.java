@@ -38,18 +38,21 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.RuleFilteringConsentService;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
+/**
+ * Examples integrated into our documentation.
+ */
 public class AuthorizationInterceptors {
 
    public class PatientResourceProvider implements IResourceProvider
@@ -123,8 +126,20 @@ public class AuthorizationInterceptors {
    }
    //END SNIPPET: patientAndAdmin
 
+	public void ruleFiltering() {
+		RestfulServer restfulServer = new RestfulServer();
+		AuthorizationInterceptor theAuthorizationInterceptor = new AuthorizationInterceptor();
 
-   //START SNIPPET: conditionalUpdate
+		//START SNIPPET: ruleFiltering
+		ConsentInterceptor consentInterceptor = new ConsentInterceptor();
+		consentInterceptor.registerConsentService(new RuleFilteringConsentService(theAuthorizationInterceptor));
+		restfulServer.registerInterceptor(consentInterceptor);
+
+		//END SNIPPET: ruleFiltering
+	}
+
+
+	//START SNIPPET: conditionalUpdate
    @Update()
    public MethodOutcome update(
          @IdParam IdType theId,
@@ -296,6 +311,7 @@ public class AuthorizationInterceptors {
 
 		//END SNIPPET: rsnarrowing
 	}
+
 
 
 	//START SNIPPET: narrowingByCode

@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.Validate;
 import org.springframework.messaging.MessageHandler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Collections;
@@ -150,8 +152,13 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
-	public void cancelInstance(String theInstanceId) throws ResourceNotFoundException {
-		myJobPersistence.cancelInstance(theInstanceId);
+	public List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
+		return myJobQuerySvc.getInstancesByJobDefinitionIdAndEndedStatus(theJobDefinitionId, theEnded, theCount, theStart);
+	}
+
+	@Override
+	public JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException {
+		return myJobPersistence.cancelInstance(theInstanceId);
 	}
 
 	@PostConstruct
