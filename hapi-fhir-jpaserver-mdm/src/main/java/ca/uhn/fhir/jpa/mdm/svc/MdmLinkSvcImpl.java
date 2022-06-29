@@ -103,8 +103,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Override
 	@Transactional
 	public void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> theGoldenResourceIds) {
-		List<Long> goldenResourcePids = theGoldenResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
-		myMdmLinkDaoSvc.deleteLinksWithAnyReferenceToPids(goldenResourcePids);
+		myMdmLinkDaoSvc.deleteLinksWithAnyReferenceToPids(theGoldenResourceIds);
 	}
 
 	/**

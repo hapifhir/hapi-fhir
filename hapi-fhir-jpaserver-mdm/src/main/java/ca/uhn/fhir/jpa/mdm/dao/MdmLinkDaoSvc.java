@@ -368,12 +368,7 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Transactional(propagation = Propagation.MANDATORY)
-	public void deleteLinksWithAnyReferenceToPids(List<Long> theGoldenResourcePids) {
-		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
-		// method uses the list twice in the sql predicate)
-		List<List<Long>> chunks = ListUtils.partition(theGoldenResourcePids, 500);
-		for (List<Long> chunk : chunks) {
-			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
-		}
+	public void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theGoldenResourcePids) {
+		myMdmLinkDao.deleteLinksWithAnyReferenceToPids(theGoldenResourcePids);
 	}
 }

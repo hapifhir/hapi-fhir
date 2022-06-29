@@ -79,7 +79,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<IMdmLinkJpaRepository.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(mdmLinks.get(0).getSourcePid(), MdmMatchResultEnum.MATCH);
+		List<IMdmLinkJpaRepository.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new ResourcePersistentId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH);
 
 		assertThat(lists, hasSize(10));
 
@@ -100,7 +100,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setUpdated(new Date());
 		mdmLink.setGoldenResourcePersistenceId(new ResourcePersistentId(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
-		MdmLink saved= myMdmLinkDao.save(mdmLink);
+		MdmLink saved= (MdmLink) myMdmLinkDao.save(mdmLink);
 		return saved;
 	}
 }

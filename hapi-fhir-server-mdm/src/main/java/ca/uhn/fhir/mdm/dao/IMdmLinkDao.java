@@ -77,4 +77,6 @@ public interface IMdmLinkDao<T extends IMdmLink> {
 	Page<T> search(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmPageRequest thePageRequest, List<Integer> thePartitionId);
 
 	Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch);
+
+	void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theResourcePersistentIds);
 }

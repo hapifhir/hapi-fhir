@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -227,5 +228,16 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	@Override
 	public Optional<? extends IMdmLink> findBySourcePidAndMatchResult(ResourcePersistentId theSourcePid, MdmMatchResultEnum theMatch) {
 		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMatch);
+	}
+
+	@Override
+	public void deleteLinksWithAnyReferenceToPids(List<ResourcePersistentId> theResourcePersistentIds) {
+		List<Long> goldenResourcePids = theResourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
+		// method uses the list twice in the sql predicate)
+		List<List<Long>> chunks = ListUtils.partition(goldenResourcePids, 500);
+		for (List<Long> chunk : chunks) {
+			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+		}
 	}
 }

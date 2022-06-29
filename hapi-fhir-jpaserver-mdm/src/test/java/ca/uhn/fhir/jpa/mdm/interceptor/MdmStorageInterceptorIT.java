@@ -76,7 +76,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	private MdmLink getLinkByTargetId(IBaseResource theResource) {
 		MdmLink example = new MdmLink();
 		example.setSourcePid(theResource.getIdElement().getIdPartAsLong());
-		return myMdmLinkDao.findAll(Example.of(example)).get(0);
+		return (MdmLink) myMdmLinkDao.findAll(Example.of(example)).get(0);
 	}
 
 	@Test
