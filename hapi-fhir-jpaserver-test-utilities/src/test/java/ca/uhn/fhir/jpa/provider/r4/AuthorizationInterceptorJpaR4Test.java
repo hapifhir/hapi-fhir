@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -68,6 +70,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -79,6 +82,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+
+	@Autowired
+	private SearchParamMatcher mySearchParamMatcher;
 
 	@BeforeEach
 	@Override
@@ -1752,17 +1758,48 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSmartFilterSearchAllowed() {
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		createObservation(withId("allowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("allowed2"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow().read().allResources().inCompartmentWithFilter("Patient", new IdType("Patient/fred"), "date=gt2022-01-01").andThen()
-					.denyAll()
+					.allow("filter rule").read().allResources().withFilter("code=" + FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM + "|").andThen()
 					.build();
 			}
-		});
+		};
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		ourRestServer.registerInterceptor(interceptor);
 
 		// search runs without 403.
-		myClient.search().byUrl("/Observation?code=foo&patient=Patient/bob").returnBundle(Bundle.class).execute();
+		Bundle bundle = myClient.search().byUrl("/Observation?code=foo").returnBundle(Bundle.class).execute();
+		assertThat(bundle.getEntry(), hasSize(1));
+	}
+
+	@Test
+	public void testSmartFilterSearch_badQuery_abstain() {
+		createObservation(withId("obs1"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("obs2"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("filter rule").read().allResources().withFilter("unknown_code=foo").andThen()
+					.build();
+			}
+		};
+		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		ourRestServer.registerInterceptor(interceptor);
+
+		// search should fail since the allow rule can't be evaluated with an unknown SP
+		try {
+			myClient.search().byUrl("/Observation").returnBundle(Bundle.class).execute();
+			fail("expect 403 error");
+		} catch (ForbiddenOperationException e) {
+			// expected
+		}
+
 	}
 }

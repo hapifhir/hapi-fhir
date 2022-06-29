@@ -188,6 +188,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
 	}
 
+	@Nullable
+	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
+		return myAuthorizationSearchParamMatcher;
+	}
+
 	/**
 	 * Subclasses should override this method to supply the set of rules to be applied to
 	 * this individual request.

@@ -128,9 +128,11 @@ public class InMemoryResourceMatcher {
 			searchParameterMap = myMatchUrlService.translateMatchUrl(theCriteria, resourceDefinition);
 		} catch (UnsupportedOperationException e) {
 			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARSE_FAIL);
-		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
-			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARAM);
 		}
+		// wipjv consider merging InMemoryMatchResult with IAuthorizationSearchParamMatcher.Match match type
+//	} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+//		return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARAM);
+
 		searchParameterMap.clean();
 		return match(searchParameterMap, theResource, resourceDefinition, theSearchParams);
 	}
