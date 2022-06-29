@@ -16,19 +16,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,7 +50,7 @@ public class IdHelperServiceTest {
 	@Mock
 	private PartitionSettings myPartitionSettings;
 
-	@InjectMocks @Spy
+	@InjectMocks
 	private IdHelperService myHelperService;
 
 	@BeforeEach
@@ -129,9 +130,9 @@ public class IdHelperServiceTest {
 		ResourcePersistentId blue = new ResourcePersistentId("Patient",  new Long(456l));
 
 		// we will pretend the lookup value is in the cache
-		when(myMemoryCacheService.getThenPutAfterCommit(Mockito.any(MemoryCacheService.CacheEnum.class),
+		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
 			Mockito.anyString(),
-			Mockito.any(Function.class)))
+			any(Function.class)))
 			.thenReturn(red)
 			.thenReturn(blue);
 
@@ -150,6 +151,7 @@ public class IdHelperServiceTest {
 		Assertions.assertEquals(blue, map.get("BLUE"));
 	}
 
+	// FIXME ND fix broken tests in this class (per the one we fixed together)
 	@Test
 	public void testResolveResourceIdentity_defaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
@@ -169,11 +171,18 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		List<String> ids = Arrays.asList("A", "B", "C");
 
-		Map<String, ResourcePersistentId> testResult = new HashMap();
-		doReturn(testResult).when(myHelperService).resolveResourcePersistentIds(partitionId, resourceType, ids, false);
+		ResourcePersistentId resourcePersitentId1 = new ResourcePersistentId("TEST1");
+		ResourcePersistentId resourcePersitentId2 = new ResourcePersistentId("TEST2");
+		ResourcePersistentId resourcePersitentId3 = new ResourcePersistentId("TEST3");
+		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
+			.thenReturn(resourcePersitentId1)
+			.thenReturn(resourcePersitentId2)
+			.thenReturn(resourcePersitentId3);
 		Map<String, ResourcePersistentId> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids);
-		verify(myHelperService, times(1)).resolveResourcePersistentIds(partitionId, resourceType, ids, false);
-		assertEquals(result, testResult);
+		assertThat(result.keySet(), hasSize(3));
+		assertEquals("TEST1", result.get("A").getId());
+		assertEquals("TEST2", result.get("B").getId());
+		assertEquals("TEST3", result.get("C").getId());
 	}
 
 	@Test

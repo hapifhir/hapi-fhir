@@ -67,7 +67,7 @@ public interface IIdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theFilterDeleted);
+	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
 
 	/**
 	 * Returns a mapping of Id -> ResourcePersistentId.
@@ -83,7 +83,7 @@ public interface IIdHelperService {
 	 * Optionally filters out deleted resources.
 	 */
 	@Nonnull
-	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theFilterDeleted);
+	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theExcludeDeleted);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -108,7 +108,7 @@ public interface IIdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theFilterDeleted) throws ResourceNotFoundException;
+	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theExcludeDeleted) throws ResourceNotFoundException;
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config

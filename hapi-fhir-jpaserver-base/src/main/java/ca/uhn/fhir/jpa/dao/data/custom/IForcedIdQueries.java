@@ -37,27 +37,27 @@ public interface IForcedIdQueries {
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered.
 	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds, boolean theFilterDeleted);
+	Collection<Object[]> findAndResolveByForcedIdWithNoType(String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered.
 	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(String theResourceType, Collection<String> theForcedIds, Collection<Integer> thePartitionId, boolean theFilterDeleted);
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartition(String theResourceType, Collection<String> theForcedIds, Collection<Integer> thePartitionId, boolean theExcludeDeleted);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered.
 	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(String theResourceType, Collection<String> theForcedIds, boolean theFilterDeleted);
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionNull(String theResourceType, Collection<String> theForcedIds, boolean theExcludeDeleted);
 
 	/**
 	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
 	 * is an object array, where the order matters (the array represents columns returned by the query).
 	 * Deleted resources are optionally filtered.
 	 */
-	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(String theNextResourceType, Collection<String> theNextIds, List<Integer> thePartitionIdsWithoutDefault, boolean theFilterDeleted);
+	Collection<Object[]> findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(String theNextResourceType, Collection<String> theNextIds, List<Integer> thePartitionIdsWithoutDefault, boolean theExcludeDeleted);
 
 }

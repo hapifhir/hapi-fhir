@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -140,14 +139,14 @@ public class IdHelperService implements IIdHelperService {
 	 */
 	@Override
 	@Nonnull
-	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theFilterDeleted) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theExcludeDeleted) throws ResourceNotFoundException {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		assert theRequestPartitionId != null;
 
 		IdDt id = new IdDt(theResourceType, theResourceId);
 		Map<String, List<IResourceLookup>> matches = translateForcedIdToPids(theRequestPartitionId,
 			Collections.singletonList(id),
-			theFilterDeleted);
+			theExcludeDeleted);
 
 		// We only pass 1 input in so only 0..1 will come back
 		if (matches.isEmpty() || !matches.containsKey(theResourceId)) {
@@ -189,7 +188,7 @@ public class IdHelperService implements IIdHelperService {
 	public Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId,
 																								 String theResourceType,
 																								 List<String> theIds,
-																								 boolean theFilterDeleted) {
+																								 boolean theExcludeDeleted) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		Validate.notNull(theIds, "theIds cannot be null");
 		Validate.isTrue(!theIds.isEmpty(), "theIds must not be empty");
@@ -206,7 +205,7 @@ public class IdHelperService implements IIdHelperService {
 				// is a forced id
 				// we must resolve!
 				if (myDaoConfig.isDeleteEnabled()) {
-					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theFilterDeleted).getResourceId());
+					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted).getResourceId());
 					retVals.put(id, retVal);
 				} else {
 					// fetch from cache... adding to cache if not available
@@ -245,13 +244,13 @@ public class IdHelperService implements IIdHelperService {
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
-	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theFilterDeleted){
+	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted){
 		Validate.notNull(theId, "theId must not be null");
 
 		Map<String, ResourcePersistentId> retVal = resolveResourcePersistentIds(theRequestPartitionId,
 			theResourceType,
 			Collections.singletonList(theId),
-			theFilterDeleted);
+			theExcludeDeleted);
 		return retVal.get(theId); // should be only one
 	}
 
@@ -444,7 +443,7 @@ public class IdHelperService implements IIdHelperService {
 		return typeToIds;
 	}
 
-	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theFilterDeleted) {
+	private Map<String, List<IResourceLookup>> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId, boolean theExcludeDeleted) {
 		assert theRequestPartitionId != null;
 
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
@@ -493,14 +492,14 @@ public class IdHelperService implements IIdHelperService {
 				assert isNotBlank(nextResourceType);
 
 				if (requestPartitionId.isAllPartitions()) {
-					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theFilterDeleted);
+					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds, theExcludeDeleted);
 				} else {
 					if (requestPartitionId.isDefaultPartition()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theFilterDeleted);
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds, theExcludeDeleted);
 					} else if (requestPartitionId.hasDefaultPartitionId()) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theFilterDeleted);
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, requestPartitionId.getPartitionIdsWithoutDefault(), theExcludeDeleted);
 					} else {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theFilterDeleted);
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, requestPartitionId.getPartitionIds(), theExcludeDeleted);
 					}
 				}
 
