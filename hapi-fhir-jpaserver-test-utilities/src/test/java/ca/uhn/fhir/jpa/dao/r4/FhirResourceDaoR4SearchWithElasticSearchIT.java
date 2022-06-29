@@ -85,6 +85,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -129,6 +132,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 @RequiresDocker
 @ContextConfiguration(classes = {
 	TestR4Config.class,
@@ -141,7 +145,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	DependencyInjectionTestExecutionListener.class
 	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
 	})
-public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements IHSearchEventListener {
+public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
@@ -216,13 +220,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
-	private int hSearchCount;
+	@Mock private IHSearchEventListener mySearchEventListener;
 
-
-	@BeforeEach
-	public void registerAsSearchEventListener() {
-		myHSearchEventDispatcher.register(this);
-	}
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
@@ -684,11 +683,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		assertObservationSearchMatches(theMessage, map, theIds);
 	}
 
-	@Override
-	public void hsearchEvent(HSearchEventType theEventType) {
-		hSearchCount++;
-	}
-
 	@Nested
 	public class WithContainedIndexingIT {
 		@BeforeEach
@@ -957,6 +951,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		public void simpleTokenSkipsSql() {
 			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
 			myCaptureQueriesListener.clear();
+			myHSearchEventDispatcher.register(mySearchEventListener);
 
 			List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -965,7 +960,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertEquals( ((Observation) result.get(0)).getId(), id.getIdPart() );
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 
-			assertEquals(1, hSearchCount);
+			// only one hibernate search took place
+			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		}
 
 
@@ -2285,13 +2281,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
 				String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
 				myCaptureQueriesListener.clear();
+				myHSearchEventDispatcher.register(mySearchEventListener);
 
 				List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
 				myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 				assertThat( result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA) );
 				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-				assertEquals(1, hSearchCount);
+
+				// only one hibernate search took place
+				Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 			}
 
 		}
