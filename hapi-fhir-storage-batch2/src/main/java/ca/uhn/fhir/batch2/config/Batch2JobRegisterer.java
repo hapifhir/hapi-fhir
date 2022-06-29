@@ -20,7 +20,7 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +45,9 @@ public class Batch2JobRegisterer {
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
 
 		for (Map.Entry<String, JobDefinition> next : batchJobs.entrySet()) {
-			ourLog.info("Registering Batch2 Job Definition: {} / {}", next.getValue().getJobDefinitionId(), next.getValue().getJobDefinitionVersion());
-			jobRegistry.addJobDefinition(next.getValue());
+			JobDefinition<?> jobDefinition = next.getValue();
+			ourLog.info("Registering Batch2 Job Definition: {} / {}", jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion());
+			jobRegistry.addJobDefinition(jobDefinition);
 		}
 	}
 

@@ -57,11 +57,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		this();
 		setOperationType(theOperationType);
-		if (theOperationType != OperationTypeEnum.DELETE) {
-			setNewPayload(theFhirContext, theResource);
-		} else {
-			setPayloadIdFromPayload(theFhirContext, theResource);
-		}
+		setNewPayload(theFhirContext, theResource);
 	}
 
 	public BaseResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {

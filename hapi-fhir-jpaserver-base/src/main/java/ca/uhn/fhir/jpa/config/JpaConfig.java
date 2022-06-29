@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
-import ca.uhn.fhir.jpa.batch.mdm.MdmClearJobSubmitterImpl;
+import ca.uhn.fhir.jpa.batch.mdm.batch.MdmClearJobSubmitterImpl;
 import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -89,10 +89,12 @@ import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.reindex.ResourceReindexSvcImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
+import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
@@ -834,5 +836,10 @@ public class JpaConfig {
 	@Bean
 	public NicknameInterceptor nicknameInterceptor() throws IOException {
 		return new NicknameInterceptor();
+	}
+
+	@Bean
+	public ISynchronousSearchSvc synchronousSearchSvc(){
+		return new SynchronousSearchSvcImpl();
 	}
 }

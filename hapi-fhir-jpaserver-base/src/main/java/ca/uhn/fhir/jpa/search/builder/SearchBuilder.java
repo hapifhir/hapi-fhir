@@ -75,7 +75,6 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -93,12 +92,10 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.jena.sparql.engine.QueryIterator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -121,7 +118,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -375,9 +371,10 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.getNearDistanceParam() == null &&
 						theParams.getLastUpdated() == null &&
 						theParams.getEverythingMode() == null &&
-						theParams.getOffset() == null &&
-						// or sorting?
-						theParams.getSort() == null
+						theParams.getOffset() == null
+//						&&
+//						// or sorting?
+//						theParams.getSort() == null
 					);
 
 			if (canSkipDatabase) {
@@ -429,7 +426,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
 			}
@@ -943,7 +940,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
 
 		// is storage enabled?
-		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+		return myDaoConfig.isStoreResourceInHSearchIndex() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
@@ -953,7 +950,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
 			// wipmb standardize on ResourcePersistentId

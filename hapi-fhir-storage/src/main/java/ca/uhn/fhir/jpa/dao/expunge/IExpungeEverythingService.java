@@ -27,5 +27,5 @@ import javax.annotation.Nullable;
 public interface IExpungeEverythingService {
 	void expungeEverything(@Nullable RequestDetails theRequest);
 
-	int expungeEverythingByType(Class<?> theEntityType);
+	int getExpungeDeletedEntityCount();
 }

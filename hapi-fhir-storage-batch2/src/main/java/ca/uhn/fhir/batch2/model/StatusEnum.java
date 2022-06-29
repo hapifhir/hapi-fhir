@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -29,40 +30,44 @@ public enum StatusEnum {
 	/**
 	 * Task is waiting to execute and should begin with no intervention required.
 	 */
-	QUEUED(true),
+	QUEUED(true, false),
 
 	/**
 	 * Task is current executing
 	 */
-	IN_PROGRESS(true),
+	IN_PROGRESS(true, false),
 
 	/**
 	 * Task completed successfully
 	 */
-	COMPLETED(false),
+	COMPLETED(false, true),
 
 	/**
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED(true),
+	ERRORED(true, true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
 	 * result in a different outcome.
 	 */
-	FAILED(true),
+	FAILED(true, true),
 
 	/**
 	 * Task has been cancelled.
 	 */
-	CANCELLED(true);
+	CANCELLED(true, true);
 
 	private final boolean myIncomplete;
+	private final boolean myEnded;
 	private static Set<StatusEnum> ourIncompleteStatuses;
+	private static Set<StatusEnum> ourEndedStatuses;
+	private static Set<StatusEnum> ourNotEndedStatuses;
 
-	StatusEnum(boolean theIncomplete) {
+	StatusEnum(boolean theIncomplete, boolean theEnded) {
 		myIncomplete = theIncomplete;
+		myEnded = theEnded;
 	}
 
 	/**
@@ -72,16 +77,58 @@ public enum StatusEnum {
 	public static Set<StatusEnum> getIncompleteStatuses() {
 		Set<StatusEnum> retVal = ourIncompleteStatuses;
 		if (retVal == null) {
-			EnumSet<StatusEnum> set = EnumSet.noneOf(StatusEnum.class);
+			EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
 			for (StatusEnum next : values()) {
 				if (next.myIncomplete) {
-					set.add(next);
+					incompleteSet.add(next);
 				}
 			}
-			ourIncompleteStatuses = Collections.unmodifiableSet(set);
+			ourIncompleteStatuses = Collections.unmodifiableSet(incompleteSet);
 			retVal = ourIncompleteStatuses;
 		}
 		return retVal;
+	}
+
+	/**
+	 * Statuses that represent a job that has ended. I.e.
+	 * all statuses except {@link #QUEUED and #COMPLETED}
+	 */
+	@Nonnull
+	public static Set<StatusEnum> getEndedStatuses() {
+		Set<StatusEnum> retVal = ourEndedStatuses;
+		if (retVal == null) {
+			initializeStaticEndedStatuses();
+		}
+		retVal = ourEndedStatuses;
+		return retVal;
+	}
+
+	/**
+	 * Statuses that represent a job that has not ended. I.e.
+	 * {@link #QUEUED and #COMPLETED}
+	 */
+	@Nonnull
+	public static Set<StatusEnum> getNotEndedStatuses() {
+		Set<StatusEnum> retVal = ourNotEndedStatuses;
+		if (retVal == null) {
+			initializeStaticEndedStatuses();
+		}
+		retVal = ourNotEndedStatuses;
+		return retVal;
+	}
+	@Nonnull
+	private static void initializeStaticEndedStatuses() {
+		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
+		EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
+		for (StatusEnum next : values()) {
+			if (next.myEnded) {
+				endedSet.add(next);
+			} else {
+				notEndedSet.add(next);
+			}
+		}
+		ourEndedStatuses = Collections.unmodifiableSet(endedSet);
+		ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
 	}
 
 }

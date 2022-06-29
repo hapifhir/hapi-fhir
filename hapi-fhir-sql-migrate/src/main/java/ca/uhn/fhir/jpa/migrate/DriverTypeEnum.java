@@ -54,6 +54,8 @@ public enum DriverTypeEnum {
 
 	MSSQL_2012("com.microsoft.sqlserver.jdbc.SQLServerDriver", false),
 
+	COCKROACHDB_21_1("org.postgresql.Driver", false),
+
 	;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
@@ -102,6 +104,9 @@ public enum DriverTypeEnum {
 				break;
 			case MSSQL_2012:
 				retval = "sqlserver2012.sql";
+				break;
+			case COCKROACHDB_21_1:
+				retval = "cockroachdb201.sql";
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(45) + "No schema initialization script available for driver " + this);

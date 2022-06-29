@@ -34,6 +34,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -98,7 +99,7 @@ public class MdmLinkDaoSvc {
 			mdmLink.setPartitionId(new PartitionablePartitionId(partitionId.getFirstPartitionIdOrNull(), partitionId.getPartitionDate()));
 		}
 
-		String message = String.format("Creating MdmLink from %s to %s.", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless());
+		String message = String.format("Creating %s link from %s to Golden Resource %s.", mdmLink.getMatchResult(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theGoldenResource.getIdElement().toUnqualifiedVersionless());
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -153,11 +154,7 @@ public class MdmLinkDaoSvc {
 	 */
 	@Transactional
 	public Optional<MdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
-		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setSourcePid(theSourcePid);
-		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
-		Example<MdmLink> example = Example.of(exampleLink);
-		return myMdmLinkDao.findOne(example);
+		return myMdmLinkDao.findBySourcePidAndMatchResult(theSourcePid, MdmMatchResultEnum.MATCH);
 	}
 
 	/**
@@ -389,5 +386,15 @@ public class MdmLinkDaoSvc {
 		return getLinkByGoldenResourcePidAndSourceResourcePid(
 			myJpaIdHelperService.getPidOrNull(theGoldenResource),
 			myJpaIdHelperService.getPidOrNull(theSourceResource));
+	}
+
+	@Transactional(propagation = Propagation.MANDATORY)
+	public void deleteLinksWithAnyReferenceToPids(List<Long> theGoldenResourcePids) {
+		// Split into chunks of 500 so older versions of Oracle don't run into issues (500 = 1000 / 2 since the dao
+		// method uses the list twice in the sql predicate)
+		List<List<Long>> chunks = ListUtils.partition(theGoldenResourcePids, 500);
+		for (List<Long> chunk : chunks) {
+			myMdmLinkDao.deleteLinksWithAnyReferenceToPids(chunk);
+		}
 	}
 }

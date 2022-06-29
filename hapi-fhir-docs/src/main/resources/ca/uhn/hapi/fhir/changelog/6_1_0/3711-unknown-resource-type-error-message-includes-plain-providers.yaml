@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3710
+jira: SMILE-4230
+title: "Changing the `Unknown resource type` error message to include only resource provider classes and 
+exclude plain providers classes."

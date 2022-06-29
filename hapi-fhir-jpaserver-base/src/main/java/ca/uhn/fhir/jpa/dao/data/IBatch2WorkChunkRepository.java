@@ -41,6 +41,10 @@ public interface IBatch2WorkChunkRepository extends JpaRepository<Batch2WorkChun
 	void updateChunkStatusAndClearDataForEndSuccess(@Param("id") String theChunkId, @Param("et") Date theEndTime, @Param("rp") int theRecordsProcessed, @Param("status") StatusEnum theInProgress);
 
 	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
+	void updateAllChunksForInstanceStatusClearDataAndSetError(@Param("ids") List<String> theChunkIds, @Param("et") Date theEndTime, @Param("status") StatusEnum theInProgress, @Param("em") String theError);
+
+	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.myErrorMessage = :em, e.myErrorCount = e.myErrorCount + 1 WHERE e.myId = :id")
 	void updateChunkStatusAndIncrementErrorCountForEndError(@Param("id") String theChunkId, @Param("et") Date theEndTime, @Param("em") String theErrorMessage, @Param("status") StatusEnum theInProgress);
 

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -76,20 +75,38 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		// The data flow is as follows ->
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
+		List<String> skippedLogMessages = new ArrayList<>();
+		List<String> matchedLogMessages = new ArrayList<>();
 		for (MatchedTarget match : matchedCandidates) {
+
 			Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
+				if (ourLog.isDebugEnabled()) {
+					skippedLogMessages.add(String.format("%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.", match.getTarget().getIdElement().toUnqualifiedVersionless()));
+				}
 				continue;
 			}
 
 			MdmLink matchMdmLink = optionalMdmLink.get();
 			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePid())) {
-				ourLog.info("Skipping MDM on candidate Golden Resource with PID {} due to manual NO_MATCH", matchMdmLink.getGoldenResourcePid());
+				skippedLogMessages.add(String.format("Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH", matchMdmLink.getGoldenResourcePid()));
 				continue;
 			}
 
 			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(getResourcePersistentId(matchMdmLink.getGoldenResourcePid()), match.getMatchResult());
+			if (ourLog.isDebugEnabled()) {
+				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResource().getIdDt().toUnqualifiedVersionless()));
+			}
 			retval.add(candidate);
+		}
+
+		if (ourLog.isDebugEnabled()) {
+			for (String logMessage: skippedLogMessages) {
+				ourLog.debug(logMessage);
+			}
+			for (String logMessage: matchedLogMessages) {
+				ourLog.debug(logMessage);
+			}
 		}
 		return retval;
 	}

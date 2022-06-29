@@ -63,13 +63,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 	TestJPAConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
+	TestHSearchAddInConfig.DefaultLuceneHeap.class
 })
 public class TestDstu3Config {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
 
 	@Bean

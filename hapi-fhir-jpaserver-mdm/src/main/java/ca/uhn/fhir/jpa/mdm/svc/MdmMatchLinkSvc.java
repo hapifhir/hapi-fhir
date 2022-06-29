@@ -126,7 +126,7 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s.", theResource.getIdElement().getResourceType()));
+		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s Golden Resource.", theResource.getIdElement().getResourceType()));
 		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
 		// TODO GGG :)
 		// 1. Get the right helper

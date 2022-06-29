@@ -30,7 +30,7 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 	}
 
 	@AfterEach
