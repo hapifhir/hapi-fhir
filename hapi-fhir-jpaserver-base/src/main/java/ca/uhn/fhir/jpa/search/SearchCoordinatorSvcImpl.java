@@ -357,7 +357,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
 
-		// fixme someday - not today.
+		// todo someday - not today.
 //		SearchStrategyFactory.ISearchStrategy searchStrategy = mySearchStrategyFactory.pickStrategy(theResourceType, theParams, theRequestDetails);
 //		return searchStrategy.get();
 
