@@ -21,7 +21,7 @@ The AuthorizationInterceptor is used by subclassing it and then registering your
 
 The core rules support restricting access by resource type, resource instance, and compartment.
 The rules also support query filters expressed by FHIR queries - e.g. `code:above=http://loinc.org|55399-0` to restrict Observations to just the diabetes panel.
-To use thequery filters, you must activate the [RuleFilteringConsentService.](/apidocs/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/consent/RuleFilteringConsentService.java)
+To use query filters, you must activate the [RuleFilteringConsentService.](/apidocs/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/consent/RuleFilteringConsentService.java)
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|ruleFiltering}}
 ``` 
