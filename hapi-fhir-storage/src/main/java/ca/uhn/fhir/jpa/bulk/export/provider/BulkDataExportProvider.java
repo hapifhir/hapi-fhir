@@ -24,6 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
@@ -40,10 +43,12 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -55,6 +60,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
@@ -78,6 +84,8 @@ public class BulkDataExportProvider {
 
 //	@Autowired
 //	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private Set<String> myCompartmentResources;
 
@@ -108,6 +116,13 @@ public class BulkDataExportProvider {
 
 	private void startJob(ServletRequestDetails theRequestDetails,
 								 BulkDataExportOptions theOptions) {
+		// permission check
+		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+
+		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
 		BulkExportParameters parameters = BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions);
@@ -281,7 +296,7 @@ public class BulkDataExportProvider {
 			case SUBMITTED:
 			default:
 				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String dateString = info.getEndTime() != null ? new InstantType(info.getEndTime()).getValueAsString() : "";
+				String dateString = getTransitionTimeOfJobInfo(info);
 				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to "
 					+ info.getStatus()
 					+ " at "
@@ -330,6 +345,17 @@ public class BulkDataExportProvider {
 //				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 //				response.getWriter().close();
 //		}
+	}
+
+	private String getTransitionTimeOfJobInfo(Batch2JobInfo theInfo) {
+		if (theInfo.getEndTime() != null) {
+			return new InstantType(theInfo.getEndTime()).getValueAsString();
+		} else if (theInfo.getStartTime() != null) {
+			return new InstantType(theInfo.getStartTime()).getValueAsString();
+		} else {
+			// safety check
+			return "";
+		}
 	}
 
 	private BulkDataExportOptions buildSystemBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter) {

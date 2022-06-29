@@ -33,6 +33,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -174,6 +175,7 @@ public class JobInstanceProcessor {
 			null);
 		if (!result.isSuccessful()) {
 			myInstance.setStatus(StatusEnum.FAILED);
+			myInstance.setEndTime(new Date());
 			myJobPersistence.updateInstance(myInstance);
 		}
 	}
@@ -182,6 +184,7 @@ public class JobInstanceProcessor {
 		if (myInstance.getStatus() != newStatus) {
 			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
 			myInstance.setStatus(newStatus);
+			myInstance.setStartTime(new Date());
 			return true;
 		}
 		return false;

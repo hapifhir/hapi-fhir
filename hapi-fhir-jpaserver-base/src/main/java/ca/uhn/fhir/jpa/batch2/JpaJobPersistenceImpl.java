@@ -80,6 +80,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setInstanceId(theBatchWorkChunk.instanceId);
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
+		entity.setStartTime(new Date());
 		entity.setStatus(StatusEnum.QUEUED);
 		myWorkChunkRepository.save(entity);
 		return entity.getId();
@@ -104,6 +105,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
 		entity.setCreateTime(new Date());
+		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
 
 		entity = myJobInstanceRepository.save(entity);

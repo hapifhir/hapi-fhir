@@ -48,11 +48,13 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	@JsonProperty(value = "cancelled")
 	private boolean myCancelled;
 
+	// time when the job instance was actually first created/stored
 	@JsonProperty(value = "createTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myCreateTime;
 
+	// time when the current status was 'started'
 	@JsonProperty(value = "startTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
