@@ -22,10 +22,10 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -48,7 +48,6 @@ import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.util.common.data.RangeBoundInclusion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,24 +62,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_PARAM_NAME;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ExtendedLuceneClauseBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedLuceneClauseBuilder.class);
+public class ExtendedHSearchClauseBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedHSearchClauseBuilder.class);
 
 	private static final double QTY_APPROX_TOLERANCE_PERCENT = .10;
 	private static final double QTY_TOLERANCE_PERCENT = .05;
@@ -92,8 +90,8 @@ public class ExtendedLuceneClauseBuilder {
 
 	final List<TemporalPrecisionEnum> ordinalSearchPrecisions = Arrays.asList(TemporalPrecisionEnum.YEAR, TemporalPrecisionEnum.MONTH, TemporalPrecisionEnum.DAY);
 
-	public ExtendedLuceneClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
-			BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
+	public ExtendedHSearchClauseBuilder(FhirContext myFhirContext, ModelConfig theModelConfig,
+													BooleanPredicateClausesStep<?> myRootClause, SearchPredicateFactory myPredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myModelConfig = theModelConfig;
 		this.myRootClause = myRootClause;
@@ -271,7 +269,7 @@ public class ExtendedLuceneClauseBuilder {
 
 	/**
 	 * Normalize the string to match our standardAnalyzer.
-	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 * @see HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
 	 *
 	 * @param theString the raw string
 	 * @return a case and accent normalized version of the input

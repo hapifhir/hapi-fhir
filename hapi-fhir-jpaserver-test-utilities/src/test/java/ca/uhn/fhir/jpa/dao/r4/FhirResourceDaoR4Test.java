@@ -123,7 +123,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -3647,7 +3646,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSortByString01() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 
 		Patient p = new Patient();
 		String string = "testSortByString01";

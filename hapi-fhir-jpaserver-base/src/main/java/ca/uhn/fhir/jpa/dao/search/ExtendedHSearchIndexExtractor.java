@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -48,11 +48,11 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Extract search params for advanced lucene indexing.
+ * Extract search params for advanced HSearch indexing.
  * <p>
- * This class re-uses the extracted JPA entities to build an ExtendedLuceneIndexData instance.
+ * This class re-uses the extracted JPA entities to build an ExtendedHSearchIndexData instance.
  */
-public class ExtendedLuceneIndexExtractor {
+public class ExtendedHSearchIndexExtractor {
 
 	private final DaoConfig myDaoConfig;
 	private final FhirContext myContext;
@@ -60,8 +60,8 @@ public class ExtendedLuceneIndexExtractor {
 	private final ISearchParamExtractor mySearchParamExtractor;
 	private final ModelConfig myModelConfig;
 
-	public ExtendedLuceneIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
-			ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
+	public ExtendedHSearchIndexExtractor(DaoConfig theDaoConfig, FhirContext theContext, ResourceSearchParams theActiveParams,
+													 ISearchParamExtractor theSearchParamExtractor, ModelConfig theModelConfig) {
 		myDaoConfig = theDaoConfig;
 		myContext = theContext;
 		myParams = theActiveParams;
@@ -70,10 +70,10 @@ public class ExtendedLuceneIndexExtractor {
 	}
 
 	@NotNull
-	public ExtendedLuceneIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedLuceneIndexData retVal = new ExtendedLuceneIndexData(myContext, myModelConfig);
+	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myModelConfig);
 
-		if(myDaoConfig.isStoreResourceInLuceneIndex()) {
+		if(myDaoConfig.isStoreResourceInHSearchIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
 		}
 
@@ -160,7 +160,7 @@ public class ExtendedLuceneIndexExtractor {
 	/**
 	 * Re-extract token parameters so we can distinguish
 	 */
-	private void extractAutocompleteTokens(IBaseResource theResource, ExtendedLuceneIndexData theRetVal) {
+	private void extractAutocompleteTokens(IBaseResource theResource, ExtendedHSearchIndexData theRetVal) {
 		// we need to re-index token params to match up display with codes.
 		myParams.values().stream()
 			.filter(p->p.getParamType() == RestSearchParameterTypeEnum.TOKEN)
@@ -170,7 +170,7 @@ public class ExtendedLuceneIndexExtractor {
 			));
 	}
 
-	private void indexTokenValue(ExtendedLuceneIndexData theRetVal, RuntimeSearchParam p, IBase nextValue) {
+	private void indexTokenValue(ExtendedHSearchIndexData theRetVal, RuntimeSearchParam p, IBase nextValue) {
 		String nextType = mySearchParamExtractor.toRootTypeName(nextValue);
 		String spName = p.getName();
 		switch (nextType) {
@@ -194,14 +194,14 @@ public class ExtendedLuceneIndexExtractor {
 	}
 	}
 
-	private void addToken_CodeableConcept(ExtendedLuceneIndexData theRetVal, String theSpName, IBase theValue) {
+	private void addToken_CodeableConcept(ExtendedHSearchIndexData theRetVal, String theSpName, IBase theValue) {
 		List<IBase> codings = mySearchParamExtractor.getCodingsFromCodeableConcept(theValue);
 		for (IBase nextCoding : codings) {
 			addToken_Coding(theRetVal, theSpName, (IBaseCoding) nextCoding);
 		}
 	}
 
-	private void addToken_Coding(ExtendedLuceneIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
+	private void addToken_Coding(ExtendedHSearchIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
 		theRetVal.addTokenIndexData(theSpName, theNextValue);
 	}
 }

@@ -36,8 +36,8 @@ import java.util.Map;
  * The Hibernate Search DocumentElement api only supports create - it does not support fetching an existing element.
  * This class demand-creates object elements for a given path.
  */
-public class HibernateSearchElementCache {
-	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchElementCache.class);
+public class HSearchElementCache {
+	private static final Logger ourLog = LoggerFactory.getLogger(HSearchElementCache.class);
 	private final DocumentElement myRoot;
 	private final Map<String, DocumentElement> myCache = new HashMap<>();
 
@@ -45,7 +45,7 @@ public class HibernateSearchElementCache {
 	 * Create the helper rooted on the given DocumentElement
 	 * @param theRoot the document root
 	 */
-	public HibernateSearchElementCache(DocumentElement theRoot) {
+	public HSearchElementCache(DocumentElement theRoot) {
 		this.myRoot = theRoot;
 	}
 

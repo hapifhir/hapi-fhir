@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -21,6 +20,7 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -87,10 +87,10 @@ import static org.mockito.Mockito.when;
  * and remove the abstract qualifier
  */
 //@ExtendWith(SpringExtension.class)
-//@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-//@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.DefaultLuceneHeap.class})
-public abstract class AbstractValueSetFreeTextExpansionR4Test extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetFreeTextExpansionR4Test.class);
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetHSearchExpansionR4Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";

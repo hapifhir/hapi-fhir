@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
@@ -73,6 +75,16 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public synchronized Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
 		return myWrap.fetchInstanceAndMarkInProgress(theInstanceId);
+	}
+
+	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
+		return myWrap.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, thePageSize, thePageIndex);
+	}
+
+	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return myWrap.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
 	}
 
 	@Override
@@ -132,7 +144,7 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public void cancelInstance(String theInstanceId) {
-		myWrap.cancelInstance(theInstanceId);
+	public JobOperationResultJson cancelInstance(String theInstanceId) {
+		return myWrap.cancelInstance(theInstanceId);
 	}
 }
