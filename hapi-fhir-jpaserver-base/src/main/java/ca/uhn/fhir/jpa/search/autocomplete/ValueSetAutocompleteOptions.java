@@ -82,7 +82,7 @@ public class ValueSetAutocompleteOptions {
 		if (haveId || haveIdentifier || haveValueSet) {
 			throw new InvalidRequestException(Msg.code(2020) + "$expand with contexDirection='existing' is only supported at the type leve. It is not supported at instance level, with a url specified, or with a ValueSet .");
 		}
-		if (!theDaoConfig.isAdvancedLuceneIndexing()) {
+		if (!theDaoConfig.isAdvancedHSearchIndexing()) {
 			throw new InvalidRequestException(Msg.code(2022) + "$expand with contexDirection='existing' requires Extended Lucene Indexing.");
 		}
 		if (theContext == null || theContext.isEmpty()) {

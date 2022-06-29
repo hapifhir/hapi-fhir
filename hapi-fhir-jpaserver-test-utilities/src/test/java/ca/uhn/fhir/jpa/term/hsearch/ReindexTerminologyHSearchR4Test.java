@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.term.freetext;
+package ca.uhn.fhir.jpa.term.hsearch;
 
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -12,7 +11,8 @@ import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.LuceneFilesystem.class
-	, ReindexTerminologyFreetextR4Test.NoopMandatoryTransactionListener.class
+@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.LuceneFilesystem.class
+	, ReindexTerminologyHSearchR4Test.NoopMandatoryTransactionListener.class
 })
-public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
+public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	public static final String LOINC_URL = "http://loinc.org";
 	public static final String TEST_FILES_CLASSPATH = "loinc-reindex/";
 	public static final String NULL = "'null'";
@@ -60,7 +60,7 @@ public class ReindexTerminologyFreetextR4Test extends BaseJpaR4Test {
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_small_v68.zip";
 	public static final String LOINC_ZIP_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v268_loincupload.properties";
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyFreetextR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ReindexTerminologyHSearchR4Test.class);
 	long termCodeSystemVersionWithVersionId;
 	long termCodeSystemVersionWithNoVersionId;
 	Map<String, Long> conceptCounts = Map.ofEntries(

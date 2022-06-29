@@ -36,7 +36,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@AfterEach
 	public void reset() {
 		SearchBuilder.setMaxPageSize50ForTest(false);
-		myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
 	@Test
 	public void testLastN_onEnablingStoringObservationWithIndexMapping_shouldSkipLoadingResourceFromDB() throws IOException {
 		// Enable flag
-		myDaoConfig.setStoreResourceInLuceneIndex(true);
+		myDaoConfig.setStoreResourceInHSearchIndex(true);
 
 		// Create Data
 		Patient pt = new Patient();

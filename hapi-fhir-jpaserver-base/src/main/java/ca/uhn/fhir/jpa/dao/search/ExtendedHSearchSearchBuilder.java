@@ -42,9 +42,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Search builder for lucene/elastic for token, string, and reference parameters.
+ * Search builder for HSearch for token, string, and reference parameters.
  */
-public class ExtendedLuceneSearchBuilder {
+public class ExtendedHSearchSearchBuilder {
 	public static final String EMPTY_MODIFIER = "";
 
 	/**
@@ -150,7 +150,7 @@ public class ExtendedLuceneSearchBuilder {
 		}
 	}
 
-	public void addAndConsumeAdvancedQueryClauses(ExtendedLuceneClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
+	public void addAndConsumeAdvancedQueryClauses(ExtendedHSearchClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = compileParamNames(theParams);
 		for (String nextParam : paramNames) {

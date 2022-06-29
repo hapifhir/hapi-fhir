@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
@@ -57,13 +57,13 @@ import java.util.Properties;
  * Turn off by adding {@link NoFT} to the test Contexts.
  * Use Elasticsearch instead via docker by adding {@link Elasticsearch} to the test Contexts;
  */
-public class TestHibernateSearchAddInConfig {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestHibernateSearchAddInConfig.class);
+public class TestHSearchAddInConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(TestHSearchAddInConfig.class);
 
 	/**
 	 * Add Hibernate Search config to JPA properties.
 	 */
-	public interface IHibernateSearchConfigurer {
+	public interface IHSearchConfigurer {
 		void apply(Properties theJPAProperties);
 	}
 
@@ -76,7 +76,7 @@ public class TestHibernateSearchAddInConfig {
 
 		@Bean
 		@Primary
-		IHibernateSearchConfigurer hibernateSearchConfigurer() throws IOException {
+		IHSearchConfigurer hibernateSearchConfigurer() throws IOException {
 			ourLog.warn("Hibernate Search: using lucene - filesystem");
 
 			// replace by existing directory for debugging purposes
@@ -86,7 +86,8 @@ public class TestHibernateSearchAddInConfig {
 
 			Map<String, String> luceneProperties = new HashMap<>();
 			luceneProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+			luceneProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), dirPath);
 			ourLog.info("Using lucene root dir: {}", dirPath);
@@ -114,12 +115,13 @@ public class TestHibernateSearchAddInConfig {
 	public static class DefaultLuceneHeap {
 
 		@Bean
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHSearchConfigurer hibernateSearchConfigurer() {
 			ourLog.warn("Hibernate Search: using lucene - local-heap");
 
 			Map<String, String> luceneHeapProperties = new HashMap<>();
 			luceneHeapProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+				HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
@@ -142,7 +144,7 @@ public class TestHibernateSearchAddInConfig {
 	@Configuration
 	public static class NoFT {
 		@Bean
-		IHibernateSearchConfigurer hibernateSearchConfigurer() {
+		IHSearchConfigurer hibernateSearchConfigurer() {
 			ourLog.info("Hibernate Search is disabled");
 			return (theProperties) -> theProperties.put("hibernate.search.enabled", "false");
 		}
@@ -166,7 +168,7 @@ public class TestHibernateSearchAddInConfig {
 	public static class Elasticsearch {
 		@Bean
 		@Primary // override the default
-		IHibernateSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
+		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
 			return (theProperties) -> {
 				int httpPort = theContainer.getMappedPort(9200);//9200 is the HTTP port
 				String host = theContainer.getHost();

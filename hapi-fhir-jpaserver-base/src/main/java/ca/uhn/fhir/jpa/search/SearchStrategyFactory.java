@@ -39,8 +39,8 @@ public class SearchStrategyFactory {
 	public boolean isSupportsHSearchDirect(String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		return
 			myFulltextSearchSvc != null &&
-			myDaoConfig.isStoreResourceInLuceneIndex() &&
-			myDaoConfig.isAdvancedLuceneIndexing() &&
+			myDaoConfig.isStoreResourceInHSearchIndex() &&
+			myDaoConfig.isAdvancedHSearchIndexing() &&
 			myFulltextSearchSvc.supportsAllOf(theParams) &&
 			theParams.getSummaryMode() == null &&
 			theParams.getSearchTotalMode() == null;

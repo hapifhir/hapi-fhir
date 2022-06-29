@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Collection;
 
-public class HibernateSearchIndexWriter {
-	private static final Logger ourLog = LoggerFactory.getLogger(HibernateSearchIndexWriter.class);
+public class HSearchIndexWriter {
+	private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
@@ -55,23 +55,23 @@ public class HibernateSearchIndexWriter {
 
 
 
-	final HibernateSearchElementCache myNodeCache;
+	final HSearchElementCache myNodeCache;
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
 
-	HibernateSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
+	HSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
-		myNodeCache = new HibernateSearchElementCache(theRoot);
+		myNodeCache = new HSearchElementCache(theRoot);
 	}
 
 	public DocumentElement getSearchParamIndexNode(String theSearchParamName, String theIndexType) {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HibernateSearchIndexWriter forRoot(
+	public static HSearchIndexWriter forRoot(
 			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HibernateSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
+		return new HSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
