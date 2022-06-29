@@ -1,28 +1,24 @@
-package ca.uhn.fhir.jpa.searchparam;
+package ca.uhn.fhir.jpa.auth;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.FhirQueryRuleImpl;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
-import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,8 +41,6 @@ import static org.hamcrest.Matchers.nullValue;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu3Config.class, DaoTestDataBuilder.Config.class})
 public class SmartV2AuthServiceTest implements ITestDataBuilder {
-	private static final Logger ourLog = LoggerFactory.getLogger(SmartV2AuthServiceTest.class);
-
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 	@Autowired
@@ -54,24 +48,7 @@ public class SmartV2AuthServiceTest implements ITestDataBuilder {
 	@Autowired
 	FhirContext myFhirContext;
 
-	protected IRuleApplier myRuleApplier = new IRuleApplier() {
-		@NotNull
-		@Override
-		public Logger getTroubleshootingLog() {
-			return ourLog;
-		}
-
-		@Override
-		public AuthorizationInterceptor.Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut) {
-			return null;
-		}
-
-		@Nullable
-		@Override
-		public IValidationSupport getValidationSupport() {
-			return null;
-		}
-
+	protected IRuleApplier myRuleApplier = new TestRuleApplier() {
 		@Override
 		public AuthorizationSearchParamMatcher getSearchParamMatcher() {
 			return myMatcher;
@@ -79,18 +56,19 @@ public class SmartV2AuthServiceTest implements ITestDataBuilder {
 	};
 
 	@RegisterExtension
-	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(SmartV2AuthServiceTest.class.getName());
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(myRuleApplier.getTroubleshootingLog().getName());
 
 
 	private AuthorizationSearchParamMatcher myMatcher;
 	private IBaseResource myResource;
 	private IAuthorizationSearchParamMatcher.MatchResult result;
-	private SystemRequestDetails mySrd = new SystemRequestDetails();
+	private final SystemRequestDetails mySrd = new SystemRequestDetails();
 
 	@BeforeEach
 	void setUp() {
 		// wipjv What about Mongo? Also add to Mongo persistence and export.
 		myMatcher = new AuthorizationSearchParamMatcher(mySearchParamMatcher);
+		mySrd.setFhirContext(myFhirContext);
 	}
 
 	@Nested
@@ -170,7 +148,7 @@ public class SmartV2AuthServiceTest implements ITestDataBuilder {
 		public void fullRule_unsupported_passAndWarn() {
 			// given
 			helpCreatePatient();
-			FhirQueryRuleImpl rule = buildSimplePatientRuleWithFilter("birthdate=ap2020");
+			FhirQueryRuleImpl rule = buildSimplePatientRuleWithFilter("foo=bar");
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = rule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, myResource, myRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);

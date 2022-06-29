@@ -12,19 +12,16 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.util.Set;
 
-// wipjv Ken - Should we complicate RuleImplOp instead?  Or enhance the testers?
+/**
+ * Extension to rules that also requires matching a query filter, e.g. code=foo
+ */
 public class FhirQueryRuleImpl extends RuleImplOp {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleImpl.class);
 
 	private String myFilter;
 
-	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
-
-
 	/**
 	 * Constructor
-	 *
-	 * @param theRuleName
 	 */
 	public FhirQueryRuleImpl(String theRuleName) {
 		super(theRuleName);
@@ -38,13 +35,18 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 		return myFilter;
 	}
 
+	/**
+	 * Our override that first checks our filter against the resource if present.
+	 */
 	@Override
 	protected AuthorizationInterceptor.Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
 		ourLog.trace("applyRuleLogic {} {}", theOperation, theRuleTarget);
-		// wipjv hack alert - theOutputResource == null means we're in the pre-show pointcut.
+		// Note - theOutputResource == null means we're in some other pointcut and don't have a result yet.
 		if (theOutputResource == null) {
 			return super.applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget, theRuleApplier);
 		}
+
+		// look for a matcher
 		IAuthorizationSearchParamMatcher matcher = theRuleApplier.getSearchParamMatcher();
 		if (matcher == null) {
 			theRuleApplier.getTroubleshootingLog().warn("No matcher provided.  Can't apply filter permission.");
@@ -55,7 +57,6 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 		}
 
 		// wipjv check in vs out resource - write will need to check write.
-		// wipjv has the logic already considered theOutputResource.fhirType() vs myTypes?
 		// wipjv what about the id case - does that path doesn't call applyRuleLogic()
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(theOutputResource.fhirType() + "?" + myFilter, theOutputResource);
 
@@ -65,8 +66,6 @@ public class FhirQueryRuleImpl extends RuleImplOp {
 				result = super.applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget, theRuleApplier);
 				break;
 			case UNSUPPORTED:
-				// wipjv log a warning to the troubleshooting log
-				// wipjv if deny mode, we should deny here.
 				theRuleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.  Abstaining.", myFilter, mr.getUnsupportedReason());
 				if ( PolicyEnum.DENY.equals(getMode())) {
 					result = new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);

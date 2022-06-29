@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
@@ -44,9 +43,8 @@ public class RuleFilteringConsentService implements IConsentService {
 		ourLog.trace("canSeeResource() {} {}", theRequestDetails, theResource);
 
 		// apply rules!  If yes, then yes!
-		// wipjv Ken - ask if this the right RestOperationTypeEnum?
 		AuthorizationInterceptor.Verdict ruleResult =
-			myRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.SEARCH_TYPE, theRequestDetails, null, null, theResource, CAN_SEE_POINTCUT);
+			myRuleApplier.applyRulesAndReturnDecision(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, theResource, CAN_SEE_POINTCUT);
 		if (ruleResult.getDecision() == PolicyEnum.ALLOW) {
 			// are these the right codes?
 			return ConsentOutcome.PROCEED;

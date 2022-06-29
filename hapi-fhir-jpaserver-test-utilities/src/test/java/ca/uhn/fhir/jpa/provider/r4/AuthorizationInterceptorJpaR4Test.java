@@ -1751,20 +1751,18 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testSmartFilterSearch() {
-		// wipjv flesh out unit tests for new rule type here.
-	   // given
+	public void testSmartFilterSearchAllowed() {
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow().read().allResources().inCompartmentWithFilter("Patient", new IdType("Patient/bob"), "date=gt2022-01-01").andThen()
+					.allow().read().allResources().inCompartmentWithFilter("Patient", new IdType("Patient/fred"), "date=gt2022-01-01").andThen()
 					.denyAll()
 					.build();
 			}
 		});
 
-	   // when
+		// search runs without 403.
 		myClient.search().byUrl("/Observation?code=foo&patient=Patient/bob").returnBundle(Bundle.class).execute();
 	}
 }

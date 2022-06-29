@@ -1,8 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -23,9 +25,11 @@ class RuleFilteringConsentServiceTest {
 	@Mock
 	IRuleApplier myRuleApplier;
 	RuleFilteringConsentService myRuleFilteringConsentService;
+	ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 
 	@BeforeEach
 	void setUp() {
+		myRequestDetails.setRestOperationType(RestOperationTypeEnum.SEARCH_TYPE);
 		myRuleFilteringConsentService = new RuleFilteringConsentService(myRuleApplier);
 	}
 
@@ -34,7 +38,7 @@ class RuleFilteringConsentServiceTest {
 		when(myRuleApplier.applyRulesAndReturnDecision(any(), any(), any(), any(), any(), any()))
 			.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.ALLOW, null));
 
-		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(null, null, null);
+		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
 		assertThat(consentDecision.getStatus(), equalTo(ConsentOperationStatusEnum.PROCEED));
 
@@ -45,7 +49,7 @@ class RuleFilteringConsentServiceTest {
 		when(myRuleApplier.applyRulesAndReturnDecision(any(), any(), any(), any(), any(), any()))
 			.thenReturn(new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, null));
 
-		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(null, null, null);
+		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
 		assertThat(consentDecision.getStatus(), equalTo(ConsentOperationStatusEnum.REJECT));
 	}
