@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 
 import java.util.Iterator;
 import java.util.List;
