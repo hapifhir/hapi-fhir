@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.apache.commons.dbcp2.BasicDataSource;
-import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

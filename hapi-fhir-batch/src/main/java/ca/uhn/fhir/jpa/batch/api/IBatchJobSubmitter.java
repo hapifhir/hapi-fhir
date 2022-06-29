@@ -25,6 +25,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 
+/**
+ * @deprecated we are in the process of converting to batch2
+ */
+@Deprecated
 public interface IBatchJobSubmitter {
 
 	/**

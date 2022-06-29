@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
