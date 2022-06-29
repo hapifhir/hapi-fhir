@@ -1,4 +1,4 @@
-# HAPI FHIR Build Pipeline
+# HAPI FHIR Release Pipeline
 
 variables:
    MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
@@ -6,14 +6,12 @@ variables:
    NEW_RELEASE_VERSION:
    BRANCH:
 
-trigger: 
-  - none
+trigger: none
 
 pool:
    vmImage: ubuntu-latest
 
 jobs:
-
    - job: get_release_version
      timeoutInMinutes: 5
      steps:
