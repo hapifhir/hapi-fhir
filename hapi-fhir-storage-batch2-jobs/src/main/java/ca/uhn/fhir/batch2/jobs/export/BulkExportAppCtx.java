@@ -5,8 +5,8 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
-import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,6 @@ public class BulkExportAppCtx {
 		builder.setJobDescription("FHIR Bulk Export");
 		builder.setJobDefinitionVersion(1);
 
-		// :(
 		JobDefinition def =  builder.setParametersType(BulkExportJobParameters.class)
 			// validator
 			.setParametersValidator(bulkExportJobParametersValidator())

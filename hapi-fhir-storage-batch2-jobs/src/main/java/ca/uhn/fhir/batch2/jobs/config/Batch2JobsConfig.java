@@ -43,4 +43,5 @@ public class Batch2JobsConfig {
 	public IBatch2JobRunner batch2JobRunner() {
 		return new Batch2JobRunnerImpl();
 	}
+
 }

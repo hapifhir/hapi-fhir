@@ -23,8 +23,6 @@ package ca.uhn.fhir.jpa.batch;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -58,17 +56,4 @@ public class CommonBatchJobConfig {
 	public ReverseCronologicalBatchResourcePidReader reverseCronologicalBatchResourcePidReader() {
 		return new ReverseCronologicalBatchResourcePidReader();
 	}
-
-	@Bean
-	@StepScope
-	public PidToIBaseResourceProcessor pidToResourceProcessor() {
-		return new PidToIBaseResourceProcessor();
-	}
-
-	@Bean
-	@StepScope
-	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
-		return new GoldenResourceAnnotatingProcessor();
-	}
-
 }

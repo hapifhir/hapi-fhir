@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -58,9 +57,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
@@ -82,8 +79,6 @@ public class BulkDataExportProvider {
 	public static final String FARM_TO_TABLE_TYPE_FILTER_REGEX = "(?:,)(?=[A-Z][a-z]+\\?)";
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
-//	@Autowired
-//	private IBulkDataExportSvc myBulkDataExportSvc;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -131,7 +126,7 @@ public class BulkDataExportProvider {
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
 
-		IBulkDataExportSvc.JobInfo info = new IBulkDataExportSvc.JobInfo();
+		JobInfo info = new JobInfo();
 		info.setJobMetadataId(response.getJobId());
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 
@@ -304,47 +299,6 @@ public class BulkDataExportProvider {
 				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
 				break;
 		}
-
-		// we have the job instance id -> need to transfer to the actual id of the record
-		// (should we maybe index it?)
-		// alternatively - we can use the same id when we save it
-//		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
-//		switch (status.getStatus()) {
-//			case SUBMITTED:
-//			case BUILDING:
-//				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-//				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to " + status.getStatus() + " at " + new InstantType(status.getStatusTime()).getValueAsString());
-//				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-//				break;
-//			case COMPLETE:
-//				response.setStatus(Constants.STATUS_HTTP_200_OK);
-//				response.setContentType(Constants.CT_JSON);
-//
-//				// Create a JSON response
-//				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-//				bulkResponseDocument.setTransactionTime(status.getStatusTime());
-//				bulkResponseDocument.setRequest(status.getRequest());
-//				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
-//					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
-//					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
-//					bulkResponseDocument
-//						.addOutput()
-//						.setType(nextFile.getResourceType())
-//						.setUrl(nextUrl);
-//				}
-//				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
-//				response.getWriter().close();
-//				break;
-//			case ERROR:
-//				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
-//				response.setContentType(Constants.CT_FHIR_JSON);
-//
-//				// Create an OperationOutcome response
-//				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-//				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
-//				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
-//				response.getWriter().close();
-//		}
 	}
 
 	private String getTransitionTimeOfJobInfo(Batch2JobInfo theInfo) {
@@ -403,7 +357,7 @@ public class BulkDataExportProvider {
 		return bulkDataExportOptions;
 	}
 
-	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, IBulkDataExportSvc.JobInfo theOutcome) {
+	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
 

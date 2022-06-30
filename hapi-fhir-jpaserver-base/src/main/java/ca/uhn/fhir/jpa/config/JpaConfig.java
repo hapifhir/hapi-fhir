@@ -19,10 +19,8 @@ import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
-import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -441,12 +439,6 @@ public class JpaConfig {
 	@Bean
 	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
 		return new AutowiringSpringBeanJobFactory();
-	}
-
-	@Bean
-	@Lazy
-	public IBulkDataExportSvc bulkDataExportSvc() {
-		return new BulkDataExportSvcImpl();
 	}
 
 	@Bean

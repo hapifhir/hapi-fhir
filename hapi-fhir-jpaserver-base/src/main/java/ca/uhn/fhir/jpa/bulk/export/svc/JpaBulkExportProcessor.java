@@ -15,8 +15,6 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
@@ -78,20 +76,14 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	protected SearchBuilderFactory mySearchBuilderFactory;
 
 	@Autowired
-	private BulkExportDaoSvc myBulkExportDaoSvc;
-
-	@Autowired
-	private IBulkExportJobDao myBulkExportJobDao;
-
-	@Autowired
-	private IBulkExportCollectionDao myCollectionDao;
-
-	@Autowired
 	private IIdHelperService myIdHelperService;
+
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
+
 	@Autowired
 	private IJpaIdHelperService myJpaIdHelperService;
+
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 

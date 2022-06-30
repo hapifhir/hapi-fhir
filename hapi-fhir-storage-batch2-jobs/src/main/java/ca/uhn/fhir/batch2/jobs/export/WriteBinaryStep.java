@@ -51,7 +51,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
 
-		// FiXME
+		// TODO
 		// should be dependent on the
 		// output format in parameters
 		// but for now, only NDJSON is supported

@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -49,7 +50,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	public Batch2JobInfo getJobInfo(String theJobId) {
 		JobInstance instance = myJobCoordinator.getInstance(theJobId);
 		if (instance == null) {
-			throw new ResourceNotFoundException(theJobId);
+			throw new ResourceNotFoundException(Msg.code(2102) + " : " + theJobId);
 		}
 		return fromJobInstanceToBatch2JobInfo(instance);
 	}
