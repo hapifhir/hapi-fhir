@@ -1462,7 +1462,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
 		private ISearchQueryExecutor myResultsIterator;
-		private boolean myStillNeedToFetchIncludes;
+		private boolean myFetchIncludesForEverythingOperation;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
@@ -1475,7 +1475,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			// Includes are processed inline for $everything query
 			if (myParams.getEverythingMode() != null) {
-				myStillNeedToFetchIncludes = true;
+				myFetchIncludesForEverythingOperation = true;
 			}
 
 			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
@@ -1570,9 +1570,9 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 
 					if (myNext == null) {
-						if (myStillNeedToFetchIncludes) {
+						if (myFetchIncludesForEverythingOperation) {
 							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
-							myStillNeedToFetchIncludes = false;
+							myFetchIncludesForEverythingOperation = false;
 						}
 						if (myIncludesIterator != null) {
 							while (myIncludesIterator.hasNext()) {
