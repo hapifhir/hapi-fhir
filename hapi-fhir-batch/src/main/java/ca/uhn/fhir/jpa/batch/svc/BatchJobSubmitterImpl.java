@@ -37,6 +37,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * @deprecated we are in the process of converting to batch2
+ */
+@Deprecated
 public class BatchJobSubmitterImpl implements IBatchJobSubmitter {
 
 	private static final Logger ourLog = getLogger(BatchJobSubmitterImpl.class);

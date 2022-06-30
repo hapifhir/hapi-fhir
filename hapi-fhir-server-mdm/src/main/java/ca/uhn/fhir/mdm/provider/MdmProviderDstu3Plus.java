@@ -153,7 +153,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		List<String> resourceNames = new ArrayList<>();
 
-
 		if (theResourceNames != null) {
 			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 			validateResourceNames(resourceNames);
@@ -161,8 +160,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
 		}
 
-		List<String> urls = resourceNames.stream().map(s -> s + "?").collect(Collectors.toList());
-		return myMdmControllerSvc.submitMdmClearJob(urls, theBatchSize, theRequestDetails);
+		return myMdmControllerSvc.submitMdmClearJob(resourceNames, theBatchSize, theRequestDetails);
 	}
 
 	private void validateResourceNames(List<String> theResourceNames) {

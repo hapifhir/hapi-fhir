@@ -108,14 +108,15 @@ public class MeasureOperationsProvider {
 				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
-					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), theRequestDetails);
+					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				default:
 					throw new IllegalArgumentException(Msg.code(1664) + "Invalid report type: " + reportType);
 			}
 		}
 
 		// default report type is subject
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, , practitionerRef, theRequestDetails);
+
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");

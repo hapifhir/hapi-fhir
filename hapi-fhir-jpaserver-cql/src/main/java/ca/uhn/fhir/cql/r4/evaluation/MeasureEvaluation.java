@@ -79,11 +79,11 @@ public class MeasureEvaluation {
 		this.measurementPeriod = measurementPeriod;
 	}
 
-	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, RequestDetails theRequestDetails) {
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, String thePractitionerRef, RequestDetails theRequestDetails) {
 		logger.info("Generating individual report");
 
 		if (patientId == null) {
-			return evaluatePopulationMeasure(measure, context, theRequestDetails);
+			return evaluatePopulationMeasure(measure, context, thePractitionerRef, theRequestDetails);
 		}
 
 		Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id", patientId, "Patient", null, null, null,
@@ -126,11 +126,11 @@ public class MeasureEvaluation {
 		return patients;
 	}
 
-	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, RequestDetails theRequestDetails) {
+	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, String thePractitionerRef, RequestDetails theRequestDetails) {
 		logger.info("Generating summary report");
-
+		List<Patient> patients = thePractitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(thePractitionerRef, theRequestDetails);
 		boolean isSingle = false;
-		return evaluate(measure, context, getAllPatients(theRequestDetails), MeasureReport.MeasureReportType.SUMMARY, isSingle);
+		return evaluate(measure, context, patients, MeasureReport.MeasureReportType.SUMMARY, isSingle);
 	}
 
 	@SuppressWarnings("unchecked")
