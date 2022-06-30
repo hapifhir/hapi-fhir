@@ -251,7 +251,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 				.stream()
 				.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
 				.map(t -> resourceName + ":" + t.getName())
-				.sorted().toList();
+				.sorted().collect(Collectors.toList());
 			theResource.addSearchInclude("*");
 			for (String nextInclude : includes) {
 				theResource.addSearchInclude(nextInclude);
