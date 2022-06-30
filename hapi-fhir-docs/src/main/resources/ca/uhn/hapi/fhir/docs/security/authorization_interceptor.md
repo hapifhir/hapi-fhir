@@ -24,8 +24,7 @@ The rules also support query filters expressed by FHIR queries - e.g. `code:abov
 To use query filters, you must activate the [RuleFilteringConsentService.](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/consent/RuleFilteringConsentService.html)
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/AuthorizationInterceptors.java|ruleFiltering}}
-``` 
-
+```
 
 ## Using AuthorizationInterceptor in a REST Server
 
