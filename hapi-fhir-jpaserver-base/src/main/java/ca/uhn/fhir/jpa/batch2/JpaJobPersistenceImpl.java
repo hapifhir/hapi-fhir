@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
@@ -177,50 +178,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
-		WorkChunk retVal = new WorkChunk();
-		retVal.setId(theEntity.getId());
-		retVal.setSequence(theEntity.getSequence());
-		retVal.setJobDefinitionId(theEntity.getJobDefinitionId());
-		retVal.setJobDefinitionVersion(theEntity.getJobDefinitionVersion());
-		retVal.setInstanceId(theEntity.getInstanceId());
-		retVal.setTargetStepId(theEntity.getTargetStepId());
-		retVal.setStatus(theEntity.getStatus());
-		retVal.setCreateTime(theEntity.getCreateTime());
-		retVal.setStartTime(theEntity.getStartTime());
-		retVal.setEndTime(theEntity.getEndTime());
-		retVal.setErrorMessage(theEntity.getErrorMessage());
-		retVal.setErrorCount(theEntity.getErrorCount());
-		retVal.setRecordsProcessed(theEntity.getRecordsProcessed());
-		if (theIncludeData) {
-			if (theEntity.getSerializedData() != null) {
-				retVal.setData(theEntity.getSerializedData());
-			}
-		}
-		return retVal;
+		return JobInstanceUtil.fromEntityToWorkChunk(theEntity, theIncludeData);
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
-		JobInstance retVal = new JobInstance();
-		retVal.setInstanceId(theEntity.getId());
-		retVal.setJobDefinitionId(theEntity.getDefinitionId());
-		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
-		retVal.setStatus(theEntity.getStatus());
-		retVal.setCancelled(theEntity.isCancelled());
-		retVal.setStartTime(theEntity.getStartTime());
-		retVal.setCreateTime(theEntity.getCreateTime());
-		retVal.setEndTime(theEntity.getEndTime());
-		retVal.setCombinedRecordsProcessed(theEntity.getCombinedRecordsProcessed());
-		retVal.setCombinedRecordsProcessedPerSecond(theEntity.getCombinedRecordsProcessedPerSecond());
-		retVal.setTotalElapsedMillis(theEntity.getTotalElapsedMillis());
-		retVal.setWorkChunksPurged(theEntity.getWorkChunksPurged());
-		retVal.setProgress(theEntity.getProgress());
-		retVal.setErrorMessage(theEntity.getErrorMessage());
-		retVal.setErrorCount(theEntity.getErrorCount());
-		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
-		retVal.setParameters(theEntity.getParams());
-		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
-		retVal.setReport(theEntity.getReport());
-		return retVal;
+		return JobInstanceUtil.fromEntityToInstance(theEntity);
 	}
 
 	@Override
