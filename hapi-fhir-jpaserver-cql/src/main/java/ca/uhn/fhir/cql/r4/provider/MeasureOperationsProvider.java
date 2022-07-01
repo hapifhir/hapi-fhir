@@ -104,7 +104,7 @@ public class MeasureOperationsProvider {
 		if (reportType != null) {
 			switch (reportType) {
 				case "subject":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
 				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
@@ -115,7 +115,7 @@ public class MeasureOperationsProvider {
 		}
 
 		// default report type is subject
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, , practitionerRef, theRequestDetails);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
 
 		if (productLine != null) {
 			Extension ext = new Extension();
