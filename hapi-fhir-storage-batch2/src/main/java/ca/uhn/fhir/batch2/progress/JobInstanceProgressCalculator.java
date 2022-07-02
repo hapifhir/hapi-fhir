@@ -68,6 +68,10 @@ public class JobInstanceProgressCalculator {
 		}
 
 		if (instanceProgress.changed()) {
+			// This code can be called by both the maintenance service and the fast track work step executor.
+			// We only want to call the completion handler if the status was changed to COMPLETED in this thread.  We use the
+			// record changed count from of a sql update change status to rely on the database to tell us which thread
+			// the status change happened in.
 			boolean statusChanged = myJobPersistence.updateInstance(myInstance);
 			if (statusChanged && myInstance.getStatus() == StatusEnum.COMPLETED) {
 				ourLog.info("Status changed to COMPLETED.  Invoking completion handler.");
