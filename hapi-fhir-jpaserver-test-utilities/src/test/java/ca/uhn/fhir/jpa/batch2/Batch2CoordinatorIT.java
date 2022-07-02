@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.test.concurrency.LatchTimedOutError;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
@@ -37,11 +38,9 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -137,12 +136,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobId = "test-job-2a";
-		CountDownLatch calledLatch = new CountDownLatch(2);
+		PointcutLatch calledLatch = new PointcutLatch("Completion Handler Called");
 		CountDownLatch waitLatch = new CountDownLatch(2);
 
 		myCompletionHandler = details -> {
 			try {
-				calledLatch.countDown();
+				calledLatch.call(details);
+				Thread.dumpStack();
 				waitLatch.await();
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
@@ -157,6 +157,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
+		calledLatch.setExpectedCount(1);
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
@@ -164,17 +165,25 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// Start a maintenance run in the background
 		ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		// Wait for the fastrack call
+		calledLatch.awaitExpected();
+
+		// Now queue up the maintenance call
+		calledLatch.setExpectedCount(1);
 		executor.submit(() -> myJobMaintenanceService.runMaintenancePass());
 
 		// We should have only called the completion handler once
-		boolean countdownCompletedBeforeTimeout = calledLatch.await(5, TimeUnit.SECONDS);
-		assertFalse(countdownCompletedBeforeTimeout);
+		try {
+			calledLatch.awaitExpected();
+			fail();
+		} catch (LatchTimedOutError e) {
+			assertEquals("", e.getMessage());
+		}
 
-		// Now release the latch
+		// Now release the latches
 		waitLatch.countDown();
 		waitLatch.countDown(); // This shouldn't be necessary, but just in case
-
-		assertEquals(1, calledLatch.getCount());
 
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
