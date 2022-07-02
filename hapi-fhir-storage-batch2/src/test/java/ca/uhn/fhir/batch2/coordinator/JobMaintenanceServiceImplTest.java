@@ -231,6 +231,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.updateInstance(any())).thenReturn(true);
 
 		// Execute
 

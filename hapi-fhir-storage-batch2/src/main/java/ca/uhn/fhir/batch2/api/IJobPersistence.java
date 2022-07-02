@@ -155,8 +155,9 @@ public interface IJobPersistence {
 	 * Update the stored instance
 	 *
 	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
 	 */
-	void updateInstance(JobInstance theInstance);
+	boolean updateInstance(JobInstance theInstance);
 
 	/**
 	 * Deletes the instance and all associated work chunks

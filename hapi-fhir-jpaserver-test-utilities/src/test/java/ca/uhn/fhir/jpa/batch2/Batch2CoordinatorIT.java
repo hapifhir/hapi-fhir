@@ -136,13 +136,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
 		String jobId = "test-job-2a";
-		PointcutLatch calledLatch = new PointcutLatch("Completion Handler Called");
+		String completionHandlerLatchName = "Completion Handler";
+		PointcutLatch calledLatch = new PointcutLatch(completionHandlerLatchName);
 		CountDownLatch waitLatch = new CountDownLatch(2);
 
 		myCompletionHandler = details -> {
 			try {
 				calledLatch.call(details);
-				Thread.dumpStack();
 				waitLatch.await();
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
@@ -160,14 +160,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		calledLatch.setExpectedCount(1);
 		String instanceId = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
+		calledLatch.awaitExpected();
 
 		myBatch2JobHelper.assertNoGatedStep(instanceId);
 
 		// Start a maintenance run in the background
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-
-		// Wait for the fastrack call
-		calledLatch.awaitExpected();
 
 		// Now queue up the maintenance call
 		calledLatch.setExpectedCount(1);
@@ -175,10 +173,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// We should have only called the completion handler once
 		try {
-			calledLatch.awaitExpected();
+			// This test will pause for 5 seconds here.  This should be more than enough time on most servers to hit the
+			// spot where the maintenance services calls the completion handler
+			calledLatch.awaitExpectedWithTimeout(5);
 			fail();
 		} catch (LatchTimedOutError e) {
-			assertEquals("", e.getMessage());
+			assertEquals("HAPI-1483: " + completionHandlerLatchName + " PointcutLatch timed out waiting 5 seconds for latch to countdown from 1 to 0.  Is 1.", e.getMessage());
 		}
 
 		// Now release the latches

@@ -241,8 +241,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
+	/**
+	 * Update the stored instance
+	 *
+	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
+	 */
 	@Override
-	public void updateInstance(JobInstance theInstance) {
+	public boolean updateInstance(JobInstance theInstance) {
+		// Separate updating the status so we have atomic information about whether the status is changing
+		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
+
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
 		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
 
@@ -262,6 +271,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instance);
+		return recordsChangedByStatusUpdate > 0;
 	}
 
 	@Override

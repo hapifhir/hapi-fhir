@@ -20,13 +20,9 @@ package ca.uhn.fhir.batch2.progress;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,11 +136,7 @@ class InstanceProgress {
 			theInstance.setProgress(percentComplete);
 
 			if (jobSuccessfullyCompleted()) {
-				boolean completed = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
-				if (completed) {
-					invokeJobCompletionHandler(theInstance);
-				}
-				changedStatus = completed;
+				changedStatus = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
 			} else if (myErroredChunkCount > 0) {
 				changedStatus = updateInstanceStatus(theInstance, StatusEnum.ERRORED);
 			}
@@ -165,17 +157,6 @@ class InstanceProgress {
 
 	private boolean jobSuccessfullyCompleted() {
 		return myIncompleteChunkCount == 0 && myErroredChunkCount == 0 && myFailedChunkCount == 0;
-	}
-
-	private <PT extends IModelJson> void invokeJobCompletionHandler(JobInstance myInstance) {
-		JobDefinition<PT> definition = (JobDefinition<PT>) myInstance.getJobDefinition();
-		IJobCompletionHandler<PT> completionHandler = definition.getCompletionHandler();
-		if (completionHandler != null) {
-			String instanceId = myInstance.getInstanceId();
-			PT jobParameters = myInstance.getParameters(definition.getParametersType());
-			JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, instanceId);
-			completionHandler.jobComplete(completionDetails);
-		}
 	}
 
 	public boolean failed() {
