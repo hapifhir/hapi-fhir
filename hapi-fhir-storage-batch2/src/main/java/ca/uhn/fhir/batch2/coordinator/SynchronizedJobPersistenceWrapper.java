@@ -139,8 +139,8 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized void markInstanceAsCompleted(String theInstanceId) {
-		myWrap.markInstanceAsCompleted(theInstanceId);
+	public synchronized boolean markInstanceAsCompleted(String theInstanceId) {
+		return myWrap.markInstanceAsCompleted(theInstanceId);
 	}
 
 	@Override

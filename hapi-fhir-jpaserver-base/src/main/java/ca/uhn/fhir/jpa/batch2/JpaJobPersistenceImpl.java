@@ -286,8 +286,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public void markInstanceAsCompleted(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+	public boolean markInstanceAsCompleted(String theInstanceId) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+		return recordsChanged > 0;
 	}
 
 	@Override

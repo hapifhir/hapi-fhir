@@ -177,8 +177,9 @@ public interface IJobPersistence {
 	 * Marks an instance as being complete
 	 *
 	 * @param theInstanceId The instance ID
+	 * @return true if the instance status changed
 	 */
-	void markInstanceAsCompleted(String theInstanceId);
+	boolean markInstanceAsCompleted(String theInstanceId);
 
 	/**
 	 * Marks an instance as cancelled
