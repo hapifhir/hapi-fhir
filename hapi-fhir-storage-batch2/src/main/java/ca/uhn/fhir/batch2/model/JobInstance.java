@@ -122,7 +122,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
 		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
 		setReport(theJobInstance.getReport());
-		setJobDefinition(theJobInstance.getJobDefinition());
+		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
