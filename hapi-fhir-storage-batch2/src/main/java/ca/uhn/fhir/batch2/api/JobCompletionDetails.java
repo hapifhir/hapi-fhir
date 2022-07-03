@@ -34,6 +34,8 @@ public class JobCompletionDetails<PT extends IModelJson> {
 	public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
+		// Make a copy of the instance.  Even though the interface is read-only, we don't want to risk users of this API
+		// casting the instance and changing values inside it.
 		myInstance = new JobInstance(theInstance);
 	}
 
