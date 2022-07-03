@@ -186,7 +186,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 	List<TokenAutocompleteHit> autocompleteSearch(String theResourceType, String theSPName, String theModifier, String theSearchText) {
 		return new TransactionTemplate(myTxManager).execute(s -> {
-			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(myFhirCtx, myModelConfig, Search.session(myEntityManager));
+			TokenAutocompleteSearch tokenAutocompleteSearch = new TokenAutocompleteSearch(Search.session(myEntityManager));
 			return  tokenAutocompleteSearch.search(theResourceType, theSPName, theSearchText, theModifier,30);
 		});
 	}
