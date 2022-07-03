@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
@@ -43,7 +42,6 @@ import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -188,28 +186,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.where(
 				f -> f.bool(b -> {
 					HSearchClauseProvider clauseProvider = new HSearchClauseProvider(myHSearchParamHelperProvider, f, b);
-
-					/*
-					 * Handle _content parameter (resource body content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _content parameter, so we remove it from the map here
-					 */
-					// fixme jm: how is this different than rest of params? Think not
-//					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-//					clauseProvider.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
-
-					/*
-					 * Handle _text parameter (resource narrative content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _text parameter, so we remove it from the map here
-					 */
-					// fixme jm: how is this different than rest of params? Think not
-//					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-//					clauseProvider.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));

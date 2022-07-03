@@ -27,6 +27,8 @@ public class HSearchClauseProvider {
 	public void addAndConsumeAndPlusOrClauses(String theResourceTypeName,
 															String theParamName, List<List<IQueryParameterType>> theAndOrTerms) {
 
+		if (theAndOrTerms.isEmpty()) { return; }
+
 		HSearchParamHelper<?> paramHelper = getParamHelper(theResourceTypeName, theParamName);
 
 		BooleanPredicateClausesStep<?> topBool = myFactory.bool();
@@ -35,7 +37,7 @@ public class HSearchClauseProvider {
 			// need an extra bool level for nested properties (embedding it under topBool before leaving loop)
 			BooleanPredicateClausesStep<?> activeBool = paramHelper.isNested() ? myFactory.bool()  : topBool;
 
-			paramHelper.processOrTerms(myFactory, activeBool, orTerms, theParamName, paramHelper);
+			paramHelper.processOrTerms(myFactory, activeBool, orTerms, theParamName);
 
 			if ( paramHelper.isNested() ) {
 				topBool.must(myFactory.nested().objectField(NESTED_PREFIX + theParamName).nest(activeBool));

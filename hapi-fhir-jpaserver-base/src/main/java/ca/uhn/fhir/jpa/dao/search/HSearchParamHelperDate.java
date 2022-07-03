@@ -7,7 +7,6 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.util.DateUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,8 +24,6 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_LOWER
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_LOWER_ORD;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_UPPER;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_UPPER_ORD;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 
 public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
@@ -64,13 +61,15 @@ public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
 
 
 	@Override
-	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool, List<IQueryParameterType> theOrTerms, String theParamName, HSearchParamHelper<?> theParamHelper) {
+	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool,
+										List<IQueryParameterType> theOrTerms, String theParamName) {
+
 		if (theOrTerms.size() > 1) {
 			throw new IllegalArgumentException(Msg.code(2032) +
 				"OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
 		}
 
-		theParamHelper.addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
+		addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
 	}
 
 

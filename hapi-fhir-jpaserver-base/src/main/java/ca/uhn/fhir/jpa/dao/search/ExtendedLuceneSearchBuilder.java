@@ -142,28 +142,6 @@ public class ExtendedLuceneSearchBuilder {
 
 			// NOTE - keep this in sync with isParamSupported() above.
 			switch (activeParam.getParamType()) {
-				case TOKEN:
-					List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, tokenTextAndOrTerms);
-
-					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, tokenUnmodifiedAndOrTerms);
-					break;
-
-				case STRING:
-					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, stringTextAndOrTerms);
-
-					List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, stringExactAndOrTerms);
-
-					List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, stringContainsAndOrTerms);
-
-					List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, stringAndOrTerms);
-					break;
-
 				case DATE:
 					if (nextParam.equalsIgnoreCase("_lastupdated")) {
 						List<List<IQueryParameterType>> andOrTerms = getLastUpdatedAndOrList(theParams);
@@ -178,6 +156,8 @@ public class ExtendedLuceneSearchBuilder {
 					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, andOrTerms);
 					break;
 
+				case STRING:
+				case TOKEN:
 				case NUMBER:
 					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = theParams.remove(nextParam);
 					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, numberUnmodifiedAndOrTerms);

@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +17,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
 
 @Component
 public abstract class HSearchParamHelper<T extends IQueryParameterType> {
 	protected final Logger ourLog = LoggerFactory.getLogger(getClass());
+
+	protected static final String TEXT_PATH =  String.join(".", SEARCH_PARAM_ROOT, "*", "string", IDX_STRING_TEXT );
+
 
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -70,10 +80,10 @@ public abstract class HSearchParamHelper<T extends IQueryParameterType> {
 	}
 
 	public void processOrTerms(SearchPredicateFactory theFactory, BooleanPredicateClausesStep<?> theBool,
-					List<IQueryParameterType> theOrTerms, String theParamName, HSearchParamHelper<?> theParamHelper) {
+					List<IQueryParameterType> theOrTerms, String theParamName) {
 
 		if (theOrTerms.size() == 1) {
-			theParamHelper.addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
+			addOrClauses(theFactory, theBool, theParamName, theOrTerms.get(0));
 			return;
 		}
 
@@ -83,10 +93,37 @@ public abstract class HSearchParamHelper<T extends IQueryParameterType> {
 
 			for (IQueryParameterType orTerm : theOrTerms) {
 				var paramBool = theFactory.bool();
-				theParamHelper.addOrClauses(theFactory, paramBool, theParamName, orTerm);
+				addOrClauses(theFactory, paramBool, theParamName, orTerm);
 				b2.should(paramBool);
 			}
 		}));
-
 	}
+
+	/**
+	 * Used ny STRING and TOKEN children
+	 */
+	protected PredicateFinalStep getPredicatesForTextQualifier(SearchPredicateFactory theFactory, Set<String> terms, String theParamName) {
+		String fieldPath = getTextPath(theParamName);
+
+		String query = terms.stream() .map(s -> "( " + s + " )") .collect(Collectors.joining(" | "));
+		return theFactory.simpleQueryString().field(fieldPath).matching(query).defaultOperator(BooleanOperator.AND);
+	}
+
+
+	private String getTextPath(String theParamName) {
+//		fixme jm: why is this needed? Why not defined as other parameters?
+		switch (theParamName) {
+			case Constants.PARAM_CONTENT:
+				return "myContentText";
+
+			case Constants.PARAM_TEXT:
+				return "myNarrativeText";
+
+			default:
+				return mergeParamIntoProperty(TEXT_PATH, theParamName);
+		}
+	}
+
+
+
 }
