@@ -77,7 +77,7 @@ class JobQuerySvc {
 	private JobInstance massageInstanceForUserAccess(JobInstance theInstance) {
 		JobInstance retVal = new JobInstance(theInstance);
 
-		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
+		JobDefinition<?> definition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(theInstance);
 
 		// Serializing the parameters strips any write-only params
 		IModelJson parameters = retVal.getParameters(definition.getParametersType());

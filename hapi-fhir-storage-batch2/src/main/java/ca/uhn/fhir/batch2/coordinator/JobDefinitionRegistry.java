@@ -113,7 +113,7 @@ public class JobDefinitionRegistry {
 	}
 
 	public void setJobDefinition(JobInstance theInstance) {
-		JobDefinition<?> jobDefinition = getJobDefinitionOrThrowException(theInstance.getJobDefinitionId(), theInstance.getJobDefinitionVersion());
+		JobDefinition<?> jobDefinition = getJobDefinitionOrThrowException(theInstance);
 		theInstance.setJobDefinition(jobDefinition);
 	}
 
@@ -129,5 +129,13 @@ public class JobDefinitionRegistry {
 
 	public boolean isEmpty() {
 		return myJobs.isEmpty();
+	}
+
+	public Optional<JobDefinition<?>> getJobDefinition(JobInstance theJobInstance) {
+		return getJobDefinition(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+	}
+
+	public JobDefinition<?> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
+		return getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
 	}
 }

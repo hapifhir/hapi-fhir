@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
-
 class InstanceProgress {
 	private static final Logger ourLog = LoggerFactory.getLogger(InstanceProgress.class);
 
@@ -107,15 +105,11 @@ class InstanceProgress {
 		theInstance.setErrorCount(myErrorCountForAllStatuses);
 		theInstance.setCombinedRecordsProcessed(myRecordsProcessed);
 
-		boolean changedStatus = updateStatus(theInstance);
+		updateStatus(theInstance);
 
 		setEndTime(theInstance);
 
 		theInstance.setErrorMessage(myErrormessage);
-
-		if (changedStatus || theInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", theInstance.getInstanceId(), theInstance.getJobDefinitionId(), theInstance.getStatus(), theInstance.getCombinedRecordsProcessed(), theInstance.getCombinedRecordsProcessedPerSecond(), theInstance.getEstimatedTimeRemaining());
-		}
 	}
 
 	private void setEndTime(JobInstance theInstance) {
@@ -128,17 +122,16 @@ class InstanceProgress {
 		}
 	}
 
-	private boolean updateStatus(JobInstance theInstance) {
-		boolean changedStatus = false;
+	private void updateStatus(JobInstance theInstance) {
 		if (myCompleteChunkCount > 1 || myErroredChunkCount > 1) {
 
 			double percentComplete = (double) (myCompleteChunkCount) / (double) (myIncompleteChunkCount + myCompleteChunkCount + myFailedChunkCount + myErroredChunkCount);
 			theInstance.setProgress(percentComplete);
 
 			if (jobSuccessfullyCompleted()) {
-				changedStatus = updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
+				theInstance.setStatus(StatusEnum.COMPLETED);
 			} else if (myErroredChunkCount > 0) {
-				changedStatus = updateInstanceStatus(theInstance, StatusEnum.ERRORED);
+				theInstance.setStatus(StatusEnum.ERRORED);
 			}
 
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
@@ -152,7 +145,6 @@ class InstanceProgress {
 				}
 			}
 		}
-		return changedStatus;
 	}
 
 	private boolean jobSuccessfullyCompleted() {

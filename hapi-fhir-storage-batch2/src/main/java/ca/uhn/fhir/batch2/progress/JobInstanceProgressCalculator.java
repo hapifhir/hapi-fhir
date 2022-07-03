@@ -20,32 +20,28 @@ package ca.uhn.fhir.batch2.progress;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-
-import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
 
 public class JobInstanceProgressCalculator {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		myJobPersistence = theJobPersistence;
 		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
 
 	public void calculateAndStoreInstanceProgress() {
@@ -62,32 +58,17 @@ public class JobInstanceProgressCalculator {
 		instanceProgress.updateInstance(myInstance);
 
 		if (instanceProgress.failed()) {
-			updateInstanceStatus(myInstance, StatusEnum.FAILED);
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, StatusEnum.FAILED);
 			return;
 		}
 
-		if (instanceProgress.changed()) {
-			// This code can be called by both the maintenance service and the fast track work step executor.
-			// We only want to call the completion handler if the status was changed to COMPLETED in this thread.  We use the
-			// record changed count from of a sql update change status to rely on the database to tell us which thread
-			// the status change happened in.
-			boolean statusChanged = myJobPersistence.updateInstance(myInstance);
-			if (statusChanged && myInstance.getStatus() == StatusEnum.COMPLETED) {
-				ourLog.info("Status changed to COMPLETED.  Invoking completion handler.");
-				invokeCompletionHandler();
-			}
-		}
-	}
 
-	private  <PT extends IModelJson> void invokeCompletionHandler() {
-		JobDefinition<PT> definition = (JobDefinition<PT>) myInstance.getJobDefinition();
-		IJobCompletionHandler<PT> completionHandler = definition.getCompletionHandler();
-		if (completionHandler != null) {
-			String instanceId = myInstance.getInstanceId();
-			PT jobParameters = myInstance.getParameters(definition.getParametersType());
-			JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, instanceId);
-			completionHandler.jobComplete(completionDetails);
+		if (instanceProgress.changed() || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
+		}
+
+		if (instanceProgress.changed()) {
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 	}
 }

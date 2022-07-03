@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.model;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
+import ca.uhn.fhir.batch2.api.IJobErrorHandler;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -34,7 +35,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,11 +51,12 @@ public class JobDefinition<PT extends IModelJson> {
 	private final boolean myGatedExecution;
 	private final List<String> myStepIds;
 	private final IJobCompletionHandler<PT> myCompletionHandler;
+	private final IJobErrorHandler<PT> myErrorHandler;
 
 	/**
 	 * Constructor
 	 */
-	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
+	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobErrorHandler<PT> theErrorHandler) {
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
@@ -70,11 +71,17 @@ public class JobDefinition<PT extends IModelJson> {
 		myParametersValidator = theParametersValidator;
 		myGatedExecution = theGatedExecution;
 		myCompletionHandler = theCompletionHandler;
+		myErrorHandler = theErrorHandler;
 	}
 
 	@Nullable
 	public IJobCompletionHandler<PT> getCompletionHandler() {
 		return myCompletionHandler;
+	}
+
+	@Nullable
+	public IJobErrorHandler<PT> getErrorHandler() {
+		return myErrorHandler;
 	}
 
 	@Nullable
@@ -135,10 +142,6 @@ public class JobDefinition<PT extends IModelJson> {
 		return retVal;
 	}
 
-	public boolean isLastStep(String theStepId) {
-		return getStepIndex(theStepId) == (myStepIds.size() - 1);
-	}
-
 	public static class Builder<PT extends IModelJson, NIT extends IModelJson> {
 
 		private final List<JobDefinitionStep<PT, ?, ?>> mySteps;
@@ -151,12 +154,13 @@ public class JobDefinition<PT extends IModelJson> {
 		private IJobParametersValidator<PT> myParametersValidator;
 		private boolean myGatedExecution;
 		private IJobCompletionHandler<PT> myCompletionHandler;
+		private IJobErrorHandler<PT> myErrorHandler;
 
 		Builder() {
 			mySteps = new ArrayList<>();
 		}
 
-		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, @Nullable IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler) {
+		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, @Nullable IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobErrorHandler<PT> theErrorHandler) {
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -166,6 +170,7 @@ public class JobDefinition<PT extends IModelJson> {
 			myParametersValidator = theParametersValidator;
 			myGatedExecution = theGatedExecution;
 			myCompletionHandler = theCompletionHandler;
+			myErrorHandler = theErrorHandler;
 		}
 
 		/**
@@ -196,7 +201,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addFirstStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, VoidModel, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, VoidModel.class, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}
 
 		/**
@@ -210,7 +215,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public <OT extends IModelJson> Builder<PT, OT> addIntermediateStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IJobStepWorker<PT, NIT, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}
 
 		/**
@@ -224,17 +229,17 @@ public class JobDefinition<PT extends IModelJson> {
 		 */
 		public Builder<PT, VoidModel> addLastStep(String theStepId, String theStepDescription, IJobStepWorker<PT, NIT, VoidModel> theStepWorker) {
 			mySteps.add(new JobDefinitionStep<>(theStepId, theStepDescription, theStepWorker, myNextInputType, VoidModel.class));
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution, myCompletionHandler);
+			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}
 
 		public <OT extends IModelJson> Builder<PT, OT> addFinalReducerStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IReductionStepWorker<PT, NIT, OT> theStepWorker) {
 			mySteps.add(new JobDefinitionReductionStep<PT, NIT, OT>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
-			return new Builder<PT, OT>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler);
+			return new Builder<PT, OT>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}
 
 		public JobDefinition<PT> build() {
 			Validate.notNull(myJobParametersType, "No job parameters type was supplied");
-			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator, myGatedExecution, myCompletionHandler);
+			return new JobDefinition<>(myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, Collections.unmodifiableList(mySteps), myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}
 
 		public Builder<PT, NIT> setJobDescription(String theJobDescription) {
@@ -326,6 +331,14 @@ public class JobDefinition<PT extends IModelJson> {
 			return this;
 		}
 
+		/**
+		 * Supplies an optional callback that will be invoked if the job fails
+		 */
+		public Builder<PT, NIT> errorHandler(IJobErrorHandler<PT> theErrorHandler) {
+			Validate.isTrue(theErrorHandler == null, "Can not supply multiple error handlers");
+			myErrorHandler = theErrorHandler;
+			return this;
+		}
 
 	}
 
