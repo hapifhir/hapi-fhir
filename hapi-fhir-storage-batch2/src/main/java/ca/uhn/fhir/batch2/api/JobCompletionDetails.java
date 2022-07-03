@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
@@ -28,12 +29,12 @@ import javax.annotation.Nonnull;
 public class JobCompletionDetails<PT extends IModelJson> {
 
 	private final PT myParameters;
-	private final String myInstanceId;
+	private final IJobInstance myInstance;
 
-	public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull String theInstanceId) {
+	public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
-		myInstanceId = theInstanceId;
+		myInstance = new JobInstance(theInstance);
 	}
 
 	/**
@@ -49,8 +50,8 @@ public class JobCompletionDetails<PT extends IModelJson> {
 	 * Returns the job instance ID being executed
 	 */
 	@Nonnull
-	public String getInstanceId() {
-		return myInstanceId;
+	public IJobInstance getInstance() {
+		return myInstance;
 	}
 
 }

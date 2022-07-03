@@ -1,10 +1,9 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobErrorHandler;
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.api.JobErrorDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -37,7 +36,7 @@ class JobInstanceStatusUpdaterTest {
 	JobInstanceStatusUpdater mySvc;
 	private JobInstance myInstance;
 	private TestParameters myTestParameters;
-	private AtomicReference<JobErrorDetails> myErrorDetails;
+	private AtomicReference<JobCompletionDetails> myDetails;
 
 	@BeforeEach
 	public void before() {
@@ -67,7 +66,7 @@ class JobInstanceStatusUpdaterTest {
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.COMPLETED);
 
 		JobCompletionDetails<TestParameters> receivedDetails = calledDetails.get();
-		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstanceId());
+		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstance().getInstanceId());
 		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
 	}
 
@@ -102,20 +101,21 @@ class JobInstanceStatusUpdaterTest {
 	}
 
 	private void assertErrorCallbackCalled(StatusEnum expectedStatus) {
-		JobErrorDetails<TestParameters> receivedDetails = myErrorDetails.get();
-		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstanceId());
+		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
 		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
-		assertEquals(TEST_ERROR_MESSAGE, receivedDetails.getErrorMessage());
-		assertEquals(TEST_ERROR_COUNT, receivedDetails.getErrorCount());
-		assertEquals(expectedStatus, receivedDetails.getStatus());
+		IJobInstance instance = receivedDetails.getInstance();
+		assertEquals(TEST_INSTANCE_ID, instance.getInstanceId());
+		assertEquals(TEST_ERROR_MESSAGE, instance.getErrorMessage());
+		assertEquals(TEST_ERROR_COUNT, instance.getErrorCount());
+		assertEquals(expectedStatus, instance.getStatus());
 	}
 
 	private void setupErrorCallback() {
-		myErrorDetails = new AtomicReference<>();
+		myDetails = new AtomicReference<>();
 
 		// setup
 		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
-		IJobErrorHandler<TestParameters> errorHandler = details -> myErrorDetails.set(details);
+		IJobCompletionHandler<TestParameters> errorHandler = details -> myDetails.set(details);
 		when(myJobDefinition.getErrorHandler()).thenReturn(errorHandler);
 	}
 

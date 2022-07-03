@@ -21,7 +21,6 @@ package ca.uhn.fhir.batch2.model;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobErrorHandler;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
@@ -51,12 +50,12 @@ public class JobDefinition<PT extends IModelJson> {
 	private final boolean myGatedExecution;
 	private final List<String> myStepIds;
 	private final IJobCompletionHandler<PT> myCompletionHandler;
-	private final IJobErrorHandler<PT> myErrorHandler;
+	private final IJobCompletionHandler<PT> myErrorHandler;
 
 	/**
 	 * Constructor
 	 */
-	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobErrorHandler<PT> theErrorHandler) {
+	private JobDefinition(String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theParametersType, List<JobDefinitionStep<PT, ?, ?>> theSteps, IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobCompletionHandler<PT> theErrorHandler) {
 		Validate.isTrue(theJobDefinitionId.length() <= ID_MAX_LENGTH, "Maximum ID length is %d", ID_MAX_LENGTH);
 		Validate.notBlank(theJobDefinitionId, "No job definition ID supplied");
 		Validate.notBlank(theJobDescription, "No job description supplied");
@@ -80,7 +79,7 @@ public class JobDefinition<PT extends IModelJson> {
 	}
 
 	@Nullable
-	public IJobErrorHandler<PT> getErrorHandler() {
+	public IJobCompletionHandler<PT> getErrorHandler() {
 		return myErrorHandler;
 	}
 
@@ -154,13 +153,13 @@ public class JobDefinition<PT extends IModelJson> {
 		private IJobParametersValidator<PT> myParametersValidator;
 		private boolean myGatedExecution;
 		private IJobCompletionHandler<PT> myCompletionHandler;
-		private IJobErrorHandler<PT> myErrorHandler;
+		private IJobCompletionHandler<PT> myErrorHandler;
 
 		Builder() {
 			mySteps = new ArrayList<>();
 		}
 
-		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, @Nullable IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobErrorHandler<PT> theErrorHandler) {
+		Builder(List<JobDefinitionStep<PT, ?, ?>> theSteps, String theJobDefinitionId, int theJobDefinitionVersion, String theJobDescription, Class<PT> theJobParametersType, Class<NIT> theNextInputType, @Nullable IJobParametersValidator<PT> theParametersValidator, boolean theGatedExecution, IJobCompletionHandler<PT> theCompletionHandler, IJobCompletionHandler<PT> theErrorHandler) {
 			mySteps = theSteps;
 			myJobDefinitionId = theJobDefinitionId;
 			myJobDefinitionVersion = theJobDefinitionVersion;
@@ -334,7 +333,7 @@ public class JobDefinition<PT extends IModelJson> {
 		/**
 		 * Supplies an optional callback that will be invoked if the job fails
 		 */
-		public Builder<PT, NIT> errorHandler(IJobErrorHandler<PT> theErrorHandler) {
+		public Builder<PT, NIT> errorHandler(IJobCompletionHandler<PT> theErrorHandler) {
 			Validate.isTrue(theErrorHandler == null, "Can not supply multiple error handlers");
 			myErrorHandler = theErrorHandler;
 			return this;

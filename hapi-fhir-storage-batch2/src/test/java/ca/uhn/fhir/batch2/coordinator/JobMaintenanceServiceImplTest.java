@@ -253,7 +253,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verifyNoMoreInteractions(myJobPersistence);
 
-		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstanceId());
+		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
 		assertEquals(PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
 	}
 

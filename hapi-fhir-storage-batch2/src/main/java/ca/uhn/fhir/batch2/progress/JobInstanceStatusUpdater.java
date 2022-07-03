@@ -1,10 +1,8 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
-import ca.uhn.fhir.batch2.api.IJobErrorHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.api.JobErrorDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -33,21 +31,22 @@ public class JobInstanceStatusUpdater {
 		// record changed count from of a sql update change status to rely on the database to tell us which thread
 		// the status change happened in.
 		if (statusChanged) {
-				ourLog.info("Marking job instance {} of type {} as {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), theJobInstance.getStatus());
-				handleStatusChange(theJobInstance);
+			ourLog.info("Marking job instance {} of type {} as {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), theJobInstance.getStatus());
+			handleStatusChange(theJobInstance);
 		}
 		return statusChanged;
 	}
 
-	private void handleStatusChange(JobInstance theJobInstance) {
+	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
+		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
 		switch (theJobInstance.getStatus()) {
 			case COMPLETED:
-				invokeCompletionHandler(theJobInstance);
+				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
 				break;
 			case FAILED:
 			case ERRORED:
 			case CANCELLED:
-				invokeErrorHandler(theJobInstance);
+				invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
 				break;
 			case QUEUED:
 			case IN_PROGRESS:
@@ -57,28 +56,12 @@ public class JobInstanceStatusUpdater {
 	}
 
 
-	private  <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance) {
-		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
-		IJobCompletionHandler<PT> completionHandler = definition.getCompletionHandler();
-		if (completionHandler != null) {
-			String instanceId = theJobInstance.getInstanceId();
-			PT jobParameters = theJobInstance.getParameters(definition.getParametersType());
-			JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, instanceId);
-			completionHandler.jobComplete(completionDetails);
+	private <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance, JobDefinition<PT> theJobDefinition, IJobCompletionHandler<PT> theJobCompletionHandler) {
+		if (theJobCompletionHandler == null) {
+			return;
 		}
-	}
-
-	private  <PT extends IModelJson> void invokeErrorHandler(JobInstance theJobInstance) {
-		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
-		IJobErrorHandler<PT> errorHandler = definition.getErrorHandler();
-		if (errorHandler != null) {
-			String instanceId = theJobInstance.getInstanceId();
-			PT jobParameters = theJobInstance.getParameters(definition.getParametersType());
-			String errorMessage = theJobInstance.getErrorMessage();
-			int errorCount = theJobInstance.getErrorCount();
-			StatusEnum status = theJobInstance.getStatus();
-			JobErrorDetails<PT> errorDetails = new JobErrorDetails<>(jobParameters, instanceId, errorMessage, errorCount, status);
-			errorHandler.jobFailed(errorDetails);
-		}
+		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
+		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
+		theJobCompletionHandler.jobComplete(completionDetails);
 	}
 }
