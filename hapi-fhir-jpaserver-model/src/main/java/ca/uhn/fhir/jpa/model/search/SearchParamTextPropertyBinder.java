@@ -40,17 +40,17 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_TEXT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NUMBER_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_CODE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_SYSTEM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.QTY_VALUE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_LOWER;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
 
 /**
  * Allows hibernate search to index
@@ -59,10 +59,11 @@ import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.URI_VALUE;
  * Coding.display
  * Identifier.type.text
  */
-public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedLuceneIndexData> {
+public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBridge<ExtendedHSearchIndexData> {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
 
 	public static final String SEARCH_PARAM_TEXT_PREFIX = "text-";
-	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamTextPropertyBinder.class);
+	public static final String LOWERCASE_ASCIIFOLDING_NORMALIZER = "lowercaseAsciifoldingNormalizer";
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
@@ -74,7 +75,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		defineIndexingTemplate(thePropertyBindingContext);
 
-		thePropertyBindingContext.bridge(ExtendedLuceneIndexData.class, this);
+		thePropertyBindingContext.bridge(ExtendedHSearchIndexData.class, this);
 	}
 
 	private void defineIndexingTemplate(PropertyBindingContext thePropertyBindingContext) {
@@ -91,7 +92,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		StringIndexFieldTypeOptionsStep<?> lowerCaseNormalizer =
 			indexFieldTypeFactory.asString()
-				.normalizer("lowercase")
+				.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER)
 				.sortable(Sortable.YES)
 				.projectable(Projectable.YES);
 
@@ -144,9 +145,9 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 		// The following section is a bit ugly.  We need to enforce order and dependency or the object matches will be too big.
 		{
-			IndexSchemaObjectField spfield = indexSchemaElement.objectField(HibernateSearchIndexWriter.SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
+			IndexSchemaObjectField spfield = indexSchemaElement.objectField(HSearchIndexWriter.SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
 			spfield.toReference();
-			IndexSchemaObjectField nestedSpField = indexSchemaElement.objectField(HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
+			IndexSchemaObjectField nestedSpField = indexSchemaElement.objectField(HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT, ObjectStructure.FLATTENED);
 			nestedSpField.toReference();
 
 			// TODO MB: the lucene/elastic independent api is hurting a bit here.
@@ -218,7 +219,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 	}
 
 	@Override
-	public void write(DocumentElement theDocument, ExtendedLuceneIndexData theIndexData, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
+	public void write(DocumentElement theDocument, ExtendedHSearchIndexData theIndexData, PropertyBridgeWriteContext thePropertyBridgeWriteContext) {
 		if (theIndexData != null) {
 			ourLog.trace("Writing index data for {}", theIndexData);
 			theIndexData.writeIndexElements(theDocument);

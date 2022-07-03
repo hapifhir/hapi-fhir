@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -123,7 +123,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @RequiresDocker
 @ContextConfiguration(classes = {
 	TestR4Config.class,
-	TestHibernateSearchAddInConfig.Elasticsearch.class,
+	TestHSearchAddInConfig.Elasticsearch.class,
 	DaoTestDataBuilder.Config.class,
 	TestDaoSearch.Config.class
 })
@@ -217,15 +217,15 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	@BeforeEach
 	public void enableContainsAndLucene() {
 		myDaoConfig.setAllowContainsSearches(true);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
 	@AfterEach
 	public void restoreContains() {
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
-		myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 	}
 
 	@Test
@@ -914,12 +914,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 		}
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 		}
 
 
@@ -1557,12 +1557,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 		}
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 		}
 
 		@Test
@@ -1694,7 +1694,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 
 			myOldObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeOld"),
@@ -1707,7 +1707,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 		}
 
 		@Test
@@ -1810,7 +1810,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 		}
 
 
@@ -1858,8 +1858,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		@BeforeEach
 		public void enableContainsAndLucene() {
 			myDaoConfig.setAllowContainsSearches(true);
-			myDaoConfig.setAdvancedLuceneIndexing(true);
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
@@ -1868,8 +1868,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void restoreContains() {
 			DaoConfig defaultConfig = new DaoConfig();
 			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-			myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
-			myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
 				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
 		}
@@ -2253,8 +2253,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		@BeforeEach
 		public void enableContainsAndLucene() {
 			myDaoConfig.setAllowContainsSearches(true);
-			myDaoConfig.setAdvancedLuceneIndexing(true);
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setAdvancedHSearchIndexing(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
 				NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		}
@@ -2263,8 +2263,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		public void restoreContains() {
 			DaoConfig defaultConfig = new DaoConfig();
 			myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
-			myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
-			myDaoConfig.setStoreResourceInLuceneIndex(defaultConfig.isStoreResourceInLuceneIndex());
+			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
+			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
 				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
 		}
@@ -2360,7 +2360,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			@Test
 			void specCase8() {
-//				fixme jm: was working like in spec before
+//				fixme jm: why did this change?
 //				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
 //				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
 //				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
@@ -2379,6 +2379,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 				String raId8 = createRiskAssessmentWithPredictionProbability(108.6).getIdPart();
 				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 95 to 105)
 				assertFindIds("when le", Set.of(raId1, raId2, raId7, raId8), "/RiskAssessment?probability=ne100");
+
 			}
 		}
 

@@ -60,6 +60,7 @@ class JobDefinitionRegistryTest {
 		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
+
 	@Test
 	void testEnsureStepsHaveUniqueIds() {
 

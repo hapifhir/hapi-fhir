@@ -98,7 +98,7 @@ public class InMemoryResourceMatcher {
 				validationSupportState = ValidationSupportInitializationState.INITIALIZED;
 			} catch (BeansException | ConfigurationException ignore) {
 				// We couldn't get a validation support bean, and we don't want to waste cycles trying again
-				ourLog.warn(Msg.code(2095) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
+				ourLog.warn(Msg.code(2100) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
 				validationSupportState = ValidationSupportInitializationState.FAILED;
 			}
 		}
@@ -129,6 +129,10 @@ public class InMemoryResourceMatcher {
 		} catch (UnsupportedOperationException e) {
 			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARSE_FAIL);
 		}
+		// wipjv consider merging InMemoryMatchResult with IAuthorizationSearchParamMatcher.Match match type
+//	} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+//		return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARAM);
+
 		searchParameterMap.clean();
 		return match(searchParameterMap, theResource, resourceDefinition, theSearchParams);
 	}

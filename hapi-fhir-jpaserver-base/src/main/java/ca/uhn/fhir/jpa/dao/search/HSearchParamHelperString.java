@@ -18,11 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_EXACT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_LOWER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.IDX_STRING_NORMALIZED;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_LOWER;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
 
 public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 
@@ -31,7 +30,6 @@ public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 	private static final String LOWER_PATH = String.join(".", SEARCH_PARAM_ROOT, "*", "string", IDX_STRING_LOWER );
 
 	private static final List<String> mySearchProperties = List.of( NORM_PATH, EXACT_PATH, TEXT_PATH, LOWER_PATH );
-	private static final List<String> mySkipParamNames = List.of( "myContentText", "myNarrativeText" );
 
 
 	@Override
@@ -121,7 +119,7 @@ public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 
 	/**
 	 * Normalize the string to match our standardAnalyzer.
-	 * @see ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
+	 * @see ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer#STANDARD_ANALYZER
 	 *
 	 * @param theString the raw string
 	 * @return a case and accent normalized version of the input
@@ -174,7 +172,7 @@ public class HSearchParamHelperString extends HSearchParamHelper<StringParam> {
 	public List<String> getParamProperties(IQueryParameterType theParam) { return mySearchProperties; }
 
 	@Override
-	public boolean isNested() { return NORM_PATH.startsWith(NESTED_SEARCH_PARAM_ROOT); }
+	public boolean isNested() { return false; }
 
 
 }

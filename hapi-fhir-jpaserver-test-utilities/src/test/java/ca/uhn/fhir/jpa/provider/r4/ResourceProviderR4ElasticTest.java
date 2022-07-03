@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = TestHibernateSearchAddInConfig.Elasticsearch.class)
+@ContextConfiguration(classes = TestHSearchAddInConfig.Elasticsearch.class)
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 
@@ -61,15 +61,15 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
-		myDaoConfig.setStoreResourceInLuceneIndex(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myDaoConfig.setStoreResourceInHSearchIndex(true);
 	}
 
 	@AfterEach
 	public void afterEach() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
-		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
-		myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 	}
 
 

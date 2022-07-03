@@ -24,9 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneIndexExtractor;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneResourceProjection;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneSearchBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchIndexExtractor;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.HSearchClauseProvider;
 import ca.uhn.fhir.jpa.dao.search.IHSearchParamHelperProvider;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
@@ -34,7 +34,7 @@ import ca.uhn.fhir.jpa.dao.search.LastNOperation;
 import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteSearch;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
@@ -105,7 +105,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
-	final private ExtendedLuceneSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedLuceneSearchBuilder();
+	final private ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
 
 	private Boolean ourDisabled;
 
@@ -116,10 +116,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	public ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
+	public ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(resourceType);
-		ExtendedLuceneIndexExtractor extractor = new ExtendedLuceneIndexExtractor(
+		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
 		return extractor.extract(theResource,theNewParams);
 	}
@@ -129,7 +129,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
-		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedLuceneIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
+		requiresHibernateSearchAccess |= myDaoConfig.isAdvancedHSearchIndexing() && myAdvancedIndexQueryBuilder.isSupportsSomeOf(myParams);
 
 		return requiresHibernateSearchAccess;
 	}
@@ -198,7 +198,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle other supported parameters
 					 */
-					if (myDaoConfig.isAdvancedLuceneIndexing() && theParams.getEverythingMode() == null) {
+					if (myDaoConfig.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
 						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(clauseProvider, theResourceType, theParams, mySearchParamRegistry);
 					}
 
@@ -325,10 +325,10 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		SearchSession session = getSearchSession();
-		List<ExtendedLuceneResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
+		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
 				f -> f.composite(
-					ExtendedLuceneResourceProjection::new,
+					ExtendedHSearchResourceProjection::new,
 					f.field("myId", Long.class),
 					f.field("myForcedId", String.class),
 					f.field("myRawResource", String.class))
@@ -338,8 +338,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.fetchAllHits(); // matches '_id' from resource index
 
 		ArrayList<Long> pidList = new ArrayList<>(thePids);
-		List<ExtendedLuceneResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
-			.sorted( Ordering.explicit(pidList).onResultOf(ExtendedLuceneResourceProjection::getPid) ).collect( Collectors.toList() );
+		List<ExtendedHSearchResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
+			.sorted( Ordering.explicit(pidList).onResultOf(ExtendedHSearchResourceProjection::getPid) ).collect( Collectors.toList() );
 
 		IParser parser = myFhirContext.newJsonParser();
 		return orderedAsPidsResourceDataList.stream()

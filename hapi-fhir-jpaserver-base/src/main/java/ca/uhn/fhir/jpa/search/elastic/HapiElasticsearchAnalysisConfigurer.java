@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
@@ -71,11 +71,11 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 			.param("max_gram", "20");
 
 
-		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER).custom()
+		theConfigCtx.analyzer(HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.STANDARD_ANALYZER).custom()
 			.tokenizer("standard")
 			.tokenFilters("lowercase", "asciifolding");
 
-		theConfigCtx.analyzer(HapiLuceneAnalysisConfigurer.NORM_STRING_ANALYZER).custom()
+		theConfigCtx.analyzer(HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.NORM_STRING_ANALYZER).custom()
 			.tokenizer("keyword") // We need the whole string to match, including whitespace.
 			.tokenFilters("lowercase", "asciifolding");
 

@@ -20,11 +20,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_LOWER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_LOWER_ORD;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_UPPER;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.DATE_UPPER_ORD;
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.DATE_LOWER;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.DATE_LOWER_ORD;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.DATE_UPPER;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.DATE_UPPER_ORD;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
+
 
 public class HSearchParamHelperDate extends HSearchParamHelper<DateParam> {
 
