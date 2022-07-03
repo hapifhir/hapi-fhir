@@ -152,7 +152,8 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
-	 * Update the stored instance
+	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
+	 * instead to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstance The instance - Must contain an ID
 	 * @return true if the status changed
