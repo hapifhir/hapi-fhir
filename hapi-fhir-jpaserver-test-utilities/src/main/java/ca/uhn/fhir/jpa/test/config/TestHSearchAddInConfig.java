@@ -22,10 +22,12 @@ package ca.uhn.fhir.jpa.test.config;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.IHSearchEventListener;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
+import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
@@ -103,6 +105,12 @@ public class TestHSearchAddInConfig {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
+
+		@Bean
+		public IHSearchEventListener testHSearchEventDispatcher() {
+			return new TestHSearchEventDispatcher();
+		}
+
 	}
 
 
@@ -134,6 +142,12 @@ public class TestHSearchAddInConfig {
 			ourLog.info("Hibernate Search: FulltextSearchSvcImpl present");
 			return new FulltextSearchSvcImpl();
 		}
+
+		@Bean
+		public IHSearchEventListener testHSearchEventDispatcher() {
+			return new TestHSearchEventDispatcher();
+		}
+
 	}
 
 	/**
@@ -189,7 +203,10 @@ public class TestHSearchAddInConfig {
 			};
 		}
 
-
+		@Bean
+		public IHSearchEventListener testHSearchEventDispatcher() {
+			return new TestHSearchEventDispatcher();
+		}
 
 		@Bean
 		public ElasticsearchContainer elasticContainer() {

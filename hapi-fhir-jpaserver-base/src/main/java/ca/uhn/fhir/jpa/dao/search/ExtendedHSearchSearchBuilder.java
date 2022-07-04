@@ -68,6 +68,30 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	/**
+	 * Are all the queries supported by our indexing?
+	 */
+	public boolean isSupportsAllOf(SearchParameterMap myParams) {
+		return
+			myParams.getRevIncludes() == null && // ???
+			myParams.getIncludes() == null && // ???
+			myParams.getEverythingMode() == null && // ???
+			! myParams.isDeleteExpunge() && // ???
+
+			// not yet supported in HSearch
+			myParams.getNearDistanceParam() == null && // ???
+
+			// not yet supported in HSearch
+			myParams.getSearchContainedMode() == null && // ???
+
+			myParams.entrySet().stream()
+				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
+				// each and clause may have a different modifier, so split down to the ORs
+				.flatMap(andList -> andList.getValue().stream())
+				.flatMap(Collection::stream)
+				.allMatch(this::isParamTypeSupported);
+	}
+
+	/**
 	 * Do we support this query param type+modifier?
 	 * <p>
 	 * NOTE - keep this in sync with addAndConsumeAdvancedQueryClauses() below.
