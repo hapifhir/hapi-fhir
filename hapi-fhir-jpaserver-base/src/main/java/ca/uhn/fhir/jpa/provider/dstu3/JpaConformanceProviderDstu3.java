@@ -201,6 +201,9 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(theResourceName);
 		if (mySearchParamRegistry != null) {
 			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			if (searchParams == null) {
+				return ResourceSearchParams.empty(theResourceName);
+			}
 			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 				if (nextBuiltInSpName.startsWith("_") &&
 					!searchParams.containsParamName(nextBuiltInSpName) &&
