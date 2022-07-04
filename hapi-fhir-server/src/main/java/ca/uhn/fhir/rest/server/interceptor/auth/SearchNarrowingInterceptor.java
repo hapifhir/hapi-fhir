@@ -147,7 +147,7 @@ public class SearchNarrowingInterceptor {
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
 		//N.B do not add code above this for filtering, this should only ever occur on search.
-		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE) {
+		if (shouldSkipNarrowing(theRequestDetails)) {
 			return true;
 		}
 
@@ -186,6 +186,15 @@ public class SearchNarrowingInterceptor {
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * Skip unless it is a search request or an $everything operation
+	 */
+	private boolean shouldSkipNarrowing(RequestDetails theRequestDetails) {
+		return theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE
+			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
