@@ -24,7 +24,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.LatchTimedOutError;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -226,8 +225,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			@NotNull
 			@Override
-			public RunOutcome run(@NotNull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
-										 @NotNull IJobDataSink<ReductionStepOutput> theDataSink) throws JobExecutionFailedException {
+			public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
+										 @Nonnull IJobDataSink<ReductionStepOutput> theDataSink) throws JobExecutionFailedException {
 				theDataSink.accept(new ReductionStepOutput(myOutput));
 				callLatch(myLastStepLatch, theStepExecutionDetails);
 				return RunOutcome.SUCCESS;

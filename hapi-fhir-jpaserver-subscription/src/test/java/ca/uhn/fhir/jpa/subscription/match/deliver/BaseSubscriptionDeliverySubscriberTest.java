@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +35,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
+import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
@@ -276,14 +276,14 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 
-	@NotNull
+	@Nonnull
 	private Patient generatePatient() {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		return patient;
 	}
 
-	@NotNull
+	@Nonnull
 	private CanonicalSubscription generateSubscription() {
 		CanonicalSubscription subscription = new CanonicalSubscription();
 		subscription.setIdElement(new IdType("Subscription/123"));
