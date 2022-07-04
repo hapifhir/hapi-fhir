@@ -1,9 +1,8 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
-import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
@@ -20,7 +19,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
@@ -37,8 +35,6 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	@Autowired
 	MdmHelperR4 myMdmHelperR4;
 
-	@Mock
-	IJobDataSink<VoidModel> myDataSink;
 	private Long mySourcePid;
 	private Long myGoldenPid;
 	private MdmLink myLink;
@@ -109,10 +105,11 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	@NotNull
 	private StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> buildStepExecutionDetails(ResourceIdListWorkChunkJson chunk) {
 		String instanceId = UUID.randomUUID().toString();
+		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkid = UUID.randomUUID().toString();
 		MdmClearJobParameters parms = new MdmClearJobParameters();
 
-		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, instanceId, chunkid);
+		StepExecutionDetails<MdmClearJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(parms, chunk, jobInstance, chunkid);
 		return stepExecutionDetails;
 	}
 

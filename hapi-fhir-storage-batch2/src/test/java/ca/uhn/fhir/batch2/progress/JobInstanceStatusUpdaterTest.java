@@ -40,8 +40,7 @@ class JobInstanceStatusUpdaterTest {
 
 	@BeforeEach
 	public void before() {
-		myInstance = new JobInstance();
-		myInstance.setInstanceId(TEST_INSTANCE_ID);
+		myInstance = JobInstance.fromInstanceId(TEST_INSTANCE_ID);
 		myInstance.setStatus(StatusEnum.IN_PROGRESS);
 		myInstance.setJobDefinition(myJobDefinition);
 		myTestParameters = new TestParameters();

@@ -171,8 +171,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
-		JobInstance retVal = new JobInstance();
-		retVal.setInstanceId(theEntity.getId());
+		JobInstance retVal = JobInstance.fromInstanceId(theEntity.getId());
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());

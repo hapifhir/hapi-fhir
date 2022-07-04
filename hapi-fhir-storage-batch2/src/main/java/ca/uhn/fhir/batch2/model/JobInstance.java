@@ -131,6 +131,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return instance;
 	}
 
+	public static JobInstance fromInstanceId(String theInstanceId) {
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(theInstanceId);
+		return instance;
+	}
+
 	@Override
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
