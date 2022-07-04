@@ -148,8 +148,8 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
 			List<MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
-				addPersistentIdIfNotExist(resourcePersistentIds, new ResourcePersistentId(tuple.getGoldenPid()));
-				addPersistentIdIfNotExist(resourcePersistentIds, new ResourcePersistentId(tuple.getSourcePid()));
+				addPersistentIdIfNotExist(resourcePersistentIds, tuple.getGoldenPid());
+				addPersistentIdIfNotExist(resourcePersistentIds, tuple.getSourcePid());
 			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
