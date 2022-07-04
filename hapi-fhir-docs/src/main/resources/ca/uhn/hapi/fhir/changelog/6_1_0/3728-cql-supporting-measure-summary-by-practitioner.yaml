@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3728
+title: "If provided, the practitioner parameter for $evaluate-measure is now also be passed on to measures of type population (not only for type subject-list)."

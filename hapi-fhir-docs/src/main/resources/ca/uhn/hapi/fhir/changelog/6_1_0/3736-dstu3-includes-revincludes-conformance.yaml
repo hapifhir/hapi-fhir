@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3736
+jira: SMILE-4066
+title: "Previously, the DSTU3 Conformance provider was not including `searchInclude` or `searchRevInclude` results in the conformance response. This has been corrected."
