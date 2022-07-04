@@ -61,8 +61,8 @@ public abstract class HSearchParamHelper<T extends IQueryParameterType> {
 
 	public abstract List<String> getParamProperties(IQueryParameterType theParam);
 
-	public static Map<RestSearchParameterTypeEnum, HSearchParamHelper<? extends IQueryParameterType>> getTypeHelperMap() {
-		return HSearchParamHelper.ourTypedHelperMap;
+	public static Optional<HSearchParamHelper<? extends IQueryParameterType>> getTypeHelperForParam(RestSearchParameterTypeEnum theParamType) {
+		return Optional.ofNullable( HSearchParamHelper.ourTypedHelperMap.get(theParamType) );
 	}
 
 

@@ -43,21 +43,19 @@ public class HSearchParamHelperProviderImpl implements IHSearchParamHelperProvid
 	@NotNull
 	private HSearchParamHelper<?> findHelper(String theResourceTypeName, String theParamName) {
 		Optional<RestSearchParameterTypeEnum> paramTypeOpt = getParamType(theResourceTypeName, theParamName);
-
 		if (paramTypeOpt.isEmpty()) {
 			//	fixme jm: code
 			throw new InternalErrorException(Msg.code(0) + "Failed to obtain parameter type for resource " +
 				theResourceTypeName + " and parameter " + theParamName);
 		}
 
-		HSearchParamHelper<?> helper = HSearchParamHelper.getTypeHelperMap().get(paramTypeOpt.get());
-
-		if (helper == null) {
+		Optional<HSearchParamHelper<?>> helperOpt = HSearchParamHelper.getTypeHelperForParam(paramTypeOpt.get());
+		if (helperOpt.isEmpty()) {
 			//	fixme jm: code
 			throw new InternalErrorException(Msg.code(0) +
 				"HSearchParamHelper.myTypeHelperMap doesn't contain an entry for " + paramTypeOpt.get());
 		}
-		return helper;
+		return helperOpt.get();
 	}
 
 
