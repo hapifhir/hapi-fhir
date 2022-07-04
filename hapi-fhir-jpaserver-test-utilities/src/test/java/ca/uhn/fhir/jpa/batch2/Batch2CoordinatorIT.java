@@ -223,7 +223,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				return ChunkOutcome.SUCCESS();
 			}
 
-			@NotNull
+			@Nonnull
 			@Override
 			public RunOutcome run(@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
 										 @Nonnull IJobDataSink<ReductionStepOutput> theDataSink) throws JobExecutionFailedException {
