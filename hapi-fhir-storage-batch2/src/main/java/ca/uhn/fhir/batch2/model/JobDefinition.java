@@ -334,7 +334,7 @@ public class JobDefinition<PT extends IModelJson> {
 		 * Supplies an optional callback that will be invoked if the job fails
 		 */
 		public Builder<PT, NIT> errorHandler(IJobCompletionHandler<PT> theErrorHandler) {
-			Validate.isTrue(theErrorHandler == null, "Can not supply multiple error handlers");
+			Validate.isTrue(myErrorHandler == null, "Can not supply multiple error handlers");
 			myErrorHandler = theErrorHandler;
 			return this;
 		}
