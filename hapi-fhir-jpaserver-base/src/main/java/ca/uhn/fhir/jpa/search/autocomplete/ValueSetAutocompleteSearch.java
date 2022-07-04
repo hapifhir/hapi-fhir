@@ -42,7 +42,7 @@ public class ValueSetAutocompleteSearch {
 	public ValueSetAutocompleteSearch(FhirContext theFhirContext, ModelConfig theModelConfig, SearchSession theSession) {
 		myFhirContext = theFhirContext;
 		myModelConfig = theModelConfig;
-		myAutocompleteSearch = new TokenAutocompleteSearch(myFhirContext, myModelConfig, theSession);
+		myAutocompleteSearch = new TokenAutocompleteSearch(theSession);
 	}
 
 	public IBaseResource search(ValueSetAutocompleteOptions theOptions) {

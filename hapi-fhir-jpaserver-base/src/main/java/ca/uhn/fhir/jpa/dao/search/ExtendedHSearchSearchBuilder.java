@@ -126,7 +126,8 @@ public class ExtendedHSearchSearchBuilder {
 		}
 	}
 
-	public void addAndConsumeAdvancedQueryClauses(ExtendedHSearchClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
+	public void addAndConsumeAdvancedQueryClauses(HSearchClauseProvider builder, String theResourceType,
+					SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = compileParamNames(theParams);
 		for (String nextParam : paramNames) {
@@ -141,52 +142,25 @@ public class ExtendedHSearchSearchBuilder {
 
 			// NOTE - keep this in sync with isParamSupported() above.
 			switch (activeParam.getParamType()) {
-				case TOKEN:
-					List<List<IQueryParameterType>> tokenTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addStringTextSearch(nextParam, tokenTextAndOrTerms);
-
-					List<List<IQueryParameterType>> tokenUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addTokenUnmodifiedSearch(nextParam, tokenUnmodifiedAndOrTerms);
+				case DATE:
+					if (nextParam.equalsIgnoreCase("_lastupdated")) {
+						List<List<IQueryParameterType>> andOrTerms = getLastUpdatedAndOrList(theParams);
+						builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, andOrTerms);
+						break;
+					}
+					// flow to next case on purpose
+				case QUANTITY:
+				case REFERENCE:
+				case URI:
+					List<List<IQueryParameterType>> andOrTerms = theParams.removeByNameUnmodified(nextParam);
+					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, andOrTerms);
 					break;
 
 				case STRING:
-					List<List<IQueryParameterType>> stringTextAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_TOKEN_TEXT);
-					builder.addStringTextSearch(nextParam, stringTextAndOrTerms);
-
-					List<List<IQueryParameterType>> stringExactAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_EXACT);
-					builder.addStringExactSearch(nextParam, stringExactAndOrTerms);
-
-					List<List<IQueryParameterType>> stringContainsAndOrTerms = theParams.removeByNameAndModifier(nextParam, Constants.PARAMQUALIFIER_STRING_CONTAINS);
-					builder.addStringContainsSearch(nextParam, stringContainsAndOrTerms);
-
-					List<List<IQueryParameterType>> stringAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addStringUnmodifiedSearch(nextParam, stringAndOrTerms);
-					break;
-
-				case QUANTITY:
-					List<List<IQueryParameterType>> quantityAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addQuantityUnmodifiedSearch(nextParam, quantityAndOrTerms);
-					break;
-
-				case REFERENCE:
-					List<List<IQueryParameterType>> referenceAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addReferenceUnchainedSearch(nextParam, referenceAndOrTerms);
-					break;
-
-				case DATE:
-					List<List<IQueryParameterType>> dateAndOrTerms = nextParam.equalsIgnoreCase("_lastupdated")
-						? getLastUpdatedAndOrList(theParams) : theParams.removeByNameUnmodified(nextParam);
-					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
-					break;
-
-				case URI:
-					List<List<IQueryParameterType>> uriUnmodifiedAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addUriUnmodifiedSearch(nextParam, uriUnmodifiedAndOrTerms);
-					break;
-
+				case TOKEN:
 				case NUMBER:
 					List<List<IQueryParameterType>> numberUnmodifiedAndOrTerms = theParams.remove(nextParam);
-					builder.addNumberUnmodifiedSearch(nextParam, numberUnmodifiedAndOrTerms);
+					builder.addAndConsumeAndPlusOrClauses(theResourceType, nextParam, numberUnmodifiedAndOrTerms);
 					break;
 
 				default:

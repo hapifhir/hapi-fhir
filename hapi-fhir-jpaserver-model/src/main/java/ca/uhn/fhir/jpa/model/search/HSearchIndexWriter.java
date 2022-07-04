@@ -42,6 +42,11 @@ public class HSearchIndexWriter {
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
+	public static final String DATE_LOWER_ORD = "lower-ord";
+	public static final String DATE_LOWER		= "lower";
+	public static final String DATE_UPPER_ORD = "upper-ord";
+	public static final String DATE_UPPER		= "upper";
+
 	public static final String QTY_PARAM_NAME = "quantity";
 	public static final String QTY_CODE = "code";
 	public static final String QTY_SYSTEM = "system";
@@ -118,15 +123,14 @@ public class HSearchIndexWriter {
 	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
 		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
 		// Lower bound
-		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
-		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
+		dateIndexNode.addValue(DATE_LOWER_ORD, theValue.getLowerBoundOrdinal());
+		dateIndexNode.addValue(DATE_LOWER, theValue.getLowerBoundDate().toInstant());
 		// Upper bound
-		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
-		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
+		dateIndexNode.addValue(DATE_UPPER_ORD, theValue.getUpperBoundOrdinal());
+		dateIndexNode.addValue(DATE_UPPER, theValue.getUpperBoundDate().toInstant());
 
 		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
 	}
-
 
 
 	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {

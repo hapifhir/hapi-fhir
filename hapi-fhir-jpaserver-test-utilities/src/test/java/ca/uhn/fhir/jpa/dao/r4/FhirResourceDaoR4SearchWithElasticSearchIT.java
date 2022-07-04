@@ -2360,13 +2360,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 			@Test
 			void specCase8() {
-				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
-				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
-				String raId5 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
-				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 99.5 to 100.5)
-				assertFindIds("when le", Set.of(raId1, raId2, raId3, raId4), "/RiskAssessment?probability=ne100");
+				String raId1 = createRiskAssessmentWithPredictionProbability(91).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(93).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(96).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId5 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
+				String raId6 = createRiskAssessmentWithPredictionProbability(104).getIdPart();
+				String raId7 = createRiskAssessmentWithPredictionProbability(105).getIdPart();
+				String raId8 = createRiskAssessmentWithPredictionProbability(108).getIdPart();
+				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 95 to 105)
+				assertFindIds("when le", Set.of(raId1, raId2, raId8), "/RiskAssessment?probability=ne100");
+
 			}
 		}
 
