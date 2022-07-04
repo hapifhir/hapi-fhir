@@ -143,8 +143,16 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>com.github.dnault</groupId>
+            <artifactId>xml-patch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dogote</groupId>
+            <artifactId>json-patch</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 	<build>
 		<pluginManagement>
 			<plugins>
