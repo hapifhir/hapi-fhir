@@ -146,6 +146,11 @@ public class SearchNarrowingInterceptor {
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
+		//N.B do not add code above this for filtering, this should only ever occur on search.
+		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE) {
+			return true;
+		}
+
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		if (authorizedList == null) {
 			return true;
@@ -157,9 +162,6 @@ public class SearchNarrowingInterceptor {
 			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
 		}
 
-		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE) {
-			return true;
-		}
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
