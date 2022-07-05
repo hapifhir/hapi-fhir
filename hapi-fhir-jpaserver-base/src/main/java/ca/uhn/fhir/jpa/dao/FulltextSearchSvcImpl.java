@@ -44,17 +44,19 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import com.google.common.collect.Ordering;
 import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.projection.dsl.CompositeProjectionOptionsStep;
+import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
 import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
-import org.hibernate.search.engine.search.sort.dsl.SearchSortFactory;
-import org.hibernate.search.engine.search.sort.dsl.SortFinalStep;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.search.loading.dsl.SearchLoadingOptionsStep;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.orm.work.SearchIndexingPlan;
@@ -77,10 +79,12 @@ import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
@@ -103,6 +107,9 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private IHSearchSortHelper myExtendedFulltextSortHelper;
 
 	final private ExtendedHSearchSearchBuilder myAdvancedIndexQueryBuilder = new ExtendedHSearchSearchBuilder();
+
+	@Autowired(required = false)
+	private IHSearchEventListener myHSearchEventListener;
 
 	private Boolean ourDisabled;
 
@@ -172,6 +179,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private SearchQueryOptionsStep<?, Long, SearchLoadingOptionsStep, ?, ?> getSearchQueryOptionsStep(
 			String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		var query= getSearchSession().search(ResourceTable.class)
 			// The document id is the PK which is pid.  We use this instead of _myId to avoid fetching the doc body.
 			.select(
@@ -181,57 +189,62 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					f.documentReference())
 			)
 			.where(
-				f -> f.bool(b -> {
-					ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
-
-					/*
-					 * Handle _content parameter (resource body content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _content parameter, so we remove it from the map here
-					 */
-					List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-					builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
-
-					/*
-					 * Handle _text parameter (resource narrative content)
-					 *
-					 * Posterity:
-					 * We do not want the HAPI-FHIR dao's to process the
-					 * _text parameter, so we remove it from the map here
-					 */
-					List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-					builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
-
-					if (theReferencingPid != null) {
-						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
-					}
-
-					if (isNotBlank(theResourceType)) {
-						builder.addResourceTypeClause(theResourceType);
-					}
-
-					/*
-					 * Handle other supported parameters
-					 */
-					if (myDaoConfig.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
-						myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
-					}
-
-					//DROP EARLY HERE IF BOOL IS EMPTY?
-
-				})
+				f -> buildWhereClause(f, theResourceType, theParams, theReferencingPid)
 			);
 
 		if (theParams.getSort() != null) {
-			query.sort( f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+			query.sort(
+				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
 
 			// indicate parameter was processed
 			theParams.setSort(null);
 		}
 
 		return query;
+	}
+
+
+	private PredicateFinalStep buildWhereClause(SearchPredicateFactory f, String theResourceType,
+															  SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+		return f.bool(b -> {
+			ExtendedHSearchClauseBuilder builder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, b, f);
+
+			/*
+			 * Handle _content parameter (resource body content)
+			 *
+			 * Posterity:
+			 * We do not want the HAPI-FHIR dao's to process the
+			 * _content parameter, so we remove it from the map here
+			 */
+			List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+			builder.addStringTextSearch(Constants.PARAM_CONTENT, contentAndTerms);
+
+			/*
+			 * Handle _text parameter (resource narrative content)
+			 *
+			 * Posterity:
+			 * We do not want the HAPI-FHIR dao's to process the
+			 * _text parameter, so we remove it from the map here
+			 */
+			List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+			builder.addStringTextSearch(Constants.PARAM_TEXT, textAndTerms);
+
+			if (theReferencingPid != null) {
+				b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
+			}
+
+			if (isNotBlank(theResourceType)) {
+				builder.addResourceTypeClause(theResourceType);
+			}
+
+			/*
+			 * Handle other supported parameters
+			 */
+			if (myDaoConfig.isAdvancedHSearchIndexing() && theParams.getEverythingMode() == null) {
+				myAdvancedIndexQueryBuilder.addAndConsumeAdvancedQueryClauses(builder, theResourceType, theParams, mySearchParamRegistry);
+			}
+			//DROP EARLY HERE IF BOOL IS EMPTY?
+		});
 	}
 
 
@@ -304,6 +317,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
 
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		return autocomplete.search(theOptions);
 	}
 
@@ -329,6 +343,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	public List<ResourcePersistentId> lastN(SearchParameterMap theParams, Integer theMaximumResults) {
 		ensureElastic();
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<Long> pidList = new LastNOperation(getSearchSession(), myFhirContext, myModelConfig, mySearchParamRegistry)
 			.executeLastN(theParams, theMaximumResults);
 		return convertLongsToResourcePersistentIds(pidList);
@@ -341,37 +356,40 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		SearchSession session = getSearchSession();
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
-				f -> f.composite(
-					ExtendedHSearchResourceProjection::new,
-					f.field("myId", Long.class),
-					f.field("myForcedId", String.class),
-					f.field("myRawResource", String.class))
+				f -> buildResourceSelectClause(f)
 			)
 			.where(
-				f -> f.id().matchingAny(thePids))
-			.fetchAllHits(); // matches '_id' from resource index
+				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
+			).fetchAllHits();
 
+		// order resource projections as per thePids
 		ArrayList<Long> pidList = new ArrayList<>(thePids);
 		List<ExtendedHSearchResourceProjection> orderedAsPidsResourceDataList = rawResourceDataList.stream()
 			.sorted( Ordering.explicit(pidList).onResultOf(ExtendedHSearchResourceProjection::getPid) ).collect( Collectors.toList() );
 
+		return resourceProjectionsToResources(orderedAsPidsResourceDataList);
+	}
+
+
+	@Nonnull
+	private List<IBaseResource> resourceProjectionsToResources(List<ExtendedHSearchResourceProjection> theResourceDataList) {
 		IParser parser = myFhirContext.newJsonParser();
-		return orderedAsPidsResourceDataList.stream()
+		return theResourceDataList.stream()
 			.map(p -> p.toResource(parser))
 			.collect(Collectors.toList());
 	}
 
 
-	private SortFinalStep getSortOrder(SearchSortFactory theF, SortOrderEnum theOrder) {
-		var finalSortStep = theF.field("myId");
-		if (theOrder == SortOrderEnum.DESC) {
-			finalSortStep.desc();
-		} else {
-			finalSortStep.asc();
-		}
-		return finalSortStep;
+	private CompositeProjectionOptionsStep<?, ExtendedHSearchResourceProjection> buildResourceSelectClause(
+							SearchProjectionFactory<EntityReference, ResourceTable> f) {
+		return f.composite(
+			ExtendedHSearchResourceProjection::new,
+			f.field("myId", Long.class),
+			f.field("myForcedId", String.class),
+			f.field("myRawResource", String.class));
 	}
 
 
@@ -382,4 +400,46 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		return queryOptionsStep.fetchTotalHitCount();
 	}
+
+
+	@Override
+	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
+		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
+		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
+			offset = theParams.getOffset();
+			limit = theParams.getCount();
+			// indicate param was already processed, otherwise queries DB to process it
+			theParams.setOffset(null);
+		}
+
+		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+
+		var query = getSearchSession().search(ResourceTable.class)
+				.select(this::buildResourceSelectClause)
+				.where(f -> buildWhereClause(f, theResourceType, theParams, null));
+
+		if (theParams.getSort() != null && offset == 0) {
+			query.sort(
+				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
+		}
+
+		List<ExtendedHSearchResourceProjection> extendedLuceneResourceProjections = query.fetchHits(offset, limit);
+
+		return resourceProjectionsToResources(extendedLuceneResourceProjections);
+	}
+
+
+	@Override
+	public boolean supportsAllOf(SearchParameterMap theParams) {
+		return myAdvancedIndexQueryBuilder.isSupportsAllOf(theParams);
+	}
+
+
+	private void dispatchEvent(IHSearchEventListener.HSearchEventType theEventType) {
+		if (myHSearchEventListener != null) {
+			myHSearchEventListener.hsearchEvent(theEventType);
+		}
+	}
+
+
 }

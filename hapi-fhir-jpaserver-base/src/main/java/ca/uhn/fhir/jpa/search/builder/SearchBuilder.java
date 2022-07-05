@@ -378,11 +378,13 @@ public class SearchBuilder implements ISearchBuilder {
 					);
 
 			if (canSkipDatabase) {
+				ourLog.trace("Query finished after HSearch.  Skip db query phase");
 				if (theMaximumResults != null) {
 					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
 				}
 				queries.add(fulltextExecutor);
 			} else {
+				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				// wipmb change chunk to take iterator
