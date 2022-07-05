@@ -43,6 +43,8 @@ public interface IAuthRuleTester {
 	 */
 	class RuleTestRequest {
 		// fake record pattern
+		/** the mode of the calling rule context */
+		@Nonnull public final PolicyEnum mode;
 		/**
 		 * The FHIR operation being performed.
 		 * Note that this is not necessarily the same as the value obtained from invoking
@@ -50,11 +52,11 @@ public interface IAuthRuleTester {
 		 * because multiple operations can be nested within
 		 * an HTTP request using FHIR transaction and batch operations
 		 */
-		@Nonnull public final PolicyEnum mode;
 		@Nonnull public final RestOperationTypeEnum operation;
 		@Nonnull public final RequestDetails requestDetails;
 		@Nullable public final IIdType resourceId;
 		@Nullable public final IBaseResource resource;
+		/** supplier for support services */
 		@Nonnull public final IRuleApplier ruleApplier;
 
 		public RuleTestRequest(PolicyEnum theMode, @Nonnull RestOperationTypeEnum theOperation, @Nonnull RequestDetails theRequestDetails, @Nullable IIdType theResourceId, @Nullable IBaseResource theResource, @Nonnull IRuleApplier theRuleApplier) {
