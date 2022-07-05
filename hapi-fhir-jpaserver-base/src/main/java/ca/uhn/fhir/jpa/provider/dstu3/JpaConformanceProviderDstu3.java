@@ -49,9 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -201,6 +199,9 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(theResourceName);
 		if (mySearchParamRegistry != null) {
 			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			if (searchParams == null) {
+				return ResourceSearchParams.empty(theResourceName);
+			}
 			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
 				if (nextBuiltInSpName.startsWith("_") &&
 					!searchParams.containsParamName(nextBuiltInSpName) &&

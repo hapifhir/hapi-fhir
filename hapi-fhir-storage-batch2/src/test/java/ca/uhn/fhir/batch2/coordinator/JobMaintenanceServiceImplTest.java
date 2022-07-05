@@ -231,6 +231,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.updateInstance(any())).thenReturn(true);
 
 		// Execute
 
@@ -252,7 +253,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verifyNoMoreInteractions(myJobPersistence);
 
-		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstanceId());
+		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
 		assertEquals(PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
 	}
 
