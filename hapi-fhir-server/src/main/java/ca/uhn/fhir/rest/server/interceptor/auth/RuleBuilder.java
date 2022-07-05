@@ -583,7 +583,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 				@Override
 				public IAuthRuleFinished inCompartmentWithFilter(String theCompartmentName, IIdType theIdElement, String theFilter) {
-					// wipjv (resolved?) implemented
 					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
 					Validate.notNull(theIdElement, "theOwner must not be null");
 					validateOwner(theIdElement);
