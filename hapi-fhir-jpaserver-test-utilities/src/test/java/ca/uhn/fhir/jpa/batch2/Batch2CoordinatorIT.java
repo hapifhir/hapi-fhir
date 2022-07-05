@@ -158,7 +158,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
 		calledLatch.setExpectedCount(1);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
 		calledLatch.awaitExpected();
 
