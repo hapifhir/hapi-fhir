@@ -199,6 +199,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
+		// FIXME: This test seems relevant to the reindex -> Batch2 Job conversion
 		runInTransaction(()->{
 			List<ResourceReindexJobEntity> allJobs = myResourceReindexJobDao.findAll();
 			assertEquals(1, allJobs.size());

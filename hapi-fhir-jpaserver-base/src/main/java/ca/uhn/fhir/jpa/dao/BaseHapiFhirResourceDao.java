@@ -987,18 +987,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.filter(t -> WordUtils.containsAllWords(expression, t))
 				.collect(Collectors.toSet());
 
-			for (String resourceType : typesToMark) {
-				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
-
-				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				txTemplate.execute(t -> {
-					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
-					return null;
-				});
-
-				ourLog.debug("Marked resources of type {} for reindexing", resourceType);
-			}
+//			for (String resourceType : typesToMark) {
+//				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
+//
+//				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+//				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+//				txTemplate.execute(t -> {
+//					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
+//					return null;
+//				});
+//
+//				ourLog.debug("Marked resources of type {} for reindexing", resourceType);
+//			}
 
 		}
 

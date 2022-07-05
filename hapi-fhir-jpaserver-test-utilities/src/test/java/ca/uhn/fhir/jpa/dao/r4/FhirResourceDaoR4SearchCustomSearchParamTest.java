@@ -480,6 +480,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		mySearchParameterDao.create(fooSp, mySrd);
 
+		// FIXME: This test seems relevant to the reindex -> Batch2 Job conversion
 		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
 		myResourceReindexingSvc.forceReindexingPass();
 		myResourceReindexingSvc.forceReindexingPass();
