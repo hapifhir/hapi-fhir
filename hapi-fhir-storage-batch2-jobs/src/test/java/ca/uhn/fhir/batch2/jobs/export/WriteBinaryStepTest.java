@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -96,14 +97,15 @@ public class WriteBinaryStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> createInput(BulkExportExpandedResources theData) {
+	private StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> createInput(BulkExportExpandedResources theData,
+																																  JobInstance theInstance) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setStartDate(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = new StepExecutionDetails<>(
 			parameters,
 			theData,
-			"1",
+			theInstance,
 			"1"
 		);
 		return input;
@@ -113,12 +115,14 @@ public class WriteBinaryStepTest {
 	public void run_validInputNoErrors_succeeds() {
 		// setup
 		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
 		expandedResources.setStringifiedResources(stringified);
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources);
+		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources, instance);
 		IIdType binaryId = new IdType("Binary/123");
 		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 		methodOutcome.setId(binaryId);
@@ -157,13 +161,15 @@ public class WriteBinaryStepTest {
 	public void run_withIOException_setsToError() throws IOException {
 		// setup
 		String testException = "I am an exceptional exception.";
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
 		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
 		expandedResources.setStringifiedResources(stringified);
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources);
+		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources, instance);
 
 		ourLog.setLevel(Level.ERROR);
 

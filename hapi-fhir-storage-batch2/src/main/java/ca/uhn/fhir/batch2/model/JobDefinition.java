@@ -324,10 +324,10 @@ public class JobDefinition<PT extends IModelJson> {
 		/**
 		 * Supplies an optional callback that will be invoked when the job is complete
 		 */
-		public Builder<PT, VoidModel> completionHandler(IJobCompletionHandler<PT> theCompletionHandler) {
+		public Builder<PT, NIT> completionHandler(IJobCompletionHandler<PT> theCompletionHandler) {
 			Validate.isTrue(myCompletionHandler == null, "Can not supply multiple completion handlers");
 			myCompletionHandler = theCompletionHandler;
-			return new Builder<>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, VoidModel.class, myParametersValidator, myGatedExecution, myCompletionHandler);
+			return this;
 		}
 
 		/**

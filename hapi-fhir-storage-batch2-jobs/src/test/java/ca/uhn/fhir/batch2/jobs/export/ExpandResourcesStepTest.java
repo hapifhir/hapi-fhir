@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -68,11 +69,12 @@ public class ExpandResourcesStepTest {
 	}
 
 	private StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> createInput(BulkExportIdList theData,
-																													BulkExportJobParameters theParameters) {
+																													BulkExportJobParameters theParameters,
+																													JobInstance theInstance) {
 		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = new StepExecutionDetails<>(
 			theParameters,
 			theData,
-			"1",
+			theInstance,
 			"1"
 		);
 		return input;
@@ -88,6 +90,8 @@ public class ExpandResourcesStepTest {
 	@Test
 	public void jobComplete_withBasicParameters_succeeds() {
 		//setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
 		IJobDataSink<BulkExportExpandedResources> sink = mock(IJobDataSink.class);
 		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
 		BulkExportIdList idList = new BulkExportIdList();
@@ -110,7 +114,8 @@ public class ExpandResourcesStepTest {
 
 		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = createInput(
 			idList,
-			createParameters()
+			createParameters(),
+			instance
 		);
 
 		// when

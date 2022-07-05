@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -73,11 +74,12 @@ public class FetchResourceIdsStepTest {
 		return jobParameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters) {
+	private StepExecutionDetails<BulkExportJobParameters, VoidModel> createInput(BulkExportJobParameters theParameters,
+																										  JobInstance theInstance) {
 		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = new StepExecutionDetails<>(
 			theParameters,
 			null,
-			"1",
+			theInstance,
 			"1"
 		);
 		return input;
@@ -88,7 +90,9 @@ public class FetchResourceIdsStepTest {
 		// setup
 		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
 		BulkExportJobParameters parameters = createParameters();
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters);
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
 		List<ResourcePersistentId> patientIds = new ArrayList<>();
 		List<ResourcePersistentId> observationIds = new ArrayList<>();
@@ -155,9 +159,11 @@ public class FetchResourceIdsStepTest {
 	public void run_moreThanAThousandPatients_hasAtLeastTwoJobs() {
 		// setup
 		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
 		BulkExportJobParameters parameters = createParameters();
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters);
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> input = createInput(parameters, instance);
 		ourLog.setLevel(Level.INFO);
 		List<ResourcePersistentId> patientIds = new ArrayList<>();
 
