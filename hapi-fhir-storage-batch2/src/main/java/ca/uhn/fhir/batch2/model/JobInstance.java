@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -34,7 +35,7 @@ import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class JobInstance extends JobInstanceStartRequest implements IModelJson {
+public class JobInstance extends JobInstanceStartRequest implements IModelJson, IJobInstance {
 
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
@@ -132,6 +133,13 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return instance;
 	}
 
+	public static JobInstance fromInstanceId(String theInstanceId) {
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(theInstanceId);
+		return instance;
+	}
+
+	@Override
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
 	}
@@ -140,6 +148,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCurrentGatedStepId = theCurrentGatedStepId;
 	}
 
+	@Override
 	public int getErrorCount() {
 		return myErrorCount;
 	}
@@ -149,6 +158,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public String getEstimatedTimeRemaining() {
 		return myEstimatedTimeRemaining;
 	}
@@ -157,6 +167,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myEstimatedTimeRemaining = theEstimatedTimeRemaining;
 	}
 
+	@Override
 	public boolean isWorkChunksPurged() {
 		return myWorkChunksPurged;
 	}
@@ -165,6 +176,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myWorkChunksPurged = theWorkChunksPurged;
 	}
 
+	@Override
 	public StatusEnum getStatus() {
 		return myStatus;
 	}
@@ -174,6 +186,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public int getJobDefinitionVersion() {
 		return myJobDefinitionVersion;
 	}
@@ -182,6 +195,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 	}
 
+	@Override
 	public String getInstanceId() {
 		return myInstanceId;
 	}
@@ -190,6 +204,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myInstanceId = theInstanceId;
 	}
 
+	@Override
 	public Date getStartTime() {
 		return myStartTime;
 	}
@@ -199,6 +214,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Date getEndTime() {
 		return myEndTime;
 	}
@@ -208,6 +224,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Integer getCombinedRecordsProcessed() {
 		return myCombinedRecordsProcessed;
 	}
@@ -216,6 +233,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
 	}
 
+	@Override
 	public Double getCombinedRecordsProcessedPerSecond() {
 		return myCombinedRecordsProcessedPerSecond;
 	}
@@ -224,6 +242,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
 	}
 
+	@Override
 	public Date getCreateTime() {
 		return myCreateTime;
 	}
@@ -233,6 +252,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Integer getTotalElapsedMillis() {
 		return myTotalElapsedMillis;
 	}
@@ -241,6 +261,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myTotalElapsedMillis = theTotalElapsedMillis;
 	}
 
+	@Override
 	public double getProgress() {
 		return myProgress;
 	}
@@ -249,6 +270,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myProgress = theProgress;
 	}
 
+	@Override
 	public String getErrorMessage() {
 		return myErrorMessage;
 	}
@@ -265,10 +287,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
 	}
 
+	@Override
 	public JobDefinition<?> getJobDefinition() {
 		return myJobDefinition;
 	}
 
+	@Override
 	public boolean isCancelled() {
 		return myCancelled;
 	}
@@ -277,6 +301,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCancelled = theCancelled;
 	}
 
+	@Override
 	public String getReport() {
 		return myReport;
 	}

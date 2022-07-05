@@ -546,8 +546,7 @@ public class StepExecutionSvcTest {
 	}
 
 	private JobInstance getTestJobInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		instance.setParameters(new TestJobParameters());
 
 		return instance;

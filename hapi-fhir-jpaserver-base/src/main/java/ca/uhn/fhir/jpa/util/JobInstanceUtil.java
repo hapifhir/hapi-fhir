@@ -38,6 +38,7 @@ public class JobInstanceUtil {
 		retVal.setParameters(theEntity.getParams());
 		retVal.setCurrentGatedStepId(theEntity.getCurrentGatedStepId());
 		retVal.setReport(theEntity.getReport());
+		retVal.setEstimatedTimeRemaining(theEntity.getEstimatedTimeRemaining());
 		return retVal;
 	}
 

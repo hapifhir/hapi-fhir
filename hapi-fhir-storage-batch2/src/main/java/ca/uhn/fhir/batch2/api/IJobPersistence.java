@@ -159,11 +159,13 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
-	 * Update the stored instance
+	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
+	 * instead to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
 	 */
-	void updateInstance(JobInstance theInstance);
+	boolean updateInstance(JobInstance theInstance);
 
 	/**
 	 * Deletes the instance and all associated work chunks
@@ -183,8 +185,9 @@ public interface IJobPersistence {
 	 * Marks an instance as being complete
 	 *
 	 * @param theInstanceId The instance ID
+	 * @return true if the instance status changed
 	 */
-	void markInstanceAsCompleted(String theInstanceId);
+	boolean markInstanceAsCompleted(String theInstanceId);
 
 	/**
 	 * Marks an instance as cancelled
