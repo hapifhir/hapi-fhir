@@ -163,6 +163,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private SearchStrategyFactory mySearchStrategyFactory;
 
 	/**
 	 * Constructor
@@ -210,6 +212,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
 		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
+
+	/**
+	 * facade over raw hook intererface
+	 */
+	public class StorageInterceptorHooks {
+		/**
+		 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
+		 *
+		 * @param theRequestDetails
+		 * @param theParams
+		 * @param search
+		 */
+		private void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search) {
+			HookParams params = new HookParams()
+				.add(ICachedSearchDetails.class, search)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(SearchParameterMap.class, theParams);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		}
+		//private IInterceptorBroadcaster myInterceptorBroadcaster;
+	}
+	private StorageInterceptorHooks myStorageInterceptorHooks = new StorageInterceptorHooks();
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
@@ -321,13 +346,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
-		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
-		HookParams params = new HookParams()
-			.add(ICachedSearchDetails.class, search)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-			.add(SearchParameterMap.class, theParams);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		myStorageInterceptorHooks.callStoragePresearchRegistered(theRequestDetails, theParams, search);
 
 		validateSearch(theParams);
 
@@ -337,6 +356,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
+
+		// todo someday - not today.
+//		SearchStrategyFactory.ISearchStrategy searchStrategy = mySearchStrategyFactory.pickStrategy(theResourceType, theParams, theRequestDetails);
+//		return searchStrategy.get();
+
+		if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
+			SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+			return direct.get();
+		}
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);

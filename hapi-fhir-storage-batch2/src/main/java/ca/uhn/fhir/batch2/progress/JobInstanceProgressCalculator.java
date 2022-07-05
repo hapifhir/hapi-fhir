@@ -25,20 +25,23 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
-import static ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor.updateInstanceStatus;
-
 public class JobInstanceProgressCalculator {
+	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	public JobInstanceProgressCalculator(IJobPersistence theJobPersistence, JobInstance theInstance, JobChunkProgressAccumulator theProgressAccumulator) {
 		myJobPersistence = theJobPersistence;
 		myInstance = theInstance;
 		myProgressAccumulator = theProgressAccumulator;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
 
 	public void calculateAndStoreInstanceProgress() {
@@ -55,13 +58,17 @@ public class JobInstanceProgressCalculator {
 		instanceProgress.updateInstance(myInstance);
 
 		if (instanceProgress.failed()) {
-			updateInstanceStatus(myInstance, StatusEnum.FAILED);
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, StatusEnum.FAILED);
 			return;
 		}
 
+
+		if (instanceProgress.changed() || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
+			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
+		}
+
 		if (instanceProgress.changed()) {
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 	}
 }

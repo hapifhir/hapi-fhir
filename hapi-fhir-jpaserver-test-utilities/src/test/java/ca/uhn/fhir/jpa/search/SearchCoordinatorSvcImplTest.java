@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -72,13 +73,17 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings({"unchecked"})
 @ExtendWith(MockitoExtension.class)
 public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
-
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
+
+	@InjectMocks
+	private SearchCoordinatorSvcImpl mySvc;
+
+	@Mock private SearchStrategyFactory mySearchStrategyFactory;
+
 	@Mock
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
-	private SearchCoordinatorSvcImpl mySvc;
 	private Search myCurrentSearch;
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -90,6 +95,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 	@Mock
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
+
+
 
 	@AfterEach
 	public void after() {
@@ -103,7 +110,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 		myCurrentSearch = null;
 
-		mySvc = new SearchCoordinatorSvcImpl();
 		mySvc.setTransactionManagerForUnitTest(myTxManager);
 		mySvc.setContextForUnitTest(ourCtx);
 		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);

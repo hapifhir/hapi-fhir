@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.test.concurrency.PointcutLatch;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,7 +100,7 @@ class LinkedBlockingChannelFactoryTest {
 		assertEquals(2, myFailureCount);
 	}
 
-	@NotNull
+	@Nonnull
 	private Runnable failTwiceThenProceed() {
 		AtomicInteger counter = new AtomicInteger();
 

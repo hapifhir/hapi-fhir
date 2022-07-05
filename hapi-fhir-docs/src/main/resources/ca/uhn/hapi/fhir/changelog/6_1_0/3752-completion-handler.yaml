@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3752
+title: "It was possible under certain race conditions for the batch2 completion handler to be called twice.  This has been corrected."
