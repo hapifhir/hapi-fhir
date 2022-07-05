@@ -38,7 +38,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -59,10 +58,13 @@ public class ResponseTerminologyTranslationSvc {
 	private RuntimePrimitiveDatatypeDefinition myStringDefinition;
 	private BaseRuntimeChildDefinition myCodingDisplayChild;
 	private Map<String, String> myMappingSpec;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private IValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
+	private final FhirContext myFhirContext;
+
+	public ResponseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+		myFhirContext = theValidationSupport.getFhirContext();
+	}
 
 	@PostConstruct
 	public void setup() {
