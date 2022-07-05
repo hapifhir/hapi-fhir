@@ -94,7 +94,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.andThen().build().get(0);
 
 			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=Smith"), ArgumentMatchers.same(myResource)))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildMatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
@@ -112,7 +112,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi")
 				.andThen().build().get(0);
 			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=smi"), ArgumentMatchers.same(myResource)))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
@@ -133,7 +133,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "code=28521000087105")
 				.andThen().build().get(0);
 			when(myMatcher.match("Observation?code=28521000087105", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
@@ -152,7 +152,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.withFilter("code=12")
 				.andThen().build().get(0);
 			when(myMatcher.match("Observation?code=12", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
@@ -171,7 +171,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 				.withFilter("code=28521000087105")
 				.andThen().build().get(0);
 			when(myMatcher.match("Observation?code=28521000087105", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildMatched());
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
