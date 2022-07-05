@@ -100,7 +100,7 @@ public class StepExecutionSvc {
 		} else {
 			// all other kinds of steps
 			Validate.notNull(theWorkChunk);
-			stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, instanceId, inputType, parameters);
+			stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
 
 			// execute the step
 			boolean success = executeStep(stepExecutionDetails,
@@ -143,7 +143,7 @@ public class StepExecutionSvc {
 	 */
 	private <PT extends IModelJson, IT extends IModelJson> StepExecutionDetails<PT, IT> getExecutionDetailsForNonReductionStep(
 		WorkChunk theWorkChunk,
-		String theInstanceId,
+		JobInstance theInstance,
 		Class<IT> theInputType,
 		PT theParameters
 	) {
@@ -158,7 +158,7 @@ public class StepExecutionSvc {
 		stepExecutionDetails = new StepExecutionDetails<>(
 			theParameters,
 			inputData,
-			theInstanceId,
+			theInstance,
 			chunkId
 		);
 		return stepExecutionDetails;
@@ -267,7 +267,7 @@ public class StepExecutionSvc {
 		ReductionStepExecutionDetails<PT, IT, OT> executionDetails = new ReductionStepExecutionDetails<>(
 			theParameters,
 			null,
-			theInstance.getInstanceId()
+			theInstance
 		);
 
 		return executeStep(executionDetails,

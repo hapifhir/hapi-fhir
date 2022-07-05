@@ -67,7 +67,7 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
-		return doReindex(data, theDataSink, theStepExecutionDetails.getInstanceId(), theStepExecutionDetails.getChunkId());
+		return doReindex(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
 	}
 
 	@Nonnull

@@ -41,7 +41,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		JobDefinition<?> definition = createJobDefinition();
 		JobInstance instance = createInstance();
 
-		doReturn(definition).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
+		doReturn(definition).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(instance);
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
 
 		// Execute
@@ -60,8 +60,9 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 		// Setup
 
-		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
-		when(myJobPersistence.fetchInstances(eq(100), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
+		JobInstance instance = createInstance();
+		when(myJobPersistence.fetchInstances(eq(100), eq(0))).thenReturn(Lists.newArrayList(instance));
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(instance);
 
 		// Execute
 

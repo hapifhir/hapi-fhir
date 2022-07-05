@@ -14,7 +14,6 @@ import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +22,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
