@@ -42,18 +42,19 @@ public interface IAuthorizationSearchParamMatcher {
 	}
 
 	class MatchResult {
+		// wipmb consider a record pattern - public and drop the accessors.
 		@Nonnull private final Match myMatch;
 		@Nullable private final String myUnsupportedReason;
 
-		public static MatchResult makeMatched() {
+		public static MatchResult buildMatched() {
 			return new MatchResult(Match.MATCH, null);
 		}
 
-		public static MatchResult makeUnmatched() {
+		public static MatchResult buildUnmatched() {
 			return new MatchResult(Match.NO_MATCH, null);
 		}
 
-		public static MatchResult makeUnsupported(@Nonnull String theReason) {
+		public static MatchResult buildUnsupported(@Nonnull String theReason) {
 			return new MatchResult(Match.UNSUPPORTED, theReason);
 		}
 

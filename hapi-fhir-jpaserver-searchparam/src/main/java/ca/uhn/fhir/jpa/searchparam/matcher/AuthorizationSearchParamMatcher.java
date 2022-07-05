@@ -42,12 +42,12 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 		try {
 			InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(theCriteria, theResource, null);
 			if (!inMemoryMatchResult.supported()) {
-				return MatchResult.makeUnsupported(inMemoryMatchResult.getUnsupportedReason());
+				return MatchResult.buildUnsupported(inMemoryMatchResult.getUnsupportedReason());
 			}
 			if (inMemoryMatchResult.matched()) {
-				return MatchResult.makeMatched();
+				return MatchResult.buildMatched();
 			} else {
-				return MatchResult.makeUnmatched();
+				return MatchResult.buildUnmatched();
 			}
 		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
 			// The matcher treats a bad expression as InvalidRequestException because
@@ -55,7 +55,7 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 			// Instead, we adapt this to UNSUPPORTED during authorization.
 			// We may be applying to all types, and this filter won't match.
 			ourLog.info("Unsupported filter {} applied to resource: {}", theCriteria, e.getMessage());
-			return MatchResult.makeUnsupported(e.getMessage());
+			return MatchResult.buildUnsupported(e.getMessage());
 		}
 	}
 }

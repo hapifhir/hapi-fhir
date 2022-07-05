@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-public class FhirQueryRuleTester implements IAuthRuleTester{
+public class FhirQueryRuleTester implements IAuthRuleTester {
 	private final String myType;
 	private final String myFilter;
 
@@ -11,6 +11,7 @@ public class FhirQueryRuleTester implements IAuthRuleTester{
 
 	@Override
 	public boolean matches(RuleTestRequest theRuleTestRequest) {
+		// wipmb placeholder until we get to writes
 		return true;
 	}
 
@@ -30,7 +31,7 @@ public class FhirQueryRuleTester implements IAuthRuleTester{
 			case MATCH:
 				return true;
 			case UNSUPPORTED:
-				theRuleTestRequest.ruleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.  Abstaining.", myFilter, mr.getUnsupportedReason());
+				theRuleTestRequest.ruleApplier.getTroubleshootingLog().warn("Unsupported matcher expression {}: {}.", myFilter, mr.getUnsupportedReason());
 				// unsupported doesn't match unless this is a deny request, and we need to be safe!
 				return (theRuleTestRequest.mode == PolicyEnum.DENY);
 			case NO_MATCH:

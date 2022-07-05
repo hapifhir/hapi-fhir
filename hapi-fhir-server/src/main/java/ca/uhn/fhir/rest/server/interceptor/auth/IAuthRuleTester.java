@@ -63,11 +63,16 @@ public interface IAuthRuleTester {
 			Validate.notNull(theMode);
 			Validate.notNull(theOperation);
 			Validate.notNull(theRequestDetails);
+			Validate.notNull(theRuleApplier);
 			mode = theMode;
 			operation = theOperation;
 			requestDetails = theRequestDetails;
-			resourceId = theResourceId;
 			resource = theResource;
+			if (theResourceId == null && resource != null) {
+				resourceId = resource.getIdElement();
+			} else {
+				resourceId = theResourceId;
+			}
 			ruleApplier = theRuleApplier;
 		}
 	}
