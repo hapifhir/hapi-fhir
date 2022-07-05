@@ -41,6 +41,7 @@ public class MdmSettings implements IMdmSettings {
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
 	private boolean myPreventEidUpdates;
+	private Class<? extends IMdmLink> myMdmLinkImpl;
 
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
@@ -137,7 +138,12 @@ public class MdmSettings implements IMdmSettings {
 
 	@Override
 	public Class<? extends IMdmLink> getMdmLInkImpl() {
-		return null;
+		return myMdmLinkImpl;
+	}
+
+	public MdmSettings setMdmLinkImpl(Class<? extends IMdmLink> theMdmLinkImpl){
+		myMdmLinkImpl = theMdmLinkImpl;
+		return this;
 	}
 
 	public void setCandidateSearchLimit(int theCandidateSearchLimit) {

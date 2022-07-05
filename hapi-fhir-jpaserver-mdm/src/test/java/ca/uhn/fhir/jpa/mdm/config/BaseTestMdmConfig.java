@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
@@ -32,6 +33,7 @@ public abstract class BaseTestMdmConfig {
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		return new MdmSettings(theMdmRuleValidator)
 			.setEnabled(false)
+			.setMdmLinkImpl(MdmLink.class)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
 			.setPreventMultipleEids(myPreventMultipleEids);

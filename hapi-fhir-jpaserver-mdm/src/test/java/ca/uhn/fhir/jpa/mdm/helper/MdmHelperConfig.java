@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -35,6 +36,7 @@ public class MdmHelperConfig {
 		// Set Enabled to true, and set strict mode.
 		return new MdmSettings(theMdmRuleValidator)
 			.setEnabled(true)
+			.setMdmLinkImpl(MdmLink.class)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
 			.setPreventMultipleEids(myPreventMultipleEids);
