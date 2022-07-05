@@ -131,7 +131,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 					pids.add(resultIterator.next());
 				}
 			}
-		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
+		}
+		else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
 			// Group
 			if (resourceType.equalsIgnoreCase("Patient")) {
 				return getExpandedPatientIterator(theParams);
@@ -148,7 +149,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
 				queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, def);
 			});
-		} else {
+		}
+		else {
 			// System
 			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
@@ -340,7 +342,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 
 			//Execute query and all found pids to our local iterator.
-			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, theParams.getJobId()), null, RequestPartitionId.allPartitions());
+			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap,
+				new SearchRuntimeDetails(null, theParams.getJobId()),
+				null,
+				RequestPartitionId.allPartitions());
 			while (resultIterator.hasNext()) {
 				myReadPids.add(resultIterator.next());
 			}
