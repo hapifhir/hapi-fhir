@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
@@ -79,14 +80,14 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<IMdmLinkJpaRepository.MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new ResourcePersistentId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> lists = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new ResourcePersistentId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH);
 
 		assertThat(lists, hasSize(10));
 
 		lists.stream()
 			.forEach(tuple -> {
-					assertThat(tuple.getGoldenPid(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
-					assertThat(tuple.getSourcePid(), is(in(expectedExpandedPids)));
+					assertThat(tuple.getGoldenPid().getIdAsLong(), is(equalTo(golden.getIdElement().getIdPartAsLong())));
+					assertThat(tuple.getSourcePid().getIdAsLong(), is(in(expectedExpandedPids)));
 				});
 	}
 
