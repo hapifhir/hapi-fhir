@@ -68,8 +68,9 @@ abstract class BaseRule implements IAuthRule {
 				}
 			}
 		} else {
+			IAuthRuleTester.RuleTestRequest outputRequest = new IAuthRuleTester.RuleTestRequest(myMode, theOperation, theRequestDetails, theOutputResource.getIdElement(), theOutputResource, theRuleApplier);
 			for (IAuthRuleTester next : getTesters()) {
-				if (!next.matchesOutput(theOperation, theRequestDetails, theOutputResource)) {
+				if (!next.matchesOutput(outputRequest)) {
 					retVal = false;
 					break;
 				}
