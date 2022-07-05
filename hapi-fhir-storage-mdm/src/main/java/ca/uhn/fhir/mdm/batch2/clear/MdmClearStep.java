@@ -93,7 +93,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
 			myData = theStepExecutionDetails.getData();
-			myInstanceId = theStepExecutionDetails.getInstanceId();
+			myInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
 			myChunkId = theStepExecutionDetails.getChunkId();
 		}
 
