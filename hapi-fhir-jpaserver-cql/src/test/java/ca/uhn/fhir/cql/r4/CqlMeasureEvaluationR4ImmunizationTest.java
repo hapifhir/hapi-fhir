@@ -103,7 +103,7 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
         return this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", measureId),
                 periodStart, periodEnd, null,
 
-                "patient", patientId,
+                "subject", patientId,
 
                 null, thePractitionerRef, null, null, null, null, myRequestDetails);
     }
