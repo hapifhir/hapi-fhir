@@ -55,7 +55,11 @@ public class DeleteExpungeProvider {
 			throw new InvalidRequestException(Msg.code(1976) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-		String jobId = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().intValue(), urls, theRequestDetails);
+		Integer batchSize = null;
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+			batchSize = theBatchSize.getValue().intValue();
+		}
+		String jobId = myDeleteExpungeJobSubmitter.submitJob(batchSize, urls, theRequestDetails);
 
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);
