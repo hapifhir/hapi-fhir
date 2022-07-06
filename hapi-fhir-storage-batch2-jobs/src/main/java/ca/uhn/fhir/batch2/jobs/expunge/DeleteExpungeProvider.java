@@ -49,6 +49,8 @@ public class DeleteExpungeProvider {
 	/**
 	 * Constructor
 	 */
+// FIXME KHS swap this for the old one
+
 	public DeleteExpungeProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
