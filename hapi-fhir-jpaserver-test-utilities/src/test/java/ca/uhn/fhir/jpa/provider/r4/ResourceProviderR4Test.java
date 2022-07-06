@@ -45,6 +45,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -3984,6 +3985,74 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(toUnqualifiedVersionlessIds(found), empty());
 
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithClientAssignedId() throws IOException {
+		// Create with client assigned ID
+		Patient p = new Patient();
+		String patientId = "AAA";
+		p.setId(patientId);
+
+		MethodOutcome outcome = myClient.update().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithServerAssignedId() throws IOException {
+		// Create with server assigned ID
+		Patient p = new Patient();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+		String patientId = createdPatient.getIdElement().getIdPart();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
 	}
 
 	@Test
