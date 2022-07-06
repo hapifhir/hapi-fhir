@@ -675,15 +675,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 
-	@Override
-	public String toString() {
-		ToStringBuilder builder = toStringBuilder();
-		return builder.toString();
-	}
-
 	@Nonnull
 	protected ToStringBuilder toStringBuilder() {
-		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		ToStringBuilder builder = super.toStringBuilder();
 		builder.append("op", myOp);
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
 		builder.append("appliesTo", myAppliesTo);

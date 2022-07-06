@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Tester that a resource matches a provided query filter.
@@ -30,6 +31,14 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 			return false;
 		}
 
+		// this is a bit weird.
+		// A tester narrows a rule -- i.e. a rule only applies if the main logic matches AND the testers all match
+		// But this rule would have matched without this tester, so true means abstain.
+		if (theRuleTestRequest.resource == null) {
+			// we aren't looking at a resource yet.  treat as no-op
+			return true;
+		}
+
 		// we use the target type since the rule might apply to all types, a type set, or instances, and that has already been checked.
 		IAuthorizationSearchParamMatcher.MatchResult mr = matcher.match(theRuleTestRequest.resource.fhirType() + "?" + myQueryParameters, theRuleTestRequest.resource);
 
@@ -48,8 +57,8 @@ public class FhirQueryRuleTester implements IAuthRuleTester {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myFilter", myQueryParameters)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("filter", myQueryParameters)
 			.toString();
 	}
 }

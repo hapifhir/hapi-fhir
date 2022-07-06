@@ -54,7 +54,6 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	private IAuthRule myRule;
 	IIdType myPatientId = new IdDt("Patient/1");
-	@Mock
 	private IBaseResource myPatient;
 	private IBaseResource myObservation;
 	@Mock
