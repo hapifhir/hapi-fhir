@@ -52,7 +52,7 @@ public class DeleteExpungeProvider {
 		RequestDetails theRequestDetails
 	) {
 		if (theUrlsToDeleteExpunge == null) {
-			throw new InvalidRequestException(Msg.code(1976) + "At least one `url` parameter to $delete-expunge must be provided.");
+			throw new InvalidRequestException(Msg.code(2101) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 		Integer batchSize = null;
