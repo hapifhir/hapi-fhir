@@ -23,36 +23,42 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
- * wipjv Ken do we like this name, or this package?
+ * Adapt the InMemoryMatcher to support authorization filters in {@link FhirQueryRuleImpl}.
  */
 public interface IAuthorizationSearchParamMatcher {
 	MatchResult match(String theCriteria, IBaseResource theResource);
 
+	/**
+	 * Match outcomes.
+	 */
 	enum Match {
 		MATCH,
 		NO_MATCH,
+		/** Used for contexts without matcher infrastructure like hybrid providers */
 		UNSUPPORTED
 	}
 
-	public static class MatchResult {
-		private final Match myMatch;
-		private final String myUnsupportedReason;
+	class MatchResult {
+		// wipmb consider a record pattern - public and drop the accessors.
+		@Nonnull private final Match myMatch;
+		@Nullable private final String myUnsupportedReason;
 
-		public static MatchResult makeMatched() {
+		public static MatchResult buildMatched() {
 			return new MatchResult(Match.MATCH, null);
 		}
 
-		public static MatchResult makeUnmatched() {
+		public static MatchResult buildUnmatched() {
 			return new MatchResult(Match.NO_MATCH, null);
 		}
 
-		public static MatchResult makeUnsupported(@Nonnull String theReason) {
+		public static MatchResult buildUnsupported(@Nonnull String theReason) {
 			return new MatchResult(Match.UNSUPPORTED, theReason);
 		}
 
-		public MatchResult(Match myMatch, String myUnsupportedReason) {
+		private MatchResult(Match myMatch, String myUnsupportedReason) {
 			this.myMatch = myMatch;
 			this.myUnsupportedReason = myUnsupportedReason;
 		}

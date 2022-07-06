@@ -29,7 +29,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,20 +53,24 @@ abstract class BaseRule implements IAuthRule {
 		theTesters.forEach(this::addTester);
 	}
 
-	private boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource) {
+	private boolean applyTesters(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		assert !(theInputResource != null && theOutputResource != null);
 
 		boolean retVal = true;
 		if (theOutputResource == null) {
+			IAuthRuleTester.RuleTestRequest inputRequest = new IAuthRuleTester.RuleTestRequest(myMode, theOperation, theRequestDetails, theInputResourceId, theInputResource, theRuleApplier);
+
+
 			for (IAuthRuleTester next : getTesters()) {
-				if (!next.matches(theOperation, theRequestDetails, theInputResourceId, theInputResource)) {
+				if (!next.matches(inputRequest)) {
 					retVal = false;
 					break;
 				}
 			}
 		} else {
+			IAuthRuleTester.RuleTestRequest outputRequest = new IAuthRuleTester.RuleTestRequest(myMode, theOperation, theRequestDetails, theOutputResource.getIdElement(), theOutputResource, theRuleApplier);
 			for (IAuthRuleTester next : getTesters()) {
-				if (!next.matchesOutput(theOperation, theRequestDetails, theOutputResource)) {
+				if (!next.matchesOutput(outputRequest)) {
 					retVal = false;
 					break;
 				}
@@ -98,8 +101,8 @@ abstract class BaseRule implements IAuthRule {
 		return Collections.unmodifiableList(myTesters);
 	}
 
-	Verdict newVerdict(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
-		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+	Verdict newVerdict(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
+		if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource, theRuleApplier)) {
 			return null;
 		}
 		return new Verdict(myMode, this);
