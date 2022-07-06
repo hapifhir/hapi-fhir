@@ -21,8 +21,6 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlValidator;
-import ca.uhn.fhir.batch2.jobs.parameters.RequestListJson;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -59,8 +57,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
-	PartitionedUrlValidator myPartitionedUrlValidator;
-	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
@@ -69,7 +65,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		if (theBatchSize == null) {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();
 		}
-		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequestDetails, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
 			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}

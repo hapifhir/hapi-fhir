@@ -591,6 +591,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
 		// execute
+		myCaptureQueriesListener.clear();
 		Parameters response = myClient
 			.operation()
 			.onServer()
@@ -602,11 +603,10 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitJobCompletion(jobId);
-		int deleteCount = myCaptureQueriesListener.countDeleteQueries();
+		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		// FIXME KHS
-		assertThat(deleteCount, is(equalTo(19)));
+		assertThat(deleteCount, is(equalTo(30)));
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {

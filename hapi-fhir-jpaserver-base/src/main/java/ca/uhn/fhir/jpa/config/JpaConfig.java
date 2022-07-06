@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
-import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -453,12 +452,6 @@ public class JpaConfig {
 	@Lazy
 	public IDeleteExpungeJobSubmitter deleteExpungeJobSubmitter() {
 		return new DeleteExpungeJobSubmitterImpl();
-	}
-
-	@Bean
-	@Lazy
-	public PartitionedUrlValidator partitionedUrlValidator() {
-		return new PartitionedUrlValidator();
 	}
 
 	@Bean
