@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.step;
 
 /*-
  * #%L
@@ -20,10 +20,10 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.step.IIdChunkProducer;
+import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +31,19 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
-public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRangeJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(ReindexIdChunkProducer.class);
-	private final IResourceReindexSvc myResourceReindexSvc;
+public class UrlListIdChunkProducer implements IIdChunkProducer<UrlChunkRangeJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(UrlListIdChunkProducer.class);
+	private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	public ReindexIdChunkProducer(IResourceReindexSvc theResourceReindexSvc) {
-		myResourceReindexSvc = theResourceReindexSvc;
+	public UrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
+		myBatch2DaoSvc = theBatch2DaoSvc;
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, ReindexChunkRangeJson theData) {
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, UrlChunkRangeJson theData) {
 		String url = theData.getUrl();
 
 		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);
-		return myResourceReindexSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, url);
+		return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, url);
 	}
 }

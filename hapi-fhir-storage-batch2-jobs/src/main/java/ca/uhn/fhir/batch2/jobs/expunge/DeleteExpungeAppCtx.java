@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
@@ -35,49 +35,50 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ReindexAppCtx {
+public class DeleteExpungeAppCtx {
 
-	public static final String JOB_REINDEX = "REINDEX";
+	public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
+
 
 	@Bean
-	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
+	public JobDefinition<DeleteExpungeJobParameters> expungeJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
 		return JobDefinition
 			.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
+			.setJobDefinitionId(JOB_DELETE_EXPUNGE)
+			.setJobDescription("Expunge resources")
 			.setJobDefinitionVersion(1)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
+			.setParametersType(DeleteExpungeJobParameters.class)
+			.setParametersValidator(expungeJobParametersValidator(theBatch2DaoSvc))
 			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
-				"Generate data ranges to reindex",
+				"Generate data ranges to expunge",
 				UrlChunkRangeJson.class,
-				reindexGenerateRangeChunksStep())
+				expungeGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"load-ids",
-				"Load IDs of resources to reindex",
+				"Load IDs of resources to expunge",
 				ResourceIdListWorkChunkJson.class,
 				loadIdsStep(theBatch2DaoSvc))
-			.addLastStep("reindex",
-				"Perform the resource reindex",
-				reindexStep()
+			.addLastStep("expunge",
+				"Perform the resource expunge",
+				expungeStep()
 			)
 			.build();
 	}
 
 	@Bean
-	public ReindexJobParametersValidator reindexJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReindexJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
+	public DeleteExpungeJobParametersValidator expungeJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new DeleteExpungeJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_EXPUNGE, theBatch2DaoSvc));
 	}
 
 	@Bean
-	public ReindexStep reindexStep() {
-		return new ReindexStep();
+	public DeleteExpungeStep expungeStep() {
+		return new DeleteExpungeStep();
 	}
 
 	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
+	public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
 		return new GenerateRangeChunksStep();
 	}
 
@@ -87,8 +88,8 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public DeleteExpungeProvider expungeProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		return new DeleteExpungeProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
 	}
 
 }

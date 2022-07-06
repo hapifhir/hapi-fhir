@@ -27,7 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
-public interface IResourceReindexSvc {
+public interface IBatch2DaoSvc {
 
 	/**
 	 * Indicates whether reindexing all resource types is supported. Implementations are expected to provide a static response (either they support this or they don't).

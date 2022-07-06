@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteExpungeProviderTest {
+class DeleteDeleteExpungeProviderTest {
 
 	@Mock
 	private IDeleteExpungeJobSubmitter myJobSubmitter;

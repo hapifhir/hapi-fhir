@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
@@ -35,11 +35,12 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ReindexProvider {
+public class DeleteExpungeProvider {
 
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
@@ -48,21 +49,22 @@ public class ReindexProvider {
 	/**
 	 * Constructor
 	 */
-	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public DeleteExpungeProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
-	public IBaseParameters Reindex(
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrl,
+	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
+	public IBaseParameters deleteExpunge(
+		@OperationParam(name = ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, typeName = "string", min = 1) List<IPrimitiveType<String>> theUrlsToDeleteExpunge,
+		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
 
-		ReindexJobParameters params = new ReindexJobParameters();
-		if (theUrl != null) {
-			theUrl
+		DeleteExpungeJobParameters params = new DeleteExpungeJobParameters();
+		if (theUrlsToDeleteExpunge != null) {
+			theUrlsToDeleteExpunge
 				.stream()
 				.map(t -> t.getValue())
 				.filter(t -> isNotBlank(t))
@@ -74,7 +76,7 @@ public class ReindexProvider {
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		request.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 		request.setParameters(params);
 		String id = myJobCoordinator.startInstance(request);
 

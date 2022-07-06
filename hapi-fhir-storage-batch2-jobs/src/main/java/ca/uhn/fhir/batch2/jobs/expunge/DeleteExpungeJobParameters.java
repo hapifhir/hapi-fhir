@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
@@ -22,6 +22,5 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
 
-public class ReindexJobParameters extends UrlListJobParameters {
-
+public class DeleteExpungeJobParameters extends UrlListJobParameters {
 }

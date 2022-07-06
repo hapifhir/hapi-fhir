@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
@@ -27,16 +27,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
+public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
 	private final UrlListValidator myUrlListValidator;
 
-	public ReindexJobParametersValidator(UrlListValidator theUrlListValidator) {
+	public DeleteExpungeJobParametersValidator(UrlListValidator theUrlListValidator) {
 		myUrlListValidator = theUrlListValidator;
 	}
 
 	@Nullable
 	@Override
-	public List<String> validate(@NotNull ReindexJobParameters theParameters) {
+	public List<String> validate(@NotNull DeleteExpungeJobParameters theParameters) {
 		return myUrlListValidator.validate(theParameters.getUrls());
 	}
 }

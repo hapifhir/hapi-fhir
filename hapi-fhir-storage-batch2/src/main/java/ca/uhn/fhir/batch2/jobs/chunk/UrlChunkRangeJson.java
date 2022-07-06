@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.chunk;
 
 /*-
  * #%L
@@ -20,12 +20,11 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nullable;
 
-public class ReindexChunkRangeJson extends ChunkRangeJson {
+public class UrlChunkRangeJson extends ChunkRangeJson {
 	@Nullable
 	@JsonProperty("url")
 	private String myUrl;

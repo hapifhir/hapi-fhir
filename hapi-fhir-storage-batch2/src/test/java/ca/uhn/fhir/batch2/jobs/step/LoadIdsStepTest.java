@@ -1,12 +1,14 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +42,7 @@ public class LoadIdsStepTest {
 	public static final Date DATE_END = new InstantType("2022-02-01T00:00:00Z").getValue();
 
 	@Mock
-	private IResourceReindexSvc myResourceReindexSvc;
+	private IBatch2DaoSvc myBatch2DaoSvc;
 
 	@Mock
 	private IJobDataSink<ResourceIdListWorkChunkJson> mySink;
@@ -49,7 +51,7 @@ public class LoadIdsStepTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new LoadIdsStep(myResourceReindexSvc);
+		mySvc = new LoadIdsStep(myBatch2DaoSvc);
 	}
 
 	@Captor
@@ -57,21 +59,21 @@ public class LoadIdsStepTest {
 
 	@Test
 	public void testGenerateSteps() {
-		ReindexJobParameters parameters = new ReindexJobParameters();
-		ReindexChunkRangeJson range = new ReindexChunkRangeJson();
+		UrlListJobParameters parameters = new UrlListJobParameters();
+		UrlChunkRangeJson range = new UrlChunkRangeJson();
 		range.setStart(DATE_1).setEnd(DATE_END);
 		String instanceId = "instance-id";
 		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
-		StepExecutionDetails<ReindexJobParameters, ReindexChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
+		StepExecutionDetails<UrlListJobParameters, UrlChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
 
 		// First Execution
 
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_1), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(0L, 20000L, DATE_2));
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_2), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(20000L, 40000L, DATE_3));
-		when(myResourceReindexSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
+		when(myBatch2DaoSvc.fetchResourceIdsPage(eq(DATE_3), eq(DATE_END), eq(DEFAULT_PAGE_SIZE), isNull(), isNull()))
 			.thenReturn(createIdChunk(40000L, 40040L, DATE_3));
 
 		mySvc.run(details, mySink);
