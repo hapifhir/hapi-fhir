@@ -143,7 +143,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -460,12 +459,6 @@ public class JpaConfig {
 	@Lazy
 	public PartitionedUrlValidator partitionedUrlValidator() {
 		return new PartitionedUrlValidator();
-	}
-
-	@Bean
-	@Lazy
-	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
 	}
 
 	@Bean

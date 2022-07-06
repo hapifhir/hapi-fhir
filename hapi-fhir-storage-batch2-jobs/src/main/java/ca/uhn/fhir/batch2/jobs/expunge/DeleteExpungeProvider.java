@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,16 +20,13 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -37,24 +34,15 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.math.BigDecimal;
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import java.util.stream.Collectors;
 
 public class DeleteExpungeProvider {
-
 	private final FhirContext myFhirContext;
-	private final IJobCoordinator myJobCoordinator;
-	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
 
-	/**
-	 * Constructor
-	 */
-// FIXME KHS swap this for the old one
-
-	public DeleteExpungeProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
 		myFhirContext = theFhirContext;
-		myJobCoordinator = theJobCoordinator;
-		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myDeleteExpungeJobSubmitter = theDeleteExpungeJobSubmitter;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
@@ -63,29 +51,14 @@ public class DeleteExpungeProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_DELETE_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		RequestDetails theRequestDetails
 	) {
-
-		DeleteExpungeJobParameters params = new DeleteExpungeJobParameters();
-		if (theUrlsToDeleteExpunge != null) {
-			theUrlsToDeleteExpunge
-				.stream()
-				.map(t -> t.getValue())
-				.filter(t -> isNotBlank(t))
-				.forEach(t -> params.getUrls().add(t));
+		if (theUrlsToDeleteExpunge == null) {
+			throw new InvalidRequestException(Msg.code(1976) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
+		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
+		String jobId = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().intValue(), urls, theRequestDetails);
 
-		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
-		params.setRequestPartitionId(requestPartition);
-
-		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
-		request.setParameters(params);
-		String id = myJobCoordinator.startInstance(request);
-
-		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
-		return retVal;
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);
+		return retval;
 	}
-
-
 }

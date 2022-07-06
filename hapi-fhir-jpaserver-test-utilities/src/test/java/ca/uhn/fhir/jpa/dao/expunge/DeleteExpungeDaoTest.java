@@ -88,7 +88,6 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 	}
 
-// FIXME KHS tests
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
 		// setup

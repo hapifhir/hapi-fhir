@@ -63,7 +63,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	// FIXME KHS test
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
@@ -82,7 +81,6 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 				.add(String.class, url);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
-
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();
 		theUrlsToDeleteExpunge.forEach(deleteExpungeJobParameters::addUrl);

@@ -20,7 +20,6 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
@@ -31,7 +30,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,8 +93,7 @@ public class DeleteExpungeAppCtx {
 	}
 
 	@Bean
-	public DeleteExpungeProvider expungeProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new DeleteExpungeProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
+		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
 	}
-
 }

@@ -1,8 +1,9 @@
-package ca.uhn.fhir.rest.server.provider;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
+import ca.uhn.fhir.batch2.jobs.BaseR4ServerTest;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
-import ca.uhn.fhir.rest.server.BaseR4ServerTest;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -20,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DeleteExpungeProviderTest extends BaseR4ServerTest {
 	public static final String TEST_JOB_ID = "test-job-id";
-	public static final String TEST_JOB_NAME = "jobName";
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProviderTest.class);
 
 	private Parameters myReturnParameters;
