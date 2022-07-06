@@ -230,8 +230,8 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport) {
-		return new ResponseTerminologyTranslationInterceptor(theValidationSupport);
+	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport, ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		return new ResponseTerminologyTranslationInterceptor(theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
 	@Lazy

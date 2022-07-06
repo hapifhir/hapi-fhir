@@ -47,16 +47,16 @@ import static ca.uhn.fhir.rest.server.interceptor.InterceptorOrders.RESPONSE_TER
  */
 public class ResponseTerminologyTranslationInterceptor extends BaseResponseTerminologyInterceptor {
 
-	@Autowired
-	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	private final ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theValidationSupport The validation support module
 	 */
-	public ResponseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport) {
+	public ResponseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport, ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
 		super(theValidationSupport);
+		myResponseTerminologyTranslationSvc = theResponseTerminologyTranslationSvc;
 	}
 
 	/**
