@@ -1,29 +1,8 @@
-package ca.uhn.fhir.jpa.delete.job;
-
-/*-
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+package ca.uhn.fhir.jpa.delete.batch2;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
@@ -32,51 +11,50 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-/**
- * Input: list of pids of resources to be deleted and expunged
- * Output: list of sql statements to be executed
- */
-public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<String>> {
-	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeProcessor.class);
-
+public class DeleteExpungeSqlBuilder {
+	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeSqlBuilder.class);
 	public static final String PROCESS_NAME = "Delete Expunging";
 	public static final String THREAD_PREFIX = "delete-expunge";
+	
+	private final ResourceTableFKProvider myResourceTableFKProvider;
+	private final DaoConfig myDaoConfig;
+	private final IJpaIdHelperService myIdHelper;
+	private final IResourceLinkDao myResourceLinkDao;
 
-	@Autowired
-	ResourceTableFKProvider myResourceTableFKProvider;
-	@Autowired
-	DaoConfig myDaoConfig;
-	@Autowired
-	IJpaIdHelperService myIdHelper;
-	@Autowired
-	IResourceLinkDao myResourceLinkDao;
+	public DeleteExpungeSqlBuilder(ResourceTableFKProvider theResourceTableFKProvider, DaoConfig theDaoConfig, IJpaIdHelperService theIdHelper, IResourceLinkDao theResourceLinkDao) {
+		myResourceTableFKProvider = theResourceTableFKProvider;
+		myDaoConfig = theDaoConfig;
+		myIdHelper = theIdHelper;
+		myResourceLinkDao = theResourceLinkDao;
+	}
 
-	@Override
-	public List<String> process(List<Long> thePids) throws Exception {
-		validateOkToDeleteAndExpunge(thePids);
 
-		List<String> retval = new ArrayList<>();
+	@Nonnull
+	List<String> pidsToDeleteExpungeSql(List<ResourcePersistentId> thePersistentIds) {
+		List<Long> pids = ResourcePersistentId.toLongList(thePersistentIds);
 
-		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
+		validateOkToDeleteAndExpunge(pids);
+
+		List<String> rawSql = new ArrayList<>();
+
+		String pidListString = pids.toString().replace("[", "(").replace("]", ")");
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
 
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
-			retval.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
+			rawSql.add(deleteRecordsByColumnSql(pidListString, resourceForeignKey));
 		}
 
 		// Lastly we need to delete records from the resource table all of these other tables link to:
 		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
-		retval.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
-		return retval;
+		rawSql.add(deleteRecordsByColumnSql(pidListString, resourceTablePk));
+		return rawSql;
 	}
 
 	public void validateOkToDeleteAndExpunge(List<Long> thePids) {
@@ -87,9 +65,7 @@ public class DeleteExpungeProcessor implements ItemProcessor<List<Long>, List<St
 
 		List<ResourcePersistentId> targetPidsAsResourceIds = ResourcePersistentId.fromLongList(thePids);
 		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
-		PartitionRunner partitionRunner = new PartitionRunner(PROCESS_NAME, THREAD_PREFIX, myDaoConfig.getExpungeBatchSize(), myDaoConfig.getExpungeThreadCount());
-		Consumer<List<ResourcePersistentId>> listConsumer = someTargetPids -> findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, someTargetPids, conflictResourceLinks);
-		partitionRunner.runInPartitionedThreads(targetPidsAsResourceIds, listConsumer);
+		findResourceLinksWithTargetPidIn(targetPidsAsResourceIds, targetPidsAsResourceIds, conflictResourceLinks);
 
 		if (conflictResourceLinks.isEmpty()) {
 			return;

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.mdm.batch;
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 /*-
  * #%L
@@ -20,16 +20,27 @@ package ca.uhn.fhir.jpa.batch.mdm.batch;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MdmBatchJobSubmitterFactoryImpl implements IMdmBatchJobSubmitterFactory {
-	@Autowired
-	IMdmClearJobSubmitter myMdmClearJobSubmitter;
+import java.util.List;
+
+public class RequestListJson implements IModelJson {
+	@JsonProperty("partitionedUrls")
+	private List<PartitionedUrl> myPartitionedUrls;
 
 	@Override
-	public IMdmClearJobSubmitter getClearJobSubmitter() {
-		return myMdmClearJobSubmitter;
+	public String toString() {
+		return "RequestListJson{" +
+			"myPartitionedUrls=" + myPartitionedUrls +
+			'}';
+	}
+
+	public List<PartitionedUrl> getPartitionedUrls() {
+		return myPartitionedUrls;
+	}
+
+	public void setPartitionedUrls(List<PartitionedUrl> thePartitionedUrls) {
+		myPartitionedUrls = thePartitionedUrls;
 	}
 }

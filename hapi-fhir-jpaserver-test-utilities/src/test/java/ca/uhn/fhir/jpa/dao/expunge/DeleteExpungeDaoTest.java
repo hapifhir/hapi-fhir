@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
@@ -21,8 +21,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -90,7 +88,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		assertEquals(Msg.code(964) + "_expunge cannot be used with _cascade", e.getMessage());
 	}
 
-
+// FIXME KHS tests
 	@Test
 	public void testDeleteExpungeThrowExceptionIfForeignKeyLinksExists() {
 		// setup
@@ -104,19 +102,19 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// execute
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
-		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+		String jobExecutionId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobExecutionId);
 
 		// validate
-		assertEquals(BatchStatus.FAILED, job.getStatus());
-		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
+		assertEquals(StatusEnum.ERRORED, job.getStatus());
+		assertThat(job.getErrorMessage(), containsString("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization"));
 	}
 
-	private Long jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
+	private String jobExecutionIdFromOutcome(DeleteMethodOutcome theResult) {
 		OperationOutcome operationOutcome = (OperationOutcome) theResult.getOperationOutcome();
 		String diagnostics = operationOutcome.getIssueFirstRep().getDiagnostics();
 		String[] parts = diagnostics.split("Delete job submitted with id ");
-		return Long.valueOf(parts[1]);
+		return parts[1];
 	}
 
 	@Test
@@ -139,12 +137,12 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		// execute
 		DeleteMethodOutcome outcome = myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		Long jobId = jobExecutionIdFromOutcome(outcome);
-		JobExecution job = myBatchJobHelper.awaitJobExecution(jobId);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
 
 		// validate
-		assertEquals(BatchStatus.FAILED, job.getStatus());
-		assertThat(job.getExitStatus().getExitDescription(), containsString("DELETE with _expunge=true failed.  Unable to delete "));
+		assertEquals(StatusEnum.ERRORED, job.getStatus());
+		assertThat(job.getErrorMessage(), containsString("DELETE with _expunge=true failed.  Unable to delete "));
 	}
 
 	@Test
@@ -160,15 +158,14 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
 		// validate
-		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
-		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		// 10 / 3 rounded up = 4
-		assertEquals(4, myBatchJobHelper.getReadCount(jobExecutionId));
-		assertEquals(4, myBatchJobHelper.getWriteCount(jobExecutionId));
+		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
-		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+		// TODO KHS replace these with a report
+//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 	@Test
@@ -183,13 +180,13 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
 		// validate
-		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
-		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
-		assertEquals(1, myBatchJobHelper.getReadCount(jobExecutionId));
-		assertEquals(1, myBatchJobHelper.getWriteCount(jobExecutionId));
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
+		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
-		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+		// TODO KHS replace these with a report
+//		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(10, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 	@Test
@@ -205,15 +202,15 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 
 		//execute
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
-		Long jobExecutionId = jobExecutionIdFromOutcome(outcome);
-		JobExecution job = myBatchJobHelper.awaitJobExecution(jobExecutionId);
+		String jobId = jobExecutionIdFromOutcome(outcome);
+		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		// validate
-		assertEquals(1, myBatchJobHelper.getReadCount(jobExecutionId));
-		assertEquals(1, myBatchJobHelper.getWriteCount(jobExecutionId));
+		assertEquals(2, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
-		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
-		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
+		// TODO KHS replace these with a report
+//		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
+//		assertEquals(2, job.getExecutionContext().getLong(PidReaderCounterListener.RESOURCE_TOTAL_PROCESSED));
 	}
 
 }

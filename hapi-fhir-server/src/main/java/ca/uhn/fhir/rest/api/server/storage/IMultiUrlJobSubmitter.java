@@ -26,6 +26,10 @@ import org.springframework.batch.core.JobParametersInvalidException;
 
 import java.util.List;
 
+/**
+ * @deprecated
+ */
+// FIXME KHS delete
 public interface IMultiUrlJobSubmitter {
 	/**
 	 * @param theBatchSize     For each pass, when synchronously searching for resources, limit the number of matching resources to this number

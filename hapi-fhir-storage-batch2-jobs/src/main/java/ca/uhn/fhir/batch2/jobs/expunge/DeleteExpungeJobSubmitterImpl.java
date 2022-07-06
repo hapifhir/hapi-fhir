@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.delete;
+package ca.uhn.fhir.batch2.jobs.expunge;
 
 /*-
  * #%L
@@ -20,41 +20,36 @@ package ca.uhn.fhir.jpa.delete;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.RequestListJson;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
-import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
-import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.transaction.Transactional;
 import java.util.List;
 
+import static ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE;
+
 public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter {
 	@Autowired
-	private IBatchJobSubmitter myBatchJobSubmitter;
-	@Autowired
-	@Qualifier(BatchConstants.DELETE_EXPUNGE_JOB_NAME)
-	private Job myDeleteExpungeJob;
+	IJobCoordinator myJobCoordinator;
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -68,26 +63,38 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	// FIXME KHS test
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
-	public JobExecution submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequest) throws JobParametersInvalidException {
+	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();
 		}
-		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequest, theUrlsToDeleteExpunge);
+		RequestListJson requestListJson = myPartitionedUrlValidator.buildRequestListJson(theRequestDetails, theUrlsToDeleteExpunge);
 		if (!myDaoConfig.canDeleteExpunge()) {
 			throw new ForbiddenOperationException(Msg.code(820) + "Delete Expunge not allowed:  " + myDaoConfig.cannotDeleteExpungeReason());
 		}
 
 		for (String url : theUrlsToDeleteExpunge) {
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 				.add(String.class, url);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 		}
 
-		JobParameters jobParameters = ReverseCronologicalBatchResourcePidReader.buildJobParameters(ProviderConstants.OPERATION_DELETE_EXPUNGE, theBatchSize, requestListJson);
-		return myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
+
+		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();
+		theUrlsToDeleteExpunge.forEach(deleteExpungeJobParameters::addUrl);
+		deleteExpungeJobParameters.setBatchSize(theBatchSize);
+
+		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
+		startRequest.setParameters(deleteExpungeJobParameters);
+		return myJobCoordinator.startInstance(startRequest);
 	}
 }

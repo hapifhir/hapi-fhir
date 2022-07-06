@@ -28,41 +28,31 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteExpungeStep.class);
-	@Autowired
-	private HapiTransactionService myHapiTransactionService;
-	@Autowired
-	private IFhirSystemDao<?, ?> mySystemDao;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IIdHelperService myIdHelperService;
+	private final HapiTransactionService myHapiTransactionService;
+	private final IDeleteExpungeSvc myDeleteExpungeSvc;
 
-	// FIXME KHS
+	public DeleteExpungeStep(HapiTransactionService theHapiTransactionService, IDeleteExpungeSvc theDeleteExpungeSvc) {
+		myHapiTransactionService = theHapiTransactionService;
+		myDeleteExpungeSvc = theDeleteExpungeSvc;
+	}
 
 	@Nonnull
 	@Override
@@ -70,19 +60,19 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
-		return doReindex(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
+		return doDeleteExpunge(data, theDataSink, theStepExecutionDetails.getInstance().getInstanceId(), theStepExecutionDetails.getChunkId());
 	}
 
 	@Nonnull
-	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+	public RunOutcome doDeleteExpunge(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
-		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
+		myHapiTransactionService.execute(requestDetails, transactionDetails, new DeleteExpungeJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 
 		return new RunOutcome(data.size());
 	}
 
-	private class ReindexJob implements TransactionCallback<Void> {
+	private class DeleteExpungeJob implements TransactionCallback<Void> {
 		private final ResourceIdListWorkChunkJson myData;
 		private final RequestDetails myRequestDetails;
 		private final TransactionDetails myTransactionDetails;
@@ -90,7 +80,7 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 		private final String myChunkId;
 		private final String myInstanceId;
 
-		public ReindexJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
+		public DeleteExpungeJob(ResourceIdListWorkChunkJson theData, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
@@ -104,35 +94,15 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 
 			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
 
-			ourLog.info("Starting reindex work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
+			ourLog.info("Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
-			// Prefetch Resources from DB
-
-			mySystemDao.preFetchResources(persistentIds);
-			ourLog.info("Prefetched {} resources in {} - Instance[{}] Chunk[{}]", persistentIds.size(), sw, myInstanceId, myChunkId);
-
-			// Reindex
-
-			sw.restart();
-			for (int i = 0; i < myData.size(); i++) {
-
-				String nextResourceType = myData.getResourceType(i);
-				IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextResourceType);
-				ResourcePersistentId resourcePersistentId = persistentIds.get(i);
-				try {
-					dao.reindex(resourcePersistentId, myRequestDetails, myTransactionDetails);
-				} catch (BaseServerResponseException | DataFormatException e) {
-					String resourceForcedId = myIdHelperService.translatePidIdToForcedIdWithCache(resourcePersistentId).orElse(resourcePersistentId.toString());
-					String resourceId = nextResourceType + "/" + resourceForcedId;
-					ourLog.debug("Failure during reindexing {}", resourceId, e);
-					myDataSink.recoveredError("Failure reindexing " + resourceId + ": " + e.getMessage());
-				}
-			}
-
-			ourLog.info("Finished reindexing {} resources in {} - {}/sec - Instance[{}] Chunk[{}]", persistentIds.size(), sw, sw.formatThroughput(persistentIds.size(), TimeUnit.SECONDS), myInstanceId, myChunkId);
+			myDeleteExpungeSvc.deleteExpunge(persistentIds);
 
 			return null;
 		}
 	}
+
+
+
 }

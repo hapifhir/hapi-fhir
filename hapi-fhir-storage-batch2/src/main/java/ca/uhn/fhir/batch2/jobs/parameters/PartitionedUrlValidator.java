@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.job;
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 /*-
  * #%L
@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.batch.job;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.batch.job.model.PartitionedUrl;
-import ca.uhn.fhir.jpa.batch.job.model.RequestListJson;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;

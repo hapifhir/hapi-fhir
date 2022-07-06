@@ -39,11 +39,12 @@ public class Batch2JobHelper {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
-	public void awaitJobCompletion(String theId) {
+	public JobInstance awaitJobCompletion(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
+		return myJobCoordinator.getInstance(theId);
 	}
 
 	public void awaitSingleChunkJobCompletion(String theId) {
@@ -78,5 +79,11 @@ public class Batch2JobHelper {
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
 		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+	}
+
+	public long getCombinedRecordsProcessed(String theJobId) {
+		JobInstance job = myJobCoordinator.getInstance(theJobId);
+		return job.getCombinedRecordsProcessed();
+
 	}
 }

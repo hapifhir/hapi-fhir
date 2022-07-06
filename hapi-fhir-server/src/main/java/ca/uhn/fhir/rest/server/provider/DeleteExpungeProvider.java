@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -35,10 +36,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DeleteExpungeProvider {
-	private final MultiUrlProcessor myMultiUrlProcessor;
+	private final FhirContext myFhirContext;
+	private final IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
 
+	// FIXME KHS move
 	public DeleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		myMultiUrlProcessor = new MultiUrlProcessor(theFhirContext, theDeleteExpungeJobSubmitter);
+		myFhirContext = theFhirContext;
+		myDeleteExpungeJobSubmitter = theDeleteExpungeJobSubmitter;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_DELETE_EXPUNGE, idempotent = false)
@@ -51,7 +55,10 @@ public class DeleteExpungeProvider {
 			throw new InvalidRequestException(Msg.code(1976) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
-		Integer batchSize = myMultiUrlProcessor.getBatchSize(theBatchSize);
-		return myMultiUrlProcessor.processUrls(urls, batchSize, theRequestDetails);
+		String jobId = myDeleteExpungeJobSubmitter.submitJob(theBatchSize.getValue().intValue(), urls, theRequestDetails);
+
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, jobId);
+		return retval;
 	}
 }

@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -41,12 +42,21 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		obsInactive.setSubject(new Reference(pDelId));
 		IIdType oDelId = myObservationDao.create(obsInactive).getId().toUnqualifiedVersionless();
 
+		DiagnosticReport diagActive = new DiagnosticReport();
+		diagActive.setSubject(new Reference(pKeepId));
+		IIdType dKeepId = myDiagnosticReportDao.create(diagActive).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport diagInactive = new DiagnosticReport();
+		diagInactive.setSubject(new Reference(pDelId));
+		IIdType dDelId = myDiagnosticReportDao.create(diagInactive).getId().toUnqualifiedVersionless();
+
 		// validate precondition
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
 		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
-		jobParameters.addUrl("Observation?subject.active=false").addUrl("Patient?active=false");
+		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
 
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setParameters(jobParameters);
@@ -57,8 +67,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		// validate
-		// FIXME KHS fix test
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 	}
 }

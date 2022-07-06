@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.batch.job.model;
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 /*-
  * #%L
