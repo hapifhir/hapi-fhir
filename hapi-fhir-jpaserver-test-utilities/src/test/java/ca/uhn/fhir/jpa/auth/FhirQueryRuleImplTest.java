@@ -200,7 +200,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
 			when(myMatcher.match("Patient?family=smi", myResource))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
@@ -217,7 +217,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			myRule = (FhirQueryRuleImpl) new RuleBuilder().deny().read().resourcesOfType("Patient")
 				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
 			when(myMatcher.match("Patient?family=smi", myResource))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
