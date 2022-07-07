@@ -37,7 +37,7 @@ public class DeleteExpungeSqlBuilder {
 
 
 	@Nonnull
-	List<String> pidsToDeleteExpungeSql(List<ResourcePersistentId> thePersistentIds) {
+	List<String> convertPidsToDeleteExpungeSql(List<ResourcePersistentId> thePersistentIds) {
 		List<Long> pids = ResourcePersistentId.toLongList(thePersistentIds);
 
 		validateOkToDeleteAndExpunge(pids);

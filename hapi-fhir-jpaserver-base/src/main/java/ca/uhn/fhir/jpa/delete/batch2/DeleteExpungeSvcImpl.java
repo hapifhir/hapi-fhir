@@ -24,7 +24,7 @@ public class DeleteExpungeSvcImpl implements IDeleteExpungeSvc {
 
 	@Override
 	public void deleteExpunge(List<ResourcePersistentId> thePersistentIds) {
-		List<String> sqlList = myDeleteExpungeSqlBuilder.pidsToDeleteExpungeSql(thePersistentIds);
+		List<String> sqlList = myDeleteExpungeSqlBuilder.convertPidsToDeleteExpungeSql(thePersistentIds);
 
 		ourLog.debug("Executing {} delete expunge sql commands", sqlList.size());
 		long totalDeleted = 0;

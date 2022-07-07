@@ -56,7 +56,7 @@ public class DeleteExpungeProvider {
 		}
 		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
 		Integer batchSize = null;
-		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().intValue() > 0) {
 			batchSize = theBatchSize.getValue().intValue();
 		}
 		String jobId = myDeleteExpungeJobSubmitter.submitJob(batchSize, urls, theRequestDetails);
