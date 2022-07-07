@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3762
+jira: SMILE-4451
+title: "Supporting PATCH operation with a MongoDB backend."
