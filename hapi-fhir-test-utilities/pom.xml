@@ -38,6 +38,12 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu3</artifactId>
+			<version>${fhir_core_version}</version>
+		</dependency>
+
 		<!-- General -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -171,6 +177,15 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<configuration>
+					<nonFilteredFileExtensions>
+						<nonFilteredFileExtension>p12</nonFilteredFileExtension>
+					</nonFilteredFileExtensions>
 				</configuration>
 			</plugin>
 		</plugins>
