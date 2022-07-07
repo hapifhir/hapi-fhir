@@ -78,12 +78,18 @@ public interface IAuthRuleTester {
 	}
 
 	/**
-	 * Allows user-supplied logic for authorization rules.
+	 * User supplied logic called just before the parent rule renders a verdict on the operation
+	 * or input resource.
+	 *
+	 * Returning true will allow the verdict continue.
+	 * Returning false will block the verdict and cause the rule to abstain (i.e. return null).
+	 *
 	 * <p>
 	 * THIS IS AN EXPERIMENTAL API! Feedback is welcome, and this API
 	 * may change.
 	 *
-	 * @param theRequest The details to evaluate
+	 * @param theRequest The details of the operation or an INPUT resource to evaluate
+	 * @return true if the verdict should continue
 	 * @since 6.1.0
 	 */
 	default boolean matches(RuleTestRequest theRequest) {
@@ -101,14 +107,18 @@ public interface IAuthRuleTester {
 	}
 
 	/**
-	 * Allows user-supplied logic for authorization rules.
+	 * User supplied logic called just before the parent rule renders a verdict on an output resource.
+	 *
+	 * Returning true will allow the verdict continue.
+	 * Returning false will block the verdict and cause the rule to abstain (i.e. return null).
+	 *
 	 * <p>
 	 * THIS IS AN EXPERIMENTAL API! Feedback is welcome, and this API
 	 * may change.
 	 *
-	 * @param theRequest The details to evaluate
-	 * @since 6.1.0
-	 */
+	 * @param theRequest The details of the operation or an INPUT resource to evaluate
+	 * @return true if the verdict should continue
+	 * @since 6.1.0	 */
 	default boolean matchesOutput(RuleTestRequest theRequest) {
 		return this.matchesOutput(theRequest.operation, theRequest.requestDetails, theRequest.resource);
 	}
