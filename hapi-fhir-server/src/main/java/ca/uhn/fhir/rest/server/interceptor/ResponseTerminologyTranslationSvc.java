@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,13 +62,13 @@ public class ResponseTerminologyTranslationSvc {
 	private final IValidationSupport myValidationSupport;
 	private final FhirContext myFhirContext;
 
-	public ResponseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
+	public ResponseTerminologyTranslationSvc(@Nonnull IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
-		myFhirContext = theValidationSupport.getFhirContext();
-	}
+		Validate.notNull(theValidationSupport, "The validation support must not be null");
 
-	@PostConstruct
-	public void setup() {
+		myFhirContext = theValidationSupport.getFhirContext();
+		Validate.notNull(myFhirContext, "The validation support must not return a null context");
+
 		BaseRuntimeElementCompositeDefinition<?> codeableConceptDef = (BaseRuntimeElementCompositeDefinition<?>) Objects.requireNonNull(myFhirContext.getElementDefinition("CodeableConcept"));
 
 		myCodeableConceptType = codeableConceptDef.getImplementingClass();
