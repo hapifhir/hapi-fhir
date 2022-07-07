@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PatientEverythingR4Test.class);
 	private String orgId;
 	private String patId;
+	private String taskId;
 	private String encId1;
 	private String encId2;
 	private ArrayList<String> myObsIds;
@@ -100,6 +102,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		enc2.getSubject().setReference(patId);
 		enc2.getServiceProvider().setReference(orgId);
 		encId2 = myClient.create().resource(enc2).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Task task = new Task();
+		task.setStatus(Task.TaskStatus.COMPLETED);
+		task.getOwner().setReference(patId);
+		taskId =  myClient.create().resource(task).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter wrongEnc1 = new Encounter();
 		wrongEnc1.setStatus(EncounterStatus.ARRIVED);
@@ -177,6 +184,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, hasItem(encId1));
 		assertThat(actual, hasItem(encId2));
 		assertThat(actual, hasItem(orgId));
+		assertThat(actual, hasItem(taskId));
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
 		assertThat(actual, not(hasItem(myWrongPatId)));
 		assertThat(actual, not(hasItem(myWrongEnc1)));

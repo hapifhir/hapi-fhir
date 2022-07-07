@@ -91,7 +91,7 @@ public class ReductionStepDataSinkTest {
 
 		// when
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(createInstance()));
+			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
 
 		// test
 		myDataSink.accept(chunkData);
@@ -116,7 +116,7 @@ public class ReductionStepDataSinkTest {
 
 		// when
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID)))
-			.thenReturn(Optional.of(createInstance()));
+			.thenReturn(Optional.of(JobInstance.fromInstanceId(INSTANCE_ID)));
 
 		// test
 		myDataSink.accept(firstData);
@@ -153,9 +153,4 @@ public class ReductionStepDataSinkTest {
 		}
 	}
 
-	private JobInstance createInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
-		return instance;
-	}
 }

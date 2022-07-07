@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search.autocomplete;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.search.ExtendedLuceneClauseBuilder;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchClauseBuilder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import com.google.gson.JsonObject;
@@ -74,7 +74,7 @@ class TokenAutocompleteSearch {
 		// compose the query json
 		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession.search(ResourceTable.class)
 			.where(predFactory -> predFactory.bool(boolBuilder -> {
-				ExtendedLuceneClauseBuilder clauseBuilder = new ExtendedLuceneClauseBuilder(myFhirContext, myModelConfig, boolBuilder, predFactory);
+				ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(myFhirContext, myModelConfig, boolBuilder, predFactory);
 
 				// we apply resource-level predicates here, at the top level
 				if (isNotBlank(theResourceName)) {

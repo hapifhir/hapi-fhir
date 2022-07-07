@@ -146,6 +146,11 @@ public class SearchNarrowingInterceptor {
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
+		//N.B do not add code above this for filtering, this should only ever occur on search.
+		if (shouldSkipNarrowing(theRequestDetails)) {
+			return true;
+		}
+
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		if (authorizedList == null) {
 			return true;
@@ -157,9 +162,6 @@ public class SearchNarrowingInterceptor {
 			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
 		}
 
-		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE) {
-			return true;
-		}
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 		RuntimeResourceDefinition resDef = ctx.getResourceDefinition(theRequestDetails.getResourceName());
@@ -184,6 +186,15 @@ public class SearchNarrowingInterceptor {
 		}
 
 		return true;
+	}
+
+
+	/**
+	 * Skip unless it is a search request or an $everything operation
+	 */
+	private boolean shouldSkipNarrowing(RequestDetails theRequestDetails) {
+		return theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE
+			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)

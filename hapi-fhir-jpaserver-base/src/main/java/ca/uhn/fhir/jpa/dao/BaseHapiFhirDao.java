@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -112,7 +112,6 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -163,6 +162,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.trim;
+
 
 /*
  * #%L
@@ -1575,7 +1575,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		encodedResource.setEncoding(theEncoding);
 	}
 
-	@NotNull
+	@Nonnull
 	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
 		Map<String, Boolean> retval = new HashMap<>();
 
@@ -1889,9 +1889,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (myDaoConfig.isAdvancedLuceneIndexing()) {
-				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
-				theEntity.setLuceneIndexData(luceneIndexData);
+			if (myDaoConfig.isAdvancedHSearchIndexing()) {
+				ExtendedHSearchIndexData hSearchIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}
 	}

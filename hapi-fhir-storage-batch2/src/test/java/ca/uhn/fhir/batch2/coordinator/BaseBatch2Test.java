@@ -49,8 +49,7 @@ public abstract class BaseBatch2Test {
 	}
 
 	static JobInstance createInstance(String theJobId) {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
 		instance.setJobDefinitionId(theJobId);
 		instance.setJobDefinitionVersion(1);

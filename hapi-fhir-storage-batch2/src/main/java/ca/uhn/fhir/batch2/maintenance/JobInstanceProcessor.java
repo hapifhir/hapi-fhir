@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class JobInstanceProcessor {
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
 	private final StepExecutionSvc myJobExecutorSvc;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
@@ -60,6 +62,7 @@ public class JobInstanceProcessor {
 		myJobExecutorSvc = theExecutorSvc;
 		myProgressAccumulator = theProgressAccumulator;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(theJobPersistence, theInstance, theProgressAccumulator);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
 
 	public void process() {
@@ -72,7 +75,7 @@ public class JobInstanceProcessor {
 		if (myInstance.isPendingCancellation()) {
 			myInstance.setErrorMessage(buildCancelledMessage());
 			myInstance.setStatus(StatusEnum.CANCELLED);
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 	}
 
@@ -174,16 +177,8 @@ public class JobInstanceProcessor {
 			null);
 		if (!result.isSuccessful()) {
 			myInstance.setStatus(StatusEnum.FAILED);
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 	}
 
-	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
-		if (myInstance.getStatus() != newStatus) {
-			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
-			myInstance.setStatus(newStatus);
-			return true;
-		}
-		return false;
-	}
 }

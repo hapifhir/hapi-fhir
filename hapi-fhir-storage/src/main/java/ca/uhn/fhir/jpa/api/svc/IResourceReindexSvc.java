@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.api.svc;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
-import java.util.List;
 
 public interface IResourceReindexSvc {
 
@@ -39,34 +39,10 @@ public interface IResourceReindexSvc {
 	 *
 	 * @param theStart The start of the date range, must be inclusive.
 	 * @param theEnd   The end of the date range, should be exclusive.
+	 * @param thePageSize  The number of records to query in each pass.
 	 * @param theRequestPartitionId The request partition ID (may be <code>null</code> on nonpartitioned systems)
 	 * @param theUrl   The search URL, or <code>null</code> to return IDs for all resources across all resource types. Null will only be supplied if {@link #isAllResourceTypeSupported()} returns <code>true</code>.
 	 */
-	IdChunk fetchResourceIdsPage(Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
-
-	class IdChunk {
-
-		final List<ResourcePersistentId> myIds;
-		final List<String> myResourceTypes;
-		final Date myLastDate;
-
-		public IdChunk(List<ResourcePersistentId> theIds, List<String> theResourceTypes, Date theLastDate) {
-			myIds = theIds;
-			myResourceTypes = theResourceTypes;
-			myLastDate = theLastDate;
-		}
-
-		public List<String> getResourceTypes() {
-			return myResourceTypes;
-		}
-
-		public List<ResourcePersistentId> getIds() {
-			return myIds;
-		}
-
-		public Date getLastDate() {
-			return myLastDate;
-		}
-	}
+	IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl);
 
 }

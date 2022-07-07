@@ -64,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 	JpaR4Config.class,
 	HapiJpaConfig.class,
 	TestJPAConfig.class,
-	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class,
+	TestHSearchAddInConfig.DefaultLuceneHeap.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class
 })
@@ -93,7 +93,7 @@ public class TestR4Config {
 
 	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
 	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private boolean myHaveDumpedThreads;
 
 	@Bean

@@ -81,6 +81,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
 	private IValidationSupport myValidationSupport;
+
+	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
 	private Logger myTroubleshootingLog;
 
 	/**
@@ -175,6 +177,20 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public AuthorizationInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
 		return this;
+	}
+
+	/**
+	 * Sets a search parameter matcher for use in handling SMART v2 filter scopes
+	 *
+	 * @param theAuthorizationSearchParamMatcher The search parameter matcher. Defaults to null.
+	 */
+	public void setAuthorizationSearchParamMatcher(@Nullable IAuthorizationSearchParamMatcher theAuthorizationSearchParamMatcher) {
+		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
+	}
+
+	@Nullable
+	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
+		return myAuthorizationSearchParamMatcher;
 	}
 
 	/**

@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IJobPersistence {
 
@@ -82,6 +83,17 @@ public interface IJobPersistence {
 	 * @param theInstanceId The ID
 	 */
 	Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId);
+
+	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetch all job instances for a given job definition id
+	 * @param theJobDefinitionId
+	 * @param theCount
+	 * @param theStart
+	 * @return
+	 */
+	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)
@@ -140,11 +152,13 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
-	 * Update the stored instance
+	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
+	 * instead to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
 	 */
-	void updateInstance(JobInstance theInstance);
+	boolean updateInstance(JobInstance theInstance);
 
 	/**
 	 * Deletes the instance and all associated work chunks
@@ -164,14 +178,14 @@ public interface IJobPersistence {
 	 * Marks an instance as being complete
 	 *
 	 * @param theInstanceId The instance ID
+	 * @return true if the instance status changed
 	 */
-	void markInstanceAsCompleted(String theInstanceId);
+	boolean markInstanceAsCompleted(String theInstanceId);
 
 	/**
 	 * Marks an instance as cancelled
 	 *
 	 * @param theInstanceId The instance ID
 	 */
-	void cancelInstance(String theInstanceId);
-
+	JobOperationResultJson cancelInstance(String theInstanceId);
 }

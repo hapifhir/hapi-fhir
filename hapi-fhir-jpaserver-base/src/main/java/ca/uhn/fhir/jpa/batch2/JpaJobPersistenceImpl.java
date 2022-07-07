@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.batch2;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -111,6 +113,21 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return fetchInstance(theInstanceId);
 	}
 
+	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));
+	}
+
+	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
+		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
+		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
+	}
+
+	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {
+		return theInstancesByJobDefinitionId.stream().map(this::toInstance).collect(Collectors.toList());
+	}
+
 	@Override
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
@@ -154,8 +171,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
-		JobInstance retVal = new JobInstance();
-		retVal.setInstanceId(theEntity.getId());
+		JobInstance retVal = JobInstance.fromInstanceId(theEntity.getId());
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());
@@ -224,8 +240,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
+	/**
+	 * Update the stored instance
+	 *
+	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
+	 */
 	@Override
-	public void updateInstance(JobInstance theInstance) {
+	public boolean updateInstance(JobInstance theInstance) {
+		// Separate updating the status so we have atomic information about whether the status is changing
+		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
+
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
 		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
 
@@ -245,6 +270,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instance);
+		return recordsChangedByStatusUpdate > 0;
 	}
 
 	@Override
@@ -259,12 +285,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public void markInstanceAsCompleted(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+	public boolean markInstanceAsCompleted(String theInstanceId) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+		return recordsChanged > 0;
 	}
 
 	@Override
-	public void cancelInstance(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
+	public JobOperationResultJson cancelInstance(String theInstanceId) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
+		String operationString = "Cancel job instance " + theInstanceId;
+
+		if (recordsChanged > 0) {
+			return JobOperationResultJson.newSuccess(operationString, "Job instance <" + theInstanceId + "> successfully cancelled.");
+		} else {
+			Optional<JobInstance> instance = fetchInstance(theInstanceId);
+			if (instance.isPresent()) {
+				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> was already cancelled.  Nothing to do.");
+			} else {
+				return JobOperationResultJson.newFailure(operationString, "Job instance <" + theInstanceId + "> not found.");
+			}
+		}
 	}
 }

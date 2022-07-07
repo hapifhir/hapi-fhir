@@ -581,6 +581,38 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return finished(rule);
 				}
 
+				@Override
+				public IAuthRuleFinished inCompartmentWithFilter(String theCompartmentName, IIdType theIdElement, String theFilter) {
+					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
+					Validate.notNull(theIdElement, "theOwner must not be null");
+					validateOwner(theIdElement);
+
+					// inlined from inCompartmentWithAdditionalSearchParams()
+					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
+					myInCompartmentName = theCompartmentName;
+					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
+					Optional<RuleImplOp> oRule = findMatchingRule();
+					if (oRule.isPresent()) {
+						RuleImplOp rule = oRule.get();
+						rule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+						rule.addClassifierCompartmentOwner(theIdElement);
+						return new RuleBuilderFinished(rule);
+					}
+					myInCompartmentOwners = Collections.singletonList(theIdElement);
+
+					FhirQueryRuleImpl rule = new FhirQueryRuleImpl(myRuleName);
+					rule.setFilter(theFilter);
+					return finished(rule);
+				}
+
+				@Override
+				public IAuthRuleFinished withFilter(String theFilter) {
+					myClassifierType = ClassifierTypeEnum.ANY_ID;
+					FhirQueryRuleImpl rule = new FhirQueryRuleImpl(myRuleName);
+					rule.setFilter(theFilter);
+					return finished(rule);
+				}
+
 				RuleBuilderFinished addInstances(Collection<IIdType> theInstances) {
 					myAppliesToInstances.addAll(theInstances);
 					return new RuleBuilderFinished(myRule);
