@@ -1,0 +1,308 @@
+package ca.uhn.fhir.test.utilities;
+
+/*-
+ * #%L
+ * HAPI FHIR Test Utilities
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import ca.uhn.test.concurrency.IPointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
+import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.Organization;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
+import javax.servlet.ServletException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class RestServerDstu3Helper extends BaseRestServerHelper implements IPointcutLatch, BeforeEachCallback, AfterEachCallback {
+	protected final MyRestfulServer myRestServer;
+
+	public RestServerDstu3Helper() {
+		super(FhirContext.forDstu3());
+		myRestServer = new MyRestfulServer(myFhirContext);
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
+		startServer(myRestServer);
+	}
+
+	@Override
+	public void clearDataAndCounts() {
+		myRestServer.clearDataAndCounts();
+	}
+
+	@Override
+	public void setFailNextPut(boolean theFailNextPut) {
+		myRestServer.setFailNextPut(theFailNextPut);
+	}
+
+	@Override
+	public List<Object> getInterceptors() {
+		return myRestServer.getInterceptorService().getAllRegisteredInterceptors();
+	}
+
+	@Override
+	public void unregisterInterceptor(Object theInterceptor) {
+		myRestServer.getInterceptorService().unregisterInterceptor(theInterceptor);
+	}
+
+	@Override
+	public void clearCounts() {
+		myRestServer.clearCounts();
+	}
+
+	@Override
+	public long getPatientCountSearch() {
+		return myRestServer.getPatientResourceProvider().getCountSearch();
+	}
+
+	@Override
+	public long getPatientCountDelete() {
+		return myRestServer.getPatientResourceProvider().getCountDelete();
+	}
+
+	@Override
+	public long getPatientCountUpdate() {
+		return myRestServer.getPatientResourceProvider().getCountUpdate();
+	}
+
+	@Override
+	public long getPatientCountRead() {
+		return myRestServer.getPatientResourceProvider().getCountRead();
+	}
+
+	@Override
+	public long getObservationCountSearch() {
+		return myRestServer.getObservationResourceProvider().getCountSearch();
+	}
+
+	@Override
+	public long getObservationCountDelete() {
+		return myRestServer.getObservationResourceProvider().getCountDelete();
+	}
+
+	@Override
+	public long getObservationCountUpdate() {
+		return myRestServer.getObservationResourceProvider().getCountUpdate();
+	}
+
+	@Override
+	public long getObservationCountRead() {
+		return myRestServer.getObservationResourceProvider().getCountRead();
+	}
+
+	@Override
+	public boolean registerInterceptor(Object theInterceptor) {
+		return myRestServer.getInterceptorService().registerInterceptor(theInterceptor);
+	}
+
+	@Override
+	public void clear() {
+		myRestServer.getPlainProvider().clear();
+	}
+
+	@Override
+	public void setExpectedCount(int theCount) {
+		myRestServer.getPlainProvider().setExpectedCount(theCount);
+	}
+
+	@Override
+	public List<HookParams> awaitExpected() throws InterruptedException {
+		return myRestServer.getPlainProvider().awaitExpected();
+	}
+
+	public void registerProvider(Object theProvider) {
+		myRestServer.registerProvider(theProvider);
+	}
+
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		stop();
+	}
+
+	public static class MyPlainProvider implements IPointcutLatch {
+		private final PointcutLatch myPointcutLatch = new PointcutLatch("Transaction Counting Provider");
+		private final List<IBaseBundle> myTransactions = Collections.synchronizedList(new ArrayList<>());
+
+		@Transaction
+		public synchronized IBaseBundle transaction(@TransactionParam IBaseBundle theBundle) {
+			myPointcutLatch.call(theBundle);
+			myTransactions.add(theBundle);
+			return theBundle;
+		}
+
+		@Override
+		public void clear() {
+			myPointcutLatch.clear();
+		}
+
+		@Override
+		public void setExpectedCount(int theCount) {
+			myPointcutLatch.setExpectedCount(theCount);
+		}
+
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return myPointcutLatch.awaitExpected();
+		}
+
+		public List<IBaseBundle> getTransactions() {
+			return Collections.unmodifiableList(new ArrayList<>(myTransactions));
+		}
+	}
+
+	private static class MyRestfulServer extends RestfulServer {
+		private boolean myFailNextPut;
+		private HashMapResourceProvider<Patient> myPatientResourceProvider;
+		private HashMapResourceProvider<Observation> myObservationResourceProvider;
+		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
+		private MyPlainProvider myPlainProvider;
+
+		public MyRestfulServer(FhirContext theFhirContext) {
+			super(theFhirContext);
+		}
+
+		public MyPlainProvider getPlainProvider() {
+			return myPlainProvider;
+		}
+
+		public void setFailNextPut(boolean theFailNextPut) {
+			myFailNextPut = theFailNextPut;
+		}
+
+		public void clearCounts() {
+			for (IResourceProvider next : getResourceProviders()) {
+				if (next instanceof HashMapResourceProvider) {
+					HashMapResourceProvider provider = (HashMapResourceProvider) next;
+					provider.clearCounts();
+				}
+			}
+			myPlainProvider.clear();
+		}
+
+		public void clearDataAndCounts() {
+			for (IResourceProvider next : getResourceProviders()) {
+				if (next instanceof HashMapResourceProvider) {
+					HashMapResourceProvider provider = (HashMapResourceProvider) next;
+					provider.clear();
+				}
+			}
+			clearCounts();
+		}
+
+		public HashMapResourceProvider<Observation> getObservationResourceProvider() {
+			return myObservationResourceProvider;
+		}
+
+		public HashMapResourceProvider<Organization> getOrganizationResourceProvider() {
+			return myOrganizationResourceProvider;
+		}
+
+		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
+			return myPatientResourceProvider;
+		}
+
+		@Override
+		protected void initialize() throws ServletException {
+			super.initialize();
+
+			FhirContext fhirContext = getFhirContext();
+			myPatientResourceProvider = new MyHashMapResourceProvider(fhirContext, Patient.class);
+			registerProvider(myPatientResourceProvider);
+			myObservationResourceProvider = new MyHashMapResourceProvider(fhirContext, Observation.class);
+			registerProvider(myObservationResourceProvider);
+			myOrganizationResourceProvider = new MyHashMapResourceProvider(fhirContext, Organization.class);
+			registerProvider(myOrganizationResourceProvider);
+
+			myPlainProvider = new MyPlainProvider();
+			registerProvider(myPlainProvider);
+		}
+
+
+		public class MyHashMapResourceProvider<T extends IBaseResource> extends HashMapResourceProvider<T> {
+			public MyHashMapResourceProvider(FhirContext theContext, Class theType) {
+				super(theContext, theType);
+			}
+
+			@Override
+			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
+				if (myFailNextPut) {
+					throw new PreconditionFailedException("SOME ERROR MESSAGE");
+				}
+				return super.update(theResource, theConditional, theRequestDetails);
+			}
+		}
+	}
+
+	@Override
+	public HashMapResourceProvider<Observation> getObservationResourceProvider() {
+		return myRestServer.getObservationResourceProvider();
+	}
+
+	@Override
+	public HashMapResourceProvider<Patient> getPatientResourceProvider() {
+		return myRestServer.getPatientResourceProvider();
+	}
+
+	@Override
+	public IIdType createPatientWithId(String theId) {
+		Patient patient = new Patient();
+		patient.setId("Patient/" + theId);
+		patient.addIdentifier().setSystem("http://foo").setValue(theId);
+		return this.createPatient(patient);
+	}
+
+	@Override
+	public IIdType createPatient(IBaseResource theBaseResource) {
+		return myRestServer.getPatientResourceProvider().store((Patient) theBaseResource);
+
+	}
+
+	@Override
+	public IIdType createObservationForPatient(IIdType theFirstTargetPatientId) {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference(theFirstTargetPatientId));
+		return this.createObservation(observation);
+
+	}
+
+	@Override
+	public IIdType createObservation(IBaseResource theBaseResource) {
+		return myRestServer.getObservationResourceProvider().store((Observation) theBaseResource);
+	}
+}
