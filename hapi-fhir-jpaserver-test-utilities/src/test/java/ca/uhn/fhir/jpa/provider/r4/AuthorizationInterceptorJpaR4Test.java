@@ -1765,8 +1765,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("filter rule").read().allResources().withFilter("code=" + FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM + "|").andThen()
-					.build();
+					.allow("filter rule").read().allResources().withAnyId()
+					.withFilterTester("code=" + FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM + "|")
+					.andThen().build();
 			}
 		};
 		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));

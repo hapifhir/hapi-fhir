@@ -16,16 +16,18 @@ import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParam
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
 class FhirQueryRuleTesterTest  {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirQueryRuleTesterTest.class);
-	FhirQueryRuleTester myTester = new FhirQueryRuleTester("Observation", "code=foo");
+	FhirQueryRuleTester myTester = new FhirQueryRuleTester("code=foo");
 
 	IAuthRuleTester.RuleTestRequest myTestRequest;
 	@Mock
-	IBaseResource myResource;
+	IBaseResource myObservation;
 	@Mock
 	RequestDetails myRequestDetails;
 	@Mock
@@ -35,11 +37,13 @@ class FhirQueryRuleTesterTest  {
 
 	@BeforeEach
 	void stubConfig() {
-		when(myRuleApplier.getSearchParamMatcher()).thenReturn(mySearchParamMatcher);
+		lenient().when(myRuleApplier.getSearchParamMatcher()).thenReturn(mySearchParamMatcher);
+		lenient().when(myObservation.fhirType()).thenReturn("Observation");
+
 	}
 
 	void stubMatchResult(IAuthorizationSearchParamMatcher.MatchResult result) {
-		when(mySearchParamMatcher.match("Observation?code=foo", myResource)).thenReturn(result);
+		when(mySearchParamMatcher.match("Observation?code=foo", myObservation)).thenReturn(result);
 	}
 
 	private void stubLogForWarning() {
@@ -51,7 +55,7 @@ class FhirQueryRuleTesterTest  {
 	public void matchesFilter_true() {
 
 		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myResource, myRuleApplier);
+			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
 		stubMatchResult(buildMatched());
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
@@ -62,10 +66,9 @@ class FhirQueryRuleTesterTest  {
 
 	@Test
 	public void notMatchesFilter_false() {
-		//when(myRuleApplier.getSearchParamMatcher()).thenReturn(mySearchParamMatcher);
 
 		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myResource, myRuleApplier);
+			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
 		stubMatchResult(buildUnmatched());
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
@@ -77,7 +80,7 @@ class FhirQueryRuleTesterTest  {
 	public void unsupportedAllow_false() {
 
 		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.ALLOW, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myResource, myRuleApplier);
+			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
 		stubMatchResult(buildUnsupported("a message"));
 		stubLogForWarning();
 
@@ -90,9 +93,21 @@ class FhirQueryRuleTesterTest  {
 	public void unsupportedDeny_true() {
 
 		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.DENY, RestOperationTypeEnum.SEARCH_TYPE,
-			myRequestDetails, new IdDt("Observation/1"), myResource, myRuleApplier);
+			myRequestDetails, new IdDt("Observation/1"), myObservation, myRuleApplier);
 		stubMatchResult(buildUnsupported("a message"));
 		stubLogForWarning();
+
+		boolean matches = myTester.matchesOutput(myTestRequest);
+
+		assertTrue(matches);
+	}
+
+	@Test
+	public void preHandledCheckHasNoResource_true() {
+
+		myTestRequest = new IAuthRuleTester.RuleTestRequest(PolicyEnum.DENY, RestOperationTypeEnum.READ,
+			myRequestDetails, null, null, myRuleApplier);
+		// no stubs needed since we don't have a resource
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
