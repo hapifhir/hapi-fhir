@@ -361,7 +361,7 @@ public class SearchParamWithInlineReferencesExtractor {
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
-						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
+						String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 
