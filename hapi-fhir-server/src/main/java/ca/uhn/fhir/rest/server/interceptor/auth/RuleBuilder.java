@@ -185,6 +185,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return this;
 		}
 
+		@Override
+		public IAuthRuleFinished withFilterTester(String theQueryParameters) {
+			return withTester(new FhirQueryRuleTester(theQueryParameters));
+		}
+
 		private class TenantCheckingTester implements IAuthRuleTester {
 			private final Collection<String> myTenantIds;
 			private final boolean myOutcome;
@@ -600,17 +605,19 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					}
 					myInCompartmentOwners = Collections.singletonList(theIdElement);
 
-					FhirQueryRuleImpl rule = new FhirQueryRuleImpl(myRuleName);
-					rule.setFilter(theFilter);
-					return finished(rule);
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
+
 				}
 
 				@Override
 				public IAuthRuleFinished withFilter(String theFilter) {
 					myClassifierType = ClassifierTypeEnum.ANY_ID;
-					FhirQueryRuleImpl rule = new FhirQueryRuleImpl(myRuleName);
-					rule.setFilter(theFilter);
-					return finished(rule);
+
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
 				}
 
 				RuleBuilderFinished addInstances(Collection<IIdType> theInstances) {

@@ -51,4 +51,10 @@ public interface IAuthRuleFinished {
 	 */
 	IAuthRuleFinished withTester(@Nullable IAuthRuleTester theTester);
 
+	/**
+	 * Narrow this rule to resources matching the given FHIR query.
+	 * @param theQueryParameters a FHIR query parameter string.  E.g. category=laboratory&date=ge2021
+	 */
+	IAuthRuleFinished withFilterTester(String theQueryParameters);
+
 }
