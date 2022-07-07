@@ -152,7 +152,7 @@
             <artifactId>json-patch</artifactId>
         </dependency>
 
-    </dependencies>
+	</dependencies>
 	<build>
 		<pluginManagement>
 			<plugins>
