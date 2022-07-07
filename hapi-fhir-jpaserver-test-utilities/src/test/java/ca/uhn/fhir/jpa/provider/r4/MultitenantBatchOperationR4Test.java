@@ -8,11 +8,10 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantBatchOperationR4Test.class);
-
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 
 	@BeforeEach
 	@Override
@@ -96,16 +91,17 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.execute();
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertThat(interceptor.requestPartitionIds, hasSize(1));
+		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId);
+
+		// Two calls.  First call is the page of results, second call has no results and stops the loop.
+		assertThat(interceptor.requestPartitionIds, hasSize(2));
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
-		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
+		assertThat(interceptor.requestDetails.get(0), isA(SystemRequestDetails.class));
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
-
-		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
-		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		assertEquals(1, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
