@@ -29,6 +29,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -342,7 +343,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				String resourceTypeString = nextIdText.substring(0, nextIdText.indexOf('?')).replace("/", "");
 				RuntimeResourceDefinition matchResourceDef = myContext.getResourceDefinition(resourceTypeString);
 				if (matchResourceDef == null) {
-					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
+					String msg = myContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
 					throw new InvalidRequestException(Msg.code(1090) + msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
