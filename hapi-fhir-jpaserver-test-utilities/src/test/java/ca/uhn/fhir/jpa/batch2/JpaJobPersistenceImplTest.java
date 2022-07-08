@@ -402,7 +402,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testMarkInstanceAsCompleted() {
 		String instanceId = mySvc.storeNewInstance(createInstance());
 
-		mySvc.markInstanceAsCompleted(instanceId);
+		assertTrue(mySvc.markInstanceAsCompleted(instanceId));
+		assertFalse(mySvc.markInstanceAsCompleted(instanceId));
 
 		runInTransaction(() -> {
 			Batch2JobInstanceEntity entity = myJobInstanceRepository.findById(instanceId).orElseThrow(() -> new IllegalArgumentException());
