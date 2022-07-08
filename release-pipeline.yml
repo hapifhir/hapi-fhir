@@ -151,15 +151,6 @@ jobs:
           inputs:
              dockerVersion: 17.09.0-ce
              releaseType: stable
-        - task: Maven@3
-          env:
-             JAVA_HOME_11_X64: /usr/java/openjdk-17
-          displayName: Checkstyle Build
-          inputs:
-             mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
-             goals: 'clean install'
-             options: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-             jdkVersionOption: 1.11
         - task: Bash@3
           inputs:
              targetType: 'inline'
