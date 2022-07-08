@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Base64Utils;
 
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,7 +27,9 @@ import static org.mockito.Mockito.verify;
 public class FetchFilesStepTest {
 
 	public static final String INSTANCE_ID = "instance-id";
+	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 	public static final String CHUNK_ID = "chunk-id";
+
 	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
@@ -47,7 +49,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -76,7 +78,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -98,7 +100,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test & Verify
 

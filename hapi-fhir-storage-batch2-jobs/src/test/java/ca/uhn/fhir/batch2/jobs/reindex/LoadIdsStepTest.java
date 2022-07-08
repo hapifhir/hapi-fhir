@@ -3,6 +3,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
@@ -60,8 +61,9 @@ public class LoadIdsStepTest {
 		ReindexChunkRangeJson range = new ReindexChunkRangeJson();
 		range.setStart(DATE_1).setEnd(DATE_END);
 		String instanceId = "instance-id";
+		JobInstance jobInstance = JobInstance.fromInstanceId(instanceId);
 		String chunkId = "chunk-id";
-		StepExecutionDetails<ReindexJobParameters, ReindexChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, instanceId, chunkId);
+		StepExecutionDetails<ReindexJobParameters, ReindexChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, chunkId);
 
 		// First Execution
 

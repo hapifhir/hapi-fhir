@@ -4,7 +4,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -31,20 +30,19 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -153,6 +151,187 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
+	}
+
+	@Test
+	public void testFindAndResolveByForcedIdWithNoType() {
+		// Create patients
+		String patientId = "AAA";
+		IIdType idA = createPatient(withId(patientId));
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+				"Patient", Arrays.asList(patientId)
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+				"Patient", Arrays.asList(patientId), true
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Delete resource
+		deletePatient(JpaConstants.DEFAULT_PARTITION_NAME, idA);
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeIncludeDeleted(
+				"Patient", Arrays.asList(patientId)
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoType(
+				"Patient", Arrays.asList(patientId), true
+			);
+			assertThat(forcedIds, hasSize(0));
+		});
+	}
+
+	@Test
+	public void findAndResolveByForcedIdWithNoTypeInPartitionNull() {
+		// Create patients
+		String patientId = "AAA";
+		IIdType idA = createPatient(withId(patientId));
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", Arrays.asList(patientId), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", Arrays.asList(patientId), true
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Delete resource
+		deletePatient(JpaConstants.DEFAULT_PARTITION_NAME, idA);
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", Arrays.asList(patientId), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(
+				"Patient", Arrays.asList(patientId), true
+			);
+			assertEquals(0, forcedIds.size());
+		});
+	}
+
+	@Test
+	public void testFindAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(){
+		// Create patients
+		String patientId = "AAA";
+		IIdType idA = createPatient(withTenant(TENANT_A), withId(patientId));
+
+		createPatient(withId("BBB"));
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		deletePatient(TENANT_A, idA);
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID), true
+			);
+			assertEquals(0, forcedIds.size());
+		});
+	}
+
+	@Test
+	public void testFindAndResolveByForcedIdWithNoTypeInPartition() throws IOException {
+		// Create patients
+		String patientId = "AAA";
+		IIdType idA = createPatient(withTenant(TENANT_A), withId(patientId));
+
+		createPatient(withTenant(TENANT_B), withId("BBB"));
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		deletePatient(TENANT_A, idA);
+
+		// Search and include deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), false
+			);
+			assertContainsSingleForcedId(forcedIds, patientId);
+		});
+
+		// Search and filter deleted
+		runInTransaction(() -> {
+			Collection<Object[]> forcedIds = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(
+				"Patient", Arrays.asList(patientId), Arrays.asList(TENANT_A_ID, TENANT_B_ID), true
+			);
+			assertEquals(0, forcedIds.size());
+		});
+	}
+
+	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
+		assertEquals(1, forcedIds.size());
+		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
+	}
+
+	private void deletePatient(String tenantId, IIdType patientId){
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setTenantId(tenantId);
+		myPatientDao.delete(patientId, requestDetails);
 	}
 
 	@Test

@@ -1,9 +1,8 @@
 package ca.uhn.fhir.batch2.api;
 
-import ca.uhn.fhir.batch2.model.ListResult;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
-import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -39,8 +38,9 @@ public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IMo
 
 	public ReductionStepExecutionDetails(@Nonnull PT theParameters,
 													 @Nullable IT theData,
-													 @Nonnull String theInstanceId) {
-		super(theParameters, theData, theInstanceId, "VOID");
+													 @Nonnull JobInstance theInstance) {
+		// TODO KHS shouldn't the chunkId be null?
+		super(theParameters, theData, theInstance, "VOID");
 	}
 
 	@Override
