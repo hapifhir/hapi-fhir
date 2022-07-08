@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -11,14 +12,12 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		// Add a second patient
@@ -135,7 +134,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
-			assertThat(e.getMessage(), is(equalTo("_count must be greater than 0.")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1524) + "_count must be greater than 0.")));
 		}
 
 		//Given
@@ -151,7 +150,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
-			assertThat(e.getMessage(), is(equalTo("_offset must be greater than or equal to 0. ")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1524) + "_offset must be greater than or equal to 0. ")));
 		}
 
 		//Given
@@ -167,7 +166,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 				myRequestDetails);
 		} catch (InvalidRequestException e) {
 			//Then
-			assertThat(e.getMessage(), is(equalTo("_offset must be greater than or equal to 0. _count must be greater than 0.")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(1524) + "_offset must be greater than or equal to 0. _count must be greater than 0.")));
 		}
 	}
 
@@ -223,7 +222,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Patient/notAnId123 is not known", e.getMessage());
+			assertEquals(Msg.code(2001) + "Resource Patient/notAnId123 is not known", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -68,12 +69,12 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 			String baseDefinition = inputCanonical.getBaseDefinition();
 			if (isBlank(baseDefinition)) {
-				throw new PreconditionFailedException("StructureDefinition[id=" + inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
+				throw new PreconditionFailedException(Msg.code(704) + "StructureDefinition[id=" + inputCanonical.getIdElement().getId() + ", url=" + inputCanonical.getUrl() + "] has no base");
 			}
 
 			IBaseResource base = theValidationSupportContext.getRootValidationSupport().fetchStructureDefinition(baseDefinition);
 			if (base == null) {
-				throw new PreconditionFailedException("Unknown base definition: " + baseDefinition);
+				throw new PreconditionFailedException(Msg.code(705) + "Unknown base definition: " + baseDefinition);
 			}
 
 			org.hl7.fhir.r5.model.StructureDefinition baseCanonical = (org.hl7.fhir.r5.model.StructureDefinition) converter.toCanonical(base);
@@ -110,7 +111,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 				case DSTU2_HL7ORG:
 				case DSTU2_1:
 				default:
-					throw new IllegalStateException("Can not generate snapshot for version: " + version);
+					throw new IllegalStateException(Msg.code(706) + "Can not generate snapshot for version: " + version);
 			}
 
 			return theInput;
@@ -118,7 +119,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		} catch (BaseServerResponseException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new InternalErrorException("Failed to generate snapshot", e);
+			throw new InternalErrorException(Msg.code(707) + "Failed to generate snapshot", e);
 		} finally {
 			if (inputUrl != null) {
 				theValidationSupportContext.getCurrentlyGeneratingSnapshots().remove(inputUrl);

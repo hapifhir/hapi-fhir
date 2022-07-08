@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
@@ -105,7 +106,7 @@ public class NumberPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			default:
 				String paramValue = theActualParam.getValueAsQueryToken(theFhirContext);
 				String msg = theIndexTable.getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, theInvalidValueKey, operation, paramValue);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1235) + msg);
 		}
 
 		return num;

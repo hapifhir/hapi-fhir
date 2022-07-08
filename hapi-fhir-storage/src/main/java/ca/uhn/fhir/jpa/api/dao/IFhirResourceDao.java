@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -53,7 +54,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -170,7 +170,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * Read a resource by its internal PID
 	 */
 	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
 	/**
@@ -212,7 +212,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Search for IDs for processing a match URLs, etc.
 	 */
-	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
+	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
 	}
 
@@ -223,7 +223,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                                            create/update, this is the resource being searched for
 	 * @since 5.5.0
 	 */
-	default Set<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
+	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest, @Nullable IBaseResource theConditionalOperationTargetOrNull) {
 		return searchForIds(theParams, theRequest);
 	}
 
@@ -278,6 +278,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Delete a list of resource Pids
 	 *
+	 * CAUTION: This list does not throw an exception if there are delete conflicts.  It should always be followed by
+	 * a call to DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(fhirContext, conflicts);
+	 * to actually throw the exception.  The reason this method doesn't do that itself is that it is expected to be
+	 * called repeatedly where an earlier conflict can be removed in a subsequent pass.
+	 *
 	 * @param theUrl             the original URL that triggered the delete
 	 * @param theResourceIds     the ids of the resources to be deleted
 	 * @param theDeleteConflicts out parameter of conflicts preventing deletion
@@ -293,4 +298,10 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	}
 
+	/**
+	 * Reindex the given resource
+	 *
+	 * @param theResourcePersistentId The ID
+	 */
+	void reindex(ResourcePersistentId theResourcePersistentId, RequestDetails theRequest, TransactionDetails theTransactionDetails);
 }

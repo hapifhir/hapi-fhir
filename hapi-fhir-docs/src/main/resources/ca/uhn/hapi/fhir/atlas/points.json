@@ -403,6 +403,28 @@
 			"lat": 56.15195,
 			"lon": 10.17705,
 			"added": "2021-10-06"
+		},
+				{
+			"title": "Burai L.L.C",
+			"description": "SaaS ERP for Healthcare Services, SMART ON FHIR compliance with 21st century cures act and HIPPA",
+			"company": "Burai LLC",
+			"contactName": "Tomomi Yamano",
+			"link": "https:burai.live",
+			"city": "Tokyo Japan, Florida USA",
+			"lat": 35.6762,
+			"lon": 139.6503,
+			"added": "2021-12-03"
+		},
+			{
+			"title": "HealthChain",
+			"description": "Mobile FHIR EMR",
+			"company": "imageRAD Yazalım A.Ş.",
+			"contactName": "Haluk Çelikel",
+			"link": "https://www.imagerad.com/home/",
+			"city": "Urla İzmir, Turkey",
+			"lat": 38.313733,
+			"lon": 26.634074,
+			"added": "2022-06-20"
 		}
 	]
 }

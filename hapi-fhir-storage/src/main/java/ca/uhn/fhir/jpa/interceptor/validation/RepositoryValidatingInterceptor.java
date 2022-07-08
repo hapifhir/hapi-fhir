@@ -20,12 +20,14 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -38,6 +40,8 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
 
 /**
  * This interceptor enforces validation rules on any data saved in a HAPI FHIR JPA repository.
@@ -127,24 +131,35 @@ public class RepositoryValidatingInterceptor {
 	}
 
 	private void handle(RequestDetails theRequestDetails, IBaseResource theNewResource) {
+		
 		Validate.notNull(myFhirContext, "No FhirContext has been set for this interceptor of type: %s", getClass());
-
-		String resourceType = myFhirContext.getResourceType(theNewResource);
-		Collection<IRepositoryValidatingRule> rules = myRules.get(resourceType);
-		for (IRepositoryValidatingRule nextRule : rules) {
-			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theRequestDetails, theNewResource);
-			if (!outcome.isPasses()) {
-				handleFailure(outcome);
+		if (!isPlaceholderResource(theNewResource)) {
+			String resourceType = myFhirContext.getResourceType(theNewResource);
+			Collection<IRepositoryValidatingRule> rules = myRules.get(resourceType);
+			for (IRepositoryValidatingRule nextRule : rules) {
+				IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theRequestDetails, theNewResource);
+				if (!outcome.isPasses()) {
+					handleFailure(outcome);
+				}
 			}
-		}
+		} 
+	}
+
+	/**
+	 * Return true if the given resource is a placeholder resource, as identified by a specific extension
+	 * @param theNewResource the {@link IBaseResource} to check
+	 * @return whether or not this resource is a placeholder.
+	 */
+	private boolean isPlaceholderResource(IBaseResource theNewResource) {
+		return ExtensionUtil.hasExtension(theNewResource, EXT_RESOURCE_PLACEHOLDER);
 	}
 
 	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
 		if (theOutcome.getOperationOutcome() != null) {
 			String firstIssue = OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, theOutcome.getOperationOutcome());
-			throw new PreconditionFailedException(firstIssue, theOutcome.getOperationOutcome());
+			throw new PreconditionFailedException(Msg.code(574) + firstIssue, theOutcome.getOperationOutcome());
 		}
-		throw new PreconditionFailedException(theOutcome.getFailureDescription());
+		throw new PreconditionFailedException(Msg.code(575) + theOutcome.getFailureDescription());
 	}
 
 }

@@ -39,10 +39,15 @@ import java.util.Set;
 public class AddIndexTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIndexTask.class);
+
 	private String myIndexName;
 	private List<String> myColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
+	/** Should the operation avoid taking a lock on the table */
+	private boolean myOnline;
+
+	private MetadataSource myMetadataSource = new MetadataSource();
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -103,6 +108,7 @@ public class AddIndexTask extends BaseTableTask {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 				case MSSQL_2012:
+				case COCKROACHDB_21_1:
 					includeClause = " INCLUDE (" + String.join(", ", myIncludeColumns) + ")";
 					break;
 				case H2_EMBEDDED:
@@ -117,40 +123,54 @@ public class AddIndexTask extends BaseTableTask {
 			}
 		}
 		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
-			mssqlWhereClause = " WHERE (";
-			for (int i = 0; i < myColumns.size(); i++) {
-				mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-				if (i < myColumns.size() - 1) {
-					mssqlWhereClause += "AND ";
-				}
-			}
-			mssqlWhereClause += ")";
+			mssqlWhereClause = buildMSSqlNotNullWhereClause();
 		}
-		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")" + includeClause + mssqlWhereClause;
+		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
+		String postgresOnline = "";
+		String oracleOnlineDeferred = "";
+		if (myOnline) {
+			switch (getDriverType()) {
+				case POSTGRES_9_4:
+				case COCKROACHDB_21_1:
+					postgresOnline = "CONCURRENTLY ";
+					// This runs without a lock, and can't be done transactionally.
+					setTransactional(false);
+					break;
+				case ORACLE_12C:
+					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
+					break;
+				case MSSQL_2012:
+					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
+						oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					}
+					break;
+				default:
+			}
+		}
+
+
+		String sql =
+			"create " + unique + "index " + postgresOnline + myIndexName +
+			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
 		return sql;
+	}
+
+	@Nonnull
+	private String buildMSSqlNotNullWhereClause() {
+		String mssqlWhereClause;
+		mssqlWhereClause = " WHERE (";
+		for (int i = 0; i < myColumns.size(); i++) {
+			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
+			if (i < myColumns.size() - 1) {
+				mssqlWhereClause += "AND ";
+			}
+		}
+		mssqlWhereClause += ")";
+		return mssqlWhereClause;
 	}
 
 	public void setColumns(String... theColumns) {
 		setColumns(Arrays.asList(theColumns));
-	}
-
-	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
-		super.generateEquals(theBuilder, theOtherObject);
-
-		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
-		theBuilder.append(myIndexName, otherObject.myIndexName);
-		theBuilder.append(myColumns, otherObject.myColumns);
-		theBuilder.append(myUnique, otherObject.myUnique);
-
-	}
-
-	@Override
-	protected void generateHashCode(HashCodeBuilder theBuilder) {
-		super.generateHashCode(theBuilder);
-		theBuilder.append(myIndexName);
-		theBuilder.append(myColumns);
-		theBuilder.append(myUnique);
 	}
 
 	public void setIncludeColumns(String... theIncludeColumns) {
@@ -160,5 +180,37 @@ public class AddIndexTask extends BaseTableTask {
 	private void setIncludeColumns(List<String> theIncludeColumns) {
 		Validate.notNull(theIncludeColumns);
 		myIncludeColumns = theIncludeColumns;
+	}
+
+	/**
+	 * Add Index without locking the table.
+	 */
+	public void setOnline(boolean theFlag) {
+		myOnline = theFlag;
+	}
+	@Override
+	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+		super.generateEquals(theBuilder, theOtherObject);
+
+		AddIndexTask otherObject = (AddIndexTask) theOtherObject;
+		theBuilder.append(myIndexName, otherObject.myIndexName);
+		theBuilder.append(myColumns, otherObject.myColumns);
+		theBuilder.append(myUnique, otherObject.myUnique);
+		theBuilder.append(myIncludeColumns, otherObject.myIncludeColumns);
+		theBuilder.append(myOnline, otherObject.myOnline);
+
+	}
+
+	@Override
+	protected void generateHashCode(HashCodeBuilder theBuilder) {
+		super.generateHashCode(theBuilder);
+		theBuilder.append(myIndexName);
+		theBuilder.append(myColumns);
+		theBuilder.append(myUnique);
+		theBuilder.append(myOnline);
+	}
+
+	public void setMetadataSource(MetadataSource theMetadataSource) {
+		myMetadataSource = theMetadataSource;
 	}
 }

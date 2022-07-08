@@ -17,13 +17,13 @@ import java.io.InputStream;
 
 public interface CqlProviderTestBase {
 
-	FhirContext getFhirContext();
+	FhirContext getTestFhirContext();
 
 	DaoRegistry getDaoRegistry();
 
 	default IBaseResource loadResource(String theLocation, RequestDetails theRequestDetails) throws IOException {
 		String json = stringFromResource(theLocation);
-		IBaseResource resource = getFhirContext().newJsonParser().parseResource(json);
+		IBaseResource resource = getTestFhirContext().newJsonParser().parseResource(json);
 		IFhirResourceDao<IBaseResource> dao = getDaoRegistry().getResourceDao(resource.getIdElement().getResourceType());
 		if (dao == null) {
 			return null;

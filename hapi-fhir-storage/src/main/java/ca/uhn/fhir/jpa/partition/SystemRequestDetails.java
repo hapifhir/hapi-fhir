@@ -53,8 +53,14 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.ALL_PARTITIONS_NAME;
  * use the DEFAULT partition when partitioning is enabled.
  */
 public class SystemRequestDetails extends RequestDetails {
+	private FhirContext myFhirContext;
+
 	public SystemRequestDetails() {
 		super(new MyInterceptorBroadcaster());
+	}
+
+	public static SystemRequestDetails forAllPartitions(){
+		return new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
 	private ListMultimap<String, String> myHeaders;
@@ -89,7 +95,11 @@ public class SystemRequestDetails extends RequestDetails {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return null;
+		return myFhirContext;
+	}
+
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
 	}
 
 	@Override

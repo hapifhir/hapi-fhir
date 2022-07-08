@@ -20,7 +20,10 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.binary.svc.BaseBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -32,8 +35,6 @@ import org.hibernate.Session;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -153,7 +154,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
 			IOUtils.copy(inputStream, theOutputStream);
 		} catch (SQLException e) {
-			throw new IOException(e);
+			throw new IOException(Msg.code(1341) + e);
 		}
 	}
 
@@ -162,7 +163,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		try {
 			return IOUtils.toByteArray(theEntity.getBlob().getBinaryStream(), size);
 		} catch (SQLException e) {
-			throw new IOException(e);
+			throw new IOException(Msg.code(1342) + e);
 		}
 	}
 }

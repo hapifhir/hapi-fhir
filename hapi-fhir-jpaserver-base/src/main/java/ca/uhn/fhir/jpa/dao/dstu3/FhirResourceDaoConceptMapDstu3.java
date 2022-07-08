@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -37,19 +39,19 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 
 public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
-		if (theTranslationRequest.hasReverse() && theTranslationRequest.getReverseAsBoolean()) {
-			return myTermConceptMappingSvc.translateWithReverse(theTranslationRequest);
-		}
-
-		return myTermConceptMappingSvc.translate(theTranslationRequest);
+		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
+		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 
@@ -65,7 +67,7 @@ public class FhirResourceDaoConceptMapDstu3 extends BaseHapiFhirResourceDao<Conc
 					org.hl7.fhir.r4.model.ConceptMap converted = (org.hl7.fhir.r4.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(conceptMap, new BaseAdvisor_30_40(false));
 					myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, converted);
 				} catch (FHIRException fe) {
-					throw new InternalErrorException(fe);
+					throw new InternalErrorException(Msg.code(1083) + fe);
 				}
 			} else {
 				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);

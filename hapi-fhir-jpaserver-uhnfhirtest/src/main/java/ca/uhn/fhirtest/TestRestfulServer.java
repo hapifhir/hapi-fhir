@@ -1,5 +1,7 @@
 package ca.uhn.fhirtest;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -9,11 +11,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
-import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -34,6 +37,7 @@ import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4Config;
@@ -173,7 +177,7 @@ public class TestRestfulServer extends RestfulServer {
 				break;
 			}
 			default:
-				throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
+				throw new ServletException(Msg.code(1975) + "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
 
 		/*
@@ -243,7 +247,7 @@ public class TestRestfulServer extends RestfulServer {
 			// Try to fall back in case the property isn't set
 			baseUrl = System.getProperty("fhir.baseurl");
 			if (StringUtils.isBlank(baseUrl)) {
-				throw new ServletException("Missing system property: " + baseUrlProperty);
+				throw new ServletException(Msg.code(1976) + "Missing system property: " + baseUrlProperty);
 			}
 		}
 		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));
@@ -262,14 +266,12 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*
-		 * Bulk Export
+		 * Register some providers
 		 */
 		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
-
-		/*
-		 * $diff operation
-		 */
+		registerProvider(myAppCtx.getBean(ReindexProvider.class));
 		registerProvider(myAppCtx.getBean(DiffProvider.class));
+		registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 		/*
 		 * OpenAPI
@@ -281,6 +283,8 @@ public class TestRestfulServer extends RestfulServer {
 		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
 		registerInterceptor(loggingInterceptor);
 
+		// SQL Capturing
+		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
 	}
 
 	/**

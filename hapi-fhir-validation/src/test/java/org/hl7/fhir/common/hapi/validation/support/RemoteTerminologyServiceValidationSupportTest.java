@@ -3,6 +3,8 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -20,11 +22,14 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -58,9 +63,20 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private static final String CODE_SYSTEM_VERSION_AS_TEXT = "v2.1.12";
 	private static final String CODE = "CODE";
 	private static final String VALUE_SET_URL = "http://value.set/url";
-	private static final String ERROR_MESSAGE = "This is an error message";
+	private static final String TARGET_SYSTEM = "http://target.system/url";
+	private static final String CONCEPT_MAP_URL = "http://concept.map/url";
+	private static final String CONCEPT_MAP_VERSION = "2.1";
+	private static final String SOURCE_VALUE_SET_URL = "http://source.vs.system/url";
+	private static final String TARGET_VALUE_SET_URL = "http://target.vs.system/url";
+	private static final String TARGET_CODE = "CODE";
+	private static final String TARGET_CODE_DISPLAY = "code";
+	private static final boolean REVERSE = true;
+	private static final String EQUIVALENCE_CODE = "equivalent";
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final String ERROR_MESSAGE = "This is an error message";
+	private static final String SUCCESS_MESSAGE = "This is a success message";
+
+	private static FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
@@ -68,6 +84,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	private MyValueSetProvider myValueSetProvider;
 	private RemoteTerminologyServiceValidationSupport mySvc;
 	private MyCodeSystemProvider myCodeSystemProvider;
+	private MyConceptMapProvider myConceptMapProvider;
 
 	@BeforeEach
 	public void before() {
@@ -76,6 +93,9 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		myCodeSystemProvider = new MyCodeSystemProvider();
 		myRestfulServerExtension.getRestfulServer().registerProvider(myCodeSystemProvider);
+
+		myConceptMapProvider = new MyConceptMapProvider();
+		myRestfulServerExtension.getRestfulServer().registerProvider(myConceptMapProvider);
 
 		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 
@@ -275,6 +295,91 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 		assertEquals(null, outcome);
+	}
+
+	@Test
+	public void testTranslateCode_AllInParams_AllOutParams() {
+		myConceptMapProvider.myNextReturnParams = new Parameters();
+		myConceptMapProvider.myNextReturnParams.addParameter("result", true);
+		myConceptMapProvider.myNextReturnParams.addParameter("message", ERROR_MESSAGE);
+
+		TranslateConceptResults expectedResults = new TranslateConceptResults();
+		expectedResults.setResult(true);
+
+		// Add 2 matches
+		addMatchToTranslateRequest(myConceptMapProvider.myNextReturnParams);
+		addMatchToTranslateRequest(myConceptMapProvider.myNextReturnParams);
+
+		List<TranslateConceptResult> translateResults = new ArrayList<>();
+		TranslateConceptResult singleResult = new TranslateConceptResult();
+		singleResult
+			.setEquivalence(EQUIVALENCE_CODE)
+			.setSystem(TARGET_SYSTEM)
+			.setCode(TARGET_CODE)
+			.setConceptMapUrl(CONCEPT_MAP_URL)
+			.setDisplay(TARGET_CODE_DISPLAY);
+		translateResults.add(singleResult);
+		translateResults.add(singleResult);
+		expectedResults.setResults(translateResults);
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding(CODE_SYSTEM, CODE, null));
+
+		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(
+			Collections.unmodifiableList(codeableConcept.getCoding()),
+			TARGET_SYSTEM,
+			CONCEPT_MAP_URL,
+			CONCEPT_MAP_VERSION,
+			SOURCE_VALUE_SET_URL,
+			TARGET_VALUE_SET_URL,
+			null,
+			REVERSE);
+
+		TranslateConceptResults results = mySvc.translateConcept(request);
+
+		assertEquals(results.getResult(), true);
+		assertEquals(results.getResults().size(), 2);
+		for(TranslateConceptResult result : results.getResults()) {
+			assertEquals(singleResult, result);
+		}
+
+		assertTrue(codeableConcept.equalsDeep(myConceptMapProvider.myLastCodeableConcept));
+		assertEquals(TARGET_SYSTEM, myConceptMapProvider.myLastTargetCodeSystem.getValue());
+		assertEquals(CONCEPT_MAP_URL, myConceptMapProvider.myLastConceptMapUrl.getValue());
+		assertEquals(CONCEPT_MAP_VERSION, myConceptMapProvider.myLastConceptMapVersion.getValue());
+		assertEquals(SOURCE_VALUE_SET_URL, myConceptMapProvider.myLastSourceValueSet.getValue());
+		assertEquals(TARGET_VALUE_SET_URL, myConceptMapProvider.myLastTargetValueSet.getValue());
+		assertEquals(REVERSE, myConceptMapProvider.myLastReverse.getValue());
+	}
+
+	@Test
+	public void testTranslateCode_NoInParams_NoOutParams() {
+		myConceptMapProvider.myNextReturnParams = new Parameters();
+
+		List<IBaseCoding> codings = new ArrayList<>();
+		codings.add(new Coding(null, null, null));
+		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(codings, null);
+
+		TranslateConceptResults results = mySvc.translateConcept(request);
+
+		assertEquals(results.getResult(), false);
+		assertEquals(results.getResults().size(), 0);
+
+		assertNull(myConceptMapProvider.myLastCodeableConcept);
+		assertNull(myConceptMapProvider.myLastTargetCodeSystem);
+		assertNull(myConceptMapProvider.myLastConceptMapUrl);
+		assertNull(myConceptMapProvider.myLastConceptMapVersion);
+		assertNull(myConceptMapProvider.myLastSourceValueSet);
+		assertNull(myConceptMapProvider.myLastTargetValueSet);
+		assertNull(myConceptMapProvider.myLastReverse);
+	}
+
+	private void addMatchToTranslateRequest(Parameters params) {
+		Parameters.ParametersParameterComponent matchParam = params.addParameter().setName("match");
+		matchParam.addPart().setName("equivalence").setValue(new CodeType(EQUIVALENCE_CODE));
+		Coding value = new Coding(TARGET_SYSTEM, TARGET_CODE, TARGET_CODE_DISPLAY);
+		matchParam.addPart().setName("concept").setValue(value);
+		matchParam.addPart().setName("source").setValue(new UriType(CONCEPT_MAP_URL));
 	}
 
 	/**
@@ -636,5 +741,50 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 	}
 
+	private static class MyConceptMapProvider implements IResourceProvider {
+		private UriType myLastConceptMapUrl;
+		private StringType myLastConceptMapVersion;
+		private CodeableConcept myLastCodeableConcept;
+		private UriType myLastSourceValueSet;
+		private UriType myLastTargetValueSet;
+		private UriType myLastTargetCodeSystem;
+		private BooleanType myLastReverse;
+
+		private int myInvocationCount;
+		private Parameters myNextReturnParams;
+
+		@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
+			@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
+			@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),
+		})
+		public Parameters translate(
+			HttpServletRequest theServletRequest,
+			@IdParam(optional = true) IdType theId,
+			@OperationParam(name = "url", min = 0, max = 1) UriType theConceptMapUrl,
+			@OperationParam(name = "conceptMapVersion", min = 0, max = 1) StringType theConceptMapVersion,
+			@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theSourceCodeableConcept,
+			@OperationParam(name = "source", min = 0, max = 1) UriType theSourceValueSet,
+			@OperationParam(name = "target", min = 0, max = 1) UriType theTargetValueSet,
+			@OperationParam(name = "targetsystem", min = 0, max = 1) UriType theTargetCodeSystem,
+			@OperationParam(name = "reverse", min = 0, max = 1) BooleanType theReverse,
+			RequestDetails theRequestDetails
+		) {
+			myInvocationCount++;
+			myLastConceptMapUrl = theConceptMapUrl;
+			myLastConceptMapVersion = theConceptMapVersion;
+			myLastCodeableConcept = theSourceCodeableConcept;
+			myLastSourceValueSet = theSourceValueSet;
+			myLastTargetValueSet = theTargetValueSet;
+			myLastTargetCodeSystem = theTargetCodeSystem;
+			myLastReverse = theReverse;
+			return myNextReturnParams;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ConceptMap.class;
+		}
+
+	}
 
 }

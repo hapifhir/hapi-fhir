@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -345,11 +346,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		IdDt id = new IdDt(theUrl);
 		String resourceType = id.getResourceType();
 		if (isBlank(resourceType)) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_INCOMPLETE_URI_FOR_READ, theUrl.getValueAsString()));
+			throw new IllegalArgumentException(Msg.code(1365) + myContext.getLocalizer().getMessage(I18N_INCOMPLETE_URI_FOR_READ, theUrl.getValueAsString()));
 		}
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 		if (def == null) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
+			throw new IllegalArgumentException(Msg.code(1366) + myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theUrl.getValueAsString()));
 		}
 		return read(def.getImplementingClass(), id);
 	}
@@ -413,7 +414,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	@Override
 	public <T extends IBaseResource> T vread(final Class<T> theType, IdDt theId) {
 		if (!theId.hasVersionIdPart()) {
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
+			throw new IllegalArgumentException(Msg.code(1367) + myContext.getLocalizer().getMessage(I18N_NO_VERSION_ID_FOR_VREAD, theId.getValue()));
 		}
 		return doReadOrVRead(theType, theId, true, null, null, false, null, null, null, null, null);
 	}
@@ -544,7 +545,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		protected IBaseResource parseResourceBody(String theResourceBody) {
 			EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(theResourceBody);
 			if (encoding == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+				throw new IllegalArgumentException(Msg.code(1368) + myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			return encoding.newParser(myContext).parseResource(theResourceBody);
 		}
@@ -758,7 +759,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			IIdType id = theResource.getIdElement();
 			Validate.notNull(id, "theResource.getIdElement() can not be null");
 			if (!id.hasResourceType() || !id.hasIdPart()) {
-				throw new IllegalArgumentException("theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
+				throw new IllegalArgumentException(Msg.code(1369) + "theResource.getId() must contain a resource type and logical ID at a minimum (e.g. Patient/1234), found: " + id.getValue());
 			}
 			myId = id;
 			return this;
@@ -768,7 +769,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IDeleteTyped resourceById(IIdType theId) {
 			Validate.notNull(theId, "theId can not be null");
 			if (!theId.hasResourceType() || !theId.hasIdPart()) {
-				throw new IllegalArgumentException("theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: " + theId.getValue());
+				throw new IllegalArgumentException(Msg.code(1370) + "theId must contain a resource type and logical ID at a minimum (e.g. Patient/1234)found: " + theId.getValue());
 			}
 			myId = theId;
 			return this;
@@ -778,11 +779,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IDeleteTyped resourceById(String theResourceType, String theLogicalId) {
 			Validate.notBlank(theResourceType, "theResourceType can not be blank/null");
 			if (myContext.getResourceDefinition(theResourceType) == null) {
-				throw new IllegalArgumentException("Unknown resource type");
+				throw new IllegalArgumentException(Msg.code(1371) + "Unknown resource type");
 			}
 			Validate.notBlank(theLogicalId, "theLogicalId can not be blank/null");
 			if (theLogicalId.contains("/")) {
-				throw new IllegalArgumentException("LogicalId can not contain '/' (should only be the logical ID portion, not a qualified ID)");
+				throw new IllegalArgumentException(Msg.code(1372) + "LogicalId can not contain '/' (should only be the logical ID portion, not a qualified ID)");
 			}
 			myId = new IdDt(theResourceType, theLogicalId);
 			return this;
@@ -800,7 +801,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public IDeleteWithQuery resourceConditionalByType(String theResourceType) {
 			Validate.notBlank(theResourceType, "theResourceType can not be blank/null");
 			if (myContext.getResourceDefinition(theResourceType) == null) {
-				throw new IllegalArgumentException("Unknown resource type: " + theResourceType);
+				throw new IllegalArgumentException(Msg.code(1373) + "Unknown resource type: " + theResourceType);
 			}
 			myResourceType = theResourceType;
 			myConditional = true;
@@ -837,7 +838,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theResourceType, "theResourceType must not be null");
 			myType = myContext.getResourceDefinition(theResourceType);
 			if (myType == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceType));
+				throw new IllegalArgumentException(Msg.code(1374) + myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceType));
 			}
 			return this;
 		}
@@ -930,7 +931,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IHistoryUntyped onInstance(IIdType theId) {
 			if (!theId.hasResourceType()) {
-				throw new IllegalArgumentException("Resource ID does not have a resource type: " + theId.getValue());
+				throw new IllegalArgumentException(Msg.code(1375) + "Resource ID does not have a resource type: " + theId.getValue());
 			}
 			myId = theId;
 			return this;
@@ -995,7 +996,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IGetPageUntyped byUrl(String thePageUrl) {
 			if (isBlank(thePageUrl)) {
-				throw new IllegalArgumentException("thePagingUrl must not be blank or null");
+				throw new IllegalArgumentException(Msg.code(1376) + "thePagingUrl must not be blank or null");
 			}
 			myPageUrl = thePageUrl;
 			return this;
@@ -1010,7 +1011,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theBundle);
 			List<IBase> links = def.getChildByName("link").getAccessor().getValues(theBundle);
 			if (links == null || links.isEmpty()) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
+				throw new IllegalArgumentException(Msg.code(1377) + myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
 			}
 			for (IBase nextLink : links) {
 				BaseRuntimeElementCompositeDefinition linkDef = (BaseRuntimeElementCompositeDefinition) myContext.getElementDefinition(nextLink.getClass());
@@ -1031,7 +1032,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					return (IGetPageTyped<T>) byUrl(url).andReturnBundle(theBundle.getClass());
 				}
 			}
-			throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
+			throw new IllegalArgumentException(Msg.code(1378) + myContext.getLocalizer().getMessage(GenericClient.class, "noPagingLinkFoundInBundle", theWantRel));
 		}
 
 		@Override
@@ -1091,7 +1092,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			// Should not happen
 			if (invocation == null) {
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(1379));
 			}
 
 			IClientResponseHandler handler;
@@ -1227,7 +1228,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else if (theValue instanceof IBaseResource) {
 				parameterElem.getChildByName("resource").getMutator().setValue(parameter, theValue);
 			} else {
-				throw new IllegalArgumentException("Don't know how to handle parameter of type " + theValue.getClass());
+				throw new IllegalArgumentException(Msg.code(1380) + "Don't know how to handle parameter of type " + theValue.getClass());
 			}
 		}
 
@@ -1447,10 +1448,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theOutputParameterType, "theOutputParameterType may not be null");
 			RuntimeResourceDefinition def = myContext.getResourceDefinition(theOutputParameterType);
 			if (def == null) {
-				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
+				throw new IllegalArgumentException(Msg.code(1381) + "theOutputParameterType must refer to a HAPI FHIR Resource type: " + theOutputParameterType.getName());
 			}
 			if (!"Parameters".equals(def.getName())) {
-				throw new IllegalArgumentException("theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
+				throw new IllegalArgumentException(Msg.code(1382) + "theOutputParameterType must refer to a HAPI FHIR Resource type for a resource named " + "Parameters" + " - " + theOutputParameterType.getName()
 					+ " is a resource named: " + def.getName());
 			}
 			myParameters = (IBaseParameters) def.newInstance();
@@ -1587,10 +1588,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		public MethodOutcome execute() {
 
 			if (myPatchType == null) {
-				throw new InvalidRequestException("No patch type supplied, cannot invoke server");
+				throw new InvalidRequestException(Msg.code(1383) + "No patch type supplied, cannot invoke server");
 			}
 			if (myPatchBody == null) {
-				throw new InvalidRequestException("No patch body supplied, cannot invoke server");
+				throw new InvalidRequestException(Msg.code(1384) + "No patch body supplied, cannot invoke server");
 			}
 
 			BaseHttpClientInvocation invocation;
@@ -1600,7 +1601,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				invocation = MethodUtil.createPatchInvocation(myContext, myPatchType, myPatchBody, myResourceType, getParamMap());
 			} else {
 				if (myId == null || myId.hasIdPart() == false) {
-					throw new InvalidRequestException("No ID supplied for resource to patch, can not invoke server");
+					throw new InvalidRequestException(Msg.code(1385) + "No ID supplied for resource to patch, can not invoke server");
 				}
 				invocation = MethodUtil.createPatchInvocation(myContext, myId, myPatchType, myPatchBody);
 			}
@@ -1632,7 +1633,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			} else if (encoding == EncodingEnum.JSON) {
 				myPatchType = PatchTypeEnum.JSON_PATCH;
 			} else {
-				throw new IllegalArgumentException("Unable to determine encoding of patch");
+				throw new IllegalArgumentException(Msg.code(1386) + "Unable to determine encoding of patch");
 			}
 
 			return this;
@@ -1651,7 +1652,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IPatchExecutable withId(IIdType theId) {
 			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
+				throw new NullPointerException(Msg.code(1387) + "theId can not be null");
 			}
 			Validate.notBlank(theId.getIdPart(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
 			Validate.notBlank(theId.getResourceType(), "theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: %s", UrlUtil.sanitizeUrlPart(theId.getValue()));
@@ -1662,7 +1663,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IPatchExecutable withId(String theId) {
 			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
+				throw new NullPointerException(Msg.code(1388) + "theId can not be null");
 			}
 			return withId(new IdDt(theId));
 		}
@@ -1722,11 +1723,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private void processUrl() {
 			String resourceType = myId.getResourceType();
 			if (isBlank(resourceType)) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_INCOMPLETE_URI_FOR_READ, myId));
+				throw new IllegalArgumentException(Msg.code(1389) + myContext.getLocalizer().getMessage(I18N_INCOMPLETE_URI_FOR_READ, myId));
 			}
 			myType = myContext.getResourceDefinition(resourceType);
 			if (myType == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, myId));
+				throw new IllegalArgumentException(Msg.code(1390) + myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, myId));
 			}
 		}
 
@@ -1735,7 +1736,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notNull(theResourceType, "theResourceType must not be null");
 			myType = myContext.getResourceDefinition(theResourceType);
 			if (myType == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceType));
+				throw new IllegalArgumentException(Msg.code(1391) + myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceType));
 			}
 			return this;
 		}
@@ -1745,7 +1746,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			Validate.notBlank(theResourceAsText, "You must supply a value for theResourceAsText");
 			myType = myContext.getResourceDefinition(theResourceAsText);
 			if (myType == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceAsText));
+				throw new IllegalArgumentException(Msg.code(1392) + myContext.getLocalizer().getMessage(I18N_CANNOT_DETEMINE_RESOURCE_TYPE, theResourceAsText));
 			}
 			return this;
 		}
@@ -1858,7 +1859,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 					searchUrl = searchUrl.substring(1);
 				}
 				if (!searchUrl.matches("[a-zA-Z]+($|\\?.*)")) {
-					throw new IllegalArgumentException("Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]");
+					throw new IllegalArgumentException(Msg.code(1393) + "Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]");
 				}
 				int qIndex = searchUrl.indexOf('?');
 				if (qIndex == -1) {
@@ -2039,7 +2040,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IQuery returnBundle(Class theClass) {
 			if (theClass == null) {
-				throw new NullPointerException("theClass must not be null");
+				throw new NullPointerException(Msg.code(1394) + "theClass must not be null");
 			}
 			myReturnBundleType = theClass;
 			return this;
@@ -2150,7 +2151,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			myRawBundle = theBundle;
 			myRawBundleEncoding = EncodingEnum.detectEncodingNoDefault(myRawBundle);
 			if (myRawBundleEncoding == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+				throw new IllegalArgumentException(Msg.code(1395) + myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 		}
 
@@ -2244,6 +2245,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
+		private boolean myIsHistoryRewrite;
+
+		@Override
+		public IUpdateTyped historyRewrite() {
+			myIsHistoryRewrite = true;
+			return this;
+		}
 
 		@Override
 		public IUpdateWithQuery conditional() {
@@ -2279,9 +2287,18 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				}
 
 				if (myId == null || myId.hasIdPart() == false) {
-					throw new InvalidRequestException("No ID supplied for resource to update, can not invoke server");
+					throw new InvalidRequestException(Msg.code(1396) + "No ID supplied for resource to update, can not invoke server");
 				}
-				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+
+				if (myIsHistoryRewrite) {
+					if (!myId.hasVersionIdPart()) {
+						throw new InvalidRequestException(Msg.code(2090) + "ID must contain a history version, found: " + myId.getVersionIdPart());
+					}
+					invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
+					invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+				} else {
+					invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+				}
 			}
 
 			addPreferHeader(myPrefer, invocation);
@@ -2316,10 +2333,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IUpdateExecutable withId(IIdType theId) {
 			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
+				throw new NullPointerException(Msg.code(1397) + "theId can not be null");
 			}
 			if (theId.hasIdPart() == false) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId.getValue());
+				throw new NullPointerException(Msg.code(1398) + "theId must not be blank and must contain an ID, found: " + theId.getValue());
 			}
 			myId = theId;
 			return this;
@@ -2328,10 +2345,10 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public IUpdateExecutable withId(String theId) {
 			if (theId == null) {
-				throw new NullPointerException("theId can not be null");
+				throw new NullPointerException(Msg.code(1399) + "theId can not be null");
 			}
 			if (isBlank(theId)) {
-				throw new NullPointerException("theId must not be blank and must contain an ID, found: " + theId);
+				throw new NullPointerException(Msg.code(1400) + "theId must not be blank and must contain an ID, found: " + theId);
 			}
 			myId = new IdDt(theId);
 			return this;
@@ -2366,7 +2383,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			EncodingEnum enc = EncodingEnum.detectEncodingNoDefault(theResourceRaw);
 			if (enc == null) {
-				throw new IllegalArgumentException(myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
+				throw new IllegalArgumentException(Msg.code(1401) + myContext.getLocalizer().getMessage(GenericClient.class, "cantDetermineRequestType"));
 			}
 			switch (enc) {
 				case XML:
@@ -2490,7 +2507,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				if (nextChar == '?') {
 					haveHadQuestionMark = true;
 				} else if (!Character.isLetter(nextChar)) {
-					throw new IllegalArgumentException("Conditional URL must be in the format \"[ResourceType]?[Params]\" and must not have a base URL - Found: " + theSearchUrl);
+					throw new IllegalArgumentException(Msg.code(1402) + "Conditional URL must be in the format \"[ResourceType]?[Params]\" and must not have a base URL - Found: " + theSearchUrl);
 				}
 				b.append(nextChar);
 			} else {

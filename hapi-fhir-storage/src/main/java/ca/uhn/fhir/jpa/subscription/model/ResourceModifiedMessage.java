@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.model;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -40,6 +41,10 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 	@JsonProperty(value = "subscriptionId", required = false)
 	private String mySubscriptionId;
 
+	@JsonProperty(value = "partitionId", required = false)
+	private RequestPartitionId myPartitionId;
+
+
 	/**
 	 * Constructor
 	 */
@@ -49,10 +54,17 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
+		myPartitionId = RequestPartitionId.defaultPartition();
 	}
 
 	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
+		myPartitionId = RequestPartitionId.defaultPartition();
+	}
+
+	public ResourceModifiedMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+		super(theFhirContext, theNewResource, theOperationType, theRequest);
+		myPartitionId = theRequestPartitionId;
 	}
 
 
@@ -64,12 +76,22 @@ public class ResourceModifiedMessage extends BaseResourceModifiedMessage {
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	public RequestPartitionId getPartitionId() {
+		return myPartitionId;
+	}
+
+	public void setPartitionId(RequestPartitionId thePartitionId) {
+		myPartitionId = thePartitionId;
+	}
+
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("operationType", myOperationType)
 			.append("subscriptionId", mySubscriptionId)
 			.append("payloadId", myPayloadId)
+			.append("partitionId", myPartitionId)
 			.toString();
 	}
 }

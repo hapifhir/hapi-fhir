@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -35,7 +36,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
@@ -55,9 +56,11 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		super.after();
 	}
 

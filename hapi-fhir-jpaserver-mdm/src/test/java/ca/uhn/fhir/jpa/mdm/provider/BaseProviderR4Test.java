@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
+import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -26,9 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
-	MdmProviderDstu3Plus myMdmProvider;
-	@Autowired
-	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
+	protected MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
 	@Autowired
@@ -38,24 +40,37 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	@Autowired
 	private MdmSettings myMdmSettings;
 	@Autowired
+	private MdmControllerHelper myMdmHelper;
+	@Autowired
 	BatchJobHelper myBatchJobHelper;
+	@Autowired
+	Batch2JobHelper myBatch2JobHelper;
+	@Autowired
+	MessageHelper myMessageHelper;
 
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private String defaultScript;
 
 	protected void setMdmRuleJson(String theString) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theString);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
 		myMdmResourceMatcherSvc.init();
 	}
 
 	@BeforeEach
-	public void before() {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmSubmitSvc, myMdmSettings);
+	public void before() throws Exception {
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
+// FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc
 		defaultScript = myMdmSettings.getScriptText();
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		super.after();
@@ -65,12 +80,12 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	protected void clearMdmLinks() {
 		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(null, null, myRequestDetails);
-		myBatchJobHelper.awaitJobExecution(BatchHelperR4.jobIdFromParameters(result));
+		myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 	}
 
 	protected void clearMdmLinks(String theResourceName) {
 		Parameters result = (Parameters) myMdmProvider.clearMdmLinks(getResourceNames(theResourceName), null, myRequestDetails);
-		myBatchJobHelper.awaitJobExecution(BatchHelperR4.jobIdFromParameters(result));
+		myBatch2JobHelper.awaitJobCompletion(BatchHelperR4.jobIdFromBatch2Parameters(result));
 	}
 
 	@Nonnull

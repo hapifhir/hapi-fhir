@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -35,6 +36,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -46,9 +48,15 @@ import java.util.Date;
 
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
+	// TODO GGG DROP this index, and instead use the below one
 	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
+	// v---- this one
+	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
+	//TODO GGG Should i make individual indices for PERSON/TARGET?
+}, indexes = {
+	@Index(name = "IDX_EMPI_MATCH_TGT_VER", columnList = "MATCH_RESULT, TARGET_PID, VERSION")
 })
-public class MdmLink implements IMdmLink {
+public class MdmLink extends BasePartitionable implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;
 	private static final int MATCH_RESULT_LENGTH = 16;
 	private static final int LINK_SOURCE_LENGTH = 16;
@@ -327,6 +335,7 @@ public class MdmLink implements IMdmLink {
 			.append("myHadToCreateNewResource", myHadToCreateNewGoldenResource)
 			.append("myScore", myScore)
 			.append("myRuleCount", myRuleCount)
+			.append("myPartitionId", getPartitionId())
 			.toString();
 	}
 

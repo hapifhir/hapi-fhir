@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
@@ -60,16 +61,16 @@ public class ElementsParameter implements IParameter {
 			retVal.addAll(value);
 			return retVal;
 		} catch (InstantiationException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
+			throw new InternalErrorException(Msg.code(413) + "Failed to instantiate " + myInnerCollectionType, e);
 		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Failed to instantiate " + myInnerCollectionType, e);
+			throw new InternalErrorException(Msg.code(414) + "Failed to instantiate " + myInnerCollectionType, e);
 		}
 	}
 
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
+			throw new ConfigurationException(Msg.code(415) + "Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
 				+ " but can not be a collection of collections");
 		}
 		if (theInnerCollectionType != null) {

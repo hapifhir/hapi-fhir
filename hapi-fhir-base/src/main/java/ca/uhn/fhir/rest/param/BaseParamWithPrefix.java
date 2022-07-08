@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -28,7 +29,10 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 
 	private static final long serialVersionUID = 1L;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParamWithPrefix.class);
-	
+
+
+	public static final String MSG_PREFIX_INVALID_FORMAT = "Invalid date/time/quantity format: ";
+
 	private ParamPrefixEnum myPrefix;
 
 	/**
@@ -57,7 +61,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		}
 
 		if (offset > 0 && theString.length() == offset) {
-			throw new DataFormatException("Invalid date/time format: \"" + theString + "\"");
+			throw new DataFormatException(Msg.code(1940) + MSG_PREFIX_INVALID_FORMAT + "\"" + theString + "\"");
 		}
 
 		String prefix = theString.substring(0, offset);
@@ -87,7 +91,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 					myPrefix = ParamPrefixEnum.EQUAL;
 					break;
 				default :
-					throw new DataFormatException("Invalid prefix: \"" + prefix + "\"");
+					throw new DataFormatException(Msg.code(1941) + "Invalid prefix: \"" + prefix + "\"");
 				}
 				ourLog.warn("Date parameter has legacy prefix '{}' which has been removed from FHIR. This should be replaced with '{}'", prefix, myPrefix.getValue());
 			}

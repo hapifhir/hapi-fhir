@@ -24,14 +24,15 @@ import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -56,12 +58,12 @@ import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import javax.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -70,7 +72,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -104,6 +105,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
 
 	@VisibleForTesting
 	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
@@ -120,19 +123,12 @@ public class SearchParamWithInlineReferencesExtractor {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
+	public void populateFromResource(RequestPartitionId theRequestPartitionId, ResourceIndexedSearchParams theParams, TransactionDetails theTransactionDetails, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest, boolean theFailOnInvalidReference) {
 		extractInlineReferences(theResource, theTransactionDetails, theRequest);
 
-		RequestPartitionId partitionId;
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			partitionId = PartitionablePartitionId.toRequestPartitionId(theEntity.getPartitionId());
-		} else {
-			partitionId = RequestPartitionId.allPartitions();
-		}
+		mySearchParamExtractorService.extractFromResource(theRequestPartitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
 
-		mySearchParamExtractorService.extractFromResource(partitionId, theRequest, theParams, theEntity, theResource, theTransactionDetails, theFailOnInvalidReference);
-
-		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType());
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
 			theParams.findMissingSearchParams(myPartitionSettings, myDaoConfig.getModelConfig(), theEntity, activeSearchParams);
 		}
@@ -183,8 +179,8 @@ public class SearchParamWithInlineReferencesExtractor {
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParam(theParams, theResourceType, theParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
-				ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-				theParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theParam.getId()));
+			ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+			theParams.myComboStringUniques.add(new ResourceIndexedComboStringUnique(theEntity, nextQueryString, theParam.getId()));
 		}
 	}
 
@@ -299,12 +295,11 @@ public class SearchParamWithInlineReferencesExtractor {
 		if (paramsListForCompositePart != null) {
 			paramsListForCompositePart = paramsListForCompositePart
 				.stream()
-				.filter(t->t.getParamName().equals(nextCompositeOf.getName()))
+				.filter(t -> t.getParamName().equals(nextCompositeOf.getName()))
 				.collect(Collectors.toList());
 		}
 		return paramsListForCompositePart;
 	}
-
 
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
@@ -315,12 +310,6 @@ public class SearchParamWithInlineReferencesExtractor {
 	public void setContext(FhirContext theContext) {
 		myContext = theContext;
 	}
-
-
-	@Autowired
-	private MemoryCacheService myMemoryCacheService;
-
-
 
 	/**
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
@@ -354,7 +343,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				RuntimeResourceDefinition matchResourceDef = myContext.getResourceDefinition(resourceTypeString);
 				if (matchResourceDef == null) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlInvalidResourceType", nextId.getValue(), resourceTypeString);
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1090) + msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
@@ -372,12 +361,12 @@ public class SearchParamWithInlineReferencesExtractor {
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
-						throw new ResourceNotFoundException(msg);
+						throw new ResourceNotFoundException(Msg.code(1091) + msg);
 					}
 
 				} else if (matches.size() > 1) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlMultipleMatches", nextId.getValue());
-					throw new PreconditionFailedException(msg);
+					throw new PreconditionFailedException(Msg.code(1092) + msg);
 				} else {
 					match = matches.iterator().next();
 				}
@@ -418,7 +407,7 @@ public class SearchParamWithInlineReferencesExtractor {
 						}
 
 						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
-						throw new PreconditionFailedException(msg);
+						throw new PreconditionFailedException(Msg.code(1093) + msg);
 					}
 				}
 				ourLog.debug("Persisting unique index: {}", next);

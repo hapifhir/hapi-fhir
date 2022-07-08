@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -107,6 +108,7 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -396,7 +398,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		if (resourceMethod == null) {
 			if (isBlank(requestPath)) {
-				throw new InvalidRequestException(myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
+				throw new InvalidRequestException(Msg.code(287) + myFhirContext.getLocalizer().getMessage(RestfulServer.class, "rootRequest"));
 			}
 			throwUnknownFhirOperationException(requestDetails, requestPath, requestType);
 		}
@@ -436,27 +438,27 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
-			count += findResourceMethods(theProvider, supertype);
 			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
+			count += findResourceMethods(theProvider, supertype);
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
-			count += findResourceMethods(theProvider, clazz);
 			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
+			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
-			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
+			throw new ConfigurationException(Msg.code(288) + "Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
 		if (count == 0) {
-			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getName());
+			throw new ConfigurationException(Msg.code(289) + "Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getName());
 		}
 	}
 
 	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
 		int count = 0;
 		for (Class<?> anInterface : interfaces) {
-			count += findResourceMethods(theProvider, anInterface);
 			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+			count += findResourceMethods(theProvider, anInterface);
 		}
 		return count;
 	}
@@ -481,10 +483,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			if (!Modifier.isPublic(m.getModifiers())) {
-				throw new ConfigurationException("Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
+				throw new ConfigurationException(Msg.code(290) + "Method '" + m.getName() + "' is not public, FHIR RESTful methods must be public");
 			}
 			if (Modifier.isStatic(m.getModifiers())) {
-				throw new ConfigurationException("Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
+				throw new ConfigurationException(Msg.code(291) + "Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
 			}
 			ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
@@ -514,7 +516,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						Package pack = annotation.annotationType().getPackage();
 						if (pack.equals(IdParam.class.getPackage())) {
 							if (!allowableParams.contains(annotation.annotationType())) {
-								throw new ConfigurationException("Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
+								throw new ConfigurationException(Msg.code(292) + "Method[" + m.toString() + "] is not allowed to have a parameter annotated with " + annotation);
 							}
 						}
 					}
@@ -606,7 +608,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setETagSupport(ETagSupportEnum theETagSupport) {
 		if (theETagSupport == null) {
-			throw new NullPointerException("theETagSupport can not be null");
+			throw new NullPointerException(Msg.code(293) + "theETagSupport can not be null");
 		}
 		myETagSupport = theETagSupport;
 	}
@@ -680,7 +682,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			.stream()
 			.filter(t -> t instanceof IServerInterceptor)
 			.map(t -> (IServerInterceptor) t)
-			.collect(Collectors.toList());
+			.collect(toList());
 		return Collections.unmodifiableList(retVal);
 	}
 
@@ -934,7 +936,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setServerConformanceProvider(Object theServerConformanceProvider) {
 		if (myStarted) {
-			throw new IllegalStateException("Server is already started");
+			throw new IllegalStateException(Msg.code(294) + "Server is already started");
 		}
 
 		// call the setRestfulServer() method to point the Conformance
@@ -1319,7 +1321,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (elements != null) {
 			for (String next : elements) {
 				if (next.indexOf(':') != -1) {
-					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+					throw new InvalidRequestException(Msg.code(295) + "Invalid _elements value: \"" + next + "\"");
 				}
 			}
 		}
@@ -1328,7 +1330,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (elements != null) {
 			for (String next : elements) {
 				if (next.indexOf(':') != -1) {
-					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+					throw new InvalidRequestException(Msg.code(296) + "Invalid _elements value: \"" + next + "\"");
 				}
 			}
 		}
@@ -1391,7 +1393,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			} catch (Exception e) {
 				ourLog.error("An error occurred while loading request handlers!", e);
-				throw new ServletException("Failed to initialize FHIR Restful server: " + e.getMessage(), e);
+				throw new ServletException(Msg.code(297) + "Failed to initialize FHIR Restful server: " + e.getMessage(), e);
 			}
 
 			myStarted = true;
@@ -1593,7 +1595,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				if (tok.hasMoreTokens()) {
 					String versionString = tok.nextTokenUnescapedAndSanitized();
 					if (id == null) {
-						throw new InvalidRequestException("Don't know how to handle request path: " + theRequestPath);
+						throw new InvalidRequestException(Msg.code(298) + "Don't know how to handle request path: " + theRequestPath);
 					}
 					id.setParts(null, resourceName, id.getIdPart(), UrlUtil.unescape(versionString));
 				} else {
@@ -1601,7 +1603,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			} else if (partIsOperation(nextString)) {
 				if (operation != null) {
-					throw new InvalidRequestException("URL Path contains two operations: " + theRequestPath);
+					throw new InvalidRequestException(Msg.code(299) + "URL Path contains two operations: " + theRequestPath);
 				}
 				operation = nextString;
 			} else {
@@ -1619,7 +1621,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			} else if (secondaryOperation == null) {
 				secondaryOperation = nextString;
 			} else {
-				throw new InvalidRequestException("URL path has unexpected token '" + nextString + "' at the end: " + theRequestPath);
+				throw new InvalidRequestException(Msg.code(300) + "URL path has unexpected token '" + nextString + "' at the end: " + theRequestPath);
 			}
 		}
 
@@ -1704,7 +1706,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
 					if (resourceType == null) {
-						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
+						throw new NullPointerException(Msg.code(301) + "getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
 					}
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
@@ -1903,7 +1905,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
-		throw new ResourceNotFoundException("Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+		List<String> knownResourceTypes = myResourceProviders.stream()
+			.map(t -> t.getResourceType().getSimpleName())
+			.collect(toList());
+		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownResourceTypes);
 	}
 
 	/**
@@ -2041,7 +2046,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
 		OperationOutcomeUtil.addIssue(theFhirContext, oo, "error", message, null, "not-supported");
 
-		throw new InvalidRequestException(message, oo);
+		throw new InvalidRequestException(Msg.code(303) + message, oo);
 	}
 
 	private static boolean partIsOperation(String nextString) {

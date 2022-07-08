@@ -74,6 +74,8 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
+	List<TermConcept> findCodes(String theCodeSystem, List<String> theCodes);
+
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
 	List<FhirVersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
@@ -130,5 +132,11 @@ public interface ITermReadSvc extends IValidationSupport {
 	 * Version independent
 	 */
 	Optional<IBaseResource> readCodeSystemByForcedId(String theForcedId);
+
+	/**
+	 * Version independent
+	 * Recreates freetext indexes for TermConcept and nested TermConceptProperty
+	 */
+	ReindexTerminologyResult reindexTerminology() throws InterruptedException;
 
 }

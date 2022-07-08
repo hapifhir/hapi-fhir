@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -48,7 +49,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private final IChannelNamer myChannelNamer;
-	private Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
+	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
 	public LinkedBlockingChannelFactory(IChannelNamer theChannelNamer) {
 		myChannelNamer = theChannelNamer;
@@ -69,7 +70,10 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		return myChannelNamer;
 	}
 
-	private LinkedBlockingChannel getOrCreateChannel(String theChannelName, int theConcurrentConsumers, IChannelSettings theChannelSettings) {
+	private LinkedBlockingChannel getOrCreateChannel(String theChannelName,
+																	 int theConcurrentConsumers,
+																	 IChannelSettings theChannelSettings) {
+		// TODO - does this need retry settings?
 		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 
 		return myChannels.computeIfAbsent(channelName, t -> {
@@ -78,6 +82,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 
 			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 				.namingPattern(threadNamingPattern)
+				.uncaughtExceptionHandler(uncaughtExceptionHandler(channelName))
 				.daemon(false)
 				.priority(Thread.NORM_PRIORITY)
 				.build();
@@ -90,13 +95,13 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 					queue.put(theRunnable);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
-						" rejected from " + e.toString());
+					throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
+						" rejected from " + e);
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());
 			};
 			ThreadPoolExecutor executor = new ThreadPoolExecutor(
-				1,
+				theConcurrentConsumers,
 				theConcurrentConsumers,
 				0L,
 				TimeUnit.MILLISECONDS,
@@ -106,6 +111,15 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			return new LinkedBlockingChannel(channelName, executor, queue);
 
 		});
+	}
+
+	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler(String theChannelName) {
+		return new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				ourLog.error("Failure handling message in channel {}", theChannelName, e);
+			}
+		};
 	}
 
 

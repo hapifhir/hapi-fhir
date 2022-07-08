@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -71,7 +72,7 @@ public class LoadedFileDescriptors implements Closeable {
 													try {
 														return new FileInputStream(nextTemporaryFile);
 													} catch (FileNotFoundException e) {
-														throw new InternalErrorException(e);
+														throw new InternalErrorException(Msg.code(860) + e);
 													}
 												}
 											});
@@ -88,7 +89,7 @@ public class LoadedFileDescriptors implements Closeable {
 
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(861) + e);
 		}
 
 	}
@@ -131,7 +132,7 @@ public class LoadedFileDescriptors implements Closeable {
 	void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
 		List<String> notFound = notFound(theExpectedFilenameFragments);
 		if (!notFound.isEmpty()) {
-			throw new UnprocessableEntityException("Could not find the following mandatory files in input: " + notFound);
+			throw new UnprocessableEntityException(Msg.code(862) + "Could not find the following mandatory files in input: " + notFound);
 		}
 	}
 
@@ -156,7 +157,7 @@ public class LoadedFileDescriptors implements Closeable {
 			} else {
 				msg = "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
 			}
-			throw new UnprocessableEntityException(msg);
+			throw new UnprocessableEntityException(Msg.code(863) + msg);
 		}
 	}
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -15,13 +16,11 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -35,22 +34,26 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
-
-	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
-
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
 	private EIDHelper myEidHelper;
 	@Autowired
 	private GoldenResourceHelper myGoldenResourceHelper;
+	@Autowired
+	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 	@Test
 	public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {
@@ -157,7 +160,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(externalEid.get(0).getValue(), is(equalTo(sampleEID)));
 	}
 
@@ -211,7 +214,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//We want to make sure the patients were linked to the same Golden Resource.
 		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
-		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
+		Patient sourcePatient = getGoldenResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
@@ -222,7 +225,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
+		assertThat(secondIdentifier.getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"))));
 		assertThat(secondIdentifier.getValue(), is(equalTo("12345")));
 	}
 
@@ -286,6 +289,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		// Patient with "no-mdm" tag is not matched
 		Patient janePatient = buildJanePatient();
 		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
+		String s = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(janePatient);
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}
@@ -396,11 +400,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		IBundleProvider bundle = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 		assertEquals(1, bundle.size());
-		Patient sourcePatient = (Patient) bundle.getResources(0, 1).get(0);
 
-		//assertEquals(Person.IdentityAssuranceLevel.LEVEL2, sourcePatient.getLink().get(0).getAssurance());
-		//assertEquals(Person.IdentityAssuranceLevel.LEVEL1, sourcePatient.getLink().get(1).getAssurance());
-		//assertEquals(Person.IdentityAssuranceLevel.LEVEL1, sourcePatient.getLink().get(2).getAssurance());
 		//TODO GGG MDM: Convert these asserts to checking the MPI_LINK table
 
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH);
@@ -489,7 +489,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testPatientUpdateOverwritesGoldenResourceDataOnChanges() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
-		Patient janeSourcePatient = (Patient) getGoldenResourceFromTargetResource(janePatient);
+		Patient janeSourcePatient = getGoldenResourceFromTargetResource(janePatient);
 
 		//Change Jane's name to paul.
 		Patient patient1 = buildPaulPatient();
@@ -499,7 +499,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertThat(janeSourcePatient, is(sameGoldenResourceAs(janePaulPatient)));
 
 		//Ensure the related GoldenResource was updated with new info.
-		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(janePaulPatient);
+		Patient sourcePatientFromTarget = getGoldenResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 
 		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
@@ -513,7 +513,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		paul.getBirthDateElement().setValueAsString(incorrectBirthdate);
 		paul = createPatientAndUpdateLinks(paul);
 
-		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
+		Patient sourcePatientFromTarget = getGoldenResourceFromTargetResource(paul);
 		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
 
 		String correctBirthdate = "1990-06-28";
@@ -521,7 +521,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		paul = updatePatientAndUpdateLinks(paul);
 
-		sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
+		sourcePatientFromTarget = getGoldenResourceFromTargetResource(paul);
 		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
 	}
@@ -529,33 +529,51 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	// Test Case #3
 	public void testUpdatedEidThatWouldRelinkAlsoCausesPossibleDuplicate() {
-		String EID_1 = "123";
-		String EID_2 = "456";
-
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		Patient originalPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
+		Patient originalPaulGolden = getGoldenResourceFromTargetResource(paul);
 
 		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
-		Patient originalJanePatient = (Patient) getGoldenResourceFromTargetResource(jane);
+		Patient originalJaneGolden = getGoldenResourceFromTargetResource(jane);
 
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);
 		updatePatientAndUpdateLinks(paul);
 
-		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
+		assertThat(originalJaneGolden, is(possibleDuplicateOf(originalPaulGolden)));
+		assertThat(jane, is(sameGoldenResourceAs(paul)));
+	}
+
+	@Test
+	// Test Case #3a
+	public void originalLinkIsNoMatch() {
+		// setup
+		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		Patient originalPaulGolden = getGoldenResourceFromTargetResource(paul);
+
+		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
+		Patient originalJaneGolden = getGoldenResourceFromTargetResource(jane);
+
+		MdmTransactionContext mdmCtx = buildUpdateLinkMdmTransactionContext();
+		myMdmLinkUpdaterSvc.updateLink(originalPaulGolden, paul, NO_MATCH, mdmCtx);
+
+		clearExternalEIDs(paul);
+		addExternalEID(paul, EID_2);
+
+		// execute
+		updatePatientAndUpdateLinks(paul);
+
+		// verify
+		assertThat(originalJaneGolden, is(not(possibleDuplicateOf(originalPaulGolden))));
 		assertThat(jane, is(sameGoldenResourceAs(paul)));
 	}
 
 	@Test
 	public void testSinglyLinkedGoldenResourceThatGetsAnUpdatedEidSimplyUpdatesEID() {
 		//Use Case # 2
-		String EID_1 = "123";
-		String EID_2 = "456";
-
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		Patient originalPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
+		Patient originalPaulGolden = getGoldenResourceFromTargetResource(paul);
 
-		String oldEid = myEidHelper.getExternalEid(originalPaulPatient).get(0).getValue();
+		String oldEid = myEidHelper.getExternalEid(originalPaulGolden).get(0).getValue();
 		assertThat(oldEid, is(equalTo(EID_1)));
 
 		clearExternalEIDs(paul);
@@ -564,8 +582,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		paul = updatePatientAndUpdateLinks(paul);
 		assertNoDuplicates();
 
-		Patient newlyFoundPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
-		assertThat(originalPaulPatient, is(sameGoldenResourceAs(newlyFoundPaulPatient)));
+		Patient newlyFoundPaulPatient = getGoldenResourceFromTargetResource(paul);
+		assertThat(originalPaulGolden, is(sameGoldenResourceAs(newlyFoundPaulPatient)));
 		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPatient).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));
 	}

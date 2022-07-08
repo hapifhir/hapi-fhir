@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
-	private static final IdType libraryId = new IdType("Library", "library-mrp-logic");
 	private static final IdType measureId = new IdType("Measure", "measure-asf");
 	private static final String measure = "Measure/measure-asf";
 	private static final String patient = "Patient/Patient-6529";
@@ -51,7 +50,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
 
 		myPartitionHelper.clear();
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "subject",
 			patient, null, null, null, null, null, null, myRequestDetails);
 
 		// Assert it worked
@@ -68,7 +67,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
 
 		myPartitionHelper.clear();
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "patient",
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "subject",
 			patient, null, null, null, null, null, null, myRequestDetails);
 
 		// Assert it worked

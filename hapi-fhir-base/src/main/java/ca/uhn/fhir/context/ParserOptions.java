@@ -22,7 +22,12 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.parser.IParser;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This object supplies default configuration to all {@link IParser parser} instances
@@ -37,31 +42,40 @@ public class ParserOptions {
 	private boolean myStripVersionsFromReferences = true;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths = Collections.emptySet();
 	private boolean myOverrideResourceIdWithBundleEntryFullUrl = true;
+	private boolean myAutoContainReferenceTargetsWithNoId = true;
 
 	/**
-	 * If supplied value(s), any resource references at the specified paths will have their
-	 * resource versions encoded instead of being automatically stripped during the encoding
-	 * process. This setting has no effect on the parsing process.
+	 * If set to {@literal true} (which is the default), contained resources may be specified by
+	 * populating the target (contained) resource directly in {@link org.hl7.fhir.instance.model.api.IBaseReference#setReference(String)}
+	 * and the parser will automatically locate it and insert it into <code>Resource.contained</code> when
+	 * serializing. This is convenient, but also imposes a performance cost when serializing large numbers
+	 * of resources, so this can be disabled if it is not needed.
 	 * <p>
-	 * This method provides a finer-grained level of control than {@link #setStripVersionsFromReferences(boolean)}
-	 * and any paths specified by this method will be encoded even if {@link #setStripVersionsFromReferences(boolean)}
-	 * has been set to <code>true</code> (which is the default)
+	 * If disabled, only resources that are directly placed in <code>Resource.contained</code> will be
+	 * serialized.
 	 * </p>
 	 *
-	 * @param thePaths A collection of paths for which the resource versions will not be removed automatically
-	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
-	 *                 only resource name and field names with dots separating is allowed here (no repetition
-	 *                 indicators, FluentPath expressions, etc.)
-	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
-	 * @see #setStripVersionsFromReferences(boolean)
+	 * @since 5.7.0
 	 */
-	public ParserOptions setDontStripVersionsFromReferencesAtPaths(String... thePaths) {
-		if (thePaths == null) {
-			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
-		} else {
-			setDontStripVersionsFromReferencesAtPaths(Arrays.asList(thePaths));
-		}
-		return this;
+	public boolean isAutoContainReferenceTargetsWithNoId() {
+		return myAutoContainReferenceTargetsWithNoId;
+	}
+
+	/**
+	 * If set to {@literal true} (which is the default), contained resources may be specified by
+	 * populating the target (contained) resource directly in {@link org.hl7.fhir.instance.model.api.IBaseReference#setReference(String)}
+	 * and the parser will automatically locate it and insert it into <code>Resource.contained</code> when
+	 * serializing. This is convenient, but also imposes a performance cost when serializing large numbers
+	 * of resources, so this can be disabled if it is not needed.
+	 * <p>
+	 * If disabled, only resources that are directly placed in <code>Resource.contained</code> will be
+	 * serialized.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public void setAutoContainReferenceTargetsWithNoId(boolean theAllowAutoContainedReferences) {
+		myAutoContainReferenceTargetsWithNoId = theAllowAutoContainedReferences;
 	}
 
 	/**
@@ -107,6 +121,32 @@ public class ParserOptions {
 	 */
 	public Set<String> getDontStripVersionsFromReferencesAtPaths() {
 		return myDontStripVersionsFromReferencesAtPaths;
+	}
+
+	/**
+	 * If supplied value(s), any resource references at the specified paths will have their
+	 * resource versions encoded instead of being automatically stripped during the encoding
+	 * process. This setting has no effect on the parsing process.
+	 * <p>
+	 * This method provides a finer-grained level of control than {@link #setStripVersionsFromReferences(boolean)}
+	 * and any paths specified by this method will be encoded even if {@link #setStripVersionsFromReferences(boolean)}
+	 * has been set to <code>true</code> (which is the default)
+	 * </p>
+	 *
+	 * @param thePaths A collection of paths for which the resource versions will not be removed automatically
+	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *                 only resource name and field names with dots separating is allowed here (no repetition
+	 *                 indicators, FluentPath expressions, etc.)
+	 * @return Returns a reference to <code>this</code> parser so that method calls can be chained together
+	 * @see #setStripVersionsFromReferences(boolean)
+	 */
+	public ParserOptions setDontStripVersionsFromReferencesAtPaths(String... thePaths) {
+		if (thePaths == null) {
+			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
+		} else {
+			setDontStripVersionsFromReferencesAtPaths(Arrays.asList(thePaths));
+		}
+		return this;
 	}
 
 	/**

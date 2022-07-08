@@ -21,11 +21,10 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
-import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
@@ -39,30 +38,20 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
-import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_OFFSET;
@@ -72,9 +61,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private static final Logger ourLog = getLogger(MdmProviderDstu3Plus.class);
 
 	private final IMdmControllerSvc myMdmControllerSvc;
-	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
+	private final MdmControllerHelper myMdmControllerHelper;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -85,74 +74,36 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public MdmProviderDstu3Plus(FhirContext theFhirContext, IMdmControllerSvc theMdmControllerSvc, IMdmMatchFinderSvc theMdmMatchFinderSvc, IMdmSubmitSvc theMdmSubmitSvc, IMdmSettings theIMdmSettings) {
+	public MdmProviderDstu3Plus(FhirContext theFhirContext,
+										 IMdmControllerSvc theMdmControllerSvc,
+										 MdmControllerHelper theMdmHelper,
+										 IMdmSubmitSvc theMdmSubmitSvc,
+										 IMdmSettings theIMdmSettings) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
-		myMdmMatchFinderSvc = theMdmMatchFinderSvc;
+		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myMdmSettings = theIMdmSettings;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
-	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient) {
+	public IBaseBundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1, typeName = "Patient") IAnyResource thePatient,
+									 RequestDetails theRequestDetails) {
 		if (thePatient == null) {
-			throw new InvalidRequestException("resource may not be null");
+			throw new InvalidRequestException(Msg.code(1498) + "resource may not be null");
 		}
-		return getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(thePatient, "Patient", theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_MATCH)
 	public IBaseBundle serverMatch(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
-											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType
+											 @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
+											 RequestDetails theRequestDetails
 	) {
 		if (theResource == null) {
-			throw new InvalidRequestException("resource may not be null");
+			throw new InvalidRequestException(Msg.code(1499) + "resource may not be null");
 		}
-		return getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString());
-	}
-
-	/**
-	 * Helper method which will return a bundle of all Matches and Possible Matches.
-	 */
-	private IBaseBundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
-		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
-		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
-
-		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.setBundleField("type", "searchset");
-		builder.setBundleField("id", UUID.randomUUID().toString());
-		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
-
-		IBaseBundle retVal = builder.getBundle();
-		for (MatchedTarget next : matches) {
-			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
-			if (!shouldKeepThisEntry) {
-				continue;
-			}
-
-			IBase entry = builder.addEntry();
-			builder.addToEntry(entry, "resource", next.getTarget());
-
-			IBaseBackboneElement search = builder.addSearch(entry);
-			toBundleEntrySearchComponent(builder, search, next);
-		}
-		return retVal;
-	}
-
-
-	public IBaseBackboneElement toBundleEntrySearchComponent(BundleBuilder theBuilder, IBaseBackboneElement theSearch, MatchedTarget theMatchedTarget) {
-		theBuilder.setSearchField(theSearch, "mode", "match");
-		double score = theMatchedTarget.getMatchResult().getNormalizedScore();
-		theBuilder.setSearchField(theSearch, "score",
-			theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
-
-		String matchGrade = getMatchGrade(theMatchedTarget);
-		IBaseDatatype codeType = (IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
-		IBaseExtension searchExtension = theSearch.addExtension();
-		searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-		searchExtension.setValue(codeType);
-
-		return theSearch;
+		return myMdmControllerHelper.getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueAsString(), theRequestDetails);
 	}
 
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
@@ -202,7 +153,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		List<String> resourceNames = new ArrayList<>();
 
-
 		if (theResourceNames != null) {
 			resourceNames.addAll(theResourceNames.stream().map(IPrimitiveType::getValue).collect(Collectors.toList()));
 			validateResourceNames(resourceNames);
@@ -210,14 +160,13 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			resourceNames.addAll(myMdmSettings.getMdmRules().getMdmTypes());
 		}
 
-		List<String> urls = resourceNames.stream().map(s -> s + "?").collect(Collectors.toList());
-		return myMdmControllerSvc.submitMdmClearJob(urls, theBatchSize, theRequestDetails);
+		return myMdmControllerSvc.submitMdmClearJob(resourceNames, theBatchSize, theRequestDetails);
 	}
 
 	private void validateResourceNames(List<String> theResourceNames) {
 		for (String resourceName : theResourceNames) {
 			if (!myMdmSettings.isSupportedMdmType(resourceName)) {
-				throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
+				throw new InvalidRequestException(Msg.code(1500) + ProviderConstants.OPERATION_MDM_CLEAR + " does not support resource type: " + resourceName);
 			}
 		}
 	}
@@ -235,13 +184,13 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 												 @Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
 												 @OperationParam(name = Constants.PARAM_COUNT, min = 0, max = 1, typeName = "integer")
 														 IPrimitiveType<Integer> theCount,
-
 												 ServletRequestDetails theRequestDetails) {
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 		Page<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
-				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)), mdmPageRequest);
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)),
+			mdmPageRequest, theRequestDetails);
 
 		return parametersFromMdmLinks(mdmLinkJson, true, theRequestDetails, mdmPageRequest);
 	}
@@ -258,7 +207,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 		MdmPageRequest mdmPageRequest = new MdmPageRequest(theOffset, theCount, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest);
+		Page<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, null), mdmPageRequest, theRequestDetails);
 
 		return parametersFromMdmLinks(possibleDuplicates, false, theRequestDetails, mdmPageRequest);
 	}
@@ -290,9 +239,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
 		if (resourceType != null) {
-			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria);
+			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
 		} else {
-			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria);
+			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
 		}
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
@@ -308,7 +257,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -319,7 +268,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
+		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -329,7 +278,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -340,7 +289,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
+		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -351,17 +300,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, theCount);
 		return retval;
-	}
-
-	@Nonnull
-	protected String getMatchGrade(MatchedTarget theTheMatchedTarget) {
-		String retVal = "probable";
-		if (theTheMatchedTarget.isMatch()) {
-			retVal = "certain";
-		} else if (theTheMatchedTarget.isPossibleMatch()) {
-			retVal = "possible";
-		}
-		return retVal;
 	}
 
 	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId) {

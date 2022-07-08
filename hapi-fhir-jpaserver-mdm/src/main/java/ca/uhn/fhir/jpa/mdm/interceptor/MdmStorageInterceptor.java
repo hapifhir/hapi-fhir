@@ -20,30 +20,29 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,7 +53,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmStorageInterceptor.class);
 
 	@Autowired
-	private ExpungeEverythingService myExpungeEverythingService;
+	private IExpungeEverythingService myExpungeEverythingService;
 	@Autowired
 	private MdmLinkDeleteSvc myMdmLinkDeleteSvc;
 	@Autowired
@@ -156,7 +155,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockEidChange() {
-		throw new ForbiddenOperationException("While running with EID updates disabled, EIDs may not be updated on source resources");
+		throw new ForbiddenOperationException(Msg.code(763) + "While running with EID updates disabled, EIDs may not be updated on source resources");
 	}
 
 	/*
@@ -181,7 +180,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 * We assume that if we have RequestDetails, then this was an HTTP request and not an internal one.
 	 */
 	private boolean isInternalRequest(RequestDetails theRequestDetails) {
-		return theRequestDetails == null;
+		return theRequestDetails == null || theRequestDetails instanceof SystemRequestDetails;
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {
@@ -199,15 +198,15 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockMdmManagedTagChange() {
-		throw new ForbiddenOperationException("The " + MdmConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
+		throw new ForbiddenOperationException(Msg.code(764) + "The " + MdmConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
 	}
 
 	private void throwModificationBlockedByMdm() {
-		throw new ForbiddenOperationException("Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: " + MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
+		throw new ForbiddenOperationException(Msg.code(765) + "Cannot create or modify Resources that are managed by MDM. This resource contains a tag with one of these systems: " + MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS + " or " + MdmConstants.SYSTEM_MDM_MANAGED);
 	}
 
 	private void throwBlockMultipleEids() {
-		throw new ForbiddenOperationException("While running with multiple EIDs disabled, source resources may have at most one EID.");
+		throw new ForbiddenOperationException(Msg.code(766) + "While running with multiple EIDs disabled, source resources may have at most one EID.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {
@@ -217,7 +216,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING)
 	public void expungeAllMdmLinks(AtomicInteger theCounter) {
 		ourLog.debug("Expunging all MdmLink records");
-		theCounter.addAndGet(myExpungeEverythingService.expungeEverythingByType(MdmLink.class));
+		theCounter.addAndGet(((ExpungeEverythingService)myExpungeEverythingService).expungeEverythingByType(MdmLink.class));
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)

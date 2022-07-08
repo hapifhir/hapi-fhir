@@ -4,10 +4,13 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -56,9 +59,9 @@ public class DaoConfig {
 	 */
 	public static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	/**
-	 * Default value for {@link #setTranslationCachesExpireAfterWriteInMinutes(Long)}: 60 minutes
+	 * Default value for {@link #myTranslationCachesExpireAfterWriteInMinutes}: 60 minutes
 	 *
-	 * @see #setTranslationCachesExpireAfterWriteInMinutes(Long)
+	 * @see #myTranslationCachesExpireAfterWriteInMinutes
 	 */
 	public static final Long DEFAULT_TRANSLATION_CACHES_EXPIRE_AFTER_WRITE_IN_MINUTES = 60L;
 	/**
@@ -264,19 +267,57 @@ public class DaoConfig {
 	/**
 	 * @since 5.6.0
 	 */
-	private String myElasicSearchIndexPrefix;
+	private String myHSearchIndexPrefix;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 
 	/**
-	 * Activates the new Lucene/Elasticsearch indexing of search parameters.
+	 * Activates the new HSearch indexing of search parameters.
 	 * When active, string, token, and reference parameters will be indexed and
 	 * queried within Hibernate Search.
 	 *
 	 * @since 5.6.0
 	 * TODO mb test more with this true
 	 */
-	private boolean myAdvancedLuceneIndexing = false;
+	private boolean myAdvancedHSearchIndexing = false;
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	private int myInlineResourceTextBelowSize = 0;
+
+	/**
+	 * @since 5.7.0
+	 */
+	private boolean myStoreResourceInHSearchIndex;
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	private boolean myConcurrentBundleValidation;
+
+	/**
+	 * Since 6.0.0
+	 */
+	private boolean myAllowAutoInflateBinaries = true;
+	/**
+	 * Since 6.0.0
+	 */
+	private long myAutoInflateBinariesMaximumBytes = 10 * FileUtils.ONE_MB;
+
+	/**
+	 * Since 6.0.0
+	 */
+	private int myBulkExportFileRetentionPeriodHours = 2;
+
+	/**
+	 * Since 6.1.0
+	 */
+	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
 	/**
 	 * Constructor
@@ -298,6 +339,28 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	public int getInlineResourceTextBelowSize() {
+		return myInlineResourceTextBelowSize;
+	}
+
+	/**
+	 * If set to a positive number, any resources with a character length at or below the given number
+	 * of characters will be stored inline in the <code>HFJ_RES_VER</code> table instead of using a
+	 * separate LOB column.
+	 *
+	 * @since 5.7.0
+	 */
+	public void setInlineResourceTextBelowSize(int theInlineResourceTextBelowSize) {
+		myInlineResourceTextBelowSize = theInlineResourceTextBelowSize;
 	}
 
 	/**
@@ -411,7 +474,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
-	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * indexing Observation resources. This operation involves creating a special set of tables in hsearch for
 	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
 	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
 	 *
@@ -423,7 +486,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
-	 * indexing Observation resources. This operation involves creating a special set of tables in ElasticSearch for
+	 * indexing Observation resources. This operation involves creating a special set of tables in hsearch for
 	 * discovering Observation resources. Enabling this setting increases the amount of storage space required, and can
 	 * slow write operations, but can be very useful for searching for collections of Observations for some applications.
 	 *
@@ -2653,24 +2716,200 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * Sets a prefix for any indexes created when interacting with hsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
 	 * @since 5.6.0
 	 */
-	public String getElasticSearchIndexPrefix() {
-		return myElasicSearchIndexPrefix;
+	public String getHSearchIndexPrefix() {
+		return myHSearchIndexPrefix;
 	}
 
 	/**
-	 * Sets a prefix for any indexes created when interacting with elasticsearch. This will apply to fulltext search indexes
+	 * Sets a prefix for any indexes created when interacting with hsearch. This will apply to fulltext search indexes
 	 * and terminology expansion indexes.
 	 *
 	 * @since 5.6.0
 	 */
-	public void setElasticSearchIndexPrefix(String thePrefix) {
-		myElasicSearchIndexPrefix = thePrefix;
+	public void setHSearchIndexPrefix(String thePrefix) {
+		myHSearchIndexPrefix = thePrefix;
 	}
+
+	/**
+	 * Is HSearch indexing enabled beyond _contains or _text?
+	 *
+	 * @since 5.6.0
+	 */
+	public boolean isAdvancedHSearchIndexing() {
+		return myAdvancedHSearchIndexing;
+	}
+
+	/**
+	 * Enable/disable HSearch indexing enabled beyond _contains or _text.
+	 * <p>
+	 * String, token, and reference parameters can be indexed in HSearch.
+	 * This extends token search to support :text searches, as well as supporting
+	 * :contains and :text on string parameters.
+	 *
+	 * @since 5.6.0
+	 */
+	public void setAdvancedHSearchIndexing(boolean theAdvancedHSearchIndexing) {
+		this.myAdvancedHSearchIndexing = theAdvancedHSearchIndexing;
+	}
+
+	/**
+	 * Is storing of Resource in HSearch index enabled?
+	 *
+	 * @since 5.7.0
+	 */
+	public boolean isStoreResourceInHSearchIndex() {
+		return myStoreResourceInHSearchIndex;
+	}
+
+	/**
+	 * <p>
+	 * Enable Resource to be stored inline with HSearch index mappings.
+	 * This is useful in cases where after performing a search operation the resulting resource identifiers don't have to be
+	 * looked up in the persistent storage, but rather the inline stored resource can be used instead.
+	 * </p>
+	 * <p>
+	 * For e.g - Storing Observation resource in HSearch index would be useful when performing
+	 * <a href="https://www.hl7.org/fhir/observation-operation-lastn.html">$lastn</a> operation.
+	 * </p>
+	 *
+	 * @since 5.7.0
+	 */
+	public void setStoreResourceInHSearchIndex(boolean theStoreResourceInHSearchIndex) {
+		myStoreResourceInHSearchIndex = theStoreResourceInHSearchIndex;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public boolean isConcurrentBundleValidation() {
+		return myConcurrentBundleValidation;
+	}
+
+	/**
+	 * @see FhirValidator#isConcurrentBundleValidation()
+	 * @since 5.7.0
+	 */
+	public DaoConfig setConcurrentBundleValidation(boolean theConcurrentBundleValidation) {
+		myConcurrentBundleValidation = theConcurrentBundleValidation;
+		return this;
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 7.5.0
+	 */
+	public boolean isCrossPartitionSubscription() {
+		return this.myModelConfig.isCrossPartitionSubscription();
+	}
+
+	/**
+	 * This setting indicates if a cross-partition subscription can be made.
+	 *
+	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
+	 * @since 5.7.0
+	 */
+	public void setCrossPartitionSubscription(boolean theAllowCrossPartitionSubscription) {
+		this.myModelConfig.setCrossPartitionSubscription(theAllowCrossPartitionSubscription);
+	}
+
+
+	/**
+	 *
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @return whether binaries are allowed to be automatically inflated from external storage during requests.
+	 */
+	public boolean isAllowAutoInflateBinaries() {
+		return myAllowAutoInflateBinaries;
+	}
+
+
+	/**
+	 * This setting indicates whether binaries are allowed to be automatically inflated from external storage during requests.
+	 * Default is true.
+	 *
+	 * @since 6.0.0
+	 * @param theAllowAutoDeExternalizingBinaries the value to set.
+	 */
+	public void setAllowAutoInflateBinaries(boolean theAllowAutoDeExternalizingBinaries) {
+		myAllowAutoInflateBinaries = theAllowAutoDeExternalizingBinaries;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @param theAutoInflateBinariesMaximumBytes the maximum number of bytes to de-externalize.
+	 */
+	public void setAutoInflateBinariesMaximumBytes(long theAutoInflateBinariesMaximumBytes) {
+		myAutoInflateBinariesMaximumBytes = theAutoInflateBinariesMaximumBytes;
+	}
+
+	/**
+	 * This setting controls how many bytes of binaries will be automatically inflated from external storage during requests.
+	 * which contain binary data.
+	 * Default is 10MB
+	 *
+	 * @since 6.0.0
+	 * @return the number of bytes to de-externalize during requests.
+	 */
+	public long getAutoInflateBinariesMaximumBytes() {
+		return myAutoInflateBinariesMaximumBytes;
+	}
+
+
+	/**
+	 * This setting controls how long Bulk Export collection entities will be retained after job start.
+	 * Default is 2 hours. Setting this value to 0 or less will cause Bulk Export collection entities to never be expired.
+	 *
+	 * @since 6.0.0
+	 */
+    public int getBulkExportFileRetentionPeriodHours() {
+        return myBulkExportFileRetentionPeriodHours;
+	 }
+
+	/**
+	 * This setting controls how long Bulk Export collection entities will be retained after job start.
+	 * Default is 2 hours. Setting this value to 0 or less will cause Bulk Export collection entities to never be expired.
+	 *
+	 * @since 6.0.0
+	 */
+	public void setBulkExportFileRetentionPeriodHours(int theBulkExportFileRetentionPeriodHours) {
+		myBulkExportFileRetentionPeriodHours = theBulkExportFileRetentionPeriodHours;
+	}
+
+	/**
+	 * This setting indicates whether updating the history of a resource is allowed.
+	 * Default is false.
+	 *
+	 * @since 6.1.0
+	 */
+	public boolean isUpdateWithHistoryRewriteEnabled() {
+		return myUpdateWithHistoryRewriteEnabled;
+	}
+
+	/**
+	 * This setting indicates whether updating the history of a resource is allowed.
+	 * Default is false.
+	 *
+	 * @since 6.1.0
+	 */
+	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
+		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
+	}
+
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
@@ -2693,28 +2932,6 @@ public class DaoConfig {
 		public boolean isStoreRequestId() {
 			return myStoreRequestId;
 		}
-	}
-
-	/**
-	 * Is lucene/hibernate indexing enabled beyond _contains or _text?
-	 *
-	 * @since 5.6.0
-	 */
-	public boolean isAdvancedLuceneIndexing() {
-		return myAdvancedLuceneIndexing;
-	}
-
-	/**
-	 * Enable/disable lucene/hibernate indexing enabled beyond _contains or _text.
-	 *
-	 * String, token, and reference parameters can be indexed in Lucene.
-	 * This extends token search to support :text searches, as well as supporting
-	 * :contains and :text on string parameters.
-	 *
-	 * @since 5.6.0
-	 */
-	public void setAdvancedLuceneIndexing(boolean theAdvancedLuceneIndexing) {
-		this.myAdvancedLuceneIndexing = theAdvancedLuceneIndexing;
 	}
 
 
@@ -2784,7 +3001,7 @@ public class DaoConfig {
 		NON_VERSIONED,
 
 		/**
-		 * Tags are stored directly in the resource body (in the {@link ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable}
+		 * Tags are stored directly in the resource body (in the {@link ResourceHistoryTable}
 		 * entry for the resource, meaning that they are not indexed separately, and are versioned with the rest
 		 * of the resource.
 		 */

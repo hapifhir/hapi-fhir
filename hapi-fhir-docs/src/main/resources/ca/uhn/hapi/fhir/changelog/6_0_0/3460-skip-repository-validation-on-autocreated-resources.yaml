@@ -1,0 +1,9 @@
+---
+type: change
+issue: 3460
+jira: SMILE-3863
+backport: 5.7.1
+title: "Previously, during RepositoryValidation, we would perform validation on resources created via DaoConfig's `setAutoCreatePlaceholderReferenceTargets` property. This caused validation failures on placeholder resources
+as they do not conform to any profile. This has been changed, and Repository Validation will not occur on any resource containing an extension with URL http://hapifhir.io/fhir/StructureDefinition/resource-placeholder`."
+
+

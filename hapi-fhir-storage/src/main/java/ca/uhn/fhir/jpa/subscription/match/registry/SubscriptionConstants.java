@@ -46,4 +46,5 @@ public class SubscriptionConstants {
 	public static final String SUBSCRIPTION_TYPE = "Subscription.channel.type";
 	public static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
 	public static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
+	public static final String ERROR_STATUS = Subscription.SubscriptionStatus.ERROR.toCode();
 }

@@ -21,9 +21,11 @@ package ca.uhn.fhir.rest.param;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -38,7 +40,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	private boolean myExact;
 	private String myValue;
 
-	private Boolean myMdmExpand;
+	private Boolean myNicknameExpand;
+
 
 	/**
 	 * Constructor
@@ -77,12 +80,12 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		return ParameterUtil.escape(myValue);
 	}
 
-	public boolean isMdmExpand() {
-		return myMdmExpand != null && myMdmExpand;
+	public boolean isNicknameExpand() {
+		return myNicknameExpand != null && myNicknameExpand;
 	}
 
-	public StringParam setMdmExpand(boolean theMdmExpand) {
-		myMdmExpand = theMdmExpand;
+	public StringParam setNicknameExpand(boolean theNicknameExpand) {
+		myNicknameExpand = theNicknameExpand;
 		return this;
 	}
 
@@ -98,6 +101,15 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
+		if (Constants.PARAMQUALIFIER_NICKNAME.equals(theQualifier)) {
+			if ("name".equals(theParamName) || "given".equals(theParamName)) {
+				myNicknameExpand = true;
+				theQualifier = "";
+			} else {
+				throw new InvalidRequestException(Msg.code(2077) + "Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameters");
+			}
+		}
+
 		if (Constants.PARAMQUALIFIER_STRING_EXACT.equals(theQualifier)) {
 			setExact(true);
 		} else {

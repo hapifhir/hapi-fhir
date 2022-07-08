@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -81,6 +82,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 				// Quote the column names as "SYSTEM" is a reserved word in MySQL
 				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (`" + getColumnName() + "`) references " + myForeignTableName + " (`" + myForeignColumnName + "`)";
 				break;
+			case COCKROACHDB_21_1:
 			case POSTGRES_9_4:
 			case DERBY_EMBEDDED:
 			case H2_EMBEDDED:
@@ -89,7 +91,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask {
 				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (" + getColumnName() + ") references " + myForeignTableName;
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(68));
 		}
 
 

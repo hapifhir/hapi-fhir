@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -36,6 +37,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
@@ -149,14 +151,14 @@ public class MdmMessageHandler implements MessageHandler {
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an MdmTransactionContext for {}", theMsg.getOperationType());
-				throw new InvalidRequestException("We can't handle non-update/create operations in MDM");
+				throw new InvalidRequestException(Msg.code(734) + "We can't handle non-update/create operations in MDM");
 		}
 		return new MdmTransactionContext(transactionLogMessages, mdmOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
-			throw new IllegalStateException("Unsupported resource type submitted to MDM matching queue: " + theResourceType);
+			throw new IllegalStateException(Msg.code(735) + "Unsupported resource type submitted to MDM matching queue: " + theResourceType);
 		}
 	}
 
@@ -165,7 +167,9 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
-		return (IAnyResource) theMsg.getNewPayload(myFhirContext);
+		IBaseResource newPayload = theMsg.getNewPayload(myFhirContext);
+		newPayload.setUserData(Constants.RESOURCE_PARTITION_ID, theMsg.getPartitionId());
+		return (IAnyResource) newPayload;
 	}
 
 	private void handleUpdateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {

@@ -1,0 +1,146 @@
+{
+	"resourceType": "StructureDefinition",
+	"meta": {
+		"versionId": "25",
+		"lastUpdated": "2021-02-19T07:29:29.911+00:00"
+	},
+	"extension": [
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
+			"valueString": "Base.Individuals"
+		},
+		{
+			"url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category",
+			"valueCode": "patient"
+		}
+	],
+	"url": "https://example.com/StructureDefinition/Patient-v1",
+	"version": "1",
+	"name": "EXAMPLE_Patient_v1",
+	"title": "EXAMPLE Patient",
+	"status": "active",
+	"date": "2021-01-28",
+	"description": "A profile on the Patient resource for EXAMPLE Project",
+	"purpose": "This profile is created for the EXAMPLE Integration project.",
+	"fhirVersion": "4.0.1",
+	"mapping": [
+		{
+			"identity": "rim",
+			"uri": "http://hl7.org/v3",
+			"name": "RIM Mapping"
+		},
+		{
+			"identity": "cda",
+			"uri": "http://hl7.org/v3/cda",
+			"name": "CDA (R2)"
+		},
+		{
+			"identity": "w5",
+			"uri": "http://hl7.org/fhir/fivews",
+			"name": "FiveWs Pattern Mapping"
+		},
+		{
+			"identity": "v2",
+			"uri": "http://hl7.org/v2",
+			"name": "HL7 v2 Mapping"
+		},
+		{
+			"identity": "loinc",
+			"uri": "http://loinc.org",
+			"name": "LOINC code for the element"
+		}
+	],
+	"kind": "resource",
+	"abstract": false,
+	"type": "Patient",
+	"baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+	"derivation": "constraint",
+	"differential": {
+		"element": [
+			{
+				"id": "Patient.meta",
+				"path": "Patient.meta",
+				"min": 1
+			},
+			{
+				"id": "Patient.meta.tag",
+				"path": "Patient.meta.tag",
+				"min": 3,
+				"max": "4"
+			},
+			{
+				"id": "Patient.meta.tag.system",
+				"path": "Patient.meta.tag.system",
+				"min": 1
+			},
+			{
+				"id": "Patient.meta.tag.code",
+				"path": "Patient.meta.tag.code",
+				"min": 1
+			},
+			{
+				"id": "Patient.meta.tag.display",
+				"path": "Patient.meta.tag.display",
+				"min": 1
+			},
+			{
+				"id": "Patient.identifier",
+				"path": "Patient.identifier",
+				"min": 1
+			},
+			{
+				"id": "Patient.identifier.system",
+				"path": "Patient.identifier.system",
+				"min": 1
+			},
+			{
+				"id": "Patient.identifier.value",
+				"path": "Patient.identifier.value",
+				"min": 1
+			},
+			{
+				"id": "Patient.active",
+				"path": "Patient.active",
+				"min": 1
+			},
+			{
+				"id": "Patient.name",
+				"path": "Patient.name",
+				"min": 1
+			},
+			{
+				"id": "Patient.name.family",
+				"path": "Patient.name.family",
+				"min": 1
+			},
+			{
+				"id": "Patient.name.given",
+				"path": "Patient.name.given",
+				"min": 1
+			},
+			{
+				"id": "Patient.birthDate",
+				"path": "Patient.birthDate",
+				"min": 1
+			},
+			{
+				"id": "Patient.communication.language",
+				"path": "Patient.communication.language",
+				"binding": {
+					"strength": "required",
+					"valueSet": "http://hl7.org/fhir/ValueSet/languages"
+				}
+			},
+			{
+				"id": "Patient.generalPractitioner",
+				"path": "Patient.generalPractitioner",
+				"min": 1
+			},
+			{
+				"id": "Patient.managingOrganization",
+				"path": "Patient.managingOrganization",
+				"min": 1
+			}
+		]
+	}
+}

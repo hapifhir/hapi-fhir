@@ -20,14 +20,19 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -52,10 +57,11 @@ public class MdmResourceDaoSvc {
 
 	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
 		if (theGoldenResource.getIdElement().hasIdPart()) {
-			return resourceDao.update(theGoldenResource);
+			return resourceDao.update(theGoldenResource, requestDetails);
 		} else {
-			return resourceDao.create(theGoldenResource);
+			return resourceDao.create(theGoldenResource, requestDetails);
 		}
 	}
 
@@ -67,7 +73,8 @@ public class MdmResourceDaoSvc {
 	 */
 	public void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
-		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD, requestDetails);
 	}
 
 	public IAnyResource readGoldenResourceByPid(ResourcePersistentId theGoldenResourcePid, String theResourceType) {
@@ -75,18 +82,23 @@ public class MdmResourceDaoSvc {
 		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);
 	}
 
-	//TODO GGG MDM address this
 	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType) {
-		SearchParameterMap map = buildEidSearchParameterMap(theEid);
+		return this.searchGoldenResourceByEID(theEid, theResourceType, null);
+	}
+
+	public Optional<IAnyResource> searchGoldenResourceByEID(String theEid, String theResourceType, RequestPartitionId thePartitionId) {
+		SearchParameterMap map = buildEidSearchParameterMap(theEid, theResourceType);
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider search = resourceDao.search(map);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(thePartitionId);
+		IBundleProvider search = resourceDao.search(map, systemRequestDetails);
 		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 
 		if (resources.isEmpty()) {
 			return Optional.empty();
 		} else if (resources.size() > 1) {
-			throw new InternalErrorException("Found more than one active " +
+			throw new InternalErrorException(Msg.code(737) + "Found more than one active " +
 				MdmConstants.CODE_HAPI_MDM_MANAGED +
 				" Golden Resource with EID " +
 				theEid +
@@ -101,10 +113,10 @@ public class MdmResourceDaoSvc {
 	}
 
 	@Nonnull
-	private SearchParameterMap buildEidSearchParameterMap(String theTheEid) {
+	private SearchParameterMap buildEidSearchParameterMap(String theEid, String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		map.add("identifier", new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystem(), theTheEid));
+		map.add("identifier", new TokenParam(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(theResourceType), theEid));
 		map.add("_tag", new TokenParam(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD));
 		return map;
 	}

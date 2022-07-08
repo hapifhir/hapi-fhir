@@ -34,7 +34,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -113,10 +112,14 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	@Override
 	public InstantDt getPublished() {
 		if (myPublished != null) {
-			return new InstantDt(cloneDate(myPublished));
+			return new InstantDt(getPublishedDate());
 		} else {
 			return null;
 		}
+	}
+
+	public Date getPublishedDate() {
+		return cloneDate(myPublished);
 	}
 
 	public void setPublished(Date thePublished) {
@@ -137,7 +140,12 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 
 	@Override
 	public InstantDt getUpdated() {
-		return new InstantDt(cloneDate(myUpdated));
+		return new InstantDt(getUpdatedDate());
+	}
+
+	@Override
+	public Date getUpdatedDate() {
+		return cloneDate(myUpdated);
 	}
 
 	public void setUpdated(Date theUpdated) {
@@ -146,11 +154,6 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 
 	public void setUpdated(InstantDt theUpdated) {
 		myUpdated = theUpdated.getValue();
-	}
-
-	@Override
-	public Date getUpdatedDate() {
-		return cloneDate(myUpdated);
 	}
 
 	@Override

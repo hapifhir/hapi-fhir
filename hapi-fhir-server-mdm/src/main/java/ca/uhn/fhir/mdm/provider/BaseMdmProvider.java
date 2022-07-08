@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -53,13 +54,13 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
-			throw new InvalidRequestException("fromGoldenResourceId must be different from toGoldenResourceId");
+			throw new InvalidRequestException(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId");
 		}
 	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {
-			throw new InvalidRequestException(theName + " cannot be null");
+			throw new InvalidRequestException(Msg.code(1494) + theName + " cannot be null");
 		}
 	}
 
@@ -73,7 +74,7 @@ public abstract class BaseMdmProvider {
 			case MATCH:
 				break;
 			default:
-				throw new InvalidRequestException(ProviderConstants.MDM_UPDATE_LINK + " illegal " + ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT +
+				throw new InvalidRequestException(Msg.code(1495) + ProviderConstants.MDM_UPDATE_LINK + " illegal " + ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT +
 					" value '" + matchResult + "'.  Must be " + MdmMatchResultEnum.NO_MATCH + " or " + MdmMatchResultEnum.MATCH);
 		}
 	}
@@ -94,7 +95,7 @@ public abstract class BaseMdmProvider {
 				case MATCH:
 					break;
 				default:
-					throw new InvalidRequestException(ProviderConstants.MDM_CREATE_LINK + " illegal " + ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT +
+					throw new InvalidRequestException(Msg.code(1496) + ProviderConstants.MDM_CREATE_LINK + " illegal " + ProviderConstants.MDM_CREATE_LINK_MATCH_RESULT +
 						" value '" + matchResult + "'.  Must be " + MdmMatchResultEnum.NO_MATCH + ", " + MdmMatchResultEnum.MATCH + " or " + MdmMatchResultEnum.POSSIBLE_MATCH);
 			}
 		}
@@ -117,7 +118,7 @@ public abstract class BaseMdmProvider {
 	protected IBaseParameters parametersFromMdmLinks(Page<MdmLinkJson> theMdmLinkStream, boolean includeResultAndSource, ServletRequestDetails theServletRequestDetails, MdmPageRequest thePageRequest) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
 		addPagingParameters(retval, theMdmLinkStream, theServletRequestDetails, thePageRequest);
-		theMdmLinkStream.forEach(mdmLink -> {
+		theMdmLinkStream.getContent().forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
 			ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());

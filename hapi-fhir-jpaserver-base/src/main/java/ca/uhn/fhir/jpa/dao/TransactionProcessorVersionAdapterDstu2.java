@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.model.dstu2.valueset.IssueTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -83,7 +85,7 @@ public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProc
 		try {
 			resp.setType(BundleTypeEnum.forCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException("Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(936) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}
@@ -116,6 +118,11 @@ public class TransactionProcessorVersionAdapterDstu2 implements ITransactionProc
 	@Override
 	public String getFullUrl(Bundle.Entry theEntry) {
 		return theEntry.getFullUrl();
+	}
+
+	@Override
+	public void setFullUrl(Bundle.Entry theEntry, String theFullUrl) {
+		theEntry.setFullUrl(theFullUrl);
 	}
 
 	@Override

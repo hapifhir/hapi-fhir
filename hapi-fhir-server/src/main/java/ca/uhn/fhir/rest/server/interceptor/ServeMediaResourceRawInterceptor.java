@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -131,7 +132,7 @@ public class ServeMediaResourceRawInterceptor {
 			theServletResponse.getOutputStream().write(theData.getValue());
 			theServletResponse.getOutputStream().close();
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(321) + e);
 		}
 	}
 }

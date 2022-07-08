@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.r4.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.evaluation.MeasurePopulationType;
 import ca.uhn.fhir.cql.common.evaluation.MeasureScoring;
 import ca.uhn.fhir.cql.r4.builder.MeasureReportBuilder;
@@ -78,11 +79,11 @@ public class MeasureEvaluation {
 		this.measurementPeriod = measurementPeriod;
 	}
 
-	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, RequestDetails theRequestDetails) {
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, String thePractitionerRef, RequestDetails theRequestDetails) {
 		logger.info("Generating individual report");
 
 		if (patientId == null) {
-			return evaluatePopulationMeasure(measure, context, theRequestDetails);
+			return evaluatePopulationMeasure(measure, context, thePractitionerRef, theRequestDetails);
 		}
 
 		Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id", patientId, "Patient", null, null, null,
@@ -98,7 +99,7 @@ public class MeasureEvaluation {
 	}
 
 	public MeasureReport evaluateSubjectListMeasure(Measure measure, Context context, String practitionerRef, RequestDetails theRequestDetails) {
-		logger.info("Generating patient-list report");
+		logger.info("Generating subject-list report");
 
 		List<Patient> patients = practitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(practitionerRef, theRequestDetails);
 		boolean isSingle = false;
@@ -125,11 +126,11 @@ public class MeasureEvaluation {
 		return patients;
 	}
 
-	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, RequestDetails theRequestDetails) {
+	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, String thePractitionerRef, RequestDetails theRequestDetails) {
 		logger.info("Generating summary report");
-
+		List<Patient> patients = thePractitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(thePractitionerRef, theRequestDetails);
 		boolean isSingle = false;
-		return evaluate(measure, context, getAllPatients(theRequestDetails), MeasureReport.MeasureReportType.SUMMARY, isSingle);
+		return evaluate(measure, context, patients, MeasureReport.MeasureReportType.SUMMARY, isSingle);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -160,8 +161,7 @@ public class MeasureEvaluation {
 		String observationName = pop.getCriteria().getExpression();
 		ExpressionDef ed = context.resolveExpressionRef(observationName);
 		if (!(ed instanceof FunctionDef)) {
-			throw new IllegalArgumentException(
-					String.format("Measure observation %s does not reference a function definition", observationName));
+			throw new IllegalArgumentException(Msg.code(1672) + String.format("Measure observation %s does not reference a function definition", observationName));
 		}
 
 		Object result = null;
@@ -301,7 +301,7 @@ public class MeasureEvaluation {
 
 		MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
 		if (measureScoring == null) {
-			throw new RuntimeException("Measure scoring is required in order to calculate.");
+			throw new RuntimeException(Msg.code(1673) + "Measure scoring is required in order to calculate.");
 		}
 
 		List<Measure.MeasureSupplementalDataComponent> sde = new ArrayList<>();

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.fhirpath;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -66,7 +67,7 @@ public class FluentPathTest {
 		try {
 			fp.evaluate(p, "Patient.name", StringType.class);
 		} catch (FhirPathExecutionException e) {
-			assertEquals("FluentPath expression \"Patient.name\" returned unexpected type HumanName - Expected org.hl7.fhir.dstu3.model.StringType", e.getMessage());
+			assertEquals(Msg.code(608) + "FluentPath expression \"Patient.name\" returned unexpected type HumanName - Expected org.hl7.fhir.dstu3.model.StringType", e.getMessage());
 		}
 	}
 

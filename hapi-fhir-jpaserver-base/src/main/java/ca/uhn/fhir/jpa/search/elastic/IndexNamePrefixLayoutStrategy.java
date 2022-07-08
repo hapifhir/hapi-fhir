@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.backend.elasticsearch.index.layout.IndexLayoutStrategy;
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
 /**
  * This class instructs hibernate search on how to create index names for indexed entities.
  * In our case, we use this class to add an optional prefix to all indices which are created, which can be controlled via
- * {@link DaoConfig#setElasticSearchIndexPrefix(String)}.
+ * {@link DaoConfig#setHSearchIndexPrefix(String)}.
  */
 @Service
 public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
@@ -62,8 +63,8 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 
 	private String addPrefixIfNecessary(String theCandidateName) {
 		validateDaoConfigIsPresent();
-		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
-			return myDaoConfig.getElasticSearchIndexPrefix() + "-" + theCandidateName;
+		if (!StringUtils.isBlank(myDaoConfig.getHSearchIndexPrefix())) {
+			return myDaoConfig.getHSearchIndexPrefix() + "-" + theCandidateName;
 		} else {
 			return theCandidateName;
 		}
@@ -85,15 +86,15 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 
 	private String removePrefixIfNecessary(String theCandidateUniqueKey) {
 		validateDaoConfigIsPresent();
-		if (!StringUtils.isBlank(myDaoConfig.getElasticSearchIndexPrefix())) {
-			return theCandidateUniqueKey.replace(myDaoConfig.getElasticSearchIndexPrefix() + "-", "");
+		if (!StringUtils.isBlank(myDaoConfig.getHSearchIndexPrefix())) {
+			return theCandidateUniqueKey.replace(myDaoConfig.getHSearchIndexPrefix() + "-", "");
 		} else {
 			return theCandidateUniqueKey;
 		}
 	}
 	private void validateDaoConfigIsPresent() {
 		if (myDaoConfig == null) {
-			throw new ConfigurationException("While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the DaoConfig. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
+			throw new ConfigurationException(Msg.code(1168) + "While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the DaoConfig. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
 		}
 	}
 }

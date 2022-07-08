@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -42,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +69,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *
  * @see SearchNarrowingInterceptor
  */
-@Interceptor
+@Interceptor(order = AuthorizationConstants.ORDER_AUTH_INTERCEPTOR)
 public class AuthorizationInterceptor implements IRuleApplier {
 
 	public static final String REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS = AuthorizationInterceptor.class.getName() + "_BulkDataExportOptions";
@@ -77,12 +80,17 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	private final String myRequestRuleListKey = AuthorizationInterceptor.class.getName() + "_" + myInstanceIndex + "_RULELIST";
 	private PolicyEnum myDefaultPolicy = PolicyEnum.DENY;
 	private Set<AuthorizationFlagsEnum> myFlags = Collections.emptySet();
+	private IValidationSupport myValidationSupport;
+
+	private IAuthorizationSearchParamMatcher myAuthorizationSearchParamMatcher;
+	private Logger myTroubleshootingLog;
 
 	/**
 	 * Constructor
 	 */
 	public AuthorizationInterceptor() {
 		super();
+		setTroubleshootingLog(ourLog);
 	}
 
 	/**
@@ -93,6 +101,17 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public AuthorizationInterceptor(PolicyEnum theDefaultPolicy) {
 		this();
 		setDefaultPolicy(theDefaultPolicy);
+	}
+
+	@Nonnull
+	@Override
+	public Logger getTroubleshootingLog() {
+		return myTroubleshootingLog;
+	}
+
+	public void setTroubleshootingLog(@Nonnull Logger theTroubleshootingLog) {
+		Validate.notNull(theTroubleshootingLog, "theTroubleshootingLog must not be null");
+		myTroubleshootingLog = theTroubleshootingLog;
 	}
 
 	private void applyRulesAndFailIfDeny(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId,
@@ -136,6 +155,42 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 
 		return verdict;
+	}
+
+	/**
+	 * @since 6.0.0
+	 */
+	@Nullable
+	@Override
+	public IValidationSupport getValidationSupport() {
+		return myValidationSupport;
+	}
+
+	/**
+	 * Sets a validation support module that will be used for terminology-based rules
+	 *
+	 * @param theValidationSupport The validation support. Null is also acceptable (this is the default),
+	 *                             in which case the validation support module associated with the {@link FhirContext}
+	 *                             will be used.
+	 * @since 6.0.0
+	 */
+	public AuthorizationInterceptor setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+		return this;
+	}
+
+	/**
+	 * Sets a search parameter matcher for use in handling SMART v2 filter scopes
+	 *
+	 * @param theAuthorizationSearchParamMatcher The search parameter matcher. Defaults to null.
+	 */
+	public void setAuthorizationSearchParamMatcher(@Nullable IAuthorizationSearchParamMatcher theAuthorizationSearchParamMatcher) {
+		this.myAuthorizationSearchParamMatcher = theAuthorizationSearchParamMatcher;
+	}
+
+	@Nullable
+	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
+		return myAuthorizationSearchParamMatcher;
 	}
 
 	/**
@@ -214,7 +269,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 			default:
 				// Should not happen
-				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(Msg.code(332) + "Unable to apply security to event of type " + theOperation);
 		}
 
 	}
@@ -294,9 +349,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
 			String ruleName = defaultString(decision.getDecidingRule().getName(), "(unnamed rule)");
-			throw new ForbiddenOperationException("Access denied by rule: " + ruleName);
+			throw new ForbiddenOperationException(Msg.code(333) + "Access denied by rule: " + ruleName);
 		}
-		throw new ForbiddenOperationException("Access denied by default policy (no applicable rules)");
+		throw new ForbiddenOperationException(Msg.code(334) + "Access denied by default policy (no applicable rules)");
 	}
 
 	private void handleUserOperation(RequestDetails theRequest, IBaseResource theResource, RestOperationTypeEnum theOperation, Pointcut thePointcut) {
@@ -361,7 +416,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
-
 
 	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
 		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, theInputResource.getIdElement(), null, thePointcut);
@@ -441,6 +495,34 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		OUT,
 	}
 
+	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		if (theResponseObject == null) {
+			return Collections.emptyList();
+		}
+
+		List<IBaseResource> retVal;
+
+		boolean isContainer = false;
+		if (theResponseObject instanceof IBaseBundle) {
+			isContainer = true;
+		} else if (theResponseObject instanceof IBaseParameters) {
+			isContainer = true;
+		}
+
+		if (!isContainer) {
+			return Collections.singletonList(theResponseObject);
+		}
+
+		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+
+		// Exclude the container
+		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+			retVal = retVal.subList(1, retVal.size());
+		}
+
+		return retVal;
+	}
+
 	public static class Verdict {
 
 		private final IAuthRule myDecidingRule;
@@ -475,34 +557,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			return b.build();
 		}
 
-	}
-
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
-		if (theResponseObject == null) {
-			return Collections.emptyList();
-		}
-
-		List<IBaseResource> retVal;
-
-		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
-		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
-		}
-
-		if (!isContainer) {
-			return Collections.singletonList(theResponseObject);
-		}
-
-		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
-
-		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
-			retVal = retVal.subList(1, retVal.size());
-		}
-
-		return retVal;
 	}
 
 }

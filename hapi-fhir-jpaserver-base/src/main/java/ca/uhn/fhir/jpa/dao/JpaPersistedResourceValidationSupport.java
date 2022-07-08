@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -130,8 +131,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchValueSet(String theSystem) {
 		if (TermReadSvcUtil.isLoincUnversionedValueSet(theSystem)) {
 			Optional<IBaseResource> currentVSOpt = getValueSetCurrentVersion(new UriType(theSystem));
-			return currentVSOpt.orElseThrow(() -> new ResourceNotFoundException(
-				"Unable to find current version of ValueSet for url: " + theSystem));
+			return currentVSOpt.orElse(null);
 		}
 
 		return fetchResource(myValueSetType, theSystem);
@@ -160,6 +160,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	@Nullable
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
+		if (!myDaoRegistry.isResourceTypeSupported("StructureDefinition")) {
+			return null;
+		}
 		IBundleProvider search = myDaoRegistry.getResourceDao("StructureDefinition").search(new SearchParameterMap().setLoadSynchronousUpTo(1000));
 		return (List<T>) search.getResources(0, 1000);
 	}
@@ -279,7 +282,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			}
 			default:
-				throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
+				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
 		}
 
 		Integer size = search.size();

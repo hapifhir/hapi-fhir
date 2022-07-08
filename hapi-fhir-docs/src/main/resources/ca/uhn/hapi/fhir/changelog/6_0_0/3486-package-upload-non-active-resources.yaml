@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 3486
+jira: SMILE-3626
+title: "When doing package upload, all resources were filtered by `status=active`. That is inappropriate for some types. 
+For Subscription, we need to check if the value is requested, for DocumentReference and Communication other values 
+outside the expected active and not active also exist. This change adds a check for those types of resources other than 
+ the one normally done for active matching value."

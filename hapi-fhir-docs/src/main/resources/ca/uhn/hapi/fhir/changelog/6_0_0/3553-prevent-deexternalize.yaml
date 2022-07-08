@@ -1,0 +1,4 @@
+type: fix
+issue: 3553
+jira: SMILE-3964
+title: "Added a new setting to BinaryStorageInterceptor which allows you to disable binary de-externalization during resource reads."

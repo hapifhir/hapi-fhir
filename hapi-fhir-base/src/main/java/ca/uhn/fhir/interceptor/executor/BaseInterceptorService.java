@@ -20,6 +20,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
@@ -163,13 +164,22 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	@Override
+	public void unregisterAllAnonymousInterceptors() {
+		synchronized (myRegistryMutex) {
+			unregisterInterceptorsIf(t -> true, myAnonymousInvokers);
+		}
+	}
+
+	@Override
 	public void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction) {
 		unregisterInterceptorsIf(theShouldUnregisterFunction, myGlobalInvokers);
 		unregisterInterceptorsIf(theShouldUnregisterFunction, myAnonymousInvokers);
 	}
 
 	private void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction, ListMultimap<POINTCUT, BaseInvoker> theGlobalInvokers) {
-		theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+		synchronized (myRegistryMutex) {
+			theGlobalInvokers.entries().removeIf(t -> theShouldUnregisterFunction.test(t.getValue().getInterceptor()));
+		}
 	}
 
 	@Override
@@ -291,7 +301,8 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	private Object doCallHooks(POINTCUT thePointcut, HookParams theParams, Object theRetVal) {
-		List<BaseInvoker> invokers = getInvokersForPointcut(thePointcut);
+		// use new list for loop to avoid ConcurrentModificationException in case invoker gets added while looping
+		List<BaseInvoker> invokers = new ArrayList<>(getInvokersForPointcut(thePointcut));
 
 		/*
 		 * Call each hook in order
@@ -403,7 +414,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	 */
 	boolean haveAppropriateParams(POINTCUT thePointcut, HookParams theParams) {
 		if (theParams.getParamsForType().values().size() != thePointcut.getParameterTypes().size()) {
-			throw new IllegalArgumentException(String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
+			throw new IllegalArgumentException(Msg.code(1909) + String.format("Wrong number of params for pointcut %s - Wanted %s but found %s", thePointcut.name(), toErrorString(thePointcut.getParameterTypes()), theParams.getParamsForType().values().stream().map(t -> t != null ? t.getClass().getSimpleName() : "null").sorted().collect(Collectors.toList())));
 		}
 
 		List<String> wantedTypes = new ArrayList<>(thePointcut.getParameterTypes());
@@ -473,6 +484,32 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	protected abstract Optional<HookDescriptor> scanForHook(Method nextMethod);
+
+	protected static <T extends Annotation> Optional<T> findAnnotation(AnnotatedElement theObject, Class<T> theHookClass) {
+		T annotation;
+		if (theObject instanceof Method) {
+			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
+		} else {
+			annotation = theObject.getAnnotation(theHookClass);
+		}
+		return Optional.ofNullable(annotation);
+	}
+
+	private static int determineOrder(Class<?> theInterceptorClass) {
+		int typeOrder = Interceptor.DEFAULT_ORDER;
+		Optional<Interceptor> typeOrderAnnotation = findAnnotation(theInterceptorClass, Interceptor.class);
+		if (typeOrderAnnotation.isPresent()) {
+			typeOrder = typeOrderAnnotation.get().order();
+		}
+		return typeOrder;
+	}
+
+	private static String toErrorString(List<String> theParameterTypes) {
+		return theParameterTypes
+			.stream()
+			.sorted()
+			.collect(Collectors.joining(","));
+	}
 
 	protected abstract static class BaseInvoker implements Comparable<BaseInvoker> {
 
@@ -573,10 +610,10 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 				if (targetException instanceof RuntimeException) {
 					throw ((RuntimeException) targetException);
 				} else {
-					throw new InternalErrorException("Failure invoking interceptor for pointcut(s) " + getPointcut(), targetException);
+					throw new InternalErrorException(Msg.code(1910) + "Failure invoking interceptor for pointcut(s) " + getPointcut(), targetException);
 				}
 			} catch (Exception e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1911) + e);
 			}
 
 		}
@@ -601,32 +638,6 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			return myOrder;
 		}
 
-	}
-
-	protected static <T extends Annotation> Optional<T> findAnnotation(AnnotatedElement theObject, Class<T> theHookClass) {
-		T annotation;
-		if (theObject instanceof Method) {
-			annotation = MethodUtils.getAnnotation((Method) theObject, theHookClass, true, true);
-		} else {
-			annotation = theObject.getAnnotation(theHookClass);
-		}
-		return Optional.ofNullable(annotation);
-	}
-
-	private static int determineOrder(Class<?> theInterceptorClass) {
-		int typeOrder = Interceptor.DEFAULT_ORDER;
-		Optional<Interceptor> typeOrderAnnotation = findAnnotation(theInterceptorClass, Interceptor.class);
-		if (typeOrderAnnotation.isPresent()) {
-			typeOrder = typeOrderAnnotation.get().order();
-		}
-		return typeOrder;
-	}
-
-	private static String toErrorString(List<String> theParameterTypes) {
-		return theParameterTypes
-			.stream()
-			.sorted()
-			.collect(Collectors.joining(","));
 	}
 
 }

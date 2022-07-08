@@ -21,13 +21,15 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -36,6 +38,8 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.HasOrListParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,6 +60,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
 
 /**
  * Bulk Item reader for the Group Bulk Export job.
@@ -75,20 +82,26 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private boolean myMdmEnabled;
 
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
+	@Autowired
+	private IJpaIdHelperService myJpaIdHelperService;
 
 	@Override
 	protected Iterator<ResourcePersistentId> getResourcePidIterator() {
-		Set<ResourcePersistentId> myReadPids = new HashSet<>();
+		//Short circuit out if we detect we are attempting to export groups.
+		if (myResourceType.equalsIgnoreCase("Group")) {
+			return getSingletonGroupIterator();
+		}
 
 		//Short circuit out if we detect we are attempting to extract patients
 		if (myResourceType.equalsIgnoreCase("Patient")) {
 			return getExpandedPatientIterator();
 		}
+
 
 		//First lets expand the group so we get a list of all patient IDs of the group, and MDM-matched patient IDs of the group.
 		Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup();
@@ -98,15 +111,28 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 		//Next, let's search for the target resources, with their correct patient references, chunked.
 		//The results will be jammed into myReadPids
+		Set<ResourcePersistentId> myExpandedMemberPids = new HashSet<>();
 		QueryChunker<String> queryChunker = new QueryChunker<>();
 		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
-			queryResourceTypeWithReferencesToPatients(myReadPids, idChunk);
+			queryResourceTypeWithReferencesToPatients(myExpandedMemberPids, idChunk);
 		});
 
 		if (ourLog.isDebugEnabled()) {
-			ourLog.debug("Resource PIDs to be Bulk Exported: [{}]", myReadPids.stream().map(ResourcePersistentId::toString).collect(Collectors.joining(",")));
+			ourLog.debug("Resource PIDs to be Bulk Exported: {}", myExpandedMemberPids);
 		}
-		return myReadPids.iterator();
+		return myExpandedMemberPids.iterator();
+	}
+
+	/**
+	 * If we are exporting a group during group export, we intentionally do not expand to other groups the member might be part of.
+	 * This code short-circuits the standard "expand group into its members then check the search compartment" logic.
+	 *
+	 * @return An iterator containing a single Group ID.
+	 */
+	private Iterator<ResourcePersistentId> getSingletonGroupIterator() {
+		String stringedId = new IdDt(myGroupId).getIdPart();
+		ResourcePersistentId groupId = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), myResourceType, stringedId);
+		return Collections.singletonList(groupId).iterator();
 	}
 
 	/**
@@ -116,13 +142,13 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		List<Long> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(ids);
+		List<Long> pidsOrThrowException =myJpaIdHelperService.getPidsOrThrowException(ids);
 		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (myMdmEnabled) {
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), srd);
-			Long pidOrNull = myIdHelperService.getPidOrNull(group);
+			Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
 			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
 				patientPidsToExport.add(tuple.getGoldenPid());
@@ -198,7 +224,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		Set<String> expandedIds = new HashSet<>();
 		SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(myGroupId), requestDetails);
-		Long pidOrNull = myIdHelperService.getPidOrNull(group);
+		Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
 
 		//Attempt to perform MDM Expansion of membership
 		if (myMdmEnabled) {
@@ -239,6 +265,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	}
 
 	private void queryResourceTypeWithReferencesToPatients(Set<ResourcePersistentId> myReadPids, List<String> idChunk) {
+
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
 		List<SearchParameterMap> expandedSpMaps = createSearchParameterMapsForResourceType();
@@ -247,11 +274,15 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
 			validateSearchParameters(expandedSpMap);
 
-			// Now, further filter the query with patient references defined by the chunk of IDs we have.
-			filterSearchByResourceIds(idChunk, expandedSpMap);
-
 			// Fetch and cache a search builder for this resource type
 			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType();
+
+			// Now, further filter the query with patient references defined by the chunk of IDs we have.
+			if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType)) {
+				filterSearchByHasParam(idChunk, expandedSpMap);
+			} else {
+				filterSearchByResourceIds(idChunk, expandedSpMap);
+			}
 
 			//Execute query and all found pids to our local iterator.
 			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap, new SearchRuntimeDetails(null, myJobUUID), null, RequestPartitionId.allPartitions());
@@ -261,17 +292,41 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		}
 	}
 
+	/**
+	 *
+	 * @param idChunk
+	 * @param expandedSpMap
+	 */
+	private void filterSearchByHasParam(List<String> idChunk, SearchParameterMap expandedSpMap) {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		idChunk.stream().forEach(id -> hasOrListParam.addOr(buildHasParam(id)));
+		expandedSpMap.add("_has", hasOrListParam);
+	}
+
+	private HasParam buildHasParam(String theId) {
+		if ("Practitioner".equalsIgnoreCase(myResourceType)) {
+			return new HasParam("Patient", "general-practitioner", "_id", theId);
+		} else if ("Organization".equalsIgnoreCase(myResourceType)) {
+			return new HasParam("Patient", "organization", "_id", theId);
+		} else {
+			throw new IllegalArgumentException(Msg.code(2077) + " We can't handle forward references onto type " + myResourceType);
+		}
+	}
+
 	private void filterSearchByResourceIds(List<String> idChunk, SearchParameterMap expandedSpMap) {
 		ReferenceOrListParam orList =  new ReferenceOrListParam();
 		idChunk.forEach(id -> orList.add(new ReferenceParam(id)));
 		expandedSpMap.add(getPatientSearchParamForCurrentResourceType().getName(), orList);
 	}
 
-	private RuntimeSearchParam validateSearchParameters(SearchParameterMap expandedSpMap) {
-		RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
-		if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
-			throw new IllegalArgumentException(String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+	private void validateSearchParameters(SearchParameterMap expandedSpMap) {
+		if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(myResourceType)) {
+			return;
+		} else {
+			RuntimeSearchParam runtimeSearchParam = getPatientSearchParamForCurrentResourceType();
+			if (expandedSpMap.get(runtimeSearchParam.getName()) != null) {
+				throw new IllegalArgumentException(Msg.code(792) + String.format("Group Bulk Export manually modifies the Search Parameter called [%s], so you may not include this search parameter in your _typeFilter!", runtimeSearchParam.getName()));
+			}
 		}
-		return runtimeSearchParam;
 	}
 }

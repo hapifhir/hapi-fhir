@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildContainedResources;
 import ca.uhn.fhir.context.RuntimeChildNarrativeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IIdentifiableElement;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -65,7 +67,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -198,8 +199,6 @@ public abstract class BaseParser implements IParser {
 				} else if (myNext.getDef() instanceof RuntimeChildNarrativeDefinition) {
 					if (isSuppressNarratives() || isSummaryMode()) {
 						continue;
-					} else if (theContainedResource) {
-						continue;
 					}
 				} else if (myNext.getDef() instanceof RuntimeChildContainedResources) {
 					if (theContainedResource) {
@@ -268,11 +267,11 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public String encodeResourceToString(IBaseResource theResource) throws DataFormatException {
-		Writer stringWriter = new StringWriter();
+		Writer stringWriter = new StringBuilderWriter();
 		try {
 			encodeResourceToWriter(theResource, stringWriter);
 		} catch (IOException e) {
-			throw new Error("Encountered IOException during write to string - This should not happen!");
+			throw new Error(Msg.code(1828) + "Encountered IOException during write to string - This should not happen!");
 		}
 		return stringWriter.toString();
 	}
@@ -290,8 +289,7 @@ public abstract class BaseParser implements IParser {
 		Validate.notNull(theEncodeContext, "theEncodeContext can not be null");
 
 		if (theResource.getStructureFhirVersionEnum() != myContext.getVersion().getVersion()) {
-			throw new IllegalArgumentException(
-				"This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
+			throw new IllegalArgumentException(Msg.code(1829) + "This parser is for FHIR version " + myContext.getVersion().getVersion() + " - Can not encode a structure for version " + theResource.getStructureFhirVersionEnum());
 		}
 
 		String resourceName = myContext.getResourceType(theResource);
@@ -615,7 +613,7 @@ public abstract class BaseParser implements IParser {
 							if (isBlank(resourceId.getValue())) {
 								resourceId.setValue(fullUrl);
 							} else {
-								if (fullUrl.startsWith("urn:") && fullUrl.endsWith(":" + resourceId.getIdPart())) {
+								if (fullUrl.startsWith("urn:") && fullUrl.length() > resourceId.getIdPart().length() && fullUrl.charAt(fullUrl.length() - resourceId.getIdPart().length() - 1) == ':' && fullUrl.endsWith(resourceId.getIdPart())) {
 									resourceId.setValue(fullUrl);
 								} else {
 									IIdType fullUrlId = myContext.getVersion().newIdType();
@@ -684,7 +682,7 @@ public abstract class BaseParser implements IParser {
 				try {
 					metaValue = (IBaseMetaType) metaValue.getClass().getMethod("copy").invoke(metaValue);
 				} catch (Exception e) {
-					throw new InternalErrorException("Failed to duplicate meta", e);
+					throw new InternalErrorException(Msg.code(1830) + "Failed to duplicate meta", e);
 				}
 
 				if (isBlank(metaValue.getVersionId())) {
@@ -896,9 +894,9 @@ public abstract class BaseParser implements IParser {
 				RuntimeChildChoiceDefinition choice = (RuntimeChildChoiceDefinition) nextChild;
 				b.append(" - Expected one of: " + choice.getValidChildTypes());
 			}
-			throw new DataFormatException(b.toString());
+			throw new DataFormatException(Msg.code(1831) + b.toString());
 		}
-		throw new DataFormatException(nextChild + " has no child of type " + theType);
+		throw new DataFormatException(Msg.code(1832) + nextChild + " has no child of type " + theType);
 	}
 
 	protected boolean shouldEncodeResource(String theName) {

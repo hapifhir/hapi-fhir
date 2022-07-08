@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -68,7 +69,6 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -76,10 +76,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,9 +172,7 @@ public abstract class BaseStorageDao {
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
 		if(!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
-			FhirTerser terser = myFhirContext.newTerser();
-			replaceAbsoluteReferencesWithRelative(theResource, terser);
-			replaceAbsoluteUrisWithRelative(theResource, terser);
+			replaceAbsoluteReferencesWithRelative(theResource, myFhirContext.newTerser());
 		}
 
 		performAutoVersioning(theResource, thePerformIndexing);
@@ -189,7 +185,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
+			throw new InvalidRequestException(Msg.code(520) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 	}
 
@@ -199,7 +195,7 @@ public abstract class BaseStorageDao {
 	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+				throw new InvalidRequestException(Msg.code(521) + getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
 	}
@@ -214,7 +210,7 @@ public abstract class BaseStorageDao {
 			bundleType = defaultString(bundleType);
 			if (!allowedBundleTypes.contains(bundleType)) {
 				String message = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidBundleTypeForStorage", (isNotBlank(bundleType) ? bundleType : "(missing)"));
-				throw new UnprocessableEntityException(message);
+				throw new UnprocessableEntityException(Msg.code(522) + message);
 			}
 		}
 	}
@@ -236,32 +232,11 @@ public abstract class BaseStorageDao {
 	}
 
 	/**
-	 * Replace Canonical URI's with local references, if we find that the canonical should be treated as local.
-	 */
-	private void replaceAbsoluteUrisWithRelative(IBaseResource theResource, FhirTerser theTerser) {
-
-		BaseRuntimeElementDefinition<?> canonicalElementDefinition = myFhirContext.getElementDefinition("canonical");
-		if (canonicalElementDefinition != null) {
-			Class<? extends IPrimitiveType<String>> canonicalType = (Class<? extends IPrimitiveType<String>>) canonicalElementDefinition.getImplementingClass();
-			List<? extends IPrimitiveType<String>> canonicals = theTerser.getAllPopulatedChildElementsOfType(theResource, canonicalType);
-
-			//TODO GGG this is pretty inefficient if there are many baseUrls, and many canonicals. Consider improving.
-			for (String baseUrl : myModelConfig.getTreatBaseUrlsAsLocal()) {
-				for (IPrimitiveType<String> canonical : canonicals) {
-					if (canonical.getValue().startsWith(baseUrl)) {
-						canonical.setValue(canonical.getValue().substring(baseUrl.length() + 1));
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Handle {@link ModelConfig#getAutoVersionReferenceAtPaths() auto-populate-versions}
 	 * <p>
 	 * We only do this if thePerformIndexing is true because if it's false, that means
 	 * we're in a FHIR transaction during the first phase of write operation processing,
-	 * meaning that the versions of other resources may not have need updated yet. For example
+	 * meaning that the versions of other resources may not have need updatd yet. For example
 	 * we're about to store an Observation with a reference to a Patient, and that Patient
 	 * is also being updated in the same transaction, during the first "no index" phase,
 	 * the Patient will not yet have its version number incremented, so it would be wrong
@@ -301,7 +276,7 @@ public abstract class BaseStorageDao {
 						// resource not found
 						// and no autocreateplaceholders set...
 						// we throw
-						throw new ResourceNotFoundException(referenceElement);
+						throw new ResourceNotFoundException(Msg.code(523) + referenceElement);
 					}
 					String newTargetReference = referenceElement.withVersion(version.toString()).getValue();
 					nextReference.setReference(newTargetReference);
@@ -431,7 +406,7 @@ public abstract class BaseStorageDao {
 		return oo;
 	}
 
-	@NotNull
+	@Nonnull
 	protected ResourceGoneException createResourceGoneException(IBasePersistedResource theResourceEntity) {
 		StringBuilder b = new StringBuilder();
 		b.append("Resource was deleted at ");
@@ -463,7 +438,7 @@ public abstract class BaseStorageDao {
 			return;
 		}
 
-		Map<String, RuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
+		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(getResourceName());
 
 		Set<String> paramNames = theSource.keySet();
 		for (String nextParamName : paramNames) {
@@ -472,7 +447,7 @@ public abstract class BaseStorageDao {
 			if (param == null) {
 				Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(getResourceName());
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), getResourceName(), validNames);
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(524) + msg);
 			}
 
 			// Should not be null since the check above would have caught it
@@ -491,8 +466,7 @@ public abstract class BaseStorageDao {
 	public void notifyInterceptors(RestOperationTypeEnum theOperationType, IServerInterceptor.ActionRequestDetails theRequestDetails) {
 		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
 			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException(
-					"Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+				throw new InternalErrorException(Msg.code(525) + "Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
 			}
 		}
 

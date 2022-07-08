@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -23,7 +24,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +64,7 @@ import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 
 @SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
+	private static final Logger ourLog = LoggerFactory.getLogger(RuleImplOp.class);
 
 	private AppliesTypeEnum myAppliesTo;
 	private Set<String> myAppliesToTypes;
@@ -93,7 +98,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
 									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
-		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+		FhirContext ctx = theRequestDetails.getFhirContext();
 
 		RuleTarget target = new RuleTarget();
 
@@ -109,13 +114,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							break;
 						case SEARCH_SYSTEM:
 						case HISTORY_SYSTEM:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
-								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							}
 							break;
 						case SEARCH_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
-								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
 							target.setSearchParams(theRequestDetails);
@@ -129,19 +134,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 							break;
 						case HISTORY_TYPE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
-								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							}
 							target.resourceType = theRequestDetails.getResourceName();
 							break;
 						case HISTORY_INSTANCE:
-							if (theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
-								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							if (theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+								return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							}
 							target.resourceIds = Collections.singleton(theInputResourceId);
 							break;
 						case GET_PAGE:
-							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 
 						// None of the following are checked on the way in
 						case ADD_TAGS:
@@ -172,6 +177,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case WRITE:
 				if (theInputResource == null && theInputResourceId == null) {
+					return null;
+				}
+				if (theRequestDetails.isRewriteHistory() && theRequestDetails.getId() != null && theRequestDetails.getId().hasVersionIdPart() && theOperation == RestOperationTypeEnum.UPDATE) {
 					return null;
 				}
 				switch (theOperation) {
@@ -214,7 +222,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
@@ -225,10 +233,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					if (theInputResourceId.hasIdPart() == false) {
 						// This is a conditional DELETE, so we'll authorize it using STORAGE events instead
 						// so just let it through for now..
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 					}
 					if (theInputResource == null && myClassifierCompartmentOwners != null && myClassifierCompartmentOwners.size() > 0) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 					}
 
 					target.resource = theInputResource;
@@ -238,28 +246,28 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				}
 				break;
 			case GRAPHQL:
-				return applyRuleToGraphQl(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, thePointcut);
+				return applyRuleToGraphQl(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, thePointcut, theRuleApplier);
 			case TRANSACTION:
 				return applyRuleToTransaction(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier, thePointcut, ctx);
 			case ALL:
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			case METADATA:
 				if (theOperation == RestOperationTypeEnum.METADATA) {
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				}
 				return null;
 			default:
 				// Should not happen
-				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
+				throw new IllegalStateException(Msg.code(335) + "Unable to apply security to event of type " + theOperation);
 		}
 
 		switch (myAppliesTo) {
 			case INSTANCES:
-				return applyRuleToInstances(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, target);
+				return applyRuleToInstances(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, target, theRuleApplier);
 			case ALL_RESOURCES:
 				if (target.resourceType != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 					}
 				}
 				break;
@@ -287,30 +295,41 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						return null;
 					}
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 					} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
 						// ok we'll check below
 					}
 				}
 				break;
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(336) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
+		return applyRuleLogic(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target, theRuleApplier);
+	}
+
+	/**
+	 * Apply any special processing logic specific to this rule.
+	 * This is intended to be overridden.
+	 *
+	 * TODO: At this point {@link RuleImplOp} handles "any ID" and "in compartment" logic - It would be nice to split these into separate classes.
+	 */
+	protected Verdict applyRuleLogic(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext theFhirContext, RuleTarget theRuleTarget, IRuleApplier theRuleApplier) {
+		ourLog.trace("applyRuleLogic {} {}", theOperation, theRuleTarget);
 		switch (myClassifierType) {
 			case ANY_ID:
 				break;
 			case IN_COMPARTMENT:
-				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, ctx, target);
+				return applyRuleToCompartment(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theFlags, theFhirContext, theRuleTarget, theRuleApplier);
 			default:
-				throw new IllegalStateException("Unable to apply security to event of applies to type " + myAppliesTo);
+				throw new IllegalStateException(Msg.code(337) + "Unable to apply security to event of applies to type " + myAppliesTo);
 		}
 
-		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 	}
 
 	@Nullable
-	private Verdict applyRuleToGraphQl(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut) {
+	private Verdict applyRuleToGraphQl(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut, IRuleApplier theRuleApplier) {
 		if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
 
 			// Make sure that the requestor actually has sufficient access to see the given resource
@@ -318,14 +337,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return null;
 			}
 
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		} else {
 			return null;
 		}
 	}
 
 	@Nullable
-	private Verdict applyRuleToCompartment(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext ctx, RuleTarget target) {
+	private Verdict applyRuleToCompartment(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Set<AuthorizationFlagsEnum> theFlags, FhirContext ctx, RuleTarget target, IRuleApplier theRuleApplier) {
 		FhirTerser t = ctx.newTerser();
 		boolean foundMatch = false;
 
@@ -358,7 +377,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			 * it makes sense.
 			 */
 			if (next.getResourceType().equals(target.resourceType)) {
-				Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, SP_RES_ID, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, SP_RES_ID, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				if (verdict != null) {
 					return verdict;
 				}
@@ -401,16 +420,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						 * would match the given compartment. In this case, this
 						 * is a very effective mechanism.
 						 */
-						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.NO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
+						if (target.getSearchParams() != null && !theFlags.contains(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS)) {
 							for (RuntimeSearchParam nextRuntimeSearchParam : params) {
 								String name = nextRuntimeSearchParam.getName();
-								Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+								Verdict verdict = checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(target.getSearchParams(), next, name, theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 								if (verdict != null) {
 									return verdict;
 								}
 							}
 						} else if (getMode() == PolicyEnum.ALLOW) {
-							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 						}
 					}
 				}
@@ -419,11 +438,11 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		if (!foundMatch) {
 			return null;
 		}
-		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 	}
 
 	@Nullable
-	private Verdict applyRuleToInstances(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, RuleTarget target) {
+	private Verdict applyRuleToInstances(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, RuleTarget target, IRuleApplier theRuleApplier) {
 		if (target.resourceIds != null && target.resourceIds.size() > 0) {
 			int haveMatches = 0;
 			for (IIdType requestAppliesToResource : target.resourceIds) {
@@ -444,7 +463,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			}
 
 			if (haveMatches == target.resourceIds.size()) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 		}
 
@@ -458,7 +477,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 		if (theInputResource != null && requestAppliesToTransaction(ctx, myOp, theInputResource)) {
 			if (getMode() == PolicyEnum.DENY) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 			List<BundleEntryParts> inputResources = BundleUtil.toListOfEntries(ctx, (IBaseBundle) theInputResource);
 			Verdict verdict = null;
@@ -496,7 +515,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					operation = RestOperationTypeEnum.PATCH;
 				} else {
 
-					throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
+					throw new InvalidRequestException(Msg.code(338) + "Can not handle transaction with operation of type " + nextPart.getRequestType());
 				}
 
 				/*
@@ -507,7 +526,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (nextPart.getResource() != null) {
 					RuntimeResourceDefinition resourceDef = ctx.getResourceDefinition(nextPart.getResource());
 					if ("Parameters".equals(resourceDef.getName()) || "Bundle".equals(resourceDef.getName())) {
-						throw new InvalidRequestException("Can not handle transaction with nested resource of type " + resourceDef.getName());
+						throw new InvalidRequestException(Msg.code(339) + "Can not handle transaction with nested resource of type " + resourceDef.getName());
 					}
 				}
 
@@ -532,7 +551,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			 * be applying security on the way out
 			 */
 			if (allComponentsAreGets) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 
 			return verdict;
@@ -583,7 +602,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		}
 	}
 
-	private Verdict checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(Map<String, String[]> theSearchParams, IIdType theCompartmentOwner, String theSearchParamName, RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource) {
+	private Verdict checkForSearchParameterMatchingCompartmentAndReturnSuccessfulVerdictOrNull(Map<String, String[]> theSearchParams, IIdType theCompartmentOwner, String theSearchParamName, RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier) {
 		Verdict verdict = null;
 		if (theSearchParams != null) {
 			String[] values = theSearchParams.get(theSearchParamName);
@@ -592,11 +611,11 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					QualifiedParamList orParamList = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextParameterValue);
 					for (String next : orParamList) {
 						if (next.equals(theCompartmentOwner.getValue())) {
-							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							break;
 						}
 						if (next.equals(theCompartmentOwner.getIdPart())) {
-							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+							verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 							break;
 						}
 					}
@@ -624,7 +643,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				return true;
 			} else {
 				String msg = theContext.getLocalizer().getMessage(RuleImplOp.class, "invalidRequestBundleTypeForTransaction", '"' + bundleType + '"');
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(340) + msg);
 			}
 		}
 		return false;
@@ -656,9 +675,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 
-	@Override
-	public String toString() {
-		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	@Nonnull
+	protected ToStringBuilder toStringBuilder() {
+		ToStringBuilder builder = super.toStringBuilder();
 		builder.append("op", myOp);
 		builder.append("transactionAppliesToOp", myTransactionAppliesToOp);
 		builder.append("appliesTo", myAppliesTo);
@@ -666,7 +685,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("classifierCompartmentName", myClassifierCompartmentName);
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);
-		return builder.toString();
+		return builder;
 	}
 
 	void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
@@ -706,4 +725,5 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public void setAdditionalSearchParamsForCompartmentTypes(AdditionalCompartmentSearchParameters theAdditionalParameters) {
 		myAdditionalCompartmentSearchParamMap = theAdditionalParameters;
 	}
+
 }

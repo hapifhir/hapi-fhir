@@ -20,9 +20,11 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -122,7 +124,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Subclasses may change this behaviour by providing alternate behaviour.
 	 */
 	protected void fail(RequestDetails theRequestDetails, ValidationResult theValidationResult) {
-		throw new UnprocessableEntityException(theRequestDetails.getServer().getFhirContext(), theValidationResult.toOperationOutcome());
+		throw new UnprocessableEntityException(Msg.code(330) + theValidationResult.getMessages().get(0).getMessage(), theValidationResult.toOperationOutcome());
 	}
 
 	/**
@@ -306,8 +308,18 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 	 * Note: May return null
 	 */
 	protected ValidationResult validate(T theRequest, RequestDetails theRequestDetails) {
-		if (theRequest == null) {
+		if (theRequest == null || theRequestDetails == null) {
 			return null;
+		}
+
+		RestOperationTypeEnum opType = theRequestDetails.getRestOperationType();
+		if (opType != null) {
+			switch (opType) {
+				case GRAPHQL_REQUEST:
+					return null;
+				default:
+					break;
+			}
 		}
 
 		FhirValidator validator;
@@ -333,7 +345,7 @@ public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnric
 			if (e instanceof BaseServerResponseException) {
 				throw (BaseServerResponseException) e;
 			}
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(331) + e);
 		}
 
 		if (myAddResponseIssueHeaderOnSeverity != null) {

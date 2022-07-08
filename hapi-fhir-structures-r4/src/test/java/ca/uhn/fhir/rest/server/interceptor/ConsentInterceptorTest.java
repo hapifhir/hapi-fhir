@@ -1,7 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -11,38 +11,32 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptorTest;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -50,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,36 +57,47 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsentInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
-	private static CloseableHttpClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forR4();
-	private static int ourPort;
-	private static RestfulServer ourServlet;
-	private static Server ourServer;
-	private static DummyPatientResourceProvider ourPatientProvider;
-	private static IGenericClient ourFhirClient;
-	private static DummySystemProvider ourSystemProvider;
+	@RegisterExtension
+	private final HttpClientExtension myClient = new HttpClientExtension();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private int myPort;
+	private static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
+	private static final DummySystemProvider ourSystemProvider = new DummySystemProvider();
 
-	@Mock
+	@RegisterExtension
+	private static RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		.registerProvider(ourPatientProvider)
+		.registerProvider(ourSystemProvider)
+		.withPagingProvider(new FifoMemoryPagingProvider(10));
+
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
 	private IConsentService myConsentSvc;
+	@Mock(answer = Answers.CALLS_REAL_METHODS)
+	private IConsentService myConsentSvc2;
 	private ConsentInterceptor myInterceptor;
 	@Captor
 	private ArgumentCaptor<BaseServerResponseException> myExceptionCaptor;
+	private IGenericClient myFhirClient;
 
 	@AfterEach
 	public void after() {
-		ourServlet.unregisterInterceptor(myInterceptor);
+		ourServer.unregisterInterceptor(myInterceptor);
 	}
 
 	@BeforeEach
 	public void before() {
+		myPort = ourServer.getPort();
+		myFhirClient = ourServer.getFhirClient();
+
 		myInterceptor = new ConsentInterceptor(myConsentSvc);
-		ourServlet.registerInterceptor(myInterceptor);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
+
+		ourServer.registerInterceptor(myInterceptor);
 		ourPatientProvider.clear();
 	}
 
@@ -117,9 +121,9 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -147,12 +151,65 @@ public class ConsentInterceptorTest {
 
 		HttpGet httpGet;
 
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=accurate");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString(Msg.code(2037) + "_total=accurate is not permitted on this server"));
+		}
+
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=estimated");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"total\"")));
+		}
 
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=none");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"total\"")));
+		}
+	}
+
+	@Test
+	public void testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
+		Patient patientA = new Patient();
+		patientA.setId("Patient/A");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+		ourPatientProvider.store(patientA);
+
+		Patient patientB = new Patient();
+		patientB.setId("Patient/B");
+		patientB.setActive(true);
+		patientB.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientB.addIdentifier().setSystem("SYSTEM").setValue("VALUEB");
+		ourPatientProvider.store(patientB);
+
+		HttpGet httpGet;
+
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=count");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString(Msg.code(2038) + "_summary=count is not permitted on this server"));
+		}
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -160,8 +217,8 @@ public class ConsentInterceptorTest {
 		}
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -172,15 +229,15 @@ public class ConsentInterceptorTest {
 
 	@Test
 	public void testMetadataCallHasChecksSkipped() throws IOException{
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/metadata");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/metadata");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 		}
 
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/$meta");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		httpGet = new HttpGet("http://localhost:" + myPort + "/$meta");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -192,6 +249,35 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, times(2)).completeOperationSuccess(any(), any());
 	}
 
+
+	@Test
+	public void testSearch_ShouldProcessCanSeeResourcesReturnsFalse() throws IOException {
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("PTA"));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+
 	@Test
 	public void testSearch_SeeResourceAuthorizesOuterBundle() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
@@ -201,9 +287,9 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -211,6 +297,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -232,9 +319,9 @@ public class ConsentInterceptorTest {
 			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -242,6 +329,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, timeout(10000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, timeout(10000).times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(10000).times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(10000).times(1)).completeOperationSuccess(any(), any());
@@ -261,15 +349,16 @@ public class ConsentInterceptorTest {
 			return ConsentOutcome.REJECT;
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(204, status.getStatusLine().getStatusCode());
 			assertNull(status.getEntity());
 			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any()); // the two patients + the bundle
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -295,9 +384,9 @@ public class ConsentInterceptorTest {
 			return ConsentOutcome.PROCEED;
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -309,6 +398,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, timeout(1000).times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, timeout(1000).times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(1000).times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(1000).times(1)).completeOperationSuccess(any(), any());
@@ -334,9 +424,9 @@ public class ConsentInterceptorTest {
 			return ConsentOutcome.PROCEED;
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -349,6 +439,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(4)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -371,9 +462,9 @@ public class ConsentInterceptorTest {
 			return ConsentOutcome.PROCEED;
 		});
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -386,6 +477,7 @@ public class ConsentInterceptorTest {
 		}
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
@@ -403,8 +495,8 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
 
 			String nextPageLink;
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=1");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -427,7 +519,7 @@ public class ConsentInterceptorTest {
 		});
 
 		httpGet = new HttpGet(nextPageLink);
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -442,12 +534,214 @@ public class ConsentInterceptorTest {
 
 
 	@Test
+	public void testTwoServices_FirstRejectsCanSee() {
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.REJECT);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		Bundle response = myFhirClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertNull(response.getTotalElement().getValue());
+		assertEquals(0, response.getEntry().size());
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc2, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Test
+	public void testTwoServices_ShouldProcessCanSeeResourcesReturnsFalse_FirstSvcOnly() throws IOException {
+
+		// Setup
+
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.shouldProcessCanSeeResource(any(),any())).thenReturn(false);
+		when(myConsentSvc2.shouldProcessCanSeeResource(any(),any())).thenReturn(true);
+		when(myConsentSvc2.canSeeResource(any(),any(),any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc2.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.REJECT);
+
+		// Execute
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
+
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+
+			// Verify
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"entry\"")));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(2)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(2)).willSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testTwoServices_FirstAuthorizesCanSee() {
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		Bundle response = myFhirClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertNull(response.getTotalElement().getValue());
+		assertEquals(1, response.getEntry().size());
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(0)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc2, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Test
+	public void testTwoServices_SecondRejectsCanSee() {
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.REJECT);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		Bundle response = myFhirClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertNull(response.getTotalElement().getValue());
+		assertEquals(0, response.getEntry().size());
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc2, times(1)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Test
+	public void testTwoServices_ModificationsInWillSee() {
+		myInterceptor.registerConsentService(myConsentSvc2);
+
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc2.willSeeResource(any(), any(Patient.class), any())).thenAnswer(t->new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, t.getArgument(1, Patient.class).addIdentifier(new Identifier().setSystem("FOO"))));
+		when(myConsentSvc.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc2.willSeeResource(any(), any(Bundle.class), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		Bundle response = myFhirClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertNull(response.getTotalElement().getValue());
+		assertEquals(1, response.getEntry().size());
+
+		Patient patient = (Patient) response.getEntry().get(0).getResource();
+		assertEquals(2, patient.getIdentifier().size());
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+		verify(myConsentSvc2, times(1)).startOperation(any(), any());
+		verify(myConsentSvc, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc2, times(1)).shouldProcessCanSeeResource(any(), any());
+		verify(myConsentSvc, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc2, times(1)).canSeeResource(any(), any(), any());
+		verify(myConsentSvc, times(2)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc2, times(2)).willSeeResource(any(), any(), any()); // On bundle
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc2, times(1)).completeOperationSuccess(any(), any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
+		verify(myConsentSvc2, times(0)).completeOperationFailure(any(), any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+		verifyNoMoreInteractions(myConsentSvc2);
+	}
+
+	@Test
 	public void testOutcomeException() throws IOException {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchThrowNullPointerException=1");
+		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?searchThrowNullPointerException=1");
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
@@ -456,7 +750,34 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, times(0)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(1)).completeOperationFailure(any(), myExceptionCaptor.capture(), any());
 
-		assertEquals("Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
+		assertEquals(Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
+	}
+
+
+	@Test
+	public void testNoServicesRegistered() throws IOException {
+		myInterceptor.unregisterConsentService(myConsentSvc);
+
+		Patient patientA = new Patient();
+		patientA.setId("Patient/A");
+		patientA.setActive(true);
+		patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+		ourPatientProvider.store(patientA);
+
+		Patient patientB = new Patient();
+		patientB.setId("Patient/B");
+		patientB.setActive(true);
+		patientB.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patientB.addIdentifier().setSystem("SYSTEM").setValue("VALUEB");
+		ourPatientProvider.store(patientB);
+
+		Bundle response = myFhirClient
+			.search()
+			.forResource(Patient.class)
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(2, response.getTotal());
 	}
 
 	public static class DummyPatientResourceProvider extends HashMapResourceProvider<Patient> {
@@ -473,40 +794,6 @@ public class ConsentInterceptorTest {
 			throw new NullPointerException("A MESSAGE");
 		}
 
-	}
-
-	@AfterAll
-	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		ourClient.close();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
-		ourSystemProvider = new DummySystemProvider();
-
-		ServletHandler servletHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setDefaultPrettyPrint(true);
-		ourServlet.setResourceProviders(ourPatientProvider);
-		ourServlet.registerProvider(ourSystemProvider);
-		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
-
-		ourServer.setHandler(servletHandler);
-		ourServer.start();
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-		ourFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
 
 	private static class DummySystemProvider{

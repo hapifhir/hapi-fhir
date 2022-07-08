@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3612
+jira: SMILE-4112
+title: "Search with tag parameters using `:below` qualifier was not working. This is now fixed."

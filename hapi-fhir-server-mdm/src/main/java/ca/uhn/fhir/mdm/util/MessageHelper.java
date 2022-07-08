@@ -21,9 +21,9 @@ package ca.uhn.fhir.mdm.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +106,18 @@ public class MessageHelper {
 
 	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
 		return theSourceResource + " already has matched golden resource. Use $mdm-query-links to see more details.";
+	}
+
+	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
+		return theGoldenResourceId + " used as parameter [" + theParamName + "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
+	}
+
+	public String getMessageForMismatchPartition(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForMismatchPartition(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForMismatchPartition(String theGoldenRecord, String theSourceResource) {
+		return theGoldenRecord + " and " + theSourceResource + " are stored in different partitions. This operation is only available for resources on the same partition.";
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -279,7 +280,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			mergeGoldenPatients();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
+			assertEquals(Msg.code(752) + "A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
 		}
 	}
 
@@ -299,7 +300,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 			mergeGoldenPatients();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
+			assertEquals(Msg.code(752) + "A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
 		}
 	}
 

@@ -1,15 +1,13 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
-import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
+import javax.annotation.Nonnull;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 /*-
  * #%L
@@ -73,7 +71,7 @@ public class LoincLinguisticVariantsHandler implements IZipContentsHandlerCsv {
 		private String myIsoCountry;
 		private String myLanguageName;
 
-		public LinguisticVariant(@NotNull String theId, @NotNull String theIsoLanguage, @NotNull String theIsoCountry, @NotNull String theLanguageName) {
+		public LinguisticVariant(@Nonnull String theId, @Nonnull String theIsoLanguage, @Nonnull String theIsoCountry, @Nonnull String theLanguageName) {
 			this.myId = theId;
 			this.myIsoLanguage = theIsoLanguage;
 			this.myIsoCountry = theIsoCountry;

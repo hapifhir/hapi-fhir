@@ -22,11 +22,12 @@ package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -64,7 +65,7 @@ public class MdmResourceMatcherSvc {
 	public void init() {
 		myMdmRulesJson = myMdmSettings.getMdmRules();
 		if (myMdmRulesJson == null) {
-			throw new ConfigurationException("Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
+			throw new ConfigurationException(Msg.code(1521) + "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
 		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
@@ -91,10 +92,9 @@ public class MdmResourceMatcherSvc {
 		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.vector);
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
-			if (matchResult.isMatch() || matchResult.isPossibleMatch()) {
-				ourLog.debug("{} {} with field matchers {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getFieldMatchNamesForVector(matchResult.vector));
-			} else if (ourLog.isTraceEnabled()) {
-				ourLog.trace("{} {}.  Field matcher results: {}", matchResult, theRightResource.getIdElement().toUnqualifiedVersionless(), myMdmRulesJson.getDetailedFieldMatchResultForUnmatchedVector(matchResult.vector));
+				ourLog.debug("{} {}: {}", matchResult.getMatchResultEnum(), theRightResource.getIdElement().toUnqualifiedVersionless(), matchResult);
+			 if (ourLog.isTraceEnabled()) {
+				ourLog.trace("Field matcher results:\n{}", myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.vector));
 			}
 		}
 		return matchResult;
@@ -130,10 +130,13 @@ public class MdmResourceMatcherSvc {
 				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
 				continue;
 			}
-			ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
+			ourLog.trace("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
 			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1 << i);
+				ourLog.trace("Match: Successfully matched matcher {} with score {}.", fieldComparator.getName(), matchEvaluation.score);
+			} else {
+				ourLog.trace("No match: Matcher {} did not match (score: {}).", fieldComparator.getName(), matchEvaluation.score);
 			}
 			score += matchEvaluation.score;
 			appliedRuleCount += 1;

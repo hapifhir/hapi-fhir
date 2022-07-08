@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.search.elastic;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
@@ -28,12 +30,12 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.PutIndexTemplateRequest;
 import org.elasticsearch.common.settings.Settings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.engine.cfg.BackendSettings;
 import org.hibernate.search.mapper.orm.automaticindexing.session.AutomaticIndexingSynchronizationStrategyNames;
 import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
-import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
-import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Properties;
 
+import static org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings.Defaults.SCROLL_TIMEOUT;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -60,6 +63,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	private String myUsername;
 	private String myPassword;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
+	private long myScrollTimeoutSecs = SCROLL_TIMEOUT;
 	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;
 	private boolean myDebugPrettyPrintJsonLog = false;
 	private String myProtocol;
@@ -78,7 +82,8 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 		// the below properties are used for ElasticSearch integration
 		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
-		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER),
+			HapiHSearchAnalysisConfigurers.HapiElasticsearchAnalysisConfigurer.class.getName());
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myHosts);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
 
@@ -96,6 +101,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		// Only for unit tests
 		theProperties.put(HibernateOrmMapperSettings.AUTOMATIC_INDEXING_SYNCHRONIZATION_STRATEGY, myDebugSyncStrategy);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.SCROLL_TIMEOUT), Long.toString(myScrollTimeoutSecs));
 
 		//This tells elasticsearch to use our custom index naming strategy.
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
@@ -128,6 +134,11 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
+	public ElasticsearchHibernatePropertiesBuilder setScrollTimeoutSecs(long theScrollTimeoutSecs) {
+		myScrollTimeoutSecs = theScrollTimeoutSecs;
+		return this;
+	}
+
 	public ElasticsearchHibernatePropertiesBuilder setDebugIndexSyncStrategy(String theSyncStrategy) {
 		myDebugSyncStrategy = theSyncStrategy;
 		return this;
@@ -156,7 +167,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 			assert acknowledgedResponse.isAcknowledged();
 		} catch (IOException theE) {
 			theE.printStackTrace();
-			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
+			throw new ConfigurationException(Msg.code(1169) + "Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
 		}
 	}
 }

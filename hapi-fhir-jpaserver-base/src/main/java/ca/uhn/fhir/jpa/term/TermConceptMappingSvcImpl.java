@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
@@ -46,6 +47,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -117,16 +120,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	@Override
 	@Transactional
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
-
-		CodeableConcept sourceCodeableConcept = new CodeableConcept();
-		sourceCodeableConcept
-			.addCoding()
-			.setSystem(theRequest.getSourceSystemUrl())
-			.setCode(theRequest.getSourceCode());
-
-		TranslationRequest request = new TranslationRequest();
-		request.setCodeableConcept(sourceCodeableConcept);
-		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		TranslationRequest request = TranslationRequest.fromTranslateCodeRequest(theRequest);
+		if (request.hasReverse() && request.getReverseAsBoolean()) {
+			return translateWithReverse(request);
+		}
 
 		return translate(request);
 	}
@@ -197,7 +194,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					termConceptMap.setTarget(target);
 				}
 			} catch (FHIRException fe) {
-				throw new InternalErrorException(fe);
+				throw new InternalErrorException(Msg.code(837) + fe);
 			}
 			termConceptMap = myConceptMapDao.save(termConceptMap);
 			int codesSaved = 0;
@@ -210,7 +207,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					groupSource = source;
 				}
 				if (isBlank(groupSource)) {
-					throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
+					throw new UnprocessableEntityException(Msg.code(838) + "ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.source");
 				}
 
 				String groupTarget = group.getTarget();
@@ -218,7 +215,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					groupTarget = target;
 				}
 				if (isBlank(groupTarget)) {
-					throw new UnprocessableEntityException("ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
+					throw new UnprocessableEntityException(Msg.code(839) + "ConceptMap[url='" + theConceptMap.getUrl() + "'] contains at least one group without a value in ConceptMap.group.target");
 				}
 
 				termConceptMapGroup = new TermConceptMapGroup();
@@ -273,7 +270,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					"cannotCreateDuplicateConceptMapUrl",
 					conceptMapUrl,
 					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(840) + msg);
 
 			} else {
 				String msg = myContext.getLocalizer().getMessage(
@@ -281,7 +278,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					"cannotCreateDuplicateConceptMapUrlAndVersion",
 					conceptMapUrl, conceptMapVersion,
 					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
+				throw new UnprocessableEntityException(Msg.code(841) + msg);
 			}
 		}
 
@@ -322,7 +319,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 				if (coding.hasCode()) {
 					predicates.add(criteriaBuilder.equal(elementJoin.get("myCode"), coding.getCode()));
 				} else {
-					throw new InvalidRequestException("A code must be provided for translation to occur.");
+					throw new InvalidRequestException(Msg.code(842) + "A code must be provided for translation to occur.");
 				}
 
 				if (coding.hasSystem()) {
@@ -448,7 +445,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
 					targetCode = coding.getCode();
 				} else {
-					throw new InvalidRequestException("A code must be provided for translation to occur.");
+					throw new InvalidRequestException(Msg.code(843) + "A code must be provided for translation to occur.");
 				}
 
 				if (coding.hasSystem()) {

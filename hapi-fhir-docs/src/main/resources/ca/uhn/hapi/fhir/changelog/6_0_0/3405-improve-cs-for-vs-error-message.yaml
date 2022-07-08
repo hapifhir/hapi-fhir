@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3405
+title: "When validating a code, a helpful error message is now returned if the user has supplied a
+  ValueSet URL where a CodeSystem URL should be used, since this is a common mistake."

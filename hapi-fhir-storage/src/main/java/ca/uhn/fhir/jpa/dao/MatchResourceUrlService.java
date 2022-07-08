@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -112,7 +112,7 @@ public class MatchResourceUrlService {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
 			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
-				throw new InvalidRequestException("Invalid match URL[" + matchUrl + "] - URL has no search parameters");
+				throw new InvalidRequestException(Msg.code(518) + "Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 			}
 			paramMap.setLoadSynchronousUpTo(2);
 
@@ -165,7 +165,7 @@ public class MatchResourceUrlService {
 	private <R extends IBaseResource> IFhirResourceDao<R> getResourceDao(Class<R> theResourceType) {
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
-			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
+			throw new InternalErrorException(Msg.code(519) + "No DAO for resource type: " + theResourceType.getName());
 		}
 		return dao;
 	}
@@ -185,7 +185,7 @@ public class MatchResourceUrlService {
 	@Nullable
 	public ResourcePersistentId processMatchUrlUsingCacheOnly(String theResourceType, String theMatchUrl) {
 		ResourcePersistentId existing = null;
-		if (myDaoConfig.getMatchUrlCache()) {
+		if (myDaoConfig.isMatchUrlCacheEnabled()) {
 			String matchUrl = massageForStorage(theResourceType, theMatchUrl);
 			existing = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.MATCH_URL, matchUrl);
 		}
@@ -196,7 +196,7 @@ public class MatchResourceUrlService {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
+		List<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
@@ -208,7 +208,8 @@ public class MatchResourceUrlService {
 				.add(StorageProcessingMessage.class, message);
 			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
-		return retVal;
+
+		return new HashSet<>(retVal);
 	}
 
 

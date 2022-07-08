@@ -1,0 +1,4 @@
+type: add
+issue: 3547
+jira: SMILE-4141
+title: "Added a new pointcut: `STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID` which is invoked when a user attempts to create a resource with a client-assigned ID. "

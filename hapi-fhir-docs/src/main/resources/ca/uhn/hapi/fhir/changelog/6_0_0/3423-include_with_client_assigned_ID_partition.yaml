@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3423
+jira: SMILE-3664
+title: "Fixed a bug when searching for the resource persistent id in the partitioned environment. This happens when the Cross-Partition Reference Mode is set to ALLOWED_UNQUALIFIED and it is searching for the wrong partition id and resulted in resource persistent id not found."

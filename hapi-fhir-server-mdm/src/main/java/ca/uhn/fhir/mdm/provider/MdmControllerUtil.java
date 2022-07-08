@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -57,9 +58,8 @@ public class MdmControllerUtil {
 
 	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
 		IdDt goldenResourceId = new IdDt(theId);
-		//TODO GGG MDM: maybe add a gate here to only consider resources that can possibly be EMPI'ed?
 		if (goldenResourceId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
+			throw new InvalidRequestException(Msg.code(1505) + theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
 		return goldenResourceId;
 	}
@@ -67,7 +67,7 @@ public class MdmControllerUtil {
 	public static IIdType getSourceIdDtOrThrowException(String theParamName, String theSourceId) {
 		IdDt sourceId = new IdDt(theSourceId);
 		if (sourceId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theSourceId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
+			throw new InvalidRequestException(Msg.code(1506) + theParamName + " is '" + theSourceId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
 		return sourceId;
 	}

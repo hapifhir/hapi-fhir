@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.demo;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.binstore.DatabaseBlobBinaryStorageSvcImpl;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.dstu3.JpaDstu3Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -52,8 +52,8 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement()
-@Import(CommonConfig.class)
-public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
+@Import({CommonConfig.class, JpaDstu3Config.class, HapiJpaConfig.class,})
+public class FhirServerConfigDstu3 {
 
 	@Autowired
 	private DataSource myDataSource;
@@ -61,10 +61,9 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory) {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory(theConfigurableListableBeanFactory);
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("HAPI_PU");
 		retVal.setDataSource(myDataSource);
 		retVal.setJpaProperties(myJpaProperties);
@@ -89,13 +88,13 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
 	 * @return
 	 */
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public IServerInterceptor subscriptionSecurityInterceptor() {
 		SubscriptionsRequireManualActivationInterceptorDstu3 retVal = new SubscriptionsRequireManualActivationInterceptorDstu3();
 		return retVal;

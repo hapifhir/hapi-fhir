@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -28,7 +29,7 @@ import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -77,10 +78,10 @@ abstract class BasePredicateBuilder {
 	}
 
 	void addPredicateParamMissingForReference(String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		From<?, SearchParamPresent> paramPresentJoin = myQueryStack.createJoin(SearchBuilderJoinEnum.PRESENCE, null);
+		From<?, SearchParamPresentEntity> paramPresentJoin = myQueryStack.createJoin(SearchBuilderJoinEnum.PRESENCE, null);
 
 		Expression<Long> hashPresence = paramPresentJoin.get("myHashPresence").as(Long.class);
-		Long hash = SearchParamPresent.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
+		Long hash = SearchParamPresentEntity.calculateHashPresence(myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
 
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(myCriteriaBuilder.equal(hashPresence, hash));
@@ -173,7 +174,7 @@ abstract class BasePredicateBuilder {
 			case STARTS_AFTER:
 			default:
 				String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1069) + msg);
 		}
 
 		if (theParamName == null) {

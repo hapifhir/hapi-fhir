@@ -28,20 +28,19 @@ public class MailSvcIT {
 	@RegisterExtension
 	static GreenMailExtension ourGreenMail = new GreenMailExtension(ServerSetupTest.SMTP);
 
-	private MailSvc fixture;
+	private IMailSvc fixture;
 
 	@BeforeEach
 	public void setUp() {
-		fixture = new MailSvc();
+		fixture = new MailSvc(withMailConfig());
 	}
 
 	@Test
 	public void testSendSingleMail() throws Exception {
 		// setup
-		final MailConfig mailConfig = withMailConfig();
 		final Email email = withEmail();
 		// execute
-		fixture.sendMail(mailConfig, email);
+		fixture.sendMail(email);
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
@@ -53,10 +52,9 @@ public class MailSvcIT {
 	@Test
 	public void testSendMultipleMail() throws Exception {
 		// setup
-		final MailConfig mailConfig = withMailConfig();
 		final List<Email> emails = Arrays.asList(withEmail(), withEmail(), withEmail());
 		// execute
-		fixture.sendMail(mailConfig, emails);
+		fixture.sendMail(emails);
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, emails.size()));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
@@ -72,10 +70,11 @@ public class MailSvcIT {
 	@Test
 	public void testSendMailWithInvalidToAddress() {
 		// setup
-		final MailConfig mailConfig = withMailConfig();
 		final Email email = withEmail("xyz");
+
 		// execute
-		fixture.sendMail(mailConfig, email);
+		fixture.sendMail(email);
+
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
@@ -85,10 +84,9 @@ public class MailSvcIT {
 	@Test
 	public void testSendMailWithInvalidToAddressExpectErrorHandler() {
 		// setup
-		final MailConfig mailConfig = withMailConfig();
 		final Email email = withEmail("xyz");
 		// execute
-		fixture.sendMail(mailConfig, email,
+		fixture.sendMail(email,
 			() -> fail("Should not execute on Success"),
 			(e) -> {
 				assertTrue(e instanceof MailException);

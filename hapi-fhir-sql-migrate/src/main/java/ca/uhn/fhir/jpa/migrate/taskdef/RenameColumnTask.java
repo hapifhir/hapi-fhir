@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -84,7 +85,7 @@ public class RenameColumnTask extends BaseTableTask {
 					return jdbcTemplate.query(sql, new ColumnMapRowMapper()).size();
 				});
 				if (rowsWithData != null && rowsWithData > 0) {
-					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
+					throw new SQLException(Msg.code(54) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
 				if (getDriverType().equals(DriverTypeEnum.MYSQL_5_7) || mySimulateMySQLForTest) {
@@ -105,13 +106,13 @@ public class RenameColumnTask extends BaseTableTask {
 				String sql = DropColumnTask.createSql(getTableName(), myNewName);
 				executeSql(getTableName(), sql);
 			} else {
-				throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
+				throw new SQLException(Msg.code(55) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
 			}
 		} else if (!haveOldName && !haveNewName) {
 			if (isOkayIfNeitherColumnExists()) {
 				return;
 			}
-			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
+			throw new SQLException(Msg.code(56) + "Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
 		} else if (haveNewName) {
 			logInfo(ourLog, "Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
@@ -124,7 +125,7 @@ public class RenameColumnTask extends BaseTableTask {
 			existingType = getSqlType(existingColumnType.getColumnTypeEnum(), existingColumnType.getLength());
 			notNull = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), myOldName) ? " null " : " not null";
 		} catch (SQLException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(57) + e);
 		}
 		String sql = buildRenameColumnSqlStatement(existingType, notNull);
 
@@ -146,6 +147,7 @@ public class RenameColumnTask extends BaseTableTask {
 				break;
 			case POSTGRES_9_4:
 			case ORACLE_12C:
+			case COCKROACHDB_21_1:
 				sql = "ALTER TABLE " + getTableName() + " RENAME COLUMN " + myOldName + " TO " + myNewName;
 				break;
 			case MSSQL_2012:
@@ -155,7 +157,7 @@ public class RenameColumnTask extends BaseTableTask {
 				sql = "ALTER TABLE " + getTableName() + " ALTER COLUMN " + myOldName + " RENAME TO " + myNewName;
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(58));
 		}
 		return sql;
 	}

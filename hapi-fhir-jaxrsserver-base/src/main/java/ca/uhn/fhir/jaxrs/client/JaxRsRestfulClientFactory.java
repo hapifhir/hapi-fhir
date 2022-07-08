@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +90,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
   */
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
-		throw new UnsupportedOperationException("Proxies are not supported yet in JAX-RS client");
+		throw new UnsupportedOperationException(Msg.code(605) + "Proxies are not supported yet in JAX-RS client");
 	}
   
   /**

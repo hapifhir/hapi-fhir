@@ -26,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 
+import javax.annotation.Nullable;
+
 public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 
 	private static final long serialVersionUID = 1L;
@@ -58,4 +60,9 @@ public abstract class BaseJsonMessage<T> implements Message<T>, IModelJson {
 	public void setHeaders(HapiMessageHeaders theHeaders) {
 		myHeaders = theHeaders;
 	}
+
+	@Nullable
+    public String getMessageKeyOrNull() {
+		return null;
+    }
 }

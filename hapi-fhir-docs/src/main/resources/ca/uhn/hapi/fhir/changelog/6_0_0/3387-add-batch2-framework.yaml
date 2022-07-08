@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3387
+title: "A new batch operation framework for executing long running background jobs has been created. This new
+  framework is called 'Batch2', and will eventually replace Spring Batch. This framework is intended to be
+  much more resilient to failures as well as much more paralellized than Spring Batch jobs."

@@ -22,14 +22,15 @@ package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,10 +42,11 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+
 	/**
 	 * @return Returns all active search params for the given resource
 	 */
-	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
+	ResourceSearchParams getActiveSearchParams(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed now, in the current thread
@@ -52,14 +54,11 @@ public interface ISearchParamRegistry {
 	default void forceRefresh() {
 	}
 
-	;
-
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	default void requestRefresh() {
 	}
-
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
@@ -85,11 +84,11 @@ public interface ISearchParamRegistry {
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
 		TreeSet<String> retval;
-		Map<String, RuntimeSearchParam> searchParamMap = getActiveSearchParams(theResourceName);
-		if (searchParamMap == null) {
+		ResourceSearchParams activeSearchParams = getActiveSearchParams(theResourceName);
+		if (activeSearchParams == null) {
 			retval = new TreeSet<>();
 		} else {
-			retval = new TreeSet<>(searchParamMap.keySet());
+			retval = new TreeSet<>(activeSearchParams.getSearchParamNames());
 		}
 		retval.add(IAnyResource.SP_RES_ID);
 		retval.add(Constants.PARAM_LASTUPDATED);
@@ -103,4 +102,23 @@ public interface ISearchParamRegistry {
 	 */
 	@Nullable
 	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl);
+
+	/**
+	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
+	 *
+	 * @param theResourceType the resource type.
+	 * @param theParamName the search parameter name.
+	 *
+	 * @return the {@link RuntimeSearchParam} that is found.
+	 */
+	default RuntimeSearchParam getRuntimeSearchParam(String theResourceType, String theParamName) {
+		RuntimeSearchParam availableSearchParamDef = getActiveSearchParam(theResourceType, theParamName);
+		if (availableSearchParamDef == null) {
+			availableSearchParamDef = getActiveSearchParam("Resource", theParamName);
+		}
+		if (availableSearchParamDef == null) {
+			throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
+		}
+		return availableSearchParamDef;
+	}
 }

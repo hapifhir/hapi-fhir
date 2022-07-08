@@ -8,7 +8,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -35,12 +35,14 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected StringType myPractitionerGoldenResourceId;
 
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
 		myPractitionerGoldenResource = getGoldenResourceFromTargetResource(myPractitioner);
 		myPractitionerGoldenResourceId = new StringType(myPractitionerGoldenResource.getIdElement().getValue());
+
+		setMdmRuleJson("mdm/nickname-mdm-rules.json");
 	}
 
 	@Test
@@ -73,7 +75,8 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {
+		} catch (ResourceGoneException e) {
+			// Expected exception
 		}
 
 	}
@@ -161,7 +164,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
-		} catch (ResourceNotFoundException e) {
+		} catch (ResourceGoneException e) {
 		}
 	}
 
@@ -171,7 +174,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("$mdm-clear does not support resource type: Observation")));
+			assertThat(e.getMessage(), is(equalTo("HAPI-1500: $mdm-clear does not support resource type: Observation")));
 		}
 	}
 

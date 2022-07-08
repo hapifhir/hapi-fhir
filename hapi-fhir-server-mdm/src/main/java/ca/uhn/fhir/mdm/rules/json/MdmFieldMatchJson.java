@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
@@ -113,7 +114,7 @@ public class MdmFieldMatchJson implements IModelJson {
 		if (mySimilarity != null) {
 			return mySimilarity.match(theFhirContext, theLeftValue, theRightValue);
 		}
-		throw new InternalErrorException("Field Match " + myName + " has neither a matcher nor a similarity.");
+		throw new InternalErrorException(Msg.code(1522) + "Field Match " + myName + " has neither a matcher nor a similarity.");
 	}
 
 	public String getFhirPath() {

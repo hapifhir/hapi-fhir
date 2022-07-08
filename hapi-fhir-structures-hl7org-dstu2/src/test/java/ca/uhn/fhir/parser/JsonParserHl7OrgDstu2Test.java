@@ -515,7 +515,7 @@ public class JsonParserHl7OrgDstu2Test {
 	}
 
 	@Test
-	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+	public void testEncodeContainedWithNarrative() throws Exception {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 
 		// Create an organization, note that the organization does not have an ID
@@ -532,7 +532,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 		
 	}

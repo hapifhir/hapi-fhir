@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -94,8 +95,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			Class<?> collectionType = ReflectionUtil.getGenericCollectionTypeOfMethodReturnType(theMethod);
 			if (collectionType != null) {
 				if (!Object.class.equals(collectionType) && !IBaseResource.class.isAssignableFrom(collectionType)) {
-					throw new ConfigurationException(
-						"Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
+					throw new ConfigurationException(Msg.code(433) + "Method " + theMethod.getDeclaringClass().getSimpleName() + "#" + theMethod.getName() + " returns an invalid collection generic type: " + collectionType);
 				}
 			}
 
@@ -113,8 +113,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		} else if (void.class.equals(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.VOID;
 		} else {
-			throw new ConfigurationException(
-				"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
+			throw new ConfigurationException(Msg.code(434) + "Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
 		}
 
 		if (theReturnResourceType != null) {
@@ -240,7 +239,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
 				if (!(next instanceof IBaseOperationOutcome)) {
-					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
+					throw new InternalErrorException(Msg.code(435) + "Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
 		}
@@ -393,9 +392,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			case RESOURCE: {
 				IBundleProvider result = (IBundleProvider) resultObj;
 				if (result.size() == 0) {
-					throw new ResourceNotFoundException(theRequest.getId());
+					throw new ResourceNotFoundException(Msg.code(436) + "Resource " + theRequest.getId() + " is not known");
 				} else if (result.size() > 1) {
-					throw new InternalErrorException("Method returned multiple resources");
+					throw new InternalErrorException(Msg.code(437) + "Method returned multiple resources");
 				}
 
 				IBaseResource resource = result.getResources(0, 1).get(0);
@@ -403,7 +402,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				break;
 			}
 			default:
-				throw new IllegalStateException(); // should not happen
+				throw new IllegalStateException(Msg.code(438)); // should not happen
 		}
 		return responseObject;
 	}
@@ -430,26 +429,28 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
-
 		IBaseResource response = doInvokeServer(theServer, theRequest);
+		/*
+		 When we write directly to an HttpServletResponse, the invocation returns null. However, we still want to invoke
+		 the SERVER_OUTGOING_RESPONSE pointcut.
+		*/
 		if (response == null) {
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			callOutgoingResponseHook(theRequest, responseDetails);
 			return null;
+		} else {
+			Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
+			ResponseDetails responseDetails = new ResponseDetails();
+			responseDetails.setResponseResource(response);
+			responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
+			if (!callOutgoingResponseHook(theRequest, responseDetails)) {
+				return null;
+			}
+			boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
+
+			return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
 		}
-
-		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
-
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(response);
-		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
-
-		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
-			return null;
-		}
-
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		return theRequest.getResponse().streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), isAddContentLocationHeader());
-
 	}
 
 	public abstract Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws InvalidRequestException, InternalErrorException;

@@ -18,6 +18,9 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_GIVEN_FIRST = "patient-given-first";
 	public static final String PATIENT_FAMILY = "patient-last";
+	public static final String PATIENT_EID_FOR_TEST = "http://hello.com/naming/patient-eid";
+	public static final String MEDICATION_EID_FOR_TEST= "http://hello.com/naming/medication-eid";
+	public static final String PRACTITIONER_EID_FOR_TEST = "http://hello.com/naming/practitioner-eid";
 
 	public static final double NAME_THRESHOLD = 0.8;
 	protected MdmFieldMatchJson myGivenNameMatchField;
@@ -71,6 +74,10 @@ public abstract class BaseMdmRulesR4Test extends BaseR4Test {
 		retval.setMdmTypes(Arrays.asList("Patient", "Practitioner", "Medication"));
 		retval.putMatchResult(myBothNameFields, MdmMatchResultEnum.MATCH);
 		retval.putMatchResult(PATIENT_GIVEN, MdmMatchResultEnum.POSSIBLE_MATCH);
+
+		retval.addEnterpriseEIDSystem("Patient", PATIENT_EID_FOR_TEST);
+		retval.addEnterpriseEIDSystem("Medication", MEDICATION_EID_FOR_TEST);
+		retval.addEnterpriseEIDSystem("Practitioner", PRACTITIONER_EID_FOR_TEST);
 		return retval;
 	}
 }

@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3756
+title: "The IAuthRuleTester api has changed and now uses a parameter object for flexibility."

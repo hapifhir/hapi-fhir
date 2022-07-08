@@ -20,6 +20,7 @@ package org.hl7.fhir.r5.hapi.ctx;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -85,7 +86,7 @@ public class FhirR5 implements IFhirVersion {
 			str = FhirR5.class.getResourceAsStream(path);
 		}
 		if (str == null) {
-			throw new ConfigurationException("Can not find model property file on classpath: " + path);
+			throw new ConfigurationException(Msg.code(200) + "Can not find model property file on classpath: " + path);
 		}
 		return str;
 	}

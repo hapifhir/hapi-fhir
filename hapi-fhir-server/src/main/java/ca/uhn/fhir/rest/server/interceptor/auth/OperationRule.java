@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Set;
 
 class OperationRule extends BaseRule implements IAuthRule {
-
 	private String myOperationName;
 	private boolean myAppliesToServer;
 	private HashSet<Class<? extends IBaseResource>> myAppliesToTypes;
@@ -200,7 +199,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 	}
 
 	/**
@@ -210,4 +209,39 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myOperationName = theOperationName;
 	}
 
+	String getOperationName() {
+		return myOperationName;
+	}
+
+	boolean isAppliesToServer() {
+		return myAppliesToServer;
+	}
+
+	HashSet<Class<? extends IBaseResource>> getAppliesToTypes() {
+		return myAppliesToTypes;
+	}
+
+	List<IIdType> getAppliesToIds() {
+		return myAppliesToIds;
+	}
+
+	HashSet<Class<? extends IBaseResource>> getAppliesToInstancesOfType() {
+		return myAppliesToInstancesOfType;
+	}
+
+	boolean isAppliesToAnyType() {
+		return myAppliesToAnyType;
+	}
+
+	boolean isAppliesToAnyInstance() {
+		return myAppliesToAnyInstance;
+	}
+
+	boolean isAppliesAtAnyLevel() {
+		return myAppliesAtAnyLevel;
+	}
+
+	boolean isAllowAllResponses() {
+		return myAllowAllResponses;
+	}
 }

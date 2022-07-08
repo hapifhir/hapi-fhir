@@ -20,12 +20,15 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,20 +53,42 @@ public class CandidateSearcher {
 	 *
 	 * @param theResourceType     the type of resources searched on
 	 * @param theResourceCriteria the criteria used to search for the candidates
+	 * @param partitionId         the partition for the search
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
-	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria) {
+	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
 		SearchParameterMap searchParameterMap = myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
 		searchParameterMap.setLoadSynchronousUpTo(myMdmSettings.getCandidateSearchLimit());
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider retval = resourceDao.search(searchParameterMap);
+		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
+		systemRequestDetails.setRequestPartitionId(partitionId);
+		IBundleProvider retval = resourceDao.search(searchParameterMap, systemRequestDetails);
 
 		if (retval.size() != null && retval.size() >= myMdmSettings.getCandidateSearchLimit()) {
 			return Optional.empty();
 		}
 		return Optional.of(retval);
+	}
+
+	/**
+	 * Perform a search for mdm candidates.
+	 *
+	 * @param theResourceType     the type of resources searched on
+	 * @param theResourceCriteria the criteria used to search for the candidates
+	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
+	 * return the bundle provider for the search results.
+	 */
+	public Optional<IBundleProvider> search(String theResourceType, String theResourceCriteria) {
+		return this.search(theResourceType, theResourceCriteria, RequestPartitionId.allPartitions());
+	}
+
+	public static String idOrType(IAnyResource theResource, String theResourceType) {
+		if (theResource.getIdElement() == null) {
+			return theResourceType;
+		}
+		return theResource.getIdElement().toUnqualifiedVersionless().toString();
 	}
 }

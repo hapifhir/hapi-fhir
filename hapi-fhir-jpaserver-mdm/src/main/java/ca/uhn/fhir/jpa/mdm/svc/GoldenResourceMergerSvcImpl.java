@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -31,6 +33,7 @@ import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -54,9 +57,13 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
+	@Autowired
+	MessageHelper myMessageHelper;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
 	@Transactional
@@ -65,9 +72,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 		String resourceType = theMdmTransactionContext.getResourceType();
 
-		if (theMergedResource != null ) {
+		if (theMergedResource != null) {
 			if (myGoldenResourceHelper.hasIdentifier(theMergedResource)) {
-				throw new IllegalArgumentException("Manually merged resource can not contain identifiers");
+				throw new IllegalArgumentException(Msg.code(751) + "Manually merged resource can not contain identifiers");
 			}
 			myGoldenResourceHelper.mergeIndentifierFields(theFromGoldenResource, theMergedResource, theMdmTransactionContext);
 			myGoldenResourceHelper.mergeIndentifierFields(theToGoldenResource, theMergedResource, theMdmTransactionContext);
@@ -80,6 +87,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			//Save changes to the golden resource
 			myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
 		}
+
+		// check if the golden resource and the source resource are in the same partition, throw error if not
+		myMdmPartitionHelper.validateResourcesInSamePartition(theFromGoldenResource, theToGoldenResource);
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
@@ -115,7 +125,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	/**
 	 * Helper method which performs merger of links between resources, and cleans up dangling links afterwards.
-	 *
+	 * <p>
 	 * For each incomingLink, either ignore it, move it, or replace the original one
 	 * 1. If the link already exists on the TO resource, and it is an automatic link, ignore the link, and subsequently delete it.
 	 * 2. If the link does not exist on the TO resource, redirect the link from the FROM resource to the TO resource
@@ -147,7 +157,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 							break;
 						case MANUAL:
 							if (fromLink.getMatchResult() != toLink.getMatchResult()) {
-								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
+								throw new InvalidRequestException(Msg.code(752) + "A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
 							}
 					}
 				} else {
