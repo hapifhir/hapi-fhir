@@ -91,4 +91,9 @@ public interface IBaseInterceptorService<POINTCUT extends IPointcut> extends IBa
 	 * Unregisters all interceptors that are indicated by the given callback function returning <code>true</code>
 	 */
 	void unregisterInterceptorsIf(Predicate<Object> theShouldUnregisterFunction);
+
+	/**
+	 * Unregisters all anonymous interceptors (i.e. all interceptors registered with <code>registerAnonymousInterceptor</code>)
+	 */
+	void unregisterAllAnonymousInterceptors();
 }

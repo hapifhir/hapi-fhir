@@ -85,7 +85,7 @@ public class Constants {
 	public static final String EXTOP_VALIDATE_RESOURCE = "resource";
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
-        public static final String FORMAT_NDJSON = "ndjson";
+	public static final String FORMAT_NDJSON = "ndjson";
 	public static final String FORMAT_XML = "xml";
 	public static final String CT_RDF_TURTLE_LEGACY = "text/turtle";
 	public static final String FORMAT_TURTLE = "ttl";
@@ -144,6 +144,7 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
 	public static final String LINK_FHIR_BASE = "fhir-base";
 	public static final String LINK_FIRST = "first";
@@ -217,7 +218,9 @@ public class Constants {
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final String PARAMQUALIFIER_MDM = ":mdm";
+	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
+	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -284,6 +287,7 @@ public class Constants {
 	 * key will be of type {@link ca.uhn.fhir.interceptor.model.RequestPartitionId}.
 	 */
 	public static final String RESOURCE_PARTITION_ID = Constants.class.getName() + "_RESOURCE_PARTITION_ID";
+	public static final String PARTITION_IDS = "partitionIds";
 	public static final String CT_APPLICATION_GZIP = "application/gzip";
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 	public static final String SUBSCRIPTION_MULTITYPE_PREFIX = "[";
@@ -291,6 +295,10 @@ public class Constants {
 	public static final String SUBSCRIPTION_MULTITYPE_STAR = "*";
 	public static final String SUBSCRIPTION_STAR_CRITERIA = SUBSCRIPTION_MULTITYPE_PREFIX + SUBSCRIPTION_MULTITYPE_STAR + SUBSCRIPTION_MULTITYPE_SUFFIX;
 	public static final String INCLUDE_STAR = "*";
+	public static final String PARAMQUALIFIER_TOKEN_IN = ":in";
+	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
+	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
+	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

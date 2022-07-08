@@ -62,6 +62,10 @@ public class UrlUtil {
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
+	public static String sanitizeBaseUrl(String theBaseUrl) {
+		return theBaseUrl.replaceAll("[^a-zA-Z0-9:/._-]", "");
+	}
+
 	public static class UrlParts {
 		private String myParams;
 		private String myResourceId;
@@ -346,10 +350,6 @@ public class UrlUtil {
 		String url = theUrl;
 		UrlParts retVal = new UrlParts();
 		if (url.startsWith("http")) {
-			if (url.startsWith("/")) {
-				url = url.substring(1);
-			}
-
 			int qmIdx = url.indexOf('?');
 			if (qmIdx != -1) {
 				retVal.setParams(defaultIfBlank(url.substring(qmIdx + 1), null));
@@ -372,10 +372,7 @@ public class UrlUtil {
 			}
 		}
 
-		if (url.length() > 1 && url.charAt(0) == '/' && Character.isLetter(url.charAt(1)) && url.contains("?")) {
-			url = url.substring(1);
-		}
-		int nextStart = 0;
+		int nextStart = parsingStart;
 		boolean nextIsHistory = false;
 
 		for (int idx = parsingStart; idx < url.length(); idx++) {

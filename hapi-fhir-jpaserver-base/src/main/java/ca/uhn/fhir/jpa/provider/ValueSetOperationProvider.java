@@ -20,24 +20,30 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,8 +69,16 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 	@Autowired
-	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT_CHAIN)
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
+	@Autowired
+	private IValidationSupport myValidationSupport;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearch;
+
+	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
 
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
@@ -90,6 +104,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
 		@OperationParam(name = "filter", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theFilter,
+		@OperationParam(name = "context", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContext,
+		@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContextDirection,
 		@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
 		@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
 		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
@@ -99,6 +115,25 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
 		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
+		boolean haveContextDirection = theContextDirection != null && !theContextDirection.isEmpty();
+		boolean haveContext = theContext != null && !theContext.isEmpty();
+
+		boolean isAutocompleteExtension = haveContext && haveContextDirection && "existing".equals(theContextDirection.getValue());
+
+		if (isAutocompleteExtension) {
+			// this is a funky extension for NIH.  Do our own thing and return.
+			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
+			startRequest(theServletRequest);
+			try {
+				if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
+					throw new InvalidRequestException(Msg.code(2083) +  " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
+				} else {
+					return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+				}
+			} finally {
+				endRequest(theServletRequest);
+			}
+		}
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
 			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
@@ -114,17 +149,33 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		try {
 
 			IFhirResourceDaoValueSet<IBaseResource, ICompositeType, ICompositeType> dao = getDao();
+
+			IValidationSupport.ValueSetExpansionOutcome outcome;
 			if (haveId) {
-				return dao.expand(theId, options, theRequestDetails);
+				IBaseResource valueSet = dao.read(theId, theRequestDetails);
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, valueSet);
 			} else if (haveIdentifier) {
+				String url;
 				if (haveValueSetVersion) {
-					return dao.expandByIdentifier(theUrl.getValue() + "|" + theValueSetVersion.getValue(), options);
+					url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
 				} else {
-					return dao.expandByIdentifier(theUrl.getValue(), options);
+					url = theUrl.getValue();
 				}
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, url);
 			} else {
-				return dao.expand(theValueSet, options);
+				outcome = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theValueSet);
 			}
+
+			if (outcome == null) {
+				throw new InternalErrorException(Msg.code(2028) + "No validation support module was able to expand the given valueset");
+			}
+
+			if (outcome.getError() != null) {
+				throw new PreconditionFailedException(Msg.code(2029) + outcome.getError());
+			}
+
+			return outcome.getValueSet();
+
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -265,3 +316,4 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return false;
 	}
 }
+

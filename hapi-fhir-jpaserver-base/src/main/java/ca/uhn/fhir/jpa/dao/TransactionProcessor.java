@@ -24,7 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -33,7 +35,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -50,6 +51,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -81,12 +83,14 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	public static final Pattern SINGLE_PARAMETER_MATCH_URL_PATTERN = Pattern.compile("^[^?]+[?][a-z0-9-]+=[^&,]+$");
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
+	@Autowired
+	private ApplicationContext myApplicationContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
@@ -272,39 +276,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				}
 			}
 
+			IFhirSystemDao<?,?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
+			systemDao.preFetchResources(ResourcePersistentId.fromLongList(idsToPreFetch));
 
-			new QueryChunker<Long>().chunk(idsToPreFetch, ids-> {
-				/*
-				 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
-				 * number of database round trips.
-				 *
-				 * The thresholds below are kind of arbitrary. It's not
-				 * actually guaranteed that this pre-fetching will help (e.g. if a Bundle contains
-				 * a bundle of NOP conditional creates for example, the pre-fetching is actually loading
-				 * more data than would otherwise be loaded).
-				 *
-				 * However, for realistic average workloads, this should reduce the number of round trips.
-				 */
-				if (ids.size() > 2) {
-					List<ResourceTable> loadedResourceTableEntries = preFetchIndexes(ids, "forcedId", "myForcedId");
-
-					if (loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).count() > 1) {
-						preFetchIndexes(ids, "string", "myParamsString");
-					}
-					if (loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).count() > 1) {
-						preFetchIndexes(ids, "token", "myParamsToken");
-					}
-					if (loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).count() > 1) {
-						preFetchIndexes(ids, "date", "myParamsDate");
-					}
-					if (loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).count() > 1) {
-						preFetchIndexes(ids, "quantity", "myParamsQuantity");
-					}
-					if (loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).count() > 1) {
-						preFetchIndexes(ids, "resourceLinks", "myResourceLinks");
-					}
-				}
-			});
 		}
 
 		return super.doTransactionWriteOperations(theRequest, theActionName, theTransactionDetails, theAllIds, theIdSubstitutions, theIdToPersistedOutcome, theResponse, theOriginalRequestOrder, theEntries, theTransactionStopWatch);
@@ -353,21 +327,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		nextSearchParameterMap.setResolved(true);
 	}
 
-	private List<ResourceTable> preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName) {
-		List<ResourceTable> retVal = new ArrayList<>();
-		new QueryChunker<Long>().chunk(theIds, ids-> {
-			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
-			query.setParameter("IDS", ids);
-			List<ResourceTable> indexFetchOutcome = query.getResultList();
-			ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
-			if (indexFetchOutcome != null) {
-				retVal.addAll(indexFetchOutcome);
-			}
-		});
-
-		return retVal;
-	}
-
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
@@ -401,8 +360,13 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@VisibleForTesting
-	public void setIdHelperServiceForUnitTest(IdHelperService theIdHelperService) {
+	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
+	}
+
+	@VisibleForTesting
+	public void setApplicationContextForUnitTest(ApplicationContext theAppCtx) {
+		myApplicationContext = theAppCtx;
 	}
 
 	private static class MatchUrlToResolve {

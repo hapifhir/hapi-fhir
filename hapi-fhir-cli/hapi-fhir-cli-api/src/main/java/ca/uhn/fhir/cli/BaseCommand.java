@@ -20,9 +20,9 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -50,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.Console;
 import java.io.File;
@@ -343,7 +344,18 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 	}
 
+	public Integer getAndParseNonNegativeIntegerParam(CommandLine theCommandLine, String theName) throws ParseException {
+		int minimum = 0;
+		return doGetAndParseIntegerParam(theCommandLine, theName, minimum);
+	}
+
 	public Integer getAndParsePositiveIntegerParam(CommandLine theCommandLine, String theName) throws ParseException {
+		int minimum = 1;
+		return doGetAndParseIntegerParam(theCommandLine, theName, minimum);
+	}
+
+	@Nullable
+	private Integer doGetAndParseIntegerParam(CommandLine theCommandLine, String theName, int minimum) throws ParseException {
 		String value = theCommandLine.getOptionValue(theName);
 		value = trim(value);
 		if (isBlank(value)) {
@@ -352,12 +364,12 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 		try {
 			int valueInt = Integer.parseInt(value);
-			if (valueInt < 1) {
-				throw new ParseException(Msg.code(1576) + "Value for argument " + theName + " must be a positive integer, got: " + value);
+			if (valueInt < minimum) {
+				throw new ParseException(Msg.code(1576) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 			}
 			return valueInt;
 		} catch (NumberFormatException e) {
-			throw new ParseException(Msg.code(1577) + "Value for argument " + theName + " must be a positive integer, got: " + value);
+			throw new ParseException(Msg.code(1577) + "Value for argument " + theName + " must be an integer >= " + minimum + ", got: " + value);
 		}
 	}
 

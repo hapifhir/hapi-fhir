@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -25,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
-
 	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
@@ -38,11 +38,14 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Autowired
 	IInterceptorService myInterceptorService;
+	@Autowired
+	MdmSettings myMdmSettings;
+
 	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
@@ -59,11 +62,14 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
 
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
+		myMdmSettings.setEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);
+		myMdmSettings.setEnabled(false);
 		super.after();
 	}
 

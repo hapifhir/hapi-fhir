@@ -58,8 +58,8 @@ public class SearchParameterUtil {
 	 * 1. Attempt to find one called 'patient'
 	 * 2. If that fails, find one called 'subject'
 	 * 3. If that fails, find find by Patient Compartment.
-	 *    3.1 If that returns >1 result, throw an error
-	 *    3.2 If that returns 1 result, return it
+	 * 3.1 If that returns >1 result, throw an error
+	 * 3.2 If that returns 1 result, return it
 	 */
 	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeSearchParam myPatientSearchParam = null;
@@ -110,9 +110,23 @@ public class SearchParameterUtil {
 	}
 
 
+	/**
+	 * Return true if any search parameter in the resource can point at a patient, false otherwise
+	 */
+	public static boolean isResourceTypeInPatientCompartment(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition).size() > 0;
+	}
+
+
 	@Nullable
 	public static String getCode(FhirContext theContext, IBaseResource theResource) {
 		return getStringChild(theContext, theResource, "code");
+	}
+
+	@Nullable
+	public static String getURL(FhirContext theContext, IBaseResource theResource) {
+		return getStringChild(theContext, theResource, "url");
 	}
 
 	@Nullable
@@ -132,5 +146,16 @@ public class SearchParameterUtil {
 			.map(t -> ((IPrimitiveType<?>) t))
 			.map(t -> t.getValueAsString())
 			.orElse(null);
+	}
+
+	public static String stripModifier(String theSearchParam) {
+		String retval;
+		int colonIndex = theSearchParam.indexOf(":");
+		if (colonIndex == -1) {
+			retval = theSearchParam;
+		} else {
+			retval = theSearchParam.substring(0, colonIndex);
+		}
+		return retval;
 	}
 }

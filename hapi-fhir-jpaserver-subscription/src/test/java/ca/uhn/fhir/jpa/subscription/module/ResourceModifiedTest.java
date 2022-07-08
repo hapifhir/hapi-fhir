@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ResourceModifiedTest {
@@ -50,7 +51,7 @@ public class ResourceModifiedTest {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 		assertEquals("Organization/testOrgId", msg.getPayloadId(myFhirContext).getValue());
 		assertEquals(ResourceModifiedMessage.OperationTypeEnum.DELETE, msg.getOperationType());
-		assertNull(msg.getNewPayload(myFhirContext));
+		assertNotNull(msg.getNewPayload(myFhirContext));
 		assertEquals(msg.getPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 

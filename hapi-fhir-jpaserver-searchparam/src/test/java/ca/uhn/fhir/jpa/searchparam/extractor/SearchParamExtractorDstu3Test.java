@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -36,14 +37,15 @@ import org.junit.jupiter.api.Test;
 import javax.annotation.Nullable;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParamExtractorDstu3Test {
@@ -104,6 +106,24 @@ public class SearchParamExtractorDstu3Test {
 		assertEquals(1, params.size());
 		// Normalized to days
 		assertEquals("2", params.iterator().next().getValue().toPlainString());
+	}
+
+	@Test
+	public void testPathSplitOnSpsWorks() {
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ourCtx, searchParamRegistry);
+		String threeSegmentPath = "Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')";
+
+		String[] expressions = extractor.split(threeSegmentPath);
+		assertThat(expressions.length, is(equalTo(3)));
+		assertThat(expressions[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
+		assertThat(expressions[1], containsString("Patient.telecom.where(system='email')"));
+		assertThat(expressions[2], containsString("Patient.telecom.where(system='mail' | system='phone')"));
+
+		String zeroPathSplit = "Patient.telecom.where(system='phone' or system='email')";
+		String[] singularExpression = extractor.split(zeroPathSplit);
+		assertThat(singularExpression.length, is(equalTo(1)));
+		assertThat(singularExpression[0], containsString("Patient.telecom.where(system='phone' or system='email')"));
 	}
 
 	@Test
@@ -255,16 +275,16 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+		public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-			Map<String, RuntimeSearchParam> sps = new HashMap<>();
+			ResourceSearchParams retval = new ResourceSearchParams(theResourceName);
 			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				sps.put(nextSp.getName(), nextSp);
+				retval.put(nextSp.getName(), nextSp);
 			}
 			for (RuntimeSearchParam next : myAddedSearchParams) {
-				sps.put(next.getName(), next);
+				retval.put(next.getName(), next);
 			}
-			return sps;
+			return retval;
 		}
 
 		@Override

@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -50,9 +49,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -103,8 +100,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
+
 	@Autowired
-	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
+	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Autowired
 	private IBatchJobSubmitter myJobSubmitter;
@@ -112,10 +110,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Autowired
 	private JobOperator myJobOperator;
 
-	@Autowired @Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
+	@Autowired
+	@Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
 	private org.springframework.batch.core.Job myTermCodeSystemDeleteJob;
 
-	@Autowired @Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+	@Autowired
+	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
 	private org.springframework.batch.core.Job myTermCodeSystemVersionDeleteJob;
 
 
@@ -189,7 +189,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			TermConcept next = myDeferredConcepts.remove(0);
 			if (myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
 				try {
-					codeCount += myCodeSystemStorageSvc.saveConcept(next);
+					codeCount += myTermConceptDaoSvc.saveConcept(next);
 				} catch (Exception theE) {
 					ourLog.error("Exception thrown when attempting to save TermConcept {} in Code System {}",
 						next.getCode(), next.getCodeSystemVersion().getCodeSystemDisplayName(), theE);
@@ -262,13 +262,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private void clearJobExecutions() {
 		for (JobExecution jobExecution : myCurrentJobExecutions) {
-			if (! jobExecution.isRunning()) { continue; }
+			if (!jobExecution.isRunning()) {
+				continue;
+			}
 
 			try {
 				myJobOperator.stop(jobExecution.getId());
-
-			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException theE) {
-				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), theE);
+			} catch (Exception e) {
+				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), e);
 			}
 		}
 
@@ -367,7 +368,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private void deleteTermCodeSystemVersionOffline(Long theCodeSystemVersionPid) {
 		JobParameters jobParameters = new JobParameters(
 			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersionPid, true) ));
+				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersionPid, true)));
 
 		try {
 
@@ -384,7 +385,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
 		JobParameters jobParameters = new JobParameters(
 			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true) ));
+				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true)));
 
 		try {
 
@@ -411,7 +412,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isJobsExecuting() {
-		return  myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
+		return myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
 	}
 
 
@@ -465,9 +466,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myTransactionMgr = theTxManager;
 	}
 
+
 	@VisibleForTesting
-	void setCodeSystemStorageSvcForUnitTest(ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
-		myCodeSystemStorageSvc = theCodeSystemStorageSvc;
+	void setTermConceptDaoSvc(TermConceptDaoSvc theTermConceptDaoSvc) {
+		myTermConceptDaoSvc = theTermConceptDaoSvc;
 	}
 
 	@VisibleForTesting

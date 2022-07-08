@@ -28,8 +28,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
-import ca.uhn.fhir.jpa.binstore.NullBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -483,7 +483,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
 				return bytes;
 			} catch (IOException | URISyntaxException e) {
-				throw new InternalErrorException(Msg.code(2024) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 			}
 		} else {
 			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();

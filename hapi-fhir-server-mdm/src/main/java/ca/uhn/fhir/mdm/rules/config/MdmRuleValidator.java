@@ -20,14 +20,14 @@ package ca.uhn.fhir.mdm.rules.config;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
-import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +151,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, theSearchParam) == null) {
+		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
+		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, searchParam) == null) {
 			throw new ConfigurationException(Msg.code(1511) + "Error in " + theFieldName + ": " + theResourceType + " does not have a search parameter called '" + theSearchParam + "'");
 		}
 	}

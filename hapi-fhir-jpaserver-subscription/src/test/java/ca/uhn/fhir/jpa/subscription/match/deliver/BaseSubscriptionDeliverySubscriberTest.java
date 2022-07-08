@@ -5,11 +5,15 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
+import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -18,11 +22,11 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -31,7 +35,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
+import javax.annotation.Nonnull;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -49,12 +56,18 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSubscriptionDeliverySubscriberTest.class);
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
+	private SubscriptionDeliveringMessageSubscriber myMessageSubscriber;
 	private final FhirContext myCtx = FhirContext.forR4();
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
 	protected SubscriptionRegistry mySubscriptionRegistry;
+	@Mock
+	private IChannelFactory myChannelFactory;
+	@Mock
+	private IChannelProducer myChannelProducer;
+
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private IRestfulClientFactory myRestfulClientFactory;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -66,6 +79,11 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		mySubscriber.setFhirContextForUnitTest(myCtx);
 		mySubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 		mySubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+
+		myMessageSubscriber = new SubscriptionDeliveringMessageSubscriber(myChannelFactory);
+		myMessageSubscriber.setFhirContextForUnitTest(myCtx);
+		myMessageSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
@@ -194,7 +212,6 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ourLog.info(jsonString);
 
 
-
 		// Assert that the partitionID is being serialized in JSON
 		assertThat(jsonString, containsString("\"partitionDate\":[2020,1,1]"));
 		assertThat(jsonString, containsString("\"partitionIds\":[123]"));
@@ -224,6 +241,30 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
+	public void testDeliveryMessageWithPartition() throws URISyntaxException {
+		RequestPartitionId thePartitionId = RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1));
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), any())).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+
+		CanonicalSubscription subscription = generateSubscription();
+		Patient patient = generatePatient();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+		payload.setPartitionId(thePartitionId);
+
+		myMessageSubscriber.handleMessage(payload);
+		verify(myChannelFactory).getOrCreateProducer(any(), any(), any());
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		final List<ResourceModifiedJsonMessage> params = captor.getAllValues();
+		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
+	}
+
+	@Test
 	public void testSerializeLegacyDeliveryMessage() throws JsonProcessingException {
 		String legacyDeliveryMessageJson = "{\"headers\":{\"retryCount\":0,\"customHeaders\":{}},\"payload\":{\"operationType\":\"CREATE\",\"canonicalSubscription\":{\"id\":\"Subscription/123\",\"endpointUrl\":\"http://example.com/fhir\",\"payload\":\"application/fhir+json\"},\"payload\":\"{\\\"resourceType\\\":\\\"Patient\\\",\\\"active\\\":true}\"}}";
 
@@ -235,14 +276,14 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 
-	@NotNull
+	@Nonnull
 	private Patient generatePatient() {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		return patient;
 	}
 
-	@NotNull
+	@Nonnull
 	private CanonicalSubscription generateSubscription() {
 		CanonicalSubscription subscription = new CanonicalSubscription();
 		subscription.setIdElement(new IdType("Subscription/123"));
@@ -250,4 +291,5 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		subscription.setPayloadString("application/fhir+json");
 		return subscription;
 	}
+
 }

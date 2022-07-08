@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3716
+title: "Server was blocking updates with Forbidden 403 that included a resource version in the url without
+the X-Rewrite-History header.  This has been corrected."

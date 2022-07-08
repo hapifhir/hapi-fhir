@@ -24,7 +24,6 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.configuration.support.ApplicationContextJobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 

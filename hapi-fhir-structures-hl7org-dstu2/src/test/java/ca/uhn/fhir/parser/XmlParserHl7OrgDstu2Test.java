@@ -14,13 +14,39 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Address;
 import org.hl7.fhir.dstu2.model.Address.AddressUse;
 import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.dstu2.model.Binary;
+import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.CodeableConcept;
+import org.hl7.fhir.dstu2.model.Composition;
+import org.hl7.fhir.dstu2.model.Condition;
+import org.hl7.fhir.dstu2.model.DateTimeType;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.DecimalType;
+import org.hl7.fhir.dstu2.model.DiagnosticReport;
+import org.hl7.fhir.dstu2.model.DocumentManifest;
+import org.hl7.fhir.dstu2.model.EnumFactory;
+import org.hl7.fhir.dstu2.model.Enumeration;
 import org.hl7.fhir.dstu2.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.dstu2.model.Extension;
+import org.hl7.fhir.dstu2.model.HumanName;
+import org.hl7.fhir.dstu2.model.Identifier;
 import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2.model.InstantType;
+import org.hl7.fhir.dstu2.model.MedicationStatement;
 import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.dstu2.model.Observation;
+import org.hl7.fhir.dstu2.model.Organization;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.PrimitiveType;
+import org.hl7.fhir.dstu2.model.Reference;
+import org.hl7.fhir.dstu2.model.Resource;
+import org.hl7.fhir.dstu2.model.SimpleQuantity;
+import org.hl7.fhir.dstu2.model.Specimen;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -343,7 +369,7 @@ public class XmlParserHl7OrgDstu2Test {
   /**
    * See #216 - Profiled datatypes should use their unprofiled parent type as
    * the choice[x] name
-   * 
+   * <p>
    * Disabled after conversation with Grahame
    */
   @Test
@@ -763,7 +789,7 @@ public class XmlParserHl7OrgDstu2Test {
   }
 
   @Test
-  public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+  public void testEncodeContainedWithNarrative() throws Exception {
     IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
     // Create an organization, note that the organization does not have an ID
@@ -782,11 +808,11 @@ public class XmlParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
     assertThat(encoded, stringContainsInOrder("<Patient", "<text>",
-        "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
+       "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
     assertThat(encoded,
-        not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+       stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization"));
 
-    assertThat(encoded, not(containsString("FOOBAR")));
+    assertThat(encoded, (containsString("FOOBAR")));
     assertThat(encoded, (containsString("BARFOO")));
 
   }

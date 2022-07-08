@@ -1,5 +1,6 @@
 package ca.uhn.fhirtest;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4Config;
@@ -263,14 +266,12 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*
-		 * Bulk Export
+		 * Register some providers
 		 */
 		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
-
-		/*
-		 * $diff operation
-		 */
+		registerProvider(myAppCtx.getBean(ReindexProvider.class));
 		registerProvider(myAppCtx.getBean(DiffProvider.class));
+		registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 		/*
 		 * OpenAPI
@@ -282,6 +283,8 @@ public class TestRestfulServer extends RestfulServer {
 		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
 		registerInterceptor(loggingInterceptor);
 
+		// SQL Capturing
+		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
 	}
 
 	/**

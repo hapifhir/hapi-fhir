@@ -1,22 +1,37 @@
 /**
- * Extended fhir indexing for Hibernate Search using Lucene/Elasticsearch.
- *
+ * <h1>Extended fhir indexing for Hibernate Search using Lucene/Elasticsearch.
+ * <p>
  * By default, Lucene indexing only provides support for _text, and _content search parameters using
  * {@link ca.uhn.fhir.jpa.model.entity.ResourceTable#myNarrativeText} and
  * {@link ca.uhn.fhir.jpa.model.entity.ResourceTable#myContentText}.
- *
- * Both {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} and {@link ca.uhn.fhir.jpa.dao.LegacySearchBuilder} delegate the
- * search to {@link ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl} when active.
- * The fulltext search runs first and interprets any search parameters it understands, returning a pid list.
- * This pid list is used as a narrowing where clause against the remaining unprocessed search parameters.
- *
  * This package extends this search to support token, string, and reference parameters via {@link ca.uhn.fhir.jpa.model.entity.ResourceTable#myLuceneIndexData}.
  * When active, the extracted search parameters which are written to the HFJ_SPIDX_* tables are also written to the Lucene index document.
+ * For now, we use the existing JPA index entities to populate the {@link ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData}
+ * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchIndexExtractor#extract(org.hl7.fhir.instance.model.api.IBaseResource, ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams)} ()}
  *
- * @see ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter
- * @see ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData
+ * <h2>Implementation</h2>
+ * Both {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} and {@link ca.uhn.fhir.jpa.dao.LegacySearchBuilder} delegate the
+ * search to {@link ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl#doSearch} when active.
+ * The fulltext search runs first and interprets any search parameters it understands, returning a pid list.
+ * This pid list is used as a narrowing where clause against the remaining unprocessed search parameters in a jdbc query.
+ * The actual queries for the different search types (e.g. token, string, modifiers, etc.) are
+ * generated in {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder}.
+ * <p>
+ *    Full resource bodies can be stored in the Hibernate Search index.
+ *    The {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection} is used to extract these.
+ *    This is currently restricted to LastN, and misses tag changes from $meta-add and $meta-delete since those don't
+ *    update Hibernate Search.
+ * </p>
  *
- * Activated by {@link ca.uhn.fhir.jpa.api.config.DaoConfig#setAdvancedLuceneIndexing(boolean)}.
+ * <h2>Operation</h2>
+ * During startup, Hibernate Search uses {@link ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder} to generate a schema.
+ *
+ * @see ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData
+ * @see ca.uhn.fhir.jpa.model.search.HSearchIndexWriter
+ * @see ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder
+ * @see ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder
+ *
+ * Activated by {@link ca.uhn.fhir.jpa.api.config.DaoConfig#setAdvancedHSearchIndexing(boolean)}.
  */
 package ca.uhn.fhir.jpa.dao.search;
 

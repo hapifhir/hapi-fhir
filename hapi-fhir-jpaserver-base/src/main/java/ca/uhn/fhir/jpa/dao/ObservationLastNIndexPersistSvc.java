@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
@@ -32,10 +32,16 @@ import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class ObservationLastNIndexPersistSvc {
 
@@ -103,7 +109,7 @@ public class ObservationLastNIndexPersistSvc {
 
 		indexedObservation.setEffectiveDtm(theEffectiveDtm);
 		indexedObservation.setIdentifier(resourcePID);
-		if (myConfig.isStoreResourceInLuceneIndex()) {
+		if (myConfig.isStoreResourceInHSearchIndex()) {
 			indexedObservation.setResource(encodeResource(theResource));
 		}
 		indexedObservation.setSubject(theSubjectId);
@@ -134,7 +140,6 @@ public class ObservationLastNIndexPersistSvc {
 		myElasticsearchSvc.createOrUpdateObservationCodeIndex(codeableConceptField.getCodeableConceptId(), codeableConceptField);
 
 		theIndexedObservation.setCode(codeableConceptField);
-		theIndexedObservation.setCode_concept_id(codeableConceptField.getCodeableConceptId());
 	}
 
 	private void addCategoriesToObservationIndex(List<IBase> observationCategoryCodeableConcepts,

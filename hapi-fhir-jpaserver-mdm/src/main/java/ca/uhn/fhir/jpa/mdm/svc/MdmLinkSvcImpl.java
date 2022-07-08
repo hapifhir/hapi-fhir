@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,7 +40,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * This class is in charge of managing MdmLinks between Golden Resources and source resources
@@ -54,13 +57,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private IdHelperService myIdHelperService;
-	@Autowired
-	private IMdmModelConverterSvc myMdmModelConverterSvc;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+	public void updateLink(@Nonnull IAnyResource theGoldenResource, @Nonnull IAnyResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
 		if (theMatchOutcome.isPossibleDuplicate() && goldenResourceLinkedAsNoMatch(theGoldenResource, theSourceResource)) {
 			log(theMdmTransactionContext, theGoldenResource.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
@@ -99,6 +100,13 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		}
 	}
 
+	@Override
+	@Transactional
+	public void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> theGoldenResourceIds) {
+		List<Long> goldenResourcePids = theGoldenResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		myMdmLinkDaoSvc.deleteLinksWithAnyReferenceToPids(goldenResourcePids);
+	}
+
 	/**
 	 * Helper function which runs various business rules about what types of requests are allowed.
 	 */
@@ -131,10 +139,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		if (theGoldenResource.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
-			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(
-				myIdHelperService.getPidOrNull(theGoldenResource),
-				myIdHelperService.getPidOrNull(theCandidate)
-			);
+			return myMdmLinkDaoSvc.getLinkByGoldenResourceAndSourceResource(theGoldenResource, theCandidate);
 		}
 	}
 

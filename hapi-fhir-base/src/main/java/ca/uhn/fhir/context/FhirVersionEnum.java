@@ -47,6 +47,8 @@ public enum FhirVersionEnum {
 
 	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
 
+	// If you add new constants, add to the various methods below too!
+
 	private final FhirVersionEnum myEquivalent;
 	private final boolean myIsRi;
 	private final String myVersionClass;
@@ -145,6 +147,29 @@ public enum FhirVersionEnum {
 
 	private interface IVersionProvider {
 		String provideVersion();
+	}
+
+	/**
+	 * Given a FHIR model object type, determine which version of FHIR it is for
+	 */
+	public static FhirVersionEnum determineVersionForType(Class<?> theFhirType) {
+		switch (theFhirType.getName()) {
+			case "ca.uhn.fhir.model.api.BaseElement":
+				return DSTU2;
+			case "org.hl7.fhir.dstu2.model.Base":
+				return DSTU2_HL7ORG;
+			case "org.hl7.fhir.dstu3.model.Base":
+				return DSTU3;
+			case "org.hl7.fhir.r4.model.Base":
+				return R4;
+			case "org.hl7.fhir.r5.model.Base":
+				return R5;
+			case "java.lang.Object":
+				return null;
+			default:
+				return determineVersionForType(theFhirType.getSuperclass());
+		}
+
 	}
 
 	private static class Version implements IVersionProvider {

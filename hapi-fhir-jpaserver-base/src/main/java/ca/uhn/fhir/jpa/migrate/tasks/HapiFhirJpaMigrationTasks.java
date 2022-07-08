@@ -37,12 +37,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.util.VersionEnum;
 
-import javax.persistence.Index;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,11 +51,10 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-	private final Set<FlagEnum> myFlags;
-
 	// H2, Derby, MariaDB, and MySql automatically add indexes to foreign keys
-	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[] {
-		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012 };
+	public static final DriverTypeEnum[] NON_AUTOMATIC_FK_INDEX_PLATFORMS = new DriverTypeEnum[]{
+		DriverTypeEnum.POSTGRES_9_4, DriverTypeEnum.ORACLE_12C, DriverTypeEnum.MSSQL_2012};
+	private final Set<FlagEnum> myFlags;
 
 
 	/**
@@ -83,23 +83,495 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init550(); // 20210520 -
 		init560(); // 20211027 -
 		init570(); // 20211102 -
+		init600(); // 20211102 -
+		init610();
 	}
 
+	private void init610() {
+		Builder version = forVersion(VersionEnum.V6_1_0);
+
+		// add new REPORT column to BATCH2 tables
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220601.1", "REPORT")
+			.nullable()
+			.type(ColumnTypeEnum.CLOB);
+	}
+
+	private void init600() {
+		Builder version = forVersion(VersionEnum.V6_0_0);
+
+		/**
+		 * New indexing for the core SPIDX tables.
+		 * Ensure all queries can be satisfied by the index directly,
+		 * either as left or right table in a hash or sort join.
+		 *
+		 * new date search indexing
+		 * @see ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder
+		 * @see ResourceIndexedSearchParamDate
+		 */
+		{
+			Builder.BuilderWithTableName dateTable = version.onTable("HFJ_SPIDX_DATE");
+
+			// replace and drop IDX_SP_DATE_HASH
+			dateTable
+				.addIndex("20220207.1", "IDX_SP_DATE_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
+			dateTable.dropIndexOnline("20220207.2", "IDX_SP_DATE_HASH");
+
+			// drop redundant
+			dateTable.dropIndexOnline("20220207.3", "IDX_SP_DATE_HASH_LOW");
+
+			// replace and drop IDX_SP_DATE_HASH_HIGH
+			dateTable
+				.addIndex("20220207.4", "IDX_SP_DATE_HASH_HIGH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH", "RES_ID", "PARTITION_ID");
+			dateTable.dropIndexOnline("20220207.5", "IDX_SP_DATE_HASH_HIGH");
+
+			// replace and drop IDX_SP_DATE_ORD_HASH
+			dateTable
+				.addIndex("20220207.6", "IDX_SP_DATE_ORD_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+			dateTable.dropIndexOnline("20220207.7", "IDX_SP_DATE_ORD_HASH");
+
+			// replace and drop IDX_SP_DATE_ORD_HASH_HIGH
+			dateTable
+				.addIndex("20220207.8", "IDX_SP_DATE_ORD_HASH_HIGH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE_HIGH_DATE_ORDINAL", "RES_ID", "PARTITION_ID");
+			dateTable.dropIndexOnline("20220207.9", "IDX_SP_DATE_ORD_HASH_HIGH");
+
+			// drop redundant
+			dateTable.dropIndexOnline("20220207.10", "IDX_SP_DATE_ORD_HASH_LOW");
+
+			// replace and drop IDX_SP_DATE_RESID
+			dateTable
+				.addIndex("20220207.11", "IDX_SP_DATE_RESID_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL", "PARTITION_ID");
+			// some engines tie the FK constraint to a particular index.
+			// So we need to drop and recreate the constraint to drop the old RES_ID index.
+			// Rename it while we're at it.  FK17s70oa59rm9n61k9thjqrsqm was not a pretty name.
+			dateTable.dropForeignKey("20220207.12", "FK17S70OA59RM9N61K9THJQRSQM", "HFJ_RESOURCE");
+			dateTable.dropIndexOnline("20220207.13", "IDX_SP_DATE_RESID");
+			dateTable.dropIndexOnline("20220207.14", "FK17S70OA59RM9N61K9THJQRSQM");
+
+			dateTable.addForeignKey("20220207.15", "FK_SP_DATE_RES")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
+			// drop obsolete
+			dateTable.dropIndexOnline("20220207.16", "IDX_SP_DATE_UPDATED");
+		}
+
+		/**
+		 * new token search indexing
+		 * @see ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder
+		 * @see ResourceIndexedSearchParamToken
+		 */
+		{
+			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_TOKEN");
+
+			// replace and drop IDX_SP_TOKEN_HASH for sorting
+			tokenTable
+				.addIndex("20220208.1", "IDX_SP_TOKEN_HASH_V2")
+				.unique(false).online(true)
+				.withColumns("HASH_IDENTITY", "SP_SYSTEM", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			tokenTable.dropIndexOnline("20220208.2", "IDX_SP_TOKEN_HASH");
+
+			// for search by system
+			tokenTable
+				.addIndex("20220208.3", "IDX_SP_TOKEN_HASH_S_V2")
+				.unique(false).online(true)
+				.withColumns("HASH_SYS", "RES_ID", "PARTITION_ID");
+
+			tokenTable.dropIndexOnline("20220208.4", "IDX_SP_TOKEN_HASH_S");
+
+			// for search by system+value
+			tokenTable
+				.addIndex("20220208.5", "IDX_SP_TOKEN_HASH_SV_V2")
+				.unique(false).online(true)
+				.withColumns("HASH_SYS_AND_VALUE", "RES_ID", "PARTITION_ID");
+
+			tokenTable.dropIndexOnline("20220208.6", "IDX_SP_TOKEN_HASH_SV");
+
+			// for search by value
+			tokenTable
+				.addIndex("20220208.7", "IDX_SP_TOKEN_HASH_V_V2")
+				.unique(false).online(true)
+				.withColumns("HASH_VALUE", "RES_ID", "PARTITION_ID");
+
+			tokenTable.dropIndexOnline("20220208.8", "IDX_SP_TOKEN_HASH_V");
+
+			// obsolete.  We're dropping this column.
+			tokenTable.dropIndexOnline("20220208.9", "IDX_SP_TOKEN_UPDATED");
+
+			// for joining as second table:
+			{
+				// replace and drop IDX_SP_TOKEN_RESID, and the associated fk constraint
+				tokenTable
+					.addIndex("20220208.10", "IDX_SP_TOKEN_RESID_V2")
+					.unique(false).online(true)
+					.withColumns("RES_ID", "HASH_SYS_AND_VALUE", "HASH_VALUE", "HASH_SYS", "HASH_IDENTITY", "PARTITION_ID");
+
+				// some engines tie the FK constraint to a particular index.
+				// So we need to drop and recreate the constraint to drop the old RES_ID index.
+				// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+				tokenTable.dropForeignKey("20220208.11", "FK7ULX3J1GG3V7MAQREJGC7YBC4", "HFJ_RESOURCE");
+				tokenTable.dropIndexOnline("20220208.12", "IDX_SP_TOKEN_RESID");
+				tokenTable.dropIndexOnline("20220208.13", "FK7ULX3J1GG3V7MAQREJGC7YBC4");
+
+				tokenTable.addForeignKey("20220208.14", "FK_SP_TOKEN_RES")
+					.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+			}
+		}
+
+		// fix for https://github.com/hapifhir/hapi-fhir/issues/3316
+		// index must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+
+		version.onTable("TRM_VALUESET_C_DESIGNATION")
+			.addIndex("20220223.1", "FK_TRM_VALUESET_CONCEPT_PID")
+			.unique(false)
+			.withColumns("VALUESET_CONCEPT_PID")
+			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+
+		// Batch2 Framework
+
+		Builder.BuilderAddTableByColumns batchInstance = version.addTableByColumns("20220227.1", "BT2_JOB_INSTANCE", "ID");
+		batchInstance.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchInstance.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchInstance.addColumn("JOB_CANCELLED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PARAMS_JSON").nullable().type(ColumnTypeEnum.STRING, 2000);
+		batchInstance.addColumn("PARAMS_JSON_LOB").nullable().type(ColumnTypeEnum.CLOB);
+		batchInstance.addColumn("CMB_RECS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("CMB_RECS_PER_SEC").nullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("TOT_ELAPSED_MILLIS").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("WORK_CHUNKS_PURGED").nonNullable().type(ColumnTypeEnum.BOOLEAN);
+		batchInstance.addColumn("PROGRESS_PCT").nullable().type(ColumnTypeEnum.DOUBLE);
+		batchInstance.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchInstance.addColumn("ERROR_COUNT").nullable().type(ColumnTypeEnum.INT);
+		batchInstance.addColumn("EST_REMAINING").nullable().type(ColumnTypeEnum.STRING, 100);
+		batchInstance.addIndex("20220227.2", "IDX_BT2JI_CT").unique(false).withColumns("CREATE_TIME");
+
+		Builder.BuilderAddTableByColumns batchChunk = version.addTableByColumns("20220227.3", "BT2_WORK_CHUNK", "ID");
+		batchChunk.addColumn("ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("SEQ").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("CREATE_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("START_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("END_TIME").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batchChunk.addColumn("DEFINITION_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("DEFINITION_VER").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("STAT").nonNullable().type(ColumnTypeEnum.STRING, 20);
+		batchChunk.addColumn("RECORDS_PROCESSED").nullable().type(ColumnTypeEnum.INT);
+		batchChunk.addColumn("TGT_STEP_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("CHUNK_DATA").nullable().type(ColumnTypeEnum.CLOB);
+		batchChunk.addColumn("INSTANCE_ID").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		batchChunk.addColumn("ERROR_MSG").nullable().type(ColumnTypeEnum.STRING, 500);
+		batchChunk.addColumn("ERROR_COUNT").nonNullable().type(ColumnTypeEnum.INT);
+		batchChunk.addIndex("20220227.4", "IDX_BT2WC_II_SEQ").unique(false).withColumns("INSTANCE_ID", "SEQ");
+		batchChunk.addForeignKey("20220227.5", "FK_BT2WC_INSTANCE").toColumn("INSTANCE_ID").references("BT2_JOB_INSTANCE", "ID");
+
+		replaceNumericSPIndices(version);
+		replaceQuantitySPIndices(version);
+
+		// Drop Index on HFJ_RESOURCE.INDEX_STATUS
+		version
+			.onTable("HFJ_RESOURCE")
+			.dropIndex("20220314.1", "IDX_INDEXSTATUS");
+
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220416.1", "CUR_GATED_STEP_ID")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 100);
+
+		//Make Job expiry nullable so that we can prevent job expiry by using a null value.
+		version
+			.onTable("HFJ_BLK_EXPORT_JOB").modifyColumn("20220423.1", "EXP_TIME").nullable().withType(ColumnTypeEnum.DATE_TIMESTAMP);
+
+		// New Index on HFJ_RESOURCE for $reindex Operation - hapi-fhir #3534
+		{
+			version.onTable("HFJ_RESOURCE")
+				.addIndex("20220425.1", "IDX_RES_TYPE_DEL_UPDATED")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_TYPE", "RES_DELETED_AT", "RES_UPDATED", "PARTITION_ID", "RES_ID");
+
+			// Drop existing Index on HFJ_RESOURCE.RES_TYPE since the new Index will meet the overall Index Demand
+			version
+				.onTable("HFJ_RESOURCE")
+				.dropIndexOnline("20220425.2", "IDX_RES_TYPE");
+		}
+
+		/**
+		 * Update string indexing
+		 * @see ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder
+		 * @see ResourceIndexedSearchParamString
+		 */
+		{
+			Builder.BuilderWithTableName tokenTable = version.onTable("HFJ_SPIDX_STRING");
+
+			// add res_id, and partition_id so queries are covered without row-reads.
+			tokenTable
+				.addIndex("20220428.1", "IDX_SP_STRING_HASH_NRM_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_NORM_PREFIX", "SP_VALUE_NORMALIZED", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.2", "IDX_SP_STRING_HASH_NRM");
+
+			tokenTable
+				.addIndex("20220428.3", "IDX_SP_STRING_HASH_EXCT_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_EXACT", "RES_ID", "PARTITION_ID");
+			tokenTable.dropIndexOnline("20220428.4", "IDX_SP_STRING_HASH_EXCT");
+
+			// we will drop the updated column.  Start with the index.
+			tokenTable.dropIndexOnline("20220428.5", "IDX_SP_STRING_UPDATED");
+		}
+
+		// Update tag indexing
+		{
+			Builder.BuilderWithTableName resTagTable = version.onTable("HFJ_RES_TAG");
+
+			// add res_id, and partition_id so queries are covered without row-reads.
+			resTagTable
+				.addIndex("20220429.1", "IDX_RES_TAG_RES_TAG")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "TAG_ID", "PARTITION_ID");
+			resTagTable
+				.addIndex("20220429.2", "IDX_RES_TAG_TAG_RES")
+				.unique(false)
+				.online(true)
+				.withColumns("TAG_ID", "RES_ID", "PARTITION_ID");
+
+			resTagTable.dropIndex("20220429.4", "IDX_RESTAG_TAGID");
+			// Weird that we don't have addConstraint.  No time to do it today.
+			Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
+			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			addResTagConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
+			version.executeRawSql("20220429.5", addResTagConstraint);
+
+			Builder.BuilderWithTableName tagTable = version.onTable("HFJ_TAG_DEF");
+			tagTable
+				.addIndex("20220429.6", "IDX_TAG_DEF_TP_CD_SYS")
+				.unique(false)
+				.online(false)
+				.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID");
+			// move constraint to new index
+			// Ugh.  Only oracle supports using IDX_TAG_DEF_TP_CD_SYS to enforce this constraint.  The others will create another index.
+			// For Sql Server, should change the index to be unique with include columns.  Do this in 6.1
+			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
+			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MSSQL_2012, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.MYSQL_5_7, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.ORACLE_12C, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			addTagDefConstraint.put(DriverTypeEnum.POSTGRES_9_4, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
+			version.executeRawSql("20220429.9", addTagDefConstraint);
+
+		}
+
+
+		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
+		version.onTable("NPM_PACKAGE_VER")
+			.modifyColumn("20220501.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
+		version.onTable("MPI_LINK")
+			.addIndex("20220613.1", "IDX_EMPI_MATCH_TGT_VER")
+			.unique(false)
+			.online(true)
+			.withColumns("MATCH_RESULT", "TARGET_PID", "VERSION");
+	}
+
+	/**
+	 * new numeric search indexing
+	 *
+	 * @see ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber
+	 */
+	private void replaceNumericSPIndices(Builder theVersion) {
+		Builder.BuilderWithTableName numberTable = theVersion.onTable("HFJ_SPIDX_NUMBER");
+
+		// Main query index
+		numberTable
+			.addIndex("20220304.1", "IDX_SP_NUMBER_HASH_VAL_V2")
+			.unique(false)
+			.online(true)
+			.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+		numberTable.dropIndexOnline("20220304.2", "IDX_SP_NUMBER_HASH_VAL");
+
+		// for joining to other queries
+		{
+			numberTable
+				.addIndex("20220304.3", "IDX_SP_NUMBER_RESID_V2")
+				.unique(false).online(true)
+				.withColumns("RES_ID", "HASH_IDENTITY", "SP_VALUE", "PARTITION_ID");
+
+			// some engines tie the FK constraint to a particular index.
+			// So we need to drop and recreate the constraint to drop the old RES_ID index.
+			// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+			numberTable.dropForeignKey("20220304.4", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB", "HFJ_RESOURCE");
+			numberTable.dropIndexOnline("20220304.5", "IDX_SP_NUMBER_RESID");
+			numberTable.dropIndexOnline("20220304.6", "FKCLTIHNC5TGPRJ9BHPT7XI5OTB");
+
+			numberTable.addForeignKey("20220304.7", "FK_SP_NUMBER_RES")
+				.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		}
+		// obsolete
+		numberTable.dropIndexOnline("20220304.8", "IDX_SP_NUMBER_UPDATED");
+	}
+
+	/**
+	 * new quantity search indexing
+	 *
+	 * @see ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized
+	 */
+	private void replaceQuantitySPIndices(Builder theVersion) {
+		{
+			Builder.BuilderWithTableName quantityTable = theVersion.onTable("HFJ_SPIDX_QUANTITY");
+
+			// bare quantity
+			quantityTable
+				.addIndex("20220304.11", "IDX_SP_QUANTITY_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.12", "IDX_SP_QUANTITY_HASH");
+
+			// quantity with system+units
+			quantityTable
+				.addIndex("20220304.13", "IDX_SP_QUANTITY_HASH_SYSUN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.14", "IDX_SP_QUANTITY_HASH_SYSUN");
+
+			// quantity with units
+			quantityTable
+				.addIndex("20220304.15", "IDX_SP_QUANTITY_HASH_UN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityTable.dropIndexOnline("20220304.16", "IDX_SP_QUANTITY_HASH_UN");
+
+			// for joining to other queries and sorts
+			{
+				quantityTable
+					.addIndex("20220304.17", "IDX_SP_QUANTITY_RESID_V2")
+					.unique(false).online(true)
+					.withColumns("RES_ID", "HASH_IDENTITY", "HASH_IDENTITY_SYS_UNITS", "HASH_IDENTITY_AND_UNITS", "SP_VALUE", "PARTITION_ID");
+
+				// some engines tie the FK constraint to a particular index.
+				// So we need to drop and recreate the constraint to drop the old RES_ID index.
+				// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+				quantityTable.dropForeignKey("20220304.18", "FKN603WJJOI1A6ASEWXBBD78BI5", "HFJ_RESOURCE");
+				quantityTable.dropIndexOnline("20220304.19", "IDX_SP_QUANTITY_RESID");
+				quantityTable.dropIndexOnline("20220304.20", "FKN603WJJOI1A6ASEWXBBD78BI5");
+
+				quantityTable.addForeignKey("20220304.21", "FK_SP_QUANTITY_RES")
+					.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+			}
+			// obsolete
+			quantityTable.dropIndexOnline("20220304.22", "IDX_SP_QUANTITY_UPDATED");
+		}
+
+		{
+			Builder.BuilderWithTableName quantityNormTable = theVersion.onTable("HFJ_SPIDX_QUANTITY_NRML");
+
+			// bare quantity
+			quantityNormTable
+				.addIndex("20220304.23", "IDX_SP_QNTY_NRML_HASH_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.24", "IDX_SP_QNTY_NRML_HASH");
+
+			// quantity with system+units
+			quantityNormTable
+				.addIndex("20220304.25", "IDX_SP_QNTY_NRML_HASH_SYSUN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_SYS_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.26", "IDX_SP_QNTY_NRML_HASH_SYSUN");
+
+			// quantity with units
+			quantityNormTable
+				.addIndex("20220304.27", "IDX_SP_QNTY_NRML_HASH_UN_V2")
+				.unique(false)
+				.online(true)
+				.withColumns("HASH_IDENTITY_AND_UNITS", "SP_VALUE", "RES_ID", "PARTITION_ID");
+
+			quantityNormTable.dropIndexOnline("20220304.28", "IDX_SP_QNTY_NRML_HASH_UN");
+
+			// for joining to other queries and sorts
+			{
+				quantityNormTable
+					.addIndex("20220304.29", "IDX_SP_QNTY_NRML_RESID_V2")
+					.unique(false).online(true)
+					.withColumns("RES_ID", "HASH_IDENTITY", "HASH_IDENTITY_SYS_UNITS", "HASH_IDENTITY_AND_UNITS", "SP_VALUE", "PARTITION_ID");
+
+				// some engines tie the FK constraint to a particular index.
+				// So we need to drop and recreate the constraint to drop the old RES_ID index.
+				// Rename it while we're at it.  FK7ULX3J1GG3V7MAQREJGC7YBC4 was not a pretty name.
+				quantityNormTable.dropForeignKey("20220304.30", "FKRCJOVMUH5KC0O6FVBLE319PYV", "HFJ_RESOURCE");
+				quantityNormTable.dropIndexOnline("20220304.31", "IDX_SP_QNTY_NRML_RESID");
+				quantityNormTable.dropIndexOnline("20220304.32", "FKRCJOVMUH5KC0O6FVBLE319PYV");
+
+				quantityNormTable.addForeignKey("20220304.33", "FK_SP_QUANTITYNM_RES")
+					.toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+			}
+			// obsolete
+			quantityNormTable.dropIndexOnline("20220304.34", "IDX_SP_QNTY_NRML_UPDATED");
+
+		}
+	}
 
 	/**
 	 * See https://github.com/hapifhir/hapi-fhir/issues/3237 for reasoning for these indexes.
-	 * This adds indexes to various tables to enhance delete-expunge performance, which does deletes by PID.
+	 * This adds indexes to various tables to enhance delete-expunge performance, which deletes by PID.
 	 */
 	private void addIndexesForDeleteExpunge(Builder theVersion) {
 
-		theVersion.onTable( "HFJ_HISTORY_TAG")
-			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID" )
+		theVersion.onTable("HFJ_HISTORY_TAG")
+			.addIndex("20211210.2", "IDX_RESHISTTAG_RESID")
 			.unique(false)
 			.withColumns("RES_ID");
 
 
-		theVersion.onTable( "HFJ_RES_VER_PROV")
-			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID" )
+		theVersion.onTable("HFJ_RES_VER_PROV")
+			.addIndex("20211210.3", "FK_RESVERPROV_RES_PID")
 			.unique(false)
 			.withColumns("RES_PID")
 			.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
@@ -152,6 +624,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(ColumnTypeEnum.STRING, 4000);
 
+		// Add partition id column for mdm
+		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
+
+		empiLink.addColumn("20220324.1", "PARTITION_ID")
+			.nullable()
+			.type(ColumnTypeEnum.INT);
+		empiLink.addColumn("20220324.2", "PARTITION_DATE")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_ONLY);
 	}
 
 
@@ -181,15 +662,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// Bump ConceptMap display lengths
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.modifyColumn("20210617.1","TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210617.1", "TARGET_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.modifyColumn("20210617.2", "SOURCE_DISPLAY").nullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_BLK_EXPORT_JOB")
-			.modifyColumn("20210624.1","REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
+			.modifyColumn("20210624.1", "REQUEST").nonNullable().withType(ColumnTypeEnum.STRING, 1024);
 
 		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
-			.modifyColumn("20210713.1","IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
+			.modifyColumn("20210713.1", "IDX_STRING").nonNullable().withType(ColumnTypeEnum.STRING, 500);
 
 		version.onTable("HFJ_RESOURCE")
 			.addColumn("20210720.1", "SP_CMPTOKS_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
@@ -221,7 +702,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20210915.1", "EXPANDED_AT")
 			.nullable()
 			.type(ColumnTypeEnum.DATE_TIMESTAMP);
-        
+
 		/*
 		 * Replace CLOB columns with BLOB columns
 		 */
@@ -237,9 +718,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_SEARCH.SEARCH_QUERY_STRING
 		version.onTable("HFJ_SEARCH")
 			.migratePostgresTextClobToBinaryClob("20211003.3", "SEARCH_QUERY_STRING");
-		
 
-		
 	}
 
 	private void init540() {
@@ -248,7 +727,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- add index on HFJ_SPIDX_DATE
 		version.onTable("HFJ_SPIDX_DATE").addIndex("20210309.1", "IDX_SP_DATE_HASH_HIGH")
-			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+			.unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH")
+			.doNothing();
 
 		//-- add index on HFJ_FORCED_ID
 		version.onTable("HFJ_FORCED_ID").addIndex("20210309.2", "IDX_FORCEID_FID")
@@ -464,9 +944,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V5_0_1);
 
 		Builder.BuilderWithTableName spidxDate = version.onTable("HFJ_SPIDX_DATE");
-		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW");
-		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL");
-		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL");
+		spidxDate.addIndex("20200514.1", "IDX_SP_DATE_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW")
+			.doNothing();
+		spidxDate.addIndex("20200514.2", "IDX_SP_DATE_ORD_HASH").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL", "SP_VALUE_HIGH_DATE_ORDINAL")
+			.doNothing();
+		spidxDate.addIndex("20200514.3", "IDX_SP_DATE_ORD_HASH_LOW").unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_LOW_DATE_ORDINAL")
+			.doNothing();
 
 		// MPI_LINK
 		version.addIdGenerator("20200517.1", "SEQ_EMPI_LINK_ID");
@@ -1050,7 +1533,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxDate
 				.addIndex("20180903.8", "IDX_SP_DATE_HASH")
 				.unique(false)
-				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
+				.withColumns("HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH")
+				.doNothing();
 			spidxDate
 				.dropIndex("20180903.9", "IDX_SP_DATE");
 			spidxDate
@@ -1073,7 +1557,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxNumber
 				.addIndex("20180903.13", "IDX_SP_NUMBER_HASH_VAL")
 				.unique(false)
-				.withColumns("HASH_IDENTITY", "SP_VALUE");
+				.withColumns("HASH_IDENTITY", "SP_VALUE")
+				.doNothing();
 			spidxNumber
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.14")
 					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")))
@@ -1177,19 +1662,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxToken
 				.addIndex("20180903.35", "IDX_SP_TOKEN_HASH")
 				.unique(false)
-				.withColumns("HASH_IDENTITY");
+				.withColumns("HASH_IDENTITY")
+				.doNothing();
 			spidxToken
 				.addIndex("20180903.36", "IDX_SP_TOKEN_HASH_S")
 				.unique(false)
-				.withColumns("HASH_SYS");
+				.withColumns("HASH_SYS")
+				.doNothing();
 			spidxToken
 				.addIndex("20180903.37", "IDX_SP_TOKEN_HASH_SV")
 				.unique(false)
-				.withColumns("HASH_SYS_AND_VALUE");
+				.withColumns("HASH_SYS_AND_VALUE")
+				.doNothing();
 			spidxToken
 				.addIndex("20180903.38", "IDX_SP_TOKEN_HASH_V")
 				.unique(false)
-				.withColumns("HASH_VALUE");
+				.withColumns("HASH_VALUE")
+				.doNothing();
 			spidxToken
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.39")
 					.setColumnName("HASH_IDENTITY")
@@ -1257,7 +1746,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), (RequestPartitionId) null, resType, paramName, present);
+			Long hash = SearchParamPresentEntity.calculateHashPresence(new PartitionSettings(), (RequestPartitionId) null, resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);

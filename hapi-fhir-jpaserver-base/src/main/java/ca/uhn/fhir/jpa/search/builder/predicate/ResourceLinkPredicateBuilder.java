@@ -35,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
@@ -116,7 +117,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired

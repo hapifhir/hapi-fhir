@@ -114,7 +114,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return retval;
 	}
 
-	private boolean isTimeToRefresh() {
+	protected boolean isTimeToRefresh() {
 		return myNextRefreshTime.isBefore(now());
 	}
 

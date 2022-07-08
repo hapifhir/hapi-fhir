@@ -21,9 +21,10 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hl7.fhir.instance.model.api.IIdType;
+
+import javax.annotation.Nonnull;
 
 public interface IAuthRuleBuilderRuleOpClassifier {
 
@@ -116,4 +117,24 @@ public interface IAuthRuleBuilderRuleOpClassifier {
 	 * </p>
 	 */
 	IAuthRuleBuilderRuleOpClassifierFinished withAnyId();
+
+	/**
+	 * Rule applies to resources where the given search parameter would be satisfied by a code in the given ValueSet
+	 * @param theSearchParameterName The search parameter name, e.g. <code>"code"</code>
+	 * @param theValueSetUrl The valueset URL, e.g. <code>"http://my-value-set"</code>
+	 * @since 6.0.0
+	 */
+	IAuthRuleBuilderRuleOpClassifierFinished withCodeInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
+
+	/**
+	 * Rule applies to resources where the given search parameter would be satisfied by a code not in the given ValueSet
+	 * @param theSearchParameterName The search parameter name, e.g. <code>"code"</code>
+	 * @param theValueSetUrl The valueset URL, e.g. <code>"http://my-value-set"</code>
+	 * @since 6.0.0
+	 */
+	IAuthRuleFinished withCodeNotInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl);
+
+	IAuthRuleFinished inCompartmentWithFilter(String theCompartment, IIdType theIdElement, String theFilter);
+
+	IAuthRuleFinished withFilter(String theFilter);
 }

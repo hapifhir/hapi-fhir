@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.7.6</version>
+		<version>6.1.0-PRE9-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -259,8 +259,13 @@
             <artifactId>jarchivelib</artifactId>
             <scope>test</scope>
         </dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 	<build>
 		<plugins>

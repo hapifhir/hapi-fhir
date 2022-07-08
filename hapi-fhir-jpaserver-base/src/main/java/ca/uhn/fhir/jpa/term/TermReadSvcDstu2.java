@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -44,9 +44,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
-
-	@Autowired
-	private IValidationSupport myValidationSupport;
 
 	private void addAllChildren(String theSystemString, ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -106,7 +103,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -131,7 +128,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}

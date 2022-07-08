@@ -65,9 +65,12 @@ class ResourceChangeListenerRegistryImplTest {
 	@Configuration
 	@Import(RegisteredResourceListenerFactoryConfig.class)
 	static class SpringContext {
+		@Autowired
+		ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
+
 		@Bean
-		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
-			return new ResourceChangeListenerRegistryImpl();
+		public IResourceChangeListenerRegistry resourceChangeListenerRegistry(InMemoryResourceMatcher theInMemoryResourceMatcher) {
+			return new ResourceChangeListenerRegistryImpl(ourFhirContext, myResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
 		}
 
 		@Bean
@@ -79,7 +82,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.newResourceChangeListenerCache(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 		entries.add(cache);
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 	}

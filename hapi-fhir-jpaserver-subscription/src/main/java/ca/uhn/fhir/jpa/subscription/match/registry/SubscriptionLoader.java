@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -74,6 +75,8 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	@Autowired
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	private SearchParameterMap mySearchParameterMap;
 	private SystemRequestDetails mySystemRequestDetails;
@@ -88,7 +91,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
-		mySystemRequestDetails = SystemRequestDetails.forAllPartition();
+		mySystemRequestDetails = SystemRequestDetails.forAllPartitions();
 
 		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 		subscriptionCache.forceRefresh();
@@ -148,7 +151,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
+			IBundleProvider subscriptionBundleList = getSubscriptionDao().search(mySearchParameterMap, mySystemRequestDetails);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -188,14 +191,9 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			String nextId = resource.getIdElement().getIdPart();
 			allIds.add(nextId);
 
-			// internally, subscriptions that cannot activate
-			// will be set to error
-			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
+			boolean activated = activateSubscriptionIfRequested(resource);
 			if (activated) {
-				activatedCount++;
-			}
-			else {
-				logSubscriptionNotActivatedPlusErrorIfPossible(resource);
+				++activatedCount;
 			}
 
 			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
@@ -210,28 +208,41 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	/**
+	 * @param theSubscription
+	 * @return true if activated
+	 */
+	private boolean activateSubscriptionIfRequested(IBaseResource theSubscription) {
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription))) {
+			// internally, subscriptions that cannot activate will be set to error
+			if (mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(theSubscription)) {
+				return true;
+			}
+			logSubscriptionNotActivatedPlusErrorIfPossible(theSubscription);
+		}
+		return false;
+	}
+
+	/**
 	 * Logs
+	 *
 	 * @param theSubscription
 	 */
 	private void logSubscriptionNotActivatedPlusErrorIfPossible(IBaseResource theSubscription) {
 		String error;
 		if (theSubscription instanceof Subscription) {
 			error = ((Subscription) theSubscription).getError();
-		}
-		else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
+		} else if (theSubscription instanceof org.hl7.fhir.dstu3.model.Subscription) {
 			error = ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getError();
-		}
-		else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
+		} else if (theSubscription instanceof org.hl7.fhir.dstu2.model.Subscription) {
 			error = ((org.hl7.fhir.dstu2.model.Subscription) theSubscription).getError();
-		}
-		else {
+		} else {
 			error = "";
 		}
 		ourLog.error("Subscription "
 			+ theSubscription.getIdElement().getIdPart()
 			+ " could not be activated."
 			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-			+ error
+			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
 		);
 	}
 
@@ -242,7 +253,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			return;
 		}
 		IFhirResourceDao<?> subscriptionDao = getSubscriptionDao();
-		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
 		List<IBaseResource> resourceList = theResourceIds.stream().map(n -> subscriptionDao.read(n, systemRequestDetails)).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}

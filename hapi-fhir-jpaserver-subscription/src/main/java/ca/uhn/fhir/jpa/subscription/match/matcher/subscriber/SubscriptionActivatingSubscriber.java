@@ -24,10 +24,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
-import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -35,7 +33,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,15 +51,11 @@ import javax.annotation.Nonnull;
 public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
 	private final Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingSubscriber.class);
 	@Autowired
-	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	/**
 	 * Constructor
@@ -96,7 +89,13 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 	}
 
-	public boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
+	/**
+	 * Note: This is synchronized because this is called both by matching channel messages
+	 * as well as from Subscription Loader (which periodically refreshes from the DB to make
+	 * sure nothing got missed). If these two mechanisms try to activate the same subscription
+	 * at the same time they can get a constraint error.
+	 */
+	public synchronized boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
 		CanonicalSubscriptionChannelType subscriptionChannelType = mySubscriptionCanonicalizer.getChannelType(theSubscription);
@@ -119,13 +118,13 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 	@SuppressWarnings("unchecked")
 	private boolean activateSubscription(final IBaseResource theSubscription) {
 		IFhirResourceDao subscriptionDao = myDaoRegistry.getSubscriptionDao();
-		SystemRequestDetails srd = SystemRequestDetails.forAllPartition();
+		SystemRequestDetails srd = SystemRequestDetails.forAllPartitions();
 
 		IBaseResource subscription = null;
 		try {
 			// read can throw ResourceGoneException
 			// if this happens, we will treat this as a failure to activate
-			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartition());
+			subscription =  subscriptionDao.read(theSubscription.getIdElement(), SystemRequestDetails.forAllPartitions());
 			subscription.setId(subscription.getIdElement().toVersionless());
 
 			ourLog.info("Activating subscription {} from status {} to {}", subscription.getIdElement().toUnqualified().getValue(), SubscriptionConstants.REQUESTED_STATUS, SubscriptionConstants.ACTIVE_STATUS);

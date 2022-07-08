@@ -20,21 +20,28 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -52,7 +59,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
@@ -67,6 +74,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	MessageHelper myMessageHelper;
 	@Autowired
 	IMdmSurvivorshipService myMdmSurvivorshipService;
+	@Autowired
+	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Transactional
 	@Override
@@ -77,6 +86,9 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theSourceResource);
+
+		// check if the golden resource and the source resource are in the same partition, throw error if not
+		myMdmPartitionHelper.validateResourcesInSamePartition(theGoldenResource, theSourceResource);
 
 		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenResourceId, targetId);
 		if (!optionalMdmLink.isPresent()) {
@@ -92,6 +104,13 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		ourLog.info("Manually updating MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", " + theSourceResource.getIdElement().toVersionless() + " from " + mdmLink.getMatchResult() + " to " + theMatchResult + ".");
 		mdmLink.setMatchResult(theMatchResult);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+
+		// Add partition for the mdm link if it doesn't exist
+		RequestPartitionId goldenResourcePartitionId = (RequestPartitionId) theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID);
+		if (goldenResourcePartitionId != null && goldenResourcePartitionId.hasPartitionIds() && goldenResourcePartitionId.getFirstPartitionIdOrNull() != null &&
+			(mdmLink.getPartitionId() == null || mdmLink.getPartitionId().getPartitionId() == null)) {
+			mdmLink.setPartitionId(new PartitionablePartitionId(goldenResourcePartitionId.getFirstPartitionIdOrNull(), goldenResourcePartitionId.getPartitionDate()));
+		}
 		myMdmLinkDaoSvc.save(mdmLink);
 
 		if (theMatchResult == MdmMatchResultEnum.MATCH) {

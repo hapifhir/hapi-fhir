@@ -185,6 +185,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return this;
 		}
 
+		@Override
+		public IAuthRuleFinished withFilterTester(String theQueryParameters) {
+			return withTester(new FhirQueryRuleTester(theQueryParameters));
+		}
+
 		private class TenantCheckingTester implements IAuthRuleTester {
 			private final Collection<String> myTenantIds;
 			private final boolean myOutcome;
@@ -316,6 +321,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
 			return new RuleBuilderBulkExport();
+		}
+
+		@Override
+		public IAuthRuleBuilderUpdateHistoryRewrite updateHistoryRewrite() {
+			return new UpdateHistoryRewriteBuilder();
 		}
 
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
@@ -472,22 +482,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				private RuleBuilderFinished finished() {
-					Validate.isTrue(myRule == null, "Can not call finished() twice");
-					myRule = new RuleImplOp(myRuleName);
-					myRule.setMode(myRuleMode);
-					myRule.setOp(myRuleOp);
-					myRule.setAppliesTo(myAppliesTo);
-					myRule.setAppliesToTypes(myAppliesToTypes);
-					myRule.setAppliesToInstances(myAppliesToInstances);
-					myRule.setClassifierType(myClassifierType);
-					myRule.setClassifierCompartmentName(myInCompartmentName);
-					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
-					myRule.setAppliesToDeleteCascade(myOnCascade);
-					myRule.setAppliesToDeleteExpunge(myOnExpunge);
-					myRule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
-					myRules.add(myRule);
+					return finished(new RuleImplOp(myRuleName));
+				}
 
-					return new RuleBuilderFinished(myRule);
+				private RuleBuilderFinished finished(RuleImplOp theRule) {
+					Validate.isTrue(myRule == null, "Can not call finished() twice");
+					myRule = theRule;
+					theRule.setMode(myRuleMode);
+					theRule.setOp(myRuleOp);
+					theRule.setAppliesTo(myAppliesTo);
+					theRule.setAppliesToTypes(myAppliesToTypes);
+					theRule.setAppliesToInstances(myAppliesToInstances);
+					theRule.setClassifierType(myClassifierType);
+					theRule.setClassifierCompartmentName(myInCompartmentName);
+					theRule.setClassifierCompartmentOwners(myInCompartmentOwners);
+					theRule.setAppliesToDeleteCascade(myOnCascade);
+					theRule.setAppliesToDeleteExpunge(myOnExpunge);
+					theRule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+					myRules.add(theRule);
+
+					return new RuleBuilderFinished(theRule);
 				}
 
 				@Override
@@ -552,6 +566,58 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				public IAuthRuleBuilderRuleOpClassifierFinished withAnyId() {
 					myClassifierType = ClassifierTypeEnum.ANY_ID;
 					return finished();
+				}
+
+				@Override
+				public IAuthRuleBuilderRuleOpClassifierFinished withCodeInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+					SearchParameterAndValueSetRuleImpl rule = new SearchParameterAndValueSetRuleImpl(myRuleName);
+					rule.setSearchParameterName(theSearchParameterName);
+					rule.setValueSetUrl(theValueSetUrl);
+					rule.setWantCode(true);
+					return finished(rule);
+				}
+
+				@Override
+				public IAuthRuleFinished withCodeNotInValueSet(@Nonnull String theSearchParameterName, @Nonnull String theValueSetUrl) {
+					SearchParameterAndValueSetRuleImpl rule = new SearchParameterAndValueSetRuleImpl(myRuleName);
+					rule.setSearchParameterName(theSearchParameterName);
+					rule.setValueSetUrl(theValueSetUrl);
+					rule.setWantCode(false);
+					return finished(rule);
+				}
+
+				@Override
+				public IAuthRuleFinished inCompartmentWithFilter(String theCompartmentName, IIdType theIdElement, String theFilter) {
+					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
+					Validate.notNull(theIdElement, "theOwner must not be null");
+					validateOwner(theIdElement);
+
+					// inlined from inCompartmentWithAdditionalSearchParams()
+					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
+					myInCompartmentName = theCompartmentName;
+					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
+					Optional<RuleImplOp> oRule = findMatchingRule();
+					if (oRule.isPresent()) {
+						RuleImplOp rule = oRule.get();
+						rule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+						rule.addClassifierCompartmentOwner(theIdElement);
+						return new RuleBuilderFinished(rule);
+					}
+					myInCompartmentOwners = Collections.singletonList(theIdElement);
+
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
+
+				}
+
+				@Override
+				public IAuthRuleFinished withFilter(String theFilter) {
+					myClassifierType = ClassifierTypeEnum.ANY_ID;
+
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
 				}
 
 				RuleBuilderFinished addInstances(Collection<IIdType> theInstances) {
@@ -722,6 +788,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleFinished allRequests() {
 				BaseRule rule = new RuleImplPatch(myRuleName)
+					.setAllRequests(true)
+					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class UpdateHistoryRewriteBuilder implements IAuthRuleBuilderUpdateHistoryRewrite {
+
+			UpdateHistoryRewriteBuilder() {
+				super();
+			}
+
+			@Override
+			public IAuthRuleFinished allRequests() {
+				BaseRule rule = new RuleImplUpdateHistoryRewrite(myRuleName)
 					.setAllRequests(true)
 					.setMode(myRuleMode);
 				myRules.add(rule);
