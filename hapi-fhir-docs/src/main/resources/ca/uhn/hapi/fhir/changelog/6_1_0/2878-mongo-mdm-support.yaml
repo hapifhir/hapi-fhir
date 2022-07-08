@@ -1,0 +1,3 @@
+---
+type: add
+title: "Refactored most mdm operations to use generic ResourcePersistenceId allow mongo persistence to be connected to mdm"
