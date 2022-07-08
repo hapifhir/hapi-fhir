@@ -212,13 +212,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
 
 	@Autowired
-	private IFulltextSearchSvc myIFulltextSearchSvc;
-
-	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
 
 	@Mock private IHSearchEventListener mySearchEventListener;
 
@@ -2272,31 +2267,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		}
 
-		@Nested
-		public class NoIdsQuery {
+		@Test
+		public void directResourceLoadWhenSorting() {
+			String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
+			String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
+			String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
+			myCaptureQueriesListener.clear();
+			myHSearchEventDispatcher.register(mySearchEventListener);
 
-			@Test
-			public void simpleTokenSkipsSql() {
-				String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
-				String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
-				String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
-				myCaptureQueriesListener.clear();
-				myHSearchEventDispatcher.register(mySearchEventListener);
+			List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-				List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
-				myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertThat( result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA) );
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 
-				assertThat( result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA) );
-				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-
-				// only one hibernate search took place
-				Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-			}
-
+			// only one hibernate search took place
+			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		}
 
-
 	}
+
 
 	@Nested
 	public class NumberParameter {
@@ -2530,14 +2520,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	public List<IBaseResource> searchForFastResources(String theQueryUrl) {
 		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theQueryUrl);
 		map.setLoadSynchronous(true);
+
 		SortSpec sort = (SortSpec) new ca.uhn.fhir.rest.server.method.SortParameter(myFhirCtx)
 			.translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
 
-		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
-		return runInTransaction( () ->  myIFulltextSearchSvc.searchForResources(search.getResourceName(), map) );
+		return myTestDaoSearch.searchForResources(theQueryUrl);
 	}
 
 

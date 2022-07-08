@@ -359,7 +359,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
-				f -> buildResourceSelectClause(f)
+				this::buildResourceSelectClause
 			)
 			.where(
 				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
@@ -407,7 +407,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			offset = theParams.getOffset();
-			limit = theParams.getCount();
+			limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 		}
