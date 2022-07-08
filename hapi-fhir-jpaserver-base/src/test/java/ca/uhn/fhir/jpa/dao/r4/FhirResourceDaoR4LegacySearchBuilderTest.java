@@ -2309,6 +2309,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 	 * See #1174
 	 */
 	@Test
+	@Disabled
 	public void testSearchDateInSavedSearch() {
 		for (int i = 1; i <= 9; i++) {
 			Patient p1 = new Patient();
