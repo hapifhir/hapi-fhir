@@ -1455,9 +1455,11 @@ public class FhirTerserR4Test {
 				futures.add(future);
 			}
 
-			for (var next : futures) {
-				next.get();
-			}
+				  for (Future<?> future : futures) {
+					  future.get();
+				  }
+
+
 
 		}finally {
 			executor.shutdown();
