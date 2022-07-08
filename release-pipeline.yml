@@ -140,7 +140,7 @@ jobs:
       # want to fail fast if there is an issue, and avoid running the tests more than once so it doesn't take all day.
      timeoutInMinutes: 360
      dependsOn: ['get_release_version', 'get_branch_id']
-     container: maven:3.8-openjdk-17
+     container: maven:3.8-openjdk-15
      steps:
         - task: Cache@2
           inputs:
@@ -157,7 +157,7 @@ jobs:
              script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
         - task: Maven@3
           env:
-             JAVA_HOME_11_X64: /usr/java/openjdk-17
+             JAVA_HOME_11_X64: /usr/java/openjdk-15
           inputs:
              goals: 'clean install'
              # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
