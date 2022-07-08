@@ -2,7 +2,7 @@ package ca.uhn.fhir.batch2.jobs.step;
 
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
