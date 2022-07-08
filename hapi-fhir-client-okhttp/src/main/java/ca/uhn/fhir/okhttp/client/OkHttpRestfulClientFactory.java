@@ -6,9 +6,15 @@ import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.https.TlsAuthentication;
+import ca.uhn.fhir.rest.https.TlsAuthenticationSvc;
+import ca.uhn.fhir.rest.https.TrustStoreInfo;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
@@ -25,18 +31,18 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
 	private Call.Factory myNativeClient;
 
-    public OkHttpRestfulClientFactory() {
-        super();
-    }
+	public OkHttpRestfulClientFactory() {
+		super();
+	}
 
-    public OkHttpRestfulClientFactory(FhirContext theFhirContext) {
-        super(theFhirContext);
-    }
+	public OkHttpRestfulClientFactory(FhirContext theFhirContext) {
+		super(theFhirContext);
+	}
 
-    @Override
-    protected IHttpClient getHttpClient(String theServerBase) {
-        return getHttpClient(theServerBase, Optional.empty());
-    }
+	@Override
+	protected IHttpClient getHttpClient(String theServerBase) {
+		return getHttpClient(theServerBase, Optional.empty());
+	}
 
 	@Override
 	protected IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
@@ -44,52 +50,70 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-    protected void resetHttpClient() {
-        myNativeClient = null;
-    }
+	protected void resetHttpClient() {
+		myNativeClient = null;
+	}
 
 	public synchronized Call.Factory getNativeClient() {
 		return getNativeClient(Optional.empty());
 	}
 
-	 // FIXME ND add authentication
-    public synchronized Call.Factory getNativeClient(Optional<TlsAuthentication> theTlsAuthentication) {
-        if (myNativeClient == null) {
-            myNativeClient = new OkHttpClient()
-				.newBuilder()
+	public synchronized Call.Factory getNativeClient(Optional<TlsAuthentication> theTlsAuthentication) {
+		if (myNativeClient == null) {
+			OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
 				.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
-					.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
-					.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
-				.build();
-        }
+				.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS);
 
-        return myNativeClient;
-    }
+			Optional<SSLContext> optionalSslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
+			if (optionalSslContext.isPresent()) {
+				SSLContext sslContext = optionalSslContext.get();
+				SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+				Optional<TrustStoreInfo> trustStoreInfo = theTlsAuthentication.get().getTrustStoreInfo();
+				X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(trustStoreInfo);
+				clientBuilder.sslSocketFactory(sslSocketFactory, trustManager);
+				HostnameVerifier hostnameVerifier = TlsAuthenticationSvc.createHostnameVerifier(trustStoreInfo);
+				clientBuilder.hostnameVerifier(hostnameVerifier);
+			}
+			myNativeClient = (Call.Factory) clientBuilder.build();
+		}
 
-    @Override
-    public IHttpClient getHttpClient(StringBuilder theUrl,
-                                     Map<String, List<String>> theIfNoneExistParams,
-                                     String theIfNoneExistString,
-                                     RequestTypeEnum theRequestType,
-                                     List<Header> theHeaders) {
-        return new OkHttpRestfulClient(getNativeClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
-    }
+		return myNativeClient;
+	}
 
-    /**
-     * Only accepts clients of type {@link OkHttpClient}
-     *
-     * @param okHttpClient
-     */
-    @Override
-    public void setHttpClient(Object okHttpClient) {
-        myNativeClient = (Call.Factory) okHttpClient;
-    }
+	@Override
+	public IHttpClient getHttpClient(StringBuilder theUrl,
+												Map<String, List<String>> theIfNoneExistParams,
+												String theIfNoneExistString,
+												RequestTypeEnum theRequestType,
+												List<Header> theHeaders) {
+		return getHttpClient(theUrl, Optional.empty(), theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	}
 
-    @Override
-    public void setProxy(String theHost, Integer thePort) {
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(theHost, thePort));
-        OkHttpClient.Builder builder = ((OkHttpClient)getNativeClient()).newBuilder().proxy(proxy);
-        setHttpClient(builder.build());
-    }
+	@Override
+	public IHttpClient getHttpClient(StringBuilder theUrl,
+												Optional<TlsAuthentication> theTlsAuthentication,
+												Map<String, List<String>> theIfNoneExistParams,
+												String theIfNoneExistString,
+												RequestTypeEnum theRequestType,
+												List<Header> theHeaders) {
+		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	}
 
+	/**
+	 * Only accepts clients of type {@link OkHttpClient}
+	 *
+	 * @param okHttpClient
+	 */
+	@Override
+	public void setHttpClient(Object okHttpClient) {
+		myNativeClient = (Call.Factory) okHttpClient;
+	}
+
+	@Override
+	public void setProxy(String theHost, Integer thePort) {
+		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(theHost, thePort));
+		OkHttpClient.Builder builder = ((OkHttpClient) getNativeClient()).newBuilder().proxy(proxy);
+		setHttpClient(builder.build());
+	}
 }

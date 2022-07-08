@@ -94,9 +94,10 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 
 	@Override
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl,
-			String theBasicAuthOptionName, String theBearerTokenOptionName, String theHttpsAuthOptionName) throws ParseException {
+			String theBasicAuthOptionName, String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 
-		IGenericClient client = super.newClientWithBaseUrl(theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theHttpsAuthOptionName);
+		IGenericClient client = super.newClientWithBaseUrl(
+			theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 		registerHeaderPassthrough(theCommandLine, client);
 
 		return client;

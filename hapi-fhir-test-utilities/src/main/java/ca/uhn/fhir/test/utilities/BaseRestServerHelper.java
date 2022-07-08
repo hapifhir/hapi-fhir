@@ -172,6 +172,8 @@ public abstract class BaseRestServerHelper {
 
 	public abstract IResourceProvider getPatientResourceProvider();
 
+	public abstract IResourceProvider getConceptMapResourceProvider();
+
 	public abstract IIdType createPatientWithId(String theId);
 
 	public abstract IIdType createPatient(IBaseResource theBaseResource);

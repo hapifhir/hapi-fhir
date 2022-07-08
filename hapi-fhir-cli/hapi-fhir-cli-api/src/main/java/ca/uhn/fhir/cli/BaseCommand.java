@@ -89,7 +89,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASE_URL_PARAM_DESC = "Base URL for the target server (e.g. \"http://example.com/fhir\").";
 	protected static final String TLS_AUTH_PARAM_LONGOPT = "tls-auth";
 	protected static final String TLS_AUTH_PARAM_NAME = "tls-auth";
-	protected static final String TLS_AUTH_PARAM_DESC = "If specified, this parameter supplies a path and filename for a json authentication file that will be used to authenticate https requests.";
+	protected static final String TLS_AUTH_PARAM_DESC = "If specified, this parameter supplies a path and filename for a json authentication file that will be used to authenticate HTTPS requests.";
 	protected static final String BASIC_AUTH_PARAM = "b";
 	protected static final String BASIC_AUTH_PARAM_LONGOPT = "basic-auth";
 	protected static final String BASIC_AUTH_PARAM_NAME = "basic-auth";
@@ -475,7 +475,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName,
-												  String theBearerTokenOptionName, String theHttpsAuthOptionName) throws ParseException {
+												  String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
 		if (isBlank(baseUrl)) {
 			throw new ParseException(Msg.code(1579) + "No target server (-" + BASE_URL_PARAM + ") specified.");
@@ -483,15 +483,15 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			throw new ParseException(Msg.code(1580) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
-		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theHttpsAuthOptionName);
+		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 	}
 
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName,
-																 String theBearerTokenOptionName, String theHttpsAuthOptionName) throws ParseException {
+																 String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
 
 
-		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theHttpsAuthOptionName);
+		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theTlsAuthOptionName);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl, tlsConfig);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
@@ -509,8 +509,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		return retVal;
 	}
 
-	private Optional<TlsAuthentication> createTlsConfig(CommandLine theCommandLine, String theHttpsAuthOptionName){
-		String httpAuthFilePath = theCommandLine.getOptionValue(theHttpsAuthOptionName);
+	private Optional<TlsAuthentication> createTlsConfig(CommandLine theCommandLine, String theTlsAuthOptionName){
+		String httpAuthFilePath = theCommandLine.getOptionValue(theTlsAuthOptionName);
 		if(isBlank(httpAuthFilePath)){
 			return Optional.empty();
 		}
@@ -529,28 +529,39 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 	}
 
-	private Optional<KeyStoreInfo> createKeyStoreInfo(JsonObject theJson){
+	private Optional<KeyStoreInfo> createKeyStoreInfo(JsonObject theJson) throws ParseException {
 		String filePath = theJson.get("filePath").getAsString();
 		if(isBlank(filePath)){
 			return Optional.empty();
 		}
 
 		String storePass = theJson.get("storePass").getAsString();
+		if (PROMPT.equals(storePass)) {
+			storePass = trim(promptUser("Enter the store password for the keystore: "));
+		}
 		String keyPass = theJson.get("keyPass").getAsString();
+		if (PROMPT.equals(keyPass)) {
+			keyPass = trim(promptUser("Enter the key password for the keystore: "));
+		}
 		String alias = theJson.get("alias").getAsString();
 
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo(filePath, storePass, keyPass, alias);
 		return Optional.of(keyStoreInfo);
 	}
 
-	private Optional<TrustStoreInfo> createTrustStoreInfo(JsonObject theJson){
+	private Optional<TrustStoreInfo> createTrustStoreInfo(JsonObject theJson) throws ParseException {
 		String filePath = theJson.get("filePath").getAsString();
 		if(isBlank(filePath)){
 			return Optional.empty();
 		}
 
 		String storePass = theJson.get("storePass").getAsString();
-		TrustStoreInfo trustStoreInfo = new TrustStoreInfo(filePath, storePass);
+		if (PROMPT.equals(storePass)) {
+			storePass = trim(promptUser("Enter the store password for the truststore: "));
+		}
+
+		String alias = theJson.get("alias").getAsString();
+		TrustStoreInfo trustStoreInfo = new TrustStoreInfo(filePath, storePass, alias);
 		return Optional.of(trustStoreInfo);
 	}
 

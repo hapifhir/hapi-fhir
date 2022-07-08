@@ -911,6 +911,7 @@ public class FhirContext {
 	 * </p>
 	 *
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
+	 * @param theTlsAuthentication Optional configuration to authenticate HTTPS server requests
 	 */
 	public IGenericClient newRestfulGenericClient(final String theServerBase, final Optional<TlsAuthentication> theTlsAuthentication) {
 		return getRestfulClientFactory().newGenericClient(theServerBase, theTlsAuthentication);

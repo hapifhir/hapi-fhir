@@ -51,6 +51,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConceptMapCommand {
+	public static final String COMMAND = "import-csv-to-conceptmap";
+
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommand.class);
 
@@ -58,21 +60,10 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	protected static final String SOURCE_VALUE_SET_PARAM_LONGOPT = "input";
 	protected static final String SOURCE_VALUE_SET_PARAM_NAME = "input";
 	protected static final String SOURCE_VALUE_SET_PARAM_DESC = "The source value set of the ConceptMap to be imported (i.e. ConceptMap.sourceUri).";
-
 	protected static final String TARGET_VALUE_SET_PARAM = "o";
 	protected static final String TARGET_VALUE_SET_PARAM_LONGOPT = "output";
 	protected static final String TARGET_VALUE_SET_PARAM_NAME = "output";
 	protected static final String TARGET_VALUE_SET_PARAM_DESC = "The target value set of the ConceptMap to be imported (i.e. ConceptMap.targetUri).";
-
-	protected static final String CLIENT_CERTIFICATION_PARAM = "c";
-	protected static final String CLIENT_CERTIFICATION_PARAM_LONGOPT = "cert";
-	protected static final String CLIENT_CERTIFICATION_PARAM_NAME = "cert";
-	protected static final String CLIENT_CERTIFICATION_PARAM_DESC = "The client certification to be used for TLS";
-
-	protected static final String CLIENT_KEY_PARAM = "k";
-	protected static final String CLIENT_KEY_PARAM_LONGOPT = "key";
-	protected static final String CLIENT_KEY_PARAM_NAME = "key";
-	protected static final String CLIENT_KEY_PARAM_DESC = "The client key to be used for TLS";
 
 	protected String sourceValueSet;
 	protected String targetValueSet;
@@ -98,9 +89,6 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		// </editor-fold desc="Additional parameters.">
 		addOptionalOption(options, SOURCE_VALUE_SET_PARAM, SOURCE_VALUE_SET_PARAM_LONGOPT, SOURCE_VALUE_SET_PARAM_NAME, SOURCE_VALUE_SET_PARAM_DESC);
 		addOptionalOption(options, TARGET_VALUE_SET_PARAM, TARGET_VALUE_SET_PARAM_LONGOPT, TARGET_VALUE_SET_PARAM_NAME, TARGET_VALUE_SET_PARAM_DESC);
-
-		addOptionalOption(options, CLIENT_CERTIFICATION_PARAM, CLIENT_CERTIFICATION_PARAM_LONGOPT, CLIENT_CERTIFICATION_PARAM_NAME, CLIENT_CERTIFICATION_PARAM_DESC);
-		addOptionalOption(options, CLIENT_KEY_PARAM, CLIENT_KEY_PARAM_LONGOPT, CLIENT_KEY_PARAM_NAME, CLIENT_KEY_PARAM_DESC);
 		// </editor-fold>
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
 

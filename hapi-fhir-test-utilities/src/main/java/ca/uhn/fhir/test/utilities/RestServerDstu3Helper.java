@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -52,8 +53,19 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerDstu3Helper() {
+		this(false);
+	}
+
+	public RestServerDstu3Helper(boolean theInitialize) {
 		super(FhirContext.forDstu3());
 		myRestServer = new MyRestfulServer(myFhirContext);
+		if(theInitialize){
+			try {
+				myRestServer.initialize();
+			} catch (ServletException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Override
@@ -191,6 +203,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 		private HashMapResourceProvider<Patient> myPatientResourceProvider;
 		private HashMapResourceProvider<Observation> myObservationResourceProvider;
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
+		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private MyPlainProvider myPlainProvider;
 
 		public MyRestfulServer(FhirContext theFhirContext) {
@@ -233,6 +246,10 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			return myOrganizationResourceProvider;
 		}
 
+		public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
+			return myConceptMapResourceProvider;
+		}
+
 		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 			return myPatientResourceProvider;
 		}
@@ -248,9 +265,19 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			registerProvider(myObservationResourceProvider);
 			myOrganizationResourceProvider = new MyHashMapResourceProvider(fhirContext, Organization.class);
 			registerProvider(myOrganizationResourceProvider);
+			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
+			registerProvider(myConceptMapResourceProvider);
 
 			myPlainProvider = new MyPlainProvider();
 			registerProvider(myPlainProvider);
+		}
+
+		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
+			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
+
+			unregisterProvider(myConceptMapResourceProvider);
+			registerProvider(theResourceProvider);
+			myConceptMapResourceProvider = theResourceProvider;
 		}
 
 
@@ -280,6 +307,11 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	}
 
 	@Override
+	public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
+		return myRestServer.getConceptMapResourceProvider();
+	}
+
+	@Override
 	public IIdType createPatientWithId(String theId) {
 		Patient patient = new Patient();
 		patient.setId("Patient/" + theId);
@@ -304,5 +336,9 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	@Override
 	public IIdType createObservation(IBaseResource theBaseResource) {
 		return myRestServer.getObservationResourceProvider().store((Observation) theBaseResource);
+	}
+
+	public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
+		myRestServer.setConceptMapResourceProvider(theResourceProvider);
 	}
 }
