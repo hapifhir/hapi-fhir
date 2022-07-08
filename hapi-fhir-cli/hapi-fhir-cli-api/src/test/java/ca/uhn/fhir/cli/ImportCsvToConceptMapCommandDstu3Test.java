@@ -2,14 +2,9 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
+import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.util.TestUtil;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.ConceptMap.ConceptMapGroupComponent;
@@ -19,8 +14,11 @@ import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 
@@ -37,26 +35,32 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
 	private static final String FILENAME = "import-csv-to-conceptmap-command-test-input.csv";
 
-	private static String file;
-	private static String ourBase;
-	private static IGenericClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static String ourVersion = "dstu3";
-
-	private static RestfulServer restfulServer;
-
-	private static HashMapResourceProviderConceptMapDstu3 hashMapResourceProviderConceptMapDstu3;
+	private final FhirContext myCtx = FhirContext.forDstu3();
+	private final String myVersion = "dstu3";
+	private String myFile;
 
 	static {
 		System.setProperty("test", "true");
 	}
 
+	@RegisterExtension
+	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	@RegisterExtension
+	public BaseRequestGeneratingCommandTestUtil myBaseRequestGeneratingCommandTestUtil = new BaseRequestGeneratingCommandTestUtil();
+
+	@BeforeEach
+	public void before(){
+		myRestServerDstu3Helper.setConceptMapResourceProvider(new HashMapResourceProviderConceptMapDstu3(myCtx));
+	}
+
 	@AfterEach
-	public void afterClearResourceProvider() {
-		HashMapResourceProviderConceptMapDstu3 resourceProvider = (HashMapResourceProviderConceptMapDstu3) restfulServer.getResourceProviders().iterator().next();
-		resourceProvider.clear();
+	public void afterEach() {
+		myRestServerDstu3Helper.clearDataAndCounts();
+	}
+
+	@AfterAll
+	public static void afterAll(){
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@Test
@@ -65,7 +69,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = ourClient
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -78,11 +82,11 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	@Test
 	public void testConditionalUpdateResultsInUpdate() {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
-		ourClient.create().resource(conceptMap).execute();
+		myRestServerDstu3Helper.getClient().create().resource(conceptMap).execute();
 		String conceptMapUrl = conceptMap.getUrl();
 
 		ourLog.info("Searching for existing ConceptMap with specified URL (i.e. ConceptMap.url): {}", conceptMapUrl);
-		MethodOutcome methodOutcome = ourClient
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
 			.update()
 			.resource(conceptMap)
 			.conditional()
@@ -95,9 +99,9 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	@Test
 	public void testNonConditionalUpdate() {
 		ConceptMap conceptMap = ExportConceptMapToCsvCommandDstu3Test.createConceptMap();
-		ourClient.create().resource(conceptMap).execute();
+		myRestServerDstu3Helper.getClient().create().resource(conceptMap).execute();
 
-		Bundle response = ourClient
+		Bundle response = myRestServerDstu3Helper.getClient()
 			.search()
 			.forResource(ConceptMap.class)
 			.where(ConceptMap.URL.matches().value(CM_URL))
@@ -106,7 +110,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ConceptMap resultConceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		MethodOutcome methodOutcome = ourClient
+		MethodOutcome methodOutcome = myRestServerDstu3Helper.getClient()
 			.update()
 			.resource(resultConceptMap)
 			.withId(resultConceptMap.getIdElement())
@@ -115,22 +119,27 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertNull(methodOutcome.getCreated());
 	}
 
-	@Test
-	public void testImportCsvToConceptMapCommand() throws FHIRException {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testImportCsvToConceptMapCommandNoTls(boolean theIncludeTls) throws FHIRException {
 		ClassLoader classLoader = getClass().getClassLoader();
 		File fileToImport = new File(classLoader.getResource(FILENAME).getFile());
-		ImportCsvToConceptMapCommandDstu3Test.file = fileToImport.getAbsolutePath();
+		myFile = fileToImport.getAbsolutePath();
 
-		App.main(new String[]{"import-csv-to-conceptmap",
-			"-v", ourVersion,
-			"-t", ourBase,
-			"-u", CM_URL,
-			"-i", VS_URL_1,
-			"-o", VS_URL_2,
-			"-f", file,
-			"-l"});
+		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFile,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerDstu3Helper
+		));
 
-		Bundle response = ourClient
+		Bundle response = myRestServerDstu3Helper.getClient()
 			.search()
 			.forResource(ConceptMap.class)
 			.where(ConceptMap.URL.matches().value(CM_URL))
@@ -139,9 +148,9 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/1", conceptMap.getId());
+		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
 		assertEquals(CM_URL, conceptMap.getUrl());
 		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
@@ -317,16 +326,20 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
 
-		App.main(new String[]{"import-csv-to-conceptmap",
-			"-v", ourVersion,
-			"-t", ourBase,
-			"-u", CM_URL,
-			"-i", VS_URL_1,
-			"-o", VS_URL_2,
-			"-f", file,
-			"-l"});
+		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+			new String[]{
+				ImportCsvToConceptMapCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-i", VS_URL_1,
+				"-o", VS_URL_2,
+				"-f", myFile,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerDstu3Helper
+		));
 
-		response = ourClient
+		response = myRestServerDstu3Helper.getClient()
 			.search()
 			.forResource(ConceptMap.class)
 			.where(ConceptMap.URL.matches().value(CM_URL))
@@ -335,34 +348,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
+		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/2", conceptMap.getId());
 	}
 
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler servletHandler = new ServletHandler();
-
-		restfulServer = new RestfulServer(ourCtx);
-		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
-		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
-
-		ServletHolder servletHolder = new ServletHolder(restfulServer);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(servletHandler);
-
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		ourBase = "http://localhost:" + ourPort;
-
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
-	}
 }

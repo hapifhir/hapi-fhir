@@ -384,7 +384,9 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * Get the http client for the given server base
 	 *
 	 * @param theServerBase
-	 *           the server base
+	 * 			the server base
+	 * @param theTlsAuthentication
+	 * 			Optional configuration to authenticate HTTPS server requests
 	 * @return the http client
 	 */
 	protected abstract IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);

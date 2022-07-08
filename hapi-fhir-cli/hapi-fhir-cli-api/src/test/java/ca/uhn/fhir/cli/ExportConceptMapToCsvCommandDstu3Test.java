@@ -1,25 +1,21 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import ca.uhn.fhir.test.utilities.LoggingExtension;
+import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
+import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.ConceptMap;
 import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -38,30 +34,50 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
 	private static final String FILE = "./target/output_dstu3.csv";
 
-	private static String ourBase;
-	private static IGenericClient ourClient;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static int ourPort;
-	private static Server ourServer;
-	private static String ourVersion = "dstu3";
+	private final FhirContext myCtx = FhirContext.forDstu3();
+	private final String myVersion = "dstu3";
 
 	static {
 		System.setProperty("test", "true");
 	}
 
 	@RegisterExtension
-	public LoggingExtension myLoggingExtension = new LoggingExtension();
+	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	@RegisterExtension
+	public BaseRequestGeneratingCommandTestUtil myBaseRequestGeneratingCommandTestUtil = new BaseRequestGeneratingCommandTestUtil();
 
-	@Test
-	public void testExportConceptMapToCsvCommand() throws IOException {
-		ourLog.debug("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+	@BeforeEach
+	public void before(){
+		myRestServerDstu3Helper.setConceptMapResourceProvider(new HashMapResourceProviderConceptMapDstu3(myCtx));
+		myRestServerDstu3Helper.getClient().create().resource(createConceptMap()).execute();
+	}
 
-		App.main(new String[]{"export-conceptmap-to-csv",
-			"-v", ourVersion,
-			"-t", ourBase,
-			"-u", CM_URL,
-			"-f", FILE,
-			"-l"});
+	@AfterEach
+	public void afterEach() {
+		myRestServerDstu3Helper.clearDataAndCounts();
+	}
+
+	@AfterAll
+	public static void afterAll(){
+		TestUtil.randomizeLocaleAndTimezone();
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testExportConceptMapToCsvCommandNoTls(boolean theIncludeTls) throws IOException {
+		ourLog.debug("ConceptMap:\n" + myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+
+		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+			new String[]{
+				ExportConceptMapToCsvCommand.COMMAND,
+				"-v", myVersion,
+				"-u", CM_URL,
+				"-f", FILE,
+				"-l"
+			},
+			"-t", theIncludeTls, myRestServerDstu3Helper
+		));
+
 		await().until(() -> new File(FILE).exists());
 
 		String expected = "\"SOURCE_CODE_SYSTEM\",\"SOURCE_CODE_SYSTEM_VERSION\",\"TARGET_CODE_SYSTEM\",\"TARGET_CODE_SYSTEM_VERSION\",\"SOURCE_CODE\",\"SOURCE_DISPLAY\",\"TARGET_CODE\",\"TARGET_DISPLAY\",\"EQUIVALENCE\",\"COMMENT\"\n" +
@@ -83,36 +99,6 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 		assertEquals(expected, result);
 
 		FileUtils.deleteQuietly(new File(FILE));
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		TestUtil.randomizeLocaleAndTimezone();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
-
-		ServletHandler servletHandler = new ServletHandler();
-
-		RestfulServer restfulServer = new RestfulServer(ourCtx);
-		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
-		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
-
-		ServletHolder servletHolder = new ServletHolder(restfulServer);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(servletHandler);
-
-		JettyUtil.startServer(ourServer);
-		ourPort = JettyUtil.getPortForStartedServer(ourServer);
-
-		ourBase = "http://localhost:" + ourPort;
-
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
-
-		ourClient.create().resource(createConceptMap()).execute();
 	}
 
 	static ConceptMap createConceptMap() {

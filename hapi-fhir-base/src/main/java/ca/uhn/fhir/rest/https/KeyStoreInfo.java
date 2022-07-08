@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.https;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.http.ssl.PrivateKeyStrategy;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -18,6 +17,7 @@ public class KeyStoreInfo {
 		myStorePass = toCharArrayOrNull(theStorePass);
 		myKeyPass = toCharArrayOrNull(theKeyPass);
 		myAlias = theAlias;
+
 		String extension = FilenameUtils.getExtension(myFilePath);
 		myType = KeyStoreType.fromFileExtension(extension);
 	}
@@ -39,8 +39,7 @@ public class KeyStoreInfo {
 	}
 
 	public KeyStoreType getType(){
-		String extension = FilenameUtils.getExtension(myFilePath);
-		return KeyStoreType.fromFileExtension(extension);
+		return myType;
 	}
 
 	private char[] toCharArrayOrNull(String theString){

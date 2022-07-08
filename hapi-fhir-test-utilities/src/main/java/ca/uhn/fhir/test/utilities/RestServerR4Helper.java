@@ -34,6 +34,7 @@ import org.eclipse.jetty.server.Request;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -58,8 +59,19 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	protected final MyRestfulServer myRestServer;
 
 	public RestServerR4Helper() {
+		this(false);
+	}
+
+	public RestServerR4Helper(boolean theInitialize) {
 		super(FhirContext.forR4Cached());
 		myRestServer = new MyRestfulServer(myFhirContext);
+		if(theInitialize){
+			try {
+				myRestServer.initialize();
+			} catch (ServletException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	@Override
@@ -169,6 +181,15 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	@Override
+	public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
+		return myRestServer.getConceptMapResourceProvider();
+	}
+
+	public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
+		myRestServer.setConceptMapResourceProvider(theResourceProvider);
+	}
+
+	@Override
 	public IIdType createPatientWithId(String theId) {
 		Patient patient = new Patient();
 		patient.setId("Patient/" + theId);
@@ -224,6 +245,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		private HashMapResourceProvider<Patient> myPatientResourceProvider;
 		private HashMapResourceProvider<Observation> myObservationResourceProvider;
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
+		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
 		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
 		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
@@ -292,6 +314,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			return myOrganizationResourceProvider;
 		}
 
+		public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
+			return myConceptMapResourceProvider;
+		}
+
 		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 			return myPatientResourceProvider;
 		}
@@ -307,6 +333,8 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			registerProvider(myObservationResourceProvider);
 			myOrganizationResourceProvider = new MyHashMapResourceProvider(fhirContext, Organization.class);
 			registerProvider(myOrganizationResourceProvider);
+			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
+			registerProvider(myConceptMapResourceProvider);
 
 			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider();
 			registerProvider(myPlainProvider);
@@ -320,6 +348,14 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			unregisterProvider(myObservationResourceProvider);
 			registerProvider(theResourceProvider);
 			myObservationResourceProvider = theResourceProvider;
+		}
+
+		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
+			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
+
+			unregisterProvider(myConceptMapResourceProvider);
+			registerProvider(theResourceProvider);
+			myConceptMapResourceProvider = theResourceProvider;
 		}
 
 
