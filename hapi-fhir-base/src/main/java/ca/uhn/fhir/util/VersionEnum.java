@@ -86,6 +86,8 @@ public enum VersionEnum {
 	V5_6_1,
 	V5_6_2,
 	V5_6_3,
+	V5_6_4,
+	V5_6_5,
 	V5_7_0,
 	V5_7_1,
 	V5_7_2,
@@ -93,14 +95,6 @@ public enum VersionEnum {
 	V6_0_1,
 	V6_0_2,
 	V6_1_0
-	V5_6_0,
-	V5_6_1,
-	V5_6_2,
-	V5_6_3,
-	V5_6_4,
-	V5_6_5,
-	V5_7_0,
-	V6_0_0
 	;
 
 	public static VersionEnum latestVersion() {
