@@ -37,6 +37,6 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 	@Nullable
 	@Override
 	public List<String> validate(@NotNull DeleteExpungeJobParameters theParameters) {
-		return myUrlListValidator.validate(theParameters.getUrls());
+		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 	}
 }

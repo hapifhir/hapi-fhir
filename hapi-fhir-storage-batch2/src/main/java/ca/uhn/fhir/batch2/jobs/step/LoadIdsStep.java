@@ -25,28 +25,28 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 
 import javax.annotation.Nonnull;
 
-public class LoadIdsStep implements IJobStepWorker<UrlListJobParameters, UrlChunkRangeJson, ResourceIdListWorkChunkJson> {
+public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	private final ResourceIdListStep<UrlListJobParameters, UrlChunkRangeJson> myResourceIdListStep;
+	private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
 	public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 
-		IIdChunkProducer<UrlChunkRangeJson> idChunkProducer = new UrlListIdChunkProducer(theBatch2DaoSvc);
+		IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer = new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
 		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
 	}
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<UrlListJobParameters, UrlChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
 	}
 

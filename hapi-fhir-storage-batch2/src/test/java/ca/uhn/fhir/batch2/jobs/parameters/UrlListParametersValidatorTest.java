@@ -33,16 +33,16 @@ public class UrlListParametersValidatorTest {
 	public void testAllResourceTypeSupportedTrue() {
 		when(myBatch2DaoSvc.isAllResourceTypeSupported()).thenReturn(true);
 
-		assertThat(mySvc.validate(Collections.emptyList()), empty());
-		assertThat(mySvc.validate(List.of("Patient?")), empty());
+		assertThat(mySvc.validateUrls(Collections.emptyList()), empty());
+		assertThat(mySvc.validateUrls(List.of("Patient?")), empty());
 	}
 
 	@Test
 	public void testAllResourceTypeSupportedFalse() {
 		when(myBatch2DaoSvc.isAllResourceTypeSupported()).thenReturn(false);
 
-		assertThat(mySvc.validate(Collections.emptyList()), Matchers.contains("At least one type-specific search URL must be provided for TESTOP on this server"));
-		assertThat(mySvc.validate(List.of("Patient?")), empty());
+		assertThat(mySvc.validateUrls(Collections.emptyList()), Matchers.contains("At least one type-specific search URL must be provided for TESTOP on this server"));
+		assertThat(mySvc.validateUrls(List.of("Patient?")), empty());
 	}
 
 }

@@ -26,8 +26,9 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,28 +37,28 @@ import java.util.Date;
 
 import static ca.uhn.fhir.batch2.config.Batch2Constants.BATCH_START_DATE;
 
-public class GenerateRangeChunksStep<PT extends UrlListJobParameters> implements IFirstJobStepWorker<PT, UrlChunkRangeJson> {
+public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters> implements IFirstJobStepWorker<PT, PartitionedUrlChunkRangeJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(GenerateRangeChunksStep.class);
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<UrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(@Nonnull StepExecutionDetails<PT, VoidModel> theStepExecutionDetails, @Nonnull IJobDataSink<PartitionedUrlChunkRangeJson> theDataSink) throws JobExecutionFailedException {
 		PT params = theStepExecutionDetails.getParameters();
 
 		Date start = BATCH_START_DATE;
 		Date end = new Date();
 
-		if (params.getUrls().isEmpty()) {
+		if (params.getPartitionedUrls().isEmpty()) {
 			ourLog.info("Initiating reindex of All Resources from {} to {}", start, end);
-			UrlChunkRangeJson nextRange = new UrlChunkRangeJson();
+			PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
 			nextRange.setStart(start);
 			nextRange.setEnd(end);
 			theDataSink.accept(nextRange);
 		} else {
-			for (String nextUrl : params.getUrls()) {
-				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextUrl, start, end);
-				UrlChunkRangeJson nextRange = new UrlChunkRangeJson();
-				nextRange.setUrl(nextUrl);
+			for (PartitionedUrl nextPartitionedUrl : params.getPartitionedUrls()) {
+				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextPartitionedUrl, start, end);
+				PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
+				nextRange.setPartitionedUrl(nextPartitionedUrl);
 				nextRange.setStart(start);
 				nextRange.setEnd(end);
 				theDataSink.accept(nextRange);

@@ -20,8 +20,8 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 
-public class ReindexJobParameters extends UrlListJobParameters {
+public class ReindexJobParameters extends PartitionedUrlListJobParameters {
 
 }

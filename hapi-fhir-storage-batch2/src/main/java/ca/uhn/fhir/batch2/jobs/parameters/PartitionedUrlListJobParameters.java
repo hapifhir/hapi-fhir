@@ -20,30 +20,37 @@ package ca.uhn.fhir.batch2.jobs.parameters;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UrlListJobParameters extends PartitionedJobParameters {
-	@JsonProperty("url")
+public class PartitionedUrlListJobParameters extends PartitionedJobParameters {
+	@JsonProperty("partitionedUrl")
 	@Nullable
-	private List<@Pattern(regexp = "^[A-Z][A-Za-z0-9]+\\?.*", message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'") String> myUrls;
+	private List<PartitionedUrl> myPartitionedUrls;
 
-	public List<String> getUrls() {
-		if (myUrls == null) {
-			myUrls = new ArrayList<>();
+	public List<PartitionedUrl> getPartitionedUrls() {
+		if (myPartitionedUrls == null) {
+			myPartitionedUrls = new ArrayList<>();
 		}
-		return myUrls;
+		return myPartitionedUrls;
 	}
 
-	public UrlListJobParameters addUrl(@Nonnull String theUrl) {
-		Validate.notNull(theUrl);
-		getUrls().add(theUrl);
+	public PartitionedUrlListJobParameters addPartitionedUrl(@Nonnull PartitionedUrl thePartitionedUrl) {
+		Validate.notNull(thePartitionedUrl);
+		getPartitionedUrls().add(thePartitionedUrl);
 		return this;
+	}
+
+	public PartitionedUrlListJobParameters addUrl(@Nonnull String theUrl) {
+		PartitionedUrl partitionedUrl = new PartitionedUrl();
+		partitionedUrl.setUrl(theUrl);
+		partitionedUrl.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		return addPartitionedUrl(partitionedUrl);
 	}
 }

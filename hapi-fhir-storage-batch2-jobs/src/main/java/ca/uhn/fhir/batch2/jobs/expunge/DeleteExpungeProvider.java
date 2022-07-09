@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -54,7 +55,11 @@ public class DeleteExpungeProvider {
 		if (theUrlsToDeleteExpunge == null) {
 			throw new InvalidRequestException(Msg.code(2101) + "At least one `url` parameter to $delete-expunge must be provided.");
 		}
-		List<String> urls = theUrlsToDeleteExpunge.stream().map(IPrimitiveType::getValue).collect(Collectors.toList());
+		List<String> urls = theUrlsToDeleteExpunge.stream()
+			.map(IPrimitiveType::getValue)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+
 		Integer batchSize = null;
 		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().intValue() > 0) {
 			batchSize = theBatchSize.getValue().intValue();

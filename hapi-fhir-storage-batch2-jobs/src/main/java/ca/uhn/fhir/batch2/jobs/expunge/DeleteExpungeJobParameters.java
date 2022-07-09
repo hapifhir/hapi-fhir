@@ -20,7 +20,7 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.parameters.UrlListJobParameters;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 
-public class DeleteExpungeJobParameters extends UrlListJobParameters {
+public class DeleteExpungeJobParameters extends PartitionedUrlListJobParameters {
 }

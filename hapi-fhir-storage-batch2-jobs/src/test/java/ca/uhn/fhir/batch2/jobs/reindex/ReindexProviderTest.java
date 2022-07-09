@@ -99,7 +99,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrls(), Matchers.contains(url));
+		assertThat(params.getPartitionedUrls(), Matchers.contains(url));
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrls(), empty());
+		assertThat(params.getPartitionedUrls(), empty());
 
 	}
 }

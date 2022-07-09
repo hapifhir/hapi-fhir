@@ -20,7 +20,8 @@ package ca.uhn.fhir.batch2.jobs.step;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -31,19 +32,21 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
-public class UrlListIdChunkProducer implements IIdChunkProducer<UrlChunkRangeJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(UrlListIdChunkProducer.class);
+public class PartitionedUrlListIdChunkProducer implements IIdChunkProducer<PartitionedUrlChunkRangeJson> {
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionedUrlListIdChunkProducer.class);
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
-	public UrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
+	public PartitionedUrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {
 		myBatch2DaoSvc = theBatch2DaoSvc;
 	}
 
 	@Override
-	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, UrlChunkRangeJson theData) {
-		String url = theData.getUrl();
+	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, PartitionedUrlChunkRangeJson theData) {
+		PartitionedUrl partitionedUrl = theData.getPartitionedUrl();
 
-		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);
-		return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, url);
+		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", partitionedUrl.getUrl(), theNextStart, theEnd);
+		// Even though a request partition id was provided in the batch job parameters, we ignore it and use the one specific
+		// to the url instead since it will be more accurate
+		return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, partitionedUrl.getRequestPartitionId(), partitionedUrl.getUrl());
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.expunge;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -38,6 +39,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.transaction.Transactional;
@@ -58,6 +60,8 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	DaoConfig myDaoConfig;
 	@Autowired
 	IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	UrlPartitioner myUrlPartitioner;
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
@@ -78,10 +82,15 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		}
 
 		DeleteExpungeJobParameters deleteExpungeJobParameters = new DeleteExpungeJobParameters();
-		theUrlsToDeleteExpunge.forEach(deleteExpungeJobParameters::addUrl);
+		// Set partition for each url since resource type can determine partition
+		theUrlsToDeleteExpunge.stream()
+			.filter(StringUtils::isNotBlank)
+			.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+			.forEach(deleteExpungeJobParameters::addPartitionedUrl);
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
-		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		ReadPartitionIdRequestDetails details = new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		// Also set toplevel partition in case there are no urls
 		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
 

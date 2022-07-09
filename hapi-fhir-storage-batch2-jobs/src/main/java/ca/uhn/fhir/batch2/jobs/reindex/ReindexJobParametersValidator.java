@@ -37,6 +37,6 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 	@Nullable
 	@Override
 	public List<String> validate(@NotNull ReindexJobParameters theParameters) {
-		return myUrlListValidator.validate(theParameters.getUrls());
+		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 	}
 }

@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class UrlListValidator {
 	private final String myOperationName;
@@ -38,7 +39,7 @@ public class UrlListValidator {
 
 
 	@Nullable
-	public List<String> validate(@Nonnull List<String> theUrls) {
+	public List<String> validateUrls(@Nonnull List<String> theUrls) {
 			if (theUrls.isEmpty()) {
 				if (!myBatch2DaoSvc.isAllResourceTypeSupported()) {
 					return Collections.singletonList("At least one type-specific search URL must be provided for " + myOperationName + " on this server");
@@ -47,4 +48,9 @@ public class UrlListValidator {
 		return Collections.emptyList();
 	}
 
+	@Nullable
+	public List<String> validatePartitionedUrls(@Nonnull List<PartitionedUrl> thePartitionedUrls) {
+		List<String> urls = thePartitionedUrls.stream().map(PartitionedUrl::getUrl).collect(Collectors.toList());
+		return validateUrls(urls);
+	}
 }

@@ -21,9 +21,10 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.chunk.UrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -52,7 +53,7 @@ public class ReindexAppCtx {
 			.addFirstStep(
 				"generate-ranges",
 				"Generate data ranges to reindex",
-				UrlChunkRangeJson.class,
+				PartitionedUrlChunkRangeJson.class,
 				reindexGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"load-ids",
@@ -87,8 +88,8 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
+		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theUrlPartitioner);
 	}
 
 }

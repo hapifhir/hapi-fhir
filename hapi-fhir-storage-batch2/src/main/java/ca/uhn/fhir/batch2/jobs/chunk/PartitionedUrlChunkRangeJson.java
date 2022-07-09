@@ -20,21 +20,22 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.annotation.Nullable;
 
-public class UrlChunkRangeJson extends ChunkRangeJson {
+public class PartitionedUrlChunkRangeJson extends ChunkRangeJson {
 	@Nullable
-	@JsonProperty("url")
-	private String myUrl;
+	@JsonProperty("partitionedUrl")
+	private PartitionedUrl myPartitionedUrl;
 
 	@Nullable
-	public String getUrl() {
-		return myUrl;
+	public PartitionedUrl getPartitionedUrl() {
+		return myPartitionedUrl;
 	}
 
-	public void setUrl(@Nullable String theUrl) {
-		myUrl = theUrl;
+	public void setPartitionedUrl(@Nullable PartitionedUrl thePartitionedUrl) {
+		myPartitionedUrl = thePartitionedUrl;
 	}
 }
