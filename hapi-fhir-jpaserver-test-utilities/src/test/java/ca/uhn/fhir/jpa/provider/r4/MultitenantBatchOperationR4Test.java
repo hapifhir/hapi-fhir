@@ -8,10 +8,10 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -94,12 +94,11 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId);
 
-		// Two calls.  First call is the page of results, second call has no results and stops the loop.
-		assertThat(interceptor.requestPartitionIds, hasSize(2));
+		assertThat(interceptor.requestPartitionIds, hasSize(3));
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
-		assertThat(interceptor.requestDetails.get(0), isA(SystemRequestDetails.class));
+		assertThat(interceptor.requestDetails.get(0), isA(ServletRequestDetails.class));
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 

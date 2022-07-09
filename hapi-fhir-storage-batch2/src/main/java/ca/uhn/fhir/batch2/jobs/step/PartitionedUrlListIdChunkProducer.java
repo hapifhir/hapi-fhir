@@ -44,9 +44,12 @@ public class PartitionedUrlListIdChunkProducer implements IIdChunkProducer<Parti
 	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, PartitionedUrlChunkRangeJson theData) {
 		PartitionedUrl partitionedUrl = theData.getPartitionedUrl();
 
-		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", partitionedUrl.getUrl(), theNextStart, theEnd);
-		// Even though a request partition id was provided in the batch job parameters, we ignore it and use the one specific
-		// to the url instead since it will be more accurate
-		return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, partitionedUrl.getRequestPartitionId(), partitionedUrl.getUrl());
+		if (partitionedUrl == null) {
+			ourLog.info("Fetching resource ID chunk for everything - Range {} - {}", theNextStart, theEnd);
+			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, null);
+		} else {
+			ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", partitionedUrl.getUrl(), theNextStart, theEnd);
+			return myBatch2DaoSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, partitionedUrl.getRequestPartitionId(), partitionedUrl.getUrl());
+		}
 	}
 }
