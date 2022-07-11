@@ -27,6 +27,9 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -63,6 +66,17 @@ public class Batch2JobHelper {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.CANCELLED));
+	}
+
+	public JobInstance awaitJobHitsStatusInTime(String theId, int theSeconds, StatusEnum... theStatuses) {
+		await().atMost(theSeconds, TimeUnit.SECONDS)
+			.pollDelay(Duration.ofSeconds(10))
+			.until(() -> {
+				myJobMaintenanceService.runMaintenancePass();
+				return myJobCoordinator.getInstance(theId).getStatus();
+			}, Matchers.in(theStatuses));
+
+		return myJobCoordinator.getInstance(theId);
 	}
 
 	public void awaitJobInProgress(String theId) {

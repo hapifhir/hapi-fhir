@@ -19,6 +19,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
@@ -34,9 +35,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -492,9 +496,63 @@ public class StepExecutionSvcTest {
 			fail("Expected Exception to be thrown");
 		} catch (JobStepFailedException jobStepFailedException) {
 			assertTrue(jobStepFailedException.getMessage().contains(msg));
-		} catch (Exception anythingElse) {
-			fail(anythingElse.getMessage());
 		}
+	}
+
+	@Test
+	public void doExecution_stepWorkerThrowsRandomExceptionForever_eventuallyMarksAsFailed() {
+		// setup
+		int counter = 0;
+		AtomicInteger errorCounter = new AtomicInteger();
+		String errorMsg = "my Error Message";
+		JobInstance jobInstance = getTestJobInstance();
+		WorkChunk chunk = new WorkChunk();
+		chunk.setId("chunkId");
+		chunk.setData(new StepInputData());
+
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+
+		// when
+		when(myNonReductionStep.run(any(), any()))
+			.thenThrow(new RuntimeException(errorMsg));
+		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCountAndReturn(any(MarkWorkChunkAsErrorParameters.class)))
+			.thenAnswer((p) -> {
+				WorkChunk ec = new WorkChunk();
+				ec.setId(chunk.getId());
+				int count = errorCounter.getAndIncrement();
+				ec.setErrorCount(count);
+				return Optional.of(ec);
+			});
+
+		// test
+		Boolean hasFailed = null;
+		do {
+			try {
+				JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
+					workCursor,
+					jobInstance,
+					chunk
+				);
+				hasFailed = output.isSuccessful();
+				break;
+			} catch (JobStepFailedException ex) {
+				assertTrue(ex.getMessage().contains(errorMsg));
+				counter++;
+			}
+			/*
+			 * +2 because...
+			 * we check for > MAX_CHUNK_ERROR_COUNT (+1)
+			 * we want it to run one extra time here (+1)
+			 */
+		} while (counter < StepExecutionSvc.MAX_CHUNK_ERROR_COUNT + 2);
+
+		// verify
+		assertNotNull(hasFailed);
+		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
+		assertEquals(StepExecutionSvc.MAX_CHUNK_ERROR_COUNT  + 1, counter);
+		assertFalse(hasFailed);
 	}
 
 	private void runExceptionThrowingTest(Exception theExceptionToThrow) {

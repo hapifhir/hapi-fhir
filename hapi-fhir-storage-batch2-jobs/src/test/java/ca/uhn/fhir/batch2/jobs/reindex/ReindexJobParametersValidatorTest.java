@@ -8,8 +8,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 
@@ -38,4 +43,19 @@ public class ReindexJobParametersValidatorTest {
 		assertThat(mySvc.validate(new ReindexJobParameters().addUrl("Patient?")), empty());
 	}
 
+	@Test
+	public void validate_invalidUrls_returnsErrors() {
+		// setup
+		ReindexJobParameters params = new ReindexJobParameters();
+		params.addUrl("?Patient, ?Task");
+
+		// test
+		List<String> errors = mySvc.validate(params);
+
+		// verify
+		assertFalse(errors.isEmpty());
+		assertEquals(2, errors.size());
+		assertTrue(errors.get(0).contains("URL cannot contain spaces"));
+		assertTrue(errors.get(1).contains("URL contains multiple '?' characters"));
+	}
 }

@@ -36,6 +36,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.i18n.Msg;
@@ -48,9 +49,13 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 public class StepExecutionSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(StepExecutionSvc.class);
+
+	// the maximum number of errors we'll allow on a chunk before failing the job
+	public static final int MAX_CHUNK_ERROR_COUNT = 3;
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -303,7 +308,18 @@ public class StepExecutionSvc {
 		} catch (Exception e) {
 			ourLog.error("Failure executing job {} step {}", jobDefinitionId, targetStepId, e);
 			if (theStepExecutionDetails.hasAssociatedWorkChunk()) {
-				myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(chunkId, e.toString());
+				MarkWorkChunkAsErrorParameters parameters = new MarkWorkChunkAsErrorParameters();
+				parameters.setChunkId(chunkId);
+				parameters.setErrorMsg(e.getMessage());
+				Optional<WorkChunk> updatedOp = myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCountAndReturn(parameters);
+				if (updatedOp.isPresent()) {
+					WorkChunk chunk = updatedOp.get();
+
+					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
+						myJobPersistence.markWorkChunkAsFailed(chunkId, "Too many errors: " + chunk.getErrorCount());
+						return false;
+					}
+				}
 			}
 			throw new JobStepFailedException(Msg.code(2041) + e.getMessage(), e);
 		} catch (Throwable t) {

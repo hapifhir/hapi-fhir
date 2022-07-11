@@ -43,7 +43,7 @@ public class ReindexIdChunkProducer implements IIdChunkProducer<ReindexChunkRang
 	public IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, ReindexChunkRangeJson theData) {
 		String url = theData.getUrl();
 
-		ourLog.info("Fetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);
+		ourLog.info("\n\nFetching resource ID chunk for URL {} - Range {} - {}", url, theNextStart, theEnd);
 		return myResourceReindexSvc.fetchResourceIdsPage(theNextStart, theEnd, thePageSize, theRequestPartitionId, url);
 	}
 }

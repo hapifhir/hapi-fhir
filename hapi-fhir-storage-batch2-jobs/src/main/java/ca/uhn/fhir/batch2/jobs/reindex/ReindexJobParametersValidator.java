@@ -22,15 +22,21 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
+
+	private final Pattern myQuestionPattern = Pattern.compile("([\\?])");
 
 	@Autowired
 	private IResourceReindexSvc myResourceReindexSvc;
@@ -41,6 +47,28 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 		if (theParameters.getUrl().isEmpty()) {
 			if (!myResourceReindexSvc.isAllResourceTypeSupported()) {
 				return Collections.singletonList("At least one type-specific search URL must be provided for " + ProviderConstants.OPERATION_REINDEX + " on this server");
+			}
+		}
+		else {
+			List<String> errors = new ArrayList<>();
+
+			List<String> urls = theParameters.getUrl();
+			for (String url : urls) {
+				if (url.contains("\s")) {
+					errors.add("Invalid URL. URL cannot contain spaces : " + url);
+				}
+				Matcher matcher = myQuestionPattern.matcher(url);
+				int questionCount = 0;
+				while (matcher.find()) {
+					questionCount++;
+				}
+				if (questionCount > 1) {
+					errors.add("Invalid URL. URL contains multiple '?' characters: " + url);
+				}
+			}
+
+			if (!errors.isEmpty()) {
+				return errors;
 			}
 		}
 
