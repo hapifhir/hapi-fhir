@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -9,13 +10,9 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.batch.job.PartitionedUrlValidator;
-import ca.uhn.fhir.jpa.batch.mdm.batch.MdmClearJobSubmitterImpl;
-import ca.uhn.fhir.jpa.batch.reader.BatchResourceSearcher;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -62,7 +59,6 @@ import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderUri;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
-import ca.uhn.fhir.jpa.delete.DeleteExpungeJobSubmitterImpl;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -85,15 +81,14 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
-import ca.uhn.fhir.jpa.reindex.ResourceReindexSvcImpl;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
-import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
@@ -139,14 +134,12 @@ import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.util.ThreadPoolUtil;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -198,6 +191,7 @@ import java.util.Date;
 	BatchJobsConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
+	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class
 })
 public class JpaConfig {
@@ -355,11 +349,6 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public BatchResourceSearcher myBatchResourceSearcher() {
-		return new BatchResourceSearcher();
-	}
-
-	@Bean
 	public HapiFhirHibernateJpaDialect hibernateJpaDialect(FhirContext theFhirContext) {
 		return new HapiFhirHibernateJpaDialect(theFhirContext.getLocalizer());
 	}
@@ -425,12 +414,6 @@ public class JpaConfig {
 		return new MdmLinkExpandSvc();
 	}
 
-
-	@Bean
-	IMdmClearJobSubmitter mdmClearJobSubmitter() {
-		return new MdmClearJobSubmitterImpl();
-	}
-
 	@Bean
 	@Lazy
 	public TerminologyUploaderProvider terminologyUploaderProvider() {
@@ -462,18 +445,6 @@ public class JpaConfig {
 	@Lazy
 	public IDeleteExpungeJobSubmitter deleteExpungeJobSubmitter() {
 		return new DeleteExpungeJobSubmitterImpl();
-	}
-
-	@Bean
-	@Lazy
-	public PartitionedUrlValidator partitionedUrlValidator() {
-		return new PartitionedUrlValidator();
-	}
-
-	@Bean
-	@Lazy
-	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
-		return new DeleteExpungeProvider(theFhirContext, theDeleteExpungeJobSubmitter);
 	}
 
 	@Bean
@@ -510,11 +481,6 @@ public class JpaConfig {
 	@Bean
 	public IResourceVersionSvc resourceVersionSvc() {
 		return new ResourceVersionSvcDaoImpl();
-	}
-
-	@Bean
-	public IResourceReindexSvc resourceReindexSvc() {
-		return new ResourceReindexSvcImpl();
 	}
 
 	/* **************************************************************** *

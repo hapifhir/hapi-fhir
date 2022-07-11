@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
+import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
 import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
@@ -33,6 +35,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CommonBatchJobConfig {
 	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
+
+	@Bean
+	@StepScope
+	public PidToIBaseResourceProcessor pidToResourceProcessor() {
+		return new PidToIBaseResourceProcessor();
+	}
+
+	@Bean
+	@StepScope
+	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
+		return new GoldenResourceAnnotatingProcessor();
+	}
 
 	@Bean
 	public MultiUrlJobParameterValidator multiUrlProcessorParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {

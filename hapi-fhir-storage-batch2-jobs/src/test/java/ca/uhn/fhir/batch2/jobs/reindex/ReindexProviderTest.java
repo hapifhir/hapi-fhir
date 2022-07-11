@@ -1,6 +1,8 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -8,7 +10,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -29,8 +30,10 @@ import org.slf4j.LoggerFactory;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +54,8 @@ public class ReindexProviderTest {
 
 	@Mock
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Mock
+	private UrlPartitioner myUrlPartitioner;
 
 	@Captor
 	private ArgumentCaptor<JobInstanceStartRequest> myStartRequestCaptor;
@@ -89,6 +94,11 @@ public class ReindexProviderTest {
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
+		PartitionedUrl partitionedUrl = new PartitionedUrl();
+		partitionedUrl.setUrl(url);
+		partitionedUrl.setRequestPartitionId(RequestPartitionId.defaultPartition());
+		when(myUrlPartitioner.partitionUrl(anyString(), any())).thenReturn(partitionedUrl);
+
 		// Execute
 
 		Parameters response = myServerExtension
@@ -107,7 +117,8 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrl(), Matchers.contains(url));
+		assertThat(params.getPartitionedUrls(), hasSize(1));
+		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
 	}
 
 	@Test
@@ -138,7 +149,7 @@ public class ReindexProviderTest {
 
 		verify(myJobCoordinator, times(1)).startInstance(myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
-		assertThat(params.getUrl(), empty());
+		assertThat(params.getPartitionedUrls(), empty());
 
 	}
 }
