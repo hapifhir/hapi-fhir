@@ -2,6 +2,7 @@ package ca.uhn.fhir.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.https.TlsAuthentication;
 import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
@@ -40,7 +41,7 @@ public class BaseFhirVersionParameterizedTest {
 			case DSTU3:
 				return new FhirVersionParams(myRestServerDstu3Helper, myDstu3FhirContext);
 			default:
-				throw new RuntimeException("Unknown FHIR Version param provided: " + theFhirVersion);
+				throw new RuntimeException(Msg.code(2114)+"Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 	}
 

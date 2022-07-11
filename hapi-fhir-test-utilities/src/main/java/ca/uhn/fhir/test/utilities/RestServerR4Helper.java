@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -28,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.eclipse.jetty.server.Request;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -69,7 +69,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(Msg.code(2110)+"Failed to initialize server", e);
 			}
 		}
 	}
@@ -367,7 +367,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException("SOME ERROR MESSAGE");
+					throw new RuntimeException(Msg.code(2111)+"Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

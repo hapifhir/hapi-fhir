@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -44,6 +45,11 @@ import java.security.KeyStore;
 import java.util.List;
 
 public abstract class BaseRestServerHelper {
+
+	private final String SERVER_KEYSTORE_PATH = "/tls/server-keystore.p12";
+	private final String SERVER_TRUSTSTORE_PATH = "/tls/server-truststore.p12";
+	private final String PASSWORD = "changeit";
+
 	protected final FhirContext myFhirContext;
 	protected int myListenerPort;
 	protected int mySecureListenerPort;
@@ -74,7 +80,20 @@ public abstract class BaseRestServerHelper {
 		proxyHandler.addServlet(targetServletHolder, "/target/*");
 
 		myListenerServer.setHandler(proxyHandler);
-		setSecurePort(myListenerServer);
+
+		SslContextFactory sslContextFactory = getSslContextFactory();
+
+		HttpConfiguration httpsConfig = new HttpConfiguration();
+		httpsConfig.setSecureScheme("https");
+		mySecureListenerPort = getRandomAvailablePort();
+		httpsConfig.setSecurePort(mySecureListenerPort);
+
+		ServerConnector sslConnector = new ServerConnector(myListenerServer,
+			new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
+			new HttpConnectionFactory(httpsConfig));
+		sslConnector.setPort(mySecureListenerPort);
+
+		myListenerServer.addConnector(sslConnector);
 		myListenerServer.start();
 
 		myBase = "http://localhost:" + myListenerPort + "/target";
@@ -90,41 +109,28 @@ public abstract class BaseRestServerHelper {
 		try (ServerSocket serverSocket = new ServerSocket(0)) {
 			return serverSocket.getLocalPort();
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2108)+"Failed to obtain random available port");
 		}
 	}
 
 
-	private void setSecurePort(Server theListenerServer) throws Exception{
-		final String serverKeyStorePath = "/tls/server-keystore.p12";
-		final String serverTrustStorePath = "/tls/server-truststore.p12";
-		final String password = "changeit";
-
+	private SslContextFactory getSslContextFactory() throws Exception{
 		try {
 			SslContextFactory sslContextFactory = new SslContextFactory.Server();
 
 			KeyStore keyStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
-			keyStore.load(BaseRestServerHelper.class.getResourceAsStream(serverKeyStorePath), password.toCharArray());
+			keyStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_KEYSTORE_PATH), PASSWORD.toCharArray());
 			sslContextFactory.setKeyStore(keyStore);
-			sslContextFactory.setKeyStorePassword(password);
+			sslContextFactory.setKeyStorePassword(PASSWORD);
 
 			KeyStore trustStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
-			trustStore.load(BaseRestServerHelper.class.getResourceAsStream(serverTrustStorePath), password.toCharArray());
+			trustStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_TRUSTSTORE_PATH), PASSWORD.toCharArray());
 			sslContextFactory.setTrustStore(trustStore);
 
-			HttpConfiguration httpsConfig = new HttpConfiguration();
-			httpsConfig.setSecureScheme("https");
-			mySecureListenerPort = getRandomAvailablePort();
-			httpsConfig.setSecurePort(mySecureListenerPort);
-
-			ServerConnector sslConnector = new ServerConnector(theListenerServer,
-				new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
-				new HttpConnectionFactory(httpsConfig));
-			sslConnector.setPort(mySecureListenerPort);
-			theListenerServer.addConnector(sslConnector);
+			return sslContextFactory;
 		}
 		catch(Exception e){
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2109)+"Failed to obtain SslContextFactory", e);
 		}
 	}
 

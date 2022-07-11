@@ -20,6 +20,7 @@ package ca.uhn.fhir.test.utilities;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.https.KeyStoreInfo;
 import ca.uhn.fhir.rest.https.TlsAuthentication;
 import ca.uhn.fhir.rest.https.TrustStoreInfo;
@@ -122,7 +123,7 @@ public class BaseRequestGeneratingCommandTestUtil implements AfterEachCallback {
 			}
 			return inputFile;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2107)+"Failed to load test TLS authentication file", e);
 		}
 	}
 }
