@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -110,6 +112,18 @@ abstract class BaseRule implements IAuthRule {
 
 	protected boolean isResourceAccess(Pointcut thePointcut) {
 		return thePointcut.equals(Pointcut.STORAGE_PREACCESS_RESOURCES) || thePointcut.equals(Pointcut.STORAGE_PRESHOW_RESOURCES);
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder builder = toStringBuilder();
+		return builder.toString();
+	}
+
+	ToStringBuilder toStringBuilder() {
+		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		builder.append("testers", myTesters);
+		return builder;
 	}
 
 }
