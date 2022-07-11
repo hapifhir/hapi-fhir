@@ -171,8 +171,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private JobInstance toInstance(Batch2JobInstanceEntity theEntity) {
-		JobInstance retVal = new JobInstance();
-		retVal.setInstanceId(theEntity.getId());
+		JobInstance retVal = JobInstance.fromInstanceId(theEntity.getId());
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());
@@ -241,8 +240,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
+	/**
+	 * Update the stored instance
+	 *
+	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
+	 */
 	@Override
-	public void updateInstance(JobInstance theInstance) {
+	public boolean updateInstance(JobInstance theInstance) {
+		// Separate updating the status so we have atomic information about whether the status is changing
+		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
+
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
 		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
 
@@ -262,6 +270,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instance.setReport(theInstance.getReport());
 
 		myJobInstanceRepository.save(instance);
+		return recordsChangedByStatusUpdate > 0;
 	}
 
 	@Override
@@ -276,8 +285,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public void markInstanceAsCompleted(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+	public boolean markInstanceAsCompleted(String theInstanceId) {
+		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
+		return recordsChanged > 0;
 	}
 
 	@Override

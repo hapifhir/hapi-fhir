@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -29,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterAll;
@@ -298,6 +300,31 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("transaction", ourLastHitMethod);
 		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
+	}
+	@Test
+	public void testNarrow_OnlyAppliesToSearches() {
+		ourNextAuthorizedList = new AuthorizedList().addCompartments("Patient/123");
+
+
+		Observation o = new Observation();
+		o.setSubject(new Reference("Patient/456"));
+
+		{
+			//Create a resource outside of the referenced compartment
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.POST).setUrl("Observation");
+			myClient.transaction().withBundle(bundle).execute();
+		}
+
+		{
+			Bundle bundle = new Bundle();
+			bundle.setType(Bundle.BundleType.TRANSACTION);
+			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("Observation");
+
+			//Update a resource outside of the referenced compartment
+			myClient.transaction().withBundle(bundle).execute();
+		}
 	}
 
 	@Test

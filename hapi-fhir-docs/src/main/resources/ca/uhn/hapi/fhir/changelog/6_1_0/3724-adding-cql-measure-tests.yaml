@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3724
+title: "Adding some test cases for CQL measures on immunization as well as some testing methods to support easier changes of CQL in unit tests."

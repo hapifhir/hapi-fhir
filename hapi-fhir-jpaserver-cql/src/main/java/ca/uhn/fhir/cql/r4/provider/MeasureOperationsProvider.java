@@ -103,19 +103,20 @@ public class MeasureOperationsProvider {
 			seed.getMeasurementPeriod());
 		if (reportType != null) {
 			switch (reportType) {
-				case "patient":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
-				case "patient-list":
+				case "subject":
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
-					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), theRequestDetails);
+					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				default:
 					throw new IllegalArgumentException(Msg.code(1664) + "Invalid report type: " + reportType);
 			}
 		}
 
-		// default report type is patient
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
+		// default report type is subject
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");

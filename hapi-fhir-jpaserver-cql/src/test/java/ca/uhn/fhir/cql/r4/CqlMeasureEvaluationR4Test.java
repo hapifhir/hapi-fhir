@@ -63,7 +63,7 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test {
 		MeasureReport actual = this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", measureId),
 			periodStart, periodEnd, null,
 			// TODO: These are all individual reports
-			"patient", patientId,
+			"subject", patientId,
 			// TODO: Generalize these parameters into a Parameters resource
 			null, null, null, null, null, null, myRequestDetails);
 

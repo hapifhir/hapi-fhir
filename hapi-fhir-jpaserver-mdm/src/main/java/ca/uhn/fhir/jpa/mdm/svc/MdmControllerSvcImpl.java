@@ -27,7 +27,6 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
@@ -80,8 +79,6 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 	@Autowired
 	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
-	@Autowired
-	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
 	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired

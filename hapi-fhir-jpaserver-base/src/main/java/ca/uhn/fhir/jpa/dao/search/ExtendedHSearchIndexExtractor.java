@@ -36,8 +36,8 @@ import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public class ExtendedHSearchIndexExtractor {
 		myModelConfig = theModelConfig;
 	}
 
-	@NotNull
+	@Nonnull
 	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
 		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myModelConfig);
 

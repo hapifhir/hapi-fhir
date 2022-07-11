@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3729
+title: "The patient-list type was renamed to subject-list for a CQL measure in R4."

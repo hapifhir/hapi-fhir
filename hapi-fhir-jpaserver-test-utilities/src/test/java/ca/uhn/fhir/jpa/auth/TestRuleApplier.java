@@ -9,10 +9,11 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * Empty implementation to base a stub.
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class TestRuleApplier implements IRuleApplier {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestRuleApplier.class);
 
-	@NotNull
+	@Nonnull
 	@Override
 	public Logger getTroubleshootingLog() {
 		return ourLog;
