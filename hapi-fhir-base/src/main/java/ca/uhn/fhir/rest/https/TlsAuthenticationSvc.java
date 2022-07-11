@@ -12,7 +12,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
-import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.util.Optional;
@@ -38,15 +37,37 @@ public class TlsAuthenticationSvc {
 				if(isNotBlank(keyStoreInfo.getAlias())){
 					privateKeyStrategy = (aliases, socket) -> keyStoreInfo.getAlias();
 				}
-				contextBuilder.loadKeyMaterial(new File(keyStoreInfo.getFilePath()), keyStoreInfo.getStorePass(), keyStoreInfo.getKeyPass(), privateKeyStrategy);
+				KeyStore keyStore = createKeyStore(keyStoreInfo);
+				contextBuilder.loadKeyMaterial(keyStore, keyStoreInfo.getKeyPass(), privateKeyStrategy);
 			}
 
 			if(tlsAuth.getTrustStoreInfo().isPresent()){
 				TrustStoreInfo trustStoreInfo = tlsAuth.getTrustStoreInfo().get();
-				contextBuilder.loadTrustMaterial(new File(trustStoreInfo.getFilePath()), trustStoreInfo.getStorePass(), TrustSelfSignedStrategy.INSTANCE);
+				KeyStore trustStore = createKeyStore(trustStoreInfo);
+				contextBuilder.loadTrustMaterial(trustStore, TrustSelfSignedStrategy.INSTANCE);
 			}
 
 			return Optional.of(contextBuilder.build());
+		}
+		catch (Exception e){
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static KeyStore createKeyStore(StoreInfo theStoreInfo){
+		try {
+			KeyStore keyStore = KeyStore.getInstance(theStoreInfo.getType().toString());
+
+			final String prefixedFilePath = theStoreInfo.getFilePath();
+			if(prefixedFilePath.startsWith(PathType.RESOURCE.getPrefix())){
+				String unPrefixedPath = prefixedFilePath.substring(PathType.RESOURCE.getPrefix().length());
+				keyStore.load(TlsAuthenticationSvc.class.getResourceAsStream(unPrefixedPath), theStoreInfo.getStorePass());
+			}
+			else if(prefixedFilePath.startsWith(PathType.FILE.getPrefix())){
+				String unPrefixedPath = prefixedFilePath.substring(PathType.FILE.getPrefix().length());
+				keyStore.load(new FileInputStream(unPrefixedPath), theStoreInfo.getStorePass());
+			}
+			return keyStore;
 		}
 		catch (Exception e){
 			throw new RuntimeException(e);
@@ -60,8 +81,7 @@ public class TlsAuthenticationSvc {
 				trustManagerFactory.init((KeyStore) null); // Load Trust Manager Factory with default Java truststore
 			} else {
 				TrustStoreInfo trustStoreInfo = theTrustStoreInfo.get();
-				KeyStore trustStore = KeyStore.getInstance(trustStoreInfo.getType().toString());
-				trustStore.load(new FileInputStream(trustStoreInfo.getFilePath()), trustStoreInfo.getStorePass());
+				KeyStore trustStore = createKeyStore(trustStoreInfo);
 				trustManagerFactory.init(trustStore);
 			}
 			for (TrustManager trustManager : trustManagerFactory.getTrustManagers()) {

@@ -40,12 +40,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BaseRequestGeneratingCommandTestUtil implements AfterEachCallback {
 
-	private static final String KEYSTORE_RESOURCE_PATH = "/tls/client-keystore.p12";
+	private static final String KEYSTORE_RESOURCE_PATH = "classpath:/tls/client-keystore.p12";
 	private static final String KEYSTORE_STOREPASS = "changeit";
 	private static final String KEYSTORE_KEYPASS = "changeit";
 	private static final String KEYSTORE_ALIAS = "1";
 
-	private static final String TRUSTSTORE_RESOURCE_PATH = "/tls/client-truststore.p12";
+	private static final String TRUSTSTORE_RESOURCE_PATH = "classpath:/tls/client-truststore.p12";
 	private static final String TRUSTSTORE_STOREPASS = "changeit";
 	private static final String TRUSTSTORE_ALIAS = "client";
 
@@ -55,11 +55,9 @@ public class BaseRequestGeneratingCommandTestUtil implements AfterEachCallback {
 	private File myTempFile;
 
 	public BaseRequestGeneratingCommandTestUtil(){
-		String keyStoreFilePath = BaseRequestGeneratingCommandTestUtil.class.getResource(KEYSTORE_RESOURCE_PATH).getPath();
-		myKeystoreInfo = new KeyStoreInfo(keyStoreFilePath, KEYSTORE_STOREPASS, KEYSTORE_KEYPASS, KEYSTORE_ALIAS);
+		myKeystoreInfo = new KeyStoreInfo(KEYSTORE_RESOURCE_PATH, KEYSTORE_STOREPASS, KEYSTORE_KEYPASS, KEYSTORE_ALIAS);
 
-		String trustStoreFilePath = BaseRequestGeneratingCommandTestUtil.class.getResource(TRUSTSTORE_RESOURCE_PATH).getPath();
-		myTrustStoreInfo = new TrustStoreInfo(trustStoreFilePath, TRUSTSTORE_STOREPASS, TRUSTSTORE_ALIAS);
+		myTrustStoreInfo = new TrustStoreInfo(TRUSTSTORE_RESOURCE_PATH, TRUSTSTORE_STOREPASS, TRUSTSTORE_ALIAS);
 
 		myTlsAuthentication = Optional.of(new TlsAuthentication(Optional.of(myKeystoreInfo), Optional.of(myTrustStoreInfo)));
 	}
@@ -112,6 +110,7 @@ public class BaseRequestGeneratingCommandTestUtil implements AfterEachCallback {
 			ObjectNode trustStore = mapper.createObjectNode();
 			trustStore.put("filePath", myTrustStoreInfo.getFilePath());
 			trustStore.put("storePass", new String(myTrustStoreInfo.getStorePass()));
+			trustStore.put("alias", new String(myTrustStoreInfo.getAlias()));
 
 			ObjectNode json = mapper.createObjectNode();
 			json.set("keyStore", keyStore);
