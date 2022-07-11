@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.https;
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -13,6 +14,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Optional;
 
@@ -50,7 +52,7 @@ public class TlsAuthenticationSvc {
 			return Optional.of(contextBuilder.build());
 		}
 		catch (Exception e){
-			throw new RuntimeException(e);
+			throw new TlsAuthenticationException(Msg.code(2102)+"Failed to create SSLContext", e);
 		}
 	}
 	
@@ -61,16 +63,20 @@ public class TlsAuthenticationSvc {
 			final String prefixedFilePath = theStoreInfo.getFilePath();
 			if(prefixedFilePath.startsWith(PathType.RESOURCE.getPrefix())){
 				String unPrefixedPath = prefixedFilePath.substring(PathType.RESOURCE.getPrefix().length());
-				keyStore.load(TlsAuthenticationSvc.class.getResourceAsStream(unPrefixedPath), theStoreInfo.getStorePass());
+				try(InputStream inputStream = TlsAuthenticationSvc.class.getResourceAsStream(unPrefixedPath)){
+					keyStore.load(inputStream, theStoreInfo.getStorePass());
+				}
 			}
 			else if(prefixedFilePath.startsWith(PathType.FILE.getPrefix())){
 				String unPrefixedPath = prefixedFilePath.substring(PathType.FILE.getPrefix().length());
-				keyStore.load(new FileInputStream(unPrefixedPath), theStoreInfo.getStorePass());
+				try(InputStream inputStream = new FileInputStream(unPrefixedPath)){
+					keyStore.load(inputStream, theStoreInfo.getStorePass());
+				}
 			}
 			return keyStore;
 		}
 		catch (Exception e){
-			throw new RuntimeException(e);
+			throw new TlsAuthenticationException(Msg.code(2103)+"Failed to create KeyStore", e);
 		}
 	}
 
@@ -89,14 +95,27 @@ public class TlsAuthenticationSvc {
 					return (X509TrustManager) trustManager;
 				}
 			}
-			throw new RuntimeException("Could not find Trust Manager");
+			throw new TlsAuthenticationException(Msg.code(2104)+"Could not find TrustManager");
 		}
 		catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new TlsAuthenticationException(Msg.code(2105)+"Failed to create TrustManager");
 		}
 	}
 
 	public static HostnameVerifier createHostnameVerifier(Optional<TrustStoreInfo> theTrustStoreInfo){
 		return theTrustStoreInfo.isPresent() ? new DefaultHostnameVerifier() : new NoopHostnameVerifier();
+	}
+
+	public static class TlsAuthenticationException extends RuntimeException {
+		private static final long serialVersionUID = 1l;
+
+		public TlsAuthenticationException(String theMessage, Throwable theCause) {
+			super(theMessage, theCause);
+		}
+
+		public TlsAuthenticationException(String theMessage) {
+			super(theMessage);
+		}
+
 	}
 }

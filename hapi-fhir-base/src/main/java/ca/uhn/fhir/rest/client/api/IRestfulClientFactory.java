@@ -180,10 +180,8 @@ public interface IRestfulClientFactory {
 	/**
 	 * Instantiates a new generic client instance
 	 *
-	 * @param theServerBase
-	 *            The URL of the base for the restful FHIR server to connect to
-	 * @param
-	 * 				theTlsAuthentication Optional configuration to authenticate HTTPS server requests
+	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
+	 * @param theTlsAuthentication Optional configuration to authenticate HTTPS server requests
 	 * @return A newly created client
 	 */
 	IGenericClient newGenericClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);

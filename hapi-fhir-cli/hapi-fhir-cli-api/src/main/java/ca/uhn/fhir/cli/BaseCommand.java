@@ -515,8 +515,8 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			return Optional.empty();
 		}
 
-		try {
-			JsonObject json = JsonParser.parseReader(new FileReader(httpAuthFilePath)).getAsJsonObject();
+		try(FileReader fileReader = new FileReader(httpAuthFilePath)) {
+			JsonObject json = JsonParser.parseReader(fileReader).getAsJsonObject();
 			Optional<KeyStoreInfo> keyStoreInfo = createKeyStoreInfo(json.get("keyStore").getAsJsonObject());
 			Optional<TrustStoreInfo> trustStoreInfo = createTrustStoreInfo(json.get("trustStore").getAsJsonObject());
 			if(keyStoreInfo.isEmpty() && trustStoreInfo.isEmpty()){

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.https;
 
+import ca.uhn.fhir.i18n.Msg;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +26,6 @@ public enum KeyStoreType {
 				return type;
 			}
 		}
-		throw new IllegalArgumentException("Invalid KeyStore Type");
+		throw new IllegalArgumentException(Msg.code(2106)+"Invalid KeyStore Type");
 	}
 }
