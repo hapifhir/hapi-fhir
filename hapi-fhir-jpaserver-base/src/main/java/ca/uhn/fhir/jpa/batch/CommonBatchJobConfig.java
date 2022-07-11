@@ -21,13 +21,6 @@ package ca.uhn.fhir.jpa.batch;
  */
 
 import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterValidator;
-import ca.uhn.fhir.jpa.batch.listener.PidReaderCounterListener;
-import ca.uhn.fhir.jpa.batch.reader.ReverseCronologicalBatchResourcePidReader;
-import ca.uhn.fhir.jpa.batch.writer.SqlExecutorWriter;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,36 +31,8 @@ public class CommonBatchJobConfig {
 
 	@Bean
 	@StepScope
-	public PidToIBaseResourceProcessor pidToResourceProcessor() {
-		return new PidToIBaseResourceProcessor();
-	}
-
-	@Bean
-	@StepScope
 	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
 		return new GoldenResourceAnnotatingProcessor();
 	}
 
-	@Bean
-	public MultiUrlJobParameterValidator multiUrlProcessorParameterValidator(MatchUrlService theMatchUrlService, DaoRegistry theDaoRegistry) {
-		return new MultiUrlJobParameterValidator(theMatchUrlService, theDaoRegistry);
-	}
-
-	@Bean
-	@StepScope
-	public SqlExecutorWriter sqlExecutorWriter() {
-		return new SqlExecutorWriter();
-	}
-
-	@Bean
-	@StepScope
-	public PidReaderCounterListener pidCountRecorderListener() {
-		return new PidReaderCounterListener();
-	}
-
-	@Bean
-	@StepScope
-	public ReverseCronologicalBatchResourcePidReader reverseCronologicalBatchResourcePidReader() {
-		return new ReverseCronologicalBatchResourcePidReader();
-	}
 }
