@@ -50,7 +50,7 @@ public class JsonPatchUtils {
 
 		final JsonPatch patch;
 		try {
-			com.fasterxml.jackson.core.JsonParser parser = factory.createParser(thePatchBody);
+			JsonParser parser = factory.createParser(thePatchBody);
 			JsonNode jsonPatchNode = mapper.readTree(parser);
 			patch = JsonPatch.fromJson(jsonPatchNode);
 
