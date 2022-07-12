@@ -26,10 +26,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Adapt the InMemoryMatcher to support authorization filters in {@link FhirQueryRuleImpl}.
+ * Adapt the InMemoryMatcher to support authorization filters in {@link FhirQueryRuleTester}.
+ * Exists because filters may be applied to resources that don't support all paramters, and UNSUPPORTED
+ * has a different meaning during authorization.
  */
 public interface IAuthorizationSearchParamMatcher {
-	MatchResult match(String theCriteria, IBaseResource theResource);
+	/**
+	 * Calculate if the resource would match the fhir query parameters.
+	 * @param theQueryParameters e.g. "category=laboratory"
+	 * @param theResource the target of the comparison
+	 */
+	MatchResult match(String theQueryParameters, IBaseResource theResource);
 
 	/**
 	 * Match outcomes.
@@ -42,9 +49,11 @@ public interface IAuthorizationSearchParamMatcher {
 	}
 
 	class MatchResult {
-		// wipmb consider a record pattern - public and drop the accessors.
-		@Nonnull private final Match myMatch;
-		@Nullable private final String myUnsupportedReason;
+		// fake record pattern
+		/** match result */
+		@Nonnull public final Match match;
+		/** the reason for the UNSUPPORTED result */
+		@Nullable public final String unsupportedReason;
 
 		public static MatchResult buildMatched() {
 			return new MatchResult(Match.MATCH, null);
@@ -59,16 +68,8 @@ public interface IAuthorizationSearchParamMatcher {
 		}
 
 		private MatchResult(Match myMatch, String myUnsupportedReason) {
-			this.myMatch = myMatch;
-			this.myUnsupportedReason = myUnsupportedReason;
-		}
-
-		public Match getMatch() {
-			return myMatch;
-		}
-
-		public String getUnsupportedReason() {
-			return myUnsupportedReason;
+			this.match = myMatch;
+			this.unsupportedReason = myUnsupportedReason;
 		}
 
 	}

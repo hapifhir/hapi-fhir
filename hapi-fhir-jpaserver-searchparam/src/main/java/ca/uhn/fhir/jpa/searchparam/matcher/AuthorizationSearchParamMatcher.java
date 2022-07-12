@@ -38,9 +38,9 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 	}
 
 	@Override
-	public MatchResult match(String theCriteria, IBaseResource theResource) {
+	public MatchResult match(String theQueryParameters, IBaseResource theResource) {
 		try {
-			InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(theCriteria, theResource, null);
+			InMemoryMatchResult inMemoryMatchResult = mySearchParamMatcher.match(theQueryParameters, theResource, null);
 			if (!inMemoryMatchResult.supported()) {
 				return MatchResult.buildUnsupported(inMemoryMatchResult.getUnsupportedReason());
 			}
@@ -54,7 +54,7 @@ public class AuthorizationSearchParamMatcher implements IAuthorizationSearchPara
 			// it assumes it is during SearchParameter storage.
 			// Instead, we adapt this to UNSUPPORTED during authorization.
 			// We may be applying to all types, and this filter won't match.
-			ourLog.info("Unsupported filter {} applied to resource: {}", theCriteria, e.getMessage());
+			ourLog.info("Unsupported filter {} applied to resource: {}", theQueryParameters, e.getMessage());
 			return MatchResult.buildUnsupported(e.getMessage());
 		}
 	}
