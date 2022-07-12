@@ -1435,11 +1435,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		TransactionDetails transactionDetails = new TransactionDetails(theEntity.getUpdatedDate());
-		updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
 	}
+
 
 	@Transactional
 	@Override
