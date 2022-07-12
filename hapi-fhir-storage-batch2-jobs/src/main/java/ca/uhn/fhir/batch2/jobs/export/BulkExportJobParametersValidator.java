@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.rest.api.Constants;
@@ -14,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BulkExportJobParametersValidator implements IJobParametersValidator<BulkExportJobParameters> {
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@Nullable
 	@Override
@@ -28,7 +32,9 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		else {
 			for (String resourceType : theParameters.getResourceTypes()) {
 				if (resourceType.equalsIgnoreCase("Binary")) {
-					errorMsgs.add("Bulk export of Binary resources is verboten");
+					errorMsgs.add("Bulk export of Binary resources is forbidden");
+				} else if (!myDaoRegistry.isResourceTypeSupported(resourceType)) {
+					errorMsgs.add("Resource type " + resourceType + " is not a supported resource type!");
 				}
 			}
 		}

@@ -49,6 +49,14 @@ import java.util.Date;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 
+
+/*
+ * These classes are no longer needed.
+ * Metadata on the job is contained in the job itself
+ * (no separate storage required).
+ *
+ * See the BulkExportAppCtx for job details
+ */
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
 		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")

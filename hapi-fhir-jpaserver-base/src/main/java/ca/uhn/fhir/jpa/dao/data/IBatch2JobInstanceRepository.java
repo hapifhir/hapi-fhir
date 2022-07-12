@@ -54,10 +54,20 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params AND STAT IN( :stats )",
 		nativeQuery = true
 	)
-	Page<JobInstance> findInstancesByJobIdParamsAndStatus(
+	List<JobInstance> findInstancesByJobIdParamsAndStatus(
 		@Param("defId") String theDefinitionId,
 		@Param("params") String theParams,
 		@Param("stats") Set<StatusEnum> theStatus,
+		Pageable thePageable
+	);
+
+	@Query(
+		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params",
+		nativeQuery = true
+	)
+	List<JobInstance> findInstancesByJobIdAndParams(
+		@Param("defId") String theDefinitionId,
+		@Param("params") String theParams,
 		Pageable thePageable
 	);
 

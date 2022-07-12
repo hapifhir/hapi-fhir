@@ -53,9 +53,9 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		if (myResourceToBinaryIds == null) {
 			myResourceToBinaryIds = new HashMap<>();
 		}
-		if (!myResourceToBinaryIds.containsKey(fileId.getResourceType())) {
-			myResourceToBinaryIds.put(fileId.getResourceType(), new ArrayList<>());
-		}
+
+		myResourceToBinaryIds.putIfAbsent(fileId.getResourceType(), new ArrayList<>());
+
 		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
 
 		return ChunkOutcome.SUCCESS();

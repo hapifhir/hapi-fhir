@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobInfo;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.rest.api.Constants;
@@ -20,9 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BulkExportJobParametersValidatorTest {
+
+	@Mock
+	private DaoRegistry myDaoRegistry;
 
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
@@ -40,6 +47,10 @@ public class BulkExportJobParametersValidatorTest {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
 
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+
 		// test
 		List<String> result = myValidator.validate(parameters);
 
@@ -54,6 +65,10 @@ public class BulkExportJobParametersValidatorTest {
 		BulkExportJobParameters parameters = createSystemExportParameters();
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+
 		// test
 		List<String> result = myValidator.validate(parameters);
 
@@ -63,12 +78,33 @@ public class BulkExportJobParametersValidatorTest {
 	}
 
 	@Test
+	public void validate_invalidResourceType_returnsError() {
+		// setup
+		String resourceType = "notValid";
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setResourceTypes(Collections.singletonList(resourceType));
+
+		// test
+		List<String> result = myValidator.validate(parameters);
+
+		// verify
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		assertTrue(result.get(0).contains("Resource type " + resourceType + " is not a supported resource type"));
+	}
+
+	@Test
 	public void validate_validateParametersForGroup_returnsEmptyList() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
 		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setGroupId("groupId");
 		parameters.setExpandMdm(true);
+
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
 
 		// test
 		List<String> result = myValidator.validate(parameters);
@@ -122,7 +158,7 @@ public class BulkExportJobParametersValidatorTest {
 		// validate
 		assertNotNull(errors);
 		assertFalse(errors.isEmpty());
-		assertTrue(errors.contains("Bulk export of Binary resources is verboten"));
+		assertTrue(errors.contains("Bulk export of Binary resources is forbidden"));
 	}
 
 	@Test

@@ -43,7 +43,6 @@ import org.springframework.data.domain.Sort;
 import javax.annotation.Nonnull;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -146,22 +145,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		String definitionId = theRequest.getJobDefinition();
 		String params = theRequest.getParameters();
 
-		Set<StatusEnum> statuses = theRequest.getStatuses();
-		if (statuses.isEmpty()) {
-			statuses.addAll(Arrays.asList(StatusEnum.values()));
-		}
-
 		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
 
 		// TODO - consider adding a new index... on the JobDefinitionId (and possibly Status)
-		Page<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+		List<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(
 			definitionId,
 			params,
-			statuses,
 			pageable
 		);
 
-		return instances == null ? new ArrayList<>() : instances.stream().collect(Collectors.toList());
+		return instances == null ? new ArrayList<>() : instances;
 	}
 
 	@Override

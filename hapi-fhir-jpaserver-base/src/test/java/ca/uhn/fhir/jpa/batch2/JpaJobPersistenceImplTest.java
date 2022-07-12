@@ -95,7 +95,7 @@ class JpaJobPersistenceImplTest {
 	}
 
 	@Test
-	public void markInstanceAsCompleted_withIsntanceId_updatesToCompleted() {
+	public void markInstanceAsCompleted_withInstanceId_updatesToCompleted() {
 		// setup
 		String jobId = "jobid";
 
@@ -261,15 +261,13 @@ class JpaJobPersistenceImplTest {
 		JobInstance job2 = createJobInstanceWithDemoData();
 		List<JobInstance> instances = Arrays.asList(job1, job2);
 
-		Page<JobInstance> page = new PageImpl<>(instances);
-
 		// when
 		when(myJobInstanceRepository
 			.findInstancesByJobIdParamsAndStatus(eq(req.getJobDefinition()),
 				eq(req.getParameters()),
 				any(Set.class),
 				any(Pageable.class)))
-			.thenReturn(page);
+			.thenReturn(instances);
 
 		// test
 		List<JobInstance> retInstances = mySvc.fetchInstances(req, pageStart, pageSize);

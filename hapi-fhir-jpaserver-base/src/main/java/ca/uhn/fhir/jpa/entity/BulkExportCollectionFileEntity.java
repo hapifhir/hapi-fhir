@@ -35,6 +35,14 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+
+/*
+ * These classes are no longer needed.
+ * Metadata on the job is contained in the job itself
+ * (no separate storage required).
+ *
+ * See the BulkExportAppCtx for job details
+ */
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLFILE")
 @Deprecated
