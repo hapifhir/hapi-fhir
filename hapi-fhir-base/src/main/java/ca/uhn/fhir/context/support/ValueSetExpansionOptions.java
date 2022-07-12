@@ -35,6 +35,8 @@ public class ValueSetExpansionOptions {
 	private boolean myIncludeHierarchy;
 	private String myFilter;
 
+	private String myDisplayLanguage;
+
 	public String getFilter() {
 		return myFilter;
 	}
@@ -117,5 +119,14 @@ public class ValueSetExpansionOptions {
 		return new ValueSetExpansionOptions()
 			.setOffset(theOffset)
 			.setCount(theCount);
+	}
+
+	public String getTheDisplayLanguage() {
+		return myDisplayLanguage;
+	}
+
+	public ValueSetExpansionOptions setTheDisplayLanguage(String theDisplayLanguage) {
+		myDisplayLanguage = theDisplayLanguage;
+		return this;
 	}
 }
