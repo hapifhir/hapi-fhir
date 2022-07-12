@@ -309,7 +309,6 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
-		// fixme this is probably broken for code:not-in with multiple or clauses.
 
 		boolean isNegativeTest = isNegative(theParamDef, theOrList);
 		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.

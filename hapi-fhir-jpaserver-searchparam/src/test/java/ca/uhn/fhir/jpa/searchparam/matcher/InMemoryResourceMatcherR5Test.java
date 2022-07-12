@@ -139,7 +139,6 @@ public class InMemoryResourceMatcherR5Test {
 		assertEquals("Parameter: <encounter.class> Reason: Chained parameters are not supported", result.getUnsupportedReason());
 	}
 
-	// fixme implement this.
 	@Test
 	public void testSupportedNot() {
 		String criteria = "code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE + ",a_different_code";
