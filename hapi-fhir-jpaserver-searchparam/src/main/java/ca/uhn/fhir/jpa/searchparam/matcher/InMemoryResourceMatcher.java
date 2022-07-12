@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
@@ -323,7 +324,8 @@ public class InMemoryResourceMatcher {
 	private boolean isNegative(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList) {
 		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
 			TokenParam tokenParam = (TokenParam) theOrList.get(0);
-			return tokenParam.getModifier().isNegative();
+			TokenParamModifier modifier = tokenParam.getModifier();
+			return modifier != null && modifier.isNegative();
 		} else {
 			return false;
 		}
