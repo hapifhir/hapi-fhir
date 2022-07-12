@@ -341,6 +341,7 @@ public class InMemoryResourceMatcher {
 
 	/**
 	 * Checks whether a query parameter of type token matches one of the search parameters of an in-memory resource.
+	 * The :not modifier is supported.
 	 * The :in and :not-in qualifiers are supported only if a bean implementing IValidationSupport is available.
 	 * Any other qualifier will be ignored and the match will be treated as unqualified.
 	 * @param theModelConfig a model configuration

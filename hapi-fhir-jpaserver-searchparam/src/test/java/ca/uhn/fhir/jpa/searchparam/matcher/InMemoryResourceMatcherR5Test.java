@@ -149,7 +149,7 @@ public class InMemoryResourceMatcherR5Test {
 
 		result = myInMemoryResourceMatcher.match("code:not=a_different_code,and_another", myObservation, mySearchParams);
 		assertTrue(result.supported());
-		assertTrue(result.matched(), ":not maches when NONE match");
+		assertTrue(result.matched(), ":not matches when NONE match");
 	}
 
 	@Test
