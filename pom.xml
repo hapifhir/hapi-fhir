@@ -752,6 +752,10 @@
 			<name>Augustas Vilčinskas</name>
 			<organization>Ivido</organization>
 		</developer>
+		<developer>
+			<id>gjergjsheldija</id>
+			<name>Gjergj Sheldija</name>
+		</developer>
 	</developers>
 
 	<licenses>
