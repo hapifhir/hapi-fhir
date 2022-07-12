@@ -309,6 +309,7 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+		// fixme this is probably broken for code:not-in with multiple or clauses.
 		return theNextAnd.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, paramDef, theSearchParams, token));
 	}
 
@@ -426,6 +427,8 @@ public class InMemoryResourceMatcher {
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
 						return getValidationSupportOrNull() != null;
+					case NOT:
+						return true;
 					default:
 						return false;
 				}
