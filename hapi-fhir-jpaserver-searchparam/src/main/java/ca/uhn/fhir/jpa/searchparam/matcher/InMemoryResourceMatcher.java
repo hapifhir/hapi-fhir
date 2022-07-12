@@ -308,9 +308,27 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
+	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
 		// fixme this is probably broken for code:not-in with multiple or clauses.
-		return theNextAnd.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, paramDef, theSearchParams, token));
+
+		boolean isNegativeTest = isNegative(theParamDef, theOrList);
+		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.
+		if (isNegativeTest) {
+			return theOrList.stream().allMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+		} else {
+			return theOrList.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+		}
+	}
+
+	/** Some modifiers are negative, and must match NONE of their or-list */
+	private boolean isNegative(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList) {
+		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
+			TokenParam tokenParam = (TokenParam) theOrList.get(0);
+			return tokenParam.getModifier().isNegative();
+		} else {
+			return false;
+		}
+
 	}
 
 	private boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
@@ -344,6 +362,8 @@ public class InMemoryResourceMatcher {
 					return theSearchParams.myTokenParams.stream()
 						.filter(t -> t.getParamName().equals(theParamName))
 						.noneMatch(t -> systemContainsCode(theQueryParam, t));
+				case NOT:
+					return !theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
 				default:
 					return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
 			}
