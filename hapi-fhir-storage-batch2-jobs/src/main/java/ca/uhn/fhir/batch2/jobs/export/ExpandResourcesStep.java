@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
+	@Autowired
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> theStepExecutionDetails,
@@ -60,6 +64,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		if (jobParameters.isExpandMdm()) {
 			myBulkExportProcessor.expandMdmResources(allResources);
 		}
+
+		// is this necessary?
+		myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
 
 		// encode them
 		List<String> resources = encodeToString(allResources, jobParameters);

@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,9 @@ public class ExpandResourcesStepTest {
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
+
+	@Mock
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Spy
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
