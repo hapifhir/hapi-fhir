@@ -23,7 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.*;
 import java.util.*;
 
-import ca.uhn.fhir.rest.https.TlsAuthentication;
+import ca.uhn.fhir.tls.TlsAuthentication;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;

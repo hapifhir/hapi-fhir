@@ -5,9 +5,9 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
-import ca.uhn.fhir.rest.https.TlsAuthentication;
-import ca.uhn.fhir.rest.https.TlsAuthenticationSvc;
-import ca.uhn.fhir.rest.https.TrustStoreInfo;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
+import ca.uhn.fhir.tls.TrustStoreInfo;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 

@@ -26,7 +26,7 @@ import java.util.Optional;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.https.TlsAuthentication;
+import ca.uhn.fhir.tls.TlsAuthentication;
 
 public interface IRestfulClientFactory {
 

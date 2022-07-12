@@ -3,7 +3,7 @@ package ca.uhn.fhir.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.https.TlsAuthentication;
+import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;

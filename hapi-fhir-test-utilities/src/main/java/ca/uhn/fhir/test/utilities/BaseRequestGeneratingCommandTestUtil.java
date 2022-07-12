@@ -21,9 +21,9 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.https.KeyStoreInfo;
-import ca.uhn.fhir.rest.https.TlsAuthentication;
-import ca.uhn.fhir.rest.https.TrustStoreInfo;
+import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.TrustStoreInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;

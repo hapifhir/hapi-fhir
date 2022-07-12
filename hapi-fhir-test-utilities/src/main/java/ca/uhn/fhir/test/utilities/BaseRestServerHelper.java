@@ -25,7 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.https.KeyStoreType;
+import ca.uhn.fhir.tls.KeyStoreType;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
