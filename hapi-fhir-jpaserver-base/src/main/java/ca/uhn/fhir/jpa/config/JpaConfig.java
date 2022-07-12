@@ -140,6 +140,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.util.ThreadPoolUtil;
@@ -223,8 +224,14 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport) {
-		return new ResponseTerminologyTranslationInterceptor(theValidationSupport);
+	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(IValidationSupport theValidationSupport, ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		return new ResponseTerminologyTranslationInterceptor(theValidationSupport, theResponseTerminologyTranslationSvc);
+	}
+
+	@Lazy
+	@Bean
+	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(IValidationSupport theValidationSupport) {
+		return new ResponseTerminologyTranslationSvc(theValidationSupport);
 	}
 
 	@Bean
