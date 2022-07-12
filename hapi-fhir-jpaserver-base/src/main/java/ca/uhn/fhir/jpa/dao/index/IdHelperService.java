@@ -709,7 +709,7 @@ public class IdHelperService implements IIdHelperService {
 	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
 		if (retVal.getId() == null) {
-			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
+			throw new IllegalStateException(Msg.code(2102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
 		return retVal;
@@ -719,7 +719,7 @@ public class IdHelperService implements IIdHelperService {
 	public IIdType resourceIdFromPidOrThrowException(String thePid, String resourceType) {
 		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(Long.parseLong(thePid));
 		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException(Msg.code(1103) + "Requested resource not found");
+			throw new ResourceNotFoundException(Msg.code(2103) + "Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
 	}
