@@ -1,0 +1,11 @@
+---
+- item:
+    type: "fix"
+    title: "This version specifically modifies reindex to support moving data from the RES_TEXT to the RES_TEXT_VC column in the HFJ_RES_VER table. This is especially important
+  for PostgreSQL users, as the RES_TEXT column only has an addressable space of about 4 billion resources.
+
+Any installation that exceeds this amount of resources stored in the RES_TEXT will experience that the software hangs on attempting to store new resources.
+In order to avoid this, you should use the `DaoConfig#setInlineResourceTextBelowSize` setting, and set it to a large non-zero value.
+This will cause PostgreSQL to not store the resource text as a LOB, but instead as a VARCHAR field. By default, this field has length 4000, but you can and should update it by following the documentation [here](https://smilecdr.com/docs/fhir_storage_relational/fhir_storage_relational_module.html#resource-body-storage).
+"
+

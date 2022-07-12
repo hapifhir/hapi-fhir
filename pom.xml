@@ -752,6 +752,10 @@
 			<name>Augustas Vilčinskas</name>
 			<organization>Ivido</organization>
 		</developer>
+		<developer>
+			<id>gjergjsheldija</id>
+			<name>Gjergj Sheldija</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -802,7 +806,7 @@
         <jaxb_runtime_version>3.0.0</jaxb_runtime_version>
         <jena_version>4.2.0</jena_version>
         <jersey_version>3.0.3</jersey_version>
-        <jetty_version>9.4.44.v20210927</jetty_version>
+        <jetty_version>9.4.48.v20220622</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
         <junit_version>5.8.2</junit_version>
         <flexmark_version>0.50.40</flexmark_version>

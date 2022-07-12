@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3654
+title: "UPDATE: This change has breen removed. Previous content was: 'Modify reindexing to migrate data HFJ_RES_VER data from the RES_TEXT column to the RES_TEXT_VC 
+if the resource's size falls inside of the configuration defined in DaoConfig's `getInlineResourceTextBelowSize` property.'"
