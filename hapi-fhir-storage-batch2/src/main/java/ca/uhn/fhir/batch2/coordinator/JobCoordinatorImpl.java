@@ -96,11 +96,13 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
 				theStartRequest.getJobDefinitionId(), theStartRequest.getParameters()
 			);
+			request.addStatus(StatusEnum.QUEUED);
+			request.addStatus(StatusEnum.IN_PROGRESS);
+			request.addStatus(StatusEnum.COMPLETED);
 
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 1, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
-
 				Collections.sort(existing, new Comparator<JobInstance>() {
 					@Override
 					public int compare(JobInstance o1, JobInstance o2) {
@@ -112,6 +114,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
 				response.setJobId(first.getInstanceId());
+				response.setUsesCachedResult(true);
 
 				return response;
 			}

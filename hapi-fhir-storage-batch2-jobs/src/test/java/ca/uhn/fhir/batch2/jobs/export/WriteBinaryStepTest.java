@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -43,6 +44,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -158,7 +160,7 @@ public class WriteBinaryStepTest {
 	}
 
 	@Test
-	public void run_withIOException_setsToError() throws IOException {
+	public void run_withIOException_throws() throws IOException {
 		// setup
 		String testException = "I am an exceptional exception.";
 		JobInstance instance = new JobInstance();
@@ -183,11 +185,14 @@ public class WriteBinaryStepTest {
 		myFinalStep.setWriter(writer);
 
 		// test
-		RunOutcome outcome = myFinalStep.run(input, sink);
+		try {
+			myFinalStep.run(input, sink);
+			fail();
+		} catch (JobExecutionFailedException ex) {
+			assertTrue(ex.getMessage().contains("Failure to process resource of type"));
+		}
 
 		// verify
-		assertEquals(-1, outcome.getRecordsProcessed());
-
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
 		assertTrue(logCaptor.getValue().getFormattedMessage()

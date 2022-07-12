@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -33,10 +35,12 @@ import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
 
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -126,9 +130,56 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	private void setupMocks(JobDefinition<TestJobParameters> theJobDefinition, WorkChunk theWorkChunk) {
-		doReturn(theJobDefinition).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
+		mockJobRegistry(theJobDefinition);
 		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(theWorkChunk));
+	}
+
+	private void mockJobRegistry(JobDefinition<TestJobParameters> theJobDefinition) {
+		doReturn(theJobDefinition)
+			.when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
+	}
+
+	@Test
+	public void startInstance_usingExistingCache_returnsExistingJobFirst() {
+		// setup
+		String instanceId = "completed-id";
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setUseCache(true);
+		startRequest.setParameters("parameters");
+
+		JobDefinition<?> def = createJobDefinition();
+
+		JobInstance existingInProgInstance = createInstance();
+		existingInProgInstance.setInstanceId("someId");
+		existingInProgInstance.setStatus(StatusEnum.IN_PROGRESS);
+		JobInstance existingCompletedInstance = createInstance();
+		existingCompletedInstance.setStatus(StatusEnum.COMPLETED);
+		existingCompletedInstance.setInstanceId(instanceId);
+
+		// when
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
+			.thenReturn(Optional.of(def));
+		when(myJobInstancePersister.fetchInstances(any(FetchJobInstancesRequest.class), anyInt(), anyInt()))
+			.thenReturn(Arrays.asList(existingInProgInstance, existingCompletedInstance));
+
+		// test
+		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
+
+		// verify
+		assertEquals(instanceId, startResponse.getJobId()); // make sure it's the completed one
+		assertTrue(startResponse.isUsesCachedResult());
+		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
+		verify(myJobInstancePersister)
+			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
+		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
+		assertEquals(3, req.getStatuses().size());
+		assertTrue(
+			req.getStatuses().contains(StatusEnum.COMPLETED)
+			&& req.getStatuses().contains(StatusEnum.IN_PROGRESS)
+			&& req.getStatuses().contains(StatusEnum.QUEUED)
+		);
 	}
 
 	/**

@@ -70,12 +70,12 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			}
 			binary.setContent(outputStream.toByteArray());
 		} catch (IOException ex) {
-			ourLog.error("Failure to process resource of type {} : {}",
+			String errorMsg = String.format("Failure to process resource of type %s : %s",
 				expandedResources.getResourceType(),
 				ex.getMessage());
+			ourLog.error(errorMsg);
 
-			// failure - return -1?
-			return new RunOutcome(-1);
+			throw new JobExecutionFailedException(errorMsg);
 		}
 
 		DaoMethodOutcome outcome = binaryDao.create(binary,

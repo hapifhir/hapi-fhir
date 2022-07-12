@@ -12,7 +12,7 @@ public class BulkExportUtils {
 	/**
 	 * Converts the BulkDataExportOptions -> BulkExportParameters
 	 */
-	public static BulkExportParameters getBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
+	public static BulkExportParameters createBulkExportJobParametersFromExportOptions(BulkDataExportOptions theOptions) {
 		BulkExportParameters parameters = new BulkExportParameters(Batch2JobDefinitionConstants.BULK_EXPORT);
 
 		parameters.setStartDate(theOptions.getSince());

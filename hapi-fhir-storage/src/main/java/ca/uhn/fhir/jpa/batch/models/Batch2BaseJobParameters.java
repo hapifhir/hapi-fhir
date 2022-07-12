@@ -14,7 +14,7 @@ public class Batch2BaseJobParameters {
 
 	/**
 	 * If true, will search for existing jobs
-	 * first and return any that have already completed or are inprogress/queued or cancelled first
+	 * first and return any that have already completed or are inprogress/queued first
 	 */
 	private boolean myUseExistingJobsFirst;
 

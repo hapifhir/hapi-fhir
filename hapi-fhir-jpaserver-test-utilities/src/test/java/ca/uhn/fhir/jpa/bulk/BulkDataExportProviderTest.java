@@ -586,9 +586,13 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testProviderProcessesNoCacheHeader() throws IOException {
+		// setup
+		Batch2JobStartResponse startResponse = createJobStartResponse();
+		startResponse.setUsesCachedResult(true);
+
 		// when
-		when(myJobRunner.startNewJob(any()))
-			.thenReturn(createJobStartResponse());
+		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+			.thenReturn(startResponse);
 
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));

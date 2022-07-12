@@ -120,7 +120,7 @@ public class BulkDataExportProvider {
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
-		BulkExportParameters parameters = BulkExportUtils.getBulkExportJobParametersFromExportOptions(theOptions);
+		BulkExportParameters parameters = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
 		parameters.setUseExistingJobsFirst(useCache);
 
 		// start job
@@ -128,6 +128,10 @@ public class BulkDataExportProvider {
 
 		JobInfo info = new JobInfo();
 		info.setJobMetadataId(response.getJobId());
+
+		// We set it to submitted, even if it's using a cached job
+		// This isn't an issue because the actual status isn't used
+		// instead, when they poll for results, they'll get the real one
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 
 		writePollingLocationToResponseHeaders(theRequestDetails, info);
