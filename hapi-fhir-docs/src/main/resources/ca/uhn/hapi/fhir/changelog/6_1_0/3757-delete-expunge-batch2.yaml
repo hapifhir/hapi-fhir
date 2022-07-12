@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3757
+title: "The Delete Expunge operation has been moved from Spring Batch to Batch 2."

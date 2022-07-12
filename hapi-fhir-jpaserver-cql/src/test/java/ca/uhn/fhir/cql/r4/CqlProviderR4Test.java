@@ -50,7 +50,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
 
 		myPartitionHelper.clear();
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "subject",
 			patient, null, null, null, null, null, null, myRequestDetails);
 
 		// Assert it worked
@@ -67,7 +67,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		loadResource("r4/hedis-ig/measure-asf.json", myRequestDetails);
 
 		myPartitionHelper.clear();
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "patient",
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "subject",
 			patient, null, null, null, null, null, null, myRequestDetails);
 
 		// Assert it worked

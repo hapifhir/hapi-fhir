@@ -2,16 +2,20 @@ package ca.uhn.fhir.jpa.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.auth.FhirQueryRuleImpl;
+import ca.uhn.fhir.rest.server.interceptor.auth.FhirQueryRuleTester;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,15 +29,16 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import javax.annotation.Nullable;
 import java.util.HashSet;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
+import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
+import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 
-// wipjv where should this test live? -
-// wipjv can we mock the resource?  We just use it for stubbing here. If so, move this back to hapi-fhir-server ca.uhn.fhir.rest.server.interceptor.auth
+// wipjv where should this test live? - It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
 @MockitoSettings
 class FhirQueryRuleImplTest implements ITestDataBuilder {
 
@@ -47,57 +52,41 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	@RegisterExtension
 	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension(myMockRuleApplier.getTroubleshootingLog().getName());
 
-	private FhirQueryRuleImpl myRule;
-	private IBaseResource myResource;
-	private IBaseResource myResource2;
-	//@Mock
-	private final SystemRequestDetails mySrd = new SystemRequestDetails();
+	private IAuthRule myRule;
+	IIdType myPatientId = new IdDt("Patient/1");
+	private IBaseResource myPatient;
+	private IBaseResource myObservation;
+	@Mock
+	private RequestDetails myRequestDetails;
 	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	@Mock
 	private IAuthorizationSearchParamMatcher myMatcher;
 
 	@BeforeEach
 	public void setUp() {
-		mySrd.setFhirContext(myFhirContext);
+		when(myRequestDetails.getFhirContext()).thenReturn(myFhirContext);
 	}
-
-
-//	// our IRuleApplierStubs
-//	@Override
-//	public Logger getTroubleshootingLog() {
-//		return ourTargetLog;
-//	}
-//
-//	public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
-//		return myMatcher;
-//	}
-//
-//	@Override
-//	public AuthorizationInterceptor.Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut) {
-//		return null;
-//	}
 
 
 	@Nested
 	public class MatchingLogic {
 
 		@Test
-		public void simpleStringSearch_whenMatchResource_allow() {
+		public void typeWithFilter_whenMatch_allow() {
 			// given
 			withPatientWithNameAndId();
 
 			RuleBuilder b = new RuleBuilder();
-			myRule = (FhirQueryRuleImpl) b.allow()
+			myRule = b.allow()
 				.read()
 				.resourcesOfType("Patient")
 				.withFilter( "family=Smith")
 				.andThen().build().get(0);
 
-			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=Smith"), ArgumentMatchers.same(myResource)))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+			stubMatcherCall("Patient?family=Smith", myPatient, buildMatched());
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
 			assertThat(verdict, notNullValue());
@@ -105,38 +94,74 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		}
 
 		@Test
-		public void simpleStringSearch_noMatch_noVerdict() {
+		public void anyTypewithQueryFilter_whenMatch_allow() {
 			// given
 			withPatientWithNameAndId();
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi")
+
+			RuleBuilder b = new RuleBuilder();
+			myRule = b.allow()
+				.read()
+				.allResources()
+				.withFilter( "family=Smith")
 				.andThen().build().get(0);
-			when(myMatcher.match(ArgumentMatchers.eq("Patient?family=smi"), ArgumentMatchers.same(myResource)))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+
+			stubMatcherCall("Patient?family=Smith", myPatient, buildMatched());
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
+
+			// then
+			assertThat(verdict, notNullValue());
+			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+		}
+
+		@Test
+		public void typeWithQuery_noQueryMatch_noVerdict() {
+			// given
+			withPatientWithNameAndId();
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Patient")
+				.withFilter( "family=smi")
+				.andThen().build().get(0);
+			stubMatcherCall("Patient?family=smi", myPatient, buildUnmatched());
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
 			assertThat(verdict, nullValue());
 		}
 
 		@Test
-		public void observation_notInCompartmentMatchFilter_noVerdict() {
+		public void typeWithQuery_wrongType_noVerdict() {
+			// given
+			withPatientWithNameAndId();
+			withObservationWithSubjectAndCode(myPatientId);
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Patient")
+				.withFilter( "family=smi")
+				.andThen().build().get(0);
+			//stubMatcherCall("Patient?family=smi", myPatient, buildUnmatched());
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
+
+			// then
+			assertThat(verdict, nullValue());
+		}
+
+		@Test
+		public void inCompartmentwithQueryFilter_resourceNotInCompartmentButMatchFilter_noVerdict() {
 			// given
 			withPatientWithNameAndId();
 			// create patient for observation to point to so that the observation isn't in our main patient compartment
-			IBaseResource patient = buildResource("Patient", withFamily("Jones"), withId("bad-id"));
-			withObservationWithSubjectAndCode(patient.getIdElement());
+			withObservationWithSubjectAndCode(myPatient.getIdElement());
 
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Observation")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "code=28521000087105")
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Observation")
+				.inCompartmentWithFilter("patient", myPatient.getIdElement().withResourceType("Patient"), "code=28521000087105")
 				.andThen().build().get(0);
-			when(myMatcher.match("Observation?code=28521000087105", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+			// matcher won't be called since not in compartment
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
 			assertThat(verdict, nullValue());
@@ -146,41 +171,88 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		public void observation_noMatchFilter_noVerdict() {
 			// given
 			withPatientWithNameAndId();
-			withObservationWithSubjectAndCode(myResource.getIdElement());
+			withObservationWithSubjectAndCode(myPatient.getIdElement());
 
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Observation")
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Observation")
 				.withFilter("code=12")
 				.andThen().build().get(0);
-			when(myMatcher.match("Observation?code=12", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnmatched());
+
+			stubMatcherCall("Observation?code=12", myObservation, buildUnmatched());
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
 			assertThat(verdict, nullValue());
 		}
 
 		@Test
-		public void observation_denyWithFilter_deny() {
+		public void denyTypeWithQueryFilter_match_deny() {
 			// given
 			withPatientWithNameAndId();
-			withObservationWithSubjectAndCode(myResource.getIdElement());
+			withObservationWithSubjectAndCode(myPatient.getIdElement());
 
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().deny().read().resourcesOfType("Observation")
+			myRule = new RuleBuilder().deny().read().resourcesOfType("Observation")
 				.withFilter("code=28521000087105")
 				.andThen().build().get(0);
-			when(myMatcher.match("Observation?code=28521000087105", myResource2))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeMatched());
+			stubMatcherCall("Observation?code=28521000087105", myObservation, buildMatched());
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource2);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myObservation);
 
 			// then
 			assertThat(verdict, notNullValue());
 			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
 		}
 
+
+		@Test
+		public void allowIdwithQueryFilter_matchesIdAndFilter_allow() {
+			// given
+			withPatientWithNameAndId();
+
+			myRule = new RuleBuilder()
+				.allow()
+				.read().instance(myPatient.getIdElement())
+				.withTester(new FhirQueryRuleTester("name=smith"))
+				.andThen().build().get(0);
+
+			stubMatcherCall("Patient?name=smith", myPatient, buildMatched());
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
+
+			// then
+			assertThat(verdict, notNullValue());
+			assertThat(verdict.getDecision(), equalTo(PolicyEnum.ALLOW));
+		}
+
+
+		@Test
+		public void allowIdwithQueryFilter_matchesJustIdNotFilter_abstain() {
+			// given
+			withPatientWithNameAndId();
+
+			myRule = new RuleBuilder()
+				.allow()
+				.read().instance(myPatient.getIdElement())
+				.withTester(new FhirQueryRuleTester("name=smith"))
+				.andThen().build().get(0);
+
+			stubMatcherCall("Patient?name=smith", myPatient, buildUnmatched());
+
+			// when
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
+
+			// then
+			assertThat(verdict, nullValue());
+		}
+
+	}
+
+	private void stubMatcherCall(String expectedQuery, IBaseResource theTargetResource, IAuthorizationSearchParamMatcher.MatchResult theStubResult) {
+		when(myMatcher.match(ArgumentMatchers.eq(expectedQuery), ArgumentMatchers.same(theTargetResource)))
+			.thenReturn(theStubResult);
 	}
 
 
@@ -197,35 +269,33 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		@Test
 		public void givenAllowRule_whenUnsupportedQuery_noVerdict() {
 			withPatientWithNameAndId();
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMatcher.match("Patient?family=smi", myResource))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Patient")
+				.inCompartmentWithFilter("patient", myPatient.getIdElement().withResourceType("Patient"), "unsupported.chain=smi").andThen().build().get(0);
+			stubMatcherCall("Patient?unsupported.chain=smi", myPatient, buildUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
 			assertThat(verdict, nullValue());
-			assertThat(myLogCapture.getLogEvents(),
-				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
+				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		@Test
 		public void givenDenyRule_whenUnsupportedQuery_reject() {
 			withPatientWithNameAndId();
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().deny().read().resourcesOfType("Patient")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Patient"), "family=smi").andThen().build().get(0);
-			when(myMatcher.match("Patient?family=smi", myResource))
-				.thenReturn(IAuthorizationSearchParamMatcher.MatchResult.makeUnsupported("I'm broken unsupported chain XXX"));
+			myRule = new RuleBuilder().deny().read().resourcesOfType("Patient")
+				.inCompartmentWithFilter("patient", myPatientId, "unsupported.chain=smi").andThen().build().get(0);
+			stubMatcherCall("Patient?unsupported.chain=smi", myPatient, buildUnsupported("I'm broken unsupported chain XXX"));
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
 			assertThat(verdict.getDecision(), equalTo(PolicyEnum.DENY));
-			assertThat(myLogCapture.getLogEvents(),
-				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
+				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
 		}
 
 		/**
@@ -236,16 +306,16 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 		public void noMatcherService_unsupportedPerm_noVerdict() {
 			withPatientWithNameAndId();
 			myMatcher = null;
-			myRule = (FhirQueryRuleImpl) new RuleBuilder().allow().read().resourcesOfType("Patient")
-				.inCompartmentWithFilter("patient", myResource.getIdElement().withResourceType("Observation"), "code:in=foo").andThen().build().get(0);
+			myRule = new RuleBuilder().allow().read().resourcesOfType("Patient")
+				.inCompartmentWithFilter("patient", myPatient.getIdElement().withResourceType("Patient"), "code:in=foo").andThen().build().get(0);
 
 			// when
-			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myResource);
+			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
 			assertThat(verdict, nullValue());
-			assertThat(myLogCapture.getLogEvents(),
-				hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
+			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
+				Matchers.hasItem(myLogCapture.eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
 		}
 
 	}
@@ -253,19 +323,20 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 	// We need the builder to set AppliesTypeEnum, and the use that to build the matcher expression.
 
 	private AuthorizationInterceptor.Verdict applyRuleToResource(IBaseResource theResource) {
-		return myRule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, mySrd, null, null, theResource, myMockRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);
+		return myRule.applyRule(RestOperationTypeEnum.SEARCH_TYPE, myRequestDetails, null, null, theResource, myMockRuleApplier, new HashSet<>(), Pointcut.STORAGE_PRESHOW_RESOURCES);
 	}
 
 	private void withPatientWithNameAndId() {
-		myResource = buildResource("Patient", withFamily("Smith"), withId("some-id"));
+		myPatient = buildPatient(withId(myPatientId));
 	}
 
 	// Use in sequence with above
 	private void withObservationWithSubjectAndCode(IIdType theIdElement) {
-		String snomedUriString = "http://snomed.info/sct";
+		String snomedUriString = "https://snomed.info/sct";
 		String insulin2hCode = "28521000087105";
-		myResource2 = buildResource("Observation", withObservationCode(snomedUriString, insulin2hCode), withSubject(theIdElement));
+		myObservation = buildResource("Observation", withObservationCode(snomedUriString, insulin2hCode), withSubject(theIdElement));
 	}
+
 
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
@@ -279,6 +350,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 	@Override
 	public FhirContext getFhirContext() {
-		return FhirContext.forR4Cached();
+		return myFhirContext;
 	}
+
 }

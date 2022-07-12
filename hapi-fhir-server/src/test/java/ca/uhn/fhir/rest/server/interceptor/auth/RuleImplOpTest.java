@@ -21,7 +21,7 @@ public class RuleImplOpTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("RuleImplOp[op=<null>,transactionAppliesToOp=<null>,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]", new RuleImplOp("").toString());
+		assertEquals("RuleImplOp[testers=<null>,op=<null>,transactionAppliesToOp=<null>,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]", new RuleImplOp("").toString());
 	}
 
 	@Test
