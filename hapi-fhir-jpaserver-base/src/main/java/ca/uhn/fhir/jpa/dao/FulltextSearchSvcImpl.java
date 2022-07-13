@@ -403,6 +403,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
 		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
