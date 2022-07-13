@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.tls;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.TrustStoreInfo;
@@ -58,11 +59,12 @@ public class TlsAuthenticationSvcTest {
 
 	@Test
 	public void testCreateSslContextPresentInvalid(){
-		KeyStoreInfo invalidKeyStoreInfo = new KeyStoreInfo("INVALID.p12", "changeit", "changeit", "server");
+		KeyStoreInfo invalidKeyStoreInfo = new KeyStoreInfo("file:///INVALID.p12", "changeit", "changeit", "server");
 		TlsAuthentication invalidTlsAuthentication = new TlsAuthentication(Optional.of(invalidKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
-		assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+		Exception thrownException = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
 			TlsAuthenticationSvc.createSslContext(Optional.of(invalidTlsAuthentication));
 		});
+		assertEquals(Msg.code(2102)+"Failed to create SSLContext", thrownException.getMessage());
 	}
 
 	@Test
@@ -72,9 +74,27 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
+	public void testCreateKeyStoreNonExistentFile() throws Exception {
+		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/non-existent.p12", "changeit", "changeit", "server");
+		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+			TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
+		});
+		assertEquals(Msg.code(2103)+"Failed to create KeyStore", exceptionThrown.getMessage());
+	}
+
+	@Test
 	public void testCreateTrustStore() throws Exception {
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerTrustStoreInfo);
 		assertNotNull(keyStore.getCertificate(myServerTrustStoreInfo.getAlias()));
+	}
+
+	@Test
+	public void testCreateTrustStoreNonExistentFile() throws Exception {
+		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/non-existent.p12", "changeit", "server");
+		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+			TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
+		});
+		assertEquals(Msg.code(2103)+"Failed to create KeyStore", exceptionThrown.getMessage());
 	}
 
 	@Test
@@ -89,9 +109,11 @@ public class TlsAuthenticationSvcTest {
 
 	@Test
 	public void testCreateTrustManagerInvalid() throws Exception{
-		TrustStoreInfo invalidKeyStoreInfo = new TrustStoreInfo("INVALID.p12", "changeit", "client");
-		X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
-		assertEquals(0, trustManager.getAcceptedIssuers().length);
+		TrustStoreInfo invalidKeyStoreInfo = new TrustStoreInfo("file:///INVALID.p12", "changeit", "client");
+		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
+		});
+		assertEquals(Msg.code(2105)+"Failed to create TrustManager", exceptionThrown.getMessage());
 	}
 
 	@Test

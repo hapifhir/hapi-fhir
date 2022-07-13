@@ -65,16 +65,15 @@ public class TlsAuthenticationSvc {
 		try {
 			KeyStore keyStore = KeyStore.getInstance(theStoreInfo.getType().toString());
 
-			final String prefixedFilePath = theStoreInfo.getFilePath();
-			if(prefixedFilePath.startsWith(PathType.RESOURCE.getPrefix())){
-				String unPrefixedPath = prefixedFilePath.substring(PathType.RESOURCE.getPrefix().length());
-				try(InputStream inputStream = TlsAuthenticationSvc.class.getResourceAsStream(unPrefixedPath)){
+			if(PathType.RESOURCE.equals(theStoreInfo.getPathType())){
+				try(InputStream inputStream = TlsAuthenticationSvc.class.getResourceAsStream(theStoreInfo.getFilePath())){
+					validateKeyStoreExists(inputStream);
 					keyStore.load(inputStream, theStoreInfo.getStorePass());
 				}
 			}
-			else if(prefixedFilePath.startsWith(PathType.FILE.getPrefix())){
-				String unPrefixedPath = prefixedFilePath.substring(PathType.FILE.getPrefix().length());
-				try(InputStream inputStream = new FileInputStream(unPrefixedPath)){
+			else if(PathType.FILE.equals(theStoreInfo.getPathType())){
+				try(InputStream inputStream = new FileInputStream(theStoreInfo.getFilePath())){
+					validateKeyStoreExists(inputStream);
 					keyStore.load(inputStream, theStoreInfo.getStorePass());
 				}
 			}
@@ -85,12 +84,19 @@ public class TlsAuthenticationSvc {
 		}
 	}
 
+	public static void validateKeyStoreExists(InputStream theInputStream){
+		if(theInputStream == null){
+			throw new TlsAuthenticationException(Msg.code(2116)+"Keystore does not exists");
+		}
+	}
+
 	public static X509TrustManager createTrustManager(Optional<TrustStoreInfo> theTrustStoreInfo) {
 		try {
 			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 			if (theTrustStoreInfo.isEmpty()) {
 				trustManagerFactory.init((KeyStore) null); // Load Trust Manager Factory with default Java truststore
-			} else {
+			}
+			else {
 				TrustStoreInfo trustStoreInfo = theTrustStoreInfo.get();
 				KeyStore trustStore = createKeyStore(trustStoreInfo);
 				trustManagerFactory.init(trustStore);
@@ -121,6 +127,5 @@ public class TlsAuthenticationSvc {
 		public TlsAuthenticationException(String theMessage) {
 			super(theMessage);
 		}
-
 	}
 }

@@ -103,15 +103,15 @@ public class BaseRequestGeneratingCommandTestUtil implements AfterEachCallback {
 			ObjectMapper mapper = new ObjectMapper();
 
 			ObjectNode keyStore = mapper.createObjectNode();
-			keyStore.put("filePath", myKeystoreInfo.getFilePath());
-			keyStore.put("storePass", new String(myKeystoreInfo.getStorePass()));
-			keyStore.put("keyPass", new String(myKeystoreInfo.getKeyPass()));
-			keyStore.put("alias", myKeystoreInfo.getAlias());
+			keyStore.put("filePath", KEYSTORE_RESOURCE_PATH);
+			keyStore.put("storePass", KEYSTORE_STOREPASS);
+			keyStore.put("keyPass", KEYSTORE_KEYPASS);
+			keyStore.put("alias", KEYSTORE_ALIAS);
 
 			ObjectNode trustStore = mapper.createObjectNode();
-			trustStore.put("filePath", myTrustStoreInfo.getFilePath());
-			trustStore.put("storePass", new String(myTrustStoreInfo.getStorePass()));
-			trustStore.put("alias", new String(myTrustStoreInfo.getAlias()));
+			trustStore.put("filePath", TRUSTSTORE_RESOURCE_PATH);
+			trustStore.put("storePass", TRUSTSTORE_STOREPASS);
+			trustStore.put("alias", TRUSTSTORE_ALIAS);
 
 			ObjectNode json = mapper.createObjectNode();
 			json.set("keyStore", keyStore);
