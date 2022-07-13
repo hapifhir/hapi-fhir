@@ -1145,6 +1145,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateResourceType(entityToUpdate);
 
+		if (entityToUpdate.getDeleted() != null) {
+			throw createResourceGoneException(entityToUpdate);
+		}
+
 		IBaseResource resourceToUpdate = toResource(entityToUpdate, false);
 		IBaseResource destination;
 		switch (thePatchType) {
