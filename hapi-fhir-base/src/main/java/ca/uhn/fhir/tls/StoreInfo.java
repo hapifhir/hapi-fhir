@@ -8,7 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public abstract class StoreInfo {
 
 	private final String myFilePath;
-	private final PathType pathType;
+	private final PathType myPathType;
 	private final char[] myStorePass;
 	private final String myAlias;
 	private final KeyStoreType myType;
@@ -16,11 +16,11 @@ public abstract class StoreInfo {
 	public StoreInfo(String theFilePath, String theStorePass, String theAlias) {
 		if(theFilePath.startsWith(PathType.RESOURCE.getPrefix())){
 			myFilePath = theFilePath.substring(PathType.RESOURCE.getPrefix().length());
-			pathType = PathType.RESOURCE;
+			myPathType = PathType.RESOURCE;
 		}
 		else if(theFilePath.startsWith(PathType.FILE.getPrefix())){
 			myFilePath = theFilePath.substring(PathType.FILE.getPrefix().length());
-			pathType = PathType.FILE;
+			myPathType = PathType.FILE;
 		}
 		else {
 			throw new StoreInfoException(Msg.code(2117)+"Invalid path prefix");
@@ -50,7 +50,7 @@ public abstract class StoreInfo {
 	}
 
 	public PathType getPathType() {
-		return pathType;
+		return myPathType;
 	}
 
 	protected char[] toCharArray(String theString){
