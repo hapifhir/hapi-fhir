@@ -396,7 +396,7 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public int countDeleteQueries() {
 		return getDeleteQueries()
 			.stream()
-			.map(t->t.getSize())
+			.map(SqlQuery::getSize)
 			.reduce(0, Integer::sum);
 	}
 

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 	@Autowired
-	private IResourceReindexSvc mySvc;
+	private IBatch2DaoSvc mySvc;
 
 	@Test
 	public void testFetchResourceIdsPage_NoUrl_WithData() {

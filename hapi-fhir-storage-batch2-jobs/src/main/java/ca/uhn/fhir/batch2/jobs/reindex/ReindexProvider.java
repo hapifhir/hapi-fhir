@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -32,41 +33,42 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReindexProvider {
 
 	private final FhirContext myFhirContext;
 	private final IJobCoordinator myJobCoordinator;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	private final UrlPartitioner myUrlPartitioner;
 
 	/**
 	 * Constructor
 	 */
-	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+	public ReindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
 		myFhirContext = theFhirContext;
 		myJobCoordinator = theJobCoordinator;
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+		myUrlPartitioner = theUrlPartitioner;
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_REINDEX, idempotent = false)
 	public IBaseParameters Reindex(
-		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrl,
+		@OperationParam(name = ProviderConstants.OPERATION_REINDEX_PARAM_URL, typeName = "string", min = 0, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theUrlsToReindex,
 		RequestDetails theRequestDetails
 	) {
 
 		ReindexJobParameters params = new ReindexJobParameters();
-		if (theUrl != null) {
-			theUrl
-				.stream()
-				.map(t -> t.getValue())
-				.filter(t -> isNotBlank(t))
-				.forEach(t -> params.getUrl().add(t));
+		if (theUrlsToReindex != null) {
+			theUrlsToReindex.stream()
+				.map(IPrimitiveType::getValue)
+				.filter(StringUtils::isNotBlank)
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(params::addPartitionedUrl);
 		}
 
 		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
