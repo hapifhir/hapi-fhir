@@ -2,7 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
-import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -36,7 +36,7 @@ class ReindexTerminologyCommandTest {
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
 	@RegisterExtension
-	public BaseRequestGeneratingCommandTestUtil myBaseRequestGeneratingCommandTestUtil = new BaseRequestGeneratingCommandTestUtil();
+	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
 
 
 	private final ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
@@ -58,7 +58,7 @@ class ReindexTerminologyCommandTest {
 		ParametersUtil.addParameterToParametersBoolean(myContext, retVal, RESP_PARAM_SUCCESS, true);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 				"-v", "r4"
@@ -79,7 +79,7 @@ class ReindexTerminologyCommandTest {
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		Error thrown = assertThrows(Error.class, () -> {
-			App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+			App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 				new String[]{
 					ReindexTerminologyCommand.REINDEX_TERMINOLOGY
 				},
@@ -98,7 +98,7 @@ class ReindexTerminologyCommandTest {
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
 		Error thrown = assertThrows(Error.class, () -> {
-			App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+			App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 				new String[]{
 					ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 					"-v", "r4"
@@ -117,7 +117,7 @@ class ReindexTerminologyCommandTest {
 		IBaseParameters retVal = ParametersUtil.newInstance(myContext);
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 				"-v", "r4"
@@ -144,7 +144,7 @@ class ReindexTerminologyCommandTest {
 			"Freetext service is not configured. Operation didn't run.");
 		doReturn(retVal).when(myProvider).reindexTerminology(any());
 
-		App.main(myBaseRequestGeneratingCommandTestUtil.createArgs(
+		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ReindexTerminologyCommand.REINDEX_TERMINOLOGY,
 				"-v", "r4"

@@ -2,7 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -31,7 +31,7 @@ class ExampleDataUploaderTest {
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper();
 	@RegisterExtension
-	public BaseRequestGeneratingCommandTestUtil myBaseRequestGeneratingCommandTestUtil = new BaseRequestGeneratingCommandTestUtil();
+	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
 
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final ExampleDataUploader testedCommand = new RequestCapturingExampleDataUploader(myCapturingInterceptor);
@@ -50,7 +50,7 @@ class ExampleDataUploaderTest {
 		String headerKey = "test-header-key";
 		String headerValue = "test header value";
 
-		String[] args = myBaseRequestGeneratingCommandTestUtil.createArgs(
+		String[] args = myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				"-v", "r4",  // BaseRequestGeneratingCommandTest required
 				"-d", inputFilePath,

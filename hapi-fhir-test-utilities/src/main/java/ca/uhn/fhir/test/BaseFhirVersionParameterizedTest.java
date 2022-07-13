@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.TlsAuthentication;
-import ca.uhn.fhir.test.utilities.BaseRequestGeneratingCommandTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -22,7 +22,7 @@ public class BaseFhirVersionParameterizedTest {
 	@RegisterExtension
 	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper();
 	@RegisterExtension
-	public BaseRequestGeneratingCommandTestUtil myBaseRequestGeneratingCommandTestUtil = new BaseRequestGeneratingCommandTestUtil();
+	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
 
 	protected final FhirContext myR4FhirContext = FhirContext.forR4();
 	protected final FhirContext myDstu3FhirContext = FhirContext.forDstu3();
@@ -46,7 +46,7 @@ public class BaseFhirVersionParameterizedTest {
 	}
 
 	protected Optional<TlsAuthentication> getTlsAuthentication(){
-		return myBaseRequestGeneratingCommandTestUtil.getTlsAuthentication();
+		return myTlsAuthenticationTestUtil.getTlsAuthentication();
 	}
 
 	protected class FhirVersionParams {

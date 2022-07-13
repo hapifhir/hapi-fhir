@@ -68,9 +68,16 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateKeyStore() throws Exception {
+	public void testCreateKeyStoreP12() throws Exception {
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerKeyStoreInfo);
-		assertNotNull(keyStore.getKey("server", myServerKeyStoreInfo.getKeyPass()));
+		assertNotNull(keyStore.getKey(myServerKeyStoreInfo.getAlias(), myServerKeyStoreInfo.getKeyPass()));
+	}
+
+	@Test
+	public void testCreateKeyStoreJKS() throws Exception {
+		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/keystore.jks", "changeit", "changeit", "client");
+		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
+		assertNotNull(keyStore.getKey(keyStoreInfo.getAlias(), keyStoreInfo.getKeyPass()));
 	}
 
 	@Test
@@ -83,7 +90,14 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateTrustStore() throws Exception {
+	public void testCreateTrustStoreJks() throws Exception {
+		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/truststore.jks", "changeit",  "client");
+		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
+		assertNotNull(keyStore.getCertificate(trustStoreInfo.getAlias()));
+	}
+
+	@Test
+	public void testCreateTrustStoreP12() throws Exception {
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerTrustStoreInfo);
 		assertNotNull(keyStore.getCertificate(myServerTrustStoreInfo.getAlias()));
 	}
