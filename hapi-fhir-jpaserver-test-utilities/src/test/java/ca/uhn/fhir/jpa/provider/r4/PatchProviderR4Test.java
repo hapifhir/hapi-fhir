@@ -160,7 +160,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		OperationOutcome delOutcome = (OperationOutcome) myClient.delete().resourceById(id).execute().getOperationOutcome();
-		assertTrue(delOutcome.getIssue().get(0).getDiagnostics().toString().contains("Successfully deleted"));
+		assertTrue(delOutcome.getIssue().get(0).getDiagnostics().contains("Successfully deleted"));
 
 		Parameters patch = new Parameters();
 		Parameters.ParametersParameterComponent operation = patch.addParameter();
@@ -172,7 +172,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		operation
 			.addPart()
 			.setName("path")
-			.setValue(new StringType("Patient.u"));
+			.setValue(new StringType("Patient.active"));
 		operation
 			.addPart()
 			.setName("value")
