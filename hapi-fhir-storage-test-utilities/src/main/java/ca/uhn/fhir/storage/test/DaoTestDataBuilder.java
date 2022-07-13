@@ -37,6 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Implements ITestDataBuilder via a live DaoRegistry.
+ *
+ * Add the inner {@link Config} to your spring context to inject this.
+ * For convenience, you can still implement ITestDataBuilder on your test class, and delegate the missing methods to this bean.
+ */
 public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
 
@@ -84,6 +90,7 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 		ourLog.info("cleanup {}", myIds);
 
 		myIds.keySet().forEach(nextType->{
+			// todo do this in a bundle for perf.
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
 			myIds.get(nextType).forEach(dao::delete);
 		});
