@@ -145,7 +145,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 	DependencyInjectionTestExecutionListener.class
 	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
 	})
-public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
+public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
@@ -229,7 +229,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 	}
 
 	@Override
-	protected FhirContext getFhirContext() {
+	public IIdType doCreateResource(IBaseResource theResource) {
+		return myTestDataBuilder.doCreateResource(theResource);
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		return myTestDataBuilder.doUpdateResource(theResource);
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
 		return myFhirCtx;
 	}
 
@@ -1944,19 +1954,19 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 				@Test
 				public void byDate() {
-					String id1 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withEffectiveDate("2017-01-20T03:21:47")
-					)).getIdPart();
-					String id2 = myTestDataBuilder.createObservation(List.of(
-						myTestDataBuilder.withEffectiveDate("2017-01-24T03:21:47")
-					)).getIdPart();
+					// check milli level precision
+					String id1 = createObservation(withId("20-000"), withEffectiveDate("2017-01-20T03:21:47.000")).getIdPart();
+					String id2 = createObservation(withId("24-002"), withEffectiveDate("2017-01-24T03:21:47.002")).getIdPart();
+					String id3 = createObservation(withId("24-001"), withEffectiveDate("2017-01-24T03:21:47.001")).getIdPart();
+					String id4 = createObservation(withId("20-002"), withEffectiveDate("2017-01-20T03:21:47.002")).getIdPart();
 
 					myCaptureQueriesListener.clear();
-					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-date");
+					List<String> result = myTestDaoSearch.searchForIds("/Observation?_sort=-date");
 
 					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-					// requesteddate descending so order should be id2, id1
-					assertThat(getResultIds(result), contains(id2, id1));
+					ourLog.info("byDate sort {}", result);
+					// date descending - order should be id2, id1
+					assertThat(result, contains(id2, id3, id4, id1));
 				}
 
 				@Test
