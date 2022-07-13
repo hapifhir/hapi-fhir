@@ -21,20 +21,15 @@ package ca.uhn.fhir.okhttp.client;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
-import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
 import ca.uhn.fhir.tls.TlsAuthentication;
-import ca.uhn.fhir.tls.TrustStoreInfo;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
@@ -79,23 +74,17 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	public synchronized Call.Factory getNativeClient(Optional<TlsAuthentication> theTlsAuthentication) {
+		if(theTlsAuthentication.isPresent()){
+			throw new UnsupportedOperationException(Msg.code(2118)+"HTTPS not supported for OkHttpCLient");
+		}
+
 		if (myNativeClient == null) {
-			OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+			myNativeClient = new OkHttpClient()
+				.newBuilder()
 				.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
 				.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
-				.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS);
-
-			Optional<SSLContext> optionalSslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
-			if (optionalSslContext.isPresent()) {
-				SSLContext sslContext = optionalSslContext.get();
-				SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-				Optional<TrustStoreInfo> trustStoreInfo = theTlsAuthentication.get().getTrustStoreInfo();
-				X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(trustStoreInfo);
-				clientBuilder.sslSocketFactory(sslSocketFactory, trustManager);
-				HostnameVerifier hostnameVerifier = TlsAuthenticationSvc.createHostnameVerifier(trustStoreInfo);
-				clientBuilder.hostnameVerifier(hostnameVerifier);
-			}
-			myNativeClient = (Call.Factory) clientBuilder.build();
+				.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.build();
 		}
 
 		return myNativeClient;

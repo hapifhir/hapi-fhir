@@ -1,6 +1,7 @@
 package ca.uhn.fhir.okhttp;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
 import okhttp3.Call;
@@ -94,19 +95,10 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
-		OkHttpClient authenticatedClient = (OkHttpClient) clientFactory.getNativeClient(getTlsAuthentication());
-
-		assertDoesNotThrow(() -> {
-			Request request = new Request.Builder()
-				.url(fhirVersionParams.getSecuredPatientEndpoint())
-				.build();
-
-			Response response = authenticatedClient.newCall(request).execute();
-			assertEquals(200, response.code());
-			String json = response.body().string();
-			IBaseResource bundle = fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
+		Exception exceptionThrown = assertThrows(UnsupportedOperationException.class, () -> {
+			clientFactory.getNativeClient(getTlsAuthentication());
 		});
+		assertEquals(Msg.code(2118)+"HTTPS not supported for OkHttpCLient", exceptionThrown.getMessage());
 	}
 
 	@ParameterizedTest
