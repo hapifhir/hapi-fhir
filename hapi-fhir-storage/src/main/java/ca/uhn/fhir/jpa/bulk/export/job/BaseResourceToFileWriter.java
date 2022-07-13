@@ -30,12 +30,15 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.ByteArrayOutputStream;
@@ -62,6 +65,9 @@ public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseR
 	private final OutputStreamWriter myWriter;
 	private final IParser myParser;
 
+	@Autowired
+	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
 	protected BaseResourceToFileWriter(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		myFhirContext = theFhirContext;
 		myDaoRegistry = theDaoRegistry;
@@ -69,7 +75,6 @@ public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseR
 		myOutputStream = new ByteArrayOutputStream();
 		myWriter = new OutputStreamWriter(myOutputStream, Constants.CHARSET_UTF8);
 	}
-
 
 	protected IIdType createBinaryFromOutputStream() {
 		IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
@@ -81,9 +86,9 @@ public abstract class BaseResourceToFileWriter implements ItemWriter<List<IBaseR
 
 	@Override
 	public void write(List<? extends List<IBaseResource>> theList) throws Exception {
-
 		int count = 0;
 		for (List<IBaseResource> resourceList : theList) {
+			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(resourceList);
 			for (IBaseResource nextFileResource : resourceList) {
 				myParser.encodeResourceToWriter(nextFileResource, myWriter);
 				myWriter.append("\n");
