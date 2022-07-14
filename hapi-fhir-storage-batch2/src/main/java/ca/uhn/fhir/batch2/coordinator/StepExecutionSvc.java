@@ -54,7 +54,16 @@ import java.util.Optional;
 public class StepExecutionSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(StepExecutionSvc.class);
 
-	// the maximum number of errors we'll allow on a chunk before failing the job
+	// TODO
+	/**
+	 * This retry only works if your channel producer supports
+	 * retries on message processing exceptions.
+	 *
+	 * What's more, we may one day want to have this configurable
+	 * by the caller.
+	 * But since this is not a feature of HAPI,
+	 * this has not been done yet.
+	 */
 	public static final int MAX_CHUNK_ERROR_COUNT = 3;
 
 	private final IJobPersistence myJobPersistence;
@@ -316,8 +325,7 @@ public class StepExecutionSvc {
 					WorkChunk chunk = updatedOp.get();
 
 					// TODO - marking for posterity
-					// we may want to make the max error count configurable
-					// in the job params themselves (ie, let the users control)
+					// see comments on MAX_CHUNK_ERROR_COUNT
 					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
 						myJobPersistence.markWorkChunkAsFailed(chunkId, "Too many errors: " + chunk.getErrorCount());
 						return false;

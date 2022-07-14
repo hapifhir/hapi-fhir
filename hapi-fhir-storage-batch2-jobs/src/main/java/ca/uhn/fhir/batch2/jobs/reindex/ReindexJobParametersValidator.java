@@ -33,7 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
-//	private final Pattern myQuestionPattern = Pattern.compile("([\\?])");
 
 	private final UrlListValidator myUrlListValidator;
 
@@ -48,12 +47,12 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 
 		if (errors == null || errors.isEmpty()) {
 			// only check if there's no other errors (new list to fix immutable issues)
-
 			errors = new ArrayList<>();
 			List<PartitionedUrl> urls = theParameters.getPartitionedUrls();
 			for (PartitionedUrl purl : urls) {
 				String url = purl.getUrl();
-				if (url.contains("\s")) {
+
+				if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
 					errors.add("Invalid URL. URL cannot contain spaces : " + url);
 				}
 			}

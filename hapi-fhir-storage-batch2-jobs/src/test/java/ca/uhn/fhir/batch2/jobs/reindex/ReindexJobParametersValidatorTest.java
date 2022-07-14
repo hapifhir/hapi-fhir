@@ -3,9 +3,12 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -21,9 +24,10 @@ public class ReindexJobParametersValidatorTest {
 	@InjectMocks
 	private ReindexJobParametersValidator myValidator;
 
-	@Test
-	public void validate_urlWithSpace_fails() {
-		List<String> errors = runTestWithUrl("Patient, Task");
+	@ParameterizedTest
+	@ValueSource(strings = { "\n", " ", "\t" })
+	public void validate_urlWithSpace_fails(String theWhiteSpaceChar) {
+		List<String> errors = runTestWithUrl("Patient," + theWhiteSpaceChar + "Practitioner");
 
 		// verify
 		assertFalse(errors.isEmpty());

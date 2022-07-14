@@ -126,6 +126,59 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myLastStepLatch.awaitExpected();
 	}
 
+//	@Test
+//	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
+//		// setup
+//		AtomicInteger counter = new AtomicInteger();
+//
+//		// step 1
+//		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+//			counter.getAndIncrement();
+//			throw new RuntimeException("Exception");
+//		};
+//
+//		// final step
+//		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> {
+//			fail("We should never hit this last step");
+//			return RunOutcome.SUCCESS;
+//		};
+//
+//		// job definition
+//		String jobId = new Exception().getStackTrace()[0].getMethodName();
+//		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+//			.setJobDefinitionId(jobId)
+//			.setJobDescription("test job")
+//			.setJobDefinitionVersion(TEST_JOB_VERSION)
+//			.setParametersType(TestJobParameters.class)
+//			.gatedExecution()
+//			.addFirstStep(
+//				FIRST_STEP_ID,
+//				"Test first step",
+//				FirstStepOutput.class,
+//				first
+//			)
+//			.addLastStep(
+//				LAST_STEP_ID,
+//				"Test last step",
+//				last
+//			)
+//			.build();
+//		myJobDefinitionRegistry.addJobDefinition(jd);
+//
+//		// test
+//		JobInstanceStartRequest request = buildRequest(jobId);
+//		myFirstStepLatch.setExpectedCount(1);
+//		String instanceId = myJobCoordinator.startInstance(request);
+//
+//		JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(instanceId,
+//			12, // we want to wait a long time (2 min here) cause backoff is incremental
+//			StatusEnum.FAILED, StatusEnum.ERRORED // error states
+//		);
+//
+//		int calls = counter.get();
+//		assertTrue(instance.getStatus() == StatusEnum.FAILED
+//			|| instance.getStatus() == StatusEnum.ERRORED);
+//	}
 
 	@Test
 	public void testFastTrack_Maintenance_do_not_both_call_CompletionHandler() throws InterruptedException {
