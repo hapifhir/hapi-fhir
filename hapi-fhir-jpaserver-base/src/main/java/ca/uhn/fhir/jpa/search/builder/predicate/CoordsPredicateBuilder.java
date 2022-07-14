@@ -146,10 +146,11 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude())),
 				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude()))
 			);
+		} else {
+			return ComboCondition.and(
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
+			);
 		}
-		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
-			BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
-		);
 	}
 }
