@@ -20,7 +20,6 @@ package ca.uhn.fhir.rest.client.impl;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.IRuntimeDatatypeDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -2245,6 +2245,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
+		private boolean myIsHistoryRewrite;
+
+		@Override
+		public IUpdateTyped historyRewrite() {
+			myIsHistoryRewrite = true;
+			return this;
+		}
 
 		@Override
 		public IUpdateWithQuery conditional() {
@@ -2282,7 +2289,16 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				if (myId == null || myId.hasIdPart() == false) {
 					throw new InvalidRequestException(Msg.code(1396) + "No ID supplied for resource to update, can not invoke server");
 				}
-				invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+
+				if (myIsHistoryRewrite) {
+					if (!myId.hasVersionIdPart()) {
+						throw new InvalidRequestException(Msg.code(2090) + "ID must contain a history version, found: " + myId.getVersionIdPart());
+					}
+					invocation = MethodUtil.createUpdateHistoryRewriteInvocation(myResource, myResourceBody, myId, myContext);
+					invocation.addHeader(Constants.HEADER_REWRITE_HISTORY, "true");
+				} else {
+					invocation = MethodUtil.createUpdateInvocation(myResource, myResourceBody, myId, myContext);
+				}
 			}
 
 			addPreferHeader(myPrefer, invocation);

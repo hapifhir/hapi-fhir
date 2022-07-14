@@ -67,4 +67,8 @@ public class CandidateList {
     public boolean isEidMatch() {
 		return myStrategy.isEidMatch();
     }
+
+    public int size() {
+		return myList.size();
+    }
 }

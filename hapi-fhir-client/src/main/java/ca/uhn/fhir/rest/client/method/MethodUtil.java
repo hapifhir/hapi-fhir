@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.client.method;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -12,7 +12,23 @@ import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.At;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Count;
+import ca.uhn.fhir.rest.annotation.Elements;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Offset;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.RawParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Since;
+import ca.uhn.fhir.rest.annotation.Sort;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -188,7 +204,7 @@ public class MethodUtil {
 	}
 
 	public static HttpPutClientInvocation createUpdateInvocation(IBaseResource theResource, String theResourceBody,
-			IIdType theId, FhirContext theContext) {
+																					 IIdType theId, FhirContext theContext) {
 		String resourceName = theContext.getResourceType(theResource);
 		StringBuilder urlBuilder = new StringBuilder();
 		urlBuilder.append(resourceName);
@@ -207,6 +223,32 @@ public class MethodUtil {
 
 		if (theId.hasVersionIdPart()) {
 			retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+		}
+
+		return retVal;
+	}
+
+	public static HttpPutClientInvocation createUpdateHistoryRewriteInvocation(IBaseResource theResource, String theResourceBody,
+																										IIdType theId, FhirContext theContext) {
+		String resourceName = theContext.getResourceType(theResource);
+		StringBuilder urlBuilder = new StringBuilder();
+		urlBuilder.append(resourceName);
+		urlBuilder.append('/');
+		urlBuilder.append(theId.getIdPart());
+		if (theId.hasVersionIdPart()) {
+			urlBuilder.append('/');
+			urlBuilder.append(Constants.PARAM_HISTORY);
+			urlBuilder.append('/');
+			urlBuilder.append(theId.getVersionIdPart());
+		}
+
+		String urlExtension = urlBuilder.toString();
+
+		HttpPutClientInvocation retVal;
+		if (StringUtils.isBlank(theResourceBody)) {
+			retVal = new HttpPutClientInvocation(theContext, theResource, urlExtension);
+		} else {
+			retVal = new HttpPutClientInvocation(theContext, theResourceBody, false, urlExtension);
 		}
 
 		return retVal;

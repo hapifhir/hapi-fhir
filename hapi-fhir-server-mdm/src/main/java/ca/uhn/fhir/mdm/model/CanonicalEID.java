@@ -111,11 +111,7 @@ public class CanonicalEID {
 
 	@Override
 	public String toString() {
-		return "CanonicalEID{" +
-			"mySystem='" + mySystem + '\'' +
-			", myUse='" + myUse + '\'' +
-			", myValue='" + myValue + '\'' +
-			'}';
+		return mySystem + '|' + myValue;
 	}
 
 

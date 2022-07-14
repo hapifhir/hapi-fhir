@@ -20,12 +20,12 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -108,6 +108,7 @@ import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -437,14 +438,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Class<?> clazz = theProvider.getClass();
 		Class<?> supertype = clazz.getSuperclass();
 		while (!Object.class.equals(supertype)) {
-			count += findResourceMethods(theProvider, supertype);
 			count += findResourceMethodsOnInterfaces(theProvider, supertype.getInterfaces());
+			count += findResourceMethods(theProvider, supertype);
 			supertype = supertype.getSuperclass();
 		}
 
 		try {
-			count += findResourceMethods(theProvider, clazz);
 			count += findResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces());
+			count += findResourceMethods(theProvider, clazz);
 		} catch (ConfigurationException e) {
 			throw new ConfigurationException(Msg.code(288) + "Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
@@ -456,8 +457,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private int findResourceMethodsOnInterfaces(Object theProvider, Class<?>[] interfaces) {
 		int count = 0;
 		for (Class<?> anInterface : interfaces) {
-			count += findResourceMethods(theProvider, anInterface);
 			count += findResourceMethodsOnInterfaces(theProvider, anInterface.getInterfaces());
+			count += findResourceMethods(theProvider, anInterface);
 		}
 		return count;
 	}
@@ -681,7 +682,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			.stream()
 			.filter(t -> t instanceof IServerInterceptor)
 			.map(t -> (IServerInterceptor) t)
-			.collect(Collectors.toList());
+			.collect(toList());
 		return Collections.unmodifiableList(retVal);
 	}
 
@@ -1904,7 +1905,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void throwUnknownResourceTypeException(String theResourceName) {
-		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
+		List<String> knownResourceTypes = myResourceProviders.stream()
+			.map(t -> t.getResourceType().getSimpleName())
+			.collect(toList());
+		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + knownResourceTypes);
 	}
 
 	/**

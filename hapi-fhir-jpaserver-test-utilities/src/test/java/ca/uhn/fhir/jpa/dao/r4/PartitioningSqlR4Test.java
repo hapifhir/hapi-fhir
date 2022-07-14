@@ -104,7 +104,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		// ugh - somewhere the hibernate round trip is mangling LocalDate to h2 date column unless the tz=GMT
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());

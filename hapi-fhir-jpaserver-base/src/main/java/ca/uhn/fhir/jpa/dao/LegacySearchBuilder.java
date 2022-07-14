@@ -227,14 +227,14 @@ public class LegacySearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
 		List<TypedQuery<Long>> queries = createQuery(null, null, null, true, theRequest, null);
-		return new CountQueryIterator(queries.get(0));
+		return new CountQueryIterator(queries.get(0)).next();
 	}
 
 	/**

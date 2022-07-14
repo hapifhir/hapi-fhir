@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 2669
+backport: 5.7.4
+title: "Previously subscriptions in a partition with the id null will be matched against incoming resources from all partitions.
+Changed to subscriptions will only match against incoming resources in the partition the subscription exists in unless
+cross partition subscription is enabled and the subscription has the appropriate extension."

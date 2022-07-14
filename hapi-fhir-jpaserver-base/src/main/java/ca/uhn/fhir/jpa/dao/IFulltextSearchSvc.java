@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -45,6 +45,7 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
+
 	/**
 	 * Query the index for a scrollable iterator of results.
 	 * No max size to the result iterator.
@@ -66,7 +67,7 @@ public interface IFulltextSearchSvc {
 
 	boolean isDisabled();
 
-	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+	ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
 	boolean supportsSomeOf(SearchParameterMap myParams);
 
@@ -89,5 +90,15 @@ public interface IFulltextSearchSvc {
 	 * @return Resources list or empty if nothing found
 	 */
 	List<IBaseResource> getResources(Collection<Long> thePids);
+
+	/**
+	 * Returns accurate hit count
+	 */
+	long count(String theResourceName, SearchParameterMap theParams);
+
+	List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams);
+
+	boolean supportsAllOf(SearchParameterMap theParams);
+
 
 }

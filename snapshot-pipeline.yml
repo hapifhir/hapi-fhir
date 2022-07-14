@@ -25,21 +25,21 @@ steps:
   - task: DownloadSecureFile@1
     displayName: 'Load public key from secure files.'
     inputs:
-      secureFile: public.pgp
+      secureFile: public.key
 
   # 2. Load the private key file
   - task: DownloadSecureFile@1
     displayName: 'Load private key from secure files.'
     inputs:
-      secureFile: private.pgp
+      secureFile: private.key
 
   # Although we have imported the key files into our workspace, GPG has no knowledge that these keys exist.
   # We use a bash script to import both the private and puablic keys into gpg for future signing.
 
   # 3. Import keys into gpg
   - bash: |
-      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.pgp
-      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.pgp
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.key
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.key
       gpg --list-keys --keyid-format LONG
       gpg --list-secret-keys --keyid-format LONG
     displayName: 'Import signing keys into gpg.'

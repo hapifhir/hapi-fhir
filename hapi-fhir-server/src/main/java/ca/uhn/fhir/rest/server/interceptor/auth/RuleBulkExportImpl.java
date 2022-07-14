@@ -72,19 +72,16 @@ public class RuleBulkExportImpl extends BaseRule {
 		}
 
 		if (myWantAnyStyle || myWantExportStyle == BulkDataExportOptions.ExportStyle.SYSTEM) {
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		}
 
 		if (isNotBlank(myGroupId) && options.getGroupId() != null) {
 			String expectedGroupId = new IdDt(myGroupId).toUnqualifiedVersionless().getValue();
 			String actualGroupId = options.getGroupId().toUnqualifiedVersionless().getValue();
 			if (Objects.equals(expectedGroupId, actualGroupId)) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
-			} else {
-				return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY,this);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 		}
-
 		return null;
 	}
 

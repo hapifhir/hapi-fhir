@@ -21,6 +21,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -38,6 +39,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -91,6 +95,13 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	/**
+	 * Constructor
+	 */
+	public SearchParameterMap(String theName, IQueryParameterType theParam) {
+		add(theName, theParam);
+	}
+
+	/**
 	 * Creates and returns a copy of this map
 	 */
 	@JsonIgnore
@@ -117,7 +128,7 @@ public class SearchParameterMap implements Serializable {
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
 			List<List<IQueryParameterType>> andParams = entry.getValue();
 			List<List<IQueryParameterType>> newAndParams = new ArrayList<>();
-			for(List<IQueryParameterType> orParams: andParams) {
+			for (List<IQueryParameterType> orParams : andParams) {
 				List<IQueryParameterType> newOrParams = new ArrayList<>(orParams);
 				newAndParams.add(newOrParams);
 			}
@@ -125,15 +136,7 @@ public class SearchParameterMap implements Serializable {
 		}
 
 
-
 		return map;
-	}
-
-	/**
-	 * Constructor
-	 */
-	public SearchParameterMap(String theName, IQueryParameterType theParam) {
-		add(theName, theParam);
 	}
 
 	public SummaryEnum getSummaryMode() {
@@ -233,6 +236,9 @@ public class SearchParameterMap implements Serializable {
 		for (Include nextInclude : list) {
 			addUrlParamSeparator(b);
 			b.append(paramName);
+			if (nextInclude.isRecurse()) {
+				b.append(Constants.PARAM_INCLUDE_QUALIFIER_RECURSE);
+			}
 			b.append('=');
 			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 			b.append(':');
@@ -515,9 +521,14 @@ public class SearchParameterMap implements Serializable {
 
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ParamPrefixEnum.LESSTHAN_OR_EQUALS, ub);
+
+			if (isNotEqualsComparator(lb, ub)) {
+				addLastUpdateParam(b, NOT_EQUAL, getLastUpdated().getLowerBound());
+			} else {
+				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
+				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+			}
 		}
 
 		if (getCount() != null) {
@@ -566,6 +577,10 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
+		return theLowerBound != null && theUpperBound != null && theLowerBound.getPrefix().equals(NOT_EQUAL) && theUpperBound.getPrefix().equals(NOT_EQUAL);
+	}
+
 	/**
 	 * @since 5.5.0
 	 */
@@ -576,10 +591,10 @@ public class SearchParameterMap implements Serializable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (isEmpty() == false) {
+		if (!isEmpty()) {
 			b.append("params", mySearchParameterMap);
 		}
-		if (getIncludes().isEmpty() == false) {
+		if (!getIncludes().isEmpty()) {
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
@@ -668,7 +683,7 @@ public class SearchParameterMap implements Serializable {
 	/**
 	 * Variant of removeByNameAndModifier for unmodified params.
 	 *
-	 * @param theName
+	 * @param theName the query parameter key
 	 * @return an And/Or List of Query Parameters matching the name with no modifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
@@ -679,9 +694,8 @@ public class SearchParameterMap implements Serializable {
 	 * Given a search parameter name and modifier (e.g. :text),
 	 * get and remove all Search Parameters matching this name and modifier
 	 *
-	 * @param theName the query parameter key
+	 * @param theName     the query parameter key
 	 * @param theModifier the qualifier you want to remove - nullable for unmodified params.
-	 *
 	 * @return an And/Or List of Query Parameters matching the qualifier.
 	 */
 	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
@@ -696,7 +710,7 @@ public class SearchParameterMap implements Serializable {
 			for (List<IQueryParameterType> orList : andList) {
 				if (!orList.isEmpty() &&
 					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
-							.equals(theModifier)) {
+						.equals(theModifier)) {
 					matchingParameters.add(orList);
 				} else {
 					remainderParameters.add(orList);
@@ -719,14 +733,14 @@ public class SearchParameterMap implements Serializable {
 	/**
 	 * For each search parameter in the map, extract any which have the given qualifier.
 	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
-	 *
+	 * <p>
 	 * If we call this function with `:text`, it will return a map that looks like:
-	 *
+	 * <p>
 	 * code -> [[code:text=abc], [code:text=def]]
 	 * reason -> [[reason:text=somereason]]
-	 *
+	 * <p>
 	 * and the remaining search parameters in the map will be:
-	 *
+	 * <p>
 	 * code -> [[code=123]]
 	 *
 	 * @param theQualifier
@@ -809,6 +823,30 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
+	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+		CompareToBuilder b = new CompareToBuilder();
+		b.append(theO1.getMissing(), theO2.getMissing());
+		b.append(theO1.getQueryParameterQualifier(), theO2.getQueryParameterQualifier());
+		if (b.toComparison() == 0) {
+			b.append(theO1.getValueAsQueryToken(theCtx), theO2.getValueAsQueryToken(theCtx));
+		}
+
+		return b.toComparison();
+	}
+
+	public static SearchParameterMap newSynchronous() {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		return retVal;
+	}
+
+	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		retVal.add(theName, theParam);
+		return retVal;
+	}
+
 	public static class IncludeComparator implements Comparator<Include> {
 
 		@Override
@@ -853,51 +891,6 @@ public class SearchParameterMap implements Serializable {
 			return SearchParameterMap.compare(myCtx, theO1, theO2);
 		}
 
-	}
-
-	private static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
-		int retVal;
-		if (theO1.getMissing() == null && theO2.getMissing() == null) {
-			retVal = 0;
-		} else if (theO1.getMissing() == null) {
-			retVal = -1;
-		} else if (theO2.getMissing() == null) {
-			retVal = 1;
-		} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
-			retVal = 0;
-		} else {
-			if (theO1.getMissing()) {
-				retVal = 1;
-			} else {
-				retVal = -1;
-			}
-		}
-
-		if (retVal == 0) {
-			String q1 = theO1.getQueryParameterQualifier();
-			String q2 = theO2.getQueryParameterQualifier();
-			retVal = StringUtils.compare(q1, q2);
-		}
-
-		if (retVal == 0) {
-			String v1 = theO1.getValueAsQueryToken(theCtx);
-			String v2 = theO2.getValueAsQueryToken(theCtx);
-			retVal = StringUtils.compare(v1, v2);
-		}
-		return retVal;
-	}
-
-	public static SearchParameterMap newSynchronous() {
-		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronous(true);
-		return retVal;
-	}
-
-	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
-		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronous(true);
-		retVal.add(theName, theParam);
-		return retVal;
 	}
 
 

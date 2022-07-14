@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -145,6 +147,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -224,6 +227,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
 	}
 
 	@BeforeEach
@@ -3984,6 +3988,74 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchByIdForDeletedResourceWithClientAssignedId() throws IOException {
+		// Create with client assigned ID
+		Patient p = new Patient();
+		String patientId = "AAA";
+		p.setId(patientId);
+
+		MethodOutcome outcome = myClient.update().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithServerAssignedId() throws IOException {
+		// Create with server assigned ID
+		Patient p = new Patient();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+		String patientId = createdPatient.getIdElement().getIdPart();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
+	}
+
+	@Test
 	public void testSearchByIdentifier() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
@@ -6688,6 +6760,134 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
 
+	}
+
+	@Test
+	public void testUpdateHistoryRewriteWithIdNoHistoryVersion() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		IIdType id = createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId(id).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId("1234").execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+
+		p.setId(id);
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+	}
+
+	@Test
+	public void testUpdateHistoryRewriteWithIdNull() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId((IIdType) null).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("can not be null"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId((String) null).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("can not be null"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
+		}
+	}
+
+	@Test
+	public void testUpdateHistoryRewriteWithIdNoIdPart() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		IIdType noIdPartId = new IdDt();
+		try {
+			myClient.update().resource(p).historyRewrite().withId(noIdPartId).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId("").execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
+		}
+
+		p.setId(noIdPartId);
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
+		}
+	}
+
+	@Nonnull
+	private IIdType createNewPatientWithHistory() {
+		String TEST_SYSTEM_NAME = "testHistoryRewrite";
+		String TEST_FAMILY_NAME = "Johnson";
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(TEST_FAMILY_NAME);
+		p.setId("Patient/" + id.getIdPart());
+
+		myClient.update().resource(p).execute();
+		return id;
 	}
 
 	private String toStr(Date theDate) {

@@ -162,6 +162,8 @@ public abstract class BaseTask {
 
 	private int doExecuteSql(@Language("SQL") String theSql, Object[] theArguments) {
 		JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
+		// 0 means no timeout -- we use this for index rebuilds that may take time.
+		jdbcTemplate.setQueryTimeout(0);
 		try {
 			int changesCount = jdbcTemplate.update(theSql, theArguments);
 			if (!"true".equals(System.getProperty("unit_test_mode"))) {

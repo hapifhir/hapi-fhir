@@ -1,0 +1,4 @@
+---
+type: change
+issue: 3671
+title: "Converted mdm clear batch job from Spring Batch to Batch2"

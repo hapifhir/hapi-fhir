@@ -113,12 +113,12 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		}
 
 		if (myWantCode && codeMatchCount.getMatchingCodeCount() > 0) {
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		} else if (!myWantCode) {
 			boolean notFound = getMode() == PolicyEnum.ALLOW && codeMatchCount.getMatchingCodeCount() == 0;
 			boolean othersFound = getMode() == PolicyEnum.DENY && codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
 			if (notFound || othersFound) {
-				AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				AuthorizationInterceptor.Verdict verdict = newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				if (notFound) {
 					troubleshootingLog
 						.debug("Code was not found in VS - Verdict: {}", verdict);

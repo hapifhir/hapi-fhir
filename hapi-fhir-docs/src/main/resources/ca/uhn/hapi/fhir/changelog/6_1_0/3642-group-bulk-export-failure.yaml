@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3642
+backport: 6.0.1
+jira: SMILE-4383
+title: "Previously, the RuleBuilder's rules surrounding Group Bulk Export would return failures too early in the case of multiple permissions. This has been corrected, and the rule will no longer prematurely
+return a DENY verdict, instead opting to delegate to future rules."

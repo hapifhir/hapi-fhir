@@ -20,12 +20,15 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.impl.BatchWorkChunk;
+import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IJobPersistence {
 
@@ -69,12 +72,28 @@ public interface IJobPersistence {
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
 	/**
+	 * Fetch instances ordered by myCreateTime DESC
+	 */
+	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
+
+	/**
 	 * Fetch a given instance and update the stored status
 	 * * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
 	 *
 	 * @param theInstanceId The ID
 	 */
 	Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId);
+
+	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
+
+	/**
+	 * Fetch all job instances for a given job definition id
+	 * @param theJobDefinitionId
+	 * @param theCount
+	 * @param theStart
+	 * @return
+	 */
+	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)
@@ -99,6 +118,15 @@ public interface IJobPersistence {
 	void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed);
 
 	/**
+	 * Marks all work chunks with the provided status and erases the data
+	 * @param  theInstanceId - the instance id
+	 * @param theChunkIds - the ids of work chunks being reduced to single chunk
+	 * @param theStatus - the status to mark
+	 * @param theErrorMsg  - error message (if status warrants it)
+	 */
+	void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg);
+
+	/**
 	 * Increments the work chunk error count by the given amount
 	 *
 	 * @param theChunkId     The chunk ID
@@ -116,11 +144,21 @@ public interface IJobPersistence {
 	List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex);
 
 	/**
-	 * Update the stored instance
+	 * Fetch all chunks for a given instance.
+	 * @param theInstanceId - instance id
+	 * @param theWithData - whether or not to include the data
+	 * @return - an iterator for fetching work chunks
+	 */
+	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
+
+	/**
+	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
+	 * instead to ensure state-change callbacks are invoked properly.
 	 *
 	 * @param theInstance The instance - Must contain an ID
+	 * @return true if the status changed
 	 */
-	void updateInstance(JobInstance theInstance);
+	boolean updateInstance(JobInstance theInstance);
 
 	/**
 	 * Deletes the instance and all associated work chunks
@@ -140,14 +178,14 @@ public interface IJobPersistence {
 	 * Marks an instance as being complete
 	 *
 	 * @param theInstanceId The instance ID
+	 * @return true if the instance status changed
 	 */
-	void markInstanceAsCompleted(String theInstanceId);
+	boolean markInstanceAsCompleted(String theInstanceId);
 
 	/**
 	 * Marks an instance as cancelled
 	 *
 	 * @param theInstanceId The instance ID
 	 */
-	void cancelInstance(String theInstanceId);
-
+	JobOperationResultJson cancelInstance(String theInstanceId);
 }

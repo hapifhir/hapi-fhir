@@ -144,6 +144,7 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
 	public static final String LINK_FHIR_BASE = "fhir-base";
 	public static final String LINK_FIRST = "first";
@@ -217,6 +218,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final String PARAMQUALIFIER_MDM = ":mdm";
+	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
 	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;

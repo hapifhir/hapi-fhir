@@ -110,8 +110,8 @@ import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
-import org.hibernate.search.mapper.orm.massindexing.impl.LoggingMassIndexingMonitor;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -140,7 +140,6 @@ import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -308,6 +307,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.map(t -> t.getParent().getId().toString())
 				.collect(joining(" "));
 		}
+
 
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
@@ -534,7 +534,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String expansionTimestamp = toHumanReadableExpansionTimestamp(termValueSet);
 		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
-		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
+		expandConcepts(theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
 	}
 
 	private TermCodeSystem getTermCodeSystemByValueSetUrl(String theValueSetUrl) {
@@ -584,7 +584,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return myHibernatePropertiesProvider.getDialect() instanceof org.hibernate.dialect.Oracle12cDialect;
 	}
 
-	private void expandConcepts(IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd, boolean theOracle) {
+	private void expandConcepts(ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd, boolean theOracle) {
 		// NOTE: if you modifiy the logic here, look to `expandConceptsOracle` and see if your new code applies to its copy pasted sibling
 		Integer offset = theAccumulator.getSkipCountRemaining();
 		offset = ObjectUtils.defaultIfNull(offset, 0);
@@ -653,12 +653,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to designations optional.
 			if (conceptView.getDesignationPid() != null) {
 				TermConceptDesignation designation = new TermConceptDesignation();
-				designation.setUseSystem(conceptView.getDesignationUseSystem());
-				designation.setUseCode(conceptView.getDesignationUseCode());
-				designation.setUseDisplay(conceptView.getDesignationUseDisplay());
-				designation.setValue(conceptView.getDesignationVal());
-				designation.setLanguage(conceptView.getDesignationLang());
-				pidToDesignations.put(conceptPid, designation);
+
+				if(isValueSetDisplayLanguageMatch(theExpansionOptions, conceptView.getDesignationLang() )) {
+					designation.setUseSystem(conceptView.getDesignationUseSystem());
+					designation.setUseCode(conceptView.getDesignationUseCode());
+					designation.setUseDisplay(conceptView.getDesignationUseDisplay());
+					designation.setValue(conceptView.getDesignationVal());
+					designation.setLanguage(conceptView.getDesignationLang());
+					pidToDesignations.put(conceptPid, designation);
+				}
 
 				if (++designationsExpanded % 250 == 0) {
 					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
@@ -707,6 +710,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
 		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
+	}
+
+	static boolean isValueSetDisplayLanguageMatch(ValueSetExpansionOptions theExpansionOptions, String theStoredLang){
+		if( theExpansionOptions == null) {
+			return true;
+		}
+
+		if(theExpansionOptions.getTheDisplayLanguage() == null || theStoredLang == null) {
+			return true;
+		}
+
+		return theExpansionOptions.getTheDisplayLanguage().equalsIgnoreCase(theStoredLang);
+
 	}
 
 	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
@@ -2429,7 +2445,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nonnull
-	private IValidationSupport provideValidationSupport() {
+	protected IValidationSupport provideValidationSupport() {
 		IValidationSupport validationSupport = myValidationSupport;
 		if (validationSupport == null) {
 			validationSupport = myApplicationContext.getBean(IValidationSupport.class);
@@ -2741,9 +2757,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.cacheMode( CacheMode.IGNORE )
 				.threadsToLoadObjects( 6 )
 				.transactionTimeout( 60 * SECONDS_IN_MINUTE )
-				.monitor( new LoggingMassIndexingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
+				.monitor( new PojoMassIndexingLoggingMonitor(INDEXED_ROOTS_LOGGING_COUNT) )
 				.startAndWait();
-
 		} finally {
 			myDeferredStorageSvc.setProcessDeferred(true);
 		}

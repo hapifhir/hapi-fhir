@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3668
+title: "Fhir patch operation returning 500 when patching in a transaction with a resource query in property request.url."

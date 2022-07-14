@@ -21,9 +21,17 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
+import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
+import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,25 +41,25 @@ public class ReindexAppCtx {
 	public static final String JOB_REINDEX = "REINDEX";
 
 	@Bean
-	public JobDefinition<ReindexJobParameters> reindexJobDefinition() {
+	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
 		return JobDefinition
 			.newBuilder()
 			.setJobDefinitionId(JOB_REINDEX)
 			.setJobDescription("Reindex resources")
 			.setJobDefinitionVersion(1)
 			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(reindexJobParametersValidator())
+			.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
 			.gatedExecution()
 			.addFirstStep(
 				"generate-ranges",
 				"Generate data ranges to reindex",
-				ReindexChunkRange.class,
+				PartitionedUrlChunkRangeJson.class,
 				reindexGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"load-ids",
 				"Load IDs of resources to reindex",
-				ReindexChunkIds.class,
-				loadIdsStep())
+				ResourceIdListWorkChunkJson.class,
+				loadIdsStep(theBatch2DaoSvc))
 			.addLastStep("reindex",
 				"Perform the resource reindex",
 				reindexStep()
@@ -60,8 +68,8 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public ReindexJobParametersValidator reindexJobParametersValidator() {
-		return new ReindexJobParametersValidator();
+	public ReindexJobParametersValidator reindexJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new ReindexJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
 	}
 
 	@Bean
@@ -75,13 +83,13 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
-	public LoadIdsStep loadIdsStep() {
-		return new LoadIdsStep();
+	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
+		return new LoadIdsStep(theBatch2DaoSvc);
 	}
 
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
-		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc);
+	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
+		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theUrlPartitioner);
 	}
 
 }

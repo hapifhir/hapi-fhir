@@ -45,9 +45,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
-	@Autowired
-	private IValidationSupport myValidationSupport;
-
 	private void addAllChildren(String theSystemString, ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
 			theListToPopulate.add(new FhirVersionIndependentConcept(theSystemString, theCode.getCode()));
@@ -111,7 +108,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -136,7 +133,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}

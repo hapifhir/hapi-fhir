@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3650
+backport: 6.0.1
+title: "Removed a strict dependency on a FullTextSVC. This was causing HAPI to fail to boot when Lucene/ElasticSearch was
+not enabled."

@@ -36,6 +36,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -52,6 +53,8 @@ import java.util.Date;
 	// v---- this one
 	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
 	//TODO GGG Should i make individual indices for PERSON/TARGET?
+}, indexes = {
+	@Index(name = "IDX_EMPI_MATCH_TGT_VER", columnList = "MATCH_RESULT, TARGET_PID, VERSION")
 })
 public class MdmLink extends BasePartitionable implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -43,11 +44,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = TestHibernateSearchAddInConfig.Elasticsearch.class)
+@ContextConfiguration(classes = TestHSearchAddInConfig.Elasticsearch.class)
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 
@@ -59,15 +61,15 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEach() {
 		myDaoConfig.setLastNEnabled(true);
-		myDaoConfig.setAdvancedLuceneIndexing(true);
-		myDaoConfig.setStoreResourceInLuceneIndex(true);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myDaoConfig.setStoreResourceInHSearchIndex(true);
 	}
 
 	@AfterEach
 	public void afterEach() {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
-		myDaoConfig.setAdvancedLuceneIndexing(new DaoConfig().isAdvancedLuceneIndexing());
-		myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+		myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 	}
 
 
@@ -148,12 +150,55 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals( 1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
+		assertEquals(1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
 		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
 		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
 
 		assertEquals("Patient/p-123", observation.getSubject().getReference());
 		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
+
+	}
+
+	@Test
+	public void testCountReturnsExpectedSizeOfResources() throws IOException {
+		IntStream.range(0, 10).forEach(index -> {
+			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
+			createObservationWithCode(blood_count);
+		});
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=5");
+		myCaptureQueriesListener.clear();
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			// then
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
+			assertEquals(5, bundle.getEntry().size(), "Expected 5 observation entries to match page size");
+			assertTrue(bundle.getLink("next").hasRelation());
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+	}
+
+	@Test
+	public void testCountZeroReturnsNoResourceEntries() throws IOException {
+		IntStream.range(0, 10).forEach(index -> {
+			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
+			createObservationWithCode(blood_count);
+		});
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=0");
+		myCaptureQueriesListener.clear();
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
+			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
+			assertEquals(0, bundle.getEntry().size(), "Expected no entries in bundle");
+			assertNull(bundle.getLink("next"), "Expected no 'next' link");
+			assertNull(bundle.getLink("prev"), "Expected no 'prev' link");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
 
 	}
 

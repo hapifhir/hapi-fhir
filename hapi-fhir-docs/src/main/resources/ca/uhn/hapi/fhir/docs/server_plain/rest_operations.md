@@ -124,17 +124,51 @@ Content-Type: application/fhir+json
 { ..resource body.. }
 ```
 
-If a client performs a contention aware update, the ETag version will be placed in the version part of the IdDt/IdType that is passed into the method. For example:
+If a client performs a contention aware update, the ETag version will be placed in the version part of the IdDt/IdType
+that is passed into the method. For example:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|updateEtag}}
 ``` 
 
+## Update with History Rewrite
+
+If you wish to update a historical version of a resource without creating a new version, this can now be done with the
+Update operation. While this operation is not supported by the FHIR specification, it's an enhancement added to
+specifically to HAPI-FHIR.
+
+In order to use this new functionality, you must set the `setUpdateWithHistoryRewriteEnabled` setting in the `DaoConfig`
+to true.
+
+The following API request shows an example of executing a PUT at the following endpoint.
+
+The request must include the header `X-Rewrite-History`, and should be set to true. The body of the request must include
+the resource with the same ID and version as defined in the PUT request,
+
+```http
+PUT [serverBase]/Patient/123/_history/3
+Content-Type: application/fhir+json
+X-Rewrite-History: true
+
+{ 
+   ..
+   id: "123",
+   meta: {
+      versionId: "3",
+      ..
+   }
+   ..
+}
+```
+
 <a name="instance_delete" />
 
 # Instance Level - Delete
 
-The [delete](http://hl7.org/implement/standards/fhir/http.html#delete) operation retrieves a specific version of a resource with a given ID. It takes a single ID parameter annotated with an [@IdParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, which supplies the ID of the resource to delete.
+The [delete](http://hl7.org/implement/standards/fhir/http.html#delete) operation retrieves a specific version of a
+resource with a given ID. It takes a single ID parameter annotated with
+an [@IdParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/IdParam.html) annotation, which supplies the
+ID of the resource to delete.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|delete}}

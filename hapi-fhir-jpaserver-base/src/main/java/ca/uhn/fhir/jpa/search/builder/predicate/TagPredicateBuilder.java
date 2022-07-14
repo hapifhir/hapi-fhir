@@ -24,17 +24,19 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.List;
+import java.util.Objects;
 
+import static ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder.createLeftMatchLikeExpression;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
@@ -61,24 +63,28 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 
-	public Condition createPredicateTag(TagTypeEnum theTagType, List<Pair<String, String>> theTokens, String theParamName, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateTag(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens, String theParamName, RequestPartitionId theRequestPartitionId) {
 		addJoin(getTable(), myTagDefinitionTable, myColumnTagId, myTagDefinitionColumnTagId);
 		return createPredicateTagList(theTagType, theTokens);
 	}
 
-	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
+	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens) {
 		Condition typePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
 
 		List<Condition> orPredicates = Lists.newArrayList();
-		for (Pair<String, String> next : theTokens) {
+		for (Triple<String, String, String> next : theTokens) {
 			String system = next.getLeft();
 			String code = next.getRight();
+			String qualifier = next.getMiddle();
 
 			if (theTagType == TagTypeEnum.PROFILE) {
 				system = BaseHapiFhirDao.NS_JPA_PROFILE;
 			}
 
-			Condition codePredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
+			Condition codePredicate = Objects.equals(qualifier, UriParamQualifierEnum.BELOW.getValue())
+				? BinaryCondition.like(myTagDefinitionColumnTagCode, generatePlaceholder(createLeftMatchLikeExpression(code)))
+				: BinaryCondition.equalTo(myTagDefinitionColumnTagCode, generatePlaceholder(code));
+
 			if (isNotBlank(system)) {
 				Condition systemPredicate = BinaryCondition.equalTo(myTagDefinitionColumnTagSystem, generatePlaceholder(system));
 				orPredicates.add(ComboCondition.and(typePredicate, systemPredicate, codePredicate));

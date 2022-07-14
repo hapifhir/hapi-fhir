@@ -371,14 +371,19 @@ http://fhir.example.com/Patient?identifier=urn:foo|123&_count=10
 
 ## Offset paging with `_offset`
 
-HAPI FHIR supports also paging. Offset specification can be passed into handler methods with [@Offset](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Offset.html) annotation.
-This annotation is *not* part of the FHIR standard. 
+**Warning:** Using `_offset` without sorting can result in duplicate entries to show up across the different pages when
+following the next page link provided on each page.
+
+HAPI FHIR supports also paging. Offset specification can be passed into handler methods
+with [@Offset](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Offset.html) annotation.
+This annotation is *not* part of the FHIR standard.
 
 There are two possible ways to use paging. It is possible to define `_offset` parameter in the
 request which means that when combined with `_count` the paging is done on the database level. This type of
 paging benefits from not having to return so many items from the database when paging items. It's also possible
 to define default page size (i.e. default `_count` if not given) and maximum page size (i.e. maximum value
-for the `_count` parameter). See [RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html)
+for the `_count` parameter).
+See [RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html)
 for more information.
 
 ```java

@@ -1,0 +1,7 @@
+---
+type: add
+issue: 3658
+jira: SMILE-3080, SMILE-3372
+title: "Currently neither  HAPI-FHIR nor the FHIR specification supports modifying historical version of a resource. This
+implementation adds the feature Update with History Rewrite to HAPI-FHIR. It can be accessed via the IGenericClient's 
+`updateHistoryRewrite` method"

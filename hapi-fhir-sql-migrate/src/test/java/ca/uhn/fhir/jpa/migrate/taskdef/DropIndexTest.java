@@ -159,6 +159,9 @@ public class DropIndexTest extends BaseTest {
 						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
 						"drop index if exists IDX_ANINDEX cascade")));
 					break;
+				case COCKROACHDB_21_1:
+					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
+					break;
 			}
 		}
 
@@ -186,6 +189,9 @@ public class DropIndexTest extends BaseTest {
 					break;
 				case POSTGRES_9_4:
 					assertThat(mySql, equalTo(asList("drop index IDX_ANINDEX")));
+					break;
+				case COCKROACHDB_21_1:
+					assertThat(mySql, equalTo(asList("drop index SOMETABLE@IDX_ANINDEX")));
 					break;
 			}
 		}
@@ -218,6 +224,9 @@ public class DropIndexTest extends BaseTest {
 						"alter table SOMETABLE drop constraint if exists IDX_ANINDEX cascade",
 						"drop index CONCURRENTLY if exists IDX_ANINDEX cascade")));
 					break;
+				case COCKROACHDB_21_1:
+					assertThat(mySql, equalTo(asList("drop index if exists SOMETABLE@IDX_ANINDEX cascade")));
+					break;
 			}
 		}
 
@@ -246,6 +255,9 @@ public class DropIndexTest extends BaseTest {
 					break;
 				case POSTGRES_9_4:
 					assertThat(mySql, equalTo(asList("drop index CONCURRENTLY IDX_ANINDEX")));
+					break;
+				case COCKROACHDB_21_1:
+					assertThat(mySql, equalTo(asList("drop index SOMETABLE@IDX_ANINDEX")));
 					break;
 			}
 		}

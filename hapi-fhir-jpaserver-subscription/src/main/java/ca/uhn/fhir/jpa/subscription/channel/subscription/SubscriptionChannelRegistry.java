@@ -120,7 +120,6 @@ public class SubscriptionChannelRegistry {
 		String channelName = theActiveSubscription.getChannelName();
 		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId(), channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
-		ChannelRetryConfiguration retryConfig = theActiveSubscription.getRetryConfigurationParameters();
 
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId(), channelName);

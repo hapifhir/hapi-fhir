@@ -3,12 +3,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.BlockPolicy;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestR4Config.class, TestHibernateSearchAddInConfig.NoFT.class})
+@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
 @DirtiesContext
 public class SyntheaPerfTest extends BaseJpaTest {
 
