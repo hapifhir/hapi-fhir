@@ -548,9 +548,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<TermCodeSystemVersion> matchingValueSets = myCodeSystemVersionDao.findByCodeSystemValueset(theValueSetUri);
 		if (matchingValueSets.size() == 0) return null; //nothing was found, continue
 		if (matchingValueSets.size() > 1) {
-			String message = Msg.code(2102) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI: " +
+			String message = "More than one CodeSystem resource was found matching the provided implicit ValueSet URI: " +
 				matchingValueSets.stream().map(v -> v.getCodeSystem().getCodeSystemUri()).sorted().collect(Collectors.joining("; "));
-			throw new UnprocessableEntityException(message);
+			throw new UnprocessableEntityException(Msg.code(2102) + message);
 		}
 		// we have exactly one CS
 		TermCodeSystem ourCodeSystem = matchingValueSets.get(0).getCodeSystem();
