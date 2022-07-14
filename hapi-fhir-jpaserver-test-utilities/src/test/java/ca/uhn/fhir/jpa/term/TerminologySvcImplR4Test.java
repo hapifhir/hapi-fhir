@@ -543,7 +543,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				myTermSvc.expandValueSetFromCodeSystem(vsUrlConflict);
 				fail("Conflicting implicit VS URLs did not throw");
 			} catch (UnprocessableEntityException e) {
-				assertThat("conflicting VS url throws", e.getMessage(), Matchers.startsWith(Msg.code(2079) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI"));
+				assertThat("conflicting VS url throws", e.getMessage(), Matchers.startsWith(Msg.code(2102) + "More than one CodeSystem resource was found matching the provided implicit ValueSet URI"));
 			} catch (Exception e) {
 				fail("Conflicting implicit VS URLs did throw wrong exception type", e);
 			}
