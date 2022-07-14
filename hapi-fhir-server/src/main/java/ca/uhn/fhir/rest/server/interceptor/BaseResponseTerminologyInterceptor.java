@@ -49,7 +49,6 @@ public class BaseResponseTerminologyInterceptor {
 		Validate.notNull(myContext, "The validation support must not return a null context");
 	}
 
-
 	@Nonnull
 	protected List<IBaseResource> toListForProcessing(RequestDetails theRequestDetails, IBaseResource theResource) {
 

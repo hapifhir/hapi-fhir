@@ -746,24 +746,6 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	@Test
-	public void testSearchTokenWithNotModifierUnsupported() {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("Tester").addGiven("Joe");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-
-		SearchParameterMap params;
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
-		assertMatched(patient, params);
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
-		assertUnsupported(patient, params);
-	}
-
-	@Test
 	public void testSearchTokenWrongParam() {
 		Patient p1 = new Patient();
 		p1.setGender(Enumerations.AdministrativeGender.MALE);

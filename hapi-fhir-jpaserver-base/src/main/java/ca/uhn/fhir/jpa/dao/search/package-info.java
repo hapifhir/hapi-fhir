@@ -10,7 +10,7 @@
  * in {@link ca.uhn.fhir.jpa.dao.search.ExtendedHSearchIndexExtractor#extract(org.hl7.fhir.instance.model.api.IBaseResource, ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams)} ()}
  *
  * <h2>Implementation</h2>
- * Both {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} and {@link ca.uhn.fhir.jpa.dao.LegacySearchBuilder} delegate the
+ * {@link ca.uhn.fhir.jpa.search.builder.SearchBuilder} delegates the
  * search to {@link ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl#doSearch} when active.
  * The fulltext search runs first and interprets any search parameters it understands, returning a pid list.
  * This pid list is used as a narrowing where clause against the remaining unprocessed search parameters in a jdbc query.

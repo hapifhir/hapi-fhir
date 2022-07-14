@@ -103,9 +103,9 @@ public class MeasureOperationsProvider {
 			seed.getMeasurementPeriod());
 		if (reportType != null) {
 			switch (reportType) {
-				case "patient":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef,practitionerRef, theRequestDetails);
-				case "patient-list":
+				case "subject":
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
 					return evaluator.evaluatePopulationMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
@@ -114,8 +114,9 @@ public class MeasureOperationsProvider {
 			}
 		}
 
-		// default report type is patient
+		// default report type is subject
 		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");

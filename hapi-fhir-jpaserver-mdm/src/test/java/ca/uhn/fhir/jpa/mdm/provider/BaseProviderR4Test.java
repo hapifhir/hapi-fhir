@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
-import ca.uhn.fhir.mdm.api.IMdmClearJobSubmitter;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
@@ -33,8 +32,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	protected MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
 	private IMdmControllerSvc myMdmControllerSvc;
-	@Autowired
-	private IMdmClearJobSubmitter myMdmClearJobSubmitter;
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired

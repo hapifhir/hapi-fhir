@@ -99,7 +99,7 @@ public class MeasureEvaluation {
 	}
 
 	public MeasureReport evaluateSubjectListMeasure(Measure measure, Context context, String practitionerRef, RequestDetails theRequestDetails) {
-		logger.info("Generating patient-list report");
+		logger.info("Generating subject-list report");
 
 		List<Patient> patients = practitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(practitionerRef, theRequestDetails);
 		boolean isSingle = false;

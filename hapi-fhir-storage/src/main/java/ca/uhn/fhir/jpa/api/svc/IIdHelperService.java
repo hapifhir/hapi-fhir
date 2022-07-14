@@ -61,12 +61,29 @@ public interface IIdHelperService {
 	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
+	 * Given a resource type and ID, determines the internal persistent ID for a resource.
+	 * Optionally filters out deleted resources.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
+	ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
+
+	/**
 	 * Returns a mapping of Id -> ResourcePersistentId.
 	 * If any resource is not found, it will throw ResourceNotFound exception
 	 * (and no map will be returned)
 	 */
 	@Nonnull
 	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
+
+	/**
+	 * Returns a mapping of Id -> ResourcePersistentId.
+	 * If any resource is not found, it will throw ResourceNotFound exception (and no map will be returned)
+	 * Optionally filters out deleted resources.
+	 */
+	@Nonnull
+	Map<String, ResourcePersistentId> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theExcludeDeleted);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -82,6 +99,16 @@ public interface IIdHelperService {
 	 */
 	@Nonnull
 	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException;
+
+	/**
+	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
+	 * convert those to the underlying Long values that are stored, for lookup and comparison purposes.
+	 * Optionally filters out deleted resources.
+	 *
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
+	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theExcludeDeleted) throws ResourceNotFoundException;
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config

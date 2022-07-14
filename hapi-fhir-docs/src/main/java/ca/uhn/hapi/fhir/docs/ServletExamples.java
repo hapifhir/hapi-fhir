@@ -249,13 +249,14 @@ public class ServletExamples {
 	public class RestfulServerWithResponseTerminologyTranslationInterceptor extends RestfulServer {
 
 		private IValidationSupport myValidationSupport;
+		private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 		@Override
 		protected void initialize() throws ServletException {
 			// START SNIPPET: ResponseTerminologyTranslationInterceptor
 
 			// Create an interceptor that will map from a proprietary CodeSystem to LOINC
-			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport);
+			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport, myResponseTerminologyTranslationSvc);
 			interceptor.addMappingSpecification("http://examplelabs.org", "http://loinc.org");
 
 			// Register the interceptor
