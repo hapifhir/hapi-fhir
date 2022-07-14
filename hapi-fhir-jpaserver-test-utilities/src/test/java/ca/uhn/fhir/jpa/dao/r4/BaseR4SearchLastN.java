@@ -226,11 +226,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	private void executeTestCase(SearchParameterMap params, List<String> sortedPatients, List<String> sortedObservationCodes, List<String> theCategories, int expectedObservationCount) {
 		List<String> actual;
 		params.setLastN(true);
-
-		Map<String, String[]> requestParameters = new HashMap<>();
 		params.setLastNMax(100);
-
-		when(mySrd.getParameters()).thenReturn(requestParameters);
 
 		actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 
