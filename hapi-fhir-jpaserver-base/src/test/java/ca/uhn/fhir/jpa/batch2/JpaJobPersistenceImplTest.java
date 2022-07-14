@@ -263,9 +263,8 @@ class JpaJobPersistenceImplTest {
 
 		// when
 		when(myJobInstanceRepository
-			.findInstancesByJobIdParamsAndStatus(eq(req.getJobDefinition()),
+			.findInstancesByJobIdAndParams(eq(req.getJobDefinition()),
 				eq(req.getParameters()),
-				any(Set.class),
 				any(Pageable.class)))
 			.thenReturn(instances);
 
@@ -277,16 +276,13 @@ class JpaJobPersistenceImplTest {
 		assertEquals(instances, retInstances);
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-		ArgumentCaptor<Set<StatusEnum>> statusCaptor = ArgumentCaptor.forClass(Set.class);
 		verify(myJobInstanceRepository)
-			.findInstancesByJobIdParamsAndStatus(
+			.findInstancesByJobIdAndParams(
 				eq(req.getJobDefinition()),
 				eq(req.getParameters()),
-				statusCaptor.capture(),
 				pageableCaptor.capture()
 			);
 
-		assertEquals(StatusEnum.values().length, statusCaptor.getValue().size());
 		Pageable pageable = pageableCaptor.getValue();
 		assertEquals(pageStart, pageable.getPageNumber());
 		assertEquals(pageSize, pageable.getPageSize());
