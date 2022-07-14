@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -683,7 +684,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
-		String msg = getFhirContext().getLocalizer().getMessageSanitized(ResourceLinkPredicateBuilder.class, "invalidResourceType", theResourceType);
+		String msg = getFhirContext().getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", theResourceType);
 		throw new InvalidRequestException(Msg.code(1250) + msg);
 	}
 
