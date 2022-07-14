@@ -1,6 +1,6 @@
-package ca.uhn.fhir.jpa.dao.predicate;
+package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.dao.LegacySearchBuilderTest;
+import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SearchFuzzUtilTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(LegacySearchBuilderTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchFuzzUtilTest.class);
 
 	@Test
 	public void testCalculateMultiplierEqualNoDecimal() {
