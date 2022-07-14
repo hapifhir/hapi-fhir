@@ -51,6 +51,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
+import static ca.uhn.fhir.batch2.coordinator.StepExecutionSvc.MAX_CHUNK_ERROR_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -392,10 +393,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
+		AtomicInteger interceptorCounter = new AtomicInteger();
 		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
 			@Override
 			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
 				if (ex != null) {
+					interceptorCounter.incrementAndGet();
 					ourLog.info("Work Channel Exception thrown: {}.  Resending message", ex.getMessage());
 					channel.send(message);
 				}
@@ -443,7 +446,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED, StatusEnum.ERRORED // error states
 		);
-		int calls = counter.get();
+
+		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
+		assertEquals(MAX_CHUNK_ERROR_COUNT, interceptorCounter.get());
+
 		assertTrue(instance.getStatus() == StatusEnum.FAILED
 			|| instance.getStatus() == StatusEnum.ERRORED);
 	}
