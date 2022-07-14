@@ -50,11 +50,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -108,6 +110,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContextDirection,
 		@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
 		@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE, min = 0, max = 1, typeName = "code") IPrimitiveType<String> theDisplayLanguage,
 		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
 		RequestDetails theRequestDetails) {
 
@@ -143,7 +146,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter, theDisplayLanguage);
 
 		startRequest(theServletRequest);
 		try {
@@ -265,7 +268,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	}
 
 
-	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter) {
+	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter, IPrimitiveType<String> theDisplayLanguage) {
 		int offset = theDaoConfig.getPreExpandValueSetsDefaultOffset();
 		if (theOffset != null && theOffset.hasValue()) {
 			if (theOffset.getValue() >= 0) {
@@ -297,6 +300,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		if (theFilter != null) {
 			options.setFilter(theFilter.getValue());
+		}
+
+		if( theDisplayLanguage != null ) {
+			options.setTheDisplayLanguage(theDisplayLanguage.getValue());
 		}
 
 		return options;
