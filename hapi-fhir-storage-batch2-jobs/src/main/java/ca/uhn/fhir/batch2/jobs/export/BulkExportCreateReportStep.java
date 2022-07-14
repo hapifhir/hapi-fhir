@@ -29,19 +29,23 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 	@Override
 	public RunOutcome run(@NotNull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails,
 								 @NotNull IJobDataSink<BulkExportJobResults> theDataSink) throws JobExecutionFailedException {
+		BulkExportJobResults results = new BulkExportJobResults();
+
 		if (myResourceToBinaryIds != null) {
 			ourLog.info("Bulk Export Report creation step");
 
-			BulkExportJobResults results = new BulkExportJobResults();
 			results.setResourceTypeToBinaryIds(myResourceToBinaryIds);
-
-			// accept saves the report
-			theDataSink.accept(results);
 
 			myResourceToBinaryIds = null;
 		} else {
-			ourLog.warn("Export complete, but no data to generate report.");
+			String msg = "Export complete, but no data to generate report.";
+			ourLog.warn(msg);
+
+			results.setReportMsg(msg);
 		}
+
+		// accept saves the report
+		theDataSink.accept(results);
 		return RunOutcome.SUCCESS;
 	}
 

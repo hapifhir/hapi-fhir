@@ -258,10 +258,15 @@ public class BulkDataExportProvider {
 
 				String report = info.getReport();
 				if (isEmpty(report)) {
+					// this should never happen, but just in case...
 					ourLog.error("No report for completed bulk export job.");
 					response.getWriter().close();
 				} else {
 					BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+
+					// if there is a message....
+					bulkResponseDocument.setMsg(results.getReportMsg());
+
 					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
 
 					for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {

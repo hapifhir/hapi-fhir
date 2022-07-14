@@ -336,6 +336,45 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
+	public void testExportWhenNoResourcesReturned() throws IOException {
+		// setup
+		String msg = "Some msg";
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
+		info.setEndTime(InstantType.now().getValue());
+		ArrayList<String> ids = new ArrayList<>();
+		BulkExportJobResults results = new BulkExportJobResults();
+		HashMap<String, List<String>> map = new HashMap<>();
+		map.put("Patient", ids);
+		results.setResourceTypeToBinaryIds(map);
+		results.setReportMsg(msg);
+		info.setReport(JsonUtil.serialize(results));
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// test
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals("OK", response.getStatusLine().getReasonPhrase());
+			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
+
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(msg, responseJson.getMsg());
+		}
+	}
+
+	@Test
 	public void testPollForStatus_Gone() throws IOException {
 		// setup
 

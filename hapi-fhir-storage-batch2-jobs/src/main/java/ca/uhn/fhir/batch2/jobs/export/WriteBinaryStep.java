@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -75,7 +76,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 				ex.getMessage());
 			ourLog.error(errorMsg);
 
-			throw new JobExecutionFailedException(errorMsg);
+			throw new JobExecutionFailedException(Msg.code(2105) + errorMsg);
 		}
 
 		DaoMethodOutcome outcome = binaryDao.create(binary,

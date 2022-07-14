@@ -12,6 +12,9 @@ public class BulkExportJobResults implements IModelJson {
 	@JsonProperty("resourceType2BinaryIds")
 	private Map<String, List<String>> myResourceTypeToBinaryIds;
 
+	@JsonProperty("reportMessage")
+	private String myReportMsg;
+
 	public BulkExportJobResults() {
 	}
 
@@ -26,4 +29,11 @@ public class BulkExportJobResults implements IModelJson {
 		myResourceTypeToBinaryIds = theResourceTypeToBinaryIds;
 	}
 
+	public String getReportMsg() {
+		return myReportMsg;
+	}
+
+	public void setReportMsg(String theReportMsg) {
+		myReportMsg = theReportMsg;
+	}
 }
