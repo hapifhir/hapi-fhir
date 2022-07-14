@@ -418,13 +418,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			if (!myDaoRegistry.isResourceTypeSupported(paramType)) {
-				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramType);
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", paramType);
 				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
 				throw new InvalidRequestException(Msg.code(2017) + msg);
 			}
 
 			if (isNotBlank(paramTargetType) && !myDaoRegistry.isResourceTypeSupported(paramTargetType)) {
-				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramTargetType);
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", paramTargetType);
 				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
 				throw new InvalidRequestException(Msg.code(2016) + msg);
 			}
