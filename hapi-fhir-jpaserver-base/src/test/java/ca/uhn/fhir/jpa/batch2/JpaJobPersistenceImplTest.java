@@ -1,12 +1,9 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
-import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +15,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,28 +27,6 @@ class JpaJobPersistenceImplTest {
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
-	@Test
-	public void markWorkChunkAsErroredAndIncrementErrorCountAndReturn_basicCheck_works() {
-		// setup
-		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
-		entity.setId("id");
-		entity.setJobDefinitionId("jobdef");
-		entity.setJobDefinitionVersion(1);
-		entity.setTargetStepId("stepid");
-		MarkWorkChunkAsErrorParameters params = new MarkWorkChunkAsErrorParameters();
-		params.setChunkId(entity.getId());
-
-		// when
-		when(myWorkChunkRepository.findById(anyString()))
-			.thenReturn(Optional.of(entity));
-
-		// test
-		Optional<WorkChunk> chunkReturn = mySvc.markWorkChunkAsErroredAndIncrementErrorCountAndReturn(params);
-
-		// verify
-		assertTrue(chunkReturn.isPresent());
-		assertEquals(entity.getId(), chunkReturn.get().getId());
-	}
 
 	@Test
 	void cancelSuccess() {

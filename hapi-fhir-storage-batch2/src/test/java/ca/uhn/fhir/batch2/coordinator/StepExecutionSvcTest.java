@@ -19,7 +19,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
@@ -500,7 +500,7 @@ public class StepExecutionSvcTest {
 	}
 
 	@Test
-	public void doExecution_stepWorkerThrowsRandomExceptionForever_eventuallyMarksAsFailed() {
+	public void doExecution_stepWorkerThrowsRandomExceptionForever_eventuallyMarksAsFailedAndReturnsFalse() {
 		// setup
 		int counter = 0;
 		AtomicInteger errorCounter = new AtomicInteger();
@@ -517,7 +517,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(myNonReductionStep.run(any(), any()))
 			.thenThrow(new RuntimeException(errorMsg));
-		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCountAndReturn(any(MarkWorkChunkAsErrorParameters.class)))
+		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(any(MarkWorkChunkAsErrorRequest.class)))
 			.thenAnswer((p) -> {
 				WorkChunk ec = new WorkChunk();
 				ec.setId(chunk.getId());
@@ -527,7 +527,7 @@ public class StepExecutionSvcTest {
 			});
 
 		// test
-		Boolean hasFailed = null;
+		Boolean processedOutcomeSuccessfully = null;
 		do {
 			try {
 				JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
@@ -535,8 +535,13 @@ public class StepExecutionSvcTest {
 					jobInstance,
 					chunk
 				);
-				hasFailed = output.isSuccessful();
-				break;
+				/*
+				 * Getting a value here means we are no longer
+				 * throwing exceptions. Which is the desired outcome.
+				 * We just now need to ensure that this outcome is
+				 * "false"
+				 */
+				processedOutcomeSuccessfully = output.isSuccessful();
 			} catch (JobStepFailedException ex) {
 				assertTrue(ex.getMessage().contains(errorMsg));
 				counter++;
@@ -546,13 +551,13 @@ public class StepExecutionSvcTest {
 			 * we check for > MAX_CHUNK_ERROR_COUNT (+1)
 			 * we want it to run one extra time here (+1)
 			 */
-		} while (counter < StepExecutionSvc.MAX_CHUNK_ERROR_COUNT + 2);
+		} while (processedOutcomeSuccessfully == null && counter < StepExecutionSvc.MAX_CHUNK_ERROR_COUNT + 2);
 
 		// verify
-		assertNotNull(hasFailed);
+		assertNotNull(processedOutcomeSuccessfully);
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
 		assertEquals(StepExecutionSvc.MAX_CHUNK_ERROR_COUNT  + 1, counter);
-		assertFalse(hasFailed);
+		assertFalse(processedOutcomeSuccessfully);
 	}
 
 	private void runExceptionThrowingTest(Exception theExceptionToThrow) {

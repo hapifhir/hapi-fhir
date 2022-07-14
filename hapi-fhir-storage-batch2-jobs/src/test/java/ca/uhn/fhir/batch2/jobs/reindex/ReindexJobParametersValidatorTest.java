@@ -30,15 +30,6 @@ public class ReindexJobParametersValidatorTest {
 		assertTrue(errors.get(0).contains("Invalid URL. URL cannot contain spaces"));
 	}
 
-	@Test
-	public void validate_urlWithMultipleQuestionMarks_fails() {
-		List<String> errors = runTestWithUrl("?Patient,?Task");
-
-		// verify
-		assertFalse(errors.isEmpty());
-		assertTrue(errors.get(0).contains("Invalid URL. URL contains multiple '?' characters"));
-	}
-
 	private List<String> runTestWithUrl(String theUrl) {
 		// setup
 		ReindexJobParameters parameters = new ReindexJobParameters();

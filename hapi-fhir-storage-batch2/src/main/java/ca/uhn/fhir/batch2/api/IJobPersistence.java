@@ -22,7 +22,7 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
@@ -115,7 +115,7 @@ public interface IJobPersistence {
 	 * @param theParameters - the parameters for marking the workchunk with error
 	 * @return - workchunk optional, if available.
 	 */
-	default Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCountAndReturn(MarkWorkChunkAsErrorParameters theParameters) {
+	default Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
 		// old method - please override me
 		markWorkChunkAsErroredAndIncrementErrorCount(theParameters.getChunkId(), theParameters.getErrorMsg());
 		return Optional.empty(); // returning empty so as not to break implementers

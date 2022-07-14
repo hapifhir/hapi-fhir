@@ -12,7 +12,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
-import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorParameters;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -246,9 +246,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		ArgumentCaptor<MarkWorkChunkAsErrorParameters> parametersArgumentCaptor = ArgumentCaptor.forClass(MarkWorkChunkAsErrorParameters.class);
-		verify(myJobInstancePersister, times(1)).markWorkChunkAsErroredAndIncrementErrorCountAndReturn(parametersArgumentCaptor.capture());
-		MarkWorkChunkAsErrorParameters capturedParams = parametersArgumentCaptor.getValue();
+		ArgumentCaptor<MarkWorkChunkAsErrorRequest> parametersArgumentCaptor = ArgumentCaptor.forClass(MarkWorkChunkAsErrorRequest.class);
+		verify(myJobInstancePersister, times(1)).markWorkChunkAsErroredAndIncrementErrorCount(parametersArgumentCaptor.capture());
+		MarkWorkChunkAsErrorRequest capturedParams = parametersArgumentCaptor.getValue();
 		assertEquals(CHUNK_ID, capturedParams.getChunkId());
 		assertEquals("This is an error message", capturedParams.getErrorMsg());
 	}

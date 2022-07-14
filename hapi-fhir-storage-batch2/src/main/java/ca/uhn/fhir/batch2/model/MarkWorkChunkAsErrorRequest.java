@@ -1,6 +1,6 @@
 package ca.uhn.fhir.batch2.model;
 
-public class MarkWorkChunkAsErrorParameters {
+public class MarkWorkChunkAsErrorRequest {
 	private String myChunkId;
 
 	private String myErrorMsg;

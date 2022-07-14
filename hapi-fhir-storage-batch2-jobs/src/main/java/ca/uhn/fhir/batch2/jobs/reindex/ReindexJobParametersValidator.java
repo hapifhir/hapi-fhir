@@ -23,6 +23,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.util.UrlUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
-	private final Pattern myQuestionPattern = Pattern.compile("([\\?])");
+//	private final Pattern myQuestionPattern = Pattern.compile("([\\?])");
 
 	private final UrlListValidator myUrlListValidator;
 
@@ -54,14 +55,6 @@ public class ReindexJobParametersValidator implements IJobParametersValidator<Re
 				String url = purl.getUrl();
 				if (url.contains("\s")) {
 					errors.add("Invalid URL. URL cannot contain spaces : " + url);
-				}
-				Matcher matcher = myQuestionPattern.matcher(url);
-				int questionCount = 0;
-				while (matcher.find()) {
-					questionCount++;
-				}
-				if (questionCount > 1) {
-					errors.add("Invalid URL. URL contains multiple '?' characters: " + url);
 				}
 			}
 		}
