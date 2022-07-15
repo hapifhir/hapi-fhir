@@ -26,6 +26,7 @@ import org.apache.lucene.analysis.core.StopFilterFactory;
 import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory;
 import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
+import org.apache.lucene.analysis.miscellaneous.WordDelimiterGraphFilterFactory;
 import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
 import org.apache.lucene.analysis.ngram.NGramFilterFactory;
 import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
@@ -74,7 +75,7 @@ public class HapiHSearchAnalysisConfigurers {
 
 			theLuceneCtx.analyzer("autocompleteNGramAnalyzer").custom()
 				.tokenizer(StandardTokenizerFactory.class)
-				.tokenFilter(WordDelimiterFilterFactory.class)
+				.tokenFilter(WordDelimiterGraphFilterFactory.class)
 				.tokenFilter(LowerCaseFilterFactory.class)
 				.tokenFilter(NGramFilterFactory.class)
 				.param("minGramSize", "3")
@@ -130,7 +131,7 @@ public class HapiHSearchAnalysisConfigurers {
 				.param("group", "1");
 
 			theConfigCtx.tokenFilter("edgengram_3_50")
-				.type("edgeNGram")
+				.type("edge_ngram")
 				.param("min_gram", "3")
 				.param("max_gram", "50");
 
@@ -140,7 +141,7 @@ public class HapiHSearchAnalysisConfigurers {
 				.tokenFilters("lowercase", "stop", "wordedgengram_3_50");
 
 			theConfigCtx.tokenFilter("wordedgengram_3_50")
-				.type("edgeNGram")
+				.type("edge_ngram")
 				.param("min_gram", "3")
 				.param("max_gram", "20");
 
@@ -157,7 +158,7 @@ public class HapiHSearchAnalysisConfigurers {
 				.tokenFilters("word_delimiter", "lowercase", "ngram_3_20");
 
 			theConfigCtx.tokenFilter("ngram_3_20")
-				.type("nGram")
+				.type("ngram")
 				.param("min_gram", "3")
 				.param("max_gram", "20");
 
