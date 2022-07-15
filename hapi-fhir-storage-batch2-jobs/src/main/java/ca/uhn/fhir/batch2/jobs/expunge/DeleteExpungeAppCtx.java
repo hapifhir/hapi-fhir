@@ -22,9 +22,8 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.config.SharedCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
-import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -36,7 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DeleteExpungeAppCtx {
+public class DeleteExpungeAppCtx extends SharedCtx {
 
 	public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
 
@@ -59,7 +58,7 @@ public class DeleteExpungeAppCtx {
 				"generate-ranges",
 				"Generate data ranges to expunge",
 				PartitionedUrlChunkRangeJson.class,
-				expungeGenerateRangeChunksStep())
+				reindexGenerateRangeChunksStep())
 			.addIntermediateStep(
 				"load-ids",
 				"Load IDs of resources to expunge",
@@ -82,15 +81,6 @@ public class DeleteExpungeAppCtx {
 		return new DeleteExpungeStep(theHapiTransactionService, theDeleteExpungeSvc);
 	}
 
-	@Bean
-	public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
-	}
-
-	@Bean
-	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep(theBatch2DaoSvc);
-	}
 
 	@Bean
 	public DeleteExpungeProvider deleteExpungeProvider(FhirContext theFhirContext, IDeleteExpungeJobSubmitter theDeleteExpungeJobSubmitter) {
