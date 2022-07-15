@@ -10,12 +10,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ContextConfiguration(classes = {MdmHelperConfig.class})
 public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
@@ -27,11 +29,10 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
-	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor;
+	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor = new PatientNameModifierMdmPreProcessingInterceptor();
 
 	@BeforeEach
 	public void beforeEach(){
-		myPreProcessingInterceptor = new PatientNameModifierMdmPreProcessingInterceptor();
 		myInterceptorService.registerInterceptor(myPreProcessingInterceptor);
 	}
 
@@ -40,32 +41,43 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 		myInterceptorService.unregisterInterceptor(myPreProcessingInterceptor);
 	}
 
-	@Test
-	public void whenInterceptorIsRegisteredThenInterceptorIsCalled() throws InterruptedException {
+	@ParameterizedTest
+	@MethodSource("getNames")
+	public void whenInterceptorIsRegisteredThenInterceptorIsCalled(String theSubstituteName) throws InterruptedException {
+		myPreProcessingInterceptor.setNewValue(theSubstituteName);
+
 		Patient aPatient = buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 
 		myMdmHelper.createWithLatch(aPatient);
 
 		Patient interceptedResource = (Patient) myPreProcessingInterceptor.getReturnedValue();
 
-		String modifiedFamilyName = interceptedResource.getNameFirstRep().getFamily();
-
-		assertNull(modifiedFamilyName);
+		assertEquals(theSubstituteName, interceptedResource.getNameFirstRep().getFamily());
 
 	}
 
+	static String[] getNames() {
+		return new String[]{"NewName", null};
+	}
+
 	public static class PatientNameModifierMdmPreProcessingInterceptor {
+
+		String myNewValue = EMPTY;
 
 		IBaseResource myReturnedValue;
 
 		@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
 		public IBaseResource invoke(IBaseResource theResource) {
 
-			((Patient)theResource).getNameFirstRep().setFamily(null);
+			((Patient)theResource).getNameFirstRep().setFamily(myNewValue);
 
 			myReturnedValue = theResource;
 
 			return myReturnedValue;
+		}
+
+		public void setNewValue(String theNewValue) {
+			myNewValue = theNewValue;
 		}
 
 		public IBaseResource getReturnedValue() {
