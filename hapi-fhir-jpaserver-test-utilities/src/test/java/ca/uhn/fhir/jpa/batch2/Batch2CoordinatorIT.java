@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
+import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -17,6 +18,11 @@ import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -25,11 +31,16 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.LatchTimedOutError;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -40,6 +51,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
+import static ca.uhn.fhir.batch2.coordinator.StepExecutionSvc.MAX_CHUNK_ERROR_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,6 +72,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	IJobMaintenanceService myJobMaintenanceService;
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
+	@Autowired
+	private IChannelFactory myChannelFactory;
 
 	@Autowired
 	IJobPersistence myJobPersistence;
@@ -66,6 +81,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
 	private IJobCompletionHandler<TestJobParameters> myCompletionHandler;
+	private LinkedBlockingChannel myWorkChannel;
 
 	private static RunOutcome callLatch(PointcutLatch theLatch, StepExecutionDetails<?, ?> theStep) {
 		theLatch.call(theStep);
@@ -74,7 +90,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
-		 myCompletionHandler = details -> {};
+		myCompletionHandler = details -> {};
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+	}
+
+	@AfterEach
+	public void after() {
+		myWorkChannel.clearInterceptorsForUnitTest();
 	}
 
 	@Test
@@ -123,7 +145,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
 		myLastStepLatch.awaitExpected();
 	}
-
 
 	@Test
 	public void testFastTrack_Maintenance_do_not_both_call_CompletionHandler() throws InterruptedException {
@@ -190,7 +211,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
 	}
-
 
 	@Test
 	public void testJobDefinitionWithReductionStepIT() throws InterruptedException {
@@ -376,6 +396,69 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// validate
 		myBatch2JobHelper.awaitJobCancelled(instanceId);
+	}
+
+	@Test
+	public void testStepRunFailure_continuouslyThrows_marksJobFailed() {
+		AtomicInteger interceptorCounter = new AtomicInteger();
+		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
+			@Override
+			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+				if (ex != null) {
+					interceptorCounter.incrementAndGet();
+					ourLog.info("Work Channel Exception thrown: {}.  Resending message", ex.getMessage());
+					channel.send(message);
+				}
+			}
+		});
+
+		// setup
+		AtomicInteger counter = new AtomicInteger();
+		// step 1
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			counter.getAndIncrement();
+			throw new RuntimeException("Exception");
+		};
+		// final step
+		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> {
+			fail("We should never hit this last step");
+			return RunOutcome.SUCCESS;
+		};
+		// job definition
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				last
+			)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+		// test
+		JobInstanceStartRequest request = buildRequest(jobId);
+		myFirstStepLatch.setExpectedCount(1);
+		String instanceId = myJobCoordinator.startInstance(request);
+		JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(instanceId,
+			12, // we want to wait a long time (2 min here) cause backoff is incremental
+			StatusEnum.FAILED, StatusEnum.ERRORED // error states
+		);
+
+		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
+		assertEquals(MAX_CHUNK_ERROR_COUNT, interceptorCounter.get());
+
+		assertTrue(instance.getStatus() == StatusEnum.FAILED
+			|| instance.getStatus() == StatusEnum.ERRORED);
 	}
 
 	@Nonnull

@@ -37,10 +37,10 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -672,20 +672,19 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	@Nonnull
 	private InvalidRequestException newInvalidTargetTypeForChainException(String theResourceName, String theParamName, String theTypeValue) {
 		String searchParamName = theResourceName + ":" + theParamName;
-		String msg = getFhirContext().getLocalizer().getMessage(PredicateBuilderReference.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
+		String msg = getFhirContext().getLocalizer().getMessage(ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
 		return new InvalidRequestException(msg);
 	}
 
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
 		IQueryParameterType qp = toParameterType(theParam);
-
 		qp.setValueAsQueryToken(getFhirContext(), theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
 
 	@Nonnull
 	private InvalidRequestException newInvalidResourceTypeException(String theResourceType) {
-		String msg = getFhirContext().getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", theResourceType);
+		String msg = getFhirContext().getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", theResourceType);
 		throw new InvalidRequestException(Msg.code(1250) + msg);
 	}
 

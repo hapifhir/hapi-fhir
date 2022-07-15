@@ -6,20 +6,26 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPatchApplyR4Test {
@@ -218,6 +224,7 @@ public class FhirPatchApplyR4Test {
 			.addPart()
 			.setName("value")
 			.setValue(new StringType("2"));
+
 		operation = patch.addParameter();
 		operation.setName("operation");
 		operation
@@ -236,6 +243,7 @@ public class FhirPatchApplyR4Test {
 			.addPart()
 			.setName("value")
 			.setValue(new Coding("http://smilecdr.com/fhir/document-type", "ADMIN", null));
+
 		operation = patch.addParameter();
 		operation.setName("operation");
 		operation
@@ -259,8 +267,135 @@ public class FhirPatchApplyR4Test {
 
 		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertEquals("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}", ourCtx.newJsonParser().encodeResourceToString(patient));
+	}
+
+	@Test
+	public void testAddDoesNotReplaceHighCardinalityItems() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+
+		//Given: We create a patient with an identifier
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+
+		//Given: We create a patch request to add a second identifier.
+		Identifier theValue = new Identifier().setSystem("second-system").setValue("second-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchAddOperation( "Patient", "identifier", theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: New identifier is added, and does not overwrite.
+		assertThat(patient.getIdentifier(), hasSize(2));
+		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("first-system")));
+		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("first-value")));
+		assertThat(patient.getIdentifier().get(1).getSystem(), is(equalTo("second-system")));
+		assertThat(patient.getIdentifier().get(1).getValue(), is(equalTo("second-value")));
+	}
+
+	@Test
+	public void testAddToHighCardinalityFieldSetsValueIfEmpty() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		//Given: We create a patch request to add an identifier.
+		Parameters patch = new Parameters();
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		patch.addParameter(createPatchAddOperation("Patient", "identifier", theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it applies the new identifier correctly.
+		assertThat(patient.getIdentifier(), hasSize(1));
+		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
+		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+	}
+	@Test
+	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("first-system").setValue("first-value");
+		patient.addIdentifier().setSystem("second-system").setValue("second-value");
+
+		//Given: We create a patch request to add an identifier.
+		Identifier theValue = new Identifier().setSystem("third-system").setValue("third-value");
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchReplaceOperation("Patient.identifier",  theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it applies the new identifier correctly.
+		assertThat(patient.getIdentifier(), hasSize(1));
+		assertThat(patient.getIdentifier().get(0).getSystem(), is(equalTo("third-system")));
+		assertThat(patient.getIdentifier().get(0).getValue(), is(equalTo("third-value")));
+	}
+
+	//TODO: https://github.com/hapifhir/hapi-fhir/issues/3796
+	@Test
+	public void testAddToSingleCardinalityFieldFailsWhenExists() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		//Given: We create a patch request to add a new active statuts
+		BooleanType theValue = new BooleanType(false);
+		Parameters patch = new Parameters();
+		patch.addParameter(createPatchAddOperation("Patient", "active", theValue));
+
+		//When: We apply the patch
+		svc.apply(patient, patch);
+		ourLog.info("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+		//TODO THIS SHOULD THROW AN EXCEPTION. you cannot `add` to a field that is already set.
+	}
+
+	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {
+		return createPatchOperation("add", thePath, theName, theValue, null);
+	}
+
+	private Parameters.ParametersParameterComponent createPatchReplaceOperation(String thePath, Type theValue) {
+		return createPatchOperation("replace", thePath, null , theValue, null);
+	}
+
+	private Parameters.ParametersParameterComponent createPatchInsertOperation(String thePath, Type theValue) {
+		return createPatchOperation("replace", thePath, null , theValue, null);
+	}
 
 
+	@Nonnull
+	private Parameters.ParametersParameterComponent createPatchOperation(String theType, String thePath, String theName, Type theValue, Integer theIndex) {
+		Parameters.ParametersParameterComponent operation = new Parameters.ParametersParameterComponent();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType(theType));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType(thePath));
+
+		if (theName != null) {
+			operation
+				.addPart()
+				.setName("name")
+				.setValue(new StringType(theName));
+		}
+		if (theValue != null) {
+			operation.addPart()
+				.setName("value")
+				.setValue(theValue);
+		}
+		if (theIndex != null) {
+			operation.addPart()
+				.setName("index")
+				.setValue(new IntegerType(theIndex));
+		}
+		return operation;
 	}
 
 	public static String extractPartValuePrimitive(Parameters theDiff, int theIndex, String theParameterName, String thePartName) {

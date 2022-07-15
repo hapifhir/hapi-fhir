@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -10,13 +12,16 @@ import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
@@ -30,6 +35,9 @@ import java.nio.charset.StandardCharsets;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -141,6 +149,49 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
 		assertEquals("2", newPt.getIdElement().getVersionIdPart());
 		assertEquals(false, newPt.getActive());
+	}
+
+	@Test
+	public void testFhirPatch_AfterDelete_Returns410() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().addExtension("http://foo", new StringType("abc"));
+		patient.addIdentifier().setSystem("sys").setValue("val");
+		IIdType id = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		OperationOutcome delOutcome = (OperationOutcome) myClient.delete().resourceById(id).execute().getOperationOutcome();
+		assertTrue(delOutcome.getIssue().get(0).getDiagnostics().contains("Successfully deleted"));
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent operation = patch.addParameter();
+		operation.setName("operation");
+		operation
+			.addPart()
+			.setName("type")
+			.setValue(new CodeType("replace"));
+		operation
+			.addPart()
+			.setName("path")
+			.setValue(new StringType("Patient.active"));
+		operation
+			.addPart()
+			.setName("value")
+			.setValue(new BooleanType(false));
+
+
+		try {
+			myClient.patch().withFhirPatch(patch).withId(id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
+		}
+
+		try {
+			myClient.read().resource(Patient.class).withId(id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
+		}
 	}
 
 	@Test

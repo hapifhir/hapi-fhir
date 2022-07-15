@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
@@ -181,6 +182,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.ERRORED);
+	}
+
+	@Override
+	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
+		markWorkChunkAsErroredAndIncrementErrorCount(theParameters.getChunkId(), theParameters.getErrorMsg());
+		Optional<Batch2WorkChunkEntity> op = myWorkChunkRepository.findById(theParameters.getChunkId());
+
+		return op.map(c -> toChunk(c, theParameters.isIncludeData()));
 	}
 
 	@Override

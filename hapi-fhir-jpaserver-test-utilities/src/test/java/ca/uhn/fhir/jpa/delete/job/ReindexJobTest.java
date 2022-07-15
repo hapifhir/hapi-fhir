@@ -130,7 +130,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// Verify
 
 		assertEquals(StatusEnum.ERRORED, outcome.getStatus());
-		assertEquals("java.lang.NullPointerException: foo message", outcome.getErrorMessage());
+		assertEquals("foo message", outcome.getErrorMessage());
 	}
 
 	@Test
