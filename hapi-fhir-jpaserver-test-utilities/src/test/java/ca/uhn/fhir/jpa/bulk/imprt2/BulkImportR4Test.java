@@ -185,7 +185,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNull(instance.getEndTime());
-				assertThat(instance.getErrorMessage(), containsString("NullPointerException: This is an exception"));
+				assertThat(instance.getErrorMessage(), containsString("This is an exception"));
 			});
 
 		} finally {
