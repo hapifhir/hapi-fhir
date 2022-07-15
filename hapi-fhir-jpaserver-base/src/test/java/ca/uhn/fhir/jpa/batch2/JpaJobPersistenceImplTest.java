@@ -27,6 +27,7 @@ class JpaJobPersistenceImplTest {
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
+
 	@Test
 	void cancelSuccess() {
 		// setup

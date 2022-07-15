@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
-import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -32,7 +32,7 @@ public class BaseSearchSvc {
 	@Mock
 	protected PlatformTransactionManager myTxManager;
 	@Mock
-	protected LegacySearchBuilder mySearchBuilder;
+	protected SearchBuilder mySearchBuilder;
 
 	@Mock
 	protected IFhirResourceDao<?> myCallingDao;

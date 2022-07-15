@@ -26,8 +26,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
-import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
-import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -1149,7 +1147,7 @@ public class QueryStack {
 
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
-			String msg = myFhirContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
+			String msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "sourceParamDisabled");
 			throw new InvalidRequestException(Msg.code(1216) + msg);
 		}
 
@@ -1321,13 +1319,12 @@ public class QueryStack {
 						if (!tokenTextIndexingEnabled) {
 							String msg;
 							if (myModelConfig.isSuppressStringIndexingInTokens()) {
-								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForServer");
+								msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "textModifierDisabledForServer");
 							} else {
-								msg = myFhirContext.getLocalizer().getMessage(PredicateBuilderToken.class, "textModifierDisabledForSearchParam");
+								msg = myFhirContext.getLocalizer().getMessage(QueryStack.class, "textModifierDisabledForSearchParam");
 							}
 							throw new MethodNotAllowedException(Msg.code(1219) + msg);
 						}
-
 						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId, theSqlBuilder);
 					} 
 					

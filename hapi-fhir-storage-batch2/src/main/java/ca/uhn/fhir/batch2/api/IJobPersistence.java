@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
@@ -100,7 +101,25 @@ public interface IJobPersistence {
 	 *
 	 * @param theChunkId The chunk ID
 	 */
+	@Deprecated
 	void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage);
+
+	/**
+	 * Marks a given chunk as having errored (ie, may be recoverable)
+	 *
+	 * Returns the work chunk.
+	 *
+	 * NB: For backwards compatibility reasons, it could be an empty optional, but
+	 * this doesn't mean it has no workchunk (just implementers are not updated)
+	 *
+	 * @param theParameters - the parameters for marking the workchunk with error
+	 * @return - workchunk optional, if available.
+	 */
+	default Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
+		// old method - please override me
+		markWorkChunkAsErroredAndIncrementErrorCount(theParameters.getChunkId(), theParameters.getErrorMsg());
+		return Optional.empty(); // returning empty so as not to break implementers
+	}
 
 	/**
 	 * Marks a given chunk as having failed (i.e. probably not recoverable)

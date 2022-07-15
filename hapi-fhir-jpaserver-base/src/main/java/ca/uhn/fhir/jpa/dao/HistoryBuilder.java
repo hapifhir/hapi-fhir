@@ -50,7 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.dao.LegacySearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.toPredicateArray;
+
 
 /**
  * The HistoryBuilder is responsible for building history queries
