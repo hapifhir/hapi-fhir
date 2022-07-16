@@ -192,7 +192,7 @@ public class StepExecutionSvc {
 		IReductionStepWorker<PT, IT, OT> theReductionWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
 		// We fetch all chunks first...
-		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), true);
+		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepIterator(theInstance.getInstanceId(), theStep.getStepId());
 
 		List<String> failedChunks = new ArrayList<>();
 		List<String> successfulChunkIds = new ArrayList<>();

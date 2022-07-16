@@ -178,6 +178,15 @@ public interface IJobPersistence {
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
 
 	/**
+	 * Fetch all chunks with data for a given instance for a given step id
+	 * @param theInstanceId
+	 * @param theStepId
+	 * @return - an iterator for fetching work chunks
+	 */
+	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
+
+
+	/**
 	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}
 	 * instead to ensure state-change callbacks are invoked properly.
 	 *

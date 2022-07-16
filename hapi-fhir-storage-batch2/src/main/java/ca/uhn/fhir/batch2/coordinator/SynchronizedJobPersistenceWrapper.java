@@ -21,8 +21,8 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -132,6 +132,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
 		return myWrap.fetchAllWorkChunksIterator(theInstanceId, theWithData);
+	}
+
+	@Override
+	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
 	}
 
 
