@@ -44,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -62,6 +61,7 @@ import static org.mockito.Mockito.when;
 public class StepExecutionSvcTest {
 	private static final String INSTANCE_ID = "instanceId";
 	private static final String JOB_DEFINITION_ID = "jobDefId";
+	public static final String REDUCTION_STEP_ID = "step last";
 
 	// static internal use classes
 
@@ -156,7 +156,7 @@ public class StepExecutionSvcTest {
 		);
 
 		JobDefinitionStep<TestJobParameters, StepInputData, OT> step = (JobDefinitionStep<TestJobParameters, StepInputData, OT>) getJobDefinitionStep(
-			"stepId",
+			REDUCTION_STEP_ID,
 			theStepType
 		);
 
@@ -197,7 +197,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS());
@@ -258,7 +258,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		doThrow(new RuntimeException(errorMsg))
 			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
@@ -306,7 +306,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
@@ -351,7 +351,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
@@ -605,7 +605,7 @@ public class StepExecutionSvcTest {
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
-			.fetchAllWorkChunksIterator(anyString(), anyBoolean());
+			.fetchAllWorkChunksForStepIterator(anyString(), anyString());
 	}
 
 	private JobInstance getTestJobInstance() {
@@ -642,7 +642,7 @@ public class StepExecutionSvcTest {
 					mock(IJobStepWorker.class) // we don't care about this step - we just need it
 				)
 				.addFinalReducerStep(
-					"step last",
+					REDUCTION_STEP_ID,
 					"description 2",
 					StepOutputData.class,
 					myReductionStep
