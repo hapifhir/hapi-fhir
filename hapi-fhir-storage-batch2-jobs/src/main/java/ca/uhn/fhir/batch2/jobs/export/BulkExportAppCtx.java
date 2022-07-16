@@ -46,6 +46,7 @@ public class BulkExportAppCtx {
 		JobDefinition def =  builder.setParametersType(BulkExportJobParameters.class)
 			// validator
 			.setParametersValidator(bulkExportJobParametersValidator())
+			.gatedExecution()
 			// first step - load in (all) ids and create id chunks of 1000 each
 			.addFirstStep(
 			"fetch-resources",
