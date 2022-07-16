@@ -1,13 +1,9 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
@@ -40,25 +36,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
+public class ResponseTerminologyTranslationInterceptorIT extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseTerminologyTranslationInterceptorIT.class);
 	public static final String TEST_OBV_FILTER = "Observation?status=amended";
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
 	private ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
-
-	@Autowired
-	private FhirContext myFhirContext;
 
 	@BeforeEach
 	public void beforeEach() {
