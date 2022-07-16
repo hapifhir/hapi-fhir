@@ -245,7 +245,7 @@ public class StepExecutionSvc {
 						e.getMessage()
 					);
 					// we got a failure in a reduction
-					ourLog.error(msg);
+					ourLog.error(msg, e);
 					jobFailed = true;
 
 					myJobPersistence.markWorkChunkAsFailed(chunk.getId(), msg);
