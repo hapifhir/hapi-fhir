@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
@@ -203,21 +201,13 @@ public class ResponseTerminologyTranslationInterceptorIT extends BaseResourcePro
 
 		assertNotNull(startResponse);
 
-		// Check the status
-		Batch2JobInfo status = myJobRunner.getJobInfo(startResponse.getJobId());
-		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
-
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
-
-		// Fetch the job again
-		status = myJobRunner.getJobInfo(startResponse.getJobId());
-		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
 
 		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
-		String report = status.getReport();
+		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
