@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -226,6 +226,8 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Fetch the job again
 		status = myJobRunner.getJobInfo(startResponse.getJobId());
 		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
 		String report = status.getReport();
