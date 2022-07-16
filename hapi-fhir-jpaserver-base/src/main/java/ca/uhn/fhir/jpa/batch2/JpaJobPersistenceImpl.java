@@ -36,7 +36,8 @@ import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.data.domain.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -57,6 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Transactional
 public class JpaJobPersistenceImpl implements IJobPersistence {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaJobPersistenceImpl.class);
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
@@ -194,7 +196,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
-		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.FAILED);
+		String errorMessage;
+		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
+			ourLog.warn("Truncating error message that is too long to store in database: {}", theErrorMessage);
+			errorMessage = theErrorMessage.substring(0, Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH);
+		} else {
+			errorMessage = theErrorMessage;
+		}
+		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), errorMessage, StatusEnum.FAILED);
 	}
 
 	@Override
