@@ -634,6 +634,7 @@ public class StepExecutionSvcTest {
 				.setJobDefinitionId(JOB_DEFINITION_ID)
 				.setJobDescription("Reduction job description")
 				.setJobDefinitionVersion(1)
+				.gatedExecution()
 				.setParametersType(TestJobParameters.class)
 				.addFirstStep(
 					"step 1",
