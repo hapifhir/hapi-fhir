@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3719
+title: "Added support to Bulk Export for FHIR Response Terminology Translation. It will use the same mappings as the Translation Interceptor."

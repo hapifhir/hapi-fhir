@@ -95,4 +95,13 @@ public enum TokenParamModifier {
 		return VALUE_TO_ENUM.get(theValue);
 	}
 
+	public boolean isNegative() {
+		switch (this) {
+			case NOT:
+			case NOT_IN:
+				return true;
+			default:
+				return false;
+		}
+	}
 }

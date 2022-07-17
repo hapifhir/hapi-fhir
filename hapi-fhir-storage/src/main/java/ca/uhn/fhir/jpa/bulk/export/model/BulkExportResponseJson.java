@@ -52,6 +52,9 @@ public class BulkExportResponseJson {
 	@JsonProperty("error")
 	private List<Output> myError;
 
+	@JsonProperty("message")
+	private String myMsg;
+
 	public Date getTransactionTime() {
 		return myTransactionTime;
 	}
@@ -97,6 +100,14 @@ public class BulkExportResponseJson {
 		Output retVal = new Output();
 		getOutput().add(retVal);
 		return retVal;
+	}
+
+	public String getMsg() {
+		return myMsg;
+	}
+
+	public void setMsg(String theMsg) {
+		myMsg = theMsg;
 	}
 
 	public static class Output implements IModelJson {
