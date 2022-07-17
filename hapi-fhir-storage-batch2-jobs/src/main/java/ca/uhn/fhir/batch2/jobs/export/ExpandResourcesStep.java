@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -44,10 +45,14 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -64,7 +69,21 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Autowired
+	private ApplicationContext myApplicationContext;
+
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+
+	@PostConstruct
+	public void initialize() {
+		boolean includeNonSingletons = false;
+		// We don't want to init lazy loaded beans here, so we call getBeansOfType with allowEagerInit = false
+		boolean allowEagerInit = false;
+		Map<String, IValidationSupport> validationSupportMap = myApplicationContext.getBeansOfType(IValidationSupport.class, includeNonSingletons, allowEagerInit);
+		Optional<IValidationSupport> validationSupport = validationSupportMap.values().stream().findFirst();
+		if (validationSupport.isPresent()) {
+			myResponseTerminologyTranslationSvc = new ResponseTerminologyTranslationSvc(validationSupport.get());
+		}
+	}
 
 	@Nonnull
 	@Override
@@ -85,8 +104,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			myBulkExportProcessor.expandMdmResources(allResources);
 		}
 
-		// is this necessary?
-		myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+		if (myResponseTerminologyTranslationSvc != null) {
+			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
+		}
 
 		// encode them
 		List<String> resources = encodeToString(allResources, jobParameters);
