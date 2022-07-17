@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.batch;
  */
 
 import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
-import ca.uhn.fhir.jpa.batch.processor.PidToIBaseResourceProcessor;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,12 +28,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CommonBatchJobConfig {
 	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
-
-	@Bean
-	@StepScope
-	public PidToIBaseResourceProcessor pidToResourceProcessor() {
-		return new PidToIBaseResourceProcessor();
-	}
 
 	@Bean
 	@StepScope

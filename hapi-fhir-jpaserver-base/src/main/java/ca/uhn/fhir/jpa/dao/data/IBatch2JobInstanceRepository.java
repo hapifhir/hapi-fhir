@@ -20,8 +20,11 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,6 +32,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
+
 import java.util.Set;
 
 public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobInstanceEntity, String>, IHapiFhirJpaRepository {
@@ -44,6 +49,27 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	@Modifying
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myCurrentGatedStepId = :currentGatedStepId WHERE e.myId = :id")
 	void updateInstanceCurrentGatedStepId(@Param("id") String theInstanceId, @Param("currentGatedStepId") String theCurrentGatedStepId);
+
+	@Query(
+		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params AND STAT IN( :stats )",
+		nativeQuery = true
+	)
+	List<JobInstance> findInstancesByJobIdParamsAndStatus(
+		@Param("defId") String theDefinitionId,
+		@Param("params") String theParams,
+		@Param("stats") Set<StatusEnum> theStatus,
+		Pageable thePageable
+	);
+
+	@Query(
+		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params",
+		nativeQuery = true
+	)
+	List<JobInstance> findInstancesByJobIdAndParams(
+		@Param("defId") String theDefinitionId,
+		@Param("params") String theParams,
+		Pageable thePageable
+	);
 
 	@Query("SELECT e FROM Batch2JobInstanceEntity e WHERE e.myDefinitionId = :jobDefinitionId AND e.myStatus IN :statuses")
 	List<Batch2JobInstanceEntity> fetchInstancesByJobDefinitionIdAndStatus(@Param("jobDefinitionId") String theJobDefinitionId, @Param("statuses") Set<StatusEnum> theIncompleteStatuses, Pageable thePageRequest);

@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -164,8 +165,8 @@ public class BulkDataImportProvider {
 
 		ourLog.info("Requesting Bulk Import Job ($import by Manifest) with {} urls", typeAndUrls.size());
 
-		String jobId = myJobCoordinator.startInstance(request);
-
+		Batch2JobStartResponse jobStartResponse = myJobCoordinator.startInstance(request);
+		String jobId = jobStartResponse.getJobId();
 
 		IBaseOperationOutcome response = OperationOutcomeUtil.newInstance(myFhirCtx);
 		OperationOutcomeUtil.addIssue(

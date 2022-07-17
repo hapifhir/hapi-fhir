@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -66,6 +67,12 @@ public interface IJobPersistence {
 	 * @param theInstanceId The instance ID
 	 */
 	Optional<JobInstance> fetchInstance(String theInstanceId);
+
+	/**
+	 * Fetches any existing jobs matching provided request parameters
+	 * @return
+	 */
+	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
 
 	/**
 	 * Fetch all instances
@@ -169,6 +176,15 @@ public interface IJobPersistence {
 	 * @return - an iterator for fetching work chunks
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
+
+	/**
+	 * Fetch all chunks with data for a given instance for a given step id
+	 * @param theInstanceId
+	 * @param theStepId
+	 * @return - an iterator for fetching work chunks
+	 */
+	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
+
 
 	/**
 	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}

@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -81,6 +82,12 @@ public class BulkImportCommandTest {
 		BulkImportCommand.setEndNowForUnitTest(true);
 	}
 
+	private Batch2JobStartResponse createJobStartResponse(String theId) {
+		Batch2JobStartResponse response = new Batch2JobStartResponse();
+		response.setJobId(theId);
+		return response;
+	}
+
 	@Test
 	public void testBulkImport() throws IOException {
 
@@ -89,7 +96,8 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn("THE-JOB-ID");
+		when(myJobCoordinator.startInstance(any()))
+			.thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -123,7 +131,8 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json.gz");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json.gz");
 
-		when(myJobCoordinator.startInstance(any())).thenReturn("THE-JOB-ID");
+		when(myJobCoordinator.startInstance(any()))
+			.thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{

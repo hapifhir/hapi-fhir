@@ -34,6 +34,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -135,7 +136,7 @@ public class JobInstanceProcessor {
 		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(myInstance.getJobDefinition(), myInstance.getCurrentGatedStepId());
 
 		// final step
-		if (jobWorkCursor.isFinalStep()) {
+		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
 			return;
 		}
 
@@ -177,8 +178,18 @@ public class JobInstanceProcessor {
 			null);
 		if (!result.isSuccessful()) {
 			myInstance.setStatus(StatusEnum.FAILED);
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			myInstance.setEndTime(new Date());
+			myJobPersistence.updateInstance(myInstance);
 		}
 	}
 
+	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
+		if (myInstance.getStatus() != newStatus) {
+			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
+			myInstance.setStatus(newStatus);
+			myInstance.setStartTime(new Date());
+			return true;
+		}
+		return false;
+	}
 }
