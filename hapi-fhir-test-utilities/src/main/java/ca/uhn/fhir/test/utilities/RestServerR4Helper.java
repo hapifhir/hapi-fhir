@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.eclipse.jetty.server.Request;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -367,7 +368,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new RuntimeException(Msg.code(2111)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2111)+"Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

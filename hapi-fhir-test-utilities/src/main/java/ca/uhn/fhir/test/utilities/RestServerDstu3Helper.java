@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -289,7 +290,7 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new RuntimeException(Msg.code(2113)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2113)+"Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

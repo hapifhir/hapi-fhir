@@ -59,11 +59,6 @@ public abstract class StoreInfo {
 
 	public static class StoreInfoException extends RuntimeException {
 		private static final long serialVersionUID = 1l;
-
-		public StoreInfoException(String theMessage, Throwable theCause) {
-			super(theMessage, theCause);
-		}
-
 		public StoreInfoException(String theMessage) {
 			super(theMessage);
 		}

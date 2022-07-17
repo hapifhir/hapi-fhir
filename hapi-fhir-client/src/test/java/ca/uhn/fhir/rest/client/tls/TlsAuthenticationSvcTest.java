@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -81,7 +82,7 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateKeyStoreNonExistentFile() throws Exception {
+	public void testCreateKeyStoreNonExistentFile() {
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/non-existent.p12", "changeit", "changeit", "server");
 		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
 			TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
@@ -112,7 +113,7 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateTrustManager() throws Exception{
+	public void testCreateTrustManager() throws Exception {
 		X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(Optional.of(myClientTrustStoreInfo));
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerKeyStoreInfo);
 		Certificate serverCertificate = keyStore.getCertificate(myServerKeyStoreInfo.getAlias());
@@ -122,7 +123,14 @@ public class TlsAuthenticationSvcTest {
 	}
 
 	@Test
-	public void testCreateTrustManagerInvalid() throws Exception{
+	public void testCreateTrustManagerNoTrustStore() {
+		// trust manager should contain common certifications if no trust store information is used
+		X509TrustManager trustManager = TlsAuthenticationSvc.createTrustManager(Optional.empty());
+		assertNotEquals(0, trustManager.getAcceptedIssuers().length);
+	}
+
+	@Test
+	public void testCreateTrustManagerInvalid() {
 		TrustStoreInfo invalidKeyStoreInfo = new TrustStoreInfo("file:///INVALID.p12", "changeit", "client");
 		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
 			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
