@@ -77,10 +77,14 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		boolean includeNonSingletons = false;
 		// We don't want to init lazy loaded beans here, so we call getBeansOfType with allowEagerInit = false
 		boolean allowEagerInit = false;
-		Map<String, ResponseTerminologyTranslationSvc> rttMap = myApplicationContext.getBeansOfType(ResponseTerminologyTranslationSvc.class, includeNonSingletons, allowEagerInit);
-		Optional<ResponseTerminologyTranslationSvc> oResponseTerminologyTranslationSvc = rttMap.values().stream().findFirst();
-		if (oResponseTerminologyTranslationSvc.isPresent()) {
-			myResponseTerminologyTranslationSvc = oResponseTerminologyTranslationSvc.get();
+		try {
+			Map<String, ResponseTerminologyTranslationSvc> rttMap = myApplicationContext.getBeansOfType(ResponseTerminologyTranslationSvc.class, includeNonSingletons, allowEagerInit);
+			Optional<ResponseTerminologyTranslationSvc> oRtt = rttMap.values().stream().findFirst();
+			if (oRtt.isPresent()) {
+				myResponseTerminologyTranslationSvc = oRtt.get();
+			}
+		} catch (Exception e) {
+			ourLog.info("Terminology Translation not available on this server.  Bulk Export will operate without it.");
 		}
 	}
 
