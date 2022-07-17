@@ -30,7 +30,6 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
@@ -78,10 +77,10 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		boolean includeNonSingletons = false;
 		// We don't want to init lazy loaded beans here, so we call getBeansOfType with allowEagerInit = false
 		boolean allowEagerInit = false;
-		Map<String, IValidationSupport> validationSupportMap = myApplicationContext.getBeansOfType(IValidationSupport.class, includeNonSingletons, allowEagerInit);
-		Optional<IValidationSupport> validationSupport = validationSupportMap.values().stream().findFirst();
-		if (validationSupport.isPresent()) {
-			myResponseTerminologyTranslationSvc = new ResponseTerminologyTranslationSvc(validationSupport.get());
+		Map<String, ResponseTerminologyTranslationSvc> rttMap = myApplicationContext.getBeansOfType(ResponseTerminologyTranslationSvc.class, includeNonSingletons, allowEagerInit);
+		Optional<ResponseTerminologyTranslationSvc> oResponseTerminologyTranslationSvc = rttMap.values().stream().findFirst();
+		if (oResponseTerminologyTranslationSvc.isPresent()) {
+			myResponseTerminologyTranslationSvc = oResponseTerminologyTranslationSvc.get();
 		}
 	}
 
