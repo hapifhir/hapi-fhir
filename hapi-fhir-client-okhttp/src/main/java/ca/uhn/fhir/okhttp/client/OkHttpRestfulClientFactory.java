@@ -60,7 +60,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
     }
 
 	@Override
-	protected IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+	protected IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
 		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
@@ -70,41 +70,38 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
     }
 
 	public synchronized Call.Factory getNativeClient() {
-		return getNativeClient(Optional.empty());
-	}
-
-    public synchronized Call.Factory getNativeClient(Optional<TlsAuthentication> theTlsAuthentication) {
-		 if(theTlsAuthentication.isPresent()){
-			 throw new UnsupportedOperationException(Msg.code(2118)+"HTTPS not supported for OkHttpCLient");
-		 }
-		 if (myNativeClient == null) {
-            myNativeClient = new OkHttpClient()
+		if (myNativeClient == null) {
+			myNativeClient = new OkHttpClient()
 				.newBuilder()
 				.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
-					.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
-					.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
 				.build();
-        }
+		}
 
-        return myNativeClient;
+		return myNativeClient;
+	}
+
+    public synchronized Call.Factory getNativeClient(TlsAuthentication theTlsAuthentication) {
+		 throw new UnsupportedOperationException(Msg.code(2118)+"HTTPS not supported for OkHttpCLient");
     }
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl,
+	public IHttpClient newHttpClient(StringBuilder theUrl,
 												Map<String, List<String>> theIfNoneExistParams,
 												String theIfNoneExistString,
 												RequestTypeEnum theRequestType,
 												List<Header> theHeaders) {
-		return getHttpClient(theUrl, Optional.empty(), theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+		return new OkHttpRestfulClient(getNativeClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl,
-												Optional<TlsAuthentication> theTlsAuthentication,
-												Map<String, List<String>> theIfNoneExistParams,
-												String theIfNoneExistString,
-												RequestTypeEnum theRequestType,
-												List<Header> theHeaders) {
+	public IHttpClient newHttpsClient(StringBuilder theUrl,
+												 TlsAuthentication theTlsAuthentication,
+												 Map<String, List<String>> theIfNoneExistParams,
+												 String theIfNoneExistString,
+												 RequestTypeEnum theRequestType,
+												 List<Header> theHeaders) {
 		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 

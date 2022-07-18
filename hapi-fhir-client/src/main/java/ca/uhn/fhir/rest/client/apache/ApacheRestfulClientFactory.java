@@ -80,33 +80,32 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 	@Override
 	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
-		return getHttpClient(theServerBase, Optional.empty());
+		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	protected synchronized ApacheHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+	protected synchronized ApacheHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
 		return new ApacheHttpClient(getNativeHttpClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return getHttpClient(theUrl, Optional.empty(), theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	public synchronized IHttpClient newHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+																 String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Optional<TlsAuthentication> theTlsAuthentication,
-																 Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString,
-																 RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return new ApacheHttpClient(getNativeHttpClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
-			theHeaders);
+	public synchronized IHttpClient newHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication,
+																  Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString,
+																  RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		return new ApacheHttpClient(getNativeHttpClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,theHeaders);
 	}
 
 	public HttpClient getNativeHttpClient() {
-		return getNativeHttpClient(Optional.empty());
+		return getNativeHttpClient(null);
 	}
 
-	public HttpClient getNativeHttpClient(Optional<TlsAuthentication> theTlsAuthentication) {
+	public HttpClient getNativeHttpClient(TlsAuthentication theTlsAuthentication) {
 		if (myHttpClient == null) {
 
 			//TODO: Use of a deprecated method should be resolved.
@@ -124,10 +123,9 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 				.setDefaultRequestConfig(defaultRequestConfig)
 				.disableCookieManagement();
 
-			Optional<SSLContext> optionalSslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
 			PoolingHttpClientConnectionManager connectionManager;
-			if(optionalSslContext.isPresent()){
-				SSLContext sslContext = optionalSslContext.get();
+			if(theTlsAuthentication != null){
+				SSLContext sslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
 				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
 				builder.setSSLSocketFactory(sslConnectionSocketFactory);
 				Registry<ConnectionSocketFactory> registry = RegistryBuilder

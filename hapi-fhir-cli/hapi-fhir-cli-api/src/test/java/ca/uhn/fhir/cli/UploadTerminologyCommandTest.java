@@ -5,7 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -96,7 +96,7 @@ public class UploadTerminologyCommandTest {
 	@RegisterExtension
 	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
 	@RegisterExtension
-	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
+	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	private BaseRestServerHelper myBaseRestServerHelper;
 
@@ -138,7 +138,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -179,7 +179,7 @@ public class UploadTerminologyCommandTest {
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -219,7 +219,7 @@ public class UploadTerminologyCommandTest {
 		}
 
 		try {
-			App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
 					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 					"-v", theFhirVersion,
@@ -243,7 +243,7 @@ public class UploadTerminologyCommandTest {
 		}
 
 		try {
-			App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
 					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 					"-v", theFhirVersion,
@@ -267,7 +267,7 @@ public class UploadTerminologyCommandTest {
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -290,7 +290,7 @@ public class UploadTerminologyCommandTest {
 	@MethodSource("paramsProvider")
 	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		try {
-			App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 				new String[]{
 					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 					"-v", theFhirVersion,
@@ -318,7 +318,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -349,7 +349,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -384,7 +384,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -416,7 +416,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
@@ -447,7 +447,7 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,

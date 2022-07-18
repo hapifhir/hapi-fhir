@@ -4,13 +4,12 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.KeyStoreType;
 import ca.uhn.fhir.tls.PathType;
-import ca.uhn.fhir.tls.StoreInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class StoreInfoTest {
 
@@ -30,10 +29,12 @@ public class StoreInfoTest {
 
 	@Test
 	public void testPathTypeInvalid(){
-		Exception exceptionThrown = assertThrows(StoreInfo.StoreInfoException.class, () -> {
+		try {
 			new KeyStoreInfo("invalid:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		});
-		assertEquals(Msg.code(2117)+"Invalid path prefix", exceptionThrown.getMessage());
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2117)+"Invalid path prefix", e.getMessage());
+		}
 	}
 
 	@Test
@@ -50,10 +51,12 @@ public class StoreInfoTest {
 
 	@Test
 	public void testFileTypeInvalid(){
-		Exception exceptionThrown = assertThrows(IllegalArgumentException.class, () -> {
+		try {
 			new KeyStoreInfo("file:///my-file.invalid", "storePassword" , "keyPassword", "alias");
-		});
-		assertEquals(Msg.code(2106)+"Invalid KeyStore Type", exceptionThrown.getMessage());
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2106)+"Invalid KeyStore Type", e.getMessage());
+		}
 	}
 
 	@Test

@@ -115,7 +115,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		}
 
 		appendExtraParamsWithQuestionMark(theExtraParams, url, url.indexOf("?") == -1);
-		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
+		IHttpClient httpClient = getRestfulClientFactory().newHttpClient(url, myIfNoneExistParams, myIfNoneExistString, getRequestType(), getHeaders());
 
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;

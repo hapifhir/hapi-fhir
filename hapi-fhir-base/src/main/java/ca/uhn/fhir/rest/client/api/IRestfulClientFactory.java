@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.client.api;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -92,14 +91,14 @@ public interface IRestfulClientFactory {
 	 *            the headers to be sent together with the http request
 	 * @return the HTTP client instance
 	 */
-	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
+	IHttpClient newHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
 	 * Returns the HTTP client instance. This method will not return null.
 	 * @param theUrl
 	 *            The complete FHIR url to which the http request will be sent
 	 * @param theTlsAuthentication
-	 * 			  Optional configuration to authenticate HTTPS server requests
+	 * 			  Configuration to authenticate HTTPS server requests
 	 * @param theIfNoneExistParams
 	 *            The params for header "If-None-Exist" as a hashmap
 	 * @param theIfNoneExistString
@@ -110,7 +109,7 @@ public interface IRestfulClientFactory {
 	 *            the headers to be sent together with the http request
 	 * @return the HTTP client instance
 	 */
-	IHttpClient getHttpClient(StringBuilder theUrl, Optional<TlsAuthentication> theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
+	IHttpClient newHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead (this method is a synonym for that method, but this method is poorly named and will be removed at some point)
@@ -175,16 +174,16 @@ public interface IRestfulClientFactory {
 	 *            The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
 	 */
-	IGenericClient newGenericClient(String theServerBase);
+	IGenericClient newHttpGenericClient(String theServerBase);
 
 	/**
 	 * Instantiates a new generic client instance
 	 *
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
-	 * @param theTlsAuthentication Optional configuration to authenticate HTTPS server requests
+	 * @param theTlsAuthentication Configuration to authenticate HTTPS server requests
 	 * @return A newly created client
 	 */
-	IGenericClient newGenericClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);
+	IGenericClient newHttpsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication);
 
 	/**
 	 * Sets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection

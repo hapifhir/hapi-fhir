@@ -54,7 +54,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -897,7 +896,7 @@ public class FhirContext {
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
 	 */
 	public IGenericClient newRestfulGenericClient(final String theServerBase) {
-		return newRestfulGenericClient(theServerBase, Optional.empty());
+		return getRestfulClientFactory().newHttpGenericClient(theServerBase);
 	}
 
 	/**
@@ -911,10 +910,10 @@ public class FhirContext {
 	 * </p>
 	 *
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
-	 * @param theTlsAuthentication Optional configuration to authenticate HTTPS server requests
+	 * @param theTlsAuthentication Configuration to authenticate HTTPS server requests
 	 */
-	public IGenericClient newRestfulGenericClient(final String theServerBase, final Optional<TlsAuthentication> theTlsAuthentication) {
-		return getRestfulClientFactory().newGenericClient(theServerBase, theTlsAuthentication);
+	public IGenericClient newRestfulGenericClient(final String theServerBase, final TlsAuthentication theTlsAuthentication) {
+		return getRestfulClientFactory().newHttpsGenericClient(theServerBase, theTlsAuthentication);
 	}
 
 	public FhirTerser newTerser() {

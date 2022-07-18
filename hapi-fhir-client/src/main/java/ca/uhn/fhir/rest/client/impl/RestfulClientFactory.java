@@ -172,12 +172,15 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IGenericClient newGenericClient(String theServerBase) {
-		return newGenericClient(theServerBase, Optional.empty());
+	public synchronized IGenericClient newHttpGenericClient(String theServerBase) {
+		validateConfigured();
+		IHttpClient httpClient = getHttpClient(theServerBase);
+
+		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
 
 	@Override
-	public synchronized IGenericClient newGenericClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+	public synchronized IGenericClient newHttpsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase, theTlsAuthentication);
 
@@ -386,10 +389,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * @param theServerBase
 	 * 			the server base
 	 * @param theTlsAuthentication
-	 * 			Optional configuration to authenticate HTTPS server requests
+	 * 			Configuration to authenticate HTTPS server requests
 	 * @return the http client
 	 */
-	protected abstract IHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication);
+	protected abstract IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication);
 
 	/**
 	 * Reset the http client. This method is used when parameters have been set and a

@@ -1,4 +1,4 @@
-package client;
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
@@ -14,47 +14,42 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ApacheNativeClientTest extends BaseFhirVersionParameterizedTest {
 
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttp(FhirVersionEnum theFhirVersion) {
+	public void testNativeClientHttp(FhirVersionEnum theFhirVersion) throws Exception {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
 		HttpClient client = clientFactory.getNativeHttpClient();
 
-		assertDoesNotThrow(() -> {
-			HttpUriRequest request = new HttpGet(fhirVersionParams.getPatientEndpoint());
-			HttpResponse response = client.execute(request);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+		HttpUriRequest request = new HttpGet(fhirVersionParams.getPatientEndpoint());
+		HttpResponse response = client.execute(request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
-			String json = EntityUtils.toString(response.getEntity());
-			IBaseResource bundle = fhirVersionParams.parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-		});
+		String json = EntityUtils.toString(response.getEntity());
+		IBaseResource bundle = fhirVersionParams.parseResource(json);
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) {
+	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) throws Exception {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
 		HttpClient authenticatedClient = clientFactory.getNativeHttpClient(getTlsAuthentication());
 
-		assertDoesNotThrow(() -> {
-			HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
-			HttpResponse response = authenticatedClient.execute(request);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+		HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
+		HttpResponse response = authenticatedClient.execute(request);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
-			String json = EntityUtils.toString(response.getEntity());
-			IBaseResource bundle = fhirVersionParams.parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-		});
+		String json = EntityUtils.toString(response.getEntity());
+		IBaseResource bundle = fhirVersionParams.parseResource(json);
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -64,10 +59,14 @@ public class ApacheNativeClientTest extends BaseFhirVersionParameterizedTest {
 		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
 		HttpClient unauthenticatedClient = clientFactory.getNativeHttpClient();
 
-		assertThrows(SSLHandshakeException.class, () -> {
+		try{
 			HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
 			unauthenticatedClient.execute(request);
-		});
+			fail();
+		}
+		catch(Exception e){
+			assertEquals(SSLHandshakeException.class, e.getClass());
+		}
 	}
 
 }

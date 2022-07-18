@@ -6,6 +6,7 @@ import ca.uhn.fhir.tls.PathType;
 import ca.uhn.fhir.tls.StoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.TrustStoreInfo;
+import org.apache.commons.lang3.Validate;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
@@ -13,6 +14,7 @@ import org.apache.http.ssl.PrivateKeyStrategy;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.SSLContexts;
 
+import javax.annotation.Nonnull;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -29,17 +31,14 @@ public class TlsAuthenticationSvc {
 
 	private TlsAuthenticationSvc(){}
 
-	public static Optional<SSLContext> createSslContext(Optional<TlsAuthentication> theTlsAuthentication){
-		if(theTlsAuthentication.isEmpty()){
-			return Optional.empty();
-		}
+	public static SSLContext createSslContext(@Nonnull TlsAuthentication theTlsAuthentication){
+		Validate.notNull(theTlsAuthentication, "theTlsAuthentication cannot be null");
 
 		try{
 			SSLContextBuilder contextBuilder = SSLContexts.custom();
 
-			TlsAuthentication tlsAuth = theTlsAuthentication.get();
-			if(tlsAuth.getKeyStoreInfo().isPresent()){
-				KeyStoreInfo keyStoreInfo = tlsAuth.getKeyStoreInfo().get();
+			if(theTlsAuthentication.getKeyStoreInfo().isPresent()){
+				KeyStoreInfo keyStoreInfo = theTlsAuthentication.getKeyStoreInfo().get();
 				PrivateKeyStrategy privateKeyStrategy = null;
 				if(isNotBlank(keyStoreInfo.getAlias())){
 					privateKeyStrategy = (aliases, socket) -> keyStoreInfo.getAlias();
@@ -48,13 +47,13 @@ public class TlsAuthenticationSvc {
 				contextBuilder.loadKeyMaterial(keyStore, keyStoreInfo.getKeyPass(), privateKeyStrategy);
 			}
 
-			if(tlsAuth.getTrustStoreInfo().isPresent()){
-				TrustStoreInfo trustStoreInfo = tlsAuth.getTrustStoreInfo().get();
+			if(theTlsAuthentication.getTrustStoreInfo().isPresent()){
+				TrustStoreInfo trustStoreInfo = theTlsAuthentication.getTrustStoreInfo().get();
 				KeyStore trustStore = createKeyStore(trustStoreInfo);
 				contextBuilder.loadTrustMaterial(trustStore, TrustSelfSignedStrategy.INSTANCE);
 			}
 
-			return Optional.of(contextBuilder.build());
+			return contextBuilder.build();
 		}
 		catch (Exception e){
 			throw new TlsAuthenticationException(Msg.code(2102)+"Failed to create SSLContext", e);
@@ -106,7 +105,7 @@ public class TlsAuthenticationSvc {
 					return (X509TrustManager) trustManager;
 				}
 			}
-			throw new TlsAuthenticationException(Msg.code(2104)+"Could not find TrustManager");
+			throw new TlsAuthenticationException(Msg.code(2104)+"Could not X509 find TrustManager");
 		}
 		catch (Exception e) {
 			throw new TlsAuthenticationException(Msg.code(2105)+"Failed to create TrustManager");

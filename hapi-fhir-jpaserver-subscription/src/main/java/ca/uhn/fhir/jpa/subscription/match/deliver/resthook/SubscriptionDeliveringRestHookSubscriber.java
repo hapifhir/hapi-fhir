@@ -261,7 +261,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		List<Header> headers = parseHeadersFromSubscription(subscription);
 
 		StringBuilder url = new StringBuilder(subscription.getEndpointUrl());
-		IHttpClient client = myFhirContext.getRestfulClientFactory().getHttpClient(url, params, "", RequestTypeEnum.POST, headers);
+		IHttpClient client = myFhirContext.getRestfulClientFactory().newHttpClient(url, params, "", RequestTypeEnum.POST, headers);
 		IHttpRequest request = client.createParamRequest(myFhirContext, params, null);
 		try {
 			IHttpResponse response = request.execute();

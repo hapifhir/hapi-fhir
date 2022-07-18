@@ -17,11 +17,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.net.ssl.SSLHandshakeException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest {
 
@@ -72,22 +71,20 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttp(FhirVersionEnum theFhirVersion) {
+	public void testNativeClientHttp(FhirVersionEnum theFhirVersion) throws Exception {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
 		OkHttpClient client = (OkHttpClient) clientFactory.getNativeClient();
 
-		assertDoesNotThrow(() -> {
-			Request request = new Request.Builder()
-				.url(fhirVersionParams.getPatientEndpoint())
-				.build();
+		Request request = new Request.Builder()
+			.url(fhirVersionParams.getPatientEndpoint())
+			.build();
 
-			Response response = client.newCall(request).execute();
-			assertEquals(200, response.code());
-			String json = response.body().string();
-			IBaseResource bundle = fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-		});
+		Response response = client.newCall(request).execute();
+		assertEquals(200, response.code());
+		String json = response.body().string();
+		IBaseResource bundle = fhirVersionParams.getFhirContext().newJsonParser().parseResource(json);
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -95,10 +92,12 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
-		Exception exceptionThrown = assertThrows(UnsupportedOperationException.class, () -> {
+		try {
 			clientFactory.getNativeClient(getTlsAuthentication());
-		});
-		assertEquals(Msg.code(2118)+"HTTPS not supported for OkHttpCLient", exceptionThrown.getMessage());
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2118)+"HTTPS not supported for OkHttpCLient", e.getMessage());
+		}
 	}
 
 	@ParameterizedTest
@@ -108,12 +107,14 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
 		OkHttpClient unauthenticatedClient = (OkHttpClient) clientFactory.getNativeClient();
 
-		assertThrows(SSLHandshakeException.class, () -> {
+		try {
 			Request request = new Request.Builder()
 				.url(fhirVersionParams.getSecuredPatientEndpoint())
 				.build();
 			unauthenticatedClient.newCall(request).execute();
-		});
+			fail();
+		} catch (Exception e) {
+			assertEquals(SSLHandshakeException.class, e.getClass());
+		}
 	}
-
 }

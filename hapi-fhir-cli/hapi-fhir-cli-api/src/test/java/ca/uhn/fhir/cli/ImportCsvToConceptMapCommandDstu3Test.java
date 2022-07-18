@@ -2,7 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -13,7 +13,6 @@ import org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -46,16 +45,11 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 	@RegisterExtension
 	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
 	@RegisterExtension
-	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
+	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	@BeforeEach
 	public void before(){
 		myRestServerDstu3Helper.setConceptMapResourceProvider(new HashMapResourceProviderConceptMapDstu3(myCtx));
-	}
-
-	@AfterEach
-	public void afterEach() {
-		myRestServerDstu3Helper.clearDataAndCounts();
 	}
 
 	@AfterAll
@@ -126,7 +120,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		File fileToImport = new File(classLoader.getResource(FILENAME).getFile());
 		myFile = fileToImport.getAbsolutePath();
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ImportCsvToConceptMapCommand.COMMAND,
 				"-v", myVersion,
@@ -326,7 +320,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ImportCsvToConceptMapCommand.COMMAND,
 				"-v", myVersion,

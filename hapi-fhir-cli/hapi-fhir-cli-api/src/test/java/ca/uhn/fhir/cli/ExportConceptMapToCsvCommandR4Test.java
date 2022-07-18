@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
@@ -41,7 +41,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
 	@RegisterExtension
-	public TlsAuthenticationTestUtil myTlsAuthenticationTestUtil = new TlsAuthenticationTestUtil();
+	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	private final FhirContext myCtx = FhirContext.forR4();
 	private final String myVersion = "r4";
@@ -67,7 +67,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	public void testExportConceptMapToCsvCommand(boolean theIncludeTls) throws IOException {
 		ourLog.info("ConceptMap:\n" + myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
 
-		App.main(myTlsAuthenticationTestUtil.createBaseRequestGeneratingCommandArgs(
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
 				ExportConceptMapToCsvCommand.COMMAND,
 				"-v", myVersion,

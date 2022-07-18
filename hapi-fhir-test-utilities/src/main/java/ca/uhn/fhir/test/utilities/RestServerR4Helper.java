@@ -80,6 +80,13 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		startServer(myRestServer);
 	}
 
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		super.afterEach();
+		myRestServer.getInterceptorService().unregisterAllAnonymousInterceptors();
+		myRestServer.clearDataAndCounts();
+	}
+
 	public List<Bundle> getTransactions() {
 		return myRestServer
 			.getPlainProvider()
@@ -234,11 +241,6 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 	public IInterceptorService getInterceptorService() {
 		return myRestServer.getInterceptorService();
-	}
-
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		myRestServer.getInterceptorService().unregisterAllAnonymousInterceptors();
 	}
 
 	private static class MyRestfulServer extends RestfulServer {

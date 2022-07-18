@@ -87,7 +87,7 @@ public class MessageClientDstu2Test {
             }
         });
 
-        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.93:83/fhirServer");
+        IGenericClient client = ourCtx.getRestfulClientFactory().newHttpGenericClient("http://192.168.4.93:83/fhirServer");
 
         client.setEncoding(EncodingEnum.JSON);
 
@@ -133,7 +133,7 @@ public class MessageClientDstu2Test {
             }
         });
 
-        IGenericClient client = ourCtx.getRestfulClientFactory().newGenericClient("http://192.168.4.93:83/fhirServer");
+        IGenericClient client = ourCtx.getRestfulClientFactory().newHttpGenericClient("http://192.168.4.93:83/fhirServer");
 
         client.setEncoding(EncodingEnum.JSON);
 

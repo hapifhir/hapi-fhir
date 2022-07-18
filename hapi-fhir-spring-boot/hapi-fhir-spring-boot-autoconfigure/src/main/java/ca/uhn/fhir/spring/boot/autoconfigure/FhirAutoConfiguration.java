@@ -304,7 +304,7 @@ public class FhirAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(IRestfulClientFactory.class)
 		public IGenericClient fhirClient(final IRestfulClientFactory clientFactory) {
-			IGenericClient fhirClient = clientFactory.newGenericClient(this.properties.getServer().getUrl());
+			IGenericClient fhirClient = clientFactory.newHttpGenericClient(this.properties.getServer().getUrl());
 			if (!CollectionUtils.isEmpty(this.clientInterceptors)) {
 				for (IClientInterceptor interceptor : this.clientInterceptors) {
 					fhirClient.registerInterceptor(interceptor);

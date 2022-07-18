@@ -62,6 +62,10 @@ public abstract class BaseRestServerHelper {
 		myFhirContext = theFhirContext;
 	}
 
+	protected void afterEach() throws Exception {
+		stop();
+	}
+
 	public IGenericClient getClient() {
 		return myClient;
 	}

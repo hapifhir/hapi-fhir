@@ -75,6 +75,13 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	}
 
 	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		super.afterEach();
+		myRestServer.getInterceptorService().unregisterAllAnonymousInterceptors();
+		myRestServer.clearDataAndCounts();
+	}
+
+	@Override
 	public void clearDataAndCounts() {
 		myRestServer.clearDataAndCounts();
 	}
@@ -161,11 +168,6 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 
 	public void registerProvider(Object theProvider) {
 		myRestServer.registerProvider(theProvider);
-	}
-
-	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		stop();
 	}
 
 	public static class MyPlainProvider implements IPointcutLatch {

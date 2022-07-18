@@ -65,15 +65,14 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	public synchronized Client getNativeClientClient() {
-		return getNativeClientClient(Optional.empty());
+		return getNativeClientClient(null);
 	}
 
-	public synchronized Client getNativeClientClient(Optional<TlsAuthentication> theTlsAuthentication) {
+	public synchronized Client getNativeClientClient(TlsAuthentication theTlsAuthentication) {
 		if (myNativeClient == null) {
 			ClientBuilder builder = ClientBuilder.newBuilder();
-			Optional<SSLContext> optionalSslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
-			if(optionalSslContext.isPresent()){
-				SSLContext sslContext = optionalSslContext.get();
+			if(theTlsAuthentication != null){
+				SSLContext sslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
 				builder.sslContext(sslContext);
 			}
 			myNativeClient = builder.build();
@@ -89,12 +88,13 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return getHttpClient(url, Optional.empty(), theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
+	public synchronized IHttpClient newHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		Client client = getNativeClientClient();
+		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
-	public synchronized IHttpClient getHttpClient(StringBuilder url, Optional<TlsAuthentication> theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public synchronized IHttpClient newHttpsClient(StringBuilder url, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		Client client = getNativeClientClient(theTlsAuthentication);
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
@@ -131,11 +131,11 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 
 	@Override
 	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
-		return getHttpClient(theServerBase, Optional.empty());
+		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase, Optional<TlsAuthentication> theTlsAuthentication) {
+	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
 		return new JaxRsHttpClient(getNativeClientClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
 	}
 

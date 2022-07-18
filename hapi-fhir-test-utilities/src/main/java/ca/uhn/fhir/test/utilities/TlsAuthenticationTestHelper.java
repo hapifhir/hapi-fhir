@@ -39,7 +39,7 @@ import java.util.Optional;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TlsAuthenticationTestUtil implements AfterEachCallback {
+public class TlsAuthenticationTestHelper implements AfterEachCallback {
 
 	private static final String KEYSTORE_RESOURCE_PATH = "classpath:/tls/client-keystore.p12";
 	private static final String KEYSTORE_STOREPASS = "changeit";
@@ -50,15 +50,15 @@ public class TlsAuthenticationTestUtil implements AfterEachCallback {
 	private static final String TRUSTSTORE_STOREPASS = "changeit";
 	private static final String TRUSTSTORE_ALIAS = "client";
 
-	private final Optional<TlsAuthentication> myTlsAuthentication;
+	private final TlsAuthentication myTlsAuthentication;
 	private final KeyStoreInfo myKeystoreInfo;
 	private final TrustStoreInfo myTrustStoreInfo;
 	private File myTempFile;
 
-	public TlsAuthenticationTestUtil(){
+	public TlsAuthenticationTestHelper(){
 		myKeystoreInfo = new KeyStoreInfo(KEYSTORE_RESOURCE_PATH, KEYSTORE_STOREPASS, KEYSTORE_KEYPASS, KEYSTORE_ALIAS);
 		myTrustStoreInfo = new TrustStoreInfo(TRUSTSTORE_RESOURCE_PATH, TRUSTSTORE_STOREPASS, TRUSTSTORE_ALIAS);
-		myTlsAuthentication = Optional.of(new TlsAuthentication(Optional.of(myKeystoreInfo), Optional.of(myTrustStoreInfo)));
+		myTlsAuthentication = new TlsAuthentication(Optional.of(myKeystoreInfo), Optional.of(myTrustStoreInfo));
 	}
 
 	@Override
@@ -74,25 +74,29 @@ public class TlsAuthenticationTestUtil implements AfterEachCallback {
 			return theBaseArgs;
 		}
 
-		int newItems = theAddTls ? 4 : 2;
-		String url = theAddTls ? theRestServerHelper.getSecureBase() : theRestServerHelper.getBase();
-
-		int newSize = theBaseArgs.length + newItems;
-		String[] retVal = Arrays.copyOf(theBaseArgs, newSize);
-
-		retVal[newSize - 2] = theUrlFlag;
-		retVal[newSize - 1] = url;
-
+		String[] retVal;
 		if(theAddTls){
+			int newSize = theBaseArgs.length +  4;
+			retVal = Arrays.copyOf(theBaseArgs, newSize);
+
+			retVal[newSize - 4] = theUrlFlag;
+			retVal[newSize - 3] = theRestServerHelper.getSecureBase(); // HTTPS
+
 			myTempFile = createTlsAuthenticationFile();
-			retVal[newSize - 4] = "--tls-auth";
-			retVal[newSize - 3] = myTempFile.getAbsolutePath();
+			retVal[newSize - 2] = "--tls-auth";
+			retVal[newSize - 1] = myTempFile.getAbsolutePath();
+		}
+		else {
+			int newSize = theBaseArgs.length +  2;
+			retVal = Arrays.copyOf(theBaseArgs, newSize);
+			retVal[newSize - 2] = theUrlFlag;
+			retVal[newSize - 1] = theRestServerHelper.getBase(); // HTTP
 		}
 
 		return retVal;
 	}
 
-	public Optional<TlsAuthentication> getTlsAuthentication(){
+	public TlsAuthentication getTlsAuthentication(){
 		return myTlsAuthentication;
 	}
 

@@ -91,7 +91,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
-		when(myRestfulClientFactory.newGenericClient(any(), any())).thenReturn(myGenericClient);
+		when(myRestfulClientFactory.newHttpGenericClient(any())).thenReturn(myGenericClient);
 	}
 
 	@Test

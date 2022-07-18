@@ -49,7 +49,7 @@ public class RestfulClientFactoryDstu2Test {
 		when(ctx.getVersion()).thenReturn(FhirVersionEnum.DSTU2.getVersionImplementation());
 		when(ctx.getRestfulClientFactory()).thenReturn(restfulClientFactory);
 
-		when(restfulClientFactory.getHttpClient(nullable(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), nullable(RequestTypeEnum.class), nullable(List.class))).thenReturn(httpClient);
+		when(restfulClientFactory.newHttpClient(nullable(StringBuilder.class), (Map<String, List<String>>)nullable(Map.class), nullable(String.class), nullable(RequestTypeEnum.class), nullable(List.class))).thenReturn(httpClient);
 		
 		IHttpRequest httpRequest = mock(IHttpRequest.class);
 		when(httpClient.createGetRequest(any(FhirContext.class), nullable(EncodingEnum.class))).thenReturn(httpRequest);

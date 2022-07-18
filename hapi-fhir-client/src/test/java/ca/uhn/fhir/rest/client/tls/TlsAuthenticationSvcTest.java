@@ -17,11 +17,9 @@ import java.security.cert.Certificate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TlsAuthenticationSvcTest {
 
@@ -46,26 +44,31 @@ public class TlsAuthenticationSvcTest {
 
 	@Test
 	public void testCreateSslContextEmpty(){
-		Optional<TlsAuthentication> emptyAuthentication = Optional.empty();
-		Optional<SSLContext> result = TlsAuthenticationSvc.createSslContext(emptyAuthentication);
-		assertTrue(result.isEmpty());
+		TlsAuthentication emptyAuthentication = null;
+		try {
+			TlsAuthenticationSvc.createSslContext(emptyAuthentication);
+			fail();
+		} catch (Exception e) {
+			assertEquals("theTlsAuthentication cannot be null", e.getMessage());
+		}
 	}
 
 	@Test
 	public void testCreateSslContextPresent(){
-		Optional<SSLContext> result = TlsAuthenticationSvc.createSslContext(Optional.of(myServerTlsAuthentication));
-		assertFalse(result.isEmpty());
-		assertEquals("TLS", result.get().getProtocol());
+		SSLContext result = TlsAuthenticationSvc.createSslContext(myServerTlsAuthentication);
+		assertEquals("TLS", result.getProtocol());
 	}
 
 	@Test
 	public void testCreateSslContextPresentInvalid(){
 		KeyStoreInfo invalidKeyStoreInfo = new KeyStoreInfo("file:///INVALID.p12", "changeit", "changeit", "server");
 		TlsAuthentication invalidTlsAuthentication = new TlsAuthentication(Optional.of(invalidKeyStoreInfo), Optional.of(myServerTrustStoreInfo));
-		Exception thrownException = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
-			TlsAuthenticationSvc.createSslContext(Optional.of(invalidTlsAuthentication));
-		});
-		assertEquals(Msg.code(2102)+"Failed to create SSLContext", thrownException.getMessage());
+		try {
+			TlsAuthenticationSvc.createSslContext(invalidTlsAuthentication);
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2102)+"Failed to create SSLContext", e.getMessage());
+		}
 	}
 
 	@Test
@@ -84,10 +87,13 @@ public class TlsAuthenticationSvcTest {
 	@Test
 	public void testCreateKeyStoreNonExistentFile() {
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/non-existent.p12", "changeit", "changeit", "server");
-		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+		try {
 			TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
-		});
-		assertEquals(Msg.code(2103)+"Failed to create KeyStore", exceptionThrown.getMessage());
+			fail();
+		}
+		catch (Exception e) {
+			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
+		}
 	}
 
 	@Test
@@ -106,10 +112,12 @@ public class TlsAuthenticationSvcTest {
 	@Test
 	public void testCreateTrustStoreNonExistentFile() throws Exception {
 		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/non-existent.p12", "changeit", "server");
-		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+		try {
 			TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
-		});
-		assertEquals(Msg.code(2103)+"Failed to create KeyStore", exceptionThrown.getMessage());
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2103)+"Failed to create KeyStore", e.getMessage());
+		}
 	}
 
 	@Test
@@ -132,10 +140,12 @@ public class TlsAuthenticationSvcTest {
 	@Test
 	public void testCreateTrustManagerInvalid() {
 		TrustStoreInfo invalidKeyStoreInfo = new TrustStoreInfo("file:///INVALID.p12", "changeit", "client");
-		Exception exceptionThrown = assertThrows(TlsAuthenticationSvc.TlsAuthenticationException.class, () -> {
+		try {
 			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
-		});
-		assertEquals(Msg.code(2105)+"Failed to create TrustManager", exceptionThrown.getMessage());
+			fail();
+		} catch (Exception e) {
+			assertEquals(Msg.code(2105)+"Failed to create TrustManager", e.getMessage());
+		}
 	}
 
 	@Test

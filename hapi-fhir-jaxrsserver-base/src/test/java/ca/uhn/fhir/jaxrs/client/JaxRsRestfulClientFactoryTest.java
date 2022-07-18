@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLHandshakeException;
-import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -22,10 +21,9 @@ import java.util.Arrays;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Created by Sebastien Riviere on 31/07/2017.
@@ -76,17 +74,15 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());
 		Client client = factory.getNativeClientClient();
 
-		assertDoesNotThrow(() -> {
-			Response response = client
-				.target(fhirVersionParams.getPatientEndpoint())
-				.request(MediaType.JSON_UTF_8.toString())
-				.get(Response.class);
+		Response response = client
+			.target(fhirVersionParams.getPatientEndpoint())
+			.request(MediaType.JSON_UTF_8.toString())
+			.get(Response.class);
 
-			assertEquals(200, response.getStatus());
-			String json = response.readEntity(String.class);
-			IBaseResource bundle = fhirVersionParams.parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-		});
+		assertEquals(200, response.getStatus());
+		String json = response.readEntity(String.class);
+		IBaseResource bundle = fhirVersionParams.parseResource(json);
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -96,17 +92,15 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());
 		Client authenticatedClient = factory.getNativeClientClient(getTlsAuthentication());
 
-		assertDoesNotThrow(() -> {
-			Response response = authenticatedClient
-				.target(fhirVersionParams.getSecuredPatientEndpoint())
-				.request(MediaType.JSON_UTF_8.toString())
-				.get(Response.class);
+		Response response = authenticatedClient
+			.target(fhirVersionParams.getSecuredPatientEndpoint())
+			.request(MediaType.JSON_UTF_8.toString())
+			.get(Response.class);
 
-			assertEquals(200, response.getStatus());
-			String json = response.readEntity(String.class);
-			IBaseResource bundle = fhirVersionParams.parseResource(json);
-			assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-		});
+		assertEquals(200, response.getStatus());
+		String json = response.readEntity(String.class);
+		IBaseResource bundle = fhirVersionParams.parseResource(json);
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -116,12 +110,14 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());
 		Client unauthenticatedClient = factory.getNativeClientClient();
 
-		Throwable thrown = assertThrows(ProcessingException.class, () -> {
+		try {
 			unauthenticatedClient
 				.target(fhirVersionParams.getSecuredPatientEndpoint())
 				.request(MediaType.JSON_UTF_8.toString())
 				.get(Response.class);
-		});
-		assertEquals(SSLHandshakeException.class, thrown.getCause().getClass());
+			fail();
+		} catch (Exception e) {
+			assertEquals(SSLHandshakeException.class, e.getCause().getClass());
+		}
 	}
 }

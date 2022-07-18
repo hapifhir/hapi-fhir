@@ -492,7 +492,9 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 
 		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theTlsAuthOptionName);
-		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl, tlsConfig);
+		IGenericClient retVal = tlsConfig.isPresent()
+			? myFhirCtx.newRestfulGenericClient(theBaseUrl, tlsConfig.get())
+			: myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
 		if (isNotBlank(basicAuthHeaderValue)) {
