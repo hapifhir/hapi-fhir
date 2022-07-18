@@ -555,7 +555,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Don't delete again if it's already deleted
-		if (entity.getDeleted() != null) {
+		if (isDeleted(entity)) {
 			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue());
 
 			// used to exist, so we'll set the persistent id
@@ -1147,6 +1147,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateResourceType(entityToUpdate);
 
+		if (isDeleted(entityToUpdate)) {
+			throw createResourceGoneException(entityToUpdate);
+		}
+
 		IBaseResource resourceToUpdate = toResource(entityToUpdate, false);
 		IBaseResource destination;
 		switch (thePatchType) {
@@ -1168,6 +1172,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		@SuppressWarnings("unchecked")
 		T destinationCasted = (T) destination;
 		return update(destinationCasted, null, true, theRequest);
+	}
+
+	private boolean isDeleted(BaseHasResource entityToUpdate) {
+		return entityToUpdate.getDeleted() != null;
 	}
 
 	@PostConstruct
@@ -1210,7 +1218,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (!entity.isPresent()) {
 			throw new ResourceNotFoundException(Msg.code(975) + "No resource found with PID " + thePid);
 		}
-		if (entity.get().getDeleted() != null && !theDeletedOk) {
+		if (isDeleted(entity.get()) && !theDeletedOk) {
 			throw createResourceGoneException(entity.get());
 		}
 
@@ -1255,7 +1263,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		T retVal = toResource(myResourceType, entity, null, false);
 
 		if (theDeletedOk == false) {
-			if (entity.getDeleted() != null) {
+			if (isDeleted(entity)) {
 				throw createResourceGoneException(entity);
 			}
 		}
@@ -1810,7 +1818,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
 		 * for a test that needs this.
 		 */
-		boolean wasDeleted = entity.getDeleted() != null;
+		boolean wasDeleted = isDeleted(entity);
 		entity.setDeleted(null);
 
 		/*
@@ -1890,7 +1898,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 		assert resourceId.hasVersionIdPart();
 
-		boolean wasDeleted = entity.getDeleted() != null;
+		boolean wasDeleted = isDeleted(entity);
 		entity.setDeleted(null);
 		boolean isUpdatingCurrent = resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) == currentEntity.getVersion();
 		IBasePersistedResource savedEntity = updateHistoryEntity(theRequest, theResource, currentEntity, entity, resourceId, theTransactionDetails, isUpdatingCurrent);

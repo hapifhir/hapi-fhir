@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -187,7 +188,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(MdmClearAppCtx.JOB_MDM_CLEAR);
 		request.setParameters(params);
-		String id = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		String id = response.getJobId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);

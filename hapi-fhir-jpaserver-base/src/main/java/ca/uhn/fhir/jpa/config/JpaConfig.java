@@ -16,10 +16,8 @@ import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
-import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -136,7 +134,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -181,7 +178,8 @@ import java.util.Date;
 	BatchJobsConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
-	Batch2SupportConfig.class
+	Batch2SupportConfig.class,
+	JpaBulkExportConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -423,12 +421,6 @@ public class JpaConfig {
 	@Bean
 	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
 		return new AutowiringSpringBeanJobFactory();
-	}
-
-	@Bean
-	@Lazy
-	public IBulkDataExportSvc bulkDataExportSvc() {
-		return new BulkDataExportSvcImpl();
 	}
 
 	@Bean

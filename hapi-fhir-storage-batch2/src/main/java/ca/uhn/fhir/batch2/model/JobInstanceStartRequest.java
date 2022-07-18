@@ -33,6 +33,15 @@ public class JobInstanceStartRequest implements IModelJson {
 	private String myParameters;
 
 	/**
+	 * If true, batch2 will check the existing jobs and
+	 * if one with the same parameters that is already running
+	 * (ie, not failed, cancelled, etc)
+	 * it will return that id
+	 */
+	@JsonProperty(value = "useCache")
+	private boolean myUseCache;
+
+	/**
 	 * Constructor
 	 */
 	public JobInstanceStartRequest() {
@@ -73,4 +82,11 @@ public class JobInstanceStartRequest implements IModelJson {
 		return JsonUtil.deserialize(myParameters, theType);
 	}
 
+	public boolean isUseCache() {
+		return myUseCache;
+	}
+
+	public void setUseCache(boolean theUseCache) {
+		myUseCache = theUseCache;
+	}
 }
