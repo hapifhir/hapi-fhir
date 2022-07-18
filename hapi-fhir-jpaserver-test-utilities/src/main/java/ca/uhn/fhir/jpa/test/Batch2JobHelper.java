@@ -24,12 +24,15 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -44,6 +47,10 @@ public class Batch2JobHelper {
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
+	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
+		return awaitJobCompletion(theStartResponse.getJobId());
+	}
+
 	public JobInstance awaitJobCompletion(String theId) {
 		await().until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
@@ -52,8 +59,16 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theId);
 	}
 
+	public void awaitSingleChunkJobCompletion(Batch2JobStartResponse theStartResponse) {
+		awaitSingleChunkJobCompletion(theStartResponse.getJobId());
+	}
+
 	public void awaitSingleChunkJobCompletion(String theId) {
 		await().until(() -> myJobCoordinator.getInstance(theId).getStatus() == StatusEnum.COMPLETED);
+	}
+
+	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
+		return awaitJobFailure(theStartResponse.getJobId());
 	}
 
 	public JobInstance awaitJobFailure(String theId) {
@@ -69,6 +84,17 @@ public class Batch2JobHelper {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.CANCELLED));
+	}
+
+	public JobInstance awaitJobHitsStatusInTime(String theId, int theSeconds, StatusEnum... theStatuses) {
+		await().atMost(theSeconds, TimeUnit.SECONDS)
+			.pollDelay(Duration.ofSeconds(10))
+			.until(() -> {
+				myJobMaintenanceService.runMaintenancePass();
+				return myJobCoordinator.getInstance(theId).getStatus();
+			}, Matchers.in(theStatuses));
+
+		return myJobCoordinator.getInstance(theId);
 	}
 
 	public void awaitJobInProgress(String theId) {

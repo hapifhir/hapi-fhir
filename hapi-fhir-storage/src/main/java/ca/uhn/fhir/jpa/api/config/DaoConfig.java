@@ -505,7 +505,7 @@ public class DaoConfig {
 	 * @since 5.3.0
 	 */
 	public boolean isUseLegacySearchBuilder() {
-		return myUseLegacySearchBuilder;
+		return false;
 	}
 
 	/**
@@ -515,9 +515,10 @@ public class DaoConfig {
 	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
 	 *
 	 * @since 5.3.0
+	 * @deprecated in 6.1.0, this toggle will be removed in 6.2.0 as the Legacy Search Builder has been removed.
 	 */
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
-		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
+		//Nop
 	}
 
 	/**

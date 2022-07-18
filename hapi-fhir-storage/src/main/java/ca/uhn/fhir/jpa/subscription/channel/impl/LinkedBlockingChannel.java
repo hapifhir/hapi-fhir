@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,9 +45,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	}
 
 	public void clearInterceptorsForUnitTest() {
-		while (getInterceptors().size() > 0) {
-			removeInterceptor(0);
-		}
+		setInterceptors(new ArrayList<>());
 	}
 
 	@Override
