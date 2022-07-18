@@ -1,8 +1,8 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
