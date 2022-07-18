@@ -388,6 +388,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 //				theCodeSystemVersionPid + " failed: " + theE);
 //		}
 
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(JOB_PARAM_CODE_SYSTEM_ID);
 	}
 
 
