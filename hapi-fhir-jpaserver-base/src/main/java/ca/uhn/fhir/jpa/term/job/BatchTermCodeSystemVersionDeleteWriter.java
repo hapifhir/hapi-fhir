@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Deprecated
 public class BatchTermCodeSystemVersionDeleteWriter implements ItemWriter<Long> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchTermCodeSystemVersionDeleteWriter.class);
 

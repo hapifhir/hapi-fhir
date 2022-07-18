@@ -40,11 +40,12 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CONCEPT_RELATIONS
  * TermConceptProperty(es), TermConceptDesignation(s), and TermConceptParentChildLink(s)
  **/
 @Configuration
+@Deprecated
 public class TermCodeSystemDeleteJobConfig extends BaseTermCodeSystemDeleteJobConfig {
 
 
-	@Bean(name = TERM_CODE_SYSTEM_DELETE_JOB_NAME)
-	@Lazy
+//	@Bean(name = TERM_CODE_SYSTEM_DELETE_JOB_NAME)
+//	@Lazy
 	public Job termCodeSystemDeleteJob() {
 		return myJobBuilderFactory.get(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
 			.validator(termCodeSystemDeleteJobParameterValidator())
@@ -64,59 +65,59 @@ public class TermCodeSystemDeleteJobConfig extends BaseTermCodeSystemDeleteJobCo
 	 * This steps deletes TermConceptParentChildLink(s), TermConceptProperty(es) and TermConceptDesignation(s)
 	 * related to TermConcept(s) of the TermCodeSystemVersion being deleted
 	 */
-	@Bean(name = TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME)
-	public Step termConceptRelationsDeleteStep() {
-		return myStepBuilderFactory.get(TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME)
-			.<Long, Long>chunk(1)
-			.reader(batchTermCodeSystemVersionDeleteReader())
-			.writer(batchConceptRelationsDeleteWriter())
-			.build();
-	}
+//	@Bean(name = TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME)
+//	public Step termConceptRelationsDeleteStep() {
+//		return myStepBuilderFactory.get(TERM_CONCEPT_RELATIONS_DELETE_STEP_NAME)
+//			.<Long, Long>chunk(1)
+//			.reader(batchTermCodeSystemVersionDeleteReader())
+//			.writer(batchConceptRelationsDeleteWriter())
+//			.build();
+//	}
 
 	/**
 	 * This steps deletes TermConcept(s) of the TermCodeSystemVersion being deleted
 	 */
-	@Bean(name = TERM_CONCEPTS_DELETE_STEP_NAME)
-	public Step termConceptsDeleteStep() {
-		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
-		attribute.setTimeout(TERM_CONCEPT_DELETE_TIMEOUT);
-
-		return myStepBuilderFactory.get(TERM_CONCEPTS_DELETE_STEP_NAME)
-			.<Long, Long>chunk(1)
-			.reader(batchTermCodeSystemVersionDeleteReader())
-			.writer(batchTermConceptsDeleteWriter())
-			.transactionAttribute(attribute)
-			.build();
-	}
+//	@Bean(name = TERM_CONCEPTS_DELETE_STEP_NAME)
+//	public Step termConceptsDeleteStep() {
+//		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
+//		attribute.setTimeout(TERM_CONCEPT_DELETE_TIMEOUT);
+//
+//		return myStepBuilderFactory.get(TERM_CONCEPTS_DELETE_STEP_NAME)
+//			.<Long, Long>chunk(1)
+//			.reader(batchTermCodeSystemVersionDeleteReader())
+//			.writer(batchTermConceptsDeleteWriter())
+//			.transactionAttribute(attribute)
+//			.build();
+//	}
 
 	/**
 	 * This steps deletes the TermCodeSystemVersion
 	 */
-	@Bean(name = TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME)
-	public Step termCodeSystemVersionDeleteStep() {
-		return myStepBuilderFactory.get(TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME)
-			.<Long, Long>chunk(1)
-			.reader(batchTermCodeSystemVersionDeleteReader())
-			.writer(batchTermCodeSystemVersionDeleteWriter())
-			.build();
-	}
-
-	@Bean(name = TERM_CODE_SYSTEM_DELETE_STEP_NAME)
-	public Step termCodeSystemDeleteStep() {
-		return myStepBuilderFactory.get(TERM_CODE_SYSTEM_DELETE_STEP_NAME)
-			.tasklet(termCodeSystemDeleteTasklet())
-			.build();
-	}
-
-	@Bean
-	@StepScope
-	public BatchTermCodeSystemVersionDeleteReader batchTermCodeSystemVersionDeleteReader() {
-		return new BatchTermCodeSystemVersionDeleteReader();
-	}
-
-	@Bean
-	public TermCodeSystemDeleteTasklet termCodeSystemDeleteTasklet() {
-		return new TermCodeSystemDeleteTasklet();
-	}
+//	@Bean(name = TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME)
+//	public Step termCodeSystemVersionDeleteStep() {
+//		return myStepBuilderFactory.get(TERM_CODE_SYSTEM_VERSION_DELETE_STEP_NAME)
+//			.<Long, Long>chunk(1)
+//			.reader(batchTermCodeSystemVersionDeleteReader())
+//			.writer(batchTermCodeSystemVersionDeleteWriter())
+//			.build();
+//	}
+//
+//	@Bean(name = TERM_CODE_SYSTEM_DELETE_STEP_NAME)
+//	public Step termCodeSystemDeleteStep() {
+//		return myStepBuilderFactory.get(TERM_CODE_SYSTEM_DELETE_STEP_NAME)
+//			.tasklet(termCodeSystemDeleteTasklet())
+//			.build();
+//	}
+//
+//	@Bean
+//	@StepScope
+//	public BatchTermCodeSystemVersionDeleteReader batchTermCodeSystemVersionDeleteReader() {
+//		return new BatchTermCodeSystemVersionDeleteReader();
+//	}
+//
+//	@Bean
+//	public TermCodeSystemDeleteTasklet termCodeSystemDeleteTasklet() {
+//		return new TermCodeSystemDeleteTasklet();
+//	}
 
 }

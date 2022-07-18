@@ -43,8 +43,8 @@ import org.springframework.context.annotation.Import;
 	CommonBatchJobConfig.class,
 	BulkExportJobConfig.class,
 	BulkImportJobConfig.class,
-	TermCodeSystemDeleteJobConfig.class,
-	TermCodeSystemVersionDeleteJobConfig.class
+//	TermCodeSystemDeleteJobConfig.class,
+//	TermCodeSystemVersionDeleteJobConfig.class
   // When you define a new batch job, add it here.
 })
 @Deprecated

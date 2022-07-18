@@ -31,6 +31,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_
  * This reader works as a pass-through by passing the received parameter once to the writer,
  * in order to share the writer functionality between two jobs
  */
+@Deprecated
 public class BatchTermCodeSystemUniqueVersionDeleteReader implements ItemReader<Long> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchTermCodeSystemUniqueVersionDeleteReader.class);
 

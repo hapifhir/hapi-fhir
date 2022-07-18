@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
 
 @Component
+@Deprecated
 public class TermCodeSystemDeleteTasklet implements Tasklet {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemDeleteTasklet.class);
 

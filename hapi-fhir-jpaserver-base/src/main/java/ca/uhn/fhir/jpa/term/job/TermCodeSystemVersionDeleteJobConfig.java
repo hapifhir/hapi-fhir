@@ -39,11 +39,12 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CONCEPT_RELATIONS
  * TermConceptProperty(es), TermConceptDesignation(s), and TermConceptParentChildLink(s)
  **/
 @Configuration
+@Deprecated
 public class TermCodeSystemVersionDeleteJobConfig extends BaseTermCodeSystemDeleteJobConfig {
 
 
-	@Bean(name = TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
-	@Lazy
+//	@Bean(name = TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+//	@Lazy
 	public Job termCodeSystemVersionDeleteJob() {
 		return myJobBuilderFactory.get(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
 			.validator(termCodeSystemVersionDeleteJobParameterValidator())

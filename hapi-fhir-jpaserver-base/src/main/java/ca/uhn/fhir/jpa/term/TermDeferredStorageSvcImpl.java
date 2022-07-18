@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
@@ -36,7 +38,9 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -76,13 +80,14 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSI
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
-	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
-	final private Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
-	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
-	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
-	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
-	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
-	final private List<JobExecution> myCurrentJobExecutions = Collections.synchronizedList(new ArrayList<>());
+	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
+	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
+	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
+	private final List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
+	private final List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
+	private final List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
+
+//	private final List<JobExecution> myCurrentJobExecutions = Collections.synchronizedList(new ArrayList<>());
 
 
 	@Autowired
@@ -105,18 +110,21 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private TermConceptDaoSvc myTermConceptDaoSvc;
 
 	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
+	private IJobCoordinator myJobCoordinator;
 
-	@Autowired
-	private JobOperator myJobOperator;
+//	@Autowired
+//	private IBatchJobSubmitter myJobSubmitter;
 
-	@Autowired
-	@Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
-	private org.springframework.batch.core.Job myTermCodeSystemDeleteJob;
+//	@Autowired
+//	private JobOperator myJobOperator;
 
-	@Autowired
-	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
-	private org.springframework.batch.core.Job myTermCodeSystemVersionDeleteJob;
+//	@Autowired
+//	@Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
+//	private org.springframework.batch.core.Job myTermCodeSystemDeleteJob;
+
+//	@Autowired
+//	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
+//	private org.springframework.batch.core.Job myTermCodeSystemVersionDeleteJob;
 
 
 	@Override
@@ -261,19 +269,19 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 
 	private void clearJobExecutions() {
-		for (JobExecution jobExecution : myCurrentJobExecutions) {
-			if (!jobExecution.isRunning()) {
-				continue;
-			}
-
-			try {
-				myJobOperator.stop(jobExecution.getId());
-			} catch (Exception e) {
-				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), e);
-			}
-		}
-
-		myCurrentJobExecutions.clear();
+//		for (JobExecution jobExecution : myCurrentJobExecutions) {
+//			if (!jobExecution.isRunning()) {
+//				continue;
+//			}
+//
+//			try {
+//				myJobOperator.stop(jobExecution.getId());
+//			} catch (Exception e) {
+//				ourLog.error("Couldn't stop job execution {}: {}", jobExecution.getId(), e);
+//			}
+//		}
+//
+//		myCurrentJobExecutions.clear();
 	}
 
 
@@ -366,36 +374,44 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 
 	private void deleteTermCodeSystemVersionOffline(Long theCodeSystemVersionPid) {
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersionPid, true)));
+//		JobParameters jobParameters = new JobParameters(
+//			Collections.singletonMap(
+//				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersionPid, true)));
+//
+//		try {
+//
+//			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
+//			myCurrentJobExecutions.add(jobExecution);
+//
+//		} catch (JobParametersInvalidException theE) {
+//			throw new InternalErrorException(Msg.code(850) + "Offline job submission for TermCodeSystemVersion: " +
+//				theCodeSystemVersionPid + " failed: " + theE);
+//		}
 
-		try {
-
-			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
-			myCurrentJobExecutions.add(jobExecution);
-
-		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException(Msg.code(850) + "Offline job submission for TermCodeSystemVersion: " +
-				theCodeSystemVersionPid + " failed: " + theE);
-		}
 	}
 
 
 	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true)));
+//		JobParameters jobParameters = new JobParameters(
+//			Collections.singletonMap(
+//				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true)));
+//
+//		try {
+//
+//			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
+//			myCurrentJobExecutions.add(jobExecution);
+//
+//		} catch (JobParametersInvalidException theE) {
+//			throw new InternalErrorException(Msg.code(851) + "Offline job submission for TermCodeSystem: " +
+//				theCodeSystemPid + " failed: " + theE);
+//		}
 
-		try {
-
-			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
-			myCurrentJobExecutions.add(jobExecution);
-
-		} catch (JobParametersInvalidException theE) {
-			throw new InternalErrorException(Msg.code(851) + "Offline job submission for TermCodeSystem: " +
-				theCodeSystemPid + " failed: " + theE);
-		}
+		TermCodeSystemDeleteJobParameters parameters = new TermCodeSystemDeleteJobParameters();
+		parameters.setTermPid(theCodeSystemPid);
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setParameters(JsonUtil.serialize(parameters));
+		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		String instanceId = myJobCoordinator.startInstance(request);
 	}
 
 
@@ -412,7 +428,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isJobsExecuting() {
-		return myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
+//		return myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
+		return false;
 	}
 
 

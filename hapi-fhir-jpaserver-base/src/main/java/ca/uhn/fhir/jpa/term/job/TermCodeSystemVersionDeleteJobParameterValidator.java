@@ -30,6 +30,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_
 /**
  * Validates that a TermCodeSystem parameter is present
  */
+@Deprecated
 public class TermCodeSystemVersionDeleteJobParameterValidator implements JobParametersValidator {
 
 	@Override

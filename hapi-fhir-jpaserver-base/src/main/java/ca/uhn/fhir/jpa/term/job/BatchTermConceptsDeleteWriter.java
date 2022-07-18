@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.text.DecimalFormat;
 import java.util.List;
 
-
+@Deprecated
 public class BatchTermConceptsDeleteWriter implements ItemWriter<Long> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchTermConceptsDeleteWriter.class);
 

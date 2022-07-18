@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
  * Configuration artifacts common to TermCodeSystemDeleteJobConfig and TermCodeSystemVersionDeleteJobConfig
  **/
 @Configuration
+@Deprecated
 public class BaseTermCodeSystemDeleteJobConfig {
 
 	protected static final int TERM_CONCEPT_DELETE_TIMEOUT = 60 * 2; // two minutes

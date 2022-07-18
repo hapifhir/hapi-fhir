@@ -34,6 +34,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_
 /**
  *
  */
+@Deprecated
 public class BatchTermCodeSystemVersionDeleteReader implements ItemReader<Long> {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchTermCodeSystemVersionDeleteReader.class);
 
