@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -97,6 +98,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DELETE_EXPUNGE);
 		startRequest.setParameters(deleteExpungeJobParameters);
-		return myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		return startResponse.getJobId();
 	}
 }

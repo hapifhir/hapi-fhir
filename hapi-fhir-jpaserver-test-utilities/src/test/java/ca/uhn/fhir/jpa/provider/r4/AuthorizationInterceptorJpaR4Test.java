@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -14,7 +12,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -25,10 +22,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
-import com.github.jsonldjava.shaded.com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -61,7 +55,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -81,9 +74,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorJpaR4Test.class);
 
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
-
-	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 
 	@BeforeEach
@@ -101,297 +91,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof AuthorizationInterceptor);
-	}
-
-	@Test
-	public void testBulkExport_AuthorizeGroupId() {
-
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().bulkExport().groupExportOnGroup(new IdType("Group/123")).andThen()
-					.allow().bulkExport().groupExportOnGroup(new IdType("Group/789")).andThen()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(authInterceptor);
-
-		/*
-		 * Matching group ID
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/789"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-		/*
-		 * Second matching group ID
-		 */
-		{
-		 BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-		 bulkDataExportOptions.setGroupId(new IdType("Group/789"));
-		 bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-
-		 ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-		 IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-		 assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-
-		}
-
-		/*
-		 * Non matching group ID
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-		/*
-		 * Non group export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-	}
-
-
-	@Test
-	public void testBulkExport_AuthorizePatientId() {
-
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().bulkExport().patientExportOnGroup(new IdType("Group/123")).andThen()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(authInterceptor);
-
-		/*
-		 * Matching group ID
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/123"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-		/*
-		 * Non matching group ID
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-		/*
-		 * Non group export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-
-	}
-
-
-	@Test
-	public void testBulkExport_AuthorizeSystem() {
-
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().bulkExport().systemExport().andThen()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(authInterceptor);
-
-		/*
-		 * System export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-		/*
-		 * Patient export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-
-	}
-
-
-	@Test
-	public void testBulkExport_AuthorizeAny() {
-
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().bulkExport().any().andThen()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(authInterceptor);
-
-		/*
-		 * System export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-		/*
-		 * Patient export
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setGroupId(new IdType("Group/456"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-
-	}
-
-	@Test
-	public void testBulkExport_SpecificResourceTypesEnforced() {
-
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().bulkExport().systemExport().withResourceTypes(Lists.newArrayList("Patient", "Encounter")).andThen()
-					.build();
-			}
-		};
-		myInterceptorRegistry.registerInterceptor(authInterceptor);
-
-		/*
-		 * Appropriate Resources
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-			assertEquals(BulkExportJobStatusEnum.SUBMITTED, jobDetails.getStatus());
-		}
-
-		/*
-		 * Inappropriate Resources
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation"));
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-		/*
-		 * No Resources
-		 */
-		{
-			BulkDataExportOptions bulkDataExportOptions = new BulkDataExportOptions();
-			bulkDataExportOptions.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
-
-			try {
-				ServletRequestDetails requestDetails = new ServletRequestDetails().setServletRequest(new MockHttpServletRequest());
-				myBulkDataExportSvc.submitJob(bulkDataExportOptions, true, requestDetails);
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-		}
-
-
 	}
 
 	/**

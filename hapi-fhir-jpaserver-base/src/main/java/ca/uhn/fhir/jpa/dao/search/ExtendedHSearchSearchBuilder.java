@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -34,6 +35,8 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -72,16 +75,16 @@ public class ExtendedHSearchSearchBuilder {
 	 */
 	public boolean isSupportsAllOf(SearchParameterMap myParams) {
 		return
-			myParams.getRevIncludes() == null && // ???
-			myParams.getIncludes() == null && // ???
+			CollectionUtils.isEmpty( myParams.getRevIncludes() ) && // ???
+			CollectionUtils.isEmpty( myParams.getIncludes() ) && // ???
 			myParams.getEverythingMode() == null && // ???
-			! myParams.isDeleteExpunge() && // ???
+			BooleanUtils.isFalse( myParams.isDeleteExpunge() ) && // ???
 
 			// not yet supported in HSearch
 			myParams.getNearDistanceParam() == null && // ???
 
 			// not yet supported in HSearch
-			myParams.getSearchContainedMode() == null && // ???
+			myParams.getSearchContainedMode() == SearchContainedModeEnum.FALSE && // ???
 
 			myParams.entrySet().stream()
 				.filter(e -> !ourUnsafeSearchParmeters.contains(e.getKey()))
@@ -135,10 +138,8 @@ public class ExtendedHSearchSearchBuilder {
 					return false;
 			}
 		} else if (param instanceof DateParam) {
-			if (EMPTY_MODIFIER.equals(modifier)) {
-				return true;
-			}
-			return false;
+			return modifier.equals(EMPTY_MODIFIER);
+
 		} else if (param instanceof UriParam) {
 			return modifier.equals(EMPTY_MODIFIER);
 

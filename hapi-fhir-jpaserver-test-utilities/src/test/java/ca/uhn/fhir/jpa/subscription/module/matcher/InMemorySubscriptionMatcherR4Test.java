@@ -33,7 +33,6 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -743,24 +742,6 @@ public class InMemorySubscriptionMatcherR4Test {
 			assertMatched(patient2, map);
 			assertNotMatched(patient3, map);
 		}
-	}
-
-	@Test
-	public void testSearchTokenWithNotModifierUnsupported() {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("Tester").addGiven("Joe");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-
-		SearchParameterMap params;
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male"));
-		assertMatched(patient, params);
-
-		params = new SearchParameterMap();
-		params.add(Patient.SP_GENDER, new TokenParam(null, "male").setModifier(TokenParamModifier.NOT));
-		assertUnsupported(patient, params);
 	}
 
 	@Test

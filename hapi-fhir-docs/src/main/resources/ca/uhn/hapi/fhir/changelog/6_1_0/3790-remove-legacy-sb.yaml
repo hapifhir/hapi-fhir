@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3790
+title: "The Legacy Search Builder has been removed in favour of the new Search Builder. The DaoConfig will retain its setter for deprecation purposes, 
+but that will also be removed after the next release."
