@@ -49,7 +49,6 @@ public class NonPersistedBatchConfigurer extends DefaultBatchConfigurer {
 		return myHapiPlatformTransactionManager;
 	}
 
-
 	@Override
 	protected JobRepository createJobRepository() throws Exception {
 		MapJobRepositoryFactoryBean factory = new MapJobRepositoryFactoryBean();

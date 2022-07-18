@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SearchFuzzUtilTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchFuzzUtilTest.class);
