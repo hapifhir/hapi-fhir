@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -390,6 +391,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(JOB_PARAM_CODE_SYSTEM_ID);
+		
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 	}
 
 
@@ -413,7 +416,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(JsonUtil.serialize(parameters));
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-		String instanceId = myJobCoordinator.startInstance(request);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 	}
 
 

@@ -21,16 +21,21 @@ package ca.uhn.fhir.jpa.term.job;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import ca.uhn.fhir.util.JsonUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -95,6 +100,9 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 //	@Autowired private BatchJobHelper myBatchJobHelper;
 
 	@Autowired
+	private Batch2JobHelper myBatch2JobHelper;
+
+	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
 //	@Autowired @Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
@@ -129,17 +137,25 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 			assertEquals(162, myTermConceptDao.count());
 		});
 
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(termCodeSystemPidVect[0], true) ));
+//		JobParameters jobParameters = new JobParameters(
+//			Collections.singletonMap(
+//				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(termCodeSystemPidVect[0], true) ));
 
+		TermCodeSystemDeleteJobParameters parameters = new TermCodeSystemDeleteJobParameters();
+		parameters.setTermPid(termCodeSystemPidVect[0]);
 
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		request.setParameters(JsonUtil.serialize(parameters));
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 //		myJobCoordinator.startInstance();
 //		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
 
 
 //		myBatchJobHelper.awaitJobCompletion(jobExecution);
 //		assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
+
+		myBatch2JobHelper.awaitJobCompletion(response);
 
 		runInTransaction(() -> {
 			assertEquals(0, myTermCodeSystemDao.count());

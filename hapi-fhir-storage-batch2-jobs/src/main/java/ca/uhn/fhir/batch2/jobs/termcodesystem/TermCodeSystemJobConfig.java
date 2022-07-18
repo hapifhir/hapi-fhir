@@ -63,27 +63,27 @@ public class TermCodeSystemJobConfig {
 	}
 
 	@Bean
-	private TermCodeSystemDeleteJobParametersValidator validator() {
+	public TermCodeSystemDeleteJobParametersValidator validator() {
 		return new TermCodeSystemDeleteJobParametersValidator(); // TermCodeSystemDeleteJobParameterValidator
 	}
 
 	@Bean
-	private ReadTermConceptVersionsStep readVersionsStep() {
+	public ReadTermConceptVersionsStep readVersionsStep() {
 		return new ReadTermConceptVersionsStep();
 	}
 
 	@Bean
-	private DeleteLinksPropertiesAndDesignationsStep deleteLinksPropertiesAndDesignationsStep() {
+	public DeleteLinksPropertiesAndDesignationsStep deleteLinksPropertiesAndDesignationsStep() {
 		return new DeleteLinksPropertiesAndDesignationsStep();
 	}
 
 	@Bean
-	private DeleteCodeSystemVersionStep deleteCodeSystemVersionsStep() {
+	public DeleteCodeSystemVersionStep deleteCodeSystemVersionsStep() {
 		return new DeleteCodeSystemVersionStep();
 	}
 
 	@Bean
-	private DeleteCodeSystemStep deleteCodeSystemFinalStep() {
+	public DeleteCodeSystemStep deleteCodeSystemFinalStep() {
 		return new DeleteCodeSystemStep();
 	}
 }

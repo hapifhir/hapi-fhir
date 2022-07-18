@@ -46,20 +46,20 @@ public class TermCodeSystemDeleteJobConfig extends BaseTermCodeSystemDeleteJobCo
 
 //	@Bean(name = TERM_CODE_SYSTEM_DELETE_JOB_NAME)
 //	@Lazy
-	public Job termCodeSystemDeleteJob() {
-		return myJobBuilderFactory.get(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
-			.validator(termCodeSystemDeleteJobParameterValidator())
-			.start(termConceptRelationsDeleteStep())
-			.next(termConceptsDeleteStep())
-			.next(termCodeSystemVersionDeleteStep())
-			.next(termCodeSystemDeleteStep())
-			.build();
-	}
+//	public Job termCodeSystemDeleteJob() {
+//		return myJobBuilderFactory.get(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
+//			.validator(termCodeSystemDeleteJobParameterValidator())
+//			.start(termConceptRelationsDeleteStep())
+//			.next(termConceptsDeleteStep())
+//			.next(termCodeSystemVersionDeleteStep())
+//			.next(termCodeSystemDeleteStep())
+//			.build();
+//	}
 
-	@Bean
-	public JobParametersValidator termCodeSystemDeleteJobParameterValidator() {
-		return new TermCodeSystemDeleteJobParameterValidator();
-	}
+//	@Bean
+//	public JobParametersValidator termCodeSystemDeleteJobParameterValidator() {
+//		return new TermCodeSystemDeleteJobParameterValidator();
+//	}
 
 	/**
 	 * This steps deletes TermConceptParentChildLink(s), TermConceptProperty(es) and TermConceptDesignation(s)

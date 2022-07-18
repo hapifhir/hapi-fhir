@@ -24,7 +24,7 @@ public class DeleteCodeSystemVersionStep implements IJobStepWorker<TermCodeSyste
 	) throws JobExecutionFailedException {
 		TermCodeSystemVersionPidResult versionPidResult = theStepExecutionDetails.getData();
 
-		myITermCodeSystemSvc.deleteCodeSystemVersion(versionPidResult.getTermVersionPID());
+		myITermCodeSystemSvc.deleteCodeSystemConceptsByVersion(versionPidResult.getTermVersionPID());
 
 		theDataSink.accept(versionPidResult);
 		return RunOutcome.SUCCESS;

@@ -14,12 +14,14 @@ import com.fasterxml.jackson.databind.util.ArrayIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional()
 public class TermCodeSystemSvc implements ITermCodeSystemSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemSvc.class);
 

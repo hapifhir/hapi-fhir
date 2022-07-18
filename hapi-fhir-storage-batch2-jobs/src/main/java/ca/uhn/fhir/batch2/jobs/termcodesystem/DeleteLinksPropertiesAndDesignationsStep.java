@@ -24,7 +24,7 @@ public class DeleteLinksPropertiesAndDesignationsStep implements IJobStepWorker<
 	) throws JobExecutionFailedException {
 		TermCodeSystemVersionPidResult versionPidResult = theStepExecutionDetails.getData();
 
-		myITermCodeSystemSvc.deleteCodeSystemConceptsByVersion(versionPidResult.getTermVersionPID());
+		myITermCodeSystemSvc.deleteLinksPropertiesAndDesignationsByCodeSystemVersionPID(versionPidResult.getTermVersionPID());
 
 		theDataSink.accept(versionPidResult);
 
