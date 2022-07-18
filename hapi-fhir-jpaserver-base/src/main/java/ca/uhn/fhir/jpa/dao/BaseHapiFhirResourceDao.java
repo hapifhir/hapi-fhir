@@ -20,6 +20,10 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -120,7 +124,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -175,6 +178,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -977,26 +982,23 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (getConfig().isMarkResourcesForReindexingUponSearchParameterChange()) {
 
-			String expression = defaultString(theExpression);
+			ReindexJobParameters params = new ReindexJobParameters();
 
-			Set<String> typesToMark = myDaoRegistry
+			// TODO JR build the URLs from the base of the modified SP, not the expression
+			String expression = defaultString(theExpression);
+			myDaoRegistry
 				.getRegisteredDaoTypes()
 				.stream()
 				.filter(t -> WordUtils.containsAllWords(expression, t))
-				.collect(Collectors.toSet());
+				.map(t -> t + "?")
+				.forEach(params::addUrl);
 
-//			for (String resourceType : typesToMark) {
-//				ourLog.debug("Marking all resources of type {} for reindexing due to updated search parameter with path: {}", resourceType, theExpression);
-//
-//				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-//				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-//				txTemplate.execute(t -> {
-//					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
-//					return null;
-//				});
-//
-//				ourLog.debug("Marked resources of type {} for reindexing", resourceType);
-//			}
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			request.setParameters(params);
+			String id = myJobCoordinator.startInstance(request);
+
+			ourLog.debug("Started reindex job with parameters {}", params);
 
 		}
 

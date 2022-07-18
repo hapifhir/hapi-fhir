@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -241,9 +243,10 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		// FIXME: This test seems relevant to the reindex -> Batch2 Job conversion
 		runInTransaction(() -> {
-			List<ResourceReindexJobEntity> allJobs = myResourceReindexJobDao.findAll();
+			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 			assertEquals(1, allJobs.size());
-			assertEquals("Patient", allJobs.get(0).getResourceType());
+			assertEquals(1, allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().size());
+			assertEquals("Patient?", allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().get(0).getUrl());
 		});
 
 	}

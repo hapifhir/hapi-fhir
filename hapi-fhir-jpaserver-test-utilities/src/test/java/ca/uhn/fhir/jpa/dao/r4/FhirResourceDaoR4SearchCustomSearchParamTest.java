@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -69,6 +71,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -478,16 +481,13 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 
+		List<JobInstance> initialJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
+
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		// FIXME: This test seems relevant to the reindex -> Batch2 Job conversion
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
-		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
-
+		List<JobInstance> finalJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
+		List<JobInstance> newJobs = finalJobs.stream().filter(t -> !initialJobs.contains(t)).collect(Collectors.toList());
+		assertEquals(1, newJobs.size(), "number of jobs created");
 	}
 
 	@Test
