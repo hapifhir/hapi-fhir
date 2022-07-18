@@ -996,7 +996,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
 			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 			request.setParameters(params);
-			String id = myJobCoordinator.startInstance(request);
+			myJobCoordinator.startInstance(request);
 
 			ourLog.debug("Started reindex job with parameters {}", params);
 
