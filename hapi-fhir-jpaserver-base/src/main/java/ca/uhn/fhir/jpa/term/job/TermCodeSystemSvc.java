@@ -108,15 +108,21 @@ public class TermCodeSystemSvc implements ITermCodeSystemSvc {
 			myTermCodeSystemVersionDao.delete(theTermCodeSystemVersion);
 			ourLog.info("Code system version: {} deleted", theVersionPid);
 		});
-
 	}
 
 	@Override
 	public void deleteCodeSystem(long thePid) {
-		TermCodeSystem cs = myTermCodeSystemDao.findById(thePid).orElseThrow(IllegalStateException::new);
-		ourLog.info("Deleting code system {} / {}", thePid, cs.getCodeSystemUri());
+		ourLog.info("Deleting code system by id : {}", thePid);
 
-		myTermCodeSystemDao.deleteById(thePid);
-		ourLog.info("Code system {} deleted", thePid);
+		Optional<TermCodeSystem> csop = myTermCodeSystemDao.findById(thePid);
+		if (csop.isPresent()) {
+			TermCodeSystem cs = csop.get();
+
+			ourLog.info("Deleting code system {} / {}", thePid, cs.getCodeSystemUri());
+
+			myTermCodeSystemDao.deleteById(thePid);
+
+			ourLog.info("Code system {} deleted", thePid);
+		}
 	}
 }

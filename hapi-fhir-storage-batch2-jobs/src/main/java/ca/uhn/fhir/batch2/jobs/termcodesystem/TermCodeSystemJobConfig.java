@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.termcodesystem;
 
+import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemVersionPidResult;
@@ -54,9 +55,10 @@ public class TermCodeSystemJobConfig {
 				TermCodeSystemVersionPidResult.class,
 				deleteCodeSystemVersionsStep()
 			)
-			.addLastStep(
+			.addFinalReducerStep(
 				"DeleteCodeSystemStep",
 				"Deletes the code system proper",
+				VoidModel.class,
 				deleteCodeSystemFinalStep()
 			)
 			.build();
