@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -113,7 +115,6 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -188,6 +189,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	private TransactionTemplate myTxTemplate;
+
+	@Autowired
+	private UrlPartitioner myUrlPartitioner;
 
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
@@ -580,7 +584,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequestDetails, theTransactionDetails);
 
-		preDelete(resourceToDelete, entity);
+		preDelete(resourceToDelete, entity, theRequestDetails);
 
 		// Notify interceptors
 		if (theRequestDetails != null) {
@@ -974,7 +978,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return pagingProvider != null;
 	}
 
-	protected void markResourcesMatchingExpressionAsNeedingReindexing(Boolean theCurrentlyReindexing, String theExpression) {
+	protected void requestReindexForRelatedResources(Boolean theCurrentlyReindexing, List<String> theBase, RequestDetails theRequestDetails) {
 		// Avoid endless loops
 		if (Boolean.TRUE.equals(theCurrentlyReindexing)) {
 			return;
@@ -984,14 +988,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
-			// TODO JR build the URLs from the base of the modified SP, not the expression
-			String expression = defaultString(theExpression);
-			myDaoRegistry
-				.getRegisteredDaoTypes()
+			theBase
 				.stream()
-				.filter(t -> WordUtils.containsAllWords(expression, t))
 				.map(t -> t + "?")
-				.forEach(params::addUrl);
+				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+				.forEach(params::addPartitionedUrl);
+
+			ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+			RequestPartitionId requestPartition = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null, details);
+			params.setRequestPartitionId(requestPartition);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
 			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
@@ -1199,7 +1204,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Subclasses may override to provide behaviour. Invoked within a delete
 	 * transaction with the resource that is about to be deleted.
 	 */
-	protected void preDelete(T theResourceToDelete, ResourceTable theEntityToDelete) {
+	protected void preDelete(T theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
 		// nothing by default
 	}
 
