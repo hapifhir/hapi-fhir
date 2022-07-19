@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem;
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;

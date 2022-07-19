@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
-import ca.uhn.fhir.jpa.term.models.DeleteLinksPropertiesAndDesignationsResult;
+import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 
 import java.util.Iterator;
 
@@ -14,28 +14,30 @@ public interface ITermCodeSystemSvc {
 	Iterator<Long> getAllCodeSystemVersionForCodeSystemPid(long thePid);
 
 	/**
-	 * Deletes all child links, concept properties and concept designations for the
-	 * provided code system PID
-	 * @param theCodeSystemVersionPid
-	 * @return
+	 * Deletes all metadata associated with a code system version
+	 * Specific metadata deleted:
+	 * * concept links
+	 * * concept properties
+	 * * concept designations
+	 * * concepts
+	 * @param theVersionPid - the version id of the code system to delete
+	 * @return - a wrapper for the delete results of each of the deletes (if desired)
 	 */
-	DeleteLinksPropertiesAndDesignationsResult deleteLinksPropertiesAndDesignationsByCodeSystemVersionPID(long theCodeSystemVersionPid);
+	CodeSystemConceptsDeleteResult deleteCodeSystemConceptsByCodeSystemVersionPid(long theVersionPid);
 
 	/**
-	 * see BatchTermConceptsDeleteWriter
-	 * @param theVersionPid
-	 */
-	void deleteCodeSystemConceptsByVersion(long theVersionPid);
-
-	/**
-	 * see BatchTermCodeSystemVersionDeleteWriter
-	 * @param theVersionPid
+	 * Deletes a Code System Version
+	 * NB: it is expected that any concepts related to the Code System Version are
+	 * deleted first.
+	 * @param theVersionPid - the code system version pid for the version to delete
 	 */
 	void deleteCodeSystemVersion(long theVersionPid);
 
 	/**
-	 * see TermCodeSystemDeleteTasklet
-	 * @param thePid
+	 * Deletes a code system.
+	 * NB: it is expected that all code system versions are deleted first.
+	 * @param thePid - the code system pid
 	 */
 	void deleteCodeSystem(long thePid);
+
 }

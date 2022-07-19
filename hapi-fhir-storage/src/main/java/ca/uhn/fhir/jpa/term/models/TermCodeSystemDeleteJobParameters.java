@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.term.models;
 
-import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TermCodeSystemDeleteJobParameters implements IModelJson {
+public class TermCodeSystemDeleteJobParameters extends DeleteCodeSystemBaseParameters {
 
 	/**
 	 * Term code system PID
 	 */
-	@JsonProperty("termPid")
+	@JsonProperty("codeSystemPID")
 	private long myTermPid;
 
 	public long getTermPid() {

@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.term.models;
 
-public class DeleteLinksPropertiesAndDesignationsResult {
+public class CodeSystemConceptsDeleteResult {
 
 	private int myDeletedLinks;
 
 	private int myDeletedProperties;
 
 	private int myDeletedDesignations;
+
+	private int myCodeSystemConceptDelete;
 
 	public int getDeletedLinks() {
 		return myDeletedLinks;
@@ -30,5 +32,13 @@ public class DeleteLinksPropertiesAndDesignationsResult {
 
 	public void setDeletedDesignations(int theDeletedDesignations) {
 		myDeletedDesignations = theDeletedDesignations;
+	}
+
+	public int getCodeSystemConceptDelete() {
+		return myCodeSystemConceptDelete;
+	}
+
+	public void setCodeSystemConceptDelete(int theCodeSystemConceptDelete) {
+		myCodeSystemConceptDelete = theCodeSystemConceptDelete;
 	}
 }

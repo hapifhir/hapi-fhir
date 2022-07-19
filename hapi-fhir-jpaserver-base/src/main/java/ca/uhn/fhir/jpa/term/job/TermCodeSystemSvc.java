@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemSvc;
-import ca.uhn.fhir.jpa.term.models.DeleteLinksPropertiesAndDesignationsResult;
+import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 import com.fasterxml.jackson.databind.util.ArrayIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,32 +61,34 @@ public class TermCodeSystemSvc implements ITermCodeSystemSvc {
 	}
 
 	@Override
-	public DeleteLinksPropertiesAndDesignationsResult deleteLinksPropertiesAndDesignationsByCodeSystemVersionPID(long theCodeSystemVersionPid) {
-		DeleteLinksPropertiesAndDesignationsResult result = new DeleteLinksPropertiesAndDesignationsResult();
+	public CodeSystemConceptsDeleteResult deleteCodeSystemConceptsByCodeSystemVersionPid(long theCodeSystemVersionPid) {
+		CodeSystemConceptsDeleteResult result = new CodeSystemConceptsDeleteResult();
 
+		// code system links delete
 		ourLog.info("Deleting term code links");
 		int deletedLinks = myConceptParentChildLinkDao.deleteByCodeSystemVersion(theCodeSystemVersionPid);
 		ourLog.info("Deleted {} term code links", ourDecimalFormat.format(deletedLinks));
 		result.setDeletedLinks(deletedLinks);
 
+		// code system concept properties
 		ourLog.info("Deleting term code properties");
 		int deletedProperties = myConceptPropertyDao.deleteByCodeSystemVersion(theCodeSystemVersionPid);
 		ourLog.info("Deleted {} term code properties", ourDecimalFormat.format(deletedProperties));
 		result.setDeletedProperties(deletedProperties);
 
+		// code system concept designations
 		ourLog.info("Deleting concept designations");
 		int deletedDesignations = myConceptDesignationDao.deleteByCodeSystemVersion(theCodeSystemVersionPid);
 		ourLog.info("Deleted {} concept designations", ourDecimalFormat.format(deletedDesignations));
 		result.setDeletedDesignations(deletedDesignations);
 
-		return result;
-	}
-
-	@Override
-	public void deleteCodeSystemConceptsByVersion(long theVersionPid) {
+		// code system concept
 		ourLog.info("Deleting concepts");
-		int deletedConcepts = myConceptDao.deleteByCodeSystemVersion(theVersionPid);
+		int deletedConcepts = myConceptDao.deleteByCodeSystemVersion(theCodeSystemVersionPid);
 		ourLog.info("Deleted {} concepts", ourDecimalFormat.format(deletedConcepts));
+		result.setCodeSystemConceptDelete(deletedConcepts);
+
+		return result;
 	}
 
 	@Override

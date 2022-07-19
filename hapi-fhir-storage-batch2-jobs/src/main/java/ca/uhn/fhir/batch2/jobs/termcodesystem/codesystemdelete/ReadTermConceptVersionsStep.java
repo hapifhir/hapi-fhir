@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.termcodesystem;
+package ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete;
 
 import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
@@ -7,14 +7,14 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemSvc;
+import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import ca.uhn.fhir.jpa.term.models.TermCodeSystemVersionPidResult;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Iterator;
 
-public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, TermCodeSystemVersionPidResult> {
+public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
 
 	@Autowired
 	private ITermCodeSystemSvc myITermCodeSystemSvc;
@@ -23,7 +23,7 @@ public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCode
 	@Override
 	public RunOutcome run(
 		@NotNull StepExecutionDetails<TermCodeSystemDeleteJobParameters, VoidModel> theStepExecutionDetails,
-		@NotNull IJobDataSink<TermCodeSystemVersionPidResult> theDataSink
+		@NotNull IJobDataSink<CodeSystemVersionPIDResult> theDataSink
 	) throws JobExecutionFailedException {
 		TermCodeSystemDeleteJobParameters parameters = theStepExecutionDetails.getParameters();
 
@@ -32,8 +32,8 @@ public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCode
 		Iterator<Long> versionPids = myITermCodeSystemSvc.getAllCodeSystemVersionForCodeSystemPid(pid);
 		while (versionPids.hasNext()) {
 			long next = versionPids.next().longValue();
-			TermCodeSystemVersionPidResult versionPidResult = new TermCodeSystemVersionPidResult();
-			versionPidResult.setTermVersionPID(next);
+			CodeSystemVersionPIDResult versionPidResult = new CodeSystemVersionPIDResult();
+			versionPidResult.setCodeSystemVersionPID(next);
 			theDataSink.accept(versionPidResult);
 		}
 
