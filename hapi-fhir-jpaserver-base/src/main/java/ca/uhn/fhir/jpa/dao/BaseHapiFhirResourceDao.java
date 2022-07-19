@@ -62,7 +62,6 @@ import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
-import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -151,7 +150,6 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -167,8 +165,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected HapiTransactionService myTransactionService;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
