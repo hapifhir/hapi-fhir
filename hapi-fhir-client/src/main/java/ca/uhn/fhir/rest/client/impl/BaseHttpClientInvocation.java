@@ -73,7 +73,7 @@ public abstract class BaseHttpClientInvocation {
 	 *            the type of HTTP request (GET, DELETE, ..) 
 	 */	
 	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory().newHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, myHeaders);
 		return httpClient.createGetRequest(getContext(), theEncoding);
 	}
 

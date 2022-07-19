@@ -896,7 +896,7 @@ public class FhirContext {
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
 	 */
 	public IGenericClient newRestfulGenericClient(final String theServerBase) {
-		return getRestfulClientFactory().newHttpGenericClient(theServerBase);
+		return getRestfulClientFactory().newGenericClient(theServerBase);
 	}
 
 	/**
@@ -913,7 +913,7 @@ public class FhirContext {
 	 * @param theTlsAuthentication Configuration to authenticate HTTPS server requests
 	 */
 	public IGenericClient newRestfulGenericClient(final String theServerBase, final TlsAuthentication theTlsAuthentication) {
-		return getRestfulClientFactory().newHttpsGenericClient(theServerBase, theTlsAuthentication);
+		return getRestfulClientFactory().newTlsGenericClient(theServerBase, theTlsAuthentication);
 	}
 
 	public FhirTerser newTerser() {

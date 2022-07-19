@@ -91,7 +91,7 @@ public interface IRestfulClientFactory {
 	 *            the headers to be sent together with the http request
 	 * @return the HTTP client instance
 	 */
-	IHttpClient newHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
+	IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
 	 * Returns the HTTP client instance. This method will not return null.
@@ -109,7 +109,7 @@ public interface IRestfulClientFactory {
 	 *            the headers to be sent together with the http request
 	 * @return the HTTP client instance
 	 */
-	IHttpClient newHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
+	IHttpClient getTlsHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders);
 
 	/**
 	 * @deprecated Use {@link #getServerValidationMode()} instead (this method is a synonym for that method, but this method is poorly named and will be removed at some point)
@@ -174,7 +174,7 @@ public interface IRestfulClientFactory {
 	 *            The URL of the base for the restful FHIR server to connect to
 	 * @return A newly created client
 	 */
-	IGenericClient newHttpGenericClient(String theServerBase);
+	IGenericClient newGenericClient(String theServerBase);
 
 	/**
 	 * Instantiates a new generic client instance
@@ -183,7 +183,7 @@ public interface IRestfulClientFactory {
 	 * @param theTlsAuthentication Configuration to authenticate HTTPS server requests
 	 * @return A newly created client
 	 */
-	IGenericClient newHttpsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication);
+	IGenericClient newTlsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication);
 
 	/**
 	 * Sets the connection request timeout, in milliseconds. This is the amount of time that the HTTPClient connection

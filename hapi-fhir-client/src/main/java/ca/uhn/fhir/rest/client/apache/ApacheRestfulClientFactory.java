@@ -89,15 +89,15 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IHttpClient newHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
 																 String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
-	public synchronized IHttpClient newHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication,
-																  Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString,
-																  RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public synchronized IHttpClient getTlsHttpsClient(StringBuilder theUrl, TlsAuthentication theTlsAuthentication,
+																	  Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString,
+																	  RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,theHeaders);
 	}
 

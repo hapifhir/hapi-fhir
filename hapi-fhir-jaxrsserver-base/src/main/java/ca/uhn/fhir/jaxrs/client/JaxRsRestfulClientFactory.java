@@ -88,13 +88,13 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IHttpClient newHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public synchronized IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		Client client = getNativeClientClient();
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	@Override
-	public synchronized IHttpClient newHttpsClient(StringBuilder url, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+	public synchronized IHttpClient getTlsHttpsClient(StringBuilder url, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		Client client = getNativeClientClient(theTlsAuthentication);
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}

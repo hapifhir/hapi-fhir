@@ -172,7 +172,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IGenericClient newHttpGenericClient(String theServerBase) {
+	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase);
 
@@ -180,7 +180,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	}
 
 	@Override
-	public synchronized IGenericClient newHttpsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
+	public synchronized IGenericClient newTlsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase, theTlsAuthentication);
 

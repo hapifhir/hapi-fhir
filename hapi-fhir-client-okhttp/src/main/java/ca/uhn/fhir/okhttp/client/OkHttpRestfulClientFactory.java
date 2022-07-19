@@ -87,7 +87,7 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
     }
 
 	@Override
-	public IHttpClient newHttpClient(StringBuilder theUrl,
+	public IHttpClient getHttpClient(StringBuilder theUrl,
 												Map<String, List<String>> theIfNoneExistParams,
 												String theIfNoneExistString,
 												RequestTypeEnum theRequestType,
@@ -96,12 +96,12 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	public IHttpClient newHttpsClient(StringBuilder theUrl,
-												 TlsAuthentication theTlsAuthentication,
-												 Map<String, List<String>> theIfNoneExistParams,
-												 String theIfNoneExistString,
-												 RequestTypeEnum theRequestType,
-												 List<Header> theHeaders) {
+	public IHttpClient getTlsHttpsClient(StringBuilder theUrl,
+													 TlsAuthentication theTlsAuthentication,
+													 Map<String, List<String>> theIfNoneExistParams,
+													 String theIfNoneExistString,
+													 RequestTypeEnum theRequestType,
+													 List<Header> theHeaders) {
 		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 

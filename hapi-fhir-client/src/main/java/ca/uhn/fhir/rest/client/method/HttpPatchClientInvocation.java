@@ -72,7 +72,7 @@ public class HttpPatchClientInvocation extends BaseHttpClientInvocation {
 
 	@Override
 	protected IHttpRequest createHttpRequest(String theUrl, EncodingEnum theEncoding, RequestTypeEnum theRequestType) {
-		IHttpClient httpClient = getRestfulClientFactory().newHttpClient(new StringBuilder(theUrl), null, null, theRequestType, getHeaders());
+		IHttpClient httpClient = getRestfulClientFactory().getHttpClient(new StringBuilder(theUrl), null, null, theRequestType, getHeaders());
 		return httpClient.createByteRequest(getContext(), myContents, myContentType, null);
 	}
 
