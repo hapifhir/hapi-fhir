@@ -23,10 +23,10 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.config.SharedBatchCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
+import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ReindexAppCtx extends SharedBatchCtx {
+public class ReindexAppCtx {
 
 	public static final String JOB_REINDEX = "REINDEX";
 
@@ -59,7 +59,7 @@ public class ReindexAppCtx extends SharedBatchCtx {
 				"load-ids",
 				"Load IDs of resources to reindex",
 				ResourceIdListWorkChunkJson.class,
-				loadIdsStep(theBatch2DaoSvc))
+				new LoadIdsStep(theBatch2DaoSvc))
 			.addLastStep("reindex",
 				"Perform the resource reindex",
 				reindexStep()

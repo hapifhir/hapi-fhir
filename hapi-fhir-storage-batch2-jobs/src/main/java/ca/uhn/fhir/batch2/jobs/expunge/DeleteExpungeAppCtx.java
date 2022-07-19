@@ -22,9 +22,9 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.config.SharedBatchCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
+import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DeleteExpungeAppCtx extends SharedBatchCtx {
+public class DeleteExpungeAppCtx {
 
 	public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
 
@@ -64,7 +64,7 @@ public class DeleteExpungeAppCtx extends SharedBatchCtx {
 				"load-ids",
 				"Load IDs of resources to expunge",
 				ResourceIdListWorkChunkJson.class,
-				loadIdsStep(theBatch2DaoSvc))
+				new LoadIdsStep(theBatch2DaoSvc))
 			.addLastStep("expunge",
 				"Perform the resource expunge",
 				expungeStep(theHapiTransactionService, theDeleteExpungeSvc)
