@@ -22,12 +22,15 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.model.dstu2.resource.ImplementationGuide;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface IJobCoordinator {
 
@@ -63,5 +66,7 @@ public interface IJobCoordinator {
 	JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
 	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
+
+	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
 
 }

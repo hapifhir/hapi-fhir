@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term.job;
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 import com.fasterxml.jackson.databind.util.ArrayIterator;
 import org.slf4j.Logger;

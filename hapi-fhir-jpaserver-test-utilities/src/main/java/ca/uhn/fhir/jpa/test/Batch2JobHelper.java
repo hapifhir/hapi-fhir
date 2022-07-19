@@ -30,7 +30,10 @@ import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -123,6 +126,15 @@ public class Batch2JobHelper {
 	// TODO KHS I don't think this works yet
 	public void awaitAllCompletions(String theJobDefinitionId) {
 		List<JobInstance> instances = myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, false, 100, 0);
+		awaitJobCompletions(instances);
+	}
+
+	public void awaitAllJobs(String theJobDefinitionId) {
+		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionIdAndStatuses(
+			theJobDefinitionId,
+			new HashSet<>(Arrays.asList(StatusEnum.values())),
+			100,
+			0);
 		awaitJobCompletions(instances);
 	}
 

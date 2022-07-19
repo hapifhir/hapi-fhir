@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -157,6 +158,11 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
 		return myJobQuerySvc.getInstancesByJobDefinitionIdAndEndedStatus(theJobDefinitionId, theEnded, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		return myJobQuerySvc.getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, theStatuses, theCount, theStart);
 	}
 
 	@Override

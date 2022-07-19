@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -40,8 +38,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -50,13 +47,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,8 +64,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_ID;
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_VERSION_ID;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 
@@ -90,6 +79,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 //	private final List<JobExecution> myCurrentJobExecutions = Collections.synchronizedList(new ArrayList<>());
 
+	private final List<String> myJobExecutions = Collections.synchronizedList(new ArrayList<>());
 
 	@Autowired
 	protected ITermConceptDao myConceptDao;
@@ -112,21 +102,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
-
-//	@Autowired
-//	private IBatchJobSubmitter myJobSubmitter;
-
-//	@Autowired
-//	private JobOperator myJobOperator;
-
-//	@Autowired
-//	@Qualifier(TERM_CODE_SYSTEM_DELETE_JOB_NAME)
-//	private org.springframework.batch.core.Job myTermCodeSystemDeleteJob;
-
-//	@Autowired
-//	@Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
-//	private org.springframework.batch.core.Job myTermCodeSystemVersionDeleteJob;
-
 
 	@Override
 	public void addConceptToStorageQueue(TermConcept theConcept) {
@@ -307,7 +282,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 
 		for (int i = 0; i < 10; i++) {
-
 			if (!isDeferredConcepts() &&
 				!isConceptLinksToSaveLater() &&
 				!isDeferredValueSets() &&
@@ -375,48 +349,25 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 
 	private void deleteTermCodeSystemVersionOffline(Long theCodeSystemVersionPid) {
-//		JobParameters jobParameters = new JobParameters(
-//			Collections.singletonMap(
-//				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(theCodeSystemVersionPid, true)));
-//
-//		try {
-//
-//			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
-//			myCurrentJobExecutions.add(jobExecution);
-//
-//		} catch (JobParametersInvalidException theE) {
-//			throw new InternalErrorException(Msg.code(850) + "Offline job submission for TermCodeSystemVersion: " +
-//				theCodeSystemVersionPid + " failed: " + theE);
-//		}
-
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(JOB_PARAM_CODE_SYSTEM_ID);
+		request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+
+		TermCodeSystemDeleteVersionJobParameters parameters = new TermCodeSystemDeleteVersionJobParameters();
+		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
+		request.setParameters(parameters);
 		
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		myJobExecutions.add(response.getJobId());
 	}
 
-
 	private void deleteTermCodeSystemOffline(Long theCodeSystemPid) {
-//		JobParameters jobParameters = new JobParameters(
-//			Collections.singletonMap(
-//				JOB_PARAM_CODE_SYSTEM_ID, new JobParameter(theCodeSystemPid, true)));
-//
-//		try {
-//
-//			JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemDeleteJob, jobParameters);
-//			myCurrentJobExecutions.add(jobExecution);
-//
-//		} catch (JobParametersInvalidException theE) {
-//			throw new InternalErrorException(Msg.code(851) + "Offline job submission for TermCodeSystem: " +
-//				theCodeSystemPid + " failed: " + theE);
-//		}
-
 		TermCodeSystemDeleteJobParameters parameters = new TermCodeSystemDeleteJobParameters();
 		parameters.setTermPid(theCodeSystemPid);
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setParameters(JsonUtil.serialize(parameters));
+		request.setParameters(parameters);
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		myJobExecutions.add(response.getJobId());
 	}
 
 
@@ -428,13 +379,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		retVal &= !isDeferredValueSets();
 		retVal &= !isDeferredConceptMaps();
 		retVal &= !isDeferredCodeSystemDeletions();
-		retVal &= !isJobsExecuting();
+//		retVal &= !isJobsExecuting();
 		return retVal;
 	}
 
 	private boolean isJobsExecuting() {
+
 //		return myCurrentJobExecutions.stream().anyMatch(JobExecution::isRunning);
-		return false;
+		return true;
 	}
 
 
