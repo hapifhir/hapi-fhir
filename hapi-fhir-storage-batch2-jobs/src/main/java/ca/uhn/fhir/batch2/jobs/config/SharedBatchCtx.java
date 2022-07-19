@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SharedCtx {
+public class SharedBatchCtx {
 
 	@Bean
 	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
