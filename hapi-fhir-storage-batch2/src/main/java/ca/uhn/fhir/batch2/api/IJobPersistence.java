@@ -23,7 +23,7 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceFetchRequest;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;

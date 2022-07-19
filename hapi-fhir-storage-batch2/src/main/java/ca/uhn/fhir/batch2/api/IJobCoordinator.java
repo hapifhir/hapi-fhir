@@ -21,7 +21,7 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceFetchRequest;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;

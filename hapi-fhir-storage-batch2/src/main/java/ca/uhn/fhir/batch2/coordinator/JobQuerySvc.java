@@ -23,7 +23,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.JobInstanceFetchRequest;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;

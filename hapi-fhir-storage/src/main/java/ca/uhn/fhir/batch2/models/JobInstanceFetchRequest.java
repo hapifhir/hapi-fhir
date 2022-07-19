@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.model;
+package ca.uhn.fhir.batch2.models;
 
 public class JobInstanceFetchRequest {
 
