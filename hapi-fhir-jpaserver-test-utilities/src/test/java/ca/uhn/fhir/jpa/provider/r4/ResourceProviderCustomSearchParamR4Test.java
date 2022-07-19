@@ -241,7 +241,6 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp, mySrd);
 
-		// FIXME: This test seems relevant to the reindex -> Batch2 Job conversion
 		runInTransaction(() -> {
 			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 			assertEquals(1, allJobs.size());
