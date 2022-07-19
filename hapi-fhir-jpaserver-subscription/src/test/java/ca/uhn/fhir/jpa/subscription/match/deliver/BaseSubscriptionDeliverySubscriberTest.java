@@ -40,9 +40,11 @@ import org.springframework.messaging.support.GenericMessage;
 import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -183,7 +185,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
 			HookParams argument = t.getArgument(1, HookParams.class);
 			ResourceModifiedJsonMessage resourceModifiedJsonMessage = argument.get(ResourceModifiedJsonMessage.class);
-			resourceModifiedJsonMessage.getHapiHeaders().getCustomHeaders().put("foo", "bar");
+			resourceModifiedJsonMessage.getHapiHeaders().getCustomHeaders().put("foo", List.of("bar", "bar2"));
 			return true;
 		});
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
@@ -206,7 +208,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
 		assertThat(messages, hasSize(1));
 		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
-		assertThat(receivedMessage.getHapiHeaders().getCustomHeaders().get("foo"), is(equalTo("bar")));
+		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
+		assertThat(foo, containsInAnyOrder("bar", "bar2"));
 	}
 
 	@Test
