@@ -1266,7 +1266,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@SuppressWarnings("unchecked")
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
-		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+		theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
 		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getPersistentId());
@@ -1279,7 +1279,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * This should be the very first thing..
 		 */
 		if (theResource != null) {
-			if (thePerformIndexing) {
+			if (thePerformFullUpdate) {
 				if (!ourValidationDisabledForUnitTest) {
 					validateResourceForStorage((T) theResource, entity);
 				}
@@ -1323,7 +1323,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			entity.setDeleted(null);
 
 			// TODO: is this IF statement always true? Try removing it
-			if (thePerformIndexing || ((ResourceTable) theEntity).getVersion() == 1) {
+			if (thePerformFullUpdate || ((ResourceTable) theEntity).getVersion() == 1) {
 
 				newParams = new ResourceIndexedSearchParams();
 
@@ -1337,7 +1337,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 
 				failIfPartitionMismatch(theRequest, entity);
-				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformIndexing);
+				mySearchParamWithInlineReferencesExtractor.populateFromResource(requestPartitionId, newParams, theTransactionDetails, entity, theResource, existingParams, theRequest, thePerformFullUpdate);
 
 				changed = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 
@@ -1353,7 +1353,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					// to match a resource and then update it in a way that it no longer
 					// matches. We could certainly make this configurable though in the
 					// future.
-					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
+					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformFullUpdate) {
 						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
 					}
 
@@ -1377,7 +1377,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		}
 
-		if (thePerformIndexing && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange() && (entity.getVersion() > 1 || theUpdateVersion)) {
+		if (thePerformFullUpdate && changed != null && !changed.isChanged() && !theForceUpdate && myConfig.isSuppressUpdatesWithNoChange() && (entity.getVersion() > 1 || theUpdateVersion)) {
 			ourLog.debug("Resource {} has not changed", entity.getIdDt().toUnqualified().getValue());
 			if (theResource != null) {
 				updateResourceMetadata(entity, theResource);
@@ -1428,7 +1428,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 * index table for resource links (reference indexes) because we index
 		 * those by path and not by parameter name.
 		 */
-		if (thePerformIndexing && newParams != null) {
+		if (thePerformFullUpdate && newParams != null) {
 			Map<String, Boolean> searchParamPresenceMap = getSearchParamPresenceMap(entity, newParams);
 
 			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(entity, searchParamPresenceMap);
@@ -1451,7 +1451,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		/*
 		 * Indexing
 		 */
-		if (thePerformIndexing) {
+		if (thePerformFullUpdate) {
 			if (newParams == null) {
 				myExpungeService.deleteAllSearchParams(new ResourcePersistentId(entity.getId()));
 			} else {

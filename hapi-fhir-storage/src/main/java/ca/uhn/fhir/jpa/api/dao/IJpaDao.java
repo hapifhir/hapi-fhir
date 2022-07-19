@@ -35,7 +35,7 @@ public interface IJpaDao<T extends IBaseResource> {
 		IBaseResource theResource,
 		IBasePersistedResource theEntity,
 		Date theDeletedTimestampOrNull,
-		boolean thePerformIndexing,
+		boolean thePerformFullUpdate,
 		boolean theUpdateVersion,
 		TransactionDetails theTransactionDetails,
 		boolean theForceUpdate,

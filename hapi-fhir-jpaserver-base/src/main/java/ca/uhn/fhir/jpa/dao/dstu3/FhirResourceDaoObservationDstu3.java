@@ -73,10 +73,10 @@ public class FhirResourceDaoObservationDstu3 extends BaseHapiFhirResourceDaoObse
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
 												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		return updateObservationEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull,
-			thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate,
+                thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate,
 			theCreateNewHistoryEntry);
 	}
 
