@@ -145,6 +145,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			jobIds.add(response.getJobId());
 		}
 
+		// run the test
 		// see if we can fetch jobs
 		int index = 0;
 		int size = 2;
