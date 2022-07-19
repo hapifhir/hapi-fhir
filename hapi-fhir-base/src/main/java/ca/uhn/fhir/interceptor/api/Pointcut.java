@@ -2008,7 +2008,7 @@ public enum Pointcut implements IPointcut {
 	 * <b>MDM(EMPI) Hook:</b>
 	 * Invoked when a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) enters the MDM module. The purpose of the pointcut is to permit a pseudo
-	 * modification of the resource to influence the MDM linking process.  Any modification to the resource are not persisted.
+	 * modification of the resource elements to influence the MDM linking process.  Any modification to the resource are not persisted.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
