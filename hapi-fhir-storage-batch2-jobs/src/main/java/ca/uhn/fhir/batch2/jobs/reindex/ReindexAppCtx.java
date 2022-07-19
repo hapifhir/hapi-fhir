@@ -23,10 +23,10 @@ package ca.uhn.fhir.batch2.jobs.reindex;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.config.SharedCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
-import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ReindexAppCtx {
+public class ReindexAppCtx extends SharedCtx {
 
 	public static final String JOB_REINDEX = "REINDEX";
 
@@ -68,6 +68,11 @@ public class ReindexAppCtx {
 	}
 
 	@Bean
+	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep();
+	}
+
+	@Bean
 	public ReindexJobParametersValidator reindexJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
 		return new ReindexJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
 	}
@@ -77,15 +82,7 @@ public class ReindexAppCtx {
 		return new ReindexStep();
 	}
 
-	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
-	}
 
-	@Bean
-	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep(theBatch2DaoSvc);
-	}
 
 	@Bean
 	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
