@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -232,6 +234,9 @@ public class JobDefinition<PT extends IModelJson> {
 		}
 
 		public <OT extends IModelJson> Builder<PT, OT> addFinalReducerStep(String theStepId, String theStepDescription, Class<OT> theOutputType, IReductionStepWorker<PT, NIT, OT> theStepWorker) {
+			if (!myGatedExecution) {
+				throw new ConfigurationException(Msg.code(2106) + String.format("Job Definition %s has a reducer step but is not gated", myJobDefinitionId));
+			}
 			mySteps.add(new JobDefinitionReductionStep<PT, NIT, OT>(theStepId, theStepDescription, theStepWorker, myNextInputType, theOutputType));
 			return new Builder<PT, OT>(mySteps, myJobDefinitionId, myJobDefinitionVersion, myJobDescription, myJobParametersType, theOutputType, myParametersValidator, myGatedExecution, myCompletionHandler, myErrorHandler);
 		}

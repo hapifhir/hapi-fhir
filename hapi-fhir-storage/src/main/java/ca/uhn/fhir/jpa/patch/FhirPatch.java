@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.patch;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.path.EncodeContextPath;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.IModelVisitor2;
@@ -235,10 +235,11 @@ public class FhirPatch {
 						childDef.getMutator().addValue(next, nextNewValue);
 					}
 
-				} else {
+				} else if ("add".equals(type)) {
+					childDef.getMutator().addValue(next, newValue);
+				} else if ("replace".equals(type)) {
 					childDef.getMutator().setValue(next, newValue);
 				}
-
 			}
 
 

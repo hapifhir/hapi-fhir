@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -79,7 +80,10 @@ public class BulkDataImportProviderTest {
 		ourLog.info("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		String jobId = UUID.randomUUID().toString();
-		when(myJobCoordinator.startInstance(any())).thenReturn(jobId);
+		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
+		startResponse.setJobId(jobId);
+		when(myJobCoordinator.startInstance(any()))
+			.thenReturn(startResponse);
 
 		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
 		HttpPost post = new HttpPost(url);

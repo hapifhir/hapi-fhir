@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3787
+title: "FHIR queries using date sort were ignoring seconds and milliseconds when using lucene/elasticsearch SearchParameter indexing.
+  This has been corrected."

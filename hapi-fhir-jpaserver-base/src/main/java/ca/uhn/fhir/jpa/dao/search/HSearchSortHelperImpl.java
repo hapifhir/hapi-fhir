@@ -59,7 +59,7 @@ public class HSearchSortHelperImpl implements IHSearchSortHelper {
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", "token", "system"),
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", "token", "code") ),
 		RestSearchParameterTypeEnum.REFERENCE, List.of(SEARCH_PARAM_ROOT + ".*.reference.value"),
-		RestSearchParameterTypeEnum.DATE, 		List.of(SEARCH_PARAM_ROOT + ".*.dt.lower-ord"),
+		RestSearchParameterTypeEnum.DATE, 		List.of(SEARCH_PARAM_ROOT + ".*.dt.lower"),
 		RestSearchParameterTypeEnum.QUANTITY, 	List.of(
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE_NORM),
 			String.join(".", NESTED_SEARCH_PARAM_ROOT, "*", QTY_PARAM_NAME, QTY_VALUE) ),

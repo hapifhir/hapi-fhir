@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3784
+title: "The InMemoryMatcher used by Subscription matching not supports the token `:not` modifier.
+  The `:not-in` modifier was also corrected for cases of multiple values in a `,` separated or-list."

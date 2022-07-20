@@ -26,6 +26,7 @@ import org.springframework.data.repository.query.Param;
  * #L%
  */
 
+@Deprecated
 public interface IBulkExportCollectionDao extends JpaRepository<BulkExportCollectionEntity, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
