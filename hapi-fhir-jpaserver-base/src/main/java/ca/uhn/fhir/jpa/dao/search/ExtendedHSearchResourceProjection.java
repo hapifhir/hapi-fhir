@@ -29,12 +29,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Query result when fetching full resources from HSearch.
  */
 public class ExtendedHSearchResourceProjection {
+	public static final String RESOURCE_NOT_STORED_ERROR = "Resource not stored in search index: ";
+
 	final long myPid;
 	final String myForcedId;
 	final String myResourceString;
 
 	public ExtendedHSearchResourceProjection(long thePid, String theForcedId, String theResourceString) {
-		Validate.notEmpty(theResourceString, "Resource not stored in search index: " + thePid);
+		Validate.notEmpty(theResourceString, RESOURCE_NOT_STORED_ERROR + thePid);
 		myPid = thePid;
 		myForcedId = theForcedId;
 		myResourceString = theResourceString;

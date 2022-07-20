@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -924,11 +925,21 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Can we fast track this loading by checking elastic search?
 		if (isLoadingFromElasticSearchSupported(thePids)) {
-			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
-		} else {
-			// We only chunk because some jdbc drivers can't handle long param lists.
-			new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+			try {
+				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
+				return;
+
+			} catch (Exception theE) {
+				if (! theE.getMessage().startsWith(ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR)) {
+					throw theE;
+				}
+				// some resources were not found in index, so we will inform this and resort to JPA search
+				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+			}
 		}
+
+		// We only chunk because some jdbc drivers can't handle long param lists.
+		new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**
