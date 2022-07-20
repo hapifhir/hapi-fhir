@@ -55,13 +55,6 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 		myChannelFactory = theChannelFactory;
 	}
 
-	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theResourceModifiedJsonMessage) {
-		IBaseResource payloadResource = theMsg.getPayload(myFhirContext);
-
-		// Regardless of whether we have a payload, the message should be sent.
-		doDelivery(theMsg, theSubscription, theChannelProducer, theResourceModifiedJsonMessage);
-	}
-
 	protected void doDelivery(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, IChannelProducer theChannelProducer, ResourceModifiedJsonMessage theMessage) {
 		theChannelProducer.send(theMessage);
 		ourLog.debug("Delivering {} message payload {} for {}", theMsg.getOperationType(), theMsg.getPayloadId(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
@@ -110,7 +103,7 @@ public class SubscriptionDeliveringMessageSubscriber extends BaseSubscriptionDel
 			throw new UnsupportedOperationException(Msg.code(4) + "Only JSON payload type is currently supported for Message Subscriptions");
 		}
 
-		deliverPayload(theMessage, subscription, channelProducer, messageWrapperToSend);
+		doDelivery(theMessage, subscription, channelProducer, messageWrapperToSend);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_MESSAGE_DELIVERY
 		params = new HookParams()

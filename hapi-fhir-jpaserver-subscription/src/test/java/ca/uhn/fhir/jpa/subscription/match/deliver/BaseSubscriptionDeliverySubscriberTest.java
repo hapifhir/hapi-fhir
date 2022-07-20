@@ -209,6 +209,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertThat(messages, hasSize(1));
 		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
 		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
+
 		assertThat(foo, containsInAnyOrder("bar", "bar2"));
 	}
 
