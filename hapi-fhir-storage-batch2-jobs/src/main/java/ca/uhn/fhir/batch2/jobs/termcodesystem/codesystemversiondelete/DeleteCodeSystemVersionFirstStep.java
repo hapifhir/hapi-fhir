@@ -27,6 +27,10 @@ public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<Ter
 
 		myTermCodeSystemSvc.deleteCodeSystemConceptsByCodeSystemVersionPid(versionId);
 
+		CodeSystemVersionPIDResult result = new CodeSystemVersionPIDResult();
+		result.setCodeSystemVersionPID(versionId);
+		theDataSink.accept(result);
+
 		return RunOutcome.SUCCESS;
 	}
 }

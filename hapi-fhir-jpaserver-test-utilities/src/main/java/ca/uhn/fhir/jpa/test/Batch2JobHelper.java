@@ -123,18 +123,14 @@ public class Batch2JobHelper {
 
 	}
 
-	// TODO KHS I don't think this works yet
-	public void awaitAllCompletions(String theJobDefinitionId) {
-		List<JobInstance> instances = myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, false, 100, 0);
-		awaitJobCompletions(instances);
-	}
-
-	public void awaitAllJobs(String theJobDefinitionId) {
+	public void awaitAllJobsOfJobIdToComplete(String theJobDefinitionId) {
+		// fetch all jobs of any status type
 		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionIdAndStatuses(
 			theJobDefinitionId,
 			new HashSet<>(Arrays.asList(StatusEnum.values())),
 			100,
 			0);
+		// then await completion status
 		awaitJobCompletions(instances);
 	}
 

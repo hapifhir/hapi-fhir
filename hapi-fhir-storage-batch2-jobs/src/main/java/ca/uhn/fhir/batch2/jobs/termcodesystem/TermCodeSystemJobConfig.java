@@ -35,7 +35,7 @@ public class TermCodeSystemJobConfig {
 			.setJobDefinitionVersion(1)
 			.gatedExecution()
 			.setParametersType(TermCodeSystemDeleteVersionJobParameters.class)
-			.setParametersValidator(myDeleteCodeSystemVersionPrameterValidator())
+			.setParametersValidator(deleteCodeSystemVersionPrameterValidator())
 			.addFirstStep(
 				"DeleteCodeSystemVersionFirstStep",
 				"A first step for deleting code system versions; deletes the concepts for a provided code system version",
@@ -121,7 +121,7 @@ public class TermCodeSystemJobConfig {
 	/** Delete code system version job **/
 	
 	@Bean
-	public DeleteCodeSystemVersionPrameterValidator myDeleteCodeSystemVersionPrameterValidator() {
+	public DeleteCodeSystemVersionPrameterValidator deleteCodeSystemVersionPrameterValidator() {
 		return new DeleteCodeSystemVersionPrameterValidator();
 	}
 
