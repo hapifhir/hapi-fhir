@@ -56,12 +56,12 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     @Override
     protected IHttpClient getHttpClient(String theServerBase) {
-        return new OkHttpRestfulClient(getNativeClient(), new StringBuilder(theServerBase), null, null, null, null);
+		 return getHttpClient(new StringBuilder(theServerBase), null, null, null, null);
     }
 
 	@Override
 	protected IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
-		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
+		return getTlsHttpsClient(new StringBuilder(theServerBase), theTlsAuthentication, null, null, null, null);
 	}
 
     @Override

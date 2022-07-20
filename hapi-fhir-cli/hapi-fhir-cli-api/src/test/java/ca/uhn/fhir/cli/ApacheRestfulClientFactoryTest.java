@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
@@ -15,10 +16,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import javax.net.ssl.SSLHandshakeException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ApacheNativeClientTest extends BaseFhirVersionParameterizedTest {
-
+public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest {
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
@@ -69,4 +70,40 @@ public class ApacheNativeClientTest extends BaseFhirVersionParameterizedTest {
 		}
 	}
 
+	@ParameterizedTest
+	@MethodSource("baseParamsProvider")
+	public void testGenericClientHttp(FhirVersionEnum theFhirVersion) {
+		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
+		String base = fhirVersionParams.getBase();
+		FhirContext context = fhirVersionParams.getFhirContext();
+		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
+		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
+	}
+
+	@ParameterizedTest
+	@MethodSource("baseParamsProvider")
+	public void testGenericClientHttps(FhirVersionEnum theFhirVersion) {
+		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
+		String secureBase = fhirVersionParams.getSecureBase();
+		FhirContext context = fhirVersionParams.getFhirContext();
+		IBaseResource bundle = context.newRestfulGenericClient(secureBase, getTlsAuthentication()).search().forResource("Patient").execute();
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
+	}
+
+	@ParameterizedTest
+	@MethodSource("baseParamsProvider")
+	public void testGenericClientHttpsNoCredentials(FhirVersionEnum theFhirVersion) {
+		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
+		String secureBase = fhirVersionParams.getSecureBase();
+		FhirContext context = fhirVersionParams.getFhirContext();
+		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
+		try {
+			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
+			fail();
+		} catch (Exception e) {
+			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
+			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
+		}
+	}
 }

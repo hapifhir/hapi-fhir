@@ -3,6 +3,7 @@ package ca.uhn.fhir.test;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
@@ -17,9 +18,9 @@ import java.util.stream.Stream;
 public class BaseFhirVersionParameterizedTest {
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper();
+	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
 	@RegisterExtension
-	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper();
+	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -67,12 +68,20 @@ public class BaseFhirVersionParameterizedTest {
 			return myFhirVersion;
 		}
 
+		public String getBase(){
+			return myBaseRestServerHelper.getBase();
+		}
+
+		public String getSecureBase(){
+			return myBaseRestServerHelper.getSecureBase();
+		}
+
 		public String getPatientEndpoint(){
-			return myBaseRestServerHelper.getBase()+"/Patient";
+			return getBase()+"/Patient";
 		}
 
 		public String getSecuredPatientEndpoint(){
-			return myBaseRestServerHelper.getSecureBase()+"/Patient";
+			return getSecureBase()+"/Patient";
 		}
 
 		public IBaseResource parseResource(String json){

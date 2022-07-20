@@ -79,13 +79,13 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
-		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
+	protected synchronized IHttpClient getHttpClient(String theServerBase) {
+		return getHttpClient(new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	protected synchronized ApacheHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
-		return new ApacheHttpClient(getNativeHttpClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
+	protected synchronized IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
+		return getTlsHttpsClient(new StringBuilder(theServerBase), theTlsAuthentication, null, null, null, null);
 	}
 
 	@Override

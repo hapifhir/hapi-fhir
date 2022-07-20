@@ -144,7 +144,7 @@ public class TlsAuthenticationSvcTest {
 			TlsAuthenticationSvc.createTrustManager(Optional.of(invalidKeyStoreInfo));
 			fail();
 		} catch (Exception e) {
-			assertEquals(Msg.code(2105)+"Failed to create TrustManager", e.getMessage());
+			assertEquals(Msg.code(2105)+"Failed to create X509TrustManager", e.getMessage());
 		}
 	}
 

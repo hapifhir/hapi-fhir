@@ -105,10 +105,10 @@ public class TlsAuthenticationSvc {
 					return (X509TrustManager) trustManager;
 				}
 			}
-			throw new TlsAuthenticationException(Msg.code(2104)+"Could not X509 find TrustManager");
+			throw new TlsAuthenticationException(Msg.code(2104)+"Could not find X509TrustManager");
 		}
 		catch (Exception e) {
-			throw new TlsAuthenticationException(Msg.code(2105)+"Failed to create TrustManager");
+			throw new TlsAuthenticationException(Msg.code(2105)+"Failed to create X509TrustManager");
 		}
 	}
 
