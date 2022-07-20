@@ -1,14 +1,16 @@
 package ca.uhn.fhir.batch2.jobs.termcodesystem;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemCompletionHandler;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemConceptsByVersionStep;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemStep;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.DeleteCodeSystemVersionStep;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.ReadTermConceptVersionsStep;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemdelete.TermCodeSystemDeleteJobParametersValidator;
+import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete.DeleteCodeSystemVersionCompletionHandler;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete.DeleteCodeSystemVersionFinalStep;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete.DeleteCodeSystemVersionFirstStep;
-import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete.DeleteCodeSystemVersionPrameterValidator;
+import ca.uhn.fhir.batch2.jobs.termcodesystem.codesystemversiondelete.DeleteCodeSystemVersionParameterValidator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
@@ -47,6 +49,8 @@ public class TermCodeSystemJobConfig {
 				"Deletes the code system version",
 				deleteCodeSystemVersionFinalStep()
 			)
+			.completionHandler(deleteCodeSystemVersionCompletionHandler())
+			.errorHandler(deleteCodeSystemVersionCompletionHandler())
 			.build();
 	}
 
@@ -88,6 +92,8 @@ public class TermCodeSystemJobConfig {
 				VoidModel.class,
 				deleteCodeSystemFinalStep()
 			)
+			.completionHandler(deleteCodeSystemCompletionHandler())
+			.errorHandler(deleteCodeSystemCompletionHandler())
 			.build();
 	}
 
@@ -118,11 +124,16 @@ public class TermCodeSystemJobConfig {
 		return new DeleteCodeSystemStep();
 	}
 
+	@Bean
+	public DeleteCodeSystemCompletionHandler deleteCodeSystemCompletionHandler() {
+		return new DeleteCodeSystemCompletionHandler();
+	}
+
 	/** Delete code system version job **/
 	
 	@Bean
-	public DeleteCodeSystemVersionPrameterValidator deleteCodeSystemVersionPrameterValidator() {
-		return new DeleteCodeSystemVersionPrameterValidator();
+	public DeleteCodeSystemVersionParameterValidator deleteCodeSystemVersionPrameterValidator() {
+		return new DeleteCodeSystemVersionParameterValidator();
 	}
 
 	@Bean
@@ -133,5 +144,10 @@ public class TermCodeSystemJobConfig {
 	@Bean
 	public DeleteCodeSystemVersionFinalStep deleteCodeSystemVersionFinalStep() {
 		return new DeleteCodeSystemVersionFinalStep();
+	}
+
+	@Bean
+	public DeleteCodeSystemVersionCompletionHandler deleteCodeSystemVersionCompletionHandler() {
+		return new DeleteCodeSystemVersionCompletionHandler();
 	}
 }

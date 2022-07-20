@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeleteCodeSystemVersionPrameterValidator implements IJobParametersValidator<TermCodeSystemDeleteVersionJobParameters> {
+public class DeleteCodeSystemVersionParameterValidator implements IJobParametersValidator<TermCodeSystemDeleteVersionJobParameters> {
 
 	@Nullable
 	@Override

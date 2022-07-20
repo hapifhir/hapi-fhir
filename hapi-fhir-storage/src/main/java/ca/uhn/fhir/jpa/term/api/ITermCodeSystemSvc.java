@@ -40,4 +40,9 @@ public interface ITermCodeSystemSvc {
 	 */
 	void deleteCodeSystem(long thePid);
 
+	/**
+	 * Notifies that the job has completed (or errored out).
+	 * @param theJobId - the job id
+	 */
+	void notifyJobComplete(String theJobId);
 }

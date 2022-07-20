@@ -47,6 +47,9 @@ public class TermCodeSystemSvc implements ITermCodeSystemSvc {
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
 
+	@Autowired
+	private ITermDeferredStorageSvc myDeferredStorageSvc;
+
 	@Override
 	public Iterator<Long> getAllCodeSystemVersionForCodeSystemPid(long thePid) {
 		// TODO - make this a pageable iterator
@@ -125,5 +128,10 @@ public class TermCodeSystemSvc implements ITermCodeSystemSvc {
 
 			ourLog.info("Code system {} deleted", thePid);
 		}
+	}
+
+	@Override
+	public void notifyJobComplete(String theJobId) {
+		myDeferredStorageSvc.notifyJobEnded(theJobId);
 	}
 }

@@ -21,7 +21,9 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -257,9 +259,23 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 //			}
 //		}
 //
-//		myCurrentJobExecutions.clear();
+//		.clear();
+
+		for (String id : myJobExecutions) {
+			JobInstance instance = myJobCoordinator.getInstance(id);
+//			if (instance.getStatus() != StatusEnum.CANCELLED
+//				&& instance.getStatus() != StatusEnum.FAILED
+//				&& instance.getStatus() != StatusEnum.ERRORED
+//				&& instance.getStatus() != StatusEnum.COMPLETED) {
+				myJobCoordinator.cancelInstance(id);
+//			}
+		}
 	}
 
+	@Override
+	public void notifyJobEnded(String theId) {
+		myJobExecutions.remove(theId);
+	}
 
 	private <T> T runInTransaction(Supplier<T> theRunnable) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
