@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.config.SharedCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
+import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
