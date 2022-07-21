@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 3387
+title: "Backported a fix from HAPI-FHIR 6.0.0 which includes automatic prefetching of resources during bundle transactions. 
+This has a large performance impact when dealing with certain types of bundle transactions."
