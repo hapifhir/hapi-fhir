@@ -25,11 +25,13 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nullable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -82,6 +84,14 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 */
 	default T transactionNested(RequestDetails theRequestDetails, T theResources) {
 		throw new UnsupportedOperationException(Msg.code(570));
+	}
+
+	/**
+	 * Preload resources from the database in batch. This method is purely
+	 * a performance optimization and must be purely idempotent.
+	 */
+	default void preFetchResources(List<ResourcePersistentId> theResolvedIds) {
+		// nothing by default
 	}
 
 }
