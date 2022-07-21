@@ -105,6 +105,10 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 	}
 
 	protected void createUniqueCompositeSp() {
+		addCreateDefaultPartition();
+		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one to rewrite the resource url
+		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate");
 		sp.setType(Enumerations.SearchParamType.DATE);
@@ -112,8 +116,12 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.setExpression("Patient.birthDate");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
+		addCreateDefaultPartition();
+		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one to rewrite the resource url
+		addReadDefaultPartition(); // and one for the job request itself
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-birthdate-unique");
 		sp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -125,7 +133,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 	}
