@@ -1,0 +1,5 @@
+---
+type: change
+issue: 3755
+title: "When the Mark Resources for Reindexing after SearchParameter change configuration parameter is enabled, SMILE will
+use the Batch 2 framework to perform the reindexing operation."

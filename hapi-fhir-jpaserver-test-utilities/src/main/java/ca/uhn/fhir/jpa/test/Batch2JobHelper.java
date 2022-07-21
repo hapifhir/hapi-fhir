@@ -145,4 +145,8 @@ public class Batch2JobHelper {
 			}
 		}
 	}
+
+	public List<JobInstance> findJobsByDefinition(String theJobDefinitionId) {
+		return myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, null, 100, 0);
+	}
 }

@@ -53,7 +53,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -147,8 +146,8 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	}
 
 	@Override
-	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
+	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
 
 		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
 
