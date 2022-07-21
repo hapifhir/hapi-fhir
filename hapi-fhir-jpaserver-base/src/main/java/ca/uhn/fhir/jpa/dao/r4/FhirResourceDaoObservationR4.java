@@ -35,10 +35,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Collection;
 import java.util.Date;
 
 public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObservation<Observation> {
@@ -79,7 +81,7 @@ public class FhirResourceDaoObservationR4 extends BaseHapiFhirResourceDaoObserva
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+                                      boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry, @Nullable Collection<String> theSearchParameterRestriction) {
 		return updateObservationEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull,
                 thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate,
 			theCreateNewHistoryEntry);

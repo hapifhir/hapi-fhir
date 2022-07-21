@@ -26,6 +26,8 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Date;
 
 public interface IJpaDao<T extends IBaseResource> {
@@ -39,7 +41,8 @@ public interface IJpaDao<T extends IBaseResource> {
 		boolean theUpdateVersion,
 		TransactionDetails theTransactionDetails,
 		boolean theForceUpdate,
-		boolean theCreateNewHistoryEntry);
+		boolean theCreateNewHistoryEntry,
+		@Nullable Collection<String> theSearchParameterRestriction);
 
 	IBasePersistedResource updateInternal(
 		RequestDetails theRequestDetails,

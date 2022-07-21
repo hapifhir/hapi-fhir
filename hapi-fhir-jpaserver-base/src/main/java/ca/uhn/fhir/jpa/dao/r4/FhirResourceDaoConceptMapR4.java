@@ -34,6 +34,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Date;
 
 public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
@@ -50,8 +52,8 @@ public class FhirResourceDaoConceptMapR4 extends BaseHapiFhirResourceDao<Concept
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+                                      boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry, @Nullable Collection<String> theSearchParameterRestriction) {
+		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry, theSearchParameterRestriction);
 
 		if (!retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {

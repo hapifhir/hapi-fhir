@@ -37,6 +37,8 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.ValueSet;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Date;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
@@ -77,8 +79,8 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+                                      boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry, @Nullable Collection<String> theSearchParameterRestriction) {
+		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry, theSearchParameterRestriction);
 
 		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {

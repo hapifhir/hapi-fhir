@@ -56,7 +56,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 																	Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion,
 																	TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion,
-			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+			theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry, null);
 
 		if (getConfig().isLastNEnabled()) {
 			if (!retVal.isUnchangedInCurrentOperation()) {

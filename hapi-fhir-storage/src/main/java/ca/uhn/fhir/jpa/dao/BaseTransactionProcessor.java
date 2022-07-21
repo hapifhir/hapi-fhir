@@ -1485,7 +1485,7 @@ public abstract class BaseTransactionProcessor {
 
 			updateOutcome = jpaDao.updateInternal(theRequest, nextResource, true, forceUpdateVersion, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource(), theTransactionDetails);
 		} else if (!nonUpdatedEntities.contains(nextOutcome.getId())) {
-			updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true);
+			updateOutcome = jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theTransactionDetails, false, true, null);
 		}
 
 		// Make sure we reflect the actual final version for the resource.

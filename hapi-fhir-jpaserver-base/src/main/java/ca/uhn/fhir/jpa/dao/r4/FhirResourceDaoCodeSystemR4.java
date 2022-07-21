@@ -48,8 +48,10 @@ import org.hl7.fhir.r4.model.Coding;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -154,8 +156,8 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+                                      boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry, @Nullable Collection<String> theSearchParameterRestriction) {
+		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry, theSearchParameterRestriction);
 
 		if (!retVal.isUnchangedInCurrentOperation()) {
 			CodeSystem cs = (CodeSystem) theResource;

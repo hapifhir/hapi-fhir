@@ -337,7 +337,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Perform actual DB update
 		// this call will also update the metadata
-		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
+		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing, null);
 
 		// Store the resource forced ID if necessary
 		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
@@ -1443,7 +1443,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		TransactionDetails transactionDetails = new TransactionDetails(theEntity.getUpdatedDate());
-		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false, null);
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}

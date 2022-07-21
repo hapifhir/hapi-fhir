@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -496,5 +497,36 @@ public final class ResourceIndexedSearchParams {
 		}
 	}
 
+	/**
+	 * Creates a copy of this instance that only includes the search parameters specified in theSearchParameterRestriction
+	 *
+	 * @param theSearchParameterRestriction a collection of search parameter codes
+	 *
+	 * @return a ResourceIndexedSearchParams instance that contains only the search parameters whose codes are specified
+	 */
+    public ResourceIndexedSearchParams filterBySearchParam(Collection<String> theSearchParameterRestriction) {
+        ResourceIndexedSearchParams result = new ResourceIndexedSearchParams();
 
+       result.myStringParams.addAll(filterParams(this.myStringParams, theSearchParameterRestriction));
+		 result.myTokenParams.addAll(filterParams(this.myTokenParams, theSearchParameterRestriction));
+		 result.myNumberParams.addAll(filterParams(this.myNumberParams, theSearchParameterRestriction));
+		 result.myQuantityParams.addAll(filterParams(this.myQuantityParams, theSearchParameterRestriction));
+		 result.myQuantityNormalizedParams.addAll(filterParams(this.myQuantityNormalizedParams, theSearchParameterRestriction));
+		 result.myDateParams.addAll(filterParams(this.myDateParams, theSearchParameterRestriction));
+		 result.myUriParams.addAll(filterParams(this.myUriParams, theSearchParameterRestriction));
+		 result.myCoordsParams.addAll(filterParams(this.myCoordsParams, theSearchParameterRestriction));
+
+		 // TODO - JR
+		 //      - if the list of search parameters contains a reference type parameter or a combo parameter,
+		 //        we won't be able to identify it here, because the codes aren't stored in these tables
+		 //      - if one or more of the search parameters to be reindexed participates in a combo parameter,
+		 //        the combo parameter ought to be reindexed too.
+
+        return result;
+    }
+
+	@Nonnull
+	private  <T extends BaseResourceIndexedSearchParam> List<T> filterParams(Collection<T> theParams, Collection<String> theSearchParameterRestriction) {
+		return theParams.stream().filter(t -> theSearchParameterRestriction.contains(t.getParamName())).collect(Collectors.toList());
+	}
 }

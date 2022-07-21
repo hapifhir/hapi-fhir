@@ -33,6 +33,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Date;
 
 public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subscription> implements IFhirResourceDaoSubscription<Subscription> {
@@ -68,8 +70,8 @@ public class FhirResourceDaoSubscriptionR5 extends BaseHapiFhirResourceDao<Subsc
 
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate, boolean theUpdateVersion,
-												 TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+                                      TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry, @Nullable Collection<String> theSearchParameterRestriction) {
+		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformFullUpdate, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry, theSearchParameterRestriction);
 
 		if (theDeletedTimestampOrNull != null) {
 			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt(), theRequest, theTransactionDetails);

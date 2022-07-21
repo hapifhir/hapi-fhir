@@ -1231,7 +1231,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable entity) {
 		Date updateTime = new Date();
-		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true);
+		return updateEntity(theRequest, null, entity, updateTime, true, true, theTransactionDetails, false, true, null);
 	}
 
 	@VisibleForTesting
@@ -1267,7 +1267,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Override
 	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, IBasePersistedResource
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformFullUpdate,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry,
+												 @Nullable Collection<String> theSearchParameterRestriction) {
 		Validate.notNull(theEntity);
 		Validate.isTrue(theDeletedTimestampOrNull != null || theResource != null, "Must have either a resource[%s] or a deleted timestamp[%s] for resource PID[%s]", theDeletedTimestampOrNull != null, theResource != null, theEntity.getPersistentId());
 
@@ -1298,6 +1299,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ResourceIndexedSearchParams newParams = null;
 
+		boolean canRestrictSearchParameters = canRestrictSearchParameters(theSearchParameterRestriction);
+
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
 			// DELETE
@@ -1320,6 +1323,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				existingParams = new ResourceIndexedSearchParams(entity);
 				existingSearchParams.put(entity, existingParams);
 			}
+			// since the existingParams are cached and used by other processes, we don't want to filter them in place
+			if (canRestrictSearchParameters) {
+				existingParams = existingParams.filterBySearchParam(theSearchParameterRestriction);
+			}	
 			entity.setDeleted(null);
 
 			// TODO: is this IF statement always true? Try removing it
@@ -1487,6 +1494,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return entity;
 	}
 
+	private boolean canRestrictSearchParameters(@Nullable Collection<String> theSearchParameterRestriction) {
+		return theSearchParameterRestriction != null && !theSearchParameterRestriction.isEmpty() && myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled();
+	}
+
 	public IBasePersistedResource updateHistoryEntity(RequestDetails theRequest, T theResource, IBasePersistedResource
 		theEntity, IBasePersistedResource theHistoryEntity, IIdType theResourceId, TransactionDetails theTransactionDetails, boolean isUpdatingCurrent) {
 		Validate.notNull(theEntity);
@@ -1511,7 +1522,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
 
-			ResourceTable savedEntity = updateEntity(theRequest, theResource, entity, null, true, false, theTransactionDetails, false, false);
+			ResourceTable savedEntity = updateEntity(theRequest, theResource, entity, null, true, false, theTransactionDetails, false, false, null);
 			// Have to call populate again for the encodedResource, since using createHistoryEntry() will cause version constraint failure, ie updating the same resource at the same time
 			encodedResource = populateResourceIntoEntity(theTransactionDetails, theRequest, theResource, entity, true);
 			// For some reason the current version entity is not attached until after using updateEntity
@@ -1686,7 +1697,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);
 
 		// Perform update
-		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, theForceUpdateVersion, thePerformIndexing);
+		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, theForceUpdateVersion, thePerformIndexing, null);
 
 		/*
 		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
