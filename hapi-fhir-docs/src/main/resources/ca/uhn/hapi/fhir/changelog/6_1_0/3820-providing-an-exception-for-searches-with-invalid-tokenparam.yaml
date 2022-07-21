@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 3820
-title: "To provide an exception specific to reporting TokenParam validation failure when searching resources on parameter _tag, _profile and _security."
+title: "Providing a specialized exception encapsulating the mechanism for reporting TokenParam validation failure when searching resources on parameter _tag and _security. The new exception was introduced primarily for reusability purposes."
