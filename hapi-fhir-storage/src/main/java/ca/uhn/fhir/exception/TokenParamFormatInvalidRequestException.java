@@ -9,7 +9,7 @@ public class TokenParamFormatInvalidRequestException extends InvalidRequestExcep
 	public static final String MSG_CODE = Msg.code(1218);
 
 	public TokenParamFormatInvalidRequestException(String theParamName, String theTokenValue) {
-		super(MSG_CODE + "Invalid " + theParamName +
+		super(MSG_CODE + "Missing " + theParamName +
 			" parameter (must supply a value/code and not just a system): " + theTokenValue);
 	}
 
