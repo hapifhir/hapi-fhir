@@ -7,18 +7,20 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.method.SortParameter;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -30,10 +32,14 @@ import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
  * Simplistic implementation of FHIR queries.
  */
+@ExtendWith(MockitoExtension.class)
 public class TestDaoSearch {
 
 	@Configuration
@@ -125,19 +131,25 @@ public class TestDaoSearch {
 		return resourceIds;
 	}
 
-	public IBundleProvider searchForBundleProvider(String theQueryUrl) {
+	public IBundleProvider searchForBundleProvider(String theQueryUrl, boolean theSynchronousMode) {
 		ResourceSearch search = myMatchUrlService.getResourceSearch(theQueryUrl);
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(search.getResourceName());
 
 		SearchParameterMap map = search.getSearchParameterMap();
-		map.setLoadSynchronous(true);
+		map.setLoadSynchronous(theSynchronousMode);
 		SortSpec sort = (SortSpec) new SortParameter(myFhirCtx).translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
 		if (sort != null) {
 			map.setSort(sort);
 		}
 
-		IBundleProvider result = dao.search(map, fakeRequestDetailsFromUrl(theQueryUrl));
+		// for asynchronous mode, we also need to make the request paginated ar synchronous is forced
+		SystemRequestDetails reqDetails =  theSynchronousMode ? fakeRequestDetailsFromUrl(theQueryUrl) : fakePaginatedRequestDetailsFromUrl(theQueryUrl);
+		IBundleProvider result = dao.search(map, reqDetails);
 		return result;
+	}
+
+	public IBundleProvider searchForBundleProvider(String theQueryUrl) {
+		return searchForBundleProvider(theQueryUrl, true);
 	}
 
 	public SearchParameterMap toSearchParameters(String theQueryUrl) {
@@ -160,4 +172,20 @@ public class TestDaoSearch {
 			.forEach((key, value) -> request.addParameter(key, value.toArray(new String[0])));
 		return request;
 	}
+
+	@Nonnull
+	private SystemRequestDetails fakePaginatedRequestDetailsFromUrl(String theQueryUrl) {
+		SystemRequestDetails spiedReqDetails = spy(SystemRequestDetails.class);
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
+		uriComponents.getQueryParams()
+			.forEach((key, value) -> spiedReqDetails.addParameter(key, value.toArray(new String[0])));
+
+		IPagingProvider mockPagingProvider = mock(IPagingProvider.class);
+		IRestfulServerDefaults mockServerDfts = mock(IRestfulServerDefaults.class);
+		doReturn(mockServerDfts).when(spiedReqDetails).getServer();
+		doReturn(mockPagingProvider).when(mockServerDfts).getPagingProvider();
+		return spiedReqDetails;
+	}
+
+
 }
