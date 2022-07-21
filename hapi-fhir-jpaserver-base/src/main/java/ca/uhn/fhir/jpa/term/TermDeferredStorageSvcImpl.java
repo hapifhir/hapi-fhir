@@ -21,7 +21,9 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -379,7 +381,28 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isJobsExecuting() {
+		cleanseEndedJobs();
+
 		return !myJobExecutions.isEmpty();
+	}
+
+	private void cleanseEndedJobs() {
+		/*
+		 * Cleanse the list of completed jobs.
+		 * This is mostly a fail-safe
+		 * because "cancelled" jobs are never removed.
+		 */
+		List<String> idsToDelete = new ArrayList<>();
+		for (String id : myJobExecutions) {
+			// TODO - might want to consider a "fetch all instances"
+			JobInstance instance = myJobCoordinator.getInstance(id);
+			if (StatusEnum.getEndedStatuses().contains(instance.getStatus())) {
+				idsToDelete.add(instance.getInstanceId());
+			}
+		}
+		for (String id : idsToDelete) {
+			myJobExecutions.remove(id);
+		}
 	}
 
 	private void saveConceptLink(TermConceptParentChildLink next) {
