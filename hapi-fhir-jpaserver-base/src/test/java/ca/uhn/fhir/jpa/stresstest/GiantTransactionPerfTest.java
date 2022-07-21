@@ -180,6 +180,7 @@ public class GiantTransactionPerfTest {
 		myTransactionProcessor.setVersionAdapter(new TransactionProcessorVersionAdapterR4());
 		myTransactionProcessor.setDaoConfig(myDaoConfig);
 		myTransactionProcessor.setModelConfig(myDaoConfig.getModelConfig());
+		myTransactionProcessor.setApplicationContextForUnitTest(myAppCtx);
 		myTransactionProcessor.setHapiTransactionService(myHapiTransactionService);
 		myTransactionProcessor.setDaoRegistry(myDaoRegistry);
 		myTransactionProcessor.setPartitionSettingsForUnitTest(this.myPartitionSettings);
