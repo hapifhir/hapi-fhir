@@ -326,21 +326,6 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 		nextSearchParameterMap.setResolved(true);
 	}
 
-	private List<ResourceTable> preFetchIndexes(List<Long> theIds, String typeDesc, String fieldName) {
-		List<ResourceTable> retVal = new ArrayList<>();
-		new QueryChunker<Long>().chunk(theIds, ids-> {
-			TypedQuery<ResourceTable> query = myEntityManager.createQuery("FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )", ResourceTable.class);
-			query.setParameter("IDS", ids);
-			List<ResourceTable> indexFetchOutcome = query.getResultList();
-			ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
-			if (indexFetchOutcome != null) {
-				retVal.addAll(indexFetchOutcome);
-			}
-		});
-
-		return retVal;
-	}
-
 	@Override
 	protected void flushSession(Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome) {
 		try {
