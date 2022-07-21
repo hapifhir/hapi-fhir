@@ -142,6 +142,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -5596,13 +5598,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
 	}
 
-	@Test
-	public void testSearchTagWithInvalidTokenParam(){
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
+	public void testSearchTagWithInvalidTokenParam(String searchParam){
 
 		try {
 			myClient
 				.search()
-				.byUrl("Patient?_tag=someSystem|")
+				.byUrl("Patient?" + searchParam + "=someSystem|")
 				.returnBundle(Bundle.class)
 				.execute();
 			fail();
