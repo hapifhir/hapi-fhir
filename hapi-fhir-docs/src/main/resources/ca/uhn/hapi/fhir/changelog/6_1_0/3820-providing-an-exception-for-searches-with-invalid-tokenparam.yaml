@@ -1,4 +1,4 @@
 ---
 type: add
 issue: 3820
-title: "To provide a specific exception for search request on parameter _tag, _profile and _security. The exception should be thrown when the search parameter value (tokenParam) is not properly formatted."
+title: "To provide an exception specific to reporting TokenParam validation failure when searching resources on parameter _tag, _profile and _security."
