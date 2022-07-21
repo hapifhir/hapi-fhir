@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
@@ -141,7 +142,6 @@ public class GiantTransactionPerfTest {
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Mock
 	private IdHelperService myIdHelperService;
-
 	@AfterEach
 	public void afterEach() {
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
@@ -195,7 +195,7 @@ public class GiantTransactionPerfTest {
 		mySystemDao.start();
 
 		when(myAppCtx.getBean(eq(IInstanceValidatorModule.class))).thenReturn(myInstanceValidatorSvc);
-
+		when(myAppCtx.getBean(eq(IFhirSystemDao.class))).thenReturn(mySystemDao);
 		myInMemoryResourceMatcher = new InMemoryResourceMatcher();
 
 		myResourceVersionSvc = new MockResourceVersionSvc();
