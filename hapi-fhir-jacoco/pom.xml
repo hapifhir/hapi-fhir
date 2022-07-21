@@ -96,14 +96,14 @@
 			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!-- TODO KHS temporarily disable these tests because they are blocking ci
+<!--		&lt;!&ndash; TODO KHS temporarily disable these tests because they are blocking ci-->
 
 <dependency>
 <groupId>ca.uhn.hapi.fhir</groupId>
 <artifactId>hapi-fhir-jpaserver-elastic-test-utilities</artifactId>
 <version>${project.version}</version>
 </dependency>
--->
+<!--&ndash;&gt;-->
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

@@ -3,13 +3,13 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixTest;
+import ca.uhn.fhir.jpa.dao.r4.ElasticsearchPrefixIT;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
+import ca.uhn.fhir.jpa.test.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -48,7 +48,7 @@ public class ElasticsearchWithPrefixConfig {
 	@Bean
 	public DaoConfig daoConfig() {
 		DaoConfig daoConfig = new DaoConfig();
-		daoConfig.setHSearchIndexPrefix(ElasticsearchPrefixTest.ELASTIC_PREFIX);
+		daoConfig.setHSearchIndexPrefix(ElasticsearchPrefixIT.ELASTIC_PREFIX);
 		return daoConfig;
 	}
 
