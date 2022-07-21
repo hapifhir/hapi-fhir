@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.exception.TokenParamFormatInvalidRequestException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -5593,6 +5594,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@Test
+	public void testSearchTagWithInvalidTokenParam(){
+
+		try {
+			myClient
+				.search()
+				.byUrl("Patient?_tag=someSystem|")
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException ex){
+			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
+			assertTrue(ex.getMessage().contains(TokenParamFormatInvalidRequestException.MSG_CODE));
+		}
+
 	}
 
 	@Test
