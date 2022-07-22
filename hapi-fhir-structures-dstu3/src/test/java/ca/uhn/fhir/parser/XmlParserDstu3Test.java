@@ -188,6 +188,7 @@ public class XmlParserDstu3Test {
 
 
 	@Test
+	@Disabled
 	public void testEncodeInvalidMetaTime() {
 
 		Patient p = new Patient();
