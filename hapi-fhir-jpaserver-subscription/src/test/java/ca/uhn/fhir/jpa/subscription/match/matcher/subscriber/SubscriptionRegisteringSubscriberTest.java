@@ -115,7 +115,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessagePartitionWithNullName(){
+	public void testHandleMessagePartitionWithNullPartitionName(){
 		List<Integer> partitionIds = Arrays.asList((Integer)null);
 		List<String> partitionNames = Arrays.asList((String)null);
 		LocalDate localDate = null;
@@ -140,7 +140,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	}
 
 	@Test
-	public void testHandleMessagePartitionWithNullNamde(){
+	public void testHandleMessageWithNullPartition(){
 		RequestPartitionId requestPartitionId = null;
 		ResourceModifiedMessage resourceModifiedMessage = new ResourceModifiedMessage(myFhirContext, mySubscription, BaseResourceMessage.OperationTypeEnum.CREATE);
 		resourceModifiedMessage.setPartitionId(requestPartitionId);
