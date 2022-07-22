@@ -100,7 +100,7 @@ public class CustomTypeServerDstu3 {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class CustomTypeServerDstu3 {
 
 		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals("Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 
