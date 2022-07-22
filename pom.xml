@@ -767,7 +767,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.48<!-- *****Address the version exception marked with a to-do in RuntimeResourceDefinition when this is updated --></fhir_core_version>
+        <fhir_core_version>5.6.52-SNAPSHOT<!-- *****Address the version exception marked with a to-do in RuntimeResourceDefinition when this is updated --></fhir_core_version>
 
         <ucum_version>1.0.3</ucum_version>
 
