@@ -32,6 +32,8 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.Substance;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -372,6 +374,33 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 		}
+	}
+	@Test
+	public void testSearchIncludeSubstances() {
+		// Create substance
+		Substance res = new Substance();
+		res.addInstance().getQuantity().setSystem("http://foo").setCode("UNIT").setValue(123);
+		res.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.12.4").setValue("11");
+		mySubstanceDao.create(res, mySrd);
+
+		// Create medication
+		Medication m = new Medication();
+		m.addIdentifier().setSystem("urn:oid:2.16.840.1.113883.3.7418.12.3").setValue("1");
+		m.getCode().setText("valueb");
+		m.addIngredient().setItem(new Reference(res));
+		ourClient.create().resource(m).execute();
+
+		// Search request
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input.setId("bundle-batch-test");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET)
+			.setUrl("/Medication?_include=Medication:ingredient");
+
+		Bundle output = ourClient.transaction().withBundle(input).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Resource resource = output.getEntry().get(0).getResource();
+		assertEquals(2, resource.getChildByName("entry").getValues().size());
 	}
 
 	private List<String> toIds(Bundle theRespBundle) {
