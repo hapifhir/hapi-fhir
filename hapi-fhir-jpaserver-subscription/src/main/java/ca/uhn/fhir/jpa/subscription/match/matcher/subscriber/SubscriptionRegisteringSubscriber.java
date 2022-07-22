@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -97,7 +99,7 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
 		try {
 			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
-			RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(payload.getPartitionId());
+			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
 			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
 			if (payloadResource == null) {
 				// Only for unit test
@@ -115,6 +117,22 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
 		}
 
+	}
+
+	/**
+	 * There were some situations where the RequestDetails attempted to use the default partition
+	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
+	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
+	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
+	 */
+	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+		RequestPartitionId partitionId = payload.getPartitionId();
+		// This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
+		if(partitionId == null || partitionId.getFirstPartitionNameOrNull() == null){
+			partitionId= RequestPartitionId.defaultPartition();
+		}
+		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+		return systemRequestDetails;
 	}
 
 }
