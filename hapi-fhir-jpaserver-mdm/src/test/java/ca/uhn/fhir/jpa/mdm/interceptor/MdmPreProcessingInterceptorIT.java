@@ -1,15 +1,17 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,19 +28,16 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 
-	@Autowired
-	private IInterceptorService myInterceptorService;
-
 	private PatientNameModifierMdmPreProcessingInterceptor myPreProcessingInterceptor = new PatientNameModifierMdmPreProcessingInterceptor();
 
 	@BeforeEach
 	public void beforeEach(){
-		myInterceptorService.registerInterceptor(myPreProcessingInterceptor);
+		myInterceptorRegistry.registerInterceptor(myPreProcessingInterceptor);
 	}
 
 	@AfterEach
 	public void afterEach(){
-		myInterceptorService.unregisterInterceptor(myPreProcessingInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(myPreProcessingInterceptor);
 	}
 
 	@ParameterizedTest
@@ -56,6 +55,21 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 	}
 
+	@Test
+	public void whenPointCutModifiesBaseResourceThenBaseResourceIsNotPersisted() throws InterruptedException {
+
+		Patient aPatient = buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+
+		MdmHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myMdmHelper.createWithLatch(aPatient);
+		IIdType idDt = outcomeWrapper.getDaoMethodOutcome().getEntity().getIdDt();
+
+		IBundleProvider bundle = myPatientDao.history(idDt, null, null, 0, null);
+
+		assertEquals(1, myPreProcessingInterceptor.getInvocationCount());
+		assertEquals(1, bundle.size());
+
+	}
+
 	static String[] getNames() {
 		return new String[]{"NewName", null};
 	}
@@ -66,8 +80,11 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 		IBaseResource myReturnedValue;
 
+		int myInvocationCount = 0;
+
 		@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
 		public IBaseResource invoke(IBaseResource theResource) {
+			myInvocationCount++;
 
 			((Patient)theResource).getNameFirstRep().setFamily(myNewValue);
 
@@ -84,6 +101,9 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 			return myReturnedValue;
 		}
 
+		public int getInvocationCount() {
+			return myInvocationCount;
+		}
 	}
 
 }
