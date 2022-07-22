@@ -35,6 +35,7 @@ public class TestElasticsearchContainerHelper {
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
 
 		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
+			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
 			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 
