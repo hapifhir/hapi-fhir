@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -42,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,10 +101,21 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setTags(extractTags(subscription));
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
 		}
 		return retVal;
+	}
+
+	private boolean extractDeleteExtensionDstu2(ca.uhn.fhir.model.dstu2.resource.Subscription theSubscription) {
+		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES)
+			.stream()
+			.map(ExtensionDt::getValue)
+			.map(value -> (org.hl7.fhir.dstu2.model.BooleanType) value)
+			.map(org.hl7.fhir.dstu2.model.BooleanType::booleanValue)
+			.findFirst()
+			.orElse(false);
 	}
 
 	/**
@@ -168,22 +181,23 @@ public class SubscriptionCanonicalizer {
 				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
 			}
-
-			List<org.hl7.fhir.dstu3.model.Extension> extensionsByUrl = subscription.getChannel().getExtensionsByUrl(EX_SEND_DELETE_MESSAGES);
-			Optional<Boolean> shouldSendDeletes = extensionsByUrl.stream()
-				.map(org.hl7.fhir.dstu3.model.Extension::getValue)
-				.filter(val -> val instanceof org.hl7.fhir.dstu3.model.BooleanType)
-				.map(val -> (org.hl7.fhir.dstu3.model.BooleanType) val)
-				.map(org.hl7.fhir.dstu3.model.BooleanType::booleanValue)
-				.findFirst();
-			if (shouldSendDeletes.isPresent()) {
-				retVal.setSendDeleteMessages(shouldSendDeletes.get());
-			}
+			retVal.setSendDeleteMessages(extractSendDeletesDstu3(subscription));
 
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(560) + theE);
 		}
 		return retVal;
+	}
+
+	@NotNull
+	private Boolean extractSendDeletesDstu3(org.hl7.fhir.dstu3.model.Subscription subscription) {
+		return subscription.getChannel().getExtensionsByUrl(EX_SEND_DELETE_MESSAGES).stream()
+			.map(org.hl7.fhir.dstu3.model.Extension::getValue)
+			.filter(val -> val instanceof org.hl7.fhir.dstu3.model.BooleanType)
+			.map(val -> (org.hl7.fhir.dstu3.model.BooleanType) val)
+			.map(org.hl7.fhir.dstu3.model.BooleanType::booleanValue)
+			.findFirst()
+			.orElse(false);
 	}
 
 	private @Nonnull
