@@ -51,6 +51,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
@@ -166,6 +167,17 @@ public class SubscriptionCanonicalizer {
 				}
 				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
+			}
+
+			List<org.hl7.fhir.dstu3.model.Extension> extensionsByUrl = subscription.getChannel().getExtensionsByUrl(EX_SEND_DELETE_MESSAGES);
+			Optional<Boolean> shouldSendDeletes = extensionsByUrl.stream()
+				.map(org.hl7.fhir.dstu3.model.Extension::getValue)
+				.filter(val -> val instanceof org.hl7.fhir.dstu3.model.BooleanType)
+				.map(val -> (org.hl7.fhir.dstu3.model.BooleanType) val)
+				.map(org.hl7.fhir.dstu3.model.BooleanType::booleanValue)
+				.findFirst();
+			if (shouldSendDeletes.isPresent()) {
+				retVal.setSendDeleteMessages(shouldSendDeletes.get());
 			}
 
 		} catch (FHIRException theE) {
