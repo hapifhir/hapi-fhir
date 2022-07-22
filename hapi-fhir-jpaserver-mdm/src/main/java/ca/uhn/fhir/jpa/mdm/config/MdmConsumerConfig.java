@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.mdm.broker.MdmMessageHandler;
 import ca.uhn.fhir.jpa.mdm.broker.MdmMessageKeySvc;
 import ca.uhn.fhir.jpa.mdm.broker.MdmQueueConsumerLoader;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkFactory;
+import ca.uhn.fhir.mdm.dao.MdmLinkFactory;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceMergerSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.GoldenResourceSearchSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
@@ -62,6 +62,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.batch2.MdmBatch2Config;
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -219,8 +220,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmLinkFactory mdmLinkFactory(IMdmSettings theMdmSettings) {
-		return new MdmLinkFactory(theMdmSettings);
+	MdmLinkFactory mdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
+		return new MdmLinkFactory(theMdmSettings, theMdmLinkImplFactory);
 	}
 
 	@Bean

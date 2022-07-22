@@ -33,9 +33,9 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 	@Override
 	public MdmLinkJson toJson(IMdmLink theLink) {
 		MdmLinkJson retVal = new MdmLinkJson();
-		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePersistenceId().getId().toString(), theLink.getMdmSourceType()).toVersionless().getValue();
+		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePersistenceId(), theLink.getMdmSourceType()).toVersionless().getValue();
 		retVal.setSourceId(sourceId);
-		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId().getId().toString(), theLink.getMdmSourceType()).toVersionless().getValue();
+		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId(), theLink.getMdmSourceType()).toVersionless().getValue();
 		retVal.setGoldenResourceId(goldenResourceId);
 		retVal.setCreated(theLink.getCreated());
 		retVal.setEidMatch(theLink.getEidMatch());

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -37,7 +38,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -135,15 +135,9 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	public Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
-		Map<ResourcePersistentId, Optional<String>> pidToForcedIdMap = super.translatePidsToForcedIds(thePids);
+		PersistentIdToForcedIdMap pidToForcedIdMap = super.translatePidsToForcedIds(thePids);
 
-		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-			.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-			.collect(Collectors.toSet());
-
-		return resolvedResourceIds;
-
+		return pidToForcedIdMap.getResolvedResourceIds();
 	}
 
 }

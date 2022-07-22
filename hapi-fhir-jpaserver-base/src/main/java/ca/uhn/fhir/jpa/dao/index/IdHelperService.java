@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -592,7 +593,7 @@ public class IdHelperService implements IIdHelperService {
 	}
 
 	@Override
-	public Map<ResourcePersistentId, Optional<String>> translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds) {
+	public PersistentIdToForcedIdMap translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 		Set<Long> thePids = theResourceIds.stream().map(t -> t.getIdAsLong()).collect(Collectors.toSet());
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
@@ -627,7 +628,7 @@ public class IdHelperService implements IIdHelperService {
 				convertRetVal.put(new ResourcePersistentId(k), v);
 			}
 		);
-		return convertRetVal;
+		return new PersistentIdToForcedIdMap(convertRetVal);
 	}
 
 	/**
@@ -683,9 +684,8 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nullable
 	public ResourcePersistentId getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
-		IAnyResource anyResource = (IAnyResource) theResource;
-		ResourcePersistentId retVal = new ResourcePersistentId(anyResource.getUserData(RESOURCE_PID));
-		if (retVal.getId() == null) {
+		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
+		if (retVal == null) {
 			IIdType id = theResource.getIdElement();
 			try {
 				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
@@ -708,16 +708,15 @@ public class IdHelperService implements IIdHelperService {
 	@Nonnull
 	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
-		if (retVal.getId() == null) {
-			throw new IllegalStateException(Msg.code(2102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
-			);
+		if (retVal == null) {
+			throw new IllegalStateException(Msg.code(2102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId()));
 		}
 		return retVal;
 	}
 
 	@Override
-	public IIdType resourceIdFromPidOrThrowException(String thePid, String resourceType) {
-		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(Long.parseLong(thePid));
+	public IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType) {
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!optionalResource.isPresent()) {
 			throw new ResourceNotFoundException(Msg.code(2103) + "Requested resource not found");
 		}
@@ -739,13 +738,8 @@ public class IdHelperService implements IIdHelperService {
 	public Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
-		Map<ResourcePersistentId, Optional<String>> pidToForcedIdMap = translatePidsToForcedIds(thePids);
+		PersistentIdToForcedIdMap pidToForcedIdMap = translatePidsToForcedIds(thePids);
 
-		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-			.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-			.collect(Collectors.toSet());
-
-		return resolvedResourceIds;
+		return pidToForcedIdMap.getResolvedResourceIds();
 	}
 }

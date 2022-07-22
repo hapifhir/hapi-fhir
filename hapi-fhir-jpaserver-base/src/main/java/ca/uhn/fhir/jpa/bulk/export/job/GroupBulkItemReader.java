@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.export.job;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
@@ -140,7 +141,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator() {
 		List<String> members = getMembers();
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), ids);
+		Set<ResourcePersistentId> resourcePersistentIds = new HashSet<>(myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), ids));
 
 		if (myMdmEnabled) {
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
@@ -148,18 +149,12 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
 			List<MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
-				addPersistentIdIfNotExist(resourcePersistentIds, tuple.getGoldenPid());
-				addPersistentIdIfNotExist(resourcePersistentIds, tuple.getSourcePid());
+				resourcePersistentIds.add(tuple.getGoldenPid());
+				resourcePersistentIds.add(tuple.getSourcePid());
 			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
 		return resourcePersistentIds.iterator();
-	}
-
-	private void addPersistentIdIfNotExist(List<ResourcePersistentId> theResourcePersistentIds, ResourcePersistentId theNewResourcePersistentId) {
-		if(!theResourcePersistentIds.stream().anyMatch(item -> item.getId().equals(theNewResourcePersistentId.getId()))){
-			theResourcePersistentIds.add(theNewResourcePersistentId);
-		}
 	}
 
 	/**
@@ -188,10 +183,8 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 		goldenResourceToSourcePidMap.forEach((key, value) -> {
 			String goldenResourceId = myIdHelperService.translatePidIdToForcedIdWithCache(new ResourcePersistentId(key)).orElse(key.toString());
 			Set<ResourcePersistentId> pids  = value.stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
-			Map<ResourcePersistentId, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(pids);
-			Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
-				.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
-				.collect(Collectors.toSet());
+			PersistentIdToForcedIdMap pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(pids);
+			Set<String> sourceResourceIds = pidsToForcedIds.getResolvedResourceIds();
 			sourceResourceIds
 				.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
 		});
@@ -235,16 +228,14 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 			});
 
 			Set<ResourcePersistentId> pids  = uniquePids.stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
-			Map<ResourcePersistentId, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(pids);
+			PersistentIdToForcedIdMap pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(pids);
 
 			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
 			extract(goldenPidTargetPidTuples, goldenResourceToSourcePidMap);
 			populateMdmResourceCache(goldenPidTargetPidTuples);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-				.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-				.collect(Collectors.toSet());
+			Set<String> resolvedResourceIds = pidToForcedIdMap.getResolvedResourceIds();
 
 			expandedIds.addAll(resolvedResourceIds);
 		}
@@ -258,8 +249,8 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 
 	private void extract(List<MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
 		for (MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
-			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid().getIdAsLong();
-			Long sourcePid = goldenPidTargetPidTuple.getSourcePid().getIdAsLong();
+			Long goldenPid = goldenPidTargetPidTuple.getGoldenPidAsLong();
+			Long sourcePid = goldenPidTargetPidTuple.getGoldenPidAsLong();
 			theGoldenResourceToSourcePidMap.computeIfAbsent(goldenPid, key -> new HashSet<>()).add(sourcePid);
 		}
 	}

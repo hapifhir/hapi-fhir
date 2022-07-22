@@ -43,4 +43,20 @@ public class MdmPidTuple {
 	public ResourcePersistentId getSourcePid(){
 		return mySourcePid;
 	}
+
+	public Long getGoldenPidAsLong() {
+		return myGoldenPid.getIdAsLong();
+	}
+
+	public Long getSourcePidAsLong() {
+		return mySourcePid.getIdAsLong();
+	}
+
+	public String getGoldenPidAsString() {
+		return (String) myGoldenPid.getId();
+	}
+
+	public String getSourcePidAsString() {
+		return (String) mySourcePid.getId();
+	}
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -132,7 +133,7 @@ public interface IIdHelperService {
 
 	Optional<String> translatePidIdToForcedIdWithCache(ResourcePersistentId theResourcePersistentId);
 
-	Map<ResourcePersistentId, Optional<String>> translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds);
+	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
@@ -151,7 +152,7 @@ public interface IIdHelperService {
 	@Nonnull
 	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
 
-	IIdType resourceIdFromPidOrThrowException(String thePid, String resourceType);
+	IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType);
 
 	/**
 	 * Given a set of PIDs, return a set of public FHIR Resource IDs.

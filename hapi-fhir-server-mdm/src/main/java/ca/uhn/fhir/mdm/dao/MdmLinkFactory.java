@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.mdm.dao;
+package ca.uhn.fhir.mdm.dao;
 
 /*-
  * #%L
@@ -20,33 +20,26 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmLinkFactory {
 	private final IMdmSettings myMdmSettings;
+	private final IMdmLinkImplFactory myMdmLinkImplFactory;
 
 	@Autowired
-	public MdmLinkFactory(IMdmSettings theMdmSettings) {
+	public MdmLinkFactory(IMdmSettings theMdmSettings, IMdmLinkImplFactory theMdmLinkImplFactory) {
 		myMdmSettings = theMdmSettings;
+		myMdmLinkImplFactory = theMdmLinkImplFactory;
 	}
 
 	/**
-	 * Create a new {@link MdmLink}, populating it with the version of the ruleset used to create it.
+	 * Create a new {@link IMdmLink}, populating it with the version of the ruleset used to create it.
 	 *
-	 * @return the new {@link MdmLink}
+	 * @return the new {@link IMdmLink}
 	 */
 	public IMdmLink newMdmLink() {
-		// TODO check if mongo or jpa, return MDMLinkDocument or MDMLink accordingly
-		try {
-			IMdmLink mdmLink = myMdmSettings.getMdmLInkImpl().getDeclaredConstructor().newInstance();
-			mdmLink.setVersion(myMdmSettings.getRuleVersion());
-			return mdmLink;
-		}
-		catch (Exception e){
-			return null;
-		}
+		return myMdmLinkImplFactory.newMdmLinkImpl().setVersion(myMdmSettings.getRuleVersion());
 	}
 }
