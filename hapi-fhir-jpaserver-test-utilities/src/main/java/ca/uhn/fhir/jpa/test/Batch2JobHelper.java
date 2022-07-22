@@ -44,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
 
+	private static final int BATCH_SIZE = 100;
+
 	@Autowired
 	private IJobMaintenanceService myJobMaintenanceService;
 
@@ -128,7 +130,7 @@ public class Batch2JobHelper {
 		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionIdAndStatuses(
 			theJobDefinitionId,
 			new HashSet<>(Arrays.asList(StatusEnum.values())),
-			100,
+			BATCH_SIZE,
 			0);
 		// then await completion status
 		awaitJobCompletions(instances);
