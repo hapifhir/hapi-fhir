@@ -83,6 +83,9 @@ public class HapiMessageHeaders implements IModelJson {
 
 
 	public Map<String, Object> getCustomHeaders() {
+		if (this.headers == null) {
+			return new HashMap<>();
+		}
 		return this.headers;
 	}
 
