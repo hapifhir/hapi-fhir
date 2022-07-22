@@ -1282,7 +1282,7 @@ public class QueryStack {
 				TokenParam nextParam = (TokenParam) nextParamUncasted;
 				if (isNotBlank(nextParam.getValue())) { return true; }
 				if (isNotBlank(nextParam.getSystem())) {
-					throw new TokenParamFormatInvalidRequestException(theParamName, nextParam.getValueAsQueryToken(myFhirContext));
+					throw new TokenParamFormatInvalidRequestException(Msg.code(1218),theParamName, nextParam.getValueAsQueryToken(myFhirContext));
 				}
 			}
 
