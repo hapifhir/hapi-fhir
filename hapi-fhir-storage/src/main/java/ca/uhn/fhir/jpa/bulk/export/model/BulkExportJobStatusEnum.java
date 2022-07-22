@@ -21,8 +21,10 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  */
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.batch.core.BatchStatus;
 
+/**
+ * This may be in a "jpa" package, but it is not a jpa model!
+ */
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum BulkExportJobStatusEnum {
 
@@ -34,18 +36,5 @@ public enum BulkExportJobStatusEnum {
 	BUILDING,
 	COMPLETE,
 	ERROR;
-
-	public static BulkExportJobStatusEnum fromBatchStatus(BatchStatus status) {
-		switch (status) {
-			case STARTING :
-				return BulkExportJobStatusEnum.SUBMITTED;
-			case COMPLETED :
-				return BulkExportJobStatusEnum.COMPLETE;
-			case STARTED :
-				return BulkExportJobStatusEnum.BUILDING;
-			default :
-				return BulkExportJobStatusEnum.ERROR;
-		}
-	}
 
 }

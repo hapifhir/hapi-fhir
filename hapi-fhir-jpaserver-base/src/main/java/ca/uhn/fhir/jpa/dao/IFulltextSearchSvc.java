@@ -47,14 +47,14 @@ public interface IFulltextSearchSvc {
 
 
 	/**
-	 * Query the index for a scrollable iterator of results.
-	 * No max size to the result iterator.
+	 * Query the index for a plain list (non-scrollable) iterator of results.
 	 *
 	 * @param theResourceName e.g. Patient
 	 * @param theParams The search query
+	 * @param theMaxResultsToFetch maximum results to fetch
 	 * @return Iterator of result PIDs
 	 */
-	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
+	ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch);
 
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing

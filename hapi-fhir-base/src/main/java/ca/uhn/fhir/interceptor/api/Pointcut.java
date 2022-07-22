@@ -871,11 +871,15 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may make changes to the delivery payload, or make changes to the
 	 * canonical subscription such as adding headers, modifying the channel
 	 * endpoint, etc.
+	 * Furthermore, you may modify the outgoing message wrapper, for example adding headers via ResourceModifiedJsonMessage field.
+	 *
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
+	 *
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -883,7 +887,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
 
 
 	/**

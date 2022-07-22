@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 3829
+jira: SMILE-4178
+title: "Previously when a `Subscription` was created using the package installer and with partitioning enabled, 
+there was an error reading the partition name inside the `SubscriptionRegisteringSubscriber`. This fix checks 
+incoming `Subscription` requests for a `RequestPartitionId` with a list of partition names containing null values 
+and uses `RequestPartitionId#defaultPartition()` to obtain the default partition instead."

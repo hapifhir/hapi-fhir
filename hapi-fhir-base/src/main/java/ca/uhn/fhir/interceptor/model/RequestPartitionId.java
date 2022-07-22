@@ -49,7 +49,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class RequestPartitionId implements IModelJson {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
-
 	@JsonProperty("partitionDate")
 	private final LocalDate myPartitionDate;
 	@JsonProperty("allPartitions")

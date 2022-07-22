@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -66,8 +67,15 @@ public class ReindexProviderTest {
 	public void beforeEach() {
 		myServerExtension.registerProvider(mySvc);
 
-		when(myJobCoordinator.startInstance(any())).thenReturn(TEST_JOB_ID);
+		when(myJobCoordinator.startInstance(any()))
+			.thenReturn(createJobStartResponse());
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequest(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
+	}
+
+	private Batch2JobStartResponse createJobStartResponse() {
+		Batch2JobStartResponse response = new Batch2JobStartResponse();
+		response.setJobId(TEST_JOB_ID);
+		return response;
 	}
 
 	@AfterEach
