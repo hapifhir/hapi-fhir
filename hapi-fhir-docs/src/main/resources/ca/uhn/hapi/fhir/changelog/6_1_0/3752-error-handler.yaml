@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3752
+title: "Batch2 job definitions can now optionally provide an error handler callback that will be called when a job
+instance fails, errors or is cancelled."

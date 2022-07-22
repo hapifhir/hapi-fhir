@@ -24,8 +24,10 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.CoverageIgnore;
@@ -45,9 +47,13 @@ import org.hl7.fhir.dstu3.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
@@ -59,6 +65,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+
+	private RestfulServerConfiguration myServerConfiguration;
 
 	/**
 	 * Constructor
@@ -78,6 +86,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
+		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
 		setIncludeResourceCounts(true);
@@ -117,7 +126,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
-				ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName);
+				ResourceSearchParams searchParams = constructCompleteSearchParamList(resourceName);
 				for (RuntimeSearchParam runtimeSp : searchParams.values()) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
@@ -156,6 +165,8 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 				}
 
+				updateIncludesList(nextResource, searchParams);
+				updateRevIncludesList(nextResource, searchParams);
 			}
 		}
 
@@ -173,6 +184,80 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
+	}
+
+	private ResourceSearchParams constructCompleteSearchParamList(String theResourceName) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+
+
+		/*
+		 * If we have an explicit registry (which will be the case in the JPA server) we use it as priority,
+		 * but also fill in any gaps using params from the server itself. This makes sure we include
+		 * global params like _lastUpdated
+		 */
+		ResourceSearchParams searchParams;
+		ResourceSearchParams serverConfigurationActiveSearchParams = myServerConfiguration.getActiveSearchParams(theResourceName);
+		if (mySearchParamRegistry != null) {
+			searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName).makeCopy();
+			if (searchParams == null) {
+				return ResourceSearchParams.empty(theResourceName);
+			}
+			for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
+				if (nextBuiltInSpName.startsWith("_") &&
+					!searchParams.containsParamName(nextBuiltInSpName) &&
+					searchParamEnabled(nextBuiltInSpName)) {
+					searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
+				}
+			}
+		} else {
+			searchParams = serverConfigurationActiveSearchParams;
+		}
+
+		return searchParams;
+	}
+
+	protected boolean searchParamEnabled(String theSearchParam) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+		return !Constants.PARAM_FILTER.equals(theSearchParam) || myDaoConfig.isFilterParameterEnabled();
+	}
+
+
+	private void updateRevIncludesList(CapabilityStatementRestResourceComponent theNextResource, ResourceSearchParams theSearchParams) {
+		// Add RevInclude to CapabilityStatement.rest.resource
+		if (theNextResource.getSearchRevInclude().isEmpty()) {
+			String resourcename = theNextResource.getType();
+			Set<String> allResourceTypes = myServerConfiguration.collectMethodBindings().keySet();
+			for (String otherResourceType : allResourceTypes) {
+				if (isBlank(otherResourceType)) {
+					continue;
+				}
+				ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams(otherResourceType);
+				activeSearchParams.values()
+					.stream()
+					.filter(t -> isNotBlank(t.getName()))
+					.filter(t -> t.getTargets().contains(resourcename))
+					.forEach(t -> theNextResource.addSearchRevInclude(otherResourceType + ":" + t.getName()));
+			}
+		}
+
+
+	}
+
+	private void updateIncludesList(CapabilityStatementRestResourceComponent theResource, ResourceSearchParams theSearchParams) {
+		// Borrowed from hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.java
+		String resourceName = theResource.getType();
+		if (theResource.getSearchInclude().isEmpty()) {
+			List<String> includes = theSearchParams
+				.values()
+				.stream()
+				.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+				.map(t -> resourceName + ":" + t.getName())
+				.sorted().collect(Collectors.toList());
+			theResource.addSearchInclude("*");
+			for (String nextInclude : includes) {
+				theResource.addSearchInclude(nextInclude);
+			}
+		}
 	}
 
 	public boolean isIncludeResourceCounts() {

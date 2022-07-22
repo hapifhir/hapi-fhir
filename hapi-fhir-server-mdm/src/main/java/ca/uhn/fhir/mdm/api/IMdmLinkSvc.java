@@ -21,7 +21,10 @@ package ca.uhn.fhir.mdm.api;
  */
 
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+
+import java.util.List;
 
 public interface IMdmLinkSvc {
 
@@ -45,4 +48,10 @@ public interface IMdmLinkSvc {
 	 * @param theMdmTransactionContext
 	 */
 	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext);
+
+	/**
+	 * Delete all link records whose source or target points to the provided pids.
+	 * @param thePersistentIds
+	 */
+	void deleteLinksWithAnyReferenceTo(List<ResourcePersistentId> thePersistentIds);
 }

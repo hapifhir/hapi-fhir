@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.1.0-PRE2-SNAPSHOT</version>
+		<version>6.1.0-PRE16-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -143,6 +143,14 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>com.github.dnault</groupId>
+            <artifactId>xml-patch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dogote</groupId>
+            <artifactId>json-patch</artifactId>
+        </dependency>
 
 	</dependencies>
 	<build>

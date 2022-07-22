@@ -13,7 +13,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -128,7 +128,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@ContextConfiguration(classes = TestHibernateSearchAddInConfig.NoFT.class)
+@ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings("unchecked")
 public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3SearchNoFtTest.class);

@@ -20,29 +20,42 @@ package ca.uhn.fhir.jpa.bulk.export.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +66,12 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -65,19 +80,15 @@ public class BulkDataExportProvider {
 	private static final Logger ourLog = getLogger(BulkDataExportProvider.class);
 
 	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	private Set<String> myCompartmentResources;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
-	@VisibleForTesting
-	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
-	@VisibleForTesting
-	public void setBulkDataExportSvcForUnitTests(IBulkDataExportSvc theBulkDataExportSvc) {
-		myBulkDataExportSvc = theBulkDataExportSvc;
-	}
+	@Autowired
+	private IBatch2JobRunner myJobRunner;
 
 	/**
 	 * $export
@@ -90,11 +101,40 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
 	) {
+		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
 		BulkDataExportOptions bulkDataExportOptions = buildSystemBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
-		Boolean useCache = shouldUseCache(theRequestDetails);
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, useCache, theRequestDetails);
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		startJob(theRequestDetails, bulkDataExportOptions);
+	}
+
+	private void startJob(ServletRequestDetails theRequestDetails,
+								 BulkDataExportOptions theOptions) {
+		// permission check
+		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+
+		// get cache boolean
+		boolean useCache = shouldUseCache(theRequestDetails);
+
+		BulkExportParameters parameters = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
+		parameters.setUseExistingJobsFirst(useCache);
+
+		// start job
+		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
+
+		JobInfo info = new JobInfo();
+		info.setJobMetadataId(response.getJobId());
+
+		// We set it to submitted, even if it's using a cached job
+		// This isn't an issue because the actual status isn't used
+		// instead, when they poll for results, they'll get the real one
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+
+		writePollingLocationToResponseHeaders(theRequestDetails, info);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
@@ -134,25 +174,46 @@ public class BulkDataExportProvider {
 		ourLog.debug("_typeFilter={}", theTypeFilter);
 		ourLog.debug("_mdm=", theMdm);
 
-
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
+
 		BulkDataExportOptions bulkDataExportOptions = buildGroupBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter, theIdParam, theMdm);
-		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		if (bulkDataExportOptions.getResourceTypes() != null && !bulkDataExportOptions.getResourceTypes().isEmpty()) {
+			validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
+		} else {
+			// all patient resource types
+			bulkDataExportOptions.setResourceTypes(getPatientCompartmentResources());
+		}
+
+		startJob(theRequestDetails, bulkDataExportOptions);
 	}
 
 	private void validateResourceTypesAllContainPatientSearchParams(Set<String> theResourceTypes) {
 		if (theResourceTypes != null) {
 			List<String> badResourceTypes = theResourceTypes.stream()
 				.filter(resourceType -> !PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(resourceType))
-				.filter(resourceType -> !myBulkDataExportSvc.getPatientCompartmentResources().contains(resourceType))
+				.filter(resourceType -> !getPatientCompartmentResources().contains(resourceType))
 				.collect(Collectors.toList());
 
 			if (!badResourceTypes.isEmpty()) {
 				throw new InvalidRequestException(Msg.code(512) + String.format("Resource types [%s] are invalid for this type of export, as they do not contain search parameters that refer to patients.", String.join(",", badResourceTypes)));
 			}
 		}
+	}
+
+	private Set<String> getPatientCompartmentResources() {
+		if (myCompartmentResources == null) {
+			myCompartmentResources = myFhirContext.getResourceTypes().stream()
+				.filter(this::resourceTypeIsInPatientCompartment)
+				.collect(Collectors.toSet());
+		}
+		return myCompartmentResources;
+	}
+
+	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
+		return searchParams != null && searchParams.size() >= 1;
 	}
 
 	/**
@@ -169,8 +230,8 @@ public class BulkDataExportProvider {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
-		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(bulkDataExportOptions, shouldUseCache(theRequestDetails), theRequestDetails);
-		writePollingLocationToResponseHeaders(theRequestDetails, outcome);
+
+		startJob(theRequestDetails, bulkDataExportOptions);
 	}
 
 	/**
@@ -181,52 +242,82 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
 	) throws IOException {
-
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(theJobId.getValueAsString());
+		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
 
-		switch (status.getStatus()) {
-			case SUBMITTED:
-			case BUILDING:
-
-				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to " + status.getStatus() + " at " + new InstantType(status.getStatusTime()).getValueAsString());
-				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
-				break;
-
+		switch (info.getStatus()) {
 			case COMPLETE:
-
 				response.setStatus(Constants.STATUS_HTTP_200_OK);
 				response.setContentType(Constants.CT_JSON);
 
 				// Create a JSON response
 				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-				bulkResponseDocument.setTransactionTime(status.getStatusTime());
-				bulkResponseDocument.setRequest(status.getRequest());
-				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
+				bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
+
+				String report = info.getReport();
+				if (isEmpty(report)) {
+					// this should never happen, but just in case...
+					ourLog.error("No report for completed bulk export job.");
+					response.getWriter().close();
+				} else {
+					BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+
+					// if there is a message....
+					bulkResponseDocument.setMsg(results.getReportMsg());
+
 					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
-					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
-					bulkResponseDocument
-						.addOutput()
-						.setType(nextFile.getResourceType())
-						.setUrl(nextUrl);
+
+					for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
+						String resourceType = entrySet.getKey();
+						List<String> binaryIds = entrySet.getValue();
+						for (String binaryId : binaryIds) {
+							IIdType iId = new IdType(binaryId);
+							String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
+							bulkResponseDocument
+								.addOutput()
+								.setType(resourceType)
+								.setUrl(nextUrl);
+						}
+					}
+					JsonUtil.serialize(bulkResponseDocument, response.getWriter());
+					response.getWriter().close();
 				}
-				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
-				response.getWriter().close();
 				break;
-
 			case ERROR:
-
 				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 				response.setContentType(Constants.CT_FHIR_JSON);
 
 				// Create an OperationOutcome response
 				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
+
+				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", info.getErrorMsg(), null, null);
 				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
 				response.getWriter().close();
+				break;
+			case BUILDING:
+			case SUBMITTED:
+			default:
+				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+				String dateString = getTransitionTimeOfJobInfo(info);
+				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to "
+					+ info.getStatus()
+					+ " at "
+					+ dateString);
+				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				break;
+		}
+	}
+
+	private String getTransitionTimeOfJobInfo(Batch2JobInfo theInfo) {
+		if (theInfo.getEndTime() != null) {
+			return new InstantType(theInfo.getEndTime()).getValueAsString();
+		} else if (theInfo.getStartTime() != null) {
+			return new InstantType(theInfo.getStartTime()).getValueAsString();
+		} else {
+			// safety check
+			return "";
 		}
 	}
 
@@ -275,9 +366,9 @@ public class BulkDataExportProvider {
 		return bulkDataExportOptions;
 	}
 
-	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, IBulkDataExportSvc.JobInfo theOutcome) {
+	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
-		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobId();
+		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 
@@ -314,5 +405,4 @@ public class BulkDataExportProvider {
 
 		return retVal;
 	}
-
 }

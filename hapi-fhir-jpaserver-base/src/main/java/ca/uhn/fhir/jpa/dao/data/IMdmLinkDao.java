@@ -31,6 +31,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaRepository {
@@ -42,20 +43,28 @@ public interface IMdmLinkDao extends JpaRepository<MdmLink, Long>, IHapiFhirJpaR
 	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 
+	@Modifying
+	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid IN (:goldenPids) OR mySourcePid IN (:goldenPids)")
+	void deleteLinksWithAnyReferenceToPids(@Param("goldenPids") List<Long> theResourcePids);
+
 	@Query("SELECT ml2.myGoldenResourcePid as goldenPid, ml2.mySourcePid as sourcePid FROM MdmLink ml2 " +
 		"WHERE ml2.myMatchResult=:matchResult " +
 		"AND ml2.myGoldenResourcePid IN (" +
-			"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
-			"INNER JOIN ResourceLink hrl " +
-			"ON hrl.myTargetResourcePid=ml.mySourcePid " +
-			"AND hrl.mySourceResourcePid=:groupPid " +
-			"AND hrl.mySourcePath='Group.member.entity' " +
-			"AND hrl.myTargetResourceType='Patient'" +
+		"SELECT ml.myGoldenResourcePid FROM MdmLink ml " +
+		"INNER JOIN ResourceLink hrl " +
+		"ON hrl.myTargetResourcePid=ml.mySourcePid " +
+		"AND hrl.mySourceResourcePid=:groupPid " +
+		"AND hrl.mySourcePath='Group.member.entity' " +
+		"AND hrl.myTargetResourceType='Patient'" +
 		")")
 	List<MdmPidTuple> expandPidsFromGroupPidGivenMatchResult(@Param("groupPid") Long theGroupPid, @Param("matchResult") MdmMatchResultEnum theMdmMatchResultEnum);
 
+	@Query("SELECT ml FROM MdmLink ml WHERE ml.mySourcePid = :sourcePid AND ml.myMatchResult = :matchResult")
+	Optional<MdmLink> findBySourcePidAndMatchResult(@Param("sourcePid") Long theSourcePid, @Param("matchResult") MdmMatchResultEnum theMatch);
+
 	interface MdmPidTuple {
 		Long getGoldenPid();
+
 		Long getSourcePid();
 	}
 

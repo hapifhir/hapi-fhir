@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.bulk.imprt.job;
  */
 
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.bulk.export.job.CreateBulkExportEntityTasklet;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -38,8 +37,16 @@ public class CreateBulkImportEntityTasklet implements Tasklet {
 
 		//We can leave early if they provided us with an existing job.
 		ValidateUtil.isTrueOrThrowInvalidRequest(jobParameters.containsKey(BatchConstants.JOB_UUID_PARAMETER), "Job doesn't have a UUID");
-		CreateBulkExportEntityTasklet.addUUIDToJobContext(theChunkContext, (String) jobParameters.get(BatchConstants.JOB_UUID_PARAMETER));
+		addUUIDToJobContext(theChunkContext, (String) jobParameters.get(BatchConstants.JOB_UUID_PARAMETER));
 		return RepeatStatus.FINISHED;
 	}
 
+	public void addUUIDToJobContext(ChunkContext theChunkContext, String theJobUUID) {
+		theChunkContext
+			.getStepContext()
+			.getStepExecution()
+			.getJobExecution()
+			.getExecutionContext()
+			.putString(BatchConstants.JOB_UUID_PARAMETER, theJobUUID);
+	}
 }

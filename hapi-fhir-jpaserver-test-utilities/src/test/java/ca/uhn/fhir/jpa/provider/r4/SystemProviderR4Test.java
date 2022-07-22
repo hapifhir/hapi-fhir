@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
@@ -17,6 +16,7 @@ import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.rest.server.provider.DeleteExpungeProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -62,6 +61,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -822,13 +822,22 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		obsInactive.setSubject(new Reference(pDelId.toUnqualifiedVersionless()));
 		IIdType obsDelId = myClient.create().resource(obsInactive).execute().getId();
 
+		DiagnosticReport diagActive = new DiagnosticReport();
+		diagActive.setSubject(new Reference(pKeepId.toUnqualifiedVersionless()));
+		IIdType dKeepId = myClient.create().resource(diagActive).execute().getId();
+
+		DiagnosticReport diagInactive = new DiagnosticReport();
+		diagInactive.setSubject(new Reference(pDelId.toUnqualifiedVersionless()));
+		IIdType diagDelId = myClient.create().resource(diagInactive).execute().getId();
+
 		// validate setup
 		assertEquals(14, getAllResourcesOfType("Patient").getTotal());
 		assertEquals(2, getAllResourcesOfType("Observation").getTotal());
+		assertEquals(2, getAllResourcesOfType("DiagnosticReport").getTotal());
 
 		Parameters input = new Parameters();
-		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Observation?subject.active=false");
-		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Observation?subject.active=false");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "DiagnosticReport?subject.active=false");
 		int batchSize = 2;
 		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
 
@@ -842,18 +851,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			.execute();
 
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
 
-		Long jobId = BatchHelperR4.jobIdFromParameters(response);
+		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
 
 		// validate
 
-		// 1 observation
-		// + 12/batchSize inactive patients
-		// + 1 patient with id pDelId
-		// = 1 + 6 + 1 = 8
-		assertEquals(8, myBatchJobHelper.getReadCount(jobId));
-		assertEquals(8, myBatchJobHelper.getWriteCount(jobId));
+		myBatch2JobHelper.awaitJobCompletion(jobId);
+		assertEquals(2, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
@@ -861,11 +865,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertThat(observations, hasSize(1));
 		assertEquals(oKeepId, observations.get(0).getIdElement());
 
-		Bundle patientBundle = getAllResourcesOfType("Patient");
-		List<Patient> patients = BundleUtil.toListOfResourcesOfType(myFhirContext, patientBundle, Patient.class);
-		assertThat(patients, hasSize(1));
-		assertEquals(pKeepId, patients.get(0).getIdElement());
-
+		Bundle diagBundle = getAllResourcesOfType("DiagnosticReport");
+		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
+		assertThat(diags, hasSize(1));
+		assertEquals(dKeepId, diags.get(0).getIdElement());
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {

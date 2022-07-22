@@ -21,10 +21,8 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.batch.mdm.MdmBatchJobSubmitterFactoryImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
 import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
@@ -43,14 +41,9 @@ public class MdmCommonConfig {
 		return new MdmSearchExpandingInterceptor();
 	}
 
-	@Bean
-	IMdmBatchJobSubmitterFactory mdmBatchJobSubmitterFactory() {
-		return new MdmBatchJobSubmitterFactoryImpl();
-	}
 
 	@Bean
 	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
 		return new MdmLinkDeleteSvc();
 	}
-
 }

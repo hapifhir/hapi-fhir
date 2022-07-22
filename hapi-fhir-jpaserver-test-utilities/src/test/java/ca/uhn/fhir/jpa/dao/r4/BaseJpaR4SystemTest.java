@@ -32,6 +32,7 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 		}
 
 		when(mySrd.getServer()).thenReturn(myServer);
+		when(mySrd.getFhirContext()).thenReturn(myFhirContext);
 		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
 		when(mySrd.getServletRequest()).thenReturn(servletRequest);
 		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");

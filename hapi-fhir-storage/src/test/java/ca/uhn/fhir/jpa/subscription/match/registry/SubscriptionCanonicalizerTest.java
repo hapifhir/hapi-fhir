@@ -33,7 +33,7 @@ class SubscriptionCanonicalizerTest {
 		Extension sendDeleteMessagesExtension = new Extension()
 			.setUrl(EX_SEND_DELETE_MESSAGES)
 			.setValue(new BooleanType(true));
-		subscription.getExtension().add(sendDeleteMessagesExtension);
+		subscription.getChannel().addExtension(sendDeleteMessagesExtension);
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 

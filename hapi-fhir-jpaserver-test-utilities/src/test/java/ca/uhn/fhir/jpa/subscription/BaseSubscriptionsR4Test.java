@@ -117,7 +117,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {
-			subscription.getExtension().add(theExtension);
+			subscription.getChannel().addExtension(theExtension);
 		}
 
 		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
