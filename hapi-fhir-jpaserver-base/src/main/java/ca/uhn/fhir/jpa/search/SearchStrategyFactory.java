@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -68,10 +69,13 @@ public class SearchStrategyFactory {
 
 	public ISearchStrategy makeDirectStrategy(String theSearchUUID, String theResourceType, SearchParameterMap theParams, RequestDetails theRequestDetails) {
 		return () -> {
+			if (myFulltextSearchSvc == null) {
+				return new SimpleBundleProvider(Collections.emptyList(), theSearchUUID);
+			}
+
 			List<IBaseResource> resources = myFulltextSearchSvc.searchForResources(theResourceType, theParams);
 			SimpleBundleProvider result = new SimpleBundleProvider(resources, theSearchUUID);
-			// we don't know the size
-			result.setSize(null);
+			result.setSize(resources.size());
 			return result;
 		};
 	}

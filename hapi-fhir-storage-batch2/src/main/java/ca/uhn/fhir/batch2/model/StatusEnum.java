@@ -116,6 +116,7 @@ public enum StatusEnum {
 		retVal = ourNotEndedStatuses;
 		return retVal;
 	}
+
 	@Nonnull
 	private static void initializeStaticEndedStatuses() {
 		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);

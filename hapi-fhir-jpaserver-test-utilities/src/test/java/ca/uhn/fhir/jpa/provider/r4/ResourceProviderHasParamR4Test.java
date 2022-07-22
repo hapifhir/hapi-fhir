@@ -67,7 +67,6 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		//myDaoConfig.setUseLegacySearchBuilder(true);
 	}
 
 	@BeforeEach
