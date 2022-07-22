@@ -954,7 +954,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
 		// SearchParam - focalAccess
 		SearchParameter searchParameter1 = new SearchParameter();
-		searchParameter1.addBase("BodySite").addBase("Procedure");
+		searchParameter1.addBase("BodyStructure").addBase("Procedure");
 		searchParameter1.setCode("focalAccess");
 		searchParameter1.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");

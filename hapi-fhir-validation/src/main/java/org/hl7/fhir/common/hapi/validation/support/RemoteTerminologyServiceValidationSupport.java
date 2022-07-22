@@ -3,21 +3,19 @@ package org.hl7.fhir.common.hapi.validation.support;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
-import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
-import ca.uhn.fhir.context.support.TranslateConceptResult;
-import ca.uhn.fhir.context.support.TranslateConceptResults;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -27,15 +25,11 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -526,7 +520,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		ParametersUtil.addParameterToParameters(fhirContext, theParams, "codeableConcept", codeableConcept);
 	}
 
-	private TranslateConceptResults translateOutcomeToResults(FhirContext fhirContext, IBaseParameters outcome) {
+	public TranslateConceptResults translateOutcomeToResults(FhirContext fhirContext, IBaseParameters outcome) {
 		Optional<String> result = ParametersUtil.getNamedParameterValueAsString(fhirContext, outcome, "result");
 		Optional<String> message = ParametersUtil.getNamedParameterValueAsString(fhirContext, outcome, "message");
 		List<IBase> matches = ParametersUtil.getNamedParameters(fhirContext, outcome, "match");
