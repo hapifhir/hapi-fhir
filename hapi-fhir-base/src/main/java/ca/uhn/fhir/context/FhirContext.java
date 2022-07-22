@@ -899,23 +899,6 @@ public class FhirContext {
 		return getRestfulClientFactory().newGenericClient(theServerBase);
 	}
 
-	/**
-	 * Instantiates a new generic client. A generic client is able to perform any of the FHIR RESTful operations against
-	 * a compliant server, but does not have methods defining the specific functionality required (as is the case with
-	 * {@link #newRestfulClient(Class, String) non-generic clients}).
-	 *
-	 * <p>
-	 * Performance Note: This method performs an additional GET request to /metadata before
-	 * the desired request is performed.
-	 * </p>
-	 *
-	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
-	 * @param theTlsAuthentication Configuration to authenticate HTTPS server requests
-	 */
-	public IGenericClient newRestfulGenericClient(final String theServerBase, final TlsAuthentication theTlsAuthentication) {
-		return getRestfulClientFactory().newTlsGenericClient(theServerBase, theTlsAuthentication);
-	}
-
 	public FhirTerser newTerser() {
 		return new FhirTerser(this);
 	}

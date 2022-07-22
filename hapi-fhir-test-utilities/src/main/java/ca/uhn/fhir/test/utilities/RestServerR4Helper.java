@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -28,6 +29,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
+import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
@@ -241,6 +244,11 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 	public IInterceptorService getInterceptorService() {
 		return myRestServer.getInterceptorService();
+	}
+
+	@Override
+	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy){
+		myRestServer.setServerAddressStrategy(theServerAddressStrategy);
 	}
 
 	private static class MyRestfulServer extends RestfulServer {

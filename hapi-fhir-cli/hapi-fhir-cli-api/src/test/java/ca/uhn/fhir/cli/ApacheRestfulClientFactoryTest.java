@@ -39,22 +39,6 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) throws Exception {
-		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
-		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
-		HttpClient authenticatedClient = clientFactory.getNativeHttpClient(getTlsAuthentication());
-
-		HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
-		HttpResponse response = authenticatedClient.execute(request);
-		assertEquals(200, response.getStatusLine().getStatusCode());
-
-		String json = EntityUtils.toString(response.getEntity());
-		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-	}
-
-	@ParameterizedTest
-	@MethodSource("baseParamsProvider")
 	public void testNativeClientHttpsNoCredentials(FhirVersionEnum theFhirVersion) {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		ApacheRestfulClientFactory clientFactory = new ApacheRestfulClientFactory(fhirVersionParams.getFhirContext());
@@ -78,16 +62,6 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
 		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
-		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
-	}
-
-	@ParameterizedTest
-	@MethodSource("baseParamsProvider")
-	public void testGenericClientHttps(FhirVersionEnum theFhirVersion) {
-		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
-		String secureBase = fhirVersionParams.getSecureBase();
-		FhirContext context = fhirVersionParams.getFhirContext();
-		IBaseResource bundle = context.newRestfulGenericClient(secureBase, getTlsAuthentication()).search().forResource("Patient").execute();
 		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 

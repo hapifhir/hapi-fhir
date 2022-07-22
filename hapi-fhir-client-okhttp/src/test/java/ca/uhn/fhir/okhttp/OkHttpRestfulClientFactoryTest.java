@@ -91,19 +91,6 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) {
-		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
-		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
-		try {
-			clientFactory.getNativeClient(getTlsAuthentication());
-			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2118)+"HTTPS not supported for OkHttpCLient", e.getMessage());
-		}
-	}
-
-	@ParameterizedTest
-	@MethodSource("baseParamsProvider")
 	public void testNativeClientHttpsNoCredentials(FhirVersionEnum theFhirVersion) {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		OkHttpRestfulClientFactory clientFactory = new OkHttpRestfulClientFactory(fhirVersionParams.getFhirContext());
@@ -129,22 +116,6 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
 		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
 		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
-	}
-
-	@ParameterizedTest
-	@MethodSource("baseParamsProvider")
-	public void testGenericClientHttps(FhirVersionEnum theFhirVersion) {
-		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
-		String secureBase = fhirVersionParams.getSecureBase();
-		FhirContext context = fhirVersionParams.getFhirContext();
-		context.setRestfulClientFactory(new OkHttpRestfulClientFactory(context));
-
-		try {
-			context.newRestfulGenericClient(secureBase, getTlsAuthentication()).search().forResource("Patient").execute();
-			fail();
-		} catch (Exception e) {
-			assertEquals(Msg.code(2118) + "HTTPS not supported for OkHttpCLient", e.getMessage());
-		}
 	}
 
 	@ParameterizedTest

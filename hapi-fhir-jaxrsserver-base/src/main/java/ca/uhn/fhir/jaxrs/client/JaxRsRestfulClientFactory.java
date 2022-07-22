@@ -65,16 +65,8 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	public synchronized Client getNativeClientClient() {
-		return getNativeClientClient(null);
-	}
-
-	public synchronized Client getNativeClientClient(TlsAuthentication theTlsAuthentication) {
 		if (myNativeClient == null) {
 			ClientBuilder builder = ClientBuilder.newBuilder();
-			if(theTlsAuthentication != null){
-				SSLContext sslContext = TlsAuthenticationSvc.createSslContext(theTlsAuthentication);
-				builder.sslContext(sslContext);
-			}
 			myNativeClient = builder.build();
 		}
 
@@ -90,12 +82,6 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	@Override
 	public synchronized IHttpClient getHttpClient(StringBuilder url, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		Client client = getNativeClientClient();
-		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
-	}
-
-	@Override
-	public synchronized IHttpClient getTlsHttpsClient(StringBuilder url, TlsAuthentication theTlsAuthentication, Map<String, List<String>> theIfNoneExistParams, String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		Client client = getNativeClientClient(theTlsAuthentication);
 		return new JaxRsHttpClient(client, url, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
@@ -132,11 +118,6 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	@Override
 	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
 		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
-	}
-
-	@Override
-	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
-		return new JaxRsHttpClient(getNativeClientClient(theTlsAuthentication), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override

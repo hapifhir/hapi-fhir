@@ -100,7 +100,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 		return myTlsAuthentication;
 	}
 
-	private File createTlsAuthenticationFile() {
+	public File createTlsAuthenticationFile() {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 

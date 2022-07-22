@@ -21,6 +21,7 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
@@ -339,6 +341,11 @@ public class RestServerDstu3Helper extends BaseRestServerHelper implements IPoin
 	@Override
 	public IIdType createObservation(IBaseResource theBaseResource) {
 		return myRestServer.getObservationResourceProvider().store((Observation) theBaseResource);
+	}
+
+	@Override
+	protected void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
+		myRestServer.setServerAddressStrategy(theServerAddressStrategy);
 	}
 
 	public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {

@@ -59,11 +59,6 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 		 return getHttpClient(new StringBuilder(theServerBase), null, null, null, null);
     }
 
-	@Override
-	protected IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
-		return getTlsHttpsClient(new StringBuilder(theServerBase), theTlsAuthentication, null, null, null, null);
-	}
-
     @Override
     protected void resetHttpClient() {
         myNativeClient = null;
@@ -82,10 +77,6 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 		return myNativeClient;
 	}
 
-    public synchronized Call.Factory getNativeClient(TlsAuthentication theTlsAuthentication) {
-		 throw new UnsupportedOperationException(Msg.code(2118)+"HTTPS not supported for OkHttpCLient");
-    }
-
 	@Override
 	public IHttpClient getHttpClient(StringBuilder theUrl,
 												Map<String, List<String>> theIfNoneExistParams,
@@ -93,16 +84,6 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 												RequestTypeEnum theRequestType,
 												List<Header> theHeaders) {
 		return new OkHttpRestfulClient(getNativeClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
-	}
-
-	@Override
-	public IHttpClient getTlsHttpsClient(StringBuilder theUrl,
-													 TlsAuthentication theTlsAuthentication,
-													 Map<String, List<String>> theIfNoneExistParams,
-													 String theIfNoneExistString,
-													 RequestTypeEnum theRequestType,
-													 List<Header> theHeaders) {
-		return new OkHttpRestfulClient(getNativeClient(theTlsAuthentication), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
     /**

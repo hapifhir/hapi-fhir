@@ -20,11 +20,13 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.cli.client.HapiFhirCliRestfulClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.KeyStoreInfo;
@@ -488,13 +490,15 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName,
 																 String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
-
 
 		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theTlsAuthOptionName);
-		IGenericClient retVal = tlsConfig.isPresent()
-			? myFhirCtx.newRestfulGenericClient(theBaseUrl, tlsConfig.get())
-			: myFhirCtx.newRestfulGenericClient(theBaseUrl);
+		RestfulClientFactory restfulClientFactory = tlsConfig.isPresent()
+			? new HapiFhirCliRestfulClientFactory(myFhirCtx, tlsConfig.get())
+			: new HapiFhirCliRestfulClientFactory(myFhirCtx);
+
+		myFhirCtx.setRestfulClientFactory(restfulClientFactory);
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
+		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);
 		if (isNotBlank(basicAuthHeaderValue)) {

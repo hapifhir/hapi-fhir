@@ -87,24 +87,6 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 
 	@ParameterizedTest
 	@MethodSource("baseParamsProvider")
-	public void testNativeClientHttps(FhirVersionEnum theFhirVersion) {
-		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
-		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());
-		Client authenticatedClient = factory.getNativeClientClient(getTlsAuthentication());
-
-		Response response = authenticatedClient
-			.target(fhirVersionParams.getSecuredPatientEndpoint())
-			.request(MediaType.JSON_UTF_8.toString())
-			.get(Response.class);
-
-		assertEquals(200, response.getStatus());
-		String json = response.readEntity(String.class);
-		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
-	}
-
-	@ParameterizedTest
-	@MethodSource("baseParamsProvider")
 	public void testNativeClientHttpsNoCredentials(FhirVersionEnum theFhirVersion) {
 		FhirVersionParams fhirVersionParams = getFhirVersionParams(theFhirVersion);
 		JaxRsRestfulClientFactory factory = new JaxRsRestfulClientFactory(fhirVersionParams.getFhirContext());

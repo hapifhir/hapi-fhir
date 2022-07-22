@@ -25,8 +25,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.tls.KeyStoreType;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.IServerAddressStrategy;
+import ca.uhn.fhir.tls.KeyStoreType;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -38,6 +40,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.Servlet;
 import java.net.ServerSocket;
@@ -57,6 +60,9 @@ public abstract class BaseRestServerHelper {
 	protected String myBase;
 	protected String mySecureBase;
 	protected IGenericClient myClient;
+
+	@RegisterExtension
+	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
 	public BaseRestServerHelper(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
@@ -105,6 +111,7 @@ public abstract class BaseRestServerHelper {
 
 		myFhirContext.getRestfulClientFactory().setConnectTimeout(60000);
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
+
 		myClient = myFhirContext.newRestfulGenericClient(myBase);
 		myClient.registerInterceptor(new LoggingInterceptor(false));
 	}
@@ -191,4 +198,12 @@ public abstract class BaseRestServerHelper {
 	public abstract IIdType createObservationForPatient(IIdType theFirstTargetPatientId);
 
 	public abstract IIdType createObservation(IBaseResource theBaseResource);
+
+	public void setServerAddressStrategy(boolean theUseHttps){
+		String path = theUseHttps ? mySecureBase : myBase;
+		HardcodedServerAddressStrategy strategy = new HardcodedServerAddressStrategy(path);
+		setServerAddressStrategy(strategy);
+	}
+
+	protected abstract void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy);
 }

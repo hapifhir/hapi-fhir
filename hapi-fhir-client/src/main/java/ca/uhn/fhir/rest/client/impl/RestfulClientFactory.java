@@ -19,24 +19,35 @@ package ca.uhn.fhir.rest.client.impl;
  * limitations under the License.
  * #L%
  */
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.*;
-import java.util.*;
 
-import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
+import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
+import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.*;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
-import ca.uhn.fhir.rest.client.method.BaseMethodBinding;
-import ca.uhn.fhir.util.FhirTerser;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for a REST client factory implementation
@@ -175,14 +186,6 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	public synchronized IGenericClient newGenericClient(String theServerBase) {
 		validateConfigured();
 		IHttpClient httpClient = getHttpClient(theServerBase);
-
-		return new GenericClient(myContext, httpClient, theServerBase, this);
-	}
-
-	@Override
-	public synchronized IGenericClient newTlsGenericClient(String theServerBase, TlsAuthentication theTlsAuthentication) {
-		validateConfigured();
-		IHttpClient httpClient = getHttpClient(theServerBase, theTlsAuthentication);
 
 		return new GenericClient(myContext, httpClient, theServerBase, this);
 	}
@@ -382,17 +385,6 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	 * @return the http client
 	 */
 	protected abstract IHttpClient getHttpClient(String theServerBase);
-
-	/**
-	 * Get the http client for the given server base
-	 *
-	 * @param theServerBase
-	 * 			the server base
-	 * @param theTlsAuthentication
-	 * 			Configuration to authenticate HTTPS server requests
-	 * @return the http client
-	 */
-	protected abstract IHttpClient getHttpClient(String theServerBase, TlsAuthentication theTlsAuthentication);
 
 	/**
 	 * Reset the http client. This method is used when parameters have been set and a
