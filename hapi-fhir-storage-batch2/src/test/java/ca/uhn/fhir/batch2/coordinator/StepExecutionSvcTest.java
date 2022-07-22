@@ -19,6 +19,7 @@ import ca.uhn.fhir.batch2.model.JobDefinitionReductionStep;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
@@ -34,13 +35,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -58,6 +61,7 @@ import static org.mockito.Mockito.when;
 public class StepExecutionSvcTest {
 	private static final String INSTANCE_ID = "instanceId";
 	private static final String JOB_DEFINITION_ID = "jobDefId";
+	public static final String REDUCTION_STEP_ID = "step last";
 
 	// static internal use classes
 
@@ -152,7 +156,7 @@ public class StepExecutionSvcTest {
 		);
 
 		JobDefinitionStep<TestJobParameters, StepInputData, OT> step = (JobDefinitionStep<TestJobParameters, StepInputData, OT>) getJobDefinitionStep(
-			"stepId",
+			REDUCTION_STEP_ID,
 			theStepType
 		);
 
@@ -193,7 +197,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS());
@@ -254,7 +258,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		doThrow(new RuntimeException(errorMsg))
 			.when(myReductionStep).consume(any(ChunkExecutionDetails.class));
@@ -302,7 +306,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
@@ -347,7 +351,7 @@ public class StepExecutionSvcTest {
 		// when
 		when(workCursor.isReductionStep())
 			.thenReturn(true);
-		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(true)))
+		when(myJobPersistence.fetchAllWorkChunksForStepIterator(eq(INSTANCE_ID), eq(REDUCTION_STEP_ID)))
 			.thenReturn(chunks.iterator());
 		when(myReductionStep.consume(any(ChunkExecutionDetails.class)))
 			.thenReturn(ChunkOutcome.SUCCESS())
@@ -492,9 +496,68 @@ public class StepExecutionSvcTest {
 			fail("Expected Exception to be thrown");
 		} catch (JobStepFailedException jobStepFailedException) {
 			assertTrue(jobStepFailedException.getMessage().contains(msg));
-		} catch (Exception anythingElse) {
-			fail(anythingElse.getMessage());
 		}
+	}
+
+	@Test
+	public void doExecution_stepWorkerThrowsRandomExceptionForever_eventuallyMarksAsFailedAndReturnsFalse() {
+		// setup
+		int counter = 0;
+		AtomicInteger errorCounter = new AtomicInteger();
+		String errorMsg = "my Error Message";
+		JobInstance jobInstance = getTestJobInstance();
+		WorkChunk chunk = new WorkChunk();
+		chunk.setId("chunkId");
+		chunk.setData(new StepInputData());
+
+		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
+
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.INTERMEDIATE, workCursor, true, false);
+
+		// when
+		when(myNonReductionStep.run(any(), any()))
+			.thenThrow(new RuntimeException(errorMsg));
+		when(myJobPersistence.markWorkChunkAsErroredAndIncrementErrorCount(any(MarkWorkChunkAsErrorRequest.class)))
+			.thenAnswer((p) -> {
+				WorkChunk ec = new WorkChunk();
+				ec.setId(chunk.getId());
+				int count = errorCounter.getAndIncrement();
+				ec.setErrorCount(count);
+				return Optional.of(ec);
+			});
+
+		// test
+		Boolean processedOutcomeSuccessfully = null;
+		do {
+			try {
+				JobStepExecutorOutput<?, ?, ?> output = myExecutorSvc.doExecution(
+					workCursor,
+					jobInstance,
+					chunk
+				);
+				/*
+				 * Getting a value here means we are no longer
+				 * throwing exceptions. Which is the desired outcome.
+				 * We just now need to ensure that this outcome is
+				 * "false"
+				 */
+				processedOutcomeSuccessfully = output.isSuccessful();
+			} catch (JobStepFailedException ex) {
+				assertTrue(ex.getMessage().contains(errorMsg));
+				counter++;
+			}
+			/*
+			 * +2 because...
+			 * we check for > MAX_CHUNK_ERROR_COUNT (+1)
+			 * we want it to run one extra time here (+1)
+			 */
+		} while (processedOutcomeSuccessfully == null && counter < StepExecutionSvc.MAX_CHUNK_ERROR_COUNT + 2);
+
+		// verify
+		assertNotNull(processedOutcomeSuccessfully);
+		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
+		assertEquals(StepExecutionSvc.MAX_CHUNK_ERROR_COUNT  + 1, counter);
+		assertFalse(processedOutcomeSuccessfully);
 	}
 
 	private void runExceptionThrowingTest(Exception theExceptionToThrow) {
@@ -542,12 +605,11 @@ public class StepExecutionSvcTest {
 		verify(myJobPersistence, never())
 			.markWorkChunksWithStatusAndWipeData(anyString(), anyList(), any(), any());
 		verify(myJobPersistence, never())
-			.fetchAllWorkChunksIterator(anyString(), anyBoolean());
+			.fetchAllWorkChunksForStepIterator(anyString(), anyString());
 	}
 
 	private JobInstance getTestJobInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setInstanceId(INSTANCE_ID);
+		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
 		instance.setParameters(new TestJobParameters());
 
 		return instance;
@@ -572,6 +634,7 @@ public class StepExecutionSvcTest {
 				.setJobDefinitionId(JOB_DEFINITION_ID)
 				.setJobDescription("Reduction job description")
 				.setJobDefinitionVersion(1)
+				.gatedExecution()
 				.setParametersType(TestJobParameters.class)
 				.addFirstStep(
 					"step 1",
@@ -580,7 +643,7 @@ public class StepExecutionSvcTest {
 					mock(IJobStepWorker.class) // we don't care about this step - we just need it
 				)
 				.addFinalReducerStep(
-					"step last",
+					REDUCTION_STEP_ID,
 					"description 2",
 					StepOutputData.class,
 					myReductionStep

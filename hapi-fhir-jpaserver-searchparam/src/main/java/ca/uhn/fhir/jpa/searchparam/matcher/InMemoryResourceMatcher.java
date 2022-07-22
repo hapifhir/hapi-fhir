@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.MetaUtil;
@@ -98,7 +99,7 @@ public class InMemoryResourceMatcher {
 				validationSupportState = ValidationSupportInitializationState.INITIALIZED;
 			} catch (BeansException | ConfigurationException ignore) {
 				// We couldn't get a validation support bean, and we don't want to waste cycles trying again
-				ourLog.warn(Msg.code(2095) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
+				ourLog.warn(Msg.code(2100) + "No bean satisfying IValidationSupport could be initialized. Qualifiers dependent on IValidationSupport will not be supported.");
 				validationSupportState = ValidationSupportInitializationState.FAILED;
 			}
 		}
@@ -129,6 +130,10 @@ public class InMemoryResourceMatcher {
 		} catch (UnsupportedOperationException e) {
 			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARSE_FAIL);
 		}
+		// wipjv consider merging InMemoryMatchResult with IAuthorizationSearchParamMatcher.Match match type
+//	} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+//		return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARAM);
+
 		searchParameterMap.clean();
 		return match(searchParameterMap, theResource, resourceDefinition, theSearchParams);
 	}
@@ -304,8 +309,27 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam paramDef, List<? extends IQueryParameterType> theNextAnd, ResourceIndexedSearchParams theSearchParams) {
-		return theNextAnd.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, paramDef, theSearchParams, token));
+	private boolean matchParams(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList, ResourceIndexedSearchParams theSearchParams) {
+
+		boolean isNegativeTest = isNegative(theParamDef, theOrList);
+		// negative tests like :not and :not-in must not match any or-clause, so we invert the quantifier.
+		if (isNegativeTest) {
+			return theOrList.stream().allMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+		} else {
+			return theOrList.stream().anyMatch(token -> matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theSearchParams, token));
+		}
+	}
+
+	/** Some modifiers are negative, and must match NONE of their or-list */
+	private boolean isNegative(RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theOrList) {
+		if (theParamDef.getParamType().equals(RestSearchParameterTypeEnum.TOKEN)) {
+			TokenParam tokenParam = (TokenParam) theOrList.get(0);
+			TokenParamModifier modifier = tokenParam.getModifier();
+			return modifier != null && modifier.isNegative();
+		} else {
+			return false;
+		}
+
 	}
 
 	private boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, ResourceIndexedSearchParams theSearchParams, IQueryParameterType theToken) {
@@ -318,6 +342,7 @@ public class InMemoryResourceMatcher {
 
 	/**
 	 * Checks whether a query parameter of type token matches one of the search parameters of an in-memory resource.
+	 * The :not modifier is supported.
 	 * The :in and :not-in qualifiers are supported only if a bean implementing IValidationSupport is available.
 	 * Any other qualifier will be ignored and the match will be treated as unqualified.
 	 * @param theModelConfig a model configuration
@@ -339,6 +364,8 @@ public class InMemoryResourceMatcher {
 					return theSearchParams.myTokenParams.stream()
 						.filter(t -> t.getParamName().equals(theParamName))
 						.noneMatch(t -> systemContainsCode(theQueryParam, t));
+				case NOT:
+					return !theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
 				default:
 					return theSearchParams.matchParam(theModelConfig, theResourceName, theParamName, theParamDef, theQueryParam);
 			}
@@ -422,6 +449,8 @@ public class InMemoryResourceMatcher {
 					case NOT_IN:
 						// Support for these qualifiers is dependent on an implementation of IValidationSupport being available to delegate the check to
 						return getValidationSupportOrNull() != null;
+					case NOT:
+						return true;
 					default:
 						return false;
 				}

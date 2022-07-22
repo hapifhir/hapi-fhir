@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3773
+title: "A batch2 state change regression was introduced recently that resulted in batch2 jobs not being properly
+completed.  This has been corrected."

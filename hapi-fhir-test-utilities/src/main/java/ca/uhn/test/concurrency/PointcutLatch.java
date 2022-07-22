@@ -79,6 +79,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		return myLastInvoke.get();
 	}
 
+	// Useful for debugging when you need more time to step through a method
 	public PointcutLatch setDefaultTimeoutSeconds(int theDefaultTimeoutSeconds) {
 		myDefaultTimeoutSeconds = theDefaultTimeoutSeconds;
 		return this;
@@ -146,7 +147,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			CountDownLatch latch = myCountdownLatch.get();
 			Validate.notNull(latch, getName() + " awaitExpected() called before setExpected() called.");
 			if (!latch.await(timeoutSecond, TimeUnit.SECONDS)) {
-				throw new AssertionError(Msg.code(1483) + getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
+				throw new LatchTimedOutError(Msg.code(1483) + getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
 			}
 
 			// Defend against ConcurrentModificationException

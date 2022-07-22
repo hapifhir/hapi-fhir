@@ -140,10 +140,15 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
-	public void testUnsupportedNot() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE, myObservation, mySearchParams);
-		assertFalse(result.supported());
-		assertEquals("Parameter: <code:not> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+	public void testSupportedNot() {
+		String criteria = "code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE + ",a_different_code";
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(criteria, myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertFalse(result.matched(), ":not must not match any of the OR-list");
+
+		result = myInMemoryResourceMatcher.match("code:not=a_different_code,and_another", myObservation, mySearchParams);
+		assertTrue(result.supported());
+		assertTrue(result.matched(), ":not matches when NONE match");
 	}
 
 	@Test
@@ -184,14 +189,31 @@ public class InMemoryResourceMatcherR5Test {
 
 	@Test
 	public void testSupportedNotIn_NoMatch() {
-		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult().setCode(OBSERVATION_CODE);
-		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+		IValidationSupport.CodeValidationResult matchResult = new IValidationSupport.CodeValidationResult().setCode(OBSERVATION_CODE);
+		IValidationSupport.CodeValidationResult noMatchResult = new IValidationSupport.CodeValidationResult()
+			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+			.setMessage("not in");
 
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams);
+		// mock 2 value sets.  Once containing the code, and one not.
+		String otherValueSet = OBSERVATION_CODE_VALUE_SET_URI + "-different";
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), eq(OBSERVATION_CODE_VALUE_SET_URI))).thenReturn(matchResult);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), eq(otherValueSet))).thenReturn(noMatchResult);
+
+		String criteria = "code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI + "," + otherValueSet;
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(criteria, myObservation, mySearchParams);
 		assertTrue(result.supported());
-		assertFalse(result.matched());
+		assertFalse(result.matched(), ":not-in matches when NONE of the OR-list match");
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
+  }
+  
+   @Test
+	public void testUnrecognizedParam() {
+		try {
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match("foo=bar", myObservation, mySearchParams);
+		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
+			// expected
+		}
 	}
 
 	@Test

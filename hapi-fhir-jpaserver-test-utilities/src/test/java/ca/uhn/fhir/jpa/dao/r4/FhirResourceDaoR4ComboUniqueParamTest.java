@@ -364,7 +364,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		createUniqueIndexPatientIdentifier();
 
 		Patient pt = new Patient();
@@ -449,7 +449,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setCode("patient");
 		sp.setName("patient");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.addBase(ServiceRequest.class.getName());
+		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.subject.where(resolve() is Patient)");
 		String patientParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
 
@@ -458,7 +458,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setCode("performer");
 		sp.setName("performer");
 		sp.setType(Enumerations.SearchParamType.REFERENCE);
-		sp.addBase(ServiceRequest.class.getName());
+		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.performer");
 		String performerParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
 
@@ -467,7 +467,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 		sp.setCode("identifier");
 		sp.setName("identifier");
 		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.addBase(ServiceRequest.class.getName());
+		sp.addBase(ServiceRequest.class.getSimpleName());
 		sp.setExpression("ServiceRequest.identifier");
 		String identifierParamId = mySearchParameterDao.create(sp).getId().toUnqualifiedVersionless().getValue();
 
@@ -1043,7 +1043,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testSearchSynchronousUsingUniqueComposite() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();
@@ -1186,7 +1186,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testUniqueValuesAreIndexed_Reference_UsingModifierSyntax() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		createUniqueNameAndManagingOrganizationSps();
 
 		Organization org = new Organization();
@@ -1549,7 +1549,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	@Test
 	public void testReplaceOneWithAnother() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		createUniqueBirthdateAndGenderSps();
 
 		Patient pt1 = new Patient();

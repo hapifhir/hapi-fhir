@@ -59,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 	TestJPAConfig.class,
 	JpaBatch2Config.class,
 	Batch2JobsConfig.class,
-	TestHibernateSearchAddInConfig.DefaultLuceneHeap.class
+	TestHSearchAddInConfig.DefaultLuceneHeap.class
 })
 public class TestR5Config {
 
@@ -86,7 +86,7 @@ public class TestR5Config {
 	}
 
 	@Autowired
-	TestHibernateSearchAddInConfig.IHibernateSearchConfigurer hibernateSearchConfigurer;
+	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	@Autowired
 	private Environment myEnvironment;
 	private Exception myLastStackTrace;

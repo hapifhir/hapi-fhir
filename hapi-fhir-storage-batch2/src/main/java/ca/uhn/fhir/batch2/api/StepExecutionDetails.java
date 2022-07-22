@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.api;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 
@@ -30,17 +31,18 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 
 	private final PT myParameters;
 	private final IT myData;
-	private final String myInstanceId;
+	private final IJobInstance myInstance;
 	private final String myChunkId;
 
 	public StepExecutionDetails(@Nonnull PT theParameters,
 										 @Nullable IT theData,
-										 @Nonnull String theInstanceId,
+										 @Nonnull JobInstance theInstance,
 										 @Nonnull String theChunkId) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myData = theData;
-		myInstanceId = theInstanceId;
+		// Make a copy so the step worker can't change the one passed in
+		myInstance = new JobInstance(theInstance);
 		myChunkId = theChunkId;
 	}
 
@@ -71,8 +73,8 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	 * Returns the job instance ID being executed
 	 */
 	@Nonnull
-	public String getInstanceId() {
-		return myInstanceId;
+	public IJobInstance getInstance() {
+		return myInstance;
 	}
 
 	/**

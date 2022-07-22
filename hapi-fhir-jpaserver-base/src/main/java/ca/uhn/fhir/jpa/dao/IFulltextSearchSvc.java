@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -47,14 +47,14 @@ public interface IFulltextSearchSvc {
 
 
 	/**
-	 * Query the index for a scrollable iterator of results.
-	 * No max size to the result iterator.
+	 * Query the index for a plain list (non-scrollable) iterator of results.
 	 *
 	 * @param theResourceName e.g. Patient
 	 * @param theParams The search query
+	 * @param theMaxResultsToFetch maximum results to fetch
 	 * @return Iterator of result PIDs
 	 */
-	ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams);
+	ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch);
 
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
@@ -67,7 +67,7 @@ public interface IFulltextSearchSvc {
 
 	boolean isDisabled();
 
-	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+	ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
 	boolean supportsSomeOf(SearchParameterMap myParams);
 
@@ -95,4 +95,10 @@ public interface IFulltextSearchSvc {
 	 * Returns accurate hit count
 	 */
 	long count(String theResourceName, SearchParameterMap theParams);
+
+	List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams);
+
+	boolean supportsAllOf(SearchParameterMap theParams);
+
+
 }

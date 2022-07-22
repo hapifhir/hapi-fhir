@@ -104,7 +104,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@BeforeEach
 	public void disableAdvanceIndexing() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		// ugh - somewhere the hibernate round trip is mangling LocalDate to h2 date column unless the tz=GMT
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
@@ -112,6 +112,10 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
+		addCreateDefaultPartition();
+		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one to rewrite the resource url
+		addReadDefaultPartition(); // and one for the job request itself
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -119,7 +123,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		sp.setCode("extpatorg");
 		sp.setName("extpatorg");
 		sp.setExpression("Patient.extension('http://patext').value.as(Reference)");
-		Long id = mySearchParameterDao.create(sp).getId().getIdPartAsLong();
+		Long id = mySearchParameterDao.create(sp, mySrd).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
@@ -286,6 +290,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 	@Test
 	public void testCreateSearchParameter_DefaultPartitionWithDate() {
 		addCreateDefaultPartition(myPartitionDate);
+		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
+		addReadDefaultPartition(); // one to rewrite the resource url
+		addReadDefaultPartition(); // and one for the job request itself
 
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");

@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -73,6 +74,7 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -417,6 +419,36 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
+		CapabilityStatementRestResourceComponent res = rest.getResource().get(0);
+		assertEquals("DiagnosticReport", res.getType());
+
+		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
+//		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
+
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+
+		assertEquals(1, res.getSearchInclude().size());
+		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
+	}
+
+	@Test
+	public void testIncludesAndRevIncludes() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ProviderWithObservationSubjectSearch(), new ReadProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		String conf = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
@@ -1017,7 +1049,16 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
+	}
 
+	public static class ProviderWithObservationSubjectSearch {
+
+		@Search
+		public List<DiagnosticReport> findDiAgnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT) ReferenceParam thePatientId,
+																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+																						 @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unused")

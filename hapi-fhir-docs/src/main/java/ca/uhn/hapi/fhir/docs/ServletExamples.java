@@ -26,7 +26,17 @@ import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.*;
+import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.SearchPreferHandlingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.StaticCapabilityStatementInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -249,13 +259,14 @@ public class ServletExamples {
 	public class RestfulServerWithResponseTerminologyTranslationInterceptor extends RestfulServer {
 
 		private IValidationSupport myValidationSupport;
+		private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 		@Override
 		protected void initialize() throws ServletException {
 			// START SNIPPET: ResponseTerminologyTranslationInterceptor
 
 			// Create an interceptor that will map from a proprietary CodeSystem to LOINC
-			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport);
+			ResponseTerminologyTranslationInterceptor interceptor = new ResponseTerminologyTranslationInterceptor(myValidationSupport, myResponseTerminologyTranslationSvc);
 			interceptor.addMappingSpecification("http://examplelabs.org", "http://loinc.org");
 
 			// Register the interceptor

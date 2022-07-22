@@ -27,6 +27,8 @@ import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.search.HSearchSortHelperImpl;
+import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.provider.DaoRegistryResourceSupportedSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -34,8 +36,10 @@ import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -44,6 +48,15 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @Import({JpaConfig.class})
 public class HapiJpaConfig {
+
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+
+	@Bean
+	public IHSearchSortHelper extendedFulltextSortHelper() {
+		return new HSearchSortHelperImpl(mySearchParamRegistry);
+	}
+
 	@Bean
 	public IFulltextSearchSvc fullTextSearchSvc() {
 		return new FulltextSearchSvcImpl();

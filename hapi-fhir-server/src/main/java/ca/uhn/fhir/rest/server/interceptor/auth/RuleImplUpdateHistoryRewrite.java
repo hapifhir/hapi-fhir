@@ -41,7 +41,7 @@ public class RuleImplUpdateHistoryRewrite extends BaseRule {
 																	  IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		if (myAllRequests) {
 			if (theRequestDetails.getId() != null && theRequestDetails.getId().hasVersionIdPart() && theOperation == RestOperationTypeEnum.UPDATE) {
-				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+				return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 			}
 		}
 

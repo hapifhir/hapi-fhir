@@ -45,7 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -112,7 +112,6 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -163,6 +162,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.trim;
+
 
 /*
  * #%L
@@ -946,20 +946,22 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * Subclasses may override to provide behaviour. Called when a resource has been inserted into the database for the first time.
 	 *
-	 * @param theEntity   The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
-	 * @param theResource The resource being persisted
+	 * @param theEntity         The entity being updated (Do not modify the entity! Undefined behaviour will occur!)
+	 * @param theResource       The resource being persisted
+	 * @param theRequestDetails The request details, needed for partition support
 	 */
-	protected void postPersist(ResourceTable theEntity, T theResource) {
+	protected void postPersist(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
 		// nothing
 	}
 
 	/**
 	 * Subclasses may override to provide behaviour. Called when a pre-existing resource has been updated in the database
 	 *
-	 * @param theEntity   The resource
-	 * @param theResource The resource being persisted
+	 * @param theEntity         The resource
+	 * @param theResource       The resource being persisted
+	 * @param theRequestDetails The request details, needed for partition support
 	 */
-	protected void postUpdate(ResourceTable theEntity, T theResource) {
+	protected void postUpdate(ResourceTable theEntity, T theResource, RequestDetails theRequestDetails) {
 		// nothing
 	}
 
@@ -1401,7 +1403,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				myEntityManager.persist(entity.getForcedId());
 			}
 
-			postPersist(entity, (T) theResource);
+			postPersist(entity, (T) theResource, theRequest);
 
 		} else if (entity.getDeleted() != null) {
 			entity = myEntityManager.merge(entity);
@@ -1411,7 +1413,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			entity = myEntityManager.merge(entity);
 
-			postUpdate(entity, (T) theResource);
+			postUpdate(entity, (T) theResource, theRequest);
 		}
 
 		if (theCreateNewHistoryEntry) {
@@ -1575,7 +1577,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		encodedResource.setEncoding(theEncoding);
 	}
 
-	@NotNull
+	@Nonnull
 	private Map<String, Boolean> getSearchParamPresenceMap(ResourceTable entity, ResourceIndexedSearchParams newParams) {
 		Map<String, Boolean> retval = new HashMap<>();
 
@@ -1889,9 +1891,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		} else {
 			theEntity.setNarrativeText(parseNarrativeTextIntoWords(theResource));
 			theEntity.setContentText(parseContentTextIntoWords(theContext, theResource));
-			if (myDaoConfig.isAdvancedLuceneIndexing()) {
-				ExtendedLuceneIndexData luceneIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
-				theEntity.setLuceneIndexData(luceneIndexData);
+			if (myDaoConfig.isAdvancedHSearchIndexing()) {
+				ExtendedHSearchIndexData hSearchIndexData = myFulltextSearchSvc.extractLuceneIndexData(theResource, theNewParams);
+				theEntity.setLuceneIndexData(hSearchIndexData);
 			}
 		}
 	}

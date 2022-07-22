@@ -21,13 +21,17 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 
@@ -61,6 +65,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public synchronized List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+		return myWrap.fetchInstances(theRequest, theStart, theBatchSize);
+	}
+
+	@Override
 	public synchronized List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		return myWrap.fetchInstances(thePageSize, thePageIndex);
 	}
@@ -76,8 +85,23 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
+		return myWrap.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, thePageSize, thePageIndex);
+	}
+
+	@Override
+	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return myWrap.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
+	}
+
+	@Override
 	public synchronized void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
 		myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theChunkId, theErrorMessage);
+	}
+
+	@Override
+	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
+		return myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theParameters);
 	}
 
 	@Override
@@ -110,10 +134,15 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 		return myWrap.fetchAllWorkChunksIterator(theInstanceId, theWithData);
 	}
 
+	@Override
+	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
+	}
+
 
 	@Override
-	public synchronized void updateInstance(JobInstance theInstance) {
-		myWrap.updateInstance(theInstance);
+	public synchronized boolean updateInstance(JobInstance theInstance) {
+		return myWrap.updateInstance(theInstance);
 	}
 
 	@Override
@@ -127,12 +156,12 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized void markInstanceAsCompleted(String theInstanceId) {
-		myWrap.markInstanceAsCompleted(theInstanceId);
+	public synchronized boolean markInstanceAsCompleted(String theInstanceId) {
+		return myWrap.markInstanceAsCompleted(theInstanceId);
 	}
 
 	@Override
-	public void cancelInstance(String theInstanceId) {
-		myWrap.cancelInstance(theInstanceId);
+	public JobOperationResultJson cancelInstance(String theInstanceId) {
+		return myWrap.cancelInstance(theInstanceId);
 	}
 }

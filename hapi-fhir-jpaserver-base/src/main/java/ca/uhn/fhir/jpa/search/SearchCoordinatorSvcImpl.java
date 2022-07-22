@@ -35,7 +35,6 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderReference;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -43,6 +42,7 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
@@ -163,6 +163,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private SearchStrategyFactory mySearchStrategyFactory;
 
 	/**
 	 * Constructor
@@ -210,6 +212,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
 		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
+
+	/**
+	 * facade over raw hook intererface
+	 */
+	public class StorageInterceptorHooks {
+		/**
+		 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
+		 *
+		 * @param theRequestDetails
+		 * @param theParams
+		 * @param search
+		 */
+		private void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search) {
+			HookParams params = new HookParams()
+				.add(ICachedSearchDetails.class, search)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(SearchParameterMap.class, theParams);
+			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		}
+		//private IInterceptorBroadcaster myInterceptorBroadcaster;
+	}
+	private StorageInterceptorHooks myStorageInterceptorHooks = new StorageInterceptorHooks();
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
@@ -321,13 +346,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search, theRequestPartitionId);
 
-		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
-		HookParams params = new HookParams()
-			.add(ICachedSearchDetails.class, search)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-			.add(SearchParameterMap.class, theParams);
-		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+		myStorageInterceptorHooks.callStoragePresearchRegistered(theRequestDetails, theParams, search);
 
 		validateSearch(theParams);
 
@@ -337,6 +356,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
 		boolean isOffsetQuery = theParams.isOffsetQuery();
+
+		// todo someday - not today.
+//		SearchStrategyFactory.ISearchStrategy searchStrategy = mySearchStrategyFactory.pickStrategy(theResourceType, theParams, theRequestDetails);
+//		return searchStrategy.get();
+
+		if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
+			ourLog.info("Search {} is using direct load strategy", searchUuid);
+			SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+			return direct.get();
+		}
 
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
@@ -391,13 +420,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 
 			if (!myDaoRegistry.isResourceTypeSupported(paramType)) {
-				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramType);
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", paramType);
 				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
 				throw new InvalidRequestException(Msg.code(2017) + msg);
 			}
 
 			if (isNotBlank(paramTargetType) && !myDaoRegistry.isResourceTypeSupported(paramTargetType)) {
-				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(PredicateBuilderReference.class, "invalidResourceType", paramTargetType);
+				String resourceTypeMsg = myContext.getLocalizer().getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidResourceType", paramTargetType);
 				String msg = myContext.getLocalizer().getMessage(SearchCoordinatorSvcImpl.class, "invalidInclude", UrlUtil.sanitizeUrlPart(name), UrlUtil.sanitizeUrlPart(value), resourceTypeMsg); // last param is pre-sanitized
 				throw new InvalidRequestException(Msg.code(2016) + msg);
 			}

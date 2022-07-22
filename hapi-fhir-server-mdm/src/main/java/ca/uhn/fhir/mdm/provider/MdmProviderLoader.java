@@ -53,14 +53,11 @@ public class MdmProviderLoader {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext,
+				myResourceProviderFactory.addSupplier(() ->  new MdmProviderDstu3Plus(myFhirContext,
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
-						myMdmSettings);
-					return myMdmProvider;
-				});
+						myMdmSettings));
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());

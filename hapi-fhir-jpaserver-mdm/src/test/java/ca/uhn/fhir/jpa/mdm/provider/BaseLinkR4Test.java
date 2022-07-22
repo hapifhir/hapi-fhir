@@ -36,7 +36,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());

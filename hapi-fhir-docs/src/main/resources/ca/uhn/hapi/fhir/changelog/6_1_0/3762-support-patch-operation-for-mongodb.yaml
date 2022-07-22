@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3762
+jira: SMILE-4451
+title: "JPA server patch operation has been moved to the hapi-fhir-storage project, for reuse in other backends."

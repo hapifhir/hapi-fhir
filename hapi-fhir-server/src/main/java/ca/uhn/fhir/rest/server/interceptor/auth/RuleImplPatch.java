@@ -41,7 +41,7 @@ class RuleImplPatch extends BaseRule {
 		if (myAllRequests) {
 			if (theOperation == RestOperationTypeEnum.PATCH) {
 				if (theInputResource == null && theOutputResource == null) {
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				}
 			}
 		}
