@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -39,10 +40,17 @@ public class QueryChunker<T> {
 	}
 
 	public void chunk(List<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer ) {
-		for (int i = 0; i < theInput.size(); i += theChunkSize) {
+		List<T> input;
+		if (theInput instanceof List) {
+			input = (List<T>) theInput;
+		} else {
+			input = new ArrayList<>(theInput);
+		}
+
+		for (int i = 0; i < input.size(); i += theChunkSize) {
 			int to = i + theChunkSize;
-			to = Math.min(to, theInput.size());
-			List<T> batch = theInput.subList(i, to);
+			to = Math.min(to, input.size());
+			List<T> batch = input.subList(i, to);
 			theBatchConsumer.accept(batch);
 		}
 	}

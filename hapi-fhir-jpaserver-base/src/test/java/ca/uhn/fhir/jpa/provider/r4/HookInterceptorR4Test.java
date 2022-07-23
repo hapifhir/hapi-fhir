@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -30,7 +31,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
 	@Autowired
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	@Override
 	@BeforeEach

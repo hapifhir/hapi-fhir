@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
@@ -75,7 +76,7 @@ public class TransactionProcessorTest {
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@MockBean
 	private PartitionSettings myPartitionSettings;
 	@MockBean
@@ -91,7 +92,6 @@ public class TransactionProcessorTest {
 	@MockBean
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
-	private FhirContext myFhirCtx = FhirContext.forR4Cached();
 
 	@BeforeEach
 	public void before() {

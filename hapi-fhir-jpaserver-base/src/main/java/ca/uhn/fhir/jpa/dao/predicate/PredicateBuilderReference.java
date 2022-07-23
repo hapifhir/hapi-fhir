@@ -35,6 +35,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -114,7 +115,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderReference.class);
 	private final PredicateBuilder myPredicateBuilder;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -12,10 +13,10 @@ import java.util.Optional;
 
 public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 
-	private final IdHelperService myIdHelperService;
+	private final IJpaIdHelperService myIdHelperService;
 	private final MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-	public IsMatchedToAGoldenResource(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+	public IsMatchedToAGoldenResource(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
 	}
@@ -31,7 +32,7 @@ public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 		theDescription.appendText("target was not linked to a Golden Resource.");
 	}
 
-	public static Matcher<IAnyResource> matchedToAGoldenResource(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+	public static Matcher<IAnyResource> matchedToAGoldenResource(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
 		return new IsMatchedToAGoldenResource(theIdHelperService, theMdmLinkDaoSvc);
 	}
 }

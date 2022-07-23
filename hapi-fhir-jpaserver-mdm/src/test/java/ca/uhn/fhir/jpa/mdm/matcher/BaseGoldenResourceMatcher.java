@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -21,12 +22,12 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseGoldenResourceMatcher.class);
 
-	protected IdHelperService myIdHelperService;
+	protected IJpaIdHelperService myIdHelperService;
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	protected Collection<IAnyResource> myBaseResources;
 	protected String myTargetType;
 
-	protected BaseGoldenResourceMatcher(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected BaseGoldenResourceMatcher(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
 		myBaseResources = Arrays.stream(theBaseResource).collect(Collectors.toList());

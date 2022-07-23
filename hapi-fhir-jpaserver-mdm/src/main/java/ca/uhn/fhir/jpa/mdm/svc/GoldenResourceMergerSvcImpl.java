@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -55,7 +56,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	MdmResourceDaoSvc myMdmResourceDaoSvc;
 

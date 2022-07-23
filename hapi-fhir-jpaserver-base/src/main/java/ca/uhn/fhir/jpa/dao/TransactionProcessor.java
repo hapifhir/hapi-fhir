@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -88,7 +89,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private ApplicationContext myApplicationContext;
 	@Autowired
@@ -359,7 +360,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	}
 
 	@VisibleForTesting
-	public void setIdHelperServiceForUnitTest(IdHelperService theIdHelperService) {
+	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
 

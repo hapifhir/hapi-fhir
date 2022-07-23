@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -52,7 +53,7 @@ public class MdmCandidateSearchSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
 	@Autowired

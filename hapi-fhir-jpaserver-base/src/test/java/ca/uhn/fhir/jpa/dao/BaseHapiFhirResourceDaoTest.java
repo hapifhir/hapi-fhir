@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -41,7 +42,7 @@ class BaseHapiFhirResourceDaoTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Mock
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	@Mock
 	private EntityManager myEntityManager;

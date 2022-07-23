@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -47,7 +48,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired

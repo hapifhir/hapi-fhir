@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -57,7 +58,7 @@ public class ResourceVersionSvcTest {
 	@Mock
 	IResourceTableDao myResourceTableDao;
 	@Mock
-	IdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 
 	// TODO KHS move the methods that use this out to a separate test class
 	@InjectMocks

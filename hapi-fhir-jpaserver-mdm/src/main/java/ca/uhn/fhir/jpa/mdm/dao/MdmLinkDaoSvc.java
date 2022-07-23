@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -55,7 +56,7 @@ public class MdmLinkDaoSvc {
 	@Autowired
 	private MdmLinkFactory myMdmLinkFactory;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 

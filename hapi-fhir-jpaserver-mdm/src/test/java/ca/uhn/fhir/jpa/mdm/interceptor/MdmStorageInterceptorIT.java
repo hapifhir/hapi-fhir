@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -62,7 +63,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {

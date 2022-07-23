@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
@@ -1371,11 +1372,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nonnull RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
-			throw new ResourceNotFoundException(Msg.code(1997) + theId);
+		ResourcePersistentId persistentId = null;
+		if (theTransactionDetails != null) {
+			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
+				throw new ResourceNotFoundException(Msg.code(1997) + theId);
+			}
+			if (theTransactionDetails.hasResolvedResourceIds()) {
+				persistentId = theTransactionDetails.getResolvedResourceId(theId);
+			}
 		}
 
-		ResourcePersistentId persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
+		if (persistentId == null) {
+			persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
+		}
+
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
@@ -1916,7 +1926,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@VisibleForTesting
-	public void setIdHelperSvcForUnitTest(IdHelperService theIdHelperService) {
+	public void setIdHelperSvcForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
 

@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
@@ -201,7 +202,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 	@Autowired
-	protected IdHelperService myIdHelperService;
+	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -391,14 +392,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
 		Validate.notNull(theVersion, "theVersion must not be null");
-		synchronized (ourRetrievalContexts) {
-			FhirContext retVal = ourRetrievalContexts.get(theVersion);
-			if (retVal == null) {
-				retVal = new FhirContext(theVersion);
-				ourRetrievalContexts.put(theVersion, retVal);
-			}
-			return retVal;
+		if (theVersion == myFhirContext.getVersion().getVersion()) {
+			return myFhirContext;
 		}
+		return FhirContext.forCached(theVersion);
 	}
 
 	/**
@@ -1040,16 +1037,21 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
-			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-			((ResourceTable) theEntity).setCurrentVersionEntity(history);
+			ResourceHistoryTable history;
+			if (resource.getCurrentVersionEntity() != null) {
+				history = resource.getCurrentVersionEntity();
+			} else {
+				version = theEntity.getVersion();
+				history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+				((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
-			while (history == null) {
-				if (version > 1L) {
-					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-				} else {
-					return null;
+				while (history == null) {
+					if (version > 1L) {
+						version--;
+						history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+					} else {
+						return null;
+					}
 				}
 			}
 			resourceBytes = history.getResource();
@@ -1358,7 +1360,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		if (theUpdateVersion) {
-			entity.setVersion(entity.getVersion() + 1);
+			long newVersion = entity.getVersion() + 1;
+			entity.setVersion(newVersion);
 		}
 
 		/*
@@ -1478,6 +1481,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 		myResourceHistoryTableDao.save(historyEntry);
+		theEntity.setCurrentVersionEntity(historyEntry);
 
 		// Save resource source
 		String source = null;

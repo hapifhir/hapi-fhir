@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -18,8 +18,8 @@ public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 	private List<Long> baseResourceGoldenResourcePids;
 	private Long incomingResourceGoldenResourcePid;
 
-	protected IsPossibleLinkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
-		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);
+	protected IsPossibleLinkedTo(IJpaIdHelperService theIJpaIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
+		super(theIJpaIdHelperService, theMdmLinkDaoSvc, theTargetResources);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IAnyResource> possibleLinkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
-		return new IsPossibleLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
+	public static Matcher<IAnyResource> possibleLinkedTo(IJpaIdHelperService theIJpaIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+		return new IsPossibleLinkedTo(theIJpaIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

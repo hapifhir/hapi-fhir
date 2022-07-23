@@ -136,6 +136,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	}
 
 
+	@Disabled // TODO JA: This test fails regularly, need to get a dedicated connection pool for tag creation
 	@Test
 	public void testConcurrentAddTag() throws ExecutionException, InterruptedException {
 

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -76,7 +77,7 @@ public class GroupBulkItemReader extends BaseJpaBulkItemReader implements ItemRe
 	private boolean myMdmEnabled;
 
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired

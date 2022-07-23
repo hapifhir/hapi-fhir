@@ -96,6 +96,7 @@ public class SubscriptionActivatingSubscriber extends BaseSubscriberForSubscript
 
 	}
 
+
 	public boolean activateSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..

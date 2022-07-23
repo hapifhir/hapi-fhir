@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -45,7 +46,8 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
+
 
 	@Autowired
 	IMdmModelConverterSvc myMdmModelConverterSvc;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -20,7 +21,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	 */
 	private Long incomingGoldenResourcePid;
 
-	protected IsPossibleDuplicateOf(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsPossibleDuplicateOf(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
@@ -55,7 +56,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText("No MdmLink With POSSIBLE_DUPLICATE was found");
 	}
 
-	public static Matcher<IAnyResource> possibleDuplicateOf(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleDuplicateOf(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleDuplicateOf(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -36,7 +37,7 @@ public class MdmLinkDeleteSvc {
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IJpaIdHelperService myIdHelperService;
 
 	/**
 	 * Delete all {@link ca.uhn.fhir.jpa.entity.MdmLink} records with any reference to this resource.  (Used by Expunge.)

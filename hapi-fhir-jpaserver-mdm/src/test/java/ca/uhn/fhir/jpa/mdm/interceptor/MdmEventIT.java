@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -52,8 +53,6 @@ public class MdmEventIT extends BaseMdmR4Test {
 	@RegisterExtension
 	@Autowired
 	public MdmHelperR4 myMdmHelper;
-	@Autowired
-	private IdHelperService myIdHelperService;
 
 	@Test
 	public void testDuplicateLinkChangeEvent() throws InterruptedException {

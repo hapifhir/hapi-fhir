@@ -267,6 +267,7 @@ public abstract class BaseConfig {
 		return new DaoRegistry();
 	}
 
+
 	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
 		return new DatabaseBackedPagingProvider();

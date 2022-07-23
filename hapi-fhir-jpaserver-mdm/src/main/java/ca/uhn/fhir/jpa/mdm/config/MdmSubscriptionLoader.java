@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
@@ -54,7 +55,7 @@ public class MdmSubscriptionLoader {
 	@Autowired
 	public DaoRegistry myDaoRegistry;
 	@Autowired
-	public IdHelperService myIdHelperService;
+	public IJpaIdHelperService myIdHelperService;
 	@Autowired
 	IChannelNamer myChannelNamer;
 	@Autowired

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
@@ -28,8 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 
 	@Autowired
-	IdHelperService myIdHelperService;
+	IJpaIdHelperService myIdHelperService;
 
+	@Override
 	public MdmLinkJson toJson(MdmLink theLink) {
 		MdmLinkJson retVal = new MdmLinkJson();
 		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePid()).toVersionless().getValue();

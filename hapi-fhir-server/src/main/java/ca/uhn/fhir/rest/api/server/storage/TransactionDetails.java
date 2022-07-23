@@ -289,6 +289,11 @@ public class TransactionDetails {
 		myIsPointcutDeferred = false;
 	}
 
+
+	public boolean hasResolvedResourceIds() {
+		return !myResolvedResourceIds.isEmpty();
+	}
+
 	public void clearResolvedItems() {
 		myResolvedResourceIds.clear();
 		myResolvedMatchUrls.clear();

@@ -230,7 +230,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
-
+		myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");
 		myDaoConfig.setAllowMultipleDelete(true);
 		myClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
