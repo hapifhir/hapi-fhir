@@ -174,6 +174,7 @@ import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORM
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -2297,6 +2298,33 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
 			assertThat(allresults, not(contains(c5Id)));
 		}
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition");
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, allOf(
+			containsInAnyOrder(p1Id, c1Id),
+			not(contains(o1Id))
+		));
 	}
 
 	@Test
