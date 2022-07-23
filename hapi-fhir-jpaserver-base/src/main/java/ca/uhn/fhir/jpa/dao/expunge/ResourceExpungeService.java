@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -104,7 +106,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
+	@Autowired
+	private IForcedIdDao myForcedIdDao;
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
 	@Autowired
@@ -257,7 +261,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 			ForcedId forcedId = resource.getForcedId();
 			resource.setForcedId(null);
 			myResourceTableDao.saveAndFlush(resource);
-			myIdHelperService.delete(forcedId);
+			myForcedIdDao.deleteByPid(forcedId.getId());
 		}
 
 		myResourceTableDao.deleteByPid(resource.getId());
