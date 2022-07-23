@@ -31,7 +31,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -44,8 +44,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,10 +116,6 @@ public class IdHelperService implements IIdHelperService {
 	@VisibleForTesting
 	void setDontCheckActiveTransactionForUnitTest(boolean theDontCheckActiveTransactionForUnitTest) {
 		myDontCheckActiveTransactionForUnitTest = theDontCheckActiveTransactionForUnitTest;
-	}
-
-	public void delete(ForcedId forcedId) {
-		myForcedIdDao.deleteByPid(forcedId.getId());
 	}
 
 	/**
@@ -265,6 +259,7 @@ public class IdHelperService implements IIdHelperService {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<ResourcePersistentId> retVal = new ArrayList<>(theIds.size());
+
 		for (IIdType id : theIds) {
 			if (!id.hasIdPart()) {
 				throw new InvalidRequestException(Msg.code(1101) + "Parameter value missing in request");
@@ -289,8 +284,10 @@ public class IdHelperService implements IIdHelperService {
 					retVal.add(cachedId);
 					continue;
 				}
+
 				idsToCheck.add(nextId);
 			}
+			new QueryChunker<IIdType>().chunk(idsToCheck, SearchBuilder.getMaximumPageSize() / 2, ids -> doResolvePersistentIds(theRequestPartitionId, ids, retVal));
 		}
 
 		return retVal;
@@ -300,14 +297,16 @@ public class IdHelperService implements IIdHelperService {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ForcedId> criteriaQuery = cb.createQuery(ForcedId.class);
 		Root<ForcedId> from = criteriaQuery.from(ForcedId.class);
+
 		List<Predicate> predicates = new ArrayList<>(theIds.size());
 		for (IIdType next : theIds) {
+
 			List<Predicate> andPredicates = new ArrayList<>(3);
+
 			if (isNotBlank(next.getResourceType())) {
 				Predicate typeCriteria = cb.equal(from.get("myResourceType").as(String.class), next.getResourceType());
 				andPredicates.add(typeCriteria);
 			}
-
 
 			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
 			andPredicates.add(idCriteria);
@@ -318,6 +317,7 @@ public class IdHelperService implements IIdHelperService {
 			} else if (!theRequestPartitionId.isAllPartitions()) {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 				partitionIds = replaceDefaultPartitionIdIfNonNull(myPartitionSettings, partitionIds);
+
 				if (partitionIds.size() > 1) {
 					Predicate partitionIdCriteria = from.get("myPartitionIdValue").as(Integer.class).in(partitionIds);
 					andPredicates.add(partitionIdCriteria);
@@ -326,6 +326,7 @@ public class IdHelperService implements IIdHelperService {
 					andPredicates.add(partitionIdCriteria);
 				}
 			}
+
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
 		}
 
@@ -339,10 +340,12 @@ public class IdHelperService implements IIdHelperService {
 				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
 				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
 				theOutputListToPopulate.add(persistentId);
+
 				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
 				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
 			}
 		}
+
 	}
 
 	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {

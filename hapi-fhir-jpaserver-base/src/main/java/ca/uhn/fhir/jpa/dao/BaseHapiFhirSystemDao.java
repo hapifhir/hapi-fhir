@@ -63,6 +63,7 @@ import static ca.uhn.fhir.jpa.dao.index.IdHelperService.EMPTY_PREDICATE_ARRAY;
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseHapiFhirDao<IBaseResource> implements IFhirSystemDao<T, MT> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
+	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	@Autowired
 	@Qualifier("myResourceCountsCache")
 	public ResourceCountCache myResourceCountsCache;
@@ -132,7 +133,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	public T transactionNested(RequestDetails theRequestDetails, T theRequest) {
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest, true);
 	}
-
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
@@ -241,6 +241,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			}
 		});
 	}
+
+
 
 	@Nullable
 	@Override

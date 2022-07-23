@@ -53,6 +53,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	public static FhirContext ourFhirContext = FhirContext.forR4();
+	public static final String DEFAULT_PRESERVE_VERSION_REFS = "AuditEvent.entity.what";
 
 	@Override
 	public FhirContext fhirContext() {

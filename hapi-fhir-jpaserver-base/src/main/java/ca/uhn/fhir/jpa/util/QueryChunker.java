@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -35,11 +36,11 @@ import java.util.function.Consumer;
  */
 public class QueryChunker<T> {
 
-	public void chunk(List<T> theInput, Consumer<List<T>> theBatchConsumer) {
+	public void chunk(Collection<T> theInput, Consumer<List<T>> theBatchConsumer) {
 		chunk(theInput, SearchBuilder.getMaximumPageSize(), theBatchConsumer);
 	}
 
-	public void chunk(List<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer ) {
+	public void chunk(Collection<T> theInput, int theChunkSize, Consumer<List<T>> theBatchConsumer ) {
 		List<T> input;
 		if (theInput instanceof List) {
 			input = (List<T>) theInput;
