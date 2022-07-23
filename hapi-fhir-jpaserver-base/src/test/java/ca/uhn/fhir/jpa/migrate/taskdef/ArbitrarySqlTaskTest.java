@@ -43,7 +43,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), RequestPartitionId.defaultPartition(), resType, paramName, present);
+			Long hash = (long)((paramName + resType + present).hashCode()); // Note: not the real hash algorithm
 			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
 		});
 
@@ -54,9 +54,9 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		List<Map<String, Object>> rows = executeQuery("select * from HFJ_RES_PARAM_PRESENT order by PID asc");
 		assertEquals(2, rows.size());
 		assertEquals(100L, rows.get(0).get("PID"));
-		assertEquals(-1100208805056022671L, rows.get(0).get("HASH_PRESENT"));
+		assertEquals(-844694102L, rows.get(0).get("HASH_PRESENT"));
 		assertEquals(101L, rows.get(1).get("PID"));
-		assertEquals(-756348509333838170L, rows.get(1).get("HASH_PRESENT"));
+		assertEquals(1197628431L, rows.get(1).get("HASH_PRESENT"));
 
 	}
 
