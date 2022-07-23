@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 3387
+title: "Backported a fix from HAPI-FHIR 6.0.0 which improves ID resolution for resources with forced IDs."
