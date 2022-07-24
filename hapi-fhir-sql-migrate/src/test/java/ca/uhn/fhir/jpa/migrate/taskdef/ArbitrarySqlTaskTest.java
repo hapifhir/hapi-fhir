@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -55,7 +52,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		assertEquals(2, rows.size());
 		assertEquals(100L, rows.get(0).get("PID"));
 		assertEquals(-844694102L, rows.get(0).get("HASH_PRESENT"));
-		
+
 		assertEquals(101L, rows.get(1).get("PID"));
 		assertEquals(1197628431L, rows.get(1).get("HASH_PRESENT"));
 
