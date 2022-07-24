@@ -185,8 +185,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected IResourceIndexedComboTokensNonUniqueDao myResourceIndexedComboTokensNonUniqueDao;
 	@Autowired
-	private IIdHelperService myIdHelperService;
-	@Autowired
 	private MemoryCacheService myMemoryCacheService;
 	@Qualifier(BaseConfig.JPA_VALIDATION_SUPPORT)
 	@Autowired

@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
 import ca.uhn.fhir.jpa.mdm.matcher.IsSameGoldenResourceAs;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
@@ -131,6 +132,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
 		assertEquals(0, myMdmLinkDao.count());
+		myExpungeEverythingService.expungeEverything(new SystemRequestDetails());
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {
