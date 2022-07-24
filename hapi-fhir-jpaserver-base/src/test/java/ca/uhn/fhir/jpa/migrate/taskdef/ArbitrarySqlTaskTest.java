@@ -55,6 +55,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		assertEquals(2, rows.size());
 		assertEquals(100L, rows.get(0).get("PID"));
 		assertEquals(-844694102L, rows.get(0).get("HASH_PRESENT"));
+		
 		assertEquals(101L, rows.get(1).get("PID"));
 		assertEquals(1197628431L, rows.get(1).get("HASH_PRESENT"));
 
