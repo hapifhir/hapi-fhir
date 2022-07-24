@@ -2748,7 +2748,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logInsertQueries();
 		assertEquals(40, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
@@ -2759,11 +2759,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		outcome = mySystemDao.transaction(mySrd, input.get());
 		ourLog.info("Resp: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(12, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(8, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
@@ -2778,9 +2778,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(7, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		/*
@@ -2793,9 +2793,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logInsertQueries();
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(8, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 	}
 
