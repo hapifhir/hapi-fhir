@@ -20,38 +20,34 @@ package ca.uhn.fhir.jpa.term.job;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Properties;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.JOB_PARAM_CODE_SYSTEM_VERSION_ID;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
@@ -89,13 +85,12 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 	private final ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 	private Properties uploadProperties;
 
-	@Autowired private TermLoaderSvcImpl myTermLoaderSvc;
-	@Autowired private IBatchJobSubmitter myJobSubmitter;
-	@Autowired private BatchJobHelper myBatchJobHelper;
-
-	@Autowired @Qualifier(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)
-	private Job myTermCodeSystemVersionDeleteJob;
-
+	@Autowired
+	private TermLoaderSvcImpl myTermLoaderSvc;
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	private void initMultipleVersionLoad() throws Exception {
 		File file = ResourceUtils.getFile("classpath:loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode());
@@ -128,15 +123,21 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		});
 
 
-		JobParameters jobParameters = new JobParameters(Collections.singletonMap(
-			JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(termCodeSystemVersionPidVect[0], true) ));
+//		JobParameters jobParameters = new JobParameters(Collections.singletonMap(
+//			JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(termCodeSystemVersionPidVect[0], true) ));
+//		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
 
+		TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
+		jobParameters.setCodeSystemVersionPid(termCodeSystemVersionPidVect[0]);
 
-		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		request.setParameters(jobParameters);
 
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 
-		myBatchJobHelper.awaitJobCompletion(jobExecution);
-		assertEquals("COMPLETED", jobExecution.getExitStatus().getExitCode());
+		JobInstance instance = myBatchJobHelper.awaitJobCompletion(response);
+		assertEquals("COMPLETED", instance.getStatus().name());
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -147,45 +148,23 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 	}
 
 
-
-
-	@Test
-	public void runWithNoParameterFailsValidation() {
-		JobParametersInvalidException thrown = Assertions.assertThrows(
-			JobParametersInvalidException.class,
-			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, new JobParameters())
-		);
-		assertEquals(Msg.code(919) + "This job needs Parameter: '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "'", thrown.getMessage());
-	}
-
-
-	@Test
-	public void runWithNullParameterFailsValidation() {
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter((Long) null, true) ));
-
-		JobParametersInvalidException thrown = Assertions.assertThrows(
-			JobParametersInvalidException.class,
-			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
-		);
-		assertEquals(Msg.code(920) + "'" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' parameter is null", thrown.getMessage());
-	}
-
-
 	@Test
 	public void runWithParameterZeroFailsValidation() {
-		JobParameters jobParameters = new JobParameters(
-			Collections.singletonMap(
-				JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(0L, true) ));
+		InvalidRequestException thrown = Assertions.assertThrows(
+			InvalidRequestException.class,
+			() -> {
+				TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
+				jobParameters.setCodeSystemVersionPid(0);
 
-		JobParametersInvalidException thrown = Assertions.assertThrows(
-			JobParametersInvalidException.class,
-			() -> myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters)
+				JobInstanceStartRequest request = new JobInstanceStartRequest();
+				request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+				request.setParameters(jobParameters);
+
+				Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+			}
 		);
-		assertEquals(Msg.code(921) + "Invalid parameter '" + JOB_PARAM_CODE_SYSTEM_VERSION_ID + "' value: 0", thrown.getMessage());
+		assertTrue(thrown.getMessage().contains("Invalid code system version PID 0"));
 	}
-
 
 
 	private IIdType uploadLoincCodeSystem(String theVersion, boolean theMakeItCurrent) throws Exception {

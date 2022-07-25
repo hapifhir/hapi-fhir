@@ -4,18 +4,18 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -137,7 +137,8 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	@Autowired @Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
 	private IValidationSupport myJpaPersistedResourceValidationSupport;
 
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 
 	private ZipCollectionBuilder myFiles;
@@ -696,7 +697,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		String currentVer = "2.68";
 		uploadLoincCodeSystem(currentVer, true);
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runCommonValidations(Lists.newArrayList(nonCurrentVer, currentVer));
 
@@ -718,7 +719,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		String lastCurrentVer = "2.69";
 		uploadLoincCodeSystem(lastCurrentVer, true);
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runCommonValidations(Lists.newArrayList(firstCurrentVer, noCurrentVer, lastCurrentVer));
 
