@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
