@@ -141,6 +141,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
@@ -245,7 +247,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -267,7 +269,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -5593,6 +5595,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
+	public void testSearchTagWithInvalidTokenParam(String searchParam){
+
+		try {
+			myClient
+				.search()
+				.byUrl("Patient?" + searchParam + "=someSystem|")
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException ex){
+			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
+		}
+
 	}
 
 	@Test

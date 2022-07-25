@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -17,11 +18,14 @@ import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -51,29 +55,30 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	protected void markAffectedResources(SearchParameter theResource) {
+	protected void reindexAffectedResources(SearchParameter theResource, RequestDetails theRequestDetails) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 		String expression = theResource != null ? theResource.getExpression() : null;
-		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
+		List<String> base = theResource != null ? theResource.getBase().stream().map(CodeType::getCode).collect(Collectors.toList()) : null;
+		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 
 
 	@Override
-	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
-		super.postPersist(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postPersist(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 	}
 
 	@Override
-	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
-		super.postUpdate(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postUpdate(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
-		markAffectedResources(theResourceToDelete);
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
+		reindexAffectedResources(theResourceToDelete, theRequestDetails);
 	}
 
 	@Override
