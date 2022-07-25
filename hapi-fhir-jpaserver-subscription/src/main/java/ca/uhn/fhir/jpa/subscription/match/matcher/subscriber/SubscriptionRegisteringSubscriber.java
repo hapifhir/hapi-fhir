@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Nonnull;
 
@@ -127,11 +128,21 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		// This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
-		if (payloadPartitionId == null || payloadPartitionId.hasNoPartition()) {
+		if (isMalformedPartition(payloadPartitionId)) {
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
+	}
+
+	/**
+	 * This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
+	 */
+	private boolean isMalformedPartition(RequestPartitionId theRequestPartitionId){
+		if(theRequestPartitionId == null){
+			return true;
+		}
+		return !CollectionUtils.isEmpty(theRequestPartitionId.getPartitionNames())
+			&& theRequestPartitionId.getPartitionNames().contains(null);
 	}
 
 }
