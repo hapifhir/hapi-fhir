@@ -358,7 +358,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatch2JobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			assertEquals(3L, myTermConceptDao.count());

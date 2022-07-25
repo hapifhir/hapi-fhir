@@ -392,8 +392,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		 * This is mostly a fail-safe
 		 * because "cancelled" jobs are never removed.
 		 */
+		List<String> executions = new ArrayList<>(myJobExecutions);
 		List<String> idsToDelete = new ArrayList<>();
-		for (String id : myJobExecutions) {
+		for (String id : executions) {
 			// TODO - might want to consider a "fetch all instances"
 			JobInstance instance = myJobCoordinator.getInstance(id);
 			if (StatusEnum.getEndedStatuses().contains(instance.getStatus())) {

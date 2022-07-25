@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired private Batch2JobHelper myBatchJobHelper;
 
 	@AfterAll
 	public static void afterClassClearContext() {
@@ -72,7 +73,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		cs.addConcept().setCode("B");
 		myCodeSystemDao.update(cs, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(()->{
 			assertEquals(2, myConceptDao.count());
 		});
@@ -86,7 +87,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		cs.addConcept().setCode("C");
 		myCodeSystemDao.update(cs, mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		runInTransaction(()->{
 			assertEquals(1, myConceptDao.count());
 		});
@@ -96,7 +97,7 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 			myCodeSystemDao.delete(id);
 		});
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		runInTransaction(()->{
 			assertEquals(0L, myConceptDao.count());
 		});
