@@ -27,8 +27,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -111,8 +113,8 @@ public class SubscriptionCanonicalizer {
 		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES)
 			.stream()
 			.map(ExtensionDt::getValue)
-			.map(value -> (org.hl7.fhir.dstu2.model.BooleanType) value)
-			.map(org.hl7.fhir.dstu2.model.BooleanType::booleanValue)
+			.map(BooleanDt.class::cast)
+			.map(BasePrimitive::getValue)
 			.findFirst()
 			.orElse(false);
 	}
