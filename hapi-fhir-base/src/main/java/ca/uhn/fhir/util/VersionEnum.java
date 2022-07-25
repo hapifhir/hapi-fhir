@@ -93,6 +93,7 @@ public enum VersionEnum {
 	V5_7_7,
 	V5_7_8,
 	V5_7_9,
+	V5_7_10,
 	V6_0_0,
 	V6_0_1,
 	V6_1_0
