@@ -127,8 +127,9 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
 		RequestPartitionId payloadPartitionId = payload.getPartitionId();
-		// This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
-		if (payloadPartitionId == null || payloadPartitionId.hasNoPartition()) {
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// creates a corrupt default partition.  This resets it to a clean one.
 			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
 		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
