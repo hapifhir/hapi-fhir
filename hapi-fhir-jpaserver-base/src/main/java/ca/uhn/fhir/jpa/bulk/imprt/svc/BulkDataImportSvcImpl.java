@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
@@ -43,9 +45,7 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -73,13 +73,20 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
+
 	@Autowired
 	private ISchedulerService mySchedulerService;
+
+	//	@Autowired
+//	private IBatchJobSubmitter myJobSubmitter;
+
+//	@Autowired
+//	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
+//	private org.springframework.batch.core.Job myBulkImportJob;
+
 	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
-	@Autowired
-	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
-	private org.springframework.batch.core.Job myBulkImportJob;
+	private IJobCoordinator myJobCoordinator;
+
 	@Autowired
 	private DaoConfig myDaoConfig;
 
@@ -273,22 +280,34 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		myJobDao.delete(job);
 	}
 
-	private void processJob(BulkImportJobEntity theBulkExportJobEntity) throws JobParametersInvalidException {
+	private void processJob(BulkImportJobEntity theBulkExportJobEntity) {
 		String jobId = theBulkExportJobEntity.getJobId();
 		int batchSize = theBulkExportJobEntity.getBatchSize();
-		ValidateUtil.isTrueOrThrowInvalidRequest(batchSize > 0, "Batch size must be positive");
 
-		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
-			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
+		Batch2BulkImportPullJobParameters jobParameters = new Batch2BulkImportPullJobParameters();
+		jobParameters.setJobId(jobId);
+		jobParameters.setBatchSize(batchSize);
 
-		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
-			parameters.addString(BatchConstants.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
-		}
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
+		request.setParameters(jobParameters);
 
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 
-		myJobSubmitter.runJob(myBulkImportJob, parameters.toJobParameters());
+		myJobCoordinator.startInstance(request);
+
+//		JobParametersBuilder parameters = new JobParametersBuilder()
+//			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
+//			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
+//
+//		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
+//			parameters.addString(BatchConstants.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
+//		}
+
+
+//		myJobSubmitter.runJob(myBulkImportJob, parameters.toJobParameters());
+
+
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {

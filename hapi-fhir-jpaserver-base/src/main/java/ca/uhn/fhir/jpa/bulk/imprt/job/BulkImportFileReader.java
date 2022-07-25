@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.StringReader;
 
+@Deprecated
 @SuppressWarnings("UnstableApiUsage")
 public class BulkImportFileReader implements ItemReader<ParsedBulkImportRecord> {
 

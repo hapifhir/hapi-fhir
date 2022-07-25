@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -33,12 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,12 +65,9 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	private IBulkImportJobDao myBulkImportJobDao;
 	@Autowired
 	private IBulkImportJobFileDao myBulkImportJobFileDao;
+
 	@Autowired
-	private JobExplorer myJobExplorer;
-	@Autowired
-	private JobRegistry myJobRegistry;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private IJobCoordinator myJobCoordinator;
 
 	@AfterEach
 	public void after() {
@@ -105,6 +98,8 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		assert jobNames.length > 0;
 
 		await().until(() -> runInTransaction(() -> {
+			List<JobInstance> instances = myJobCoordinator.getRecentInstances(0, 100);
+
 			JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
 			JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
 			ourLog.info("Exit status: {}", jobExecution.getExitStatus());

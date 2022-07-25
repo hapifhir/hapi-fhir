@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
+@Deprecated
 public class BulkImportJobCloser implements Tasklet {
 
 	@Value("#{jobParameters['" + BatchConstants.JOB_UUID_PARAMETER + "']}")

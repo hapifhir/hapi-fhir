@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import static ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL;
 
+@Deprecated
 public class BulkImportProcessStepCompletionPolicy extends CompletionPolicySupport {
 
 	@Value("#{jobParameters['" + JOB_PARAM_COMMIT_INTERVAL + "']}")

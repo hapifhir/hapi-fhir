@@ -37,6 +37,7 @@ import java.util.Optional;
 /**
  * This class will prevent a job from running if the UUID does not exist or is invalid.
  */
+@Deprecated
 public class BulkImportJobParameterValidator implements JobParametersValidator {
 
 	@Autowired

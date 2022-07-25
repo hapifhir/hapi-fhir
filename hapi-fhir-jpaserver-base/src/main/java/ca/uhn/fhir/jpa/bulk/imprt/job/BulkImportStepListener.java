@@ -38,6 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class sets the job status to ERROR if any failures occur while actually
  * generating the export files.
  */
+@Deprecated
 public class BulkImportStepListener implements StepExecutionListener, RetryListener {
 
 	@Autowired

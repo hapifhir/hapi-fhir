@@ -35,6 +35,7 @@ import java.util.Map;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Deprecated
 public class BulkImportPartitioner implements Partitioner {
 	public static final String FILE_INDEX = "fileIndex";
 	public static final String FILE_DESCRIPTION = "fileDescription";

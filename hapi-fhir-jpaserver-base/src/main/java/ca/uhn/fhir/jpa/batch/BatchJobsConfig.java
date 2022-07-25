@@ -41,7 +41,7 @@ import org.springframework.context.annotation.Import;
 @EnableBatchProcessing
 @Import({
 	CommonBatchJobConfig.class,
-	BulkExportJobConfig.class,
+//	BulkExportJobConfig.class,
 	BulkImportJobConfig.class,
 	TermCodeSystemDeleteJobConfig.class,
 	TermCodeSystemVersionDeleteJobConfig.class
