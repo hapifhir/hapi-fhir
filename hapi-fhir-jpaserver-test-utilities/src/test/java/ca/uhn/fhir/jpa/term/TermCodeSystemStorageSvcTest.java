@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 
 	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private Batch2JobHelper myBatchJobHelper;
 
 
 	@Test
@@ -134,7 +134,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
-		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}

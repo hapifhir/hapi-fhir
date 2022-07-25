@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -33,7 +33,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	public static FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -139,12 +140,10 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 
 		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
-
 	}
-
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {

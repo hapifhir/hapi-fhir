@@ -44,7 +44,6 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteLargeCompleteCodeSystem() {
-
 		IIdType id = createLargeCodeSystem(null);
 
 		runInTransaction(() -> {
