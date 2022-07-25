@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
 
 import java.util.Iterator;
 
-public interface ITermCodeSystemSvc {
+public interface ITermCodeSystemDeleteJobSvc {
 
 	/**
 	 * Gets an iterator for all code system version PIDs

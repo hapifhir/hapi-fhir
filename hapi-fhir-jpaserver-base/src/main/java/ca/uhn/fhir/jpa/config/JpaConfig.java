@@ -117,7 +117,9 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
@@ -176,7 +178,7 @@ import java.util.Date;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @Import({
 	BeanPostProcessorConfig.class,
-	BatchJobsConfig.class, // TODO - remove (but currently has beans we need)
+	BatchJobsConfig.class,
 	TermCodeSystemConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,

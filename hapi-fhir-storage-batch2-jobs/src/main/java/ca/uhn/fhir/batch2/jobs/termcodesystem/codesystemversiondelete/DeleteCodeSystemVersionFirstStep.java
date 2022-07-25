@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemSvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DeleteCodeSystemVersionFirstStep implements IFirstJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
 	@Autowired
-	private ITermCodeSystemSvc myTermCodeSystemSvc;
+	private ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
 
 	@NotNull
 	@Override

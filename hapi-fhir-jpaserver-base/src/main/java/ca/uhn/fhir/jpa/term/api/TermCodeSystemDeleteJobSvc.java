@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional()
-public class TermCodeSystemSvc implements ITermCodeSystemSvc {
-	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemSvc.class);
+public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemDeleteJobSvc.class);
 
 	private static final DecimalFormat ourDecimalFormat = new DecimalFormat("#,###");
 

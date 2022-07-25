@@ -8,7 +8,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemSvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
 	@Autowired
-	private ITermCodeSystemSvc myITermCodeSystemSvc;
+	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
 
 	@NotNull
 	@Override
