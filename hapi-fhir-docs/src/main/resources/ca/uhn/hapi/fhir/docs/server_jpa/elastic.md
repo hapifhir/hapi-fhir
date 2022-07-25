@@ -82,4 +82,5 @@ This extension is only valid at the type level, and requires that Extended Lucen
 
 As an experimental feature with the extended indexing, the full resource can be stored in the 
 search index.  This allows some queries to return results without using the relational database.
-Note: This does not support the $meta-add or $meta-delete operations.
+Note: This does not support the $meta-add or $meta-delete operations. Full reindexing is required 
+when this option is enabled after resources have been indexed. 

@@ -20,6 +20,11 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+
+/**
+ * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
+ */
 public interface IResourceReindexingSvc {
 
 	/**
