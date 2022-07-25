@@ -215,11 +215,6 @@ public class TestHSearchAddInConfig {
 			return embeddedElasticSearch;
 		}
 
-		@PreDestroy
-		public void stop() {
-			elasticContainer().stop();
-		}
-
 		@Bean
 		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
