@@ -176,7 +176,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public IPackageLoadingTracker getPackageTracker() {
-		throw new UnsupportedOperationException(Msg.code(2100));
+		throw new UnsupportedOperationException(Msg.code(2108));
 	}
 
 	@Override
