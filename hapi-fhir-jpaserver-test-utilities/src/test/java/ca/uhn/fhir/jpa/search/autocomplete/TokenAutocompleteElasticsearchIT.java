@@ -19,7 +19,6 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.hibernate.search.mapper.orm.Search;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -42,7 +41,9 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -92,7 +93,7 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
-		BaseJpaTest.purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 
@@ -131,10 +132,10 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 
 		List<TokenAutocompleteHit> codes;
 		codes = autocompleteSearch("Observation", "code", "text", "blo");
-		assertThat("finds blood pressure", codes, Matchers.hasItem(matchingSystemAndCode(mean_blood_pressure)));
+		assertThat("finds blood pressure", codes, hasItem(matchingSystemAndCode(mean_blood_pressure)));
 
 		codes = autocompleteSearch("Observation", "code", "text", "pressure");
-		assertThat("finds blood pressure", codes, Matchers.hasItem(matchingSystemAndCode(mean_blood_pressure)));
+		assertThat("finds blood pressure", codes, hasItem(matchingSystemAndCode(mean_blood_pressure)));
 
 		long hits = codes.stream()
 			.filter(c -> matchingSystemAndCode(mean_blood_pressure).matches(c))
@@ -150,10 +151,10 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		assertThat("empty finds most common first", codes.get(1), matchingSystemAndCode(mean_blood_pressure));
 
 		codes = autocompleteSearch("Observation", "code", null, "88262-1");
-		assertThat("matches by code value", codes, Matchers.hasItem(matchingSystemAndCode(gram_positive_culture)));
+		assertThat("matches by code value", codes, hasItem(matchingSystemAndCode(gram_positive_culture)));
 
 		codes = autocompleteSearch("Observation", "code", null, "8826");
-		assertThat("matches by code prefix", codes, Matchers.hasItem(matchingSystemAndCode(gram_positive_culture)));
+		assertThat("matches by code prefix", codes, hasItem(matchingSystemAndCode(gram_positive_culture)));
 
 		codes = autocompleteSearch("Observation", "code", null, null);
 		assertThat("null finds everything", codes, hasSize(13));
@@ -174,12 +175,12 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 		assertThat("null finds all three codes", codes, hasSize(3));
 
 		codes = autocompleteSearch("Observation", "code", null, "789");
-		assertThat("token prefix finds the matching code", codes, Matchers.hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
-		assertThat("token prefix finds only the matching code, not all codes on the resource", codes, Matchers.contains(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("token prefix finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("token prefix finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));
 
 		codes = autocompleteSearch("Observation", "code", "text", "erythrocyte");
-		assertThat("text finds the matching code", codes, Matchers.hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
-		assertThat("text finds only the matching code, not all codes on the resource", codes, Matchers.contains(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("text finds the matching code", codes, hasItem(matchingSystemAndCode(erythrocyte_by_volume)));
+		assertThat("text finds only the matching code, not all codes on the resource", codes, contains(matchingSystemAndCode(erythrocyte_by_volume)));
 
 	}
 

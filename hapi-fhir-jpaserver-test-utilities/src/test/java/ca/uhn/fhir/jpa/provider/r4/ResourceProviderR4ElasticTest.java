@@ -21,7 +21,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,8 +88,8 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		HttpGet expandQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
+		HttpGet expandQuery = new HttpGet(ourServerBase + "/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure");
+		try (CloseableHttpResponse response = ourHttpClient.execute(expandQuery)) {
 
 			// then
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
@@ -166,9 +165,9 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5");
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=5");
 		myCaptureQueriesListener.clear();
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			// then
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
@@ -177,7 +176,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
 			assertEquals(5, bundle.getEntry().size(), "Expected 5 observation entries to match page size");
 			assertTrue(bundle.getLink("next").hasRelation());
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 	}
 
@@ -187,9 +186,9 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=0");
+		HttpGet countQuery = new HttpGet(ourServerBase + "/Observation?code=789-8&_count=0");
 		myCaptureQueriesListener.clear();
-		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
+		try (CloseableHttpResponse response = ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -198,7 +197,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			assertEquals(0, bundle.getEntry().size(), "Expected no entries in bundle");
 			assertNull(bundle.getLink("next"), "Expected no 'next' link");
 			assertNull(bundle.getLink("prev"), "Expected no 'prev' link");
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 		}
 
 	}
