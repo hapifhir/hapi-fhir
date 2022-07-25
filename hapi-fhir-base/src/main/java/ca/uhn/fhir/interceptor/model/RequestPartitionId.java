@@ -201,6 +201,10 @@ public class RequestPartitionId implements IModelJson {
 		return getPartitionIds().contains(null);
 	}
 
+	public boolean hasNoPartition() {
+		return !hasPartitionIds() && !isAllPartitions();
+	}
+
 	public List<Integer> getPartitionIdsWithoutDefault() {
 		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
 	}

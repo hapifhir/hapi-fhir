@@ -126,13 +126,12 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
-		RequestPartitionId partitionId = payload.getPartitionId();
+		RequestPartitionId payloadPartitionId = payload.getPartitionId();
 		// This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
-		if(partitionId == null || partitionId.getFirstPartitionNameOrNull() == null){
-			partitionId= RequestPartitionId.defaultPartition();
+		if (payloadPartitionId == null || payloadPartitionId.hasNoPartition()) {
+			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
-		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-		return systemRequestDetails;
+		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
 
 }
