@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3817
+title: "The 'SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY' pointcut now supports a new parameter, `ResourceModifiedJsonMessage`. This permits interceptor implementers to modify the outgoing envelope before it is sent off. "

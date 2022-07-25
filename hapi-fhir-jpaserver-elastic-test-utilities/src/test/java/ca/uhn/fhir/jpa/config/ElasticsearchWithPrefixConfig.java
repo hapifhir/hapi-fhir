@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
 import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
+import ca.uhn.fhir.jpa.test.config.BlockLargeNumbersOfParamsListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;

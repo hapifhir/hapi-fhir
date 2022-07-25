@@ -36,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantBatchOperationR4Test.class);
 
+	private boolean myReindexParameterCache;
+
 	@BeforeEach
 	@Override
 	public void before() throws Exception {
@@ -43,6 +45,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
+
+		myReindexParameterCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
 	}
 
 	@BeforeEach
@@ -58,6 +63,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(myReindexParameterCache);
 		super.after();
 	}
 
