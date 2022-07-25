@@ -177,7 +177,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 			return  (MdmLink) theMdmLink;
 		}
 		else {
-			throw new UnprocessableEntityException(Msg.code(2101) + "Unprocessable MdmLink implementation");
+			throw new UnprocessableEntityException(Msg.code(2109) + "Unprocessable MdmLink implementation");
 		}
 	}
 

@@ -25,7 +25,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
@@ -54,8 +53,6 @@ public class MdmMessageHandler implements MessageHandler {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
 	private MdmMatchLinkSvc myMdmMatchLinkSvc;
 	@Autowired

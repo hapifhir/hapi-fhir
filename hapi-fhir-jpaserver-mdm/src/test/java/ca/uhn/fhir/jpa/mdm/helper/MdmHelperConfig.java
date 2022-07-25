@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.mdm.dao.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;

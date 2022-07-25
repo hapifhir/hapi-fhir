@@ -12,13 +12,14 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -159,16 +160,16 @@ public class JpaBulkExportProcessorTest {
 		return patientTypes;
 	}
 
-	private IMdmLinkDao.MdmPidTuple createTuple(long theGroupId, long theGoldenId) {
-		return new IMdmLinkDao.MdmPidTuple() {
+	private MdmPidTuple createTuple(long theGroupId, long theGoldenId) {
+		return new MdmPidTuple() {
 			@Override
-			public Long getGoldenPid() {
-				return theGoldenId;
+			public ResourcePersistentId getGoldenPid() {
+				return new ResourcePersistentId(theGoldenId);
 			}
 
 			@Override
-			public Long getSourcePid() {
-				return theGroupId;
+			public ResourcePersistentId getSourcePid() {
+				return new ResourcePersistentId(theGroupId);
 			}
 		};
 	}
@@ -263,7 +264,7 @@ public class JpaBulkExportProcessorTest {
 			pids.add(((IdDt) type).getIdPartAsLong());
 		}
 
-		IMdmLinkDao.MdmPidTuple tuple = createTuple(groupId, groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId, groupGoldenPid);
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
 		IFhirPath path = mock(IFhirPath.class);
@@ -285,7 +286,7 @@ public class JpaBulkExportProcessorTest {
 		if (theMdm) {
 			when(myJpaIdHelperService.getPidOrNull(any(Group.class)))
 				.thenReturn(groupId);
-			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(anyLong(), eq(MdmMatchResultEnum.MATCH)))
+			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(ResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
 			when(myMdmExpansionCacheSvc.hasBeenPopulated())
 				.thenReturn(false); // does not matter, since if false, it then goes and populates
@@ -331,7 +332,7 @@ public class JpaBulkExportProcessorTest {
 			Arrays.asList(pid, pid2)
 		);
 
-		IMdmLinkDao.MdmPidTuple tuple = createTuple(groupId, groupGoldenPid);
+		MdmPidTuple tuple = createTuple(groupId, groupGoldenPid);
 		List<IPrimitiveType> patientTypes = createPatientTypes();
 
 		IFhirResourceDao<Group> groupDao = mock(IFhirResourceDao.class);
@@ -350,7 +351,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(groupId);
 
 		if (theMdm) {
-			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(anyLong(), eq(MdmMatchResultEnum.MATCH)))
+			when(myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(any(ResourcePersistentId.class), eq(MdmMatchResultEnum.MATCH)))
 				.thenReturn(Collections.singletonList(tuple));
 			when(myIdHelperService.translatePidsToForcedIds(any(Set.class)))
 				.thenAnswer(params -> {

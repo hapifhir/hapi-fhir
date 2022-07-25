@@ -685,7 +685,7 @@ public class IdHelperService implements IIdHelperService {
 	@Nullable
 	public ResourcePersistentId getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
 		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
-		if (retVal == null) {
+		if (retVal.getId() == null) {
 			IIdType id = theResource.getIdElement();
 			try {
 				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
