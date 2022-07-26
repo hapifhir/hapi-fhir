@@ -14,7 +14,4 @@ public class TestMdmConfigR4 extends BaseTestMdmConfig {
 	MdmHelperR4 mdmHelperR4() {
 		return new MdmHelperR4();
 	}
-
-	@Bean
-	IMdmLinkImplFactory myMdmLinkImplFactory(){ return new JpaMdmLinkImplFactory();}
 }

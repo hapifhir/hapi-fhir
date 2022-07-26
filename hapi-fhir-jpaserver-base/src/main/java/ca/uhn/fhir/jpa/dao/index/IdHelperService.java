@@ -707,11 +707,11 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nonnull
 	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
-		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
-		if (retVal == null) {
+		Object theResourcePID = theResource.getUserData(RESOURCE_PID);
+		if (theResourcePID == null) {
 			throw new IllegalStateException(Msg.code(2108) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId()));
 		}
-		return retVal;
+		return new ResourcePersistentId(theResourcePID);
 	}
 
 	@Override
