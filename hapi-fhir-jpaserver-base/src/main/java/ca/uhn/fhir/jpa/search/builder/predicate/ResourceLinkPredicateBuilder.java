@@ -689,15 +689,33 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		throw new InvalidRequestException(Msg.code(1250) + msg);
 	}
 
+	//FIXME should be able to chain _id and _type params
 	@Nonnull
-	public Condition createEverythingPredicate(String theResourceName, Long... theTargetPids) {
+	public Condition createEverythingPredicate(String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
 			return toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
 		} else {
 			// ... otherwise we look for resource types
-			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
+			//return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder("Condition"));
+
+			BinaryCondition binaryCondition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
+
+			List<Condition> binaryConditions = new ArrayList<>();
+			for (String theResourceType : theSourceResourceNames) {
+				BinaryCondition bin = BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceType.trim()));
+				binaryConditions.add(bin);
+			}
+
+			Condition rename = toOrPredicate(binaryConditions);
+
+			return toAndPredicate(List.of(binaryCondition, rename));
 		}
+	}
+
+	@Nonnull
+	public Condition createEverythingPredicateWithSourceType(String theResourceName) {
+		return BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceName));
 	}
 }

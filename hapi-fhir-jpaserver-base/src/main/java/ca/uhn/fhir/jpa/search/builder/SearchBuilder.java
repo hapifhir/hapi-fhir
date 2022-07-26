@@ -118,6 +118,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -552,7 +553,16 @@ public class SearchBuilder implements ISearchBuilder {
 
 			}
 
-			queryStack3.addPredicateEverythingOperation(myResourceName, targetPids.toArray(new Long[0]));
+			List<String> renameMe = new ArrayList<>();
+			for (List<IQueryParameterType> paramType : myParams.get(Constants.PARAM_TYPE)) {
+				for (IQueryParameterType param : paramType) {
+					String[] resourceTypes = ((StringParam) param).getValue().split(",");
+					renameMe.addAll(Arrays.asList(resourceTypes));
+				}
+			}
+			//queryStack3.addPredicateEverythingOperation("Observation", targetPids.toArray(new Long[0]));
+			//queryStack3.addPredicateEverythingOperationOnSourceResource("Condition");
+			queryStack3.addPredicateEverythingOperation(myResourceName, renameMe, targetPids.toArray(new Long[0]));
 		} else {
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of

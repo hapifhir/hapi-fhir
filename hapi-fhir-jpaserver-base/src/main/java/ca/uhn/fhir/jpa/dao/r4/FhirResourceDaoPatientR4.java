@@ -55,6 +55,7 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 																 SortSpec theSort,
 																 StringAndListParam theContent,
 																 StringAndListParam theNarrative,
+																 StringAndListParam theTypes,
 																 StringAndListParam theFilter,
 																 RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
@@ -69,6 +70,9 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		}
 		if (theNarrative != null) {
 			paramMap.add(Constants.PARAM_TEXT, theNarrative);
+		}
+		if (theTypes != null) {
+			paramMap.add(Constants.PARAM_TYPE, theTypes);
 		}
 		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
@@ -100,12 +104,12 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, null, theFilter, theRequestDetails);
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails, TokenOrListParam theId) {
-		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, StringAndListParam theTypes, RequestDetails theRequestDetails, TokenOrListParam theId) {
+		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theTypes, theFilter, theRequestDetails);
 	}
 
 }

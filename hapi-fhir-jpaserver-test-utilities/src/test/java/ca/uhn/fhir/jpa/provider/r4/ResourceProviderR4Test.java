@@ -103,6 +103,8 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Measure;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -2309,23 +2311,35 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
 
+		Observation obs = new Observation();
+		obs.getSubject().setReferenceElement(p1Id);
+		IIdType obsId = myClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+
+		MeasureReport meas = new MeasureReport();
+		meas.getSubject().setReferenceElement(p1Id);
+		IIdType measId = myClient.create().resource(meas).execute().getId().toUnqualifiedVersionless();
 
 		//Test for only one patient
 		Parameters parameters = new Parameters();
-		parameters.addParameter("_type", "Condition");
+		parameters.addParameter("_type", "Condition, Observation");
 
+		myCaptureQueriesListener.clear();
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, allOf(
-			containsInAnyOrder(p1Id, c1Id),
-			not(contains(o1Id))
+			hasItems(p1Id, c1Id, obsId),
+			not(contains(measId))
 		));
 	}
+	//FIXME:
+	//TODO: case where you chain _id and _type params
 
 	@Test
 	public void testEverythingPatientWorksWithForcedId() {

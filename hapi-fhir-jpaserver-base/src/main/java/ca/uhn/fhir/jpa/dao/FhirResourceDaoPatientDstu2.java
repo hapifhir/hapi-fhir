@@ -43,7 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
+public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient> implements IFhirResourceDaoPatient<Patient> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
@@ -92,7 +92,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails, TokenOrListParam theIds) {
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, StringAndListParam theTypes, RequestDetails theRequestDetails, TokenOrListParam theIds) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);
