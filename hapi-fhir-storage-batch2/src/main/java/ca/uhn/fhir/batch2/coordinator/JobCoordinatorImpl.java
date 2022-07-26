@@ -27,7 +27,6 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
-import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
 
 import javax.annotation.Nonnull;
@@ -160,8 +158,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	}
 
 	@Override
-	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
-		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
+	public List<JobInstance> fetchAllJobInstances() {
+		return myJobQuerySvc.fetchAllInstances();
 	}
 
 	@Override

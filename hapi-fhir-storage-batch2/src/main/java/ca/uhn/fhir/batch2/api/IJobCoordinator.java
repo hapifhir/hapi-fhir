@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -68,8 +69,7 @@ public interface IJobCoordinator {
 
 	/**
 	 * Fetches all job instances tht meet the FetchRequest criteria
-	 * @param theFetchRequest - fetch request
-	 * @return - page of job instances
+	 * @return - list of job instances
 	 */
-	Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
+	List<JobInstance> fetchAllJobInstances();
 }

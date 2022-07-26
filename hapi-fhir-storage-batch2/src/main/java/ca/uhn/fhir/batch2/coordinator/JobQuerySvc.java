@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.data.domain.Page;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -66,8 +64,8 @@ class JobQuerySvc {
 			.collect(Collectors.toList());
 	}
 
-	public Page<JobInstance> fetchAllInstances(JobInstanceFetchRequest theFetchRequest) {
-		return myJobPersistence.fetchJobInstances(theFetchRequest);
+	public List<JobInstance> fetchAllInstances() {
+		return myJobPersistence.fetchJobInstances();
 	}
 
 	public List<JobInstance> fetchRecentInstances(int theCount, int theStart) {
