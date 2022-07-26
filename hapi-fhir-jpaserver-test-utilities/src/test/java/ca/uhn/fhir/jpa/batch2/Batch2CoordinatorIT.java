@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -153,24 +152,22 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		request.setPageStart(index);
 		request.setBatchSize(size);
 
-		Page<JobInstance> page;
+		List<JobInstance> page;
 		Iterator<JobInstance> iterator;
 		int pageIndex = 0;
 		List<String> fetched = new ArrayList<>();
-		do {
-			// create / update our request
-			request.setPageStart(pageIndex);
-			page = myJobCoordinator.fetchAllJobInstances(request);
-			iterator = page.iterator();
+		// create / update our request
+		request.setPageStart(pageIndex);
+		page = myJobCoordinator.fetchAllJobInstances();
+		iterator = page.iterator();
 
-			while (iterator.hasNext()) {
-				JobInstance next = iterator.next();
-				assertTrue(jobIds.contains(next.getInstanceId()));
-				fetched.add(next.getInstanceId());
-			}
+		while (iterator.hasNext()) {
+			JobInstance next = iterator.next();
+			assertTrue(jobIds.contains(next.getInstanceId()));
+			fetched.add(next.getInstanceId());
+		}
 
-			pageIndex++;
-		} while (page.hasNext());
+		pageIndex++;
 
 		assertEquals(maxJobsToSave, fetched.size());
 	}
