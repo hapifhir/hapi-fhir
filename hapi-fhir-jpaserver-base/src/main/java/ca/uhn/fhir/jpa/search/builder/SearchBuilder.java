@@ -553,16 +553,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 			}
 
-			List<String> renameMe = new ArrayList<>();
-			for (List<IQueryParameterType> paramType : myParams.get(Constants.PARAM_TYPE)) {
-				for (IQueryParameterType param : paramType) {
-					String[] resourceTypes = ((StringParam) param).getValue().split(",");
-					renameMe.addAll(Arrays.asList(resourceTypes));
-				}
+			List<String> sourceResources = new ArrayList<>();
+			if (myParams.get(Constants.PARAM_TYPE) != null) {
+				sourceResources.addAll(extractSourceResourcesFromParams());
 			}
-			//queryStack3.addPredicateEverythingOperation("Observation", targetPids.toArray(new Long[0]));
-			//queryStack3.addPredicateEverythingOperationOnSourceResource("Condition");
-			queryStack3.addPredicateEverythingOperation(myResourceName, renameMe, targetPids.toArray(new Long[0]));
+
+			queryStack3.addPredicateEverythingOperation(myResourceName, sourceResources, targetPids.toArray(new Long[0]));
 		} else {
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
@@ -645,6 +641,23 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
+	}
+
+	private Collection<String> extractSourceResourcesFromParams() {
+		List<String> retVal = new ArrayList<>();
+
+		for (List<IQueryParameterType> paramType : myParams.get(Constants.PARAM_TYPE)) {
+			for (IQueryParameterType param : paramType) {
+				String[] resourceTypes = ((StringParam) param).getValue().split(",");
+
+				retVal.addAll(Arrays.stream(resourceTypes)
+					.map(String::trim)
+					.collect(Collectors.toList())
+				);
+			}
+		}
+
+		return retVal;
 	}
 
 	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {

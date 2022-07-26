@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -692,25 +691,23 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	//FIXME should be able to chain _id and _type params
 	@Nonnull
 	public Condition createEverythingPredicate(String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
+		Condition condition;
+
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			return toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			condition = toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
 		} else {
 			// ... otherwise we look for resource types
-			//return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder("Condition"));
+			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
+		}
 
-			BinaryCondition binaryCondition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
-
-			List<Condition> binaryConditions = new ArrayList<>();
-			for (String theResourceType : theSourceResourceNames) {
-				BinaryCondition bin = BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceType.trim()));
-				binaryConditions.add(bin);
-			}
-
-			Condition rename = toOrPredicate(binaryConditions);
-
-			return toAndPredicate(List.of(binaryCondition, rename));
+		if (!theSourceResourceNames.isEmpty()) {
+			// if source resources are provided, add on predicate for _type operation
+			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
+			return toAndPredicate(List.of(condition, typeCondition));
+		} else {
+			return condition;
 		}
 	}
 
