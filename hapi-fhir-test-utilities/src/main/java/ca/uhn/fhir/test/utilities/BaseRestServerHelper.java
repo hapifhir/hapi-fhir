@@ -43,7 +43,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.servlet.Servlet;
-import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public abstract class BaseRestServerHelper {
 
 	protected final FhirContext myFhirContext;
 	protected int myListenerPort;
-	protected int mySecureListenerPort;
+	protected int myHttpsListenerPort;
 	protected Server myListenerServer;
 	protected String myBase;
 	protected String mySecureBase;
@@ -77,8 +76,7 @@ public abstract class BaseRestServerHelper {
 	}
 
 	protected void startServer(Servlet theServlet) throws Exception {
-		myListenerPort = getRandomAvailablePort();
-		myListenerServer = new Server(myListenerPort);
+		myListenerServer = new Server(0);
 		
 		myFhirContext.getRestfulClientFactory().setSocketTimeout(120000);
 
@@ -95,19 +93,20 @@ public abstract class BaseRestServerHelper {
 
 		HttpConfiguration httpsConfig = new HttpConfiguration();
 		httpsConfig.setSecureScheme("https");
-		mySecureListenerPort = getRandomAvailablePort();
-		httpsConfig.setSecurePort(mySecureListenerPort);
+		httpsConfig.setSecurePort(0);
 
 		ServerConnector sslConnector = new ServerConnector(myListenerServer,
 			new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
 			new HttpConnectionFactory(httpsConfig));
-		sslConnector.setPort(mySecureListenerPort);
+		sslConnector.setPort(0);
 
 		myListenerServer.addConnector(sslConnector);
 		myListenerServer.start();
 
+		assignHttpAndHttpsPorts();
+
 		myBase = "http://localhost:" + myListenerPort + "/target";
-		mySecureBase = "https://localhost:" + mySecureListenerPort + "/target";
+		mySecureBase = "https://localhost:" + myHttpsListenerPort + "/target";
 
 		myFhirContext.getRestfulClientFactory().setConnectTimeout(60000);
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -116,14 +115,10 @@ public abstract class BaseRestServerHelper {
 		myClient.registerInterceptor(new LoggingInterceptor(false));
 	}
 
-	private int getRandomAvailablePort(){
-		try (ServerSocket serverSocket = new ServerSocket(0)) {
-			return serverSocket.getLocalPort();
-		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(2108)+"Failed to obtain random available port");
-		}
+	private void assignHttpAndHttpsPorts() {
+		myListenerPort = ((ServerConnector)myListenerServer.getConnectors()[0]).getLocalPort();
+		myHttpsListenerPort = ((ServerConnector)myListenerServer.getConnectors()[1]).getLocalPort();
 	}
-
 
 	private SslContextFactory getSslContextFactory() throws Exception{
 		try {
