@@ -501,8 +501,8 @@ public class JpaConfig {
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
 	@Scope("prototype")
-	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder() {
-		return new RepositoryValidatingRuleBuilder();
+	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder(IValidationSupport theValidationSupport) {
+		return new RepositoryValidatingRuleBuilder(theValidationSupport);
 	}
 
 	@Bean
