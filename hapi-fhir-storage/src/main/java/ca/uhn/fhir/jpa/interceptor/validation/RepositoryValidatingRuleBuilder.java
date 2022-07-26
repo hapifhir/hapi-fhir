@@ -53,14 +53,17 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	private IValidationSupport myValidationSupport;
+	private final IValidationSupport myValidationSupport;
 	@Autowired
 	private ValidatorResourceFetcher myValidatorResourceFetcher;
 	@Autowired
 	private ValidatorPolicyAdvisor myValidationPolicyAdvisor;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
+	public RepositoryValidatingRuleBuilder(IValidationSupport theValidationSupport) {
+		myValidationSupport = theValidationSupport;
+	}
 
 	/**
 	 * Begin a new rule for a specific resource type.
