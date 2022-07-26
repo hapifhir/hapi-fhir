@@ -274,11 +274,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
-		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
-			.stream()
-			.map(ResourcePersistentId::new)
-			.collect(Collectors.toList());
-		return resourcePersistentIds.iterator();
+		return patientPidsToExport.iterator();
 	}
 
 	/**
