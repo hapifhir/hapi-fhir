@@ -72,9 +72,9 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 		}
 
 		@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
-		public IBaseResource invoke(IBaseResource theResource) {
-			myReturnedValue = myPatientInterceptor.invoke(theResource);
-			return myReturnedValue;
+		public void invoke(IBaseResource theResource) {
+			myPatientInterceptor.invoke(theResource);
+			myReturnedValue = theResource;
 		}
 
 		public IBaseResource getReturnedValue() {

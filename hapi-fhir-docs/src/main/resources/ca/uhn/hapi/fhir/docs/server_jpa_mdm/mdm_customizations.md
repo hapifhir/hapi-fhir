@@ -8,7 +8,7 @@ MDM allows customization through interceptors.  Please refer to the [Interceptor
 
 ## MDM Preprocessing Pointcut
 
-MDM supports a pointcut invocation right before it starts matching an incoming source resource against defined rules.  A possible use of the pointcut would be to alter a resource property(ies) with the intention of influencing the MDM matching and linking process.  It should be noted that any modifications to the source resource are NOT persisted to the supporting storage module.  Modifications performed within the pointcut will remain valid during MDM processing only.
+MDM supports a pointcut invocation right before it starts matching an incoming source resource against defined rules.  A possible use of the pointcut would be to alter a resource content with the intention of influencing the MDM matching and linking process.  Any modifications to the source resource are NOT persisted to the database.  Modifications performed within the pointcut will remain valid during MDM processing only.
 
 ## Example: Ignoring Matches on Patient Name
 

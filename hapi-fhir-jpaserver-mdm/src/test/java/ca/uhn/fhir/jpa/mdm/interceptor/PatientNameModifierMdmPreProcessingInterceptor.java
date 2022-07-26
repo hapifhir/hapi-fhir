@@ -18,7 +18,7 @@ public class PatientNameModifierMdmPreProcessingInterceptor {
 	String myNewValue = EMPTY;
 
 	@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
-	public IBaseResource invoke(IBaseResource theResource) {
+	public void invoke(IBaseResource theResource) {
 
 		HumanName patientHumanName = ((Patient) theResource).getNameFirstRep();
 		String patientGivenAndSurname = patientHumanName.getNameAsSingleString();
@@ -27,7 +27,6 @@ public class PatientNameModifierMdmPreProcessingInterceptor {
 			patientHumanName.setFamily(myNewValue);
 		}
 
-		return theResource;
 	}
 
 	public void setNewValue(String theNewValue) {

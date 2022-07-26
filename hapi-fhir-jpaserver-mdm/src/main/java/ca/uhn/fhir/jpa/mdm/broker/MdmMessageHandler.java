@@ -50,8 +50,6 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 @Service
 public class MdmMessageHandler implements MessageHandler {
 
@@ -105,8 +103,7 @@ public class MdmMessageHandler implements MessageHandler {
 
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)){
 			HookParams params = new HookParams().add(IBaseResource.class, theSourceResource);
-			IBaseResource interceptedSourceResource = (IBaseResource) myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED, params);
-			theSourceResource = Objects.requireNonNullElse(interceptedSourceResource, theSourceResource);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED, params);
 		}
 
 		theSourceResource.setUserData(Constants.RESOURCE_PARTITION_ID, theMsg.getPartitionId());
@@ -133,7 +130,7 @@ public class MdmMessageHandler implements MessageHandler {
 			HookParams params = new HookParams()
 				.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
 				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-				.add(MdmLinkEvent.class, getLinkChangeEvent(mdmContext));
+				.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
@@ -174,17 +171,12 @@ public class MdmMessageHandler implements MessageHandler {
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
 	}
 
-	private void log(MdmTransactionContext theMdmContext, String theMessage) {
-		theMdmContext.addTransactionLogMessage(theMessage);
-		ourLog.debug(theMessage);
-	}
-
 	private void log(MdmTransactionContext theMdmContext, String theMessage, Exception theException) {
 		theMdmContext.addTransactionLogMessage(theMessage);
 		ourLog.error(theMessage, theException);
 	}
 
-	private MdmLinkEvent getLinkChangeEvent(MdmTransactionContext theMdmContext) {
+	private MdmLinkEvent buildLinkChangeEvent(MdmTransactionContext theMdmContext) {
 		MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
 		theMdmContext.getMdmLinks()
 			.stream()
