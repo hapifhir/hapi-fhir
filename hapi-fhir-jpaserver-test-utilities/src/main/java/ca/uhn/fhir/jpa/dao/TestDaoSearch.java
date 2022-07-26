@@ -36,8 +36,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +57,6 @@ import static org.mockito.Mockito.spy;
 /**
  * Simplistic implementation of FHIR queries.
  */
-@ExtendWith(MockitoExtension.class)
 public class TestDaoSearch {
 
 	@Configuration
@@ -146,9 +143,8 @@ public class TestDaoSearch {
 		IBundleProvider result = searchForBundleProvider(theQueryUrl);
 
 		// getAllResources is not safe as size is not always set
-		List<String> resourceIds = result.getResources(0, Integer.MAX_VALUE)
+		return result.getResources(0, Integer.MAX_VALUE)
 					.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
-		return resourceIds;
 	}
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl, boolean theSynchronousMode) {
@@ -164,8 +160,7 @@ public class TestDaoSearch {
 
 		// for asynchronous mode, we also need to make the request paginated ar synchronous is forced
 		SystemRequestDetails reqDetails =  theSynchronousMode ? fakeRequestDetailsFromUrl(theQueryUrl) : fakePaginatedRequestDetailsFromUrl(theQueryUrl);
-		IBundleProvider result = dao.search(map, reqDetails);
-		return result;
+		return dao.search(map, reqDetails);
 	}
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl) {
