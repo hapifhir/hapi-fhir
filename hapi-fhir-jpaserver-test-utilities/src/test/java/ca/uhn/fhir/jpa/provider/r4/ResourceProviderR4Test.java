@@ -2332,12 +2332,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			not(contains(measureId))
 		));
 	}
-	//FIXME:
-	//TODO: case where you chain _id and _type params
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeParameter";
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
