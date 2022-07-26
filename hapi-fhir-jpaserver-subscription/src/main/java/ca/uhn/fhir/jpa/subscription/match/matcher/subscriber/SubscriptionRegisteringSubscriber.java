@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
