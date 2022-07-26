@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -126,13 +125,13 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
 	 */
 	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
-		RequestPartitionId partitionId = payload.getPartitionId();
-		// This was occurring with the package installer to STORE_AND_INSTALL Subscriptions while partitioning was enabled
-		if(partitionId == null || partitionId.getFirstPartitionNameOrNull() == null){
-			partitionId= RequestPartitionId.defaultPartition();
+		RequestPartitionId payloadPartitionId = payload.getPartitionId();
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// creates a corrupt default partition.  This resets it to a clean one.
+			payloadPartitionId = RequestPartitionId.defaultPartition();
 		}
-		RequestDetails systemRequestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-		return systemRequestDetails;
+		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
 
 }
