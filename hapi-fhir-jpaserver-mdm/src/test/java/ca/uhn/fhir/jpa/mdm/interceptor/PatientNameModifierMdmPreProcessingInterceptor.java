@@ -9,27 +9,22 @@ import org.hl7.fhir.r4.model.Patient;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class PatientNameModifierMdmPreProcessingInterceptor {
 
 	List<String> myNamesToIgnore = asList("John Doe", "Jane Doe");
 
-	String myNewValue = EMPTY;
-
 	@Hook(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)
 	public void invoke(IBaseResource theResource) {
 
-		HumanName patientHumanName = ((Patient) theResource).getNameFirstRep();
-		String patientGivenAndSurname = patientHumanName.getNameAsSingleString();
+		Patient patient = (Patient) theResource;
+		List<HumanName> nameList = patient.getName();
 
-		if (myNamesToIgnore.stream().anyMatch(toIgnore -> toIgnore.equalsIgnoreCase(patientGivenAndSurname))) {
-			patientHumanName.setFamily(myNewValue);
-		}
+		List<HumanName> validHumanNameList = nameList.stream()
+			.filter(theHumanName -> !myNamesToIgnore.contains(theHumanName.getNameAsSingleString()))
+			.toList();
 
+		patient.setName(validHumanNameList);
 	}
 
-	public void setNewValue(String theNewValue) {
-		myNewValue = theNewValue;
-	}
 }

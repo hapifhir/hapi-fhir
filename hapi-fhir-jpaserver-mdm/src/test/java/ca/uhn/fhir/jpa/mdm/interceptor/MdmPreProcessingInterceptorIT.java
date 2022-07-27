@@ -10,9 +10,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -42,10 +41,8 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 		myInterceptorService.unregisterInterceptor(myPatientInterceptorWrapper);
 	}
 
-	@ParameterizedTest
-	@MethodSource("getNames")
-	public void whenInterceptorIsRegisteredThenInterceptorIsCalled(String theSubstituteName) throws InterruptedException {
-		myPreProcessingInterceptor.setNewValue(theSubstituteName);
+	@Test
+	public void whenInterceptorIsRegisteredThenInterceptorIsCalled() throws InterruptedException {
 
 		Patient aPatient = buildPatientWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 
@@ -53,12 +50,8 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 		Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
 
-		assertEquals(theSubstituteName, interceptedResource.getNameFirstRep().getFamily());
+		assertEquals(0, interceptedResource.getName().size());
 
-	}
-
-	static String[] getNames() {
-		return new String[]{"NewName", null};
 	}
 
 	public static class PatientInterceptorWrapper {
