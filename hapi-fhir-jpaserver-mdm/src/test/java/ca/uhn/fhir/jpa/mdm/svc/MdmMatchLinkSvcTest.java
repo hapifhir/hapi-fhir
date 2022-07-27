@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -121,6 +123,23 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false, true);
 		assertLinksMatchedByEid(false, false, false);
+	}
+
+	@Test
+	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
+
+		//Given: A patient exists with a matched golden resource.
+		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
+		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
+
+		//When: A patient who has no existing MDM links comes in as an update
+		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
+		secondaryJane.setActive(true);
+		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
+
+		//Then: The secondary jane should link to the first jane.
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
+		assertThat(secondaryJane, is(sameGoldenResourceAs(jane)));
 	}
 
 	@Test

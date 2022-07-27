@@ -78,13 +78,20 @@ public class MdmEidUpdateService {
 			} else if (!updateContext.isHasEidsInCommon()) {
 				handleNoEidsInCommon(theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
-		} else {
+		} else if (updateContext.hasExistingGoldenResource()) {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
 			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+		} else if (!updateContext.hasExistingGoldenResource()) {
+			//If we are in an update, and there is no existing golden resource, it is likely due to a clear operation, and we need to start from scratch.
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
+			myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+		} else {
+			ourLog.error("We are in an unknown state! Incoming resource has a new golden resource match, ");
 		}
 	}
 
@@ -190,6 +197,9 @@ public class MdmEidUpdateService {
 
 		public boolean isRemainsMatchedToSameGoldenResource() {
 			return myRemainsMatchedToSameGoldenResource;
+		}
+		public boolean hasExistingGoldenResource() {
+				return myExistingGoldenResource != null;
 		}
 	}
 }

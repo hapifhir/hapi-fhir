@@ -1,13 +1,21 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmLinkEvent;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearStep;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,7 +28,11 @@ import org.springframework.data.domain.Example;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
+import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

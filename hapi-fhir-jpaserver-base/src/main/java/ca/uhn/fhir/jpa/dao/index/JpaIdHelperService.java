@@ -42,7 +42,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.index.IdHelperService.RESOURCE_PID;
 
 /**
  * See {@link IJpaIdHelperService} for an explanation of this class.
