@@ -79,6 +79,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private final List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	private final List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
 
+	// TODO - why is this needed? it's cumbersome to maintain; consider removing it
 	/**
 	 * A list of job ids for CodeSydstemDelete and CodeSystemVersionDelete jobs that
 	 * have been scheduled (but not completed)
