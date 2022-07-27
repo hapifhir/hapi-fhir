@@ -105,7 +105,7 @@ public interface IJobPersistence {
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 
 	/**
-	 * Fetches all job instances with specified sort
+	 * Fetches all job instances
 	 * @return - a list of job instances
 	 */
 	default List<JobInstance> fetchJobInstances() {
