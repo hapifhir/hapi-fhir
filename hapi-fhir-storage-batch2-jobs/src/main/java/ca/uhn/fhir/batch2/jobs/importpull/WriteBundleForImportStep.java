@@ -37,7 +37,6 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 		@NotNull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportRecord> theStepExecutionDetails,
 		@NotNull IJobDataSink<VoidModel> theDataSink
 	) throws JobExecutionFailedException {
-		// assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		BulkImportRecord record = theStepExecutionDetails.getData();
 
