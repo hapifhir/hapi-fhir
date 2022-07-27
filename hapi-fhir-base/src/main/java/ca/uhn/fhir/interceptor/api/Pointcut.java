@@ -2008,6 +2008,23 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.validation.ValidationResult"
 	),
 
+	/**
+	 * <b>MDM(EMPI) Hook:</b>
+	 * Invoked when a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) enters the MDM module. The purpose of the pointcut is to permit a pseudo
+	 * modification of the resource elements to influence the MDM linking process.  Any modifications to the resource are not persisted.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_BEFORE_PERSISTED_RESOURCE_CHECKED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
 	 * <b>MDM(EMPI) Hook:</b>
