@@ -2328,11 +2328,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, allOf(
-			containsInAnyOrder(p1Id, c1Id, observationId),
-			not(hasItem(o1Id)),
-			not(hasItem(measureId))
-		));
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(measureId)));
 	}
 
 	@Test
@@ -2369,13 +2367,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, allOf(
-			containsInAnyOrder(p1Id, c1Id, observationId),
-			not(hasItem(o1Id)),
-			not(hasItem(measureId)),
-			not(hasItem(p1Id)),
-			not(hasItem(o2Id))
-		));
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(measureId)));
+		assertThat(ids, not(hasItem(p2Id)));
+		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
