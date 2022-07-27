@@ -325,7 +325,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				}
 			}
 		} catch (IOException | SAXException e) {
-			throw new InternalErrorException(Msg.code(865) + e);
+			throw new InternalErrorException(Msg.code(2135) + e);
 		}
 
 		codeSystem.setVersion(codeSystemVersion.getCodeSystemVersionId());
