@@ -4,11 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -54,7 +53,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes=TestR4ConfigWithElasticHSearch.class)
 abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
@@ -117,6 +116,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 		if (!dataLoaded || patient0Id == null) {
 			// enabled to also create extended lucene index during creation of test data
+			boolean hsearchSaved = myDaoConfig.isAdvancedHSearchIndexing();
 			myDaoConfig.setAdvancedHSearchIndexing(true);
 			Patient pt = new Patient();
 			pt.addName().setFamily("Lastn").addGiven("Arthur");
@@ -135,7 +135,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
 			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
 			// turn off the setting enabled earlier
-			myDaoConfig.setAdvancedHSearchIndexing(false);
+			myDaoConfig.setAdvancedHSearchIndexing(hsearchSaved);
 		}
 
 	}
