@@ -17,7 +17,6 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -144,20 +143,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			jobIds.add(response.getJobId());
 		}
 
-		// run the test
-		// see if we can fetch jobs
-		int index = 0;
-		int size = 2;
-		JobInstanceFetchRequest request = new JobInstanceFetchRequest();
-		request.setPageStart(index);
-		request.setBatchSize(size);
-
 		List<JobInstance> page;
 		Iterator<JobInstance> iterator;
-		int pageIndex = 0;
 		List<String> fetched = new ArrayList<>();
-		// create / update our request
-		request.setPageStart(pageIndex);
 		page = myJobCoordinator.fetchAllJobInstances();
 		iterator = page.iterator();
 
@@ -166,8 +154,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			assertTrue(jobIds.contains(next.getInstanceId()));
 			fetched.add(next.getInstanceId());
 		}
-
-		pageIndex++;
 
 		assertEquals(maxJobsToSave, fetched.size());
 	}
