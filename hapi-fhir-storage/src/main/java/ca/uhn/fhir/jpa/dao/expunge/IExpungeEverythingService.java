@@ -29,5 +29,7 @@ public interface IExpungeEverythingService {
 
 	int getExpungeDeletedEntityCount();
 
-    int expungeEverythingMdmLinks();
+	int expungeEverythingByType(Class<?> theEntityType);
+
+	int expungeEverythingMdmLinks();
 }

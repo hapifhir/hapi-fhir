@@ -237,6 +237,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
                 return outcome;
         }
 
+	@Override
 	public int expungeEverythingByType(Class<?> theEntityType) {
                 int result = expungeEverythingByTypeWithoutPurging(theEntityType);
                 purgeAllCaches();
