@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.mysql.cj.TransactionEventHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -106,8 +107,6 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
-		ourEndNow = false;
-
 		parseFhirContext(theCommandLine);
 
 		String baseDirectory = theCommandLine.getOptionValue(SOURCE_DIRECTORY);
@@ -143,7 +142,7 @@ public class BulkImportCommand extends BaseCommand {
 			.execute();
 
 		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been downloaded.");
+		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		while (true) {
 			if (ourEndNow) {
