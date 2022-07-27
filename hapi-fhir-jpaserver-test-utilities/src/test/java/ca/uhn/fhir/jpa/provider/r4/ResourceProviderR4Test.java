@@ -103,7 +103,6 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
@@ -2310,8 +2309,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
-		IIdType observationId = createObservationForPatient(p1Id, "1");
-		IIdType measureId = createMeasureReportForPatient(p1Id, "1");
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
 		//Test for only one patient
 		Parameters parameters = new Parameters();
@@ -2328,9 +2327,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(measureId)));
+		assertThat(ids, not(hasItem(m1Id)));
 	}
 
 	@Test
@@ -2341,8 +2340,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
-		IIdType observationId = createObservationForPatient(p1Id, "1");
-		IIdType measureId = createMeasureReportForPatient(p1Id, "1");
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
 		//Test for only one patient
 		Parameters parameters = new Parameters();
@@ -2359,9 +2358,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(measureId)));
+		assertThat(ids, not(hasItem(m1Id)));
 	}
 
 	@Test
@@ -2372,15 +2371,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
 		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
-		IIdType observationId = createObservationForPatient(p1Id, "1");
-		IIdType measureId = createMeasureReportForPatient(p1Id, "1");
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
 		//Patient 2 stuff.
 		IIdType o2Id = createOrganization(methodName, "2");
 		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
 		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
-		IIdType observation2Id = createObservationForPatient(p2Id, "2");
-		IIdType measure2Id = createMeasureReportForPatient(p2Id, "2");
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
 
 		//Test for only patient 1
 		Parameters parameters = new Parameters();
@@ -2398,9 +2397,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
-		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
-		assertThat(ids, not(hasItem(measureId)));
+		assertThat(ids, not(hasItem(m1Id)));
 		assertThat(ids, not(hasItem(p2Id)));
 		assertThat(ids, not(hasItem(o2Id)));
 	}
@@ -7038,8 +7037,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		return cId;
 	}
 
-	private IIdType createMeasureReportForPatient(IIdType thePatientId, String theIndex) {
-		MeasureReport m = new MeasureReport();
+	private IIdType createMedicationRequestForPatient(IIdType thePatientId, String theIndex) {
+		MedicationRequest m = new MedicationRequest();
 		m.addIdentifier().setValue(theIndex);
 		if (thePatientId != null) {
 			m.getSubject().setReferenceElement(thePatientId);
