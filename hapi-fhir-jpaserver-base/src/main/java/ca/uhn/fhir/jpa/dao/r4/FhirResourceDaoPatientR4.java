@@ -73,8 +73,10 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 		}
 		if (theTypes != null) {
 			paramMap.add(Constants.PARAM_TYPE, theTypes);
+		} else {
+			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		}
-		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+
 		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
