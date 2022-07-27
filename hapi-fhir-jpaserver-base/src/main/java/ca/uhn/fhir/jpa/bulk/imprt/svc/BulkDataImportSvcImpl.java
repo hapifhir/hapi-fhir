@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
@@ -44,7 +43,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,8 +59,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
@@ -76,13 +72,6 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 	@Autowired
 	private ISchedulerService mySchedulerService;
-
-	//	@Autowired
-//	private IBatchJobSubmitter myJobSubmitter;
-
-//	@Autowired
-//	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
-//	private org.springframework.batch.core.Job myBulkImportJob;
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -295,19 +284,6 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 
 		myJobCoordinator.startInstance(request);
-
-//		JobParametersBuilder parameters = new JobParametersBuilder()
-//			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
-//			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
-//
-//		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
-//			parameters.addString(BatchConstants.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
-//		}
-
-
-//		myJobSubmitter.runJob(myBulkImportJob, parameters.toJobParameters());
-
-
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {

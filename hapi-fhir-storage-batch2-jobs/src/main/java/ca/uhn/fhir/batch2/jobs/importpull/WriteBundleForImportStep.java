@@ -8,27 +8,21 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportRecord;
-import ca.uhn.fhir.batch2.importpull.svc.IBulkImportPullSvc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.IParser;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(WriteBundleForImportStep.class);
-
-	@Autowired
-	private IBulkImportPullSvc myBulkImportPullSvc;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -73,7 +67,8 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 			default:
 			case FHIR_TRANSACTION:
 				IFhirSystemDao systemDao = myDaoRegistry.getSystemDao();
-				systemDao.transactionNested(requestDetails, bundle);
+				systemDao.transaction(requestDetails, bundle);
+//				systemDao.transactionNested(requestDetails, bundle);
 				break;
 		}
 
