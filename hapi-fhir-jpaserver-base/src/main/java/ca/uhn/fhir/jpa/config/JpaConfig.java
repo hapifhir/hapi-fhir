@@ -117,7 +117,10 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -176,6 +179,7 @@ import java.util.Date;
 @Import({
 	BeanPostProcessorConfig.class,
 	BatchJobsConfig.class,
+	TermCodeSystemConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
