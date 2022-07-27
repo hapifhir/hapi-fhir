@@ -70,6 +70,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -754,7 +755,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		Coding expectedIssueCode = new Coding();
-		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode("Reference_REF_CantResolve");
+		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode(I18nConstants.REFERENCE_REF_CANTRESOLVE);
 		assertTrue(expectedIssueCode.equalsDeep(oo.getIssueFirstRep().getDetails().getCodingFirstRep()), encode(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString(obs.getSubject().getReference()));
 
@@ -824,7 +825,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		Coding expectedIssueCode = new Coding();
-		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode("Reference_REF_CantResolve");
+		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode(I18nConstants.REFERENCE_REF_CANTRESOLVE);
 		assertTrue(expectedIssueCode.equalsDeep(oo.getIssueFirstRep().getDetails().getCodingFirstRep()), encode(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString(obs.getSubject().getReference()));
 
@@ -893,7 +894,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		Coding expectedIssueCode = new Coding();
-		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode("Reference_REF_CantResolve");
+		expectedIssueCode.setSystem(JAVA_VALIDATOR_DETAILS_SYSTEM).setCode(I18nConstants.REFERENCE_REF_CANTRESOLVE);
 		assertTrue(expectedIssueCode.equalsDeep(oo.getIssueFirstRep().getDetails().getCodingFirstRep()), encode(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString(obs.getSubject().getReference()));
 

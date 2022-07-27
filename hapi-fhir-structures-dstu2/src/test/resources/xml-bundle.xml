@@ -363,7 +363,7 @@
 					<system value="email"/>
 					<use value="home"/>
 				</telecom>
-				<birthDate value="1980-06-01"/>
+				<birthDate value="1980-06-01T00:00:00"/>
 				<address>
 					<use value="home"/>
 					<line value="10 Raut Street"/>

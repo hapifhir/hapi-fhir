@@ -462,8 +462,18 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public Map<String, byte[]> getBinaries() {
-		throw new UnsupportedOperationException(Msg.code(232));
+	public Set<String> getBinaryKeysAsSet() {
+		throw new UnsupportedOperationException(Msg.code(2115));
+	}
+
+	@Override
+	public boolean hasBinaryKey(String s) {
+		throw new UnsupportedOperationException(Msg.code(2116));
+	}
+
+	@Override
+	public byte[] getBinaryForKey(String s) {
+		throw new UnsupportedOperationException(Msg.code(2117));
 	}
 
 	@Override

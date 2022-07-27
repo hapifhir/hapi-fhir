@@ -4,10 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
@@ -27,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -66,6 +68,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
 	}
 
+	@Disabled
 	@Test
 	public void testParseMinuteShouldFail() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
@@ -77,6 +80,7 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
+	@Disabled
 	@Test
 	public void testParseMinuteZuluShouldFail() throws DataFormatException {
 		DateTimeType dt = new DateTimeType();
@@ -140,13 +144,13 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			new DateType("2001-01-02T11:13:33");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 		try {
 			new InstantType("2001-01-02");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 	}
@@ -190,7 +194,22 @@ public class BaseDateTimeTypeDstu3Test {
 	public void testDateParsesWithInvalidPrecision() {
 		Goal c = new Goal();
 		c.setStatusDateElement(new DateType());
-		assertThrows(DataFormatException.class, () -> c.getStatusDateElement().setValueAsString("2001-01-02T11:13:33"));
+		c.getStatusDateElement().setValueAsString("2001-01-02T11:13:33");
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
+
+		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
+		assertThat(encoded, Matchers.containsString("value=\"2001-01-02T11:13:33\""));
+
+		c = ourCtx.newXmlParser().parseResource(Goal.class, encoded);
+
+		assertEquals("2001-01-02T11:13:33", c.getStatusDateElement().getValueAsString());
+		assertEquals(TemporalPrecisionEnum.SECOND, c.getStatusDateElement().getPrecision());
+
+		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
+		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
+		ourLog.info(outcomeStr);
+
+		assertThat(outcomeStr, containsString("date-primitive"));
 	}
 
 	@Test
