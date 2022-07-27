@@ -2318,10 +2318,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		parameters.addParameter("_type", "Condition, Observation");
 
 		myCaptureQueriesListener.clear();
+
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(BundleType.SEARCHSET, b.getType());
@@ -2358,10 +2359,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		parameters.addParameter("_id", p1Id.getIdPart());
 
 		myCaptureQueriesListener.clear();
+
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(BundleType.SEARCHSET, b.getType());

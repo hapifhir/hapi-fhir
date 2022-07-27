@@ -553,12 +553,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 			}
 
-			List<String> sourceResources = new ArrayList<>();
+			List<String> typeSourceResources = new ArrayList<>();
 			if (myParams.get(Constants.PARAM_TYPE) != null) {
-				sourceResources.addAll(extractSourceResourcesFromParams());
+				typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
 			}
 
-			queryStack3.addPredicateEverythingOperation(myResourceName, sourceResources, targetPids.toArray(new Long[0]));
+			queryStack3.addPredicateEverythingOperation(myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
 		} else {
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
@@ -643,19 +643,25 @@ public class SearchBuilder implements ISearchBuilder {
 		return Optional.of(executor);
 	}
 
-	private Collection<String> extractSourceResourcesFromParams() {
-		List<String> retVal = new ArrayList<>();
+	private Collection<String> extractTypeSourceResourcesFromParams() {
 
-		for (List<IQueryParameterType> paramType : myParams.get(Constants.PARAM_TYPE)) {
-			for (IQueryParameterType param : paramType) {
-				String[] resourceTypes = ((StringParam) param).getValue().split(",");
+		List<List<IQueryParameterType>> listOfList = myParams.get(Constants.PARAM_TYPE);
 
-				retVal.addAll(Arrays.stream(resourceTypes)
-					.map(String::trim)
-					.collect(Collectors.toList())
-				);
-			}
-		}
+		// first off, let's flatten the list of list
+		List<IQueryParameterType> iQueryParameterTypesList = listOfList.stream().flatMap(List::stream).collect(Collectors.toList());
+
+		// then, extract all elements of each CSV into one big list
+		List<String> resourceTypes = iQueryParameterTypesList
+			.stream()
+			.map(param -> ((StringParam) param).getValue())
+			.map(csvString -> List.of(csvString.split(",")))
+			.flatMap(List::stream).collect(Collectors.toList());
+
+		// remove leading/trailing whitespaces if any and remove duplicates
+		Set<String> retVal = resourceTypes
+			.stream()
+			.map(String::trim)
+			.collect(Collectors.toSet());
 
 		return retVal;
 	}
@@ -1498,8 +1504,8 @@ public class SearchBuilder implements ISearchBuilder {
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
-			// Includes are processed inline for $everything query
-			if (myParams.getEverythingMode() != null) {
+			// Includes are processed inline for $everything query when we don't have a '_type' specified
+			if (myParams.getEverythingMode() != null && !myParams.containsKey(Constants.PARAM_TYPE)) {
 				myFetchIncludesForEverythingOperation = true;
 			}
 

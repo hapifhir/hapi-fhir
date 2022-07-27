@@ -704,9 +704,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		if (!theSourceResourceNames.isEmpty()) {
 			// if source resources are provided, add on predicate for _type operation
 			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
-			return toAndPredicate(List.of(condition, typeCondition));
-		} else {
-			return condition;
+			condition = toAndPredicate(List.of(condition, typeCondition));
 		}
+
+		return condition;
 	}
 }
