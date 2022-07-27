@@ -2303,6 +2303,37 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testEverythingPatientInstanceWithTypeParameter() {
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType observationId = createObservationForPatient(p1Id, "1");
+		IIdType measureId = createMeasureReportForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, observationId));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(measureId)));
+	}
+
+	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
 		String methodName = "testEverythingPatientTypeWithTypeParameter";
 
