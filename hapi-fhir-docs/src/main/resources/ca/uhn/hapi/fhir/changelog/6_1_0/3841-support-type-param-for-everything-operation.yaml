@@ -2,4 +2,4 @@
 type: add
 issue: 3841
 jira: SMILE-3686
-title: "Support for the `_type` parameter has been added when using the `$everything` operation."
+title: "Added support for the `_type` parameter has been added when using the `$everything` operation."
