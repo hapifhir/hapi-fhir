@@ -2328,8 +2328,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, allOf(
-			hasItems(p1Id, c1Id, observationId),
-			not(contains(measureId))
+			containsInAnyOrder(p1Id, c1Id, observationId),
+			not(hasItem(o1Id)),
+			not(hasItem(measureId))
 		));
 	}
 
@@ -2367,9 +2368,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, allOf(
-			hasItems(p1Id, c1Id, observationId),
-			not(hasItems(measureId)),
-			not(hasItems(p2Id, c2Id, observation2Id, measure2Id))
+			containsInAnyOrder(p1Id, c1Id, observationId),
+			not(hasItem(o1Id)),
+			not(hasItem(measureId)),
+			not(hasItem(p1Id)),
+			not(hasItem(o2Id))
 		));
 	}
 

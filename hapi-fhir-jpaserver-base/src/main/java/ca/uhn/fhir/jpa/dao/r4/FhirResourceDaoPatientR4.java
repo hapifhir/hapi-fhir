@@ -55,8 +55,8 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 																 SortSpec theSort,
 																 StringAndListParam theContent,
 																 StringAndListParam theNarrative,
-																 StringAndListParam theTypes,
 																 StringAndListParam theFilter,
+																 StringAndListParam theTypes,
 																 RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
@@ -102,14 +102,14 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 	}
 
 	@Override
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
+	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, StringAndListParam theTypes, RequestDetails theRequestDetails) {
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, null, theFilter, theRequestDetails);
+		return doEverythingOperation(id, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theTypes, theRequestDetails);
 	}
 
 	@Override
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, StringAndListParam theTypes, RequestDetails theRequestDetails, TokenOrListParam theId) {
-		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theTypes, theFilter, theRequestDetails);
+		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theTypes, theRequestDetails);
 	}
 
 }
