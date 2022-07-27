@@ -23,7 +23,7 @@ public class BulkImportPullConfig {
 			.setParametersValidator(importParameterValidator())
 			.addFirstStep(
 				"ReadInResourcesStep",
-				"Reads an import file and extracs the resources",
+				"Reads an import file and extracts the resources",
 				BulkImportFilePartitionResult.class,
 				fetchPartitionedFilesStep()
 			)

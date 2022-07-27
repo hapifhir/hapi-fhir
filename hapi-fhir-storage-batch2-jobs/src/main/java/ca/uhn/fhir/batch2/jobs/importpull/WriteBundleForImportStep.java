@@ -67,7 +67,6 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 			case FHIR_TRANSACTION:
 				IFhirSystemDao systemDao = myDaoRegistry.getSystemDao();
 				systemDao.transaction(requestDetails, bundle);
-//				systemDao.transactionNested(requestDetails, bundle);
 				break;
 		}
 
