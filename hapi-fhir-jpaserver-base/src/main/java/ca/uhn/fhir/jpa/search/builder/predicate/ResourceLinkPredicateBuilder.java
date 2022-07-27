@@ -688,7 +688,6 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		throw new InvalidRequestException(Msg.code(1250) + msg);
 	}
 
-	//FIXME should be able to chain _id and _type params
 	@Nonnull
 	public Condition createEverythingPredicate(String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
 		Condition condition;
@@ -709,10 +708,5 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		} else {
 			return condition;
 		}
-	}
-
-	@Nonnull
-	public Condition createEverythingPredicateWithSourceType(String theResourceName) {
-		return BinaryCondition.equalTo(myColumnSrcType, generatePlaceholder(theResourceName));
 	}
 }

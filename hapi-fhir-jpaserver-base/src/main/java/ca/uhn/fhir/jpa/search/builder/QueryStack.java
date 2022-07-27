@@ -1589,12 +1589,6 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(predicate);
 	}
 
-	public void addPredicateEverythingOperationOnSourceResource(String theResourceName) {
-		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
-		Condition predicate = table.createEverythingPredicateWithSourceType(theResourceName);
-		mySqlBuilder.addPredicate(predicate);
-	}
-
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam) {
 
 		IQueryParameterType qp;
