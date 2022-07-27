@@ -648,14 +648,14 @@ public class SearchBuilder implements ISearchBuilder {
 		List<List<IQueryParameterType>> listOfList = myParams.get(Constants.PARAM_TYPE);
 
 		// first off, let's flatten the list of list
-		List<IQueryParameterType> iQueryParameterTypesList = listOfList.stream().flatMap(List::stream).toList();
+		List<IQueryParameterType> iQueryParameterTypesList = listOfList.stream().flatMap(List::stream).collect(Collectors.toList());
 
 		// then, extract all elements of each CSV into one big list
 		List<String> resourceTypes = iQueryParameterTypesList
 			.stream()
 			.map(param -> ((StringParam) param).getValue())
 			.map(csvString -> List.of(csvString.split(",")))
-			.flatMap(List::stream).toList();
+			.flatMap(List::stream).collect(Collectors.toList());
 
 		// remove leading/trailing whitespaces if any and remove duplicates
 		Set<String> retVal = resourceTypes
