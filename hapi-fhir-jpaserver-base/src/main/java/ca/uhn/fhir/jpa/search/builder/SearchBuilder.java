@@ -644,7 +644,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private Collection<String> extractTypeSourceResourcesFromParams() {
-		// TODO: Justin, pick any implementation u feel the most comfortable with
+
 		List<List<IQueryParameterType>> listOfList = myParams.get(Constants.PARAM_TYPE);
 
 		// first off, let's flatten the list of list
@@ -662,20 +662,6 @@ public class SearchBuilder implements ISearchBuilder {
 			.stream()
 			.map(String::trim)
 			.collect(Collectors.toSet());
-
-
-//		Set<String> retVal = new HashSet<>();
-//		for (List<IQueryParameterType> paramType : myParams.get(Constants.PARAM_TYPE)) {
-//			for (IQueryParameterType param : paramType) {
-//
-//				String[] resourceTypes = ((StringParam) param).getValue().split(",");
-//
-//				Arrays.stream(resourceTypes)
-//					.map(String::trim)
-//					.forEach(retVal::add);
-//
-//			}
-//		}
 
 		return retVal;
 	}
