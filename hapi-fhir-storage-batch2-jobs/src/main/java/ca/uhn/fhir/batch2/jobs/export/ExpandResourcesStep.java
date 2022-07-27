@@ -44,14 +44,10 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -67,26 +63,8 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
-	@Autowired
-	private ApplicationContext myApplicationContext;
-
+	@Autowired(required = false)
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
-
-	@PostConstruct
-	public void initialize() {
-		boolean includeNonSingletons = false;
-		// We don't want to init lazy loaded beans here, so we call getBeansOfType with allowEagerInit = false
-		boolean allowEagerInit = false;
-		try {
-			Map<String, ResponseTerminologyTranslationSvc> rttMap = myApplicationContext.getBeansOfType(ResponseTerminologyTranslationSvc.class, includeNonSingletons, allowEagerInit);
-			Optional<ResponseTerminologyTranslationSvc> oRtt = rttMap.values().stream().findFirst();
-			if (oRtt.isPresent()) {
-				myResponseTerminologyTranslationSvc = oRtt.get();
-			}
-		} catch (Exception e) {
-			ourLog.info("Terminology Translation not available on this server.  Bulk Export will operate without it.");
-		}
-	}
 
 	@Nonnull
 	@Override
