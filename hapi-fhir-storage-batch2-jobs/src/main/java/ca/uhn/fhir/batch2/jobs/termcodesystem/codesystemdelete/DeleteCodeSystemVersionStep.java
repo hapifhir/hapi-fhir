@@ -9,12 +9,14 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DeleteCodeSystemVersionStep implements IJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, CodeSystemVersionPIDResult> {
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+
+	public DeleteCodeSystemVersionStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
 	@NotNull
 	@Override

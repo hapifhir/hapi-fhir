@@ -134,7 +134,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
-		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}

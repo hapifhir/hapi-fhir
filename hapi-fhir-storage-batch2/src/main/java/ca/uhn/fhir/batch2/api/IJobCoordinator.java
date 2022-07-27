@@ -21,9 +21,9 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -74,6 +74,13 @@ public interface IJobCoordinator {
 	 */
 	Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
 
+	/**
+	 * Fetches all job instances by job definition id and statuses
+	 */
 	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
 
+	/**
+	 * Fetches all jobs by job definition id
+	 */
+	List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 }

@@ -45,7 +45,7 @@ public class FhirResourceDaoR5CodeSystemTest extends BaseJpaR5Test {
 
 		// Now the background scheduler will do its thing
 		myTermDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(0, myTermCodeSystemDao.count());
 			assertEquals(0, myTermCodeSystemVersionDao.count());
@@ -104,7 +104,7 @@ public class FhirResourceDaoR5CodeSystemTest extends BaseJpaR5Test {
 
 		// Now the background scheduler will do its thing
 		myTermDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		// Entities for first resource should be gone now.
 		runInTransaction(() -> {
@@ -139,7 +139,7 @@ public class FhirResourceDaoR5CodeSystemTest extends BaseJpaR5Test {
 
 		// Now the background scheduler will do its thing
 		myTermDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 
 		// The remaining versions and Code System entities should be gone now.
 		runInTransaction(() -> {

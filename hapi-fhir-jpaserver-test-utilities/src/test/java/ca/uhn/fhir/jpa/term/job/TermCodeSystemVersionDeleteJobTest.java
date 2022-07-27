@@ -122,11 +122,6 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 			assertEquals(81 * 2, myTermConceptDao.count());
 		});
 
-
-//		JobParameters jobParameters = new JobParameters(Collections.singletonMap(
-//			JOB_PARAM_CODE_SYSTEM_VERSION_ID, new JobParameter(termCodeSystemVersionPidVect[0], true) ));
-//		JobExecution jobExecution = myJobSubmitter.runJob(myTermCodeSystemVersionDeleteJob, jobParameters);
-
 		TermCodeSystemDeleteVersionJobParameters jobParameters = new TermCodeSystemDeleteVersionJobParameters();
 		jobParameters.setCodeSystemVersionPid(termCodeSystemVersionPidVect[0]);
 

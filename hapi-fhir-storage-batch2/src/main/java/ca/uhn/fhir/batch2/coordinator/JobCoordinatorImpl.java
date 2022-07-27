@@ -44,8 +44,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -164,6 +166,11 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
 		return myJobQuerySvc.getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, theStatuses, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return getJobInstancesByJobDefinitionIdAndStatuses(theJobDefinitionId, new HashSet<>(Arrays.asList(StatusEnum.values())), theCount, theStart);
 	}
 
 	@Override

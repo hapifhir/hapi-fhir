@@ -16,8 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class DeleteCodeSystemStep implements IReductionStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult, VoidModel> {
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+
+	public DeleteCodeSystemStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
 	@NotNull
 	@Override

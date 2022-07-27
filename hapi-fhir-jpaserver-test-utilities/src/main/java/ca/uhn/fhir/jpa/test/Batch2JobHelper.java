@@ -58,7 +58,6 @@ public class Batch2JobHelper {
 
 	public JobInstance awaitJobCompletion(String theId) {
 		await()
-			.atMost(1, TimeUnit.MINUTES)
 			.until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
@@ -125,11 +124,10 @@ public class Batch2JobHelper {
 
 	}
 
-	public void awaitAllJobsOfJobIdToComplete(String theJobDefinitionId) {
+	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
 		// fetch all jobs of any status type
-		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionIdAndStatuses(
+		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
 			theJobDefinitionId,
-			new HashSet<>(Arrays.asList(StatusEnum.values())),
 			BATCH_SIZE,
 			0);
 		// then await completion status

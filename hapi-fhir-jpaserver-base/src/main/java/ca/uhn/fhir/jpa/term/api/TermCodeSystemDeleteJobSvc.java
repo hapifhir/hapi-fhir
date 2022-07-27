@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-@Transactional()
+@Transactional
 public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemDeleteJobSvc.class);
 

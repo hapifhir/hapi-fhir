@@ -14,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+
+	public DeleteCodeSystemVersionFinalStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
 	@NotNull
 	@Override

@@ -16,8 +16,11 @@ import java.util.Iterator;
 
 public class ReadTermConceptVersionsStep implements IFirstJobStepWorker<TermCodeSystemDeleteJobParameters, CodeSystemVersionPIDResult> {
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;
+
+	public ReadTermConceptVersionsStep(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myITermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
 	@NotNull
 	@Override

@@ -140,7 +140,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		runInTransaction(() -> assertEquals(26L, myConceptDao.count()));
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllJobsOfJobIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 
 		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
 	}

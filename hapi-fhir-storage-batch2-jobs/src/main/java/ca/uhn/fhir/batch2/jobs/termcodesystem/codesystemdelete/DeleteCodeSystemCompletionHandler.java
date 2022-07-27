@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DeleteCodeSystemCompletionHandler
 	implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
 
-	@Autowired
-	private ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;
+
+	public DeleteCodeSystemCompletionHandler(ITermCodeSystemDeleteJobSvc theCodeSystemDeleteJobSvc) {
+		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
+	}
 
 	@Override
 	public void jobComplete(JobCompletionDetails<TermCodeSystemDeleteJobParameters> theDetails) {
