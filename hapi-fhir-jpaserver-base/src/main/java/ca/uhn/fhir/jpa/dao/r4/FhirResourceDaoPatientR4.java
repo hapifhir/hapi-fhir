@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
+public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient> implements IFhirResourceDaoPatient<Patient> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
