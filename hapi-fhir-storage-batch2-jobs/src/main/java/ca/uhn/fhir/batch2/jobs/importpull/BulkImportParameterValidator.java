@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +17,11 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class BulkImportParameterValidator implements IJobParametersValidator<Batch2BulkImportPullJobParameters> {
 	private static final Logger ourLog = getLogger(BulkImportParameterValidator.class);
 
-	@Autowired
-	private IBulkDataImportSvc myBulkDataImportSvc;
+	private final IBulkDataImportSvc myBulkDataImportSvc;
+
+	public BulkImportParameterValidator(IBulkDataImportSvc theIBulkDataImportSvc) {
+		myBulkDataImportSvc = theIBulkDataImportSvc;
+	}
 
 	@Nullable
 	@Override

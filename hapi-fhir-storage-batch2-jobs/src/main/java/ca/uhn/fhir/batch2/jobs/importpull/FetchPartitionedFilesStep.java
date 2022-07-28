@@ -12,15 +12,17 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> {
 	private static final Logger ourLog = getLogger(FetchPartitionedFilesStep.class);
 
-	@Autowired
-	private IBulkDataImportSvc myBulkDataImportSvc;
+	private final IBulkDataImportSvc myBulkDataImportSvc;
+
+	public FetchPartitionedFilesStep(IBulkDataImportSvc theBulkDataImportSvc) {
+		myBulkDataImportSvc = theBulkDataImportSvc;
+	}
 
 	@NotNull
 	@Override

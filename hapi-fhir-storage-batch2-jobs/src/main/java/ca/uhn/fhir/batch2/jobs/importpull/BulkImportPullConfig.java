@@ -4,12 +4,25 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportRecord;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class BulkImportPullConfig {
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private IBulkDataImportSvc myBulkDataImportSvc;
 
 	@Bean
 	public JobDefinition bulkImportPullJobDefinition() {
@@ -43,21 +56,21 @@ public class BulkImportPullConfig {
 
 	@Bean
 	public BulkImportParameterValidator importParameterValidator() {
-		return new BulkImportParameterValidator();
+		return new BulkImportParameterValidator(myBulkDataImportSvc);
 	}
 
 	@Bean
 	public FetchPartitionedFilesStep fetchPartitionedFilesStep() {
-		return new FetchPartitionedFilesStep();
+		return new FetchPartitionedFilesStep(myBulkDataImportSvc);
 	}
 
 	@Bean
 	public ReadInResourcesFromFileStep readInResourcesFromFileStep() {
-		return new ReadInResourcesFromFileStep();
+		return new ReadInResourcesFromFileStep(myBulkDataImportSvc);
 	}
 
 	@Bean
 	public WriteBundleForImportStep writeBundleForImportStep() {
-		return new WriteBundleForImportStep();
+		return new WriteBundleForImportStep(myFhirContext, myDaoRegistry);
 	}
 }

@@ -17,7 +17,6 @@ import com.google.common.io.LineReader;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,8 +25,11 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ReadInResourcesFromFileStep.class);
 
-	@Autowired
-	private IBulkDataImportSvc myBulkDataImportSvc;
+	private final IBulkDataImportSvc myBulkDataImportSvc;
+
+	public ReadInResourcesFromFileStep(IBulkDataImportSvc theBulkDataImportSvc) {
+		myBulkDataImportSvc = theBulkDataImportSvc;
+	}
 
 	// because we are using an unstable google api
 	@SuppressWarnings("UnstableApiUsage")

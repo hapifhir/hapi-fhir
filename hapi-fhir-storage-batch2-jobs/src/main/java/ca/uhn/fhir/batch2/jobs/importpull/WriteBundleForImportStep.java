@@ -18,17 +18,19 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(WriteBundleForImportStep.class);
 
-	@Autowired
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
+
+	public WriteBundleForImportStep(FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		myFhirContext = theFhirContext;
+		myDaoRegistry = theDaoRegistry;
+	}
 
 	@SuppressWarnings({"SwitchStatementWithTooFewBranches", "rawtypes", "unchecked"})
 	@NotNull
