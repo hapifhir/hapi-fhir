@@ -28,10 +28,12 @@ import java.util.HashMap;
  */
 public enum PreferReturnEnum {
 
-	REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION), MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL), OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
+	REPRESENTATION(Constants.HEADER_PREFER_RETURN_REPRESENTATION),
+	MINIMAL(Constants.HEADER_PREFER_RETURN_MINIMAL),
+	OPERATION_OUTCOME(Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 	private static HashMap<String, PreferReturnEnum> ourValues;
-	private String myHeaderValue;
+	private final String myHeaderValue;
 
 	PreferReturnEnum(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;

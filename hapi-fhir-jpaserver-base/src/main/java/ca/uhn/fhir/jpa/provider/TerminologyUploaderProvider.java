@@ -184,7 +184,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
-
 	}
 
 

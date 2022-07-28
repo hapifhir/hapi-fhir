@@ -192,14 +192,14 @@ public class StepExecutionSvc {
 		IReductionStepWorker<PT, IT, OT> theReductionWorker = (IReductionStepWorker<PT, IT, OT>) theStep.getJobStepWorker();
 
 		// We fetch all chunks first...
-		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksIterator(theInstance.getInstanceId(), true);
+		Iterator<WorkChunk> chunkIterator = myJobPersistence.fetchAllWorkChunksForStepIterator(theInstance.getInstanceId(), theStep.getStepId());
 
 		List<String> failedChunks = new ArrayList<>();
 		List<String> successfulChunkIds = new ArrayList<>();
 		boolean jobFailed = false;
 		while (chunkIterator.hasNext()) {
 			WorkChunk chunk = chunkIterator.next();
-			if (chunk.getStatus() != StatusEnum.QUEUED) {
+			if (!StatusEnum.getIncompleteStatuses().contains(chunk.getStatus())) {
 				// we are currently fetching all statuses from the db
 				// we will ignore non-completed steps.
 				// should we throw for errored values we find here?
@@ -245,7 +245,7 @@ public class StepExecutionSvc {
 						e.getMessage()
 					);
 					// we got a failure in a reduction
-					ourLog.error(msg);
+					ourLog.error(msg, e);
 					jobFailed = true;
 
 					myJobPersistence.markWorkChunkAsFailed(chunk.getId(), msg);

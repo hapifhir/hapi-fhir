@@ -21,10 +21,13 @@ package ca.uhn.fhir.batch2.api;
  */
 
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
 import java.util.List;
@@ -68,6 +71,12 @@ public interface IJobPersistence {
 	Optional<JobInstance> fetchInstance(String theInstanceId);
 
 	/**
+	 * Fetches any existing jobs matching provided request parameters
+	 * @return
+	 */
+	List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize);
+
+	/**
 	 * Fetch all instances
 	 */
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
@@ -95,6 +104,15 @@ public interface IJobPersistence {
 	 * @return
 	 */
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	/**
+	 * Fetches all job instances based on the JobFetchRequest
+	 * @param theRequest - the job fetch request
+	 * @return - a page of job instances
+	 */
+	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		return Page.empty();
+	}
 
 	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)
@@ -169,6 +187,15 @@ public interface IJobPersistence {
 	 * @return - an iterator for fetching work chunks
 	 */
 	Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData);
+
+	/**
+	 * Fetch all chunks with data for a given instance for a given step id
+	 * @param theInstanceId
+	 * @param theStepId
+	 * @return - an iterator for fetching work chunks
+	 */
+	Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId);
+
 
 	/**
 	 * Update the stored instance.  If the status is changing, use {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater}

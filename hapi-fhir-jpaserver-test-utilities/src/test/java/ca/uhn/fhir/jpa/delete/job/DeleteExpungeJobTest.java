@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -63,8 +64,8 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		String jobId = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitJobCompletion(jobId);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());

@@ -1,22 +1,20 @@
 package ca.uhn.fhir.jpa.interceptor;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
+import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
+import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterceptor;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,11 +22,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,18 +40,10 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 	public static final String TEST_OBV_FILTER = "Observation?status=amended";
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
-	@Autowired
 	private ResponseTerminologyTranslationInterceptor myResponseTerminologyTranslationInterceptor;
-	@Autowired
-	private IBulkDataExportSvc myBulkDataExportSvc;
-	@Autowired
-	private IBulkDataExportJobSchedulingHelper myBulkDataExportJobSchedulingHelper;
 
 	@Autowired
-	private FhirContext myFhirContext;
+	private IBatch2JobRunner myJobRunner;
 
 	@BeforeEach
 	public void beforeEach() {
@@ -204,53 +195,42 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		options.setResourceTypes(Sets.newHashSet("Observation"));
 		options.setFilters(Sets.newHashSet(TEST_OBV_FILTER));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(options, true, mySrd);
-		assertNotNull(jobDetails.getJobId());
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
 
-		// Check the status
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkExportJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation&_typeFilter=" + UrlUtil.escapeUrlParam(TEST_OBV_FILTER), status.getRequest());
+		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
-		myBulkDataExportJobSchedulingHelper.startSubmittedJobs();
-		awaitAllBulkJobCompletions();
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 
-		// Fetch the job again
-		status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
-		assertEquals(BulkExportJobStatusEnum.COMPLETE, status.getStatus());
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
 
 		// Iterate over the files
-		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
-			Binary nextBinary = myBinaryDao.read(next.getResourceId());
-			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
-			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
-			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
-			if ("Observation".equals(next.getResourceType())) {
-				for (String coding : codingList) {
-					assertThat(nextContents, containsString(coding));
+		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
+			String resourceTypeInFile = file.getKey();
+			List<String> binaryIds = file.getValue();
+			assertEquals(1, binaryIds.size());
+			for (String binaryId : binaryIds) {
+				Binary binary = myBinaryDao.read(new IdType(binaryId));
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
+				if ("Observation".equals(resourceTypeInFile)) {
+					for (String code : codingList) {
+						assertThat(contents, containsString(code));
+					}
+				} else {
+					fail(resourceTypeInFile);
 				}
-			} else {
-				fail(next.getResourceType());
 			}
 		}
-
-		assertEquals(1, status.getFiles().size());
 	}
 
 	@Nonnull
 	private List<String> toCodeStrings(Observation observation) {
 		return observation.getCode().getCoding().stream().map(t -> "[system=" + t.getSystem() + ", code=" + t.getCode() + ", display=" + t.getDisplay() + "]").collect(Collectors.toList());
-	}
-
-	private void awaitAllBulkJobCompletions() {
-		myBatchJobHelper.awaitAllBulkJobCompletions(
-			BatchConstants.BULK_EXPORT_JOB_NAME,
-			BatchConstants.PATIENT_BULK_EXPORT_JOB_NAME,
-			BatchConstants.GROUP_BULK_EXPORT_JOB_NAME,
-			BatchConstants.DELETE_EXPUNGE_JOB_NAME,
-			BatchConstants.MDM_CLEAR_JOB_NAME
-		);
 	}
 }

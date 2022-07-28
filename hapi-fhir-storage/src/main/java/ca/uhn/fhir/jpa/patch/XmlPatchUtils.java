@@ -15,7 +15,7 @@ import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 
 /*
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
