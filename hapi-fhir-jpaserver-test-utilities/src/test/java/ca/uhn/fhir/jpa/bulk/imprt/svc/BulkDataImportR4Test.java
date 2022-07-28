@@ -117,22 +117,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		});
 	}
 
-	private JobInstance getLatestJobExecutionOfType(String theJobTypeId) {
-		// we
-		List<JobInstance> instances = myJobCoordinator.getRecentInstances(100, 0);
-		return instances
-			.stream()
-			.filter(i -> i.getJobDefinitionId().equals(theJobTypeId))
-			.findFirst()
-			.orElseThrow();
-	}
-
-	private JobInstance awaitLatestJobOfJobType(String theJobDefinitionId, StatusEnum ...theStatuses) {
-		JobInstance instance = getLatestJobExecutionOfType(theJobDefinitionId);
-
-		return myBatch2JobHelper.awaitJobHitsStatusInTime(instance.getInstanceId(), 60, theStatuses);
-	}
-
 	@Order(-1)
 	@Test
 	public void testFlow_ErrorDuringWrite() {
@@ -188,7 +172,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome.isActivated);
 
-//		JobInstance instance = awaitLatestJobOfJobType(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
 		assertNotNull(instance);
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
@@ -219,7 +202,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
 		assertTrue(activateJobOutcome.isActivated);
 
-//		JobInstance instance = awaitLatestJobOfJobType(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
 		assertNotNull(instance);
 
