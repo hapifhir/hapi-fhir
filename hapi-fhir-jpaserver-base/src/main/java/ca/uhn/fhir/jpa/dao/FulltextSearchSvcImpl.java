@@ -405,10 +405,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	@Transactional(readOnly = true)
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
-		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
+		int offset = 0;
+		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
+
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			offset = theParams.getOffset();
-			limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 		}
