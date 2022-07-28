@@ -32,7 +32,8 @@ import static java.util.Arrays.asList;
 
 // START SNIPPET: patientInterceptor
 /**
- * This is a simple interceptor that will remove a humanName when it is black listed.
+ * This is a simple interceptor that will remove a humanName when it is found to be
+ * black listed.
  */
 public class PatientNameModifierMdmPreProcessingInterceptor {
 	List<String> myNamesToIgnore = asList("John Doe", "Jane Doe");
