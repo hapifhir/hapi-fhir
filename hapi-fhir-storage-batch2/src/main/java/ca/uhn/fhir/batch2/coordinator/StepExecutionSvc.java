@@ -327,7 +327,11 @@ public class StepExecutionSvc {
 					// TODO - marking for posterity
 					// see comments on MAX_CHUNK_ERROR_COUNT
 					if (chunk.getErrorCount() > MAX_CHUNK_ERROR_COUNT) {
-						myJobPersistence.markWorkChunkAsFailed(chunkId, "Too many errors: " + chunk.getErrorCount());
+						String errorMsg = "Too many errors: "
+							+ chunk.getErrorCount()
+							+ ". Last error msg was "
+							+ e.getMessage();
+						myJobPersistence.markWorkChunkAsFailed(chunkId, errorMsg);
 						return false;
 					}
 				}

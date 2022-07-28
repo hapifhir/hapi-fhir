@@ -12,6 +12,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
@@ -99,8 +100,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof IAnonymousInterceptor);
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyFailAfterThreeCreatesInterceptor);
-
-		myWorkChannel.clearInterceptorsForUnitTest();
 	}
 
 	/**
@@ -128,7 +127,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			.orElseThrow();
 	}
 
-	private JobInstance awaitAllJobsOfJobId(String theJobDefinitionId, StatusEnum ...theStatuses) {
+	private JobInstance awaitLatestJobOfJobType(String theJobDefinitionId, StatusEnum ...theStatuses) {
 		JobInstance instance = getLatestJobExecutionOfType(theJobDefinitionId);
 
 		return myBatch2JobHelper.awaitJobHitsStatusInTime(instance.getInstanceId(), 60, theStatuses);
@@ -142,27 +141,34 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		int transactionsPerFile = 5;
 		int fileCount = 5;
 		List<BulkImportJobFileJson> files = createInputFiles(transactionsPerFile, fileCount);
-		setupRetryFailures();
 
-		BulkImportJobJson job = new BulkImportJobJson();
-		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
-		job.setJobDescription("This is the job description");
-		job.setBatchSize(3);
-		String jobId = mySvc.createNewJob(job, files);
-		mySvc.markJobAsReadyForActivation(jobId);
+		try {
+			setupRetryFailures();
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+			BulkImportJobJson job = new BulkImportJobJson();
+			job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+			job.setJobDescription("This is the job description");
+			job.setBatchSize(3);
+			String jobId = mySvc.createNewJob(job, files);
+			mySvc.markJobAsReadyForActivation(jobId);
 
-		JobInstance instance = awaitAllJobsOfJobId(BULK_IMPORT_JOB_NAME, StatusEnum.FAILED, StatusEnum.ERRORED);
+			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+			assertTrue(activateJobOutcome.isActivated);
 
-		assertNotNull(instance);
+			JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(activateJobOutcome.jobId,
+				60,
+				StatusEnum.FAILED);
 
-		HashSet<StatusEnum> failed = new HashSet<>();
-		failed.add(StatusEnum.FAILED);
-		failed.add(StatusEnum.ERRORED);
-		assertTrue(failed.contains(instance.getStatus()));
-		assertTrue(instance.getErrorMessage().contains(MyFailAfterThreeCreatesInterceptor.ERROR_MESSAGE));
+			HashSet<StatusEnum> failed = new HashSet<>();
+			failed.add(StatusEnum.FAILED);
+			failed.add(StatusEnum.ERRORED);
+			assertTrue(failed.contains(instance.getStatus()), instance.getStatus() + " is the actual status");
+			String errorMsg = instance.getErrorMessage();
+			assertTrue(errorMsg.contains("Too many errors"), errorMsg);
+			assertTrue(errorMsg.contains("Too many errors"), MyFailAfterThreeCreatesInterceptor.ERROR_MESSAGE);
+		} finally {
+			myWorkChannel.clearInterceptorsForUnitTest();
+		}
 	}
 
 	@Order(0)
@@ -179,10 +185,11 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+		assertTrue(activateJobOutcome.isActivated);
 
-		JobInstance instance = awaitAllJobsOfJobId(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
+//		JobInstance instance = awaitLatestJobOfJobType(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
 		assertNotNull(instance);
 		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
 
@@ -209,10 +216,11 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+		assertTrue(activateJobOutcome.isActivated);
 
-		JobInstance instance = awaitAllJobsOfJobId(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
+//		JobInstance instance = awaitLatestJobOfJobType(BULK_IMPORT_JOB_NAME, StatusEnum.COMPLETED);
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
 		assertNotNull(instance);
 
 		ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);

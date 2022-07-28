@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -155,15 +156,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	 */
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
-	public boolean activateNextReadyJob() {
+	public ActivateJobResult activateNextReadyJob() {
 		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
 			Logs.getBatchTroubleshootingLog().trace("Bulk import job execution is not enabled on this server. No action taken.");
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		if (!myRunningJobSemaphore.tryAcquire()) {
 			Logs.getBatchTroubleshootingLog().trace("Already have a running batch job, not going to check for more");
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		try {
@@ -173,7 +174,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}
 	}
 
-	private boolean doActivateNextReadyJob() {
+	private ActivateJobResult doActivateNextReadyJob() {
 		Optional<BulkImportJobEntity> jobToProcessOpt = Objects.requireNonNull(myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
 			Slice<BulkImportJobEntity> submittedJobs = myJobDao.findByStatus(page, BulkImportJobStatusEnum.READY);
@@ -184,14 +185,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}));
 
 		if (!jobToProcessOpt.isPresent()) {
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		BulkImportJobEntity bulkImportJobEntity = jobToProcessOpt.get();
 
 		String jobUuid = bulkImportJobEntity.getJobId();
+		String batchJobId = null;
 		try {
-			processJob(bulkImportJobEntity);
+			batchJobId = processJob(bulkImportJobEntity);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -202,11 +204,11 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 					jobEntity.setStatusMessage(e.getMessage());
 					myJobDao.save(jobEntity);
 				}
-				return false;
+				return new ActivateJobResult(false, null);
 			});
 		}
 
-		return true;
+		return new ActivateJobResult(true, batchJobId);
 	}
 
 	@Override
@@ -269,7 +271,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		myJobDao.delete(job);
 	}
 
-	private void processJob(BulkImportJobEntity theBulkExportJobEntity) {
+	private String processJob(BulkImportJobEntity theBulkExportJobEntity) {
 		String jobId = theBulkExportJobEntity.getJobId();
 		int batchSize = theBulkExportJobEntity.getBatchSize();
 
@@ -283,7 +285,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 
-		myJobCoordinator.startInstance(request);
+		return myJobCoordinator.startInstance(request).getJobId();
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {
