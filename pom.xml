@@ -823,7 +823,7 @@
         <jackson_databind_version>2.13.2.2</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
-        <okhttp_version>4.9.3</okhttp_version>
+        <okhttp_version>4.10.0</okhttp_version>
         <poi_version>4.1.2</poi_version>
         <poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
         <resteasy_version>5.0.2.Final</resteasy_version>
