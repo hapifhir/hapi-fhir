@@ -2299,6 +2299,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	//FIXME: remove
+	@Test
+	public void testContains(){
+		List<String> test = List.of("a", "b");
+
+		assertThat(test, not(contains("b")));
+		assertThat(test, not(hasItems("a", "d")));
+	}
+
 	@Test
 	public void testEverythingPatientWorksWithForcedId() {
 		String methodName = "testEverythingPatientType";
