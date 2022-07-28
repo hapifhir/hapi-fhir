@@ -22,7 +22,6 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.config.SharedCtx;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
@@ -37,7 +36,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class DeleteExpungeAppCtx extends SharedCtx {
+public class DeleteExpungeAppCtx {
 
 	public static final String JOB_DELETE_EXPUNGE = "DELETE_EXPUNGE";
 
