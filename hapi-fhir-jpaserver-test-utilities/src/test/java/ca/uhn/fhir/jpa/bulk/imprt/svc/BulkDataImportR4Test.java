@@ -47,6 +47,7 @@ import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -157,7 +159,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 		assertNotNull(instance);
 
-		assertEquals(StatusEnum.ERRORED, instance.getStatus());
+		HashSet<StatusEnum> failed = new HashSet<>();
+		failed.add(StatusEnum.FAILED);
+		failed.add(StatusEnum.ERRORED);
+		assertTrue(failed.contains(instance.getStatus()));
 		assertTrue(instance.getErrorMessage().contains(MyFailAfterThreeCreatesInterceptor.ERROR_MESSAGE));
 	}
 

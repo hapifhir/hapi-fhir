@@ -41,7 +41,7 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 		int fileIndex = theStepExecutionDetails.getData().getFileIndex();
 		JobFileRowProcessingModeEnum mode = theStepExecutionDetails.getData().getProcessingMode();
 
-		ourLog.info("\n\nReadInResourcesFromFileStep for jobId {} begin", jobId);
+		ourLog.info("ReadInResourcesFromFileStep for jobId {} begin", jobId);
 
 		BulkImportJobFileJson file = myBulkDataImportSvc.fetchFile(jobId, fileIndex);
 		String tenantName = file.getTenantName();
