@@ -23,8 +23,6 @@ package ca.uhn.fhir.jpa.batch;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
 import ca.uhn.fhir.jpa.config.BatchJobRegisterer;
-import ca.uhn.fhir.jpa.term.job.TermCodeSystemDeleteJobConfig;
-import ca.uhn.fhir.jpa.term.job.TermCodeSystemVersionDeleteJobConfig;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -38,9 +36,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @EnableBatchProcessing
 @Import({
-	CommonBatchJobConfig.class,
-	TermCodeSystemDeleteJobConfig.class,
-	TermCodeSystemVersionDeleteJobConfig.class
+	CommonBatchJobConfig.class
   // When you define a new batch job, add it here.
 })
 @Deprecated

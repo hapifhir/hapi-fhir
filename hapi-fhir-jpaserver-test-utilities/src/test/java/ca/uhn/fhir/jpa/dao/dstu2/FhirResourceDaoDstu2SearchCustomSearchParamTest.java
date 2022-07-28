@@ -653,7 +653,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
-	public void testSearchForExtensionTwoDeepDecimal() {
+	public void testSearchForExtensionTwoDeepDecimalDstu2() {
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.setBase(ResourceTypeEnum.PATIENT);
 		siblingSp.setCode("foobar");
