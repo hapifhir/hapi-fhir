@@ -6,10 +6,13 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
-import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
+import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
@@ -24,10 +27,12 @@ import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.CommunicationRequest;
 import org.hl7.fhir.dstu3.model.DateTimeType;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Organization;
@@ -40,6 +45,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -51,6 +58,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -74,6 +82,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static Server ourListenerServer;
 	private static String ourListenerServerBase;
 	private static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	private static final List<IIdType> ourDeletedObservationIds = Collections.synchronizedList(Lists.newArrayList());
 	private static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
@@ -122,12 +131,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
-		return createSubscription(criteria, payload, endpoint, null);
+		return createSubscription(criteria, payload, endpoint, null, null);
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
-														 List<StringType> headers) throws InterruptedException {
-		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint, headers);
+														 List<StringType> headers, Extension theChannelExtension) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint, headers, theChannelExtension);
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		mySubscriptionIds.add(methodOutcome.getId());
@@ -138,7 +147,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Nonnull
-	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers) {
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers, Extension theChannelExtension) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -150,6 +159,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		channel.setEndpoint(theEndpoint);
 		if (headers != null) {
 			channel.setHeader(headers);
+		}
+		if (theChannelExtension != null ) {
+			channel.addExtension(theChannelExtension);
 		}
 		subscription.setChannel(channel);
 		return subscription;
@@ -191,6 +203,27 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
+	@ParameterizedTest
+	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
+	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {
+		String payload = "application/json";
+
+		Extension sendDeleteMessagesExtension = new Extension()
+			.setUrl(EX_SEND_DELETE_MESSAGES)
+			.setValue(new BooleanType(true));
+
+		waitForActivatedSubscriptionCount(0);
+		createSubscription(theCriteria, payload, ourNotificationListenerServer, null, sendDeleteMessagesExtension);
+		waitForActivatedSubscriptionCount(1);
+
+		Observation observation = sendObservation("OB-01", "SNOMED-CT");
+
+		ourNotificationServlet.reset();
+		ourLog.info("** About to delete observation");
+		myObservationDao.delete(IdDt.of(observation).toUnqualifiedVersionless());
+
+		await().until(() -> ourNotificationServlet.getReceivedNotificationCount() == 1);
+	}
 
 	@Test
 	public void testRestHookSubscription() throws Exception {
@@ -199,7 +232,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
 		createSubscription(criteria1, null, ourNotificationListenerServer,
-			Collections.singletonList(new StringType("Authorization: abc-def")));
+			Collections.singletonList(new StringType("Authorization: abc-def")), null);
 		createSubscription(criteria2, null, ourNotificationListenerServer);
 
 		ourLog.debug("Sending first observation");
@@ -271,7 +304,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String source = "foosource";
 		String criteria = "Observation?_source=" + source;
 
-		Subscription subscription = newSubscription(criteria, payload, ourListenerServerBase, null);
+		Subscription subscription = newSubscription(criteria, payload, ourListenerServerBase, null, null);
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		Subscription savedSub = (Subscription) methodOutcome.getResource();
 		assertInMemoryTag(savedSub);
@@ -587,7 +620,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSubscriptionWithNoStatusIsRejected() {
-		Subscription subscription = newSubscription("Observation?", "application/json", null, null);
+		Subscription subscription = newSubscription("Observation?", "application/json", null, null, null);
 		subscription.setStatus(null);
 
 		try {
@@ -619,6 +652,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			ourUpdatedObservations.add(theObservation);
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
+			return new MethodOutcome(new IdType("Observation/1"), false);
+		}
+
+		@Delete
+		public MethodOutcome delete(@IdParam IIdType theIIdType, HttpServletRequest theRequest) {
+			ourDeletedObservationIds.add(theIIdType);
+			ourLog.info("Received Listener Delete(now have {} deletes)", ourDeletedObservationIds.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 	}
@@ -675,6 +715,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		servletHolder = new ServletHolder();
 		servletHolder.setServlet(ourNotificationServlet);
 		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
+		proxyHandler.addServlet(servletHolder, "/fhir/subscription/*");
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);

@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 	JpaConfig.class
 })
 public class JpaR5Config {
+
 	@Bean
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
 		return new TermVersionAdapterSvcR5();

@@ -23,9 +23,11 @@ package ca.uhn.fhir.batch2.api;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
 import java.util.List;
@@ -102,6 +104,15 @@ public interface IJobPersistence {
 	 * @return
 	 */
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	/**
+	 * Fetches all job instances based on the JobFetchRequest
+	 * @param theRequest - the job fetch request
+	 * @return - a page of job instances
+	 */
+	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		return Page.empty();
+	}
 
 	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)

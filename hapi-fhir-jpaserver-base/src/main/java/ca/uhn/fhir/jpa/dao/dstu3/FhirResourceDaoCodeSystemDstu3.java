@@ -53,7 +53,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -145,8 +144,8 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 	}
 
 	@Override
-	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
+	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
 
 		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
 
