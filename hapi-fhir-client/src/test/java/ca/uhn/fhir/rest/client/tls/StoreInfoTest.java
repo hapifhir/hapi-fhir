@@ -55,7 +55,7 @@ public class StoreInfoTest {
 			new KeyStoreInfo("file:///my-file.invalid", "storePassword" , "keyPassword", "alias");
 			fail();
 		} catch (Exception e) {
-			assertEquals(Msg.code(2106)+"Invalid KeyStore Type", e.getMessage());
+			assertEquals(Msg.code(2121)+"Invalid KeyStore Type", e.getMessage());
 		}
 	}
 

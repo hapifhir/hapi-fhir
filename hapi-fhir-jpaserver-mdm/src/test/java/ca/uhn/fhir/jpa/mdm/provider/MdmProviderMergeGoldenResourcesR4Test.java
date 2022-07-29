@@ -97,7 +97,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		// Optional<Identifier> redirect = fromSourcePatient.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equals("REDIRECT")).findFirst();
 		// assertThat(redirect.get().getValue(), is(equalTo(myToSourcePatient.getIdElement().toUnqualified().getValue())));
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(myFromGoldenPatient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myFromGoldenPatient);
 		assertThat(links, hasSize(1));
 
 		MdmLink link = links.get(0);
@@ -129,7 +129,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		// 2 from the set-up and only one from this test should be golden resource
 		assertEquals(3, getAllGoldenPatients().size());
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(fromGoldenPatient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(fromGoldenPatient);
 		assertThat(links, hasSize(1));
 
 		MdmLink link = links.get(0);
@@ -176,7 +176,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertFalse(MdmResourceUtil.isGoldenRecord(fromSourcePatient));
 		assertTrue(MdmResourceUtil.isGoldenRecordRedirected(fromSourcePatient));
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(myFromGoldenPatient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myFromGoldenPatient);
 		assertThat(links, hasSize(1));
 
 		MdmLink link = links.get(0);

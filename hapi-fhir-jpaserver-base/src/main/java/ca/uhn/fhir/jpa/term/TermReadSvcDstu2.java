@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -35,7 +34,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

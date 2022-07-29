@@ -46,6 +46,6 @@ public enum KeyStoreType {
 				return type;
 			}
 		}
-		throw new IllegalArgumentException(Msg.code(2106)+"Invalid KeyStore Type");
+		throw new IllegalArgumentException(Msg.code(2121)+"Invalid KeyStore Type");
 	}
 }

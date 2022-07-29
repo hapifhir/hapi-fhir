@@ -125,7 +125,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 			}
 			return inputFile;
 		} catch (Exception e) {
-			throw new RuntimeException(Msg.code(2107)+"Failed to load test TLS authentication file", e);
+			throw new RuntimeException(Msg.code(2122)+"Failed to load test TLS authentication file", e);
 		}
 	}
 }

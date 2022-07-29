@@ -136,7 +136,7 @@ public abstract class BaseRestServerHelper {
 			return sslContextFactory;
 		}
 		catch(Exception e){
-			throw new RuntimeException(Msg.code(2109)+"Failed to obtain SslContextFactory", e);
+			throw new RuntimeException(Msg.code(2123)+"Failed to obtain SslContextFactory", e);
 		}
 	}
 
