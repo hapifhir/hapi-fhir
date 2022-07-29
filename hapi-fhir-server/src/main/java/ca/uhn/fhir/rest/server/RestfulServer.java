@@ -105,7 +105,6 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static java.util.stream.Collectors.toList;

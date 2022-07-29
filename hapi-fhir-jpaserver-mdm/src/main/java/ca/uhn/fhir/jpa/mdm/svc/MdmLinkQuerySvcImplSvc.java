@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -57,7 +57,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		Page<MdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
+		Page<? extends IMdmLink> mdmLinks = myMdmLinkDaoSvc.executeTypedQuery(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource, thePageRequest, thePartitionId);
 		return mdmLinks.map(myMdmModelConverterSvc::toJson);
 	}
 
@@ -70,7 +70,7 @@ public class MdmLinkQuerySvcImplSvc implements IMdmLinkQuerySvc {
 	@Override
 	@Transactional
 	public Page<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext, MdmPageRequest thePageRequest, List<Integer> thePartitionId) {
-		Page<MdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePageRequest, thePartitionId);
+		Page<? extends IMdmLink> mdmLinkPage = myMdmLinkDaoSvc.executeTypedQuery(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null, thePageRequest, thePartitionId);
 		return mdmLinkPage.map(myMdmModelConverterSvc::toJson);
 	}
 }

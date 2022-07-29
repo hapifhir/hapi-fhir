@@ -39,15 +39,7 @@ public class SharedConfigDstu3Plus {
 		return new TermCodeSystemStorageSvcImpl();
 	}
 
-	@Bean
-	public TermConceptDaoSvc termConceptDaoSvc() {
-		return new TermConceptDaoSvc();
-	}
 
-	@Bean
-	public ITermDeferredStorageSvc termDeferredStorageSvc() {
-		return new TermDeferredStorageSvcImpl();
-	}
 
 	@Bean
 	public ITermReindexingSvc termReindexingSvc() {

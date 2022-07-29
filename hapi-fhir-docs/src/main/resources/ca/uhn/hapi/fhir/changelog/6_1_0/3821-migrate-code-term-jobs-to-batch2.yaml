@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3821
+title: "Migrate existing Term Code System Delete and Term Code System Delete Version jobs to
+         batch 2 framework"

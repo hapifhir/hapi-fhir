@@ -132,7 +132,10 @@ class JobQuerySvc {
 		 } else {
 			 requestedStatus = StatusEnum.getNotEndedStatuses();
 		 }
-		return myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, requestedStatus, theCount, theStart);
+		return getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, requestedStatus, theCount, theStart);
     }
 
+    public List<JobInstance> getInstancesByJobDefinitionAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		 return myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theStatuses, theCount, theStart);
+	 }
 }
