@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.validation;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,22 +20,23 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.IDao;
-import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.validation.IResourceLoader;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
-public class SearchBuilderFactory {
-
+@Service
+public class ResourceLoaderImpl implements IResourceLoader {
 	@Autowired
-	private ApplicationContext myApplicationContext;
-	@Autowired
-	private DaoConfig myDaoConfig;
+	DaoRegistry myDaoRegistry;
 
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder) myApplicationContext.getBean(JpaConfig.SEARCH_BUILDER, theDao, theResourceName, theResourceType, myDaoConfig);
+	@Override
+	public <T extends IBaseResource> T load(Class<T> theType, IIdType theId) throws ResourceNotFoundException {
+		SystemRequestDetails systemRequestDetails = SystemRequestDetails.forAllPartitions();
+		return myDaoRegistry.getResourceDao(theType).read(theId, systemRequestDetails);
 	}
-
 }

@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
-import ca.uhn.fhir.jpa.interceptor.MdmSearchExpandingInterceptor;
+import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,7 +40,6 @@ public class MdmCommonConfig {
 	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
 		return new MdmSearchExpandingInterceptor();
 	}
-
 
 	@Bean
 	MdmLinkDeleteSvc mdmLinkDeleteSvc() {

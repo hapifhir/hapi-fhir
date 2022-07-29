@@ -17,7 +17,7 @@ In a scenario where a patient was given a placeholder name(John Doe), it would b
 The following provides a full implementation of an interceptor that prevents matching on a patient name when it detects  a placeholder value.  
 
 ```java
-{{snippet:file:hapi-fhir/hapi-fhir-jpaserver-mdm/src/test/java/ca/uhn/fhir/jpa/mdm/interceptor/PatientNameModifierMdmPreProcessingInterceptor.java}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/interceptor/PatientNameModifierMdmPreProcessingInterceptor.java|patientInterceptor}}
 ```
 
 See the [Pointcut](/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html) JavaDoc for further details on the pointcut MDM_BEFORE_PERSISTED_RESOURCE_CHECKED.

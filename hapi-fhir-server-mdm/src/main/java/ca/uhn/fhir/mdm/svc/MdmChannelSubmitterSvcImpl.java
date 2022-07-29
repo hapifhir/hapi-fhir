@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.svc;
+package ca.uhn.fhir.mdm.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
