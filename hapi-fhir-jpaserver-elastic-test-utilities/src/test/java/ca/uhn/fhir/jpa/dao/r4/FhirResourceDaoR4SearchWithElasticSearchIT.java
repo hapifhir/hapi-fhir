@@ -1475,6 +1475,30 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertNotFind("when one predicate matches each object", "/Observation" +
 						"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
+
+				@Nested
+				@Disabled // These conversions are not supported by the library we use
+				public class TemperatureUnitConversions {
+
+					@Test
+					public void celsiusToFahrenheit() {
+						withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel" );
+
+						assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|degF");
+						assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|degF");
+						assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|degF");
+					}
+
+//					@Test
+					public void fahrenheitToCelsius() {
+						withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "degF" );
+
+						assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 38.1 Cel", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 36.9 Cel", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|Cel");
+					}
+				}
+
 			}
 
 
@@ -2063,6 +2087,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result), contains(raId3, raId2, raId1));
+				}
+
+				@Test
+				public void sortWithOffset() {
+					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
+					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
+					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability&_offset=1");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(raId2, raId1));
 				}
 
 			}
