@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.mdm;
+package ca.uhn.fhir.mdm.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,9 +20,11 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +38,16 @@ public class MdmLinkDeleteSvc {
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IJpaIdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	/**
-	 * Delete all {@link ca.uhn.fhir.jpa.entity.MdmLink} records with any reference to this resource.  (Used by Expunge.)
+	 * Delete all {@link ca.uhn.fhir.mdm.api.IMdmLink} records that implements this interface.  (Used by Expunge.)
 	 *
 	 * @param theResource
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
+		ResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
 			ourLog.info("Removed {} MDM links with references to {}", removed, theResource.getIdElement().toVersionless());
@@ -54,7 +56,7 @@ public class MdmLinkDeleteSvc {
 	}
 
 	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
+		ResourcePersistentId pid = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theResource.getIdElement());
 		int removed = myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {
 			ourLog.info("Removed {} non-redirect MDM links with references to {}", removed, theResource.getIdElement().toVersionless());

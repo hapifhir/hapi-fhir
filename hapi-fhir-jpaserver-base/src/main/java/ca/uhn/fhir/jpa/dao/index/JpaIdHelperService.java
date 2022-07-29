@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -37,12 +38,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.jpa.dao.index.IdHelperService.RESOURCE_PID;
 
 /**
  * See {@link IJpaIdHelperService} for an explanation of this class.
@@ -104,13 +102,13 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 
 	@Override
 	@Nonnull
-	public Long getPidOrThrowException(@Nonnull IAnyResource theResource) {
+	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
 		if (retVal == null) {
 			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
-		return retVal;
+		return new ResourcePersistentId(retVal);
 	}
 
 	@Override
@@ -134,18 +132,12 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
 	@Override
-	public Set<String> translatePidsToFhirResourceIds(Set<Long> thePids) {
+	public Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids) {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
-		Map<Long, Optional<String>> pidToForcedIdMap = super.translatePidsToForcedIds(thePids);
+		PersistentIdToForcedIdMap pidToForcedIdMap = super.translatePidsToForcedIds(thePids);
 
-		//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-		Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-			.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-			.collect(Collectors.toSet());
-
-		return resolvedResourceIds;
-
+		return pidToForcedIdMap.getResolvedResourceIds();
 	}
 
 }

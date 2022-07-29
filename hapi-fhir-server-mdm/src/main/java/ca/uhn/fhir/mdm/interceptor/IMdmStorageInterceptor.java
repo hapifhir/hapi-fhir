@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.interceptor;
+package ca.uhn.fhir.mdm.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
