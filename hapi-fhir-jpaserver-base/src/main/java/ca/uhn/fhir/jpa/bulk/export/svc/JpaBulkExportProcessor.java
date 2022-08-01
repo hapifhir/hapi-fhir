@@ -29,13 +29,13 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -43,6 +43,8 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -100,9 +102,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
-
-	@Autowired
-	private IJpaIdHelperService myJpaIdHelperService;
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
@@ -259,25 +258,23 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator(ExportPIDIteratorParameters theParameters) {
 		List<String> members = getMembers(theParameters.getGroupId());
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		List<Long> pidsOrThrowException = myJpaIdHelperService.getPidsOrThrowException(ids);
-		Set<Long> patientPidsToExport = new HashSet<>(pidsOrThrowException);
+
+		// Are bulk exports partition aware or care about partition at all? This does
+		List<ResourcePersistentId> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), ids);
+		Set<ResourcePersistentId> patientPidsToExport = new HashSet<>(pidsOrThrowException);
 
 		if (theParameters.isExpandMdm()) {
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();
 			IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParameters.getGroupId()), srd);
-			Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
-			List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
+			List<MdmPidTuple> goldenPidSourcePidTuple = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			goldenPidSourcePidTuple.forEach(tuple -> {
 				patientPidsToExport.add(tuple.getGoldenPid());
 				patientPidsToExport.add(tuple.getSourcePid());
 			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
-		List<ResourcePersistentId> resourcePersistentIds = patientPidsToExport
-			.stream()
-			.map(ResourcePersistentId::new)
-			.collect(Collectors.toList());
-		return resourcePersistentIds.iterator();
+		return patientPidsToExport.iterator();
 	}
 
 	/**
@@ -295,7 +292,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	/**
 	 * @param thePidTuples
 	 */
-	private void populateMdmResourceCache(List<IMdmLinkDao.MdmPidTuple> thePidTuples) {
+	private void populateMdmResourceCache(List<MdmPidTuple> thePidTuples) {
 		if (myMdmExpansionCacheSvc.hasBeenPopulated()) {
 			return;
 		}
@@ -304,7 +301,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		//   patient/gold-1 -> [patient/1, patient/2]
 		//   patient/gold-2 -> [patient/3, patient/4]
 		//}
-		Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+		Map<ResourcePersistentId, Set<ResourcePersistentId>> goldenResourceToSourcePidMap = new HashMap<>();
 		extract(thePidTuples, goldenResourceToSourcePidMap);
 
 		//Next, lets convert it to an inverted index for fast lookup
@@ -317,11 +314,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
 		goldenResourceToSourcePidMap.forEach((key, value) -> {
 			String goldenResourceId = myIdHelperService.translatePidIdToForcedIdWithCache(new ResourcePersistentId(key)).orElse(key.toString());
-			Map<Long, Optional<String>> pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
+			PersistentIdToForcedIdMap pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
 
-			Set<String> sourceResourceIds = pidsToForcedIds.entrySet().stream()
-				.map(ent -> ent.getValue().isPresent() ? ent.getValue().get() : ent.getKey().toString())
-				.collect(Collectors.toSet());
+			Set<String> sourceResourceIds = pidsToForcedIds.getResolvedResourceIds();
 
 			sourceResourceIds
 				.forEach(sourceResourceId -> sourceResourceIdToGoldenResourceIdMap.put(sourceResourceId, goldenResourceId));
@@ -331,10 +326,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		myMdmExpansionCacheSvc.setCacheContents(sourceResourceIdToGoldenResourceIdMap);
 	}
 
-	private void extract(List<IMdmLinkDao.MdmPidTuple> theGoldenPidTargetPidTuples, Map<Long, Set<Long>> theGoldenResourceToSourcePidMap) {
-		for (IMdmLinkDao.MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
-			Long goldenPid = goldenPidTargetPidTuple.getGoldenPid();
-			Long sourcePid = goldenPidTargetPidTuple.getSourcePid();
+	private void extract(List<MdmPidTuple> theGoldenPidTargetPidTuples, Map<ResourcePersistentId, Set<ResourcePersistentId>> theGoldenResourceToSourcePidMap) {
+		for (MdmPidTuple goldenPidTargetPidTuple : theGoldenPidTargetPidTuples) {
+			ResourcePersistentId goldenPid = goldenPidTargetPidTuple.getGoldenPid();
+			ResourcePersistentId sourcePid = goldenPidTargetPidTuple.getSourcePid();
 			theGoldenResourceToSourcePidMap.computeIfAbsent(goldenPid, key -> new HashSet<>()).add(sourcePid);
 		}
 	}
@@ -416,28 +411,25 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		Set<String> expandedIds = new HashSet<>();
 		SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), requestDetails);
-		Long pidOrNull = myJpaIdHelperService.getPidOrNull(group);
+		ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
 
 		//Attempt to perform MDM Expansion of membership
 		if (theParams.isExpandMdm()) {
-			List<IMdmLinkDao.MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
+			List<MdmPidTuple> goldenPidTargetPidTuples = myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(pidOrNull, MdmMatchResultEnum.MATCH);
 			//Now lets translate these pids into resource IDs
-			Set<Long> uniquePids = new HashSet<>();
+			Set<ResourcePersistentId> uniquePids = new HashSet<>();
 			goldenPidTargetPidTuples.forEach(tuple -> {
 				uniquePids.add(tuple.getGoldenPid());
 				uniquePids.add(tuple.getSourcePid());
 			});
-			Map<Long, Optional<String>> pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
+			PersistentIdToForcedIdMap pidToForcedIdMap = myIdHelperService.translatePidsToForcedIds(uniquePids);
 
-			Map<Long, Set<Long>> goldenResourceToSourcePidMap = new HashMap<>();
+			Map<ResourcePersistentId, Set<ResourcePersistentId>> goldenResourceToSourcePidMap = new HashMap<>();
 			extract(goldenPidTargetPidTuples, goldenResourceToSourcePidMap);
 			populateMdmResourceCache(goldenPidTargetPidTuples);
 
 			//If the result of the translation is an empty optional, it means there is no forced id, and we can use the PID as the resource ID.
-			Set<String> resolvedResourceIds = pidToForcedIdMap.entrySet().stream()
-				.map(entry -> entry.getValue().isPresent() ? entry.getValue().get() : entry.getKey().toString())
-				.collect(Collectors.toSet());
-
+			Set<String> resolvedResourceIds = pidToForcedIdMap.getResolvedResourceIds();
 			expandedIds.addAll(resolvedResourceIds);
 		}
 

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.mdm.dao;
+package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Master Data Management
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,24 +20,21 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
-public class MdmLinkFactory {
-	private final IMdmSettings myMdmSettings;
+public class SearchBuilderFactory {
 
 	@Autowired
-	public MdmLinkFactory(IMdmSettings theMdmSettings) {
-		myMdmSettings = theMdmSettings;
+	private ApplicationContext myApplicationContext;
+	@Autowired
+	private DaoConfig myDaoConfig;
+
+	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return (ISearchBuilder) myApplicationContext.getBean(ISearchBuilder.SEARCH_BUILDER_BEAN_NAME, theDao, theResourceName, theResourceType, myDaoConfig);
 	}
 
-	/**
-	 * Create a new {@link MdmLink}, populating it with the version of the ruleset used to create it.
-	 *
-	 * @return the new {@link MdmLink}
-	 */
-	public MdmLink newMdmLink() {
-		return new MdmLink(myMdmSettings.getRuleVersion());
-	}
 }
