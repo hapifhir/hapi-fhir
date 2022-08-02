@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
+import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -888,8 +889,8 @@ public class FhirContext {
 	 * {@link #newRestfulClient(Class, String) non-generic clients}).
 	 *
 	 * <p>
-	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every operation invocation
-	 * without incurring any performance penalty
+	 * Performance Note: This method performs an additional GET request to /metadata before
+	 * the desired request is performed.
 	 * </p>
 	 *
 	 * @param theServerBase The URL of the base for the restful FHIR server to connect to
