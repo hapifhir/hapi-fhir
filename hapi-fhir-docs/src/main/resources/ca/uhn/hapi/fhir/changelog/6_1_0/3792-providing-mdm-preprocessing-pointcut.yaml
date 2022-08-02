@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3792
+title: "Adding pointcut `MDM_BEFORE_PERSISTED_RESOURCE_CHECKED` allowing for the customization of source resource before MDM processing."

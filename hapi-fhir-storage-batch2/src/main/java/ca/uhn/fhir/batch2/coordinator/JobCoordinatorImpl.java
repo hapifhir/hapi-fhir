@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -36,16 +37,19 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
+import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -157,6 +161,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
 		return myJobQuerySvc.getInstancesByJobDefinitionIdAndEndedStatus(theJobDefinitionId, theEnded, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		return myJobQuerySvc.getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, theStatuses, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return getJobInstancesByJobDefinitionIdAndStatuses(theJobDefinitionId, new HashSet<>(Arrays.asList(StatusEnum.values())), theCount, theStart);
+	}
+
+	@Override
+	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
+		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
 	@Override

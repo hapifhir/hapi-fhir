@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -38,6 +39,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,7 +58,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Transactional
+@Transactional(Transactional.TxType.REQUIRES_NEW)
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaJobPersistenceImpl.class);
 
@@ -131,6 +133,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
+	}
+
+	@Override
+	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		PageRequest pageRequest = PageRequest.of(
+			theRequest.getPageStart(),
+			theRequest.getBatchSize(),
+			theRequest.getSort()
+		);
+
+		Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
+
+		return pageOfEntities.map(this::toInstance);
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {

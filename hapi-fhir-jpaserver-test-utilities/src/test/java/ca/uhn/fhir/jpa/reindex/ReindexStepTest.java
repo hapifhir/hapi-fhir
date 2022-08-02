@@ -140,6 +140,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		// Setup
 
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		boolean markResourcesForReindexingUponSearchParameterChange = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);	// if this were true, it would set up a lot of reindex jobs extraneous to the one we're trying to test
 
 		IIdType orgId = createOrganization(withId("ORG"));
 		Long id0 = createPatient(withActiveTrue(), withFamily("SIMPSON"), withOrganization(orgId)).getIdPartAsLong();
@@ -196,6 +198,8 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		assertEquals(1, myCaptureQueriesListener.getCommitCount());
 		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
 	}
 
 	@Test
