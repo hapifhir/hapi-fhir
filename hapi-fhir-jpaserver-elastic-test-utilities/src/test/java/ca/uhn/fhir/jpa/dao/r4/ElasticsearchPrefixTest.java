@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.containsString;
 
 @RequiresDocker
 @ExtendWith(SpringExtension.class)
+// we don't reuse this context, so close it after we're done
+// fixme mb
 @ContextConfiguration(classes = {ElasticsearchWithPrefixConfig.class})
 public class ElasticsearchPrefixTest {
 

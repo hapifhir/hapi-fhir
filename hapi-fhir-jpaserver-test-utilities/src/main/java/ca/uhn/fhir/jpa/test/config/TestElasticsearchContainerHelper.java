@@ -37,6 +37,8 @@ public class TestElasticsearchContainerHelper {
 		return new ElasticsearchContainer(ELASTICSEARCH_IMAGE)
 			// the default is 4GB which is too much for our little tests
 			.withEnv("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+			// turn off security warnings
+			.withEnv("xpack.security.enabled", "false")
 			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 
