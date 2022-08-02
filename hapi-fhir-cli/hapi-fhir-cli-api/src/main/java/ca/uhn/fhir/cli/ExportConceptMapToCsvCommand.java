@@ -46,6 +46,7 @@ import java.util.concurrent.ExecutionException;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
+	public static final String COMMAND = "export-conceptmap-to-csv";
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
 
