@@ -718,7 +718,7 @@ public class IdHelperService implements IIdHelperService {
 	public IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType) {
 		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException(Msg.code(2107) + "Requested resource not found");
+			throw new ResourceNotFoundException(Msg.code(2111) + "Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
 	}
