@@ -1,4 +1,4 @@
-package ca.uhn.fhir.i18n;
+package ca.uhn.fhir.tls;
 
 /*-
  * #%L
@@ -20,17 +20,18 @@ package ca.uhn.fhir.i18n;
  * #L%
  */
 
-public final class Msg {
-	private static final String ERROR_CODE_PREFIX = "HAPI";
+public enum PathType {
 
-	/**
-	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last code value: 2123
-	 */
+	FILE("file://"),
+	RESOURCE("classpath:");
 
-	private Msg() {}
+	private String myPrefix;
 
-	public static String code(int theCode) {
-		return String.format("%s-%04d: ", ERROR_CODE_PREFIX, theCode);
+	PathType(String thePrefix) {
+		myPrefix = thePrefix;
+	}
+
+	public String getPrefix(){
+		return myPrefix;
 	}
 }

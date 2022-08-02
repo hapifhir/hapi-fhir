@@ -1,4 +1,4 @@
-package ca.uhn.fhir.i18n;
+package ca.uhn.fhir.tls;
 
 /*-
  * #%L
@@ -20,17 +20,23 @@ package ca.uhn.fhir.i18n;
  * #L%
  */
 
-public final class Msg {
-	private static final String ERROR_CODE_PREFIX = "HAPI";
+import java.util.Optional;
 
-	/**
-	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last code value: 2123
-	 */
+public class TlsAuthentication {
 
-	private Msg() {}
+	private final Optional<KeyStoreInfo> myKeyStoreInfo;
+	private final Optional<TrustStoreInfo> myTrustStoreInfo;
 
-	public static String code(int theCode) {
-		return String.format("%s-%04d: ", ERROR_CODE_PREFIX, theCode);
+	public TlsAuthentication(Optional<KeyStoreInfo> theKeyStoreInfo, Optional<TrustStoreInfo> theTrustStoreInfo) {
+		myKeyStoreInfo = theKeyStoreInfo;
+		myTrustStoreInfo = theTrustStoreInfo;
+	}
+
+	public Optional<KeyStoreInfo> getKeyStoreInfo() {
+		return myKeyStoreInfo;
+	}
+
+	public Optional<TrustStoreInfo> getTrustStoreInfo() {
+		return myTrustStoreInfo;
 	}
 }

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.client.apache;
+package ca.uhn.fhir.cli.client;
 
 /*
  * #%L
- * HAPI FHIR - Client Framework
+ * HAPI FHIR - Command Line Client - API
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -21,53 +21,50 @@ package ca.uhn.fhir.rest.client.apache;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheHttpClient;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
+import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
+import ca.uhn.fhir.tls.TlsAuthentication;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
+import javax.net.ssl.SSLContext;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
+ * Intended for use with the HapiFhir CLI only.
+ * <br/><br/>
  * A Restful Factory to create clients, requests and responses based on the Apache httpclient library.
- * 
- * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
+ * This class supports HTTP and HTTPS protocol and attempts to use the same client whenever possible.
+ * The method {@link HapiFhirCliRestfulClientFactory#useHttp()} should be used if the protocol needs to be changed to HTTP.
+ * Similarly, the method {@link HapiFhirCliRestfulClientFactory#useHttps(TlsAuthentication)} should be used if the protocol
+ * needs to be changed to HTTPS or if new TLS credentials are required for a client request.
  */
-public class ApacheRestfulClientFactory extends RestfulClientFactory {
+public class HapiFhirCliRestfulClientFactory extends RestfulClientFactory {
 
 	private HttpClient myHttpClient;
-	private HttpHost myProxy;
+	private TlsAuthentication myTlsAuthentication;
 
-	/**
-	 * Constructor
-	 */
-	public ApacheRestfulClientFactory() {
-		super();
+	public HapiFhirCliRestfulClientFactory(FhirContext theFhirContext) {
+		this(theFhirContext, null);
 	}
 
-	/**
-	 * Constructor
-	 * 
-	 * @param theContext
-	 *            The context
-	 */
-	public ApacheRestfulClientFactory(FhirContext theContext) {
-		super(theContext);
+	public HapiFhirCliRestfulClientFactory(FhirContext theFhirContext, TlsAuthentication theTlsAuthentication) {
+		super(theFhirContext);
+		myTlsAuthentication = theTlsAuthentication;
 	}
 
 	@Override
@@ -84,66 +81,69 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
-			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig =
 				RequestConfig.custom()
 					.setSocketTimeout(getSocketTimeout())
 					.setConnectTimeout(getConnectTimeout())
 					.setConnectionRequestTimeout(getConnectionRequestTimeout())
 					.setStaleConnectionCheckEnabled(true)
-					.setProxy(myProxy)
 					.build();
 
-			HttpClientBuilder builder = getHttpClientBuilder()
+			HttpClientBuilder builder = HttpClients.custom()
 				.useSystemProperties()
 				.setDefaultRequestConfig(defaultRequestConfig)
 				.disableCookieManagement();
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			PoolingHttpClientConnectionManager connectionManager;
+			if(myTlsAuthentication != null){
+				SSLContext sslContext = TlsAuthenticationSvc.createSslContext(myTlsAuthentication);
+				SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext);
+				builder.setSSLSocketFactory(sslConnectionSocketFactory);
+				Registry<ConnectionSocketFactory> registry = RegistryBuilder
+					.<ConnectionSocketFactory> create()
+					.register("https", sslConnectionSocketFactory)
+					.build();
+				connectionManager = new PoolingHttpClientConnectionManager(
+					registry, null, null, null, 5000, TimeUnit.MILLISECONDS
+				);
+			}
+			else {
+				connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			}
+
 			connectionManager.setMaxTotal(getPoolMaxTotal());
 			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 			builder.setConnectionManager(connectionManager);
 
-			if (myProxy != null && isNotBlank(getProxyUsername()) && isNotBlank(getProxyPassword())) {
-				CredentialsProvider credsProvider = new BasicCredentialsProvider();
-				credsProvider.setCredentials(new AuthScope(myProxy.getHostName(), myProxy.getPort()),
-						new UsernamePasswordCredentials(getProxyUsername(), getProxyPassword()));
-				builder.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
-				builder.setDefaultCredentialsProvider(credsProvider);
-			}
-
 			myHttpClient = builder.build();
-
 		}
 
 		return myHttpClient;
 	}
 
-	protected HttpClientBuilder getHttpClientBuilder() {
-		return HttpClients.custom();
-	}
-
 	@Override
 	protected void resetHttpClient() {
-		this.myHttpClient = null;
+		myHttpClient = null;
 	}
 
-	/**
-	 * Only allows to set an instance of type org.apache.http.client.HttpClient
-	 * @see ca.uhn.fhir.rest.client.api.IRestfulClientFactory#setHttpClient(Object)
-	 */
+	public void useHttp(){
+		myTlsAuthentication = null;
+		resetHttpClient();
+	}
+
+	public void useHttps(TlsAuthentication theTlsAuthentication){
+		myTlsAuthentication = theTlsAuthentication;
+		resetHttpClient();
+	}
+
 	@Override
 	public synchronized void setHttpClient(Object theHttpClient) {
-		this.myHttpClient = (HttpClient) theHttpClient;
+		throw new UnsupportedOperationException(Msg.code(2119));
 	}
 
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
-		if (theHost != null) {
-			myProxy = new HttpHost(theHost, thePort, "http");
-		} else {
-			myProxy = null;
-		}
+		throw new UnsupportedOperationException(Msg.code(2120));
 	}
 
 }
