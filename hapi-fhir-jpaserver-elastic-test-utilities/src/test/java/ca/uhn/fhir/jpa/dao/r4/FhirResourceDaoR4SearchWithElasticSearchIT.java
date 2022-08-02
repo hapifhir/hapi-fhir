@@ -1874,6 +1874,21 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// also validate no extra SQL queries were executed
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
+
+		@Test
+		public void offsetAndCountReturnsMoreThan50() {
+			for (int i = 0; i < 60; i++) {
+				myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-" + i)));
+			}
+
+			myCaptureQueriesListener.clear();
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?_offset=0&_count=100");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertEquals(60, resultIds.size());
+			// also validate no extra SQL queries were executed
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
 	}
 
 	@Nested

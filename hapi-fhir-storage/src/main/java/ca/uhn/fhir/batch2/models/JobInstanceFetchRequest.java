@@ -1,5 +1,7 @@
 package ca.uhn.fhir.batch2.models;
 
+import org.springframework.data.domain.Sort;
+
 public class JobInstanceFetchRequest {
 
 	/**
@@ -11,6 +13,8 @@ public class JobInstanceFetchRequest {
 	 * Page size (number of elements to return)
 	 */
 	private int myBatchSize;
+
+	private Sort mySort;
 
 	public int getPageStart() {
 		return myPageStart;
@@ -26,5 +30,13 @@ public class JobInstanceFetchRequest {
 
 	public void setBatchSize(int theBatchSize) {
 		myBatchSize = theBatchSize;
+	}
+
+	public Sort getSort() {
+		return mySort;
+	}
+
+	public void setSort(Sort theSort) {
+		mySort = theSort;
 	}
 }

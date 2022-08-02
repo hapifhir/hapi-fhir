@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.mdm.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,18 +20,23 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.Closeable;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Set;
 
-public interface IResultIterator extends Iterator<ResourcePersistentId>, Closeable {
+public interface IMdmLinkExpandSvc {
+	Set<String> expandMdmBySourceResource(IBaseResource theResource);
 
-	int getSkippedCount();
+	Set<String> expandMdmBySourceResourceId(IIdType theId);
 
-	int getNonSkippedCount();
+	Set<String> expandMdmBySourceResourcePid(ResourcePersistentId theSourceResourcePid);
 
-	Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize);
+	Set<String> expandMdmByGoldenResourceId(ResourcePersistentId theGoldenResourcePid);
 
+	Set<String> expandMdmByGoldenResourcePid(ResourcePersistentId theGoldenResourcePid);
+
+	Set<String> expandMdmByGoldenResourceId(IdDt theId);
 }

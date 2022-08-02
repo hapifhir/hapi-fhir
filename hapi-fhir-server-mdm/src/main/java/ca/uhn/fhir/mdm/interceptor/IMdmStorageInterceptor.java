@@ -1,8 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.config;
+package ca.uhn.fhir.mdm.interceptor;
 
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,16 +20,5 @@ package ca.uhn.fhir.batch2.jobs.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
-import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class SharedCtx {
-
-	@Bean
-	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep(theBatch2DaoSvc);
-	}
+public interface IMdmStorageInterceptor {
 }

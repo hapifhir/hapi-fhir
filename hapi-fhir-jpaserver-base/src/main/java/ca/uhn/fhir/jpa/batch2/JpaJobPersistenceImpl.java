@@ -139,7 +139,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
 		PageRequest pageRequest = PageRequest.of(
 			theRequest.getPageStart(),
-			theRequest.getBatchSize()
+			theRequest.getBatchSize(),
+			theRequest.getSort()
 		);
 
 		Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);

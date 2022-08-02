@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.interceptor;
+package ca.uhn.fhir.mdm.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -24,7 +24,8 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -54,7 +55,7 @@ public class MdmSearchExpandingInterceptor {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmLinkExpandSvc myMdmLinkExpandSvc;
+	private IMdmLinkExpandSvc myMdmLinkExpandSvc;
 
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -148,7 +149,7 @@ public class MdmSearchExpandingInterceptor {
 			Set<String> expandedResourceIds = myMdmLinkExpandSvc.expandMdmBySourceResourceId(id);
 
 			if (expandedResourceIds.isEmpty()) {
-				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId(id.getIdPartAsLong());
+				expandedResourceIds = myMdmLinkExpandSvc.expandMdmByGoldenResourceId((IdDt) id);
 			}
 
 			//Rebuild

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.dao.mdm;
+package ca.uhn.fhir.mdm.svc;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,11 +20,15 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -35,15 +39,16 @@ import javax.annotation.Nonnull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
-public class MdmLinkExpandSvc {
+public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
 	private IMdmLinkDao myMdmLinkDao;
 	@Autowired
-	private IJpaIdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	public MdmLinkExpandSvc() {
 	}
@@ -55,6 +60,7 @@ public class MdmLinkExpandSvc {
 	 * @param theResource The resource to MDM-Expand
 	 * @return A set of strings representing the FHIR IDs of the expanded resources.
 	 */
+	@Override
 	public Set<String> expandMdmBySourceResource(IBaseResource theResource) {
 		ourLog.debug("About to MDM-expand source resource {}", theResource);
 		return expandMdmBySourceResourceId(theResource.getIdElement());
@@ -67,10 +73,10 @@ public class MdmLinkExpandSvc {
 	 * @param theId The Resource ID of the resource to MDM-Expand
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
+	@Override
 	public Set<String> expandMdmBySourceResourceId(IIdType theId) {
 		ourLog.debug("About to expand source resource with resource id {}", theId);
-		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
-		return expandMdmBySourceResourcePid(pidOrThrowException);
+		return expandMdmBySourceResourcePid(myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId));
 	}
 
 	/**
@@ -80,9 +86,10 @@ public class MdmLinkExpandSvc {
 	 * @param theSourceResourcePid The PID of the resource to MDM-Expand
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
-	public Set<String> expandMdmBySourceResourcePid(Long theSourceResourcePid) {
+	@Override
+	public Set<String> expandMdmBySourceResourcePid(ResourcePersistentId theSourceResourcePid) {
 		ourLog.debug("About to expand source resource with PID {}", theSourceResourcePid);
-		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourceResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theSourceResourcePid, goldenPidSourcePidTuples);
 	}
 
@@ -93,9 +100,10 @@ public class MdmLinkExpandSvc {
 	 * @param theGoldenResourcePid The PID of the golden resource to MDM-Expand.
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
-	public Set<String> expandMdmByGoldenResourceId(Long theGoldenResourcePid) {
+	@Override
+	public Set<String> expandMdmByGoldenResourceId(ResourcePersistentId theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
@@ -107,21 +115,23 @@ public class MdmLinkExpandSvc {
 	 * @param theGoldenResourcePid The resource ID of the golden resource to MDM-Expand.
 	 * @return A set of strings representing the FHIR ids of the expanded resources.
 	 */
-	public Set<String> expandMdmByGoldenResourcePid(Long theGoldenResourcePid) {
+	@Override
+	public Set<String> expandMdmByGoldenResourcePid(ResourcePersistentId theGoldenResourcePid) {
 		ourLog.debug("About to expand golden resource with PID {}", theGoldenResourcePid);
-		List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
+		List<MdmPidTuple> goldenPidSourcePidTuples = myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theGoldenResourcePid, MdmMatchResultEnum.MATCH);
 		return flattenPidTuplesToSet(theGoldenResourcePid, goldenPidSourcePidTuples);
 	}
 
+	@Override
 	public Set<String> expandMdmByGoldenResourceId(IdDt theId) {
 		ourLog.debug("About to expand golden resource with golden resource id {}", theId);
-		Long pidOrThrowException = myIdHelperService.getPidOrThrowException(theId);
+		ResourcePersistentId pidOrThrowException = myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), theId);
 		return expandMdmByGoldenResourcePid(pidOrThrowException);
 	}
 
 	@Nonnull
-	private Set<String> flattenPidTuplesToSet(Long initialPid, List<IMdmLinkDao.MdmPidTuple> goldenPidSourcePidTuples) {
-		Set<Long> flattenedPids = new HashSet<>();
+	public Set<String> flattenPidTuplesToSet(ResourcePersistentId initialPid, List<MdmPidTuple> goldenPidSourcePidTuples) {
+		Set<ResourcePersistentId> flattenedPids = new HashSet<>();
 		goldenPidSourcePidTuples.forEach(tuple -> {
 			flattenedPids.add(tuple.getSourcePid());
 			flattenedPids.add(tuple.getGoldenPid());
