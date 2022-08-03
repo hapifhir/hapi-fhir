@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
@@ -59,23 +61,23 @@ public class UcumServiceUtilTest {
 	
 	@Test
 	public void testUcumDegreeFahrenheit() throws UcumException {
-		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(99.82), "[degF]");
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL,
+			new BigDecimal(99.82).round(new MathContext(4, RoundingMode.HALF_EVEN)), "[degF]");
 		Decimal converted = canonicalPair.getValue();
-		Decimal expectedApprox = new Decimal(Double.toString(310.82778f));
-		Decimal maxDifference = new Decimal(Float.toString(0.000_01f));
-//		System.out.println("expected: " + expectedApprox);
+		Decimal expected = new Decimal(Double.toString(3.108278e2));
+//		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
-//		System.out.println("diff: " + converted.subtract(expectedApprox));
-		assertTrue( converted.equals(expectedApprox, maxDifference));
+		assertTrue( converted.equals(expected));
 		assertEquals("K", canonicalPair.getCode());
 
 	}
 
 	@Test
-	public void testUcumDegreeFCelsius() throws UcumException {
-		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(73.54), "Cel");
+	public void testUcumDegreeCelsius() throws UcumException {
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL,
+			new BigDecimal(73.54).round(new MathContext(4, RoundingMode.HALF_EVEN)), "Cel");
 		Decimal converted = canonicalPair.getValue();
-		Decimal expectedApprox = new Decimal(Double.toString(73.54 + CELSIUS_KELVIN_DIFF));
+		Decimal expectedApprox = new Decimal(Double.toString(73.54 + CELSIUS_KELVIN_DIFF) );
 		Decimal maxDifference = new Decimal(Float.toString(0.000_01f));
 //		System.out.println("expected: " + expectedApprox);
 //		System.out.println("converted: " + converted);

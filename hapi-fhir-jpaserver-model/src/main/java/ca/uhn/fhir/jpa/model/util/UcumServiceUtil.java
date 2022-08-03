@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.model.util;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import ca.uhn.fhir.rest.param.QuantityParam;
 import org.fhir.ucum.Decimal;
@@ -128,15 +130,15 @@ public class UcumServiceUtil {
 	 * Formula is K = (x°F − 32) × 5/9 + 273.15
 	 */
 	private static Pair canonicalizeFahrenheit(BigDecimal theValue) throws UcumException {
-		Decimal valueDec = new Decimal(theValue.toPlainString(), theValue.precision());
-		float fiveNinths = 5f / 9f;
+		BigDecimal converted = theValue
+			.subtract( BigDecimal.valueOf(32) )
+			.multiply( BigDecimal.valueOf(5f / 9f) )
+			.add( BigDecimal.valueOf(CELSIUS_KELVIN_DIFF) );
+		// disallow precision larger than input, as it matters when defining ranges
+		BigDecimal adjusted = converted.setScale(theValue.precision(), RoundingMode.HALF_UP);
 
-		Decimal converted = valueDec
-			.subtract(new Decimal(32))
-			.multiply(new Decimal(Float.toString(fiveNinths)))
-			.add(new Decimal(Float.toString(CELSIUS_KELVIN_DIFF)));
-
-		return new Pair(converted, "K");
+		Decimal newValue = new Decimal(adjusted.toPlainString());
+		return new Pair(newValue, "K");
 	}
 
 	/**
