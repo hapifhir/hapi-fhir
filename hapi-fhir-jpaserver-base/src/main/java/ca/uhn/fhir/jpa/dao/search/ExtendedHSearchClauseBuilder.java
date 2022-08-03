@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -653,7 +655,8 @@ public class ExtendedHSearchClauseBuilder {
 			for (NumberParam orTerm : orTerms) {
 				double value = orTerm.getValue().doubleValue();
 				double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
-				double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
+				Pair<BigDecimal, BigDecimal> range = NumericParamRangeUtil.getRange(orTerm.getValue());
+
 
 				ParamPrefixEnum activePrefix = orTerm.getPrefix() == null ? ParamPrefixEnum.EQUAL : orTerm.getPrefix();
 				switch (activePrefix) {
@@ -664,7 +667,7 @@ public class ExtendedHSearchClauseBuilder {
 
 					case EQUAL:
 						numberPredicateStep.should(myPredicateFactory.range()
-							.field(fieldPath).between(value - defaultTolerance, value + defaultTolerance));
+							.field(fieldPath).between(range.getLeft().doubleValue(), range.getRight().doubleValue()));
 						break;
 
 					case STARTS_AFTER:
@@ -686,7 +689,8 @@ public class ExtendedHSearchClauseBuilder {
 						break;
 
 					case NOT_EQUAL:
-						numberPredicateStep.mustNot(myPredicateFactory.match().field(fieldPath).matching(value));
+						numberPredicateStep.mustNot(myPredicateFactory.range()
+							.field(fieldPath).between(range.getLeft().doubleValue(), range.getRight().doubleValue()));
 						break;
 				}
 			}
@@ -694,6 +698,5 @@ public class ExtendedHSearchClauseBuilder {
 			myRootClause.must(numberPredicateStep);
 		}
 	}
-
 
 }
