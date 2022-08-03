@@ -41,7 +41,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
@@ -62,7 +62,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.createLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(links.size(), 1);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
@@ -106,7 +106,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.createLink(sourcePatientId, patientId, null, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
@@ -152,7 +152,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.createLink(sourcePatientId2, patientId, NO_MATCH_RESULT, myRequestDetails);
 
 		assertLinkCount(3);
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(1).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(1).getMatchResult());
 	}

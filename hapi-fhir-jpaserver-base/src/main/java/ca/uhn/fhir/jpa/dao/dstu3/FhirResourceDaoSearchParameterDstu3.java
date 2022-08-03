@@ -5,10 +5,15 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
+import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * #%L
@@ -35,29 +40,30 @@ public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	protected void markAffectedResources(SearchParameter theResource) {
+	protected void reindexAffectedResources(SearchParameter theResource, RequestDetails theRequestDetails) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 		String expression = theResource != null ? theResource.getExpression() : null;
-		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
+		List<String> base = theResource != null ? theResource.getBase().stream().map(PrimitiveType::asStringValue).collect(Collectors.toList()) : null;
+		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 
 
 	@Override
-	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
-		super.postPersist(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postPersist(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 	}
 
 	@Override
-	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
-		super.postUpdate(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postUpdate(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
-		markAffectedResources(theResourceToDelete);
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
+		reindexAffectedResources(theResourceToDelete, theRequestDetails);
 	}
 
 	@Override

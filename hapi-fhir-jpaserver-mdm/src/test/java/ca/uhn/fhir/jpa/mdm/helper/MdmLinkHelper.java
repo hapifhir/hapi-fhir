@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.helper;
 
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class MdmLinkHelper {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkHelper.class);
 
 	@Autowired
-	IMdmLinkDao myMdmLinkDao;
+    IMdmLinkJpaRepository myMdmLinkDao;
 
 	@Transactional
 	public void logMdmLinks() {

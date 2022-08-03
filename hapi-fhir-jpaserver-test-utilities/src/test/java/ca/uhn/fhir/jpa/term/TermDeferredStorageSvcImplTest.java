@@ -1,25 +1,28 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,7 +42,10 @@ public class TermDeferredStorageSvcImplTest {
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 
 	@Mock
-	private JobExecution myJobExecution;
+	private IJobCoordinator myJobCoordinator;
+
+	@InjectMocks
+	private TermDeferredStorageSvcImpl mySvc;
 
 	@Test
 	public void testSaveDeferredWithExecutionSuspended() {
@@ -51,12 +57,21 @@ public class TermDeferredStorageSvcImplTest {
 
 	@Test
 	public void testStorageNotEmptyWhileJobsExecuting() {
-		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
-		ReflectionTestUtils.setField(svc, "myCurrentJobExecutions", Collections.singletonList(myJobExecution));
+		String jobId = "jobId";
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(jobId);
+		instance.setStatus(StatusEnum.IN_PROGRESS);
 
-		when(myJobExecution.isRunning()).thenReturn(true, false);
-		assertFalse(svc.isStorageQueueEmpty());
-		assertTrue(svc.isStorageQueueEmpty());
+		ArrayList<String> mockExecutions = new ArrayList<>();
+		mockExecutions.add(jobId);
+
+		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
+
+		when(myJobCoordinator.getInstance(eq(jobId)))
+			.thenReturn(instance);
+		assertFalse(mySvc.isStorageQueueEmpty());
+		instance.setStatus(StatusEnum.COMPLETED);
+		assertTrue(mySvc.isStorageQueueEmpty());
 	}
 
 

@@ -30,7 +30,10 @@ import org.hamcrest.Matchers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
+
+	private static final int BATCH_SIZE = 100;
 
 	@Autowired
 	private IJobMaintenanceService myJobMaintenanceService;
@@ -52,7 +57,8 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(String theId) {
-		await().until(() -> {
+		await()
+			.until(() -> {
 			myJobMaintenanceService.runMaintenancePass();
 			return myJobCoordinator.getInstance(theId).getStatus();
 		}, equalTo(StatusEnum.COMPLETED));
@@ -118,9 +124,13 @@ public class Batch2JobHelper {
 
 	}
 
-	// TODO KHS I don't think this works yet
-	public void awaitAllCompletions(String theJobDefinitionId) {
-		List<JobInstance> instances = myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, false, 100, 0);
+	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
+		// fetch all jobs of any status type
+		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
+			theJobDefinitionId,
+			BATCH_SIZE,
+			0);
+		// then await completion status
 		awaitJobCompletions(instances);
 	}
 
@@ -144,5 +154,9 @@ public class Batch2JobHelper {
 				fail(msg.toString());
 			}
 		}
+	}
+
+	public List<JobInstance> findJobsByDefinition(String theJobDefinitionId) {
+		return myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, null, 100, 0);
 	}
 }

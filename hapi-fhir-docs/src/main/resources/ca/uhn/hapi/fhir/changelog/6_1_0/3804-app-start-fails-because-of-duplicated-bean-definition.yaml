@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3804
+title: "When starting hapi-fhir from starter application, BeanDefinitionOverrideException was thrown with message: Invalid bean
+   definition with name loadIdsStep. This issue is now fixed."

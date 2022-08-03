@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.exception.TokenParamFormatInvalidRequestException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -1281,8 +1282,7 @@ public class QueryStack {
 				TokenParam nextParam = (TokenParam) nextParamUncasted;
 				if (isNotBlank(nextParam.getValue())) { return true; }
 				if (isNotBlank(nextParam.getSystem())) {
-					throw new InvalidRequestException(Msg.code(1218) + "Invalid " + theParamName +
-						" parameter (must supply a value/code and not just a system): " + nextParam.getValueAsQueryToken(myFhirContext));
+					throw new TokenParamFormatInvalidRequestException(Msg.code(1218),theParamName, nextParam.getValueAsQueryToken(myFhirContext));
 				}
 			}
 
@@ -1583,9 +1583,9 @@ public class QueryStack {
 
 
 	// expand out the pids
-	public void addPredicateEverythingOperation(String theResourceName, Long... theTargetPids) {
+	public void addPredicateEverythingOperation(String theResourceName, List<String> theTypeSourceResourceNames, Long... theTargetPids) {
 		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
-		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPids);
+		Condition predicate = table.createEverythingPredicate(theResourceName, theTypeSourceResourceNames, theTargetPids);
 		mySqlBuilder.addPredicate(predicate);
 	}
 

@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -39,8 +38,7 @@ public class Batch2JobRegisterer {
 
 
 	@PostConstruct
-	public void start() throws DuplicateJobException {
-
+	public void start() {
 		Map<String, JobDefinition> batchJobs = myApplicationContext.getBeansOfType(JobDefinition.class);
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
 
