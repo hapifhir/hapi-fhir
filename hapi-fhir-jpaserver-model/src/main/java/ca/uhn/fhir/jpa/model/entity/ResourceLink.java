@@ -117,6 +117,10 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResourceId;
 	}
 
+	public String getSourceResourceType() {
+		return mySourceResourceType;
+	}
+
 	public String getTargetResourceType() {
 		return myTargetResourceType;
 	}

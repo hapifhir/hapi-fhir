@@ -5,20 +5,21 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
+import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
+import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -69,8 +70,6 @@ public class UploadTerminologyCommandTest {
 	private final String myICD10URL = "http://hl7.org/fhir/sid/icd-10-cm";
 	private final String myICD10FileName = new File("src/test/resources").getAbsolutePath() + "/icd10cm_tabular_2021.xml";
 	private File myICD10File = new File(myICD10FileName);
-	private Server myServer;
-	private int myPort;
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
@@ -82,35 +81,43 @@ public class UploadTerminologyCommandTest {
 		System.setProperty("test", "true");
 	}
 
-	static Stream<String> paramsProvider() {
-		return Stream.of(FHIR_VERSION_DSTU3, FHIR_VERSION_R4);
+	static Stream<Arguments> paramsProvider(){
+		return Stream.of(
+			// [0] theFhirVersion, [1] theIncludeTls
+			Arguments.arguments(FHIR_VERSION_DSTU3, true),
+			Arguments.arguments(FHIR_VERSION_DSTU3, false),
+			Arguments.arguments(FHIR_VERSION_R4, true),
+			Arguments.arguments(FHIR_VERSION_R4, false)
+		);
 	}
+
+	@RegisterExtension
+	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	@RegisterExtension
+	public final RestServerDstu3Helper myRestServerDstu3Helper = new RestServerDstu3Helper(true);
+	@RegisterExtension
+	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
+
+	private BaseRestServerHelper myBaseRestServerHelper;
 
 	@BeforeEach
 	public void beforeEach(TestInfo testInfo) throws Exception {
 		writeConceptAndHierarchyFiles();
-		if (testInfo.getDisplayName().endsWith(FHIR_VERSION_DSTU3)) {
+		if (testInfo.getDisplayName().contains(FHIR_VERSION_DSTU3)) {
 			myCtx = FhirContext.forDstu3();
-		} else if (testInfo.getDisplayName().endsWith(FHIR_VERSION_R4)) {
+			myRestServerDstu3Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc));
+			myBaseRestServerHelper = myRestServerDstu3Helper;
+		} else if (testInfo.getDisplayName().contains(FHIR_VERSION_R4)) {
 			myCtx = FhirContext.forR4();
+			myRestServerR4Helper.registerProvider(new TerminologyUploaderProvider(myCtx, myTermLoaderSvc));
+			myBaseRestServerHelper = myRestServerR4Helper;
 		} else {
 			fail("Unknown FHIR Version param provided: " + testInfo.getDisplayName());
 		}
-		myServer = new Server(0);
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(provider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
 	}
 
 	@AfterEach
 	public void afterEach() throws Exception {
-		JettyUtil.closeServer(myServer);
 		FileUtils.deleteQuietly(myConceptsFile);
 		FileUtils.deleteQuietly(myHierarchyFile);
 		FileUtils.deleteQuietly(myCodeSystemFile);
@@ -122,7 +129,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAdd(String theFhirVersion) throws IOException {
+	public void testDeltaAdd(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -131,15 +138,17 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "ADD",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "ADD",
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
@@ -151,7 +160,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddUsingCodeSystemResource(String theFhirVersion) throws IOException {
+	public void testDeltaAddUsingCodeSystemResource(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
 				org.hl7.fhir.dstu3.model.CodeSystem cs = new org.hl7.fhir.dstu3.model.CodeSystem();
@@ -170,14 +179,16 @@ public class UploadTerminologyCommandTest {
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "ADD",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myCodeSystemFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "ADD",
+				"-u", "http://foo",
+				"-d", myCodeSystemFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
@@ -190,7 +201,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidResource(String theFhirVersion) throws IOException {
+	public void testDeltaAddInvalidResource(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			try (FileWriter w = new FileWriter(myCodeSystemFile, false)) {
 				org.hl7.fhir.dstu3.model.Patient patient = new org.hl7.fhir.dstu3.model.Patient();
@@ -208,14 +219,16 @@ public class UploadTerminologyCommandTest {
 		}
 
 		try {
-			App.main(new String[]{
-				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-				"-v", theFhirVersion,
-				"-m", "ADD",
-				"-t", "http://localhost:" + myPort,
-				"-u", "http://foo",
-				"-d", myCodeSystemFileName
-			});
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+				new String[]{
+					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+					"-v", theFhirVersion,
+					"-m", "ADD",
+					"-u", "http://foo",
+					"-d", myCodeSystemFileName
+				},
+				"-t", theIncludeTls, myBaseRestServerHelper
+			));
 			fail();
 		} catch (Error e) {
 			assertThat(e.toString(), containsString("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem"));
@@ -224,20 +237,23 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidFileType(String theFhirVersion) throws IOException {
+	public void testDeltaAddInvalidFileType(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		try (FileWriter w = new FileWriter(myTextFileName, false)) {
 			w.append("Help I'm a Bug");
 		}
 
 		try {
-			App.main(new String[]{
-				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-				"-v", theFhirVersion,
-				"-m", "ADD",
-				"-t", "http://localhost:" + myPort,
-				"-u", "http://foo",
-				"-d", myTextFileName
-			});
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+				new String[]{
+					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+					"-v", theFhirVersion,
+					"-m", "ADD",
+					"-u", "http://foo",
+					"-d", myTextFileName
+				},
+				"-t", theIncludeTls, myBaseRestServerHelper
+			));
+
 			fail();
 		} catch (Error e) {
 			assertThat(e.toString(), containsString("Don't know how to handle file:"));
@@ -246,19 +262,21 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddUsingCompressedFile(String theFhirVersion) throws IOException {
+	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
 
 		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.r4.model.IdType("CodeSystem/101")));
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "ADD",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myArchiveFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "ADD",
+				"-u", "http://foo",
+				"-d", myArchiveFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
@@ -270,17 +288,20 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaAddInvalidFileName(String theFhirVersion) throws IOException {
+	public void testDeltaAddInvalidFileName(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		try {
-			App.main(new String[]{
-				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-				"-v", theFhirVersion,
-				"-m", "ADD",
-				"-t", "http://localhost:" + myPort,
-				"-u", "http://foo",
-				"-d", myConceptsFileName + "/foo.csv",
-				"-d", myHierarchyFileName
-			});
+			App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+				new String[]{
+					UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+					"-v", theFhirVersion,
+					"-m", "ADD",
+					"-u", "http://foo",
+					"-d", myConceptsFileName + "/foo.csv",
+					"-d", myHierarchyFileName
+				},
+				"-t", theIncludeTls, myBaseRestServerHelper
+			));
+			fail();
 		} catch (Error e) {
 			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
 		}
@@ -288,7 +309,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeltaRemove(String theFhirVersion) throws IOException {
+	public void testDeltaRemove(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -297,15 +318,17 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "REMOVE",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "REMOVE",
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
@@ -317,7 +340,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testSnapshot(String theFhirVersion) throws IOException {
+	public void testSnapshot(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -326,15 +349,17 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "SNAPSHOT",
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
@@ -346,7 +371,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testPropertiesFile(String theFhirVersion) throws IOException {
+	public void testPropertiesFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		try (FileWriter w = new FileWriter(myPropertiesFileName, false)) {
 			w.append("a=b\n");
 		}
@@ -359,14 +384,16 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myPropertiesFileName,
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "SNAPSHOT",
+				"-u", "http://foo",
+				"-d", myPropertiesFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
@@ -378,7 +405,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testSnapshotLargeFile(String theFhirVersion) throws IOException {
+	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
@@ -389,15 +416,17 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-m", "SNAPSHOT",
-			"-t", "http://localhost:" + myPort,
-			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-m", "SNAPSHOT",
+				"-u", "http://foo",
+				"-d", myConceptsFileName,
+				"-d", myHierarchyFileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
@@ -409,7 +438,7 @@ public class UploadTerminologyCommandTest {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testUploadICD10UsingCompressedFile(String theFhirVersion) throws IOException {
+	public void testUploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -418,13 +447,15 @@ public class UploadTerminologyCommandTest {
 			fail("Unknown FHIR Version param provided: " + theFhirVersion);
 		}
 
-		App.main(new String[]{
-			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-			"-v", theFhirVersion,
-			"-t", "http://localhost:" + myPort,
-			"-u", myICD10URL,
-			"-d", myICD10FileName
-		});
+		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
+			new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", theFhirVersion,
+				"-u", myICD10URL,
+				"-d", myICD10FileName
+			},
+			"-t", theIncludeTls, myBaseRestServerHelper
+		));
 
 		verify(myTermLoaderSvc, times(1)).loadIcd10cm(myDescriptorListCaptor.capture(), any());
 

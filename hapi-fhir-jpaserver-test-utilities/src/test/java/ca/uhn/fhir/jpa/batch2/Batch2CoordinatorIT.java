@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -152,6 +153,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceFetchRequest request = new JobInstanceFetchRequest();
 		request.setPageStart(index);
 		request.setBatchSize(size);
+		request.setSort(Sort.unsorted());
 
 		Page<JobInstance> page;
 		Iterator<JobInstance> iterator;

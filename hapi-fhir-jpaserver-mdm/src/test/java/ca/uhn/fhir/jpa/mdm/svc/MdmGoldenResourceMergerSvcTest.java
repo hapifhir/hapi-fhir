@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -9,8 +11,9 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmLinkHelper;
-import ca.uhn.fhir.jpa.mdm.interceptor.IMdmStorageInterceptor;
+import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,10 +70,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void before() {
 		myFromGoldenPatient = createGoldenPatient();
 		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(fromSourcePatientId));
+		myFromGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), fromSourcePatientId)).getIdAsLong();
 		myToGoldenPatient = createGoldenPatient();
 		IdType toGoldenPatientId = myToGoldenPatient.getIdElement().toUnqualifiedVersionless();
-		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(toGoldenPatientId));
+		myToGoldenPatientPid = runInTransaction(()->myIdHelperService.getPidOrThrowException(RequestPartitionId.allPartitions(), toGoldenPatientId)).getIdAsLong();
 
 		myTargetPatient1 = createPatient();
 		myTargetPatient2 = createPatient();
@@ -121,9 +124,9 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePid(myToGoldenPatientPid)
-			.setSourcePid(myFromGoldenPatientPid)
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
+			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
+			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
 			.setMdmSourceType("Patient")
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(MdmLinkSourceEnum.AUTO);
@@ -228,6 +231,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	private List<MdmLink> getNonRedirectLinksByGoldenResource(Patient theGoldenPatient) {
 		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
 			.filter(link -> !link.isRedirect())
+			.map( link -> (MdmLink) link)
 			.collect(Collectors.toList());
 	}
 
@@ -340,7 +344,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 
 	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount) {
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theResource);
+		List<? extends IMdmLink> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theResource);
 		assertEquals(theCount, links.size());
 	}
 
@@ -359,8 +363,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private void assertResourceHasAutoLinkCount(Patient myToGoldenPatient, int theCount) {
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(myToGoldenPatient);
-		assertEquals(theCount, links.stream().filter(MdmLink::isAuto).count());
+		List<? extends IMdmLink> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(myToGoldenPatient);
+		assertEquals(theCount, links.stream().filter(IMdmLink::isAuto).count());
 	}
 
 	@Test
@@ -456,7 +460,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private MdmLink createMdmLink(Patient theSourcePatient, Patient theTargetPatient) {
-		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourcePatient, theTargetPatient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		return (MdmLink) myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourcePatient, theTargetPatient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 
 	private void populatePatient(Patient theSourcePatient) {

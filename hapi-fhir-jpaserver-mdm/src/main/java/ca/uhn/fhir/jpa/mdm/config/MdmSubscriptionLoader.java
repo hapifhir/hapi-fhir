@@ -26,7 +26,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
@@ -55,8 +54,6 @@ public class MdmSubscriptionLoader {
 	public FhirContext myFhirContext;
 	@Autowired
 	public DaoRegistry myDaoRegistry;
-	@Autowired
-	public IJpaIdHelperService myIdHelperService;
 	@Autowired
 	IChannelNamer myChannelNamer;
 	@Autowired

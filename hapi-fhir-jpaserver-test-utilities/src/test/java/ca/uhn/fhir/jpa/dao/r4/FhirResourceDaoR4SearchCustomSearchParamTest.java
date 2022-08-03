@@ -1160,7 +1160,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	public void testSearchForExtensionTwoDeepDecimal() {
+	public void testSearchForExtensionTwoDeepDecimalR4() {
 		final SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
 		siblingSp.setCode("foobar");

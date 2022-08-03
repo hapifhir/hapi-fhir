@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.cross.ResourceLookup;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
@@ -44,6 +46,8 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -589,9 +593,9 @@ public class IdHelperService implements IIdHelperService {
 	}
 
 	@Override
-	public Map<Long, Optional<String>> translatePidsToForcedIds(Set<Long> thePids) {
+	public PersistentIdToForcedIdMap translatePidsToForcedIds(Set<ResourcePersistentId> theResourceIds) {
 		assert myDontCheckActiveTransactionForUnitTest || TransactionSynchronizationManager.isSynchronizationActive();
-
+		Set<Long> thePids = theResourceIds.stream().map(t -> t.getIdAsLong()).collect(Collectors.toSet());
 		Map<Long, Optional<String>> retVal = new HashMap<>(myMemoryCacheService.getAllPresent(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, thePids));
 
 		List<Long> remainingPids = thePids
@@ -618,8 +622,13 @@ public class IdHelperService implements IIdHelperService {
 			retVal.put(nextResourcePid, Optional.empty());
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, nextResourcePid, Optional.empty());
 		}
-
-		return retVal;
+		Map<ResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
+		retVal.forEach(
+			(k, v) -> {
+				convertRetVal.put(new ResourcePersistentId(k), v);
+			}
+		);
+		return new PersistentIdToForcedIdMap(convertRetVal);
 	}
 
 	/**
@@ -663,5 +672,74 @@ public class IdHelperService implements IIdHelperService {
 
 	public static boolean isValidPid(String theIdPart) {
 		return StringUtils.isNumeric(theIdPart);
+	}
+
+	@Override
+	@Nonnull
+	public List<ResourcePersistentId> getPidsOrThrowException(@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds) {
+		List<ResourcePersistentId> resourcePersistentIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, theIds);
+		return resourcePersistentIds;
+	}
+
+	@Override
+	@Nullable
+	public ResourcePersistentId getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
+		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
+		if (retVal.getId() == null) {
+			IIdType id = theResource.getIdElement();
+			try {
+				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
+			} catch (ResourceNotFoundException e) {
+				return null;
+			}
+		}
+		return retVal;
+	}
+
+	@Override
+	@Nonnull
+	public ResourcePersistentId getPidOrThrowException(@Nonnull RequestPartitionId theRequestPartitionId, IIdType theId) {
+		List<IIdType> ids = Collections.singletonList(theId);
+		List<ResourcePersistentId> resourcePersistentIds = resolveResourcePersistentIdsWithCache(theRequestPartitionId, ids);
+		return resourcePersistentIds.get(0);
+	}
+
+	@Override
+	@Nonnull
+	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
+		Object theResourcePID = theResource.getUserData(RESOURCE_PID);
+		if (theResourcePID == null) {
+			throw new IllegalStateException(Msg.code(2108) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId()));
+		}
+		return new ResourcePersistentId(theResourcePID);
+	}
+
+	@Override
+	public IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType) {
+		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getIdAsLong());
+		if (!optionalResource.isPresent()) {
+			throw new ResourceNotFoundException(Msg.code(2107) + "Requested resource not found");
+		}
+		return optionalResource.get().getIdDt().toVersionless();
+	}
+
+	/**
+	 * Given a set of PIDs, return a set of public FHIR Resource IDs.
+	 * This function will resolve a forced ID if it resolves, and if it fails to resolve to a forced it, will just return the pid
+	 * Example:
+	 * Let's say we have Patient/1(pid == 1), Patient/pat1 (pid == 2), Patient/3 (pid == 3), their pids would resolve as follows:
+	 * <p>
+	 * [1,2,3] -> ["1","pat1","3"]
+	 *
+	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
+	 * @return A Set of strings representing the FHIR IDs of the pids.
+	 */
+	@Override
+	public Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids) {
+		assert TransactionSynchronizationManager.isSynchronizationActive();
+
+		PersistentIdToForcedIdMap pidToForcedIdMap = translatePidsToForcedIds(thePids);
+
+		return pidToForcedIdMap.getResolvedResourceIds();
 	}
 }
