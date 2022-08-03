@@ -1096,9 +1096,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertNotFind("when gt unitless", "/Observation?value-quantity=0.7");
 					assertNotFind("when gt", "/Observation?value-quantity=0.7||mmHg");
 
-					assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
-					assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
-
 					assertFind("when eq unitless", "/Observation?value-quantity=0.6");
 					assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
 				}
@@ -1160,7 +1157,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertFind("when lt", "/Observation?value-quantity=le0.7");
 				}
 			}
-
 
 			@Nested
 			public class CombinedQueries {
@@ -1288,8 +1284,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 					Observation obs2 = getObservation();
-					addComponentWithCodeAndQuantity(obs2, "8480-6",307);
-					addComponentWithCodeAndQuantity(obs2, "8462-4",260);
+					addComponentWithCodeAndQuantity(obs2, "8480-6", 307);
+					addComponentWithCodeAndQuantity(obs2, "8462-4", 260);
 
 					myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1368,6 +1364,41 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 			}
 
+			@Nested
+			public class SpecTestCases {
+				@Test
+				void specCase1() {
+					String id1 = withObservationWithValueQuantity(5.34).getIdPart();
+					String id2 = withObservationWithValueQuantity(5.36).getIdPart();
+					String id3 = withObservationWithValueQuantity(5.40).getIdPart();
+					String id4 = withObservationWithValueQuantity(5.44).getIdPart();
+					String id5 = withObservationWithValueQuantity(5.46).getIdPart();
+					// GET [base]/Observation?value-quantity=5.4 :: 5.4(+/-0.05)
+					assertFindIds("when le", Set.of(id2, id3, id4), "/Observation?value-quantity=5.4");
+				}
+
+				@Test
+				void specCase2() {
+					String id1 = withObservationWithValueQuantity(0.005394).getIdPart();
+					String id2 = withObservationWithValueQuantity(0.005395).getIdPart();
+					String id3 = withObservationWithValueQuantity(0.0054).getIdPart();
+					String id4 = withObservationWithValueQuantity(0.005404).getIdPart();
+					String id5 = withObservationWithValueQuantity(0.005406).getIdPart();
+					// GET [base]/Observation?value-quantity=5.40e-3 :: 0.0054(+/-0.000005)
+					assertFindIds("when le", Set.of(id2, id3, id4), "/Observation?value-quantity=5.40e-3");
+				}
+
+				@Test
+				void specCase6() {
+					String id1 = withObservationWithValueQuantity(4.85).getIdPart();
+					String id2 = withObservationWithValueQuantity(4.86).getIdPart();
+					String id3 = withObservationWithValueQuantity(5.94).getIdPart();
+					String id4 = withObservationWithValueQuantity(5.95).getIdPart();
+					// GET [base]/Observation?value-quantity=ap5.4 :: 5.4(+/- 10%) :: [4.86 ... 5.94]
+					assertFindIds("when le", Set.of(id2, id3), "/Observation?value-quantity=ap5.4");
+				}
+
+			}
 		}
 
 
@@ -1398,8 +1429,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 					assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
-					assertFind("when gt UCUM 10*3/L", "/Observation?value-quantity=eq58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when le UCUM 10*3/L", "/Observation?value-quantity=eq63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
 					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -2348,7 +2377,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		public class TestSpecCasesUsingSignificantFigures {
 
 			@Test
-			void NumberSpecCase1() {
+			void specCase1() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
@@ -2358,7 +2387,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase2() {
+			void specCase2() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99.994).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(99.996).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(100.004).getIdPart();
@@ -2368,7 +2397,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase3() {
+			void specCase3() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(40).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(55).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(140).getIdPart();
@@ -2379,7 +2408,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase4() {
+			void specCase4() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
 				// [parameter]=lt100	Values that are less than exactly 100
@@ -2387,7 +2416,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase5() {
+			void specCase5() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
@@ -2396,7 +2425,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase6() {
+			void specCase6() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
 				// [parameter]=gt100	Values that are greater than exactly 100
@@ -2404,7 +2433,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase7() {
+			void specCase7() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(101).getIdPart();
@@ -2413,7 +2442,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 			@Test
-			void NumberSpecCase8() {
+			void specCase8() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
 				String raId3 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
@@ -2421,38 +2450,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				String raId5 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
 				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 99.5 to 100.5)
 				assertFindIds("when le", Set.of(raId1, raId5), "/RiskAssessment?probability=ne100");
-			}
-
-			@Test
-			void QuantitySpecCase1() {
-				String raId1 = createRiskAssessmentWithPredictionProbability(5.34).getIdPart();
-				String raId2 = createRiskAssessmentWithPredictionProbability(5.36).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(5.40).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(5.44).getIdPart();
-				String raId5 = createRiskAssessmentWithPredictionProbability(5.46).getIdPart();
-				// GET [base]/Observation?value-quantity=5.4 :: 5.4(+/-0.05)
-				assertFindIds("when le", Set.of(raId2, raId3, raId4), "/RiskAssessment?probability=5.4");
-			}
-
-			@Test
-			void QuantitySpecCase2() {
-				String raId1 = createRiskAssessmentWithPredictionProbability(0.005394).getIdPart();
-				String raId2 = createRiskAssessmentWithPredictionProbability(0.005395).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(0.0054).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(0.005404).getIdPart();
-				String raId5 = createRiskAssessmentWithPredictionProbability(0.005406).getIdPart();
-				// GET [base]/Observation?value-quantity=5.40e-3 :: 0.0054(+/-0.000005)
-				assertFindIds("when le", Set.of(raId2, raId3, raId4), "/RiskAssessment?probability=5.40e-3");
-			}
-
-			@Test
-			void QuantitySpecCase6() {
-				String raId1 = createRiskAssessmentWithPredictionProbability(4.85).getIdPart();
-				String raId2 = createRiskAssessmentWithPredictionProbability(4.86).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(5.94).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(5.95).getIdPart();
-				// GET [base]/Observation?value-quantity=ap5.4 :: 5.4(+/- 10%) :: [4.86 ... 5.94]
-				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=ap5.4");
 			}
 
 		}
