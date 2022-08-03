@@ -283,7 +283,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
-		throw new UnsupportedOperationException(Msg.code(212));
+		throw new UnsupportedOperationException(Msg.code(2128));
 	}
 
 	@Override
@@ -468,7 +468,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public boolean hasBinaryKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2124));
+		throw new UnsupportedOperationException(Msg.code(2128));
 	}
 
 	@Override

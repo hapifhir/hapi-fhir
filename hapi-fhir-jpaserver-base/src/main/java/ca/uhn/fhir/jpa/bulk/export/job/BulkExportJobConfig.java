@@ -30,8 +30,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class BulkExportJobConfig {
-	public static final int CHUNK_SIZE = 100;
-
 
 	@Bean
 	public MdmExpansionCacheSvc mdmExpansionCacheSvc() {
