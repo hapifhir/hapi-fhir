@@ -1504,6 +1504,29 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertNotFind("when one predicate matches each object", "/Observation" +
 						"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
+
+				@Nested
+				public class TemperatureUnitConversions {
+
+					@Test
+					public void celsiusToFahrenheit() {
+						withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel" );
+
+						assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|[degF]");
+						assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|[degF]");
+						assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|[degF]");
+					}
+
+					@Test
+					public void fahrenheitToCelsius() {
+						withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "[degF]" );
+
+						assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 38.1 Cel", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 36.9 Cel", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|Cel");
+					}
+				}
+
 			}
 
 

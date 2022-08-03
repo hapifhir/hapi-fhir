@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.model.util;
 
+import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.CELSIUS_KELVIN_DIFF;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
+import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
+import org.fhir.ucum.UcumException;
 import org.junit.jupiter.api.Test;
 
 public class UcumServiceUtilTest {
@@ -54,10 +58,31 @@ public class UcumServiceUtilTest {
 	}
 	
 	@Test
-	public void testUcumDegreeFahrenheit() {
+	public void testUcumDegreeFahrenheit() throws UcumException {
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(99.82), "[degF]");
+		Decimal converted = canonicalPair.getValue();
+		Decimal expectedApprox = new Decimal(Double.toString(310.82778f));
+		Decimal maxDifference = new Decimal(Float.toString(0.000_01f));
+//		System.out.println("expected: " + expectedApprox);
+//		System.out.println("converted: " + converted);
+//		System.out.println("diff: " + converted.subtract(expectedApprox));
+		assertTrue( converted.equals(expectedApprox, maxDifference));
+		assertEquals("K", canonicalPair.getCode());
 
-		assertEquals(null, UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(99.82), "[degF]"));
-		
+	}
+
+	@Test
+	public void testUcumDegreeFCelsius() throws UcumException {
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(73.54), "Cel");
+		Decimal converted = canonicalPair.getValue();
+		Decimal expectedApprox = new Decimal(Double.toString(73.54 + CELSIUS_KELVIN_DIFF));
+		Decimal maxDifference = new Decimal(Float.toString(0.000_01f));
+//		System.out.println("expected: " + expectedApprox);
+//		System.out.println("converted: " + converted);
+//		System.out.println("diff: " + converted.subtract(expectedApprox));
+		assertTrue( converted.equals(expectedApprox, maxDifference));
+		assertEquals("K", canonicalPair.getCode());
+
 	}
 
 }
