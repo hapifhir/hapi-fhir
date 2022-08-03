@@ -1402,8 +1402,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 
-
-
 		@Nested
 		public class QuantityNormalizedSearch {
 
