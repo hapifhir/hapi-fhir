@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.RequestDetailsHelper;
@@ -101,7 +102,11 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 
 	protected Bundle parseBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
-		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
+		IParser jsonParser = myFhirContext.newJsonParser();
+		LenientErrorHandler lenientErrorHandler = new LenientErrorHandler();
+		lenientErrorHandler.setErrorOnInvalidValue(false);
+		jsonParser.setParserErrorHandler(lenientErrorHandler);
+		Bundle bundle = (Bundle) jsonParser.parseResource(json);
 		return bundle;
 	}
 
