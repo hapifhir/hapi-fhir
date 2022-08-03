@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+
 public class ResourceLinkPredicateBuilderTest {
 
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
@@ -34,23 +36,23 @@ public class ResourceLinkPredicateBuilderTest {
 
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient",
-			1l, 2l);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(),
+			1l, 2l); //fixme
 
 		Assertions.assertTrue(condition instanceof InCondition);
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient",
-			1l);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(),
+			1l); //fixme
 
 		Assertions.assertTrue(condition instanceof InCondition);
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient",
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), //fixme
 			new Long[0]);
 
 		Assertions.assertTrue(condition instanceof BinaryCondition);

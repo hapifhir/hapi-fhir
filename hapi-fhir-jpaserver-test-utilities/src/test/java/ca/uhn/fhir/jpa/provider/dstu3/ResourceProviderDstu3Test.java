@@ -1724,6 +1724,153 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testEverythingPatientInstanceWithTypeParameter() {
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeAndIdParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
+		//Test for only patient 1
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
+		parameters.addParameter().setName(Constants.PARAM_ID).setValue(new IdType(p1Id.getIdPart()));
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids, not(hasItem(p2Id)));
+		assertThat(ids, not(hasItem(o2Id)));
+	}
+
+	private IIdType createOrganization(String methodName, String s) {
+		Organization o1 = new Organization();
+		o1.setName(methodName + s);
+		return ourClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
+		Patient p1 = new Patient();
+		p1.addName().setFamily(theMethodName + theIndex);
+		p1.getManagingOrganization().setReferenceElement(theOrganizationId);
+		IIdType p1Id = ourClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
+		return p1Id;
+	}
+
+	private IIdType createConditionForPatient(String theMethodName, String theIndex, IIdType thePatientId) {
+		Condition c = new Condition();
+		c.addIdentifier().setValue(theMethodName + theIndex);
+		if (thePatientId != null) {
+			c.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType cId = ourClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+		return cId;
+	}
+
+	private IIdType createMedicationRequestForPatient(IIdType thePatientId, String theIndex) {
+		MedicationRequest m = new MedicationRequest();
+		m.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			m.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType mId = ourClient.create().resource(m).execute().getId().toUnqualifiedVersionless();
+		return mId;
+	}
+
+	private IIdType createObservationForPatient(IIdType thePatientId, String theIndex) {
+		Observation o = new Observation();
+		o.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			o.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType oId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		return oId;
+	}
+
+	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
 		String methodName = "testEverythingWithLastUpdatedAndSort";
 
