@@ -35,9 +35,11 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setLastNEnabled(true);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
-		ourLog.info("enableAdvancedHSearchIndexing {} {}", myDaoConfig.isAdvancedHSearchIndexing(), myDaoConfig.isStoreResourceInHSearchIndex());
+		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
+
 	}
 
 	@AfterEach

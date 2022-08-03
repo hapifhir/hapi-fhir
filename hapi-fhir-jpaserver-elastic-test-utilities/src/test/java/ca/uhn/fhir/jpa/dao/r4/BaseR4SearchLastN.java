@@ -28,8 +28,9 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
 @ContextConfiguration(classes=TestR4ConfigWithElasticHSearch.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseR4SearchLastN.class);
 
@@ -110,18 +112,18 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
 
-	@BeforeEach
+	@BeforeAll
 	public void beforeCreateTestPatientsAndObservations() throws IOException {
 		ourLog.info("setup Patients and Observations");
 		myDaoConfig.setLastNEnabled(true);
+		// enabled to also create extended lucene index during creation of test data
+		boolean hsearchSaved = myDaoConfig.isAdvancedHSearchIndexing();
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
 
-		// enabled to also create extended lucene index during creation of test data
-		boolean hsearchSaved = myDaoConfig.isAdvancedHSearchIndexing();
-		myDaoConfig.setAdvancedHSearchIndexing(true);
 		Patient pt = new Patient();
 		pt.addName().setFamily("Lastn").addGiven("Arthur");
 		patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
@@ -212,14 +214,14 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	}
 
 	@Test
-	public void testLastNNoPatients() throws InterruptedException {
+	public void testLastNNoPatients() {
+		ourLog.info("testLastNNoPatients lastn {} hsearch {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
 
 		SearchParameterMap params = new SearchParameterMap();
 
 		params.setLastN(true);
 		Map<String, String[]> requestParameters = new HashMap<>();
 		when(mySrd.getParameters()).thenReturn(requestParameters);
-		Thread.sleep(1);
 
 		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
 

@@ -49,14 +49,14 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+
 	<logger name="org.elasticsearch.client" additivity="true" level="trace"/>
 	<!--
 	<logger name="ca.uhn.fhir.jpa.model.search" additivity="false" level="debug"/>
 	<logger name="org.elasticsearch.client" additivity="true" level="trace"/>
-	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace"/>
-	<logger name="org.hibernate.search" level="TRACE"/>
-	<logger name="org.hibernate.search.query" level="TRACE"/>
-	<logger name="org.hibernate.search.elasticsearch.request" level="TRACE"/>
+	<logger name="org.hibernate.search" additivity="false" level="TRACE"/>
+	<logger name="org.hibernate.search.query" additivity="false" level="TRACE"/>
+	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="TRACE"/>
 	 -->
 	<!-- See https://docs.jboss.org/hibernate/stable/search/reference/en-US/html_single/#backend-lucene-io-writer-infostream for lucene logging
 	<logger name="org.hibernate.search.backend.lucene.infostream" level="TRACE"/>  -->
