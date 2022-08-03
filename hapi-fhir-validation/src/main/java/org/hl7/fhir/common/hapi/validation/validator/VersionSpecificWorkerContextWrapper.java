@@ -131,12 +131,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean hasBinaryKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2119));
+		throw new UnsupportedOperationException(Msg.code(2126));
 	}
 
 	@Override
 	public byte[] getBinaryForKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2120));
+		throw new UnsupportedOperationException(Msg.code(2127));
 	}
 
 	@Override
