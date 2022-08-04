@@ -2,4 +2,6 @@
 type: fix
 issue: 3837
 jira: SMILE-4467
-title: "Fix the query to include substances."
+title: "Method for finding the path of the included substances is fixed. 
+And the query result when using '_include' will contain the correct included substances now."
+
