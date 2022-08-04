@@ -156,6 +156,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	public static final String BASE_RESOURCE_NAME = "resource";
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -984,11 +985,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
-			theBase
-				.stream()
-				.map(t -> t + "?")
-				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-				.forEach(params::addPartitionedUrl);
+			if (!isCommonSearchParam(theBase)) {
+				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
+			}
 
 			ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
 			RequestPartitionId requestPartition = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null, details);
@@ -1004,6 +1003,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		mySearchParamRegistry.requestRefresh();
+	}
+
+	private void addAllResourcesTypesToReindex(List<String> theBase, RequestDetails theRequestDetails, ReindexJobParameters params) {
+		theBase
+			.stream()
+			.map(t -> t + "?")
+			.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+			.forEach(params::addPartitionedUrl);
+	}
+
+	private boolean isCommonSearchParam(List<String> theBase) {
+		// If the base contains the special resource "Resource", this is a common SP that applies to all resources
+		return theBase.stream()
+			.map(String::toLowerCase)
+			.anyMatch(BASE_RESOURCE_NAME::equals);
 	}
 
 	@Override
