@@ -1,30 +1,38 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
-import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -32,27 +40,25 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -63,23 +69,52 @@ import static org.mockito.Mockito.verify;
 public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportR4Test.class);
+
 	@Autowired
 	private IBulkDataImportSvc mySvc;
 	@Autowired
 	private IBulkImportJobDao myBulkImportJobDao;
 	@Autowired
 	private IBulkImportJobFileDao myBulkImportJobFileDao;
+
 	@Autowired
-	private JobExplorer myJobExplorer;
+	private IJobCoordinator myJobCoordinator;
+
 	@Autowired
-	private JobRegistry myJobRegistry;
+	private Batch2JobHelper myBatch2JobHelper;
+
 	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private JobDefinitionRegistry myJobDefinitionRegistry;
+
+	@Autowired
+	private IChannelFactory myChannelFactory;
+
+	private LinkedBlockingChannel myWorkChannel;
+
+	@BeforeEach
+	public void before() {
+		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
+	}
 
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof IAnonymousInterceptor);
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyFailAfterThreeCreatesInterceptor);
+	}
+
+	/**
+	 * Sets up a message retry interceptor for when errors are encountered
+	 */
+	private void setupRetryFailures() {
+		myWorkChannel.addInterceptor(new ExecutorChannelInterceptor() {
+			@Override
+			public void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler, Exception ex) {
+				if (ex != null) {
+					ourLog.info("Work channel received exception {}", ex.getMessage());
+					channel.send(message);
+				}
+			}
+		});
 	}
 
 	@Order(-1)
@@ -91,37 +126,33 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		int fileCount = 5;
 		List<BulkImportJobFileJson> files = createInputFiles(transactionsPerFile, fileCount);
 
-		BulkImportJobJson job = new BulkImportJobJson();
-		job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
-		job.setJobDescription("This is the job description");
-		job.setBatchSize(3);
-		String jobId = mySvc.createNewJob(job, files);
-		mySvc.markJobAsReadyForActivation(jobId);
+		try {
+			setupRetryFailures();
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+			BulkImportJobJson job = new BulkImportJobJson();
+			job.setProcessingMode(JobFileRowProcessingModeEnum.FHIR_TRANSACTION);
+			job.setJobDescription("This is the job description");
+			job.setBatchSize(3);
+			String jobId = mySvc.createNewJob(job, files);
+			mySvc.markJobAsReadyForActivation(jobId);
 
-		String[] jobNames = new String[]{BULK_IMPORT_JOB_NAME};
-		assert jobNames.length > 0;
+			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+			assertTrue(activateJobOutcome.isActivated);
 
-		await().until(() -> runInTransaction(() -> {
-			JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
-			JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
-			ourLog.info("Exit status: {}", jobExecution.getExitStatus());
-			return jobExecution.getExitStatus().getExitCode().equals(ExitStatus.FAILED.getExitCode());
-		}));
+			JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(activateJobOutcome.jobId,
+				60,
+				StatusEnum.FAILED);
 
-		JobInstance jobInstance = myJobExplorer.getLastJobInstance(BULK_IMPORT_JOB_NAME);
-		JobExecution jobExecution = myJobExplorer.getLastJobExecution(jobInstance);
-		List<StepExecution> failedExecutions = jobExecution
-			.getStepExecutions()
-			.stream()
-			.filter(t -> t.getExitStatus().getExitCode().equals("FAILED"))
-			.collect(Collectors.toList());
-
-		assertEquals(2, failedExecutions.size());
-		assertThat(failedExecutions.get(1).getStepName(), containsString(":File With Description"));
-
+			HashSet<StatusEnum> failed = new HashSet<>();
+			failed.add(StatusEnum.FAILED);
+			failed.add(StatusEnum.ERRORED);
+			assertTrue(failed.contains(instance.getStatus()), instance.getStatus() + " is the actual status");
+			String errorMsg = instance.getErrorMessage();
+			assertTrue(errorMsg.contains("Too many errors"), errorMsg);
+			assertTrue(errorMsg.contains("Too many errors"), MyFailAfterThreeCreatesInterceptor.ERROR_MESSAGE);
+		} finally {
+			myWorkChannel.clearInterceptorsForUnitTest();
+		}
 	}
 
 	@Order(0)
@@ -138,20 +169,12 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+		assertTrue(activateJobOutcome.isActivated);
 
-		List<JobExecution> executions = awaitAllBulkImportJobCompletion();
-		assertEquals("testFlow_TransactionRows", executions.get(0).getJobParameters().getString(BatchConstants.JOB_DESCRIPTION));
-
-		runInTransaction(() -> {
-			List<BulkImportJobEntity> jobs = myBulkImportJobDao.findAll();
-			assertEquals(0, jobs.size());
-
-			List<BulkImportJobFileEntity> jobFiles = myBulkImportJobFileDao.findAll();
-			assertEquals(0, jobFiles.size());
-
-		});
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
+		assertNotNull(instance);
+		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous());
 		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
@@ -176,10 +199,11 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		String jobId = mySvc.createNewJob(job, files);
 		mySvc.markJobAsReadyForActivation(jobId);
 
-		boolean activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome);
+		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
+		assertTrue(activateJobOutcome.isActivated);
 
-		awaitAllBulkImportJobCompletion();
+		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
+		assertNotNull(instance);
 
 		ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 		verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
@@ -218,15 +242,11 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		return files;
 	}
 
-	@Order(3)
 	@Test
-	public void testJobsAreRegisteredWithJobRegistry() throws NoSuchJobException {
-		Job job = myJobRegistry.getJob(BULK_IMPORT_JOB_NAME);
-		assertEquals(true, job.isRestartable());
-	}
+	public void testJobsAreRegisteredWithJobRegistry() {
+		Optional<JobDefinition<?>> jobDefinitionOp = myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
 
-	protected List<JobExecution> awaitAllBulkImportJobCompletion() {
-		return myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.BULK_IMPORT_JOB_NAME);
+		assertTrue(jobDefinitionOp.isPresent());
 	}
 
 	@Interceptor

@@ -420,7 +420,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				.select(this::buildResourceSelectClause)
 				.where(f -> buildWhereClause(f, theResourceType, theParams, null));
 
-		if (theParams.getSort() != null && offset == 0) {
+		if (theParams.getSort() != null) {
 			query.sort(
 				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
 		}
