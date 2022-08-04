@@ -61,10 +61,9 @@ public class UcumServiceUtilTest {
 	
 	@Test
 	public void testUcumDegreeFahrenheit() throws UcumException {
-		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL,
-			new BigDecimal(99.82).round(new MathContext(4, RoundingMode.HALF_EVEN)), "[degF]");
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal("99.82"), "[degF]");
 		Decimal converted = canonicalPair.getValue();
-		Decimal expected = new Decimal(Double.toString(3.108278e2));
+		Decimal expected = new Decimal("310.8278");
 //		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
 		assertTrue( converted.equals(expected));
@@ -74,15 +73,17 @@ public class UcumServiceUtilTest {
 
 	@Test
 	public void testUcumDegreeCelsius() throws UcumException {
-		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL,
-			new BigDecimal(73.54).round(new MathContext(4, RoundingMode.HALF_EVEN)), "Cel");
+		// round it up to set expected decimal precision
+		BigDecimal roundedCelsiusKelvinDiff = new BigDecimal(CELSIUS_KELVIN_DIFF)
+			.round(new MathContext(5, RoundingMode.HALF_UP));
+
+		Pair canonicalPair = UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal("73.54"), "Cel");
 		Decimal converted = canonicalPair.getValue();
-		Decimal expectedApprox = new Decimal(Double.toString(73.54 + CELSIUS_KELVIN_DIFF) );
-		Decimal maxDifference = new Decimal(Float.toString(0.000_01f));
-//		System.out.println("expected: " + expectedApprox);
+		Decimal expected = new Decimal("73.54").add(new Decimal(roundedCelsiusKelvinDiff.toString()));
+//		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
 //		System.out.println("diff: " + converted.subtract(expectedApprox));
-		assertTrue( converted.equals(expectedApprox, maxDifference));
+		assertTrue( converted.equals(expected));
 		assertEquals("K", canonicalPair.getCode());
 
 	}
