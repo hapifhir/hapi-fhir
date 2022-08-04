@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
+import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -368,10 +368,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			try {
 				return direct.get();
 
-			} catch (Exception theE) {
-				if (! theE.getMessage().startsWith(ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR)) {
-					throw theE;
-				}
+			} catch (ResourceNotFoundInIndexException theE) {
 				// some resources were not found in index, so we will inform this and resort to JPA search
 				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 			}

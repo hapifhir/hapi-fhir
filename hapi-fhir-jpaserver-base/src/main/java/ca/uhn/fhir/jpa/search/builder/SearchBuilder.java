@@ -43,7 +43,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
-import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
+import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -119,7 +119,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -958,10 +957,7 @@ public class SearchBuilder implements ISearchBuilder {
 				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
 				return;
 
-			} catch (Exception theE) {
-				if (! theE.getMessage().startsWith(ExtendedHSearchResourceProjection.RESOURCE_NOT_STORED_ERROR)) {
-					throw theE;
-				}
+			} catch (ResourceNotFoundInIndexException theE) {
 				// some resources were not found in index, so we will inform this and resort to JPA search
 				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
 			}
