@@ -1,0 +1,4 @@
+type: fix
+issue: 3878
+title: "Previously, if an intermediate step of a gated batch job produced no output data, an exception would be thrown
+and processing of the step would abort, leaving the batch job in an unrecoverable state. This has been fixed."
