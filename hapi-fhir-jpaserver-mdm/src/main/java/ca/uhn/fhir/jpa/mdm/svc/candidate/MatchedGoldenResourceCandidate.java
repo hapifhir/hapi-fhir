@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -34,7 +35,7 @@ public class MatchedGoldenResourceCandidate {
 		myMdmMatchOutcome = theMdmMatchOutcome;
 	}
 
-	public MatchedGoldenResourceCandidate(ResourcePersistentId theGoldenResourcePid, MdmLink theMdmLink) {
+	public MatchedGoldenResourceCandidate(ResourcePersistentId theGoldenResourcePid, IMdmLink theMdmLink) {
 		myCandidateGoldenResourcePid = theGoldenResourcePid;
 		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
 	}

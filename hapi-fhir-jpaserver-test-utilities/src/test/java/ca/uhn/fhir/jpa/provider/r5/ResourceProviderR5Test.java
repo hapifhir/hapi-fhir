@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static com.healthmarketscience.sqlbuilder.Conditions.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -18,16 +20,22 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CodeableConcept;
+import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.IdType;
+import org.hl7.fhir.r5.model.Medication;
+import org.hl7.fhir.r5.model.MedicationRequest;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r5.model.OperationOutcome;
+import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.junit.jupiter.api.AfterEach;
@@ -231,7 +239,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			// test will fail and the line above should be restored
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, respString);
 			assertEquals(1, oo.getIssue().size());
-			assertEquals("The value provided ('5.0.0-snapshot1') is not in the value set 'FHIRVersion' (http://hl7.org/fhir/ValueSet/FHIR-version|4.6.0), and a code is required from this value set) (error message = Unknown code '5.0.0-snapshot1' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/FHIR-version')", oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'FHIRVersion'"));
 
 		}
 	}
@@ -363,7 +371,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		
 		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
-		List<IdType> list = toUnqualifiedVersionlessIds(found);
+		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
 		assertEquals(oid3, list.get(0));
 		assertEquals(oid1, list.get(1));
@@ -371,8 +379,155 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		assertEquals(oid2, list.get(3));
 	}
 
-	protected List<IdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IdType> retVal = new ArrayList<>();
+	@Test
+	public void testEverythingPatientInstanceWithTypeParameter() {
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, Matchers.not(hasItem(o1Id)));
+		assertThat(ids, Matchers.not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, Matchers.not(hasItem(o1Id)));
+		assertThat(ids, Matchers.not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeAndIdParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
+		//Test for only patient 1
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+		parameters.addParameter("_id", p1Id.getIdPart());
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, Matchers.not(hasItem(o1Id)));
+		assertThat(ids, Matchers.not(hasItem(m1Id)));
+		assertThat(ids, Matchers.not(hasItem(p2Id)));
+		assertThat(ids, Matchers.not(hasItem(o2Id)));
+	}
+
+	private IIdType createOrganization(String methodName, String s) {
+		Organization o1 = new Organization();
+		o1.setName(methodName + s);
+		return myClient.create().resource(o1).execute().getId().toUnqualifiedVersionless();
+	}
+
+	public IIdType createPatientWithIndexAtOrganization(String theMethodName, String theIndex, IIdType theOrganizationId) {
+		Patient p1 = new Patient();
+		p1.addName().setFamily(theMethodName + theIndex);
+		p1.getManagingOrganization().setReferenceElement(theOrganizationId);
+		IIdType p1Id = myClient.create().resource(p1).execute().getId().toUnqualifiedVersionless();
+		return p1Id;
+	}
+
+	public IIdType createConditionForPatient(String theMethodName, String theIndex, IIdType thePatientId) {
+		Condition c = new Condition();
+		c.addIdentifier().setValue(theMethodName + theIndex);
+		if (thePatientId != null) {
+			c.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
+		return cId;
+	}
+
+	private IIdType createMedicationRequestForPatient(IIdType thePatientId, String theIndex) {
+		MedicationRequest m = new MedicationRequest();
+		m.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			m.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType mId = myClient.create().resource(m).execute().getId().toUnqualifiedVersionless();
+		return mId;
+	}
+
+	private IIdType createObservationForPatient(IIdType thePatientId, String theIndex) {
+		Observation o = new Observation();
+		o.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			o.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		return oId;
+	}
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
 			if (next.getResource()!= null) {
 				retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());

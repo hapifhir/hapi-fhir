@@ -17,6 +17,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -37,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -44,6 +47,7 @@ import org.springframework.messaging.support.ExecutorChannelInterceptor;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -97,6 +101,80 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
+	}
+
+	@Test
+	public void fetchAllJobInstances_withValidInput_returnsPage() {
+		int maxJobsToSave = 10;
+
+		// create a job
+		// step 1
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			return RunOutcome.SUCCESS;
+		};
+		// final step
+		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> {
+			return RunOutcome.SUCCESS;
+		};
+		// job definition
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"Test first step",
+				FirstStepOutput.class,
+				first
+			)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Test last step",
+				last
+			)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+
+		// start a number of jobs
+		List<String> jobIds = new ArrayList<>();
+		for (int i = 0; i < maxJobsToSave; i++) {
+			JobInstanceStartRequest request = buildRequest(jobId);
+			Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+			jobIds.add(response.getJobId());
+		}
+
+		// run the test
+		// see if we can fetch jobs
+		int index = 0;
+		int size = 2;
+		JobInstanceFetchRequest request = new JobInstanceFetchRequest();
+		request.setPageStart(index);
+		request.setBatchSize(size);
+		request.setSort(Sort.unsorted());
+
+		Page<JobInstance> page;
+		Iterator<JobInstance> iterator;
+		int pageIndex = 0;
+		List<String> fetched = new ArrayList<>();
+		do {
+			// create / update our request
+			request.setPageStart(pageIndex);
+			page = myJobCoordinator.fetchAllJobInstances(request);
+			iterator = page.iterator();
+
+			while (iterator.hasNext()) {
+				JobInstance next = iterator.next();
+				assertTrue(jobIds.contains(next.getInstanceId()));
+				fetched.add(next.getInstanceId());
+			}
+
+			pageIndex++;
+		} while (page.hasNext());
+
+		assertEquals(maxJobsToSave, fetched.size());
 	}
 
 	@Test

@@ -1098,9 +1098,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertNotFind("when gt unitless", "/Observation?value-quantity=0.7");
 					assertNotFind("when gt", "/Observation?value-quantity=0.7||mmHg");
 
-					assertFind("when a little gt - default is approx", "/Observation?value-quantity=0.599");
-					assertFind("when a little lt - default is approx", "/Observation?value-quantity=0.601");
-
 					assertFind("when eq unitless", "/Observation?value-quantity=0.6");
 					assertFind("when eq with units", "/Observation?value-quantity=0.6||mm[Hg]");
 				}
@@ -1162,7 +1159,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertFind("when lt", "/Observation?value-quantity=le0.7");
 				}
 			}
-
 
 			@Nested
 			public class CombinedQueries {
@@ -1290,8 +1286,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					IIdType obs1Id = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
 					Observation obs2 = getObservation();
-					addComponentWithCodeAndQuantity(obs2, "8480-6",307);
-					addComponentWithCodeAndQuantity(obs2, "8462-4",260);
+					addComponentWithCodeAndQuantity(obs2, "8480-6", 307);
+					addComponentWithCodeAndQuantity(obs2, "8462-4", 260);
 
 					myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -1370,6 +1366,41 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 			}
 
+			@Nested
+			public class SpecTestCases {
+				@Test
+				void specCase1() {
+					String id1 = withObservationWithValueQuantity(5.34).getIdPart();
+					String id2 = withObservationWithValueQuantity(5.36).getIdPart();
+					String id3 = withObservationWithValueQuantity(5.40).getIdPart();
+					String id4 = withObservationWithValueQuantity(5.44).getIdPart();
+					String id5 = withObservationWithValueQuantity(5.46).getIdPart();
+					// GET [base]/Observation?value-quantity=5.4 :: 5.4(+/-0.05)
+					assertFindIds("when le", Set.of(id2, id3, id4), "/Observation?value-quantity=5.4");
+				}
+
+				@Test
+				void specCase2() {
+					String id1 = withObservationWithValueQuantity(0.005394).getIdPart();
+					String id2 = withObservationWithValueQuantity(0.005395).getIdPart();
+					String id3 = withObservationWithValueQuantity(0.0054).getIdPart();
+					String id4 = withObservationWithValueQuantity(0.005404).getIdPart();
+					String id5 = withObservationWithValueQuantity(0.005406).getIdPart();
+					// GET [base]/Observation?value-quantity=5.40e-3 :: 0.0054(+/-0.000005)
+					assertFindIds("when le", Set.of(id2, id3, id4), "/Observation?value-quantity=5.40e-3");
+				}
+
+				@Test
+				void specCase6() {
+					String id1 = withObservationWithValueQuantity(4.85).getIdPart();
+					String id2 = withObservationWithValueQuantity(4.86).getIdPart();
+					String id3 = withObservationWithValueQuantity(5.94).getIdPart();
+					String id4 = withObservationWithValueQuantity(5.95).getIdPart();
+					// GET [base]/Observation?value-quantity=ap5.4 :: 5.4(+/- 10%) :: [4.86 ... 5.94]
+					assertFindIds("when le", Set.of(id2, id3), "/Observation?value-quantity=ap5.4");
+				}
+
+			}
 		}
 
 
@@ -1400,8 +1431,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 					assertFind("when eq UCUM 10*3/L ", "/Observation?value-quantity=60|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertFind("when eq UCUM 10*9/L", "/Observation?value-quantity=0.000060|" + UCUM_CODESYSTEM_URL + "|10*9/L");
-					assertFind("when gt UCUM 10*3/L", "/Observation?value-quantity=eq58|" + UCUM_CODESYSTEM_URL + "|10*3/L");
-					assertFind("when le UCUM 10*3/L", "/Observation?value-quantity=eq63|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 
 					assertNotFind("when ne UCUM 10*3/L", "/Observation?value-quantity=80|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 					assertNotFind("when gt UCUM 10*3/L", "/Observation?value-quantity=50|" + UCUM_CODESYSTEM_URL + "|10*3/L");
@@ -1477,6 +1506,30 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertNotFind("when one predicate matches each object", "/Observation" +
 						"?value-quantity=0.06|" + UCUM_CODESYSTEM_URL + "|10*3/L");
 				}
+
+				@Nested
+				@Disabled // These conversions are not supported by the library we use
+				public class TemperatureUnitConversions {
+
+					@Test
+					public void celsiusToFahrenheit() {
+						withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel" );
+
+						assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|degF");
+						assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|degF");
+						assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|degF");
+					}
+
+//					@Test
+					public void fahrenheitToCelsius() {
+						withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "degF" );
+
+						assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 38.1 Cel", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 36.9 Cel", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|Cel");
+					}
+				}
+
 			}
 
 
@@ -1876,6 +1929,21 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// also validate no extra SQL queries were executed
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
 		}
+
+		@Test
+		public void offsetAndCountReturnsMoreThan50() {
+			for (int i = 0; i < 60; i++) {
+				myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-" + i)));
+			}
+
+			myCaptureQueriesListener.clear();
+			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?_offset=0&_count=100");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertEquals(60, resultIds.size());
+			// also validate no extra SQL queries were executed
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+		}
 	}
 
 	@Nested
@@ -2050,6 +2118,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result), contains(raId3, raId2, raId1));
+				}
+
+				@Test
+				public void sortWithOffset() {
+					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
+					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
+					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability&_offset=1");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(raId2, raId1));
 				}
 
 			}
@@ -2329,13 +2411,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 		/**
-		 * The following tests are to validate the specification implementation, but they don't work because we save parameters as BigInteger
-		 * which invalidates the possibility to differentiate requested significant figures, which are needed to define precision ranges
-		 * Leaving them here in case some day we fix the implementations
-		 * We copy the JPA implementation here, which ignores precision requests and treats all numbers using default ranges
-		 * @see TestSpecCasesNotUsingSignificantFigures
+		 * The following tests are to validate the specification implementation
 		 */
-		@Disabled
 		@Nested
 		public class TestSpecCasesUsingSignificantFigures {
 
@@ -2361,18 +2438,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			@Test
 			void specCase3() {
-				String raId1 = createRiskAssessmentWithPredictionProbability(94).getIdPart();
-				String raId2 = createRiskAssessmentWithPredictionProbability(96).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(104).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(106).getIdPart();
+				String raId1 = createRiskAssessmentWithPredictionProbability(40).getIdPart();
+				String raId2 = createRiskAssessmentWithPredictionProbability(55).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(140).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(155).getIdPart();
 				// [parameter]=1e2	Values that equal 100, to 1 significant figures precision, so this is actually searching for values in the range [95 ... 105)
+				// Previous line from spec is wrong! Range for [parameter]=1e2, having 1 significant figures precision, should be [50 ... 150]
 				assertFindIds("when le", Set.of(raId2, raId3), "/RiskAssessment?probability=1e2");
 			}
-
-		}
-
-		@Nested
-		public class TestSpecCasesNotUsingSignificantFigures {
 
 			@Test
 			void specCase4() {
@@ -2412,12 +2485,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			void specCase8() {
 				String raId1 = createRiskAssessmentWithPredictionProbability(99.4).getIdPart();
 				String raId2 = createRiskAssessmentWithPredictionProbability(99.6).getIdPart();
-				String raId3 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
-				String raId4 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
-				String raId5 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId3 = createRiskAssessmentWithPredictionProbability(100).getIdPart();
+				String raId4 = createRiskAssessmentWithPredictionProbability(100.4).getIdPart();
+				String raId5 = createRiskAssessmentWithPredictionProbability(100.6).getIdPart();
 				// [parameter]=ne100	Values that are not equal to 100 (actually, in the range 99.5 to 100.5)
-				assertFindIds("when le", Set.of(raId1, raId2, raId3, raId4), "/RiskAssessment?probability=ne100");
+				assertFindIds("when le", Set.of(raId1, raId5), "/RiskAssessment?probability=ne100");
 			}
+
 		}
 
 		@Test

@@ -57,11 +57,12 @@ public interface ITermDeferredStorageSvc {
 
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
+	void notifyJobEnded(String theId);
+
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
 	 */
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();
-
 }
