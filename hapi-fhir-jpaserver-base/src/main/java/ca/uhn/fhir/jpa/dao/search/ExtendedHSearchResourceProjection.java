@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +39,7 @@ public class ExtendedHSearchResourceProjection {
 
 	public ExtendedHSearchResourceProjection(long thePid, String theForcedId, String theResourceString) {
 		if (StringUtils.isEmpty(theResourceString)) {
-			throw new ResourceNotFoundInIndexException(RESOURCE_NOT_STORED_ERROR + thePid);
+			throw new ResourceNotFoundInIndexException(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + thePid);
 		}
 		myPid = thePid;
 		myForcedId = theForcedId;

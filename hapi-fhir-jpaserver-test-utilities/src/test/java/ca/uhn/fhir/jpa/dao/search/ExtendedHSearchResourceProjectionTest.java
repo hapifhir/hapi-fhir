@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
@@ -44,7 +45,7 @@ class ExtendedHSearchResourceProjectionTest {
 		ResourceNotFoundInIndexException ex = assertThrows(
 			ResourceNotFoundInIndexException.class,
 			() -> new ExtendedHSearchResourceProjection(22, null, null));
-		assertThat(ex.getMessage(), equalTo(RESOURCE_NOT_STORED_ERROR + "22"));
+		assertThat(ex.getMessage(), equalTo(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22"));
 	}
 
 
@@ -53,7 +54,7 @@ class ExtendedHSearchResourceProjectionTest {
 		ResourceNotFoundInIndexException ex = assertThrows(
 			ResourceNotFoundInIndexException.class,
 			() -> new ExtendedHSearchResourceProjection(22, null, ""));
-		assertThat(ex.getMessage(), equalTo(RESOURCE_NOT_STORED_ERROR + "22"));
+		assertThat(ex.getMessage(), equalTo(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + "22"));
 	}
 
 
