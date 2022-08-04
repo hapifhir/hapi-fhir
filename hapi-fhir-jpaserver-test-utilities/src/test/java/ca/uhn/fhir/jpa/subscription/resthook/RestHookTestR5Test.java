@@ -816,7 +816,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		subscription.addHeader("X-Foo: FOO");
 		subscription.addHeader("X-Bar: BAR");
-		subscription.setStatus(Enumerations.SubscriptionState.REQUESTED);
+		subscription.setStatus(Enumerations.SubscriptionStatusCodes.REQUESTED);
 		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 
@@ -849,7 +849,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		waitForSize(1, ourUpdatedObservations);
 
 		// Disable
-		subscription.setStatus(Enumerations.SubscriptionState.OFF);
+		subscription.setStatus(Enumerations.SubscriptionStatusCodes.OFF);
 		myClient.update().resource(subscription).execute();
 		waitForQueueToDrain();
 

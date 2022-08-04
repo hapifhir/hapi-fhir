@@ -2117,6 +2117,20 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					assertThat(getResultIds(result), contains(raId3, raId2, raId1));
 				}
 
+				@Test
+				public void sortWithOffset() {
+					String raId1 = createRiskAssessmentWithPredictionProbability(0.23).getIdPart();
+					String raId2 = createRiskAssessmentWithPredictionProbability(0.38).getIdPart();
+					String raId3 = createRiskAssessmentWithPredictionProbability(0.76).getIdPart();
+
+					myCaptureQueriesListener.clear();
+					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability&_offset=1");
+
+					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					// requested profile (uri) descending so order should be id2, id1
+					assertThat(getResultIds(result), contains(raId2, raId1));
+				}
+
 			}
 
 			@Nested
