@@ -34,6 +34,9 @@ abstract class BaseValidatorBridge implements IValidatorModule {
 			if (riMessage.getLevel() != null) {
 				hapiMessage.setSeverity(ResultSeverityEnum.fromCode(riMessage.getLevel().toCode()));
 			}
+			if (riMessage.getMessageId() != null) {
+				hapiMessage.setMessageId(riMessage.getMessageId());
+			}
 			theCtx.addValidationMessage(hapiMessage);
 		}
 	}

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
@@ -236,10 +237,16 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
                 return outcome;
         }
 
+	@Override
 	public int expungeEverythingByType(Class<?> theEntityType) {
                 int result = expungeEverythingByTypeWithoutPurging(theEntityType);
                 purgeAllCaches();
                 return result;
+	}
+
+	@Override
+	public int expungeEverythingMdmLinks() {
+		return expungeEverythingByType(MdmLink.class);
 	}
 
 	private int doExpungeEverythingQuery(String theQuery) {

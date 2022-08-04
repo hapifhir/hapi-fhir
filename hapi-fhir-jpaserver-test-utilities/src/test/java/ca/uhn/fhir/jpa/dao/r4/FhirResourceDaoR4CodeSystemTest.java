@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired private Batch2JobHelper myBatchJobHelper;
 
 	@Test
 	public void testIndexContained() throws Exception {
@@ -43,7 +43,6 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteLargeCompleteCodeSystem() {
-
 		IIdType id = createLargeCodeSystem(null);
 
 		runInTransaction(() -> {
@@ -65,7 +64,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		// Now the background scheduler will do its thing
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 		runInTransaction(() -> {
 			assertEquals(0, myTermCodeSystemDao.count());
 			assertEquals(0, myTermCodeSystemVersionDao.count());
@@ -124,7 +123,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		// Now the background scheduler will do its thing
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		// Entities for first resource should be gone now.
 		runInTransaction(() -> {
@@ -159,7 +158,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		// Now the background scheduler will do its thing
 		myTerminologyDeferredStorageSvc.saveDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
 
 		// The remaining versions and Code System entities should be gone now.
 		runInTransaction(() -> {

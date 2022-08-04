@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
+import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -64,7 +65,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
-	IMdmLinkSvc myMdmLinkSvc;
+	IMdmLinkDao myMdmLinkSvc;
 
 	@Nonnull
 	@Override
@@ -107,7 +108,7 @@ public class MdmClearStep implements IJobStepWorker<MdmClearJobParameters, Resou
 			ourLog.info("Starting mdm clear work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
 			StopWatch sw = new StopWatch();
 
-			myMdmLinkSvc.deleteLinksWithAnyReferenceTo(persistentIds);
+			myMdmLinkSvc.deleteLinksWithAnyReferenceToPids(persistentIds);
 
 			// We know the list is not empty, and that all resource types are the same, so just use the first one
 			String resourceName  = myData.getResourceType(0);
