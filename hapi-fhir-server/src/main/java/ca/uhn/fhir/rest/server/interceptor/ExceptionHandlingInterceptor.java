@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRestfulResponse;
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -68,8 +70,7 @@ public class ExceptionHandlingInterceptor {
 		return false;
 	}
 
-	public Object handleException(RequestDetails theRequestDetails, BaseServerResponseException theException)
-			throws ServletException, IOException {
+	public Object handleException(RequestDetails theRequestDetails, BaseServerResponseException theException) throws ServletException, IOException {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
@@ -103,18 +104,24 @@ public class ExceptionHandlingInterceptor {
 		}
 
 		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		resetOutputStreamIfPossible(response);
+		try {
+			resetOutputStreamIfPossible(response);
+		} catch (Throwable t) {
+			ourLog.error("HAPI-FHIR was unable to reset the output stream during exception handling. The root causes follows:", t);
+			return null;
+		}
+
 		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
 		
 	}
 
 	/**
 	 * In some edge cases, the output stream is opened already by the point at which an exception is thrown.
-	 * This is a failsafe to that the output stream is writeable in that case.
+	 * This is a failsafe to that the output stream is writeable in that case. This operation retains status code and headers, but clears the buffer.
 	 */
-	private static void resetOutputStreamIfPossible(IRestfulResponse response) {
+	private void resetOutputStreamIfPossible(IRestfulResponse response) {
 		if (response instanceof ServletRestfulResponse) {
-			((ServletRestfulResponse)response).getRequestDetails().getServletResponse().reset();
+			((ServletRestfulResponse)response).getRequestDetails().getServletResponse().resetBuffer();
 		}
 	}
 
