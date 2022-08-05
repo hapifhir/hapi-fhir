@@ -578,8 +578,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
 
-		conceptMap.setSource(new UriType(VS_URL));
-		conceptMap.setTarget(new UriType(VS_URL_2));
+		conceptMap.setSourceScope(new UriType(VS_URL));
+		conceptMap.setTargetScope(new UriType(VS_URL_2));
 
 		ConceptMapGroupComponent group = conceptMap.addGroup();
 		group.setSource(CS_URL + "|" + "Version 1");

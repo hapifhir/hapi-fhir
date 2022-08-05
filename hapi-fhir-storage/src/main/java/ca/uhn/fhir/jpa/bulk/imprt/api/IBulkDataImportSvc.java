@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
@@ -91,7 +92,7 @@ public interface IBulkDataImportSvc {
 	 *
 	 * @return Returns {@literal true} if a job was activated
 	 */
-	boolean activateNextReadyJob();
+	ActivateJobResult activateNextReadyJob();
 
 	/**
 	 * Updates the job status for the given job

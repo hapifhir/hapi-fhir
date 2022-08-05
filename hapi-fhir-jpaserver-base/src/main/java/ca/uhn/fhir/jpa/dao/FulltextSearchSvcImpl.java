@@ -405,10 +405,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Override
 	@Transactional(readOnly = true)
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
-		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
+		int offset = 0;
+		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
+
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			offset = theParams.getOffset();
-			limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 		}
@@ -419,7 +420,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				.select(this::buildResourceSelectClause)
 				.where(f -> buildWhereClause(f, theResourceType, theParams, null));
 
-		if (theParams.getSort() != null && offset == 0) {
+		if (theParams.getSort() != null) {
 			query.sort(
 				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
 		}

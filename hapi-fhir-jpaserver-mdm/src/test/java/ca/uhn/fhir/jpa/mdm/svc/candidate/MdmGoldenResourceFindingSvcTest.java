@@ -31,7 +31,7 @@ class MdmGoldenResourceFindingSvcTest extends BaseMdmR4Test {
 		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_1));
 
 		// hack the link into a NO_MATCH
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(jane);
 		assertThat(links, hasSize(1));
 		MdmLink link = links.get(0);
 		link.setMatchResult(MdmMatchResultEnum.NO_MATCH);

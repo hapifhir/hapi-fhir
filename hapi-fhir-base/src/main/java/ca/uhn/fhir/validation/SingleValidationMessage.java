@@ -31,6 +31,7 @@ public class SingleValidationMessage {
 	private Integer myLocationLine;
 	private String myLocationString;
 	private String myMessage;
+	private String myMessageId;
 	private ResultSeverityEnum mySeverity;
 
 	@Override
@@ -70,6 +71,10 @@ public class SingleValidationMessage {
 		return myMessage;
 	}
 
+	public String getMessageId() {
+		return myMessageId;
+	}
+
 	public ResultSeverityEnum getSeverity() {
 		return mySeverity;
 	}
@@ -101,6 +106,10 @@ public class SingleValidationMessage {
 		myMessage = theMessage;
 	}
 
+	public void setMessageId(String messageId) {
+		myMessageId = messageId;
+	}
+
 	public void setSeverity(ResultSeverityEnum theSeverity) {
 		mySeverity = theSeverity;
 	}
@@ -116,6 +125,9 @@ public class SingleValidationMessage {
 			b.append("locationString", myLocationString);
 		}
 		b.append("message", myMessage);
+		if (myMessageId != null) {
+			b.append(myMessageId);
+		}
 		if (mySeverity != null) {
 			b.append("severity", mySeverity.getCode());
 		}
