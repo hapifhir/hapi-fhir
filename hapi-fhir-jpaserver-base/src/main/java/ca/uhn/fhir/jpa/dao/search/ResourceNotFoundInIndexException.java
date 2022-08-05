@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search;
 
-import java.io.Serial;
-
 public class ResourceNotFoundInIndexException extends IllegalStateException {
-	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ResourceNotFoundInIndexException(Throwable theCause) {
