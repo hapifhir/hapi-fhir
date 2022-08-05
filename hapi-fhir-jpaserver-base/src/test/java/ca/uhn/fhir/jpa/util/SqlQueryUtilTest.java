@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,7 +47,7 @@ public class SqlQueryUtilTest {
 	public void emptyCollectionReturnsFalse() {
 		String result = tested.buildInList("x.id", Collections.emptyList(), 10);
 
-		assertEquals(" 1=2 -- replacing empty 'in' parameter list: x.id in () " +
+		assertEquals(" 1=2 -- replaced empty 'in' parameter list: x.id in () " +
 			System.getProperty("line.separator"), result);
 	}
 
@@ -89,11 +90,11 @@ public class SqlQueryUtilTest {
 			public void buildInListOracleAndMoreThanOneThousand() {
 				when(myHibernatePropertiesProvider.getDialect()).thenReturn(new Oracle12cDialect());
 				String expected = " ( x.id in (" +
-					toCsv(getIntegerListOfSize(0, 1_000)) + ") or x.id in (" +
-					toCsv(getIntegerListOfSize(1_000, 1000)) + ") or x.id in (" +
-					toCsv(getIntegerListOfSize(2_000, 10)) + ") ) ";
+					toCsv(getLongListOfSize(0, 1_000)) + ") or x.id in (" +
+					toCsv(getLongListOfSize(1_000, 1000)) + ") or x.id in (" +
+					toCsv(getLongListOfSize(2_000, 10)) + ") ) ";
 
-				List<Integer> bigList = getIntegerListOfSize(0, 2_010);
+				List<Long> bigList = getLongListOfSize(0, 2_010);
 
 				String generated = tested.buildInListIfNeeded("x.id", bigList);
 
@@ -102,11 +103,11 @@ public class SqlQueryUtilTest {
 			}
 
 
-			private List<Integer> getIntegerListOfSize(int theFirstIncluded, int theSize) {
-				return IntStream.range(theFirstIncluded, theFirstIncluded + theSize).boxed().collect(Collectors.toList());
+			private List<Long> getLongListOfSize(int theFirstIncluded, int theSize) {
+				return LongStream.range(theFirstIncluded, theFirstIncluded + theSize).boxed().collect(Collectors.toList());
 			}
 
-			private String toCsv(Collection<Integer> theCollection) {
+			private String toCsv(Collection<Long> theCollection) {
 				return theCollection.stream().map(String::valueOf).collect(Collectors.joining(", "));
 			}
 		}
@@ -139,32 +140,6 @@ public class SqlQueryUtilTest {
 			}
 
 		}
-
-		@Nested
-		public class ForStringLists {
-
-			@Test
-			public void buildInListNotSplitting() {
-				String expected = " ( x.name in ('aa', 'bb', 'cc') ) ";
-
-				String generated = tested.buildInList("x.name", List.of("aa", "bb", "cc"), 10);
-
-				assertEquals(expected, generated);
-			}
-
-
-			@Test
-			public void buildInListSplitting() {
-				String expected = " ( x.name in ('aa', 'bb', 'cc') or x.name in ('dd', 'ee') ) ";
-
-				String generated = tested.buildInList("x.name", List.of("aa", "bb", "cc", "dd", "ee"), 3);
-
-				assertEquals(expected, generated);
-			}
-		}
-
 	}
-
-
 
 }
