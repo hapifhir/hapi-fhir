@@ -976,9 +976,9 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
-
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInHSearchIndex() &&
+			myDaoConfig.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2

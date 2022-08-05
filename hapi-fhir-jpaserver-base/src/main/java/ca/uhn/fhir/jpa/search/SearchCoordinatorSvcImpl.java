@@ -361,20 +361,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 //		SearchStrategyFactory.ISearchStrategy searchStrategy = mySearchStrategyFactory.pickStrategy(theResourceType, theParams, theRequestDetails);
 //		return searchStrategy.get();
 
-		if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
-			ourLog.info("Search {} is using direct load strategy", searchUuid);
-			SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
-
-			try {
-				return direct.get();
-
-			} catch (ResourceNotFoundInIndexException theE) {
-				// some resources were not found in index, so we will inform this and resort to JPA search
-				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
-			}
-		}
-
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
+			if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
+				ourLog.info("Search {} is using direct load strategy", searchUuid);
+				SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+
+				try {
+					return direct.get();
+
+				} catch (ResourceNotFoundInIndexException theE) {
+					// some resources were not found in index, so we will inform this and resort to JPA search
+					ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+				}
+			}
+
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return mySynchronousSearchSvc.executeQuery(theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, theRequestPartitionId);
 		}
