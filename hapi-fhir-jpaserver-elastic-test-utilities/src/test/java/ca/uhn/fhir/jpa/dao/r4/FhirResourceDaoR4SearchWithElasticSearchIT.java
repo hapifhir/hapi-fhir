@@ -731,6 +731,34 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	/**
+	 * When configuring direct resource load for populated index a full reindex is required
+	 * Code should detect the case and instead of throwing "Resource not stored in search index" exception, should log
+	 * a warning and route the strategy to be rerun in JPA.
+	 * This test validates that behaviour.
+	 */
+	@Test
+	public void testDirectPathWholeResourceNotIndexedWorks() {
+		IIdType id1 = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "theCode")));
+
+		// set it after creating resource, so search doesn't find it in the index
+		myDaoConfig.setStoreResourceInHSearchIndex(true);
+
+		myCaptureQueriesListener.clear();
+
+		List<IBaseResource> result = searchForFastResources("Observation?code=theCode");
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+		assertThat(result, hasSize(1));
+		assertEquals( ((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "JPA search for IDs and for resources");
+
+		// restore changed property
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
+	}
+
+
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
 		createExternalCsAndLocalVs();
@@ -2056,10 +2084,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				@Test
 				public void byDate() {
 					// check milli level precision
-					String id1 = createObservation(withId("20-000"), withEffectiveDate("2017-01-20T03:21:47.000")).getIdPart();
-					String id2 = createObservation(withId("24-002"), withEffectiveDate("2017-01-24T03:21:47.002")).getIdPart();
-					String id3 = createObservation(withId("24-001"), withEffectiveDate("2017-01-24T03:21:47.001")).getIdPart();
-					String id4 = createObservation(withId("20-002"), withEffectiveDate("2017-01-20T03:21:47.002")).getIdPart();
+					String id1 = createObservation(List.of(withId("20-000"), withEffectiveDate("2017-01-20T03:21:47.000"))).getIdPart();
+					String id2 = createObservation(List.of(withId("24-002"), withEffectiveDate("2017-01-24T03:21:47.002"))).getIdPart();
+					String id3 = createObservation(List.of(withId("24-001"), withEffectiveDate("2017-01-24T03:21:47.001"))).getIdPart();
+					String id4 = createObservation(List.of(withId("20-002"), withEffectiveDate("2017-01-20T03:21:47.002"))).getIdPart();
 
 					myCaptureQueriesListener.clear();
 					List<String> result = myTestDaoSearch.searchForIds("/Observation?_sort=-date");
