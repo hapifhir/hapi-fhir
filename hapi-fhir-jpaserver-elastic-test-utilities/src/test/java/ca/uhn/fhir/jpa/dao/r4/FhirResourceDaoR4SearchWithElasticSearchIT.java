@@ -1548,25 +1548,24 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				}
 
 				@Nested
-				@Disabled // These conversions are not supported by the library we use
 				public class TemperatureUnitConversions {
 
 					@Test
-					public void celsiusToFahrenheit() {
+					public void storeCelsiusSearchFahrenheit() {
 						withObservationWithQuantity(37.5, UCUM_CODESYSTEM_URL, "Cel" );
 
-						assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|degF");
-						assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|degF");
-						assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|degF");
+						assertFind(		"when eq UCUM  99.5 degF", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|[degF]");
+						assertNotFind(	"when eq UCUM 101.1 degF", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|[degF]");
+						assertNotFind(	"when eq UCUM  97.8 degF", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|[degF]");
 					}
 
-//					@Test
-					public void fahrenheitToCelsius() {
-						withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "degF" );
+					@Test
+					public void storeFahrenheitSearchCelsius() {
+						withObservationWithQuantity(99.5, UCUM_CODESYSTEM_URL, "[degF]" );
 
-						assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=99.5|" + UCUM_CODESYSTEM_URL + "|Cel");
-						assertNotFind(	"when eq UCUM 38.1 Cel", "/Observation?value-quantity=101.1|" + UCUM_CODESYSTEM_URL + "|Cel");
-						assertNotFind(	"when eq UCUM 36.9 Cel", "/Observation?value-quantity=97.8|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertFind(		"when eq UCUM 37.5 Cel", "/Observation?value-quantity=37.5|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 37.3 Cel", "/Observation?value-quantity=37.3|" + UCUM_CODESYSTEM_URL + "|Cel");
+						assertNotFind(	"when eq UCUM 37.7 Cel", "/Observation?value-quantity=37.7|" + UCUM_CODESYSTEM_URL + "|Cel");
 					}
 				}
 
