@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.http.HttpHeaders.CONTENT_ENCODING;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -118,10 +118,23 @@ public class ExceptionHandlingInterceptor {
 	/**
 	 * In some edge cases, the output stream is opened already by the point at which an exception is thrown.
 	 * This is a failsafe to that the output stream is writeable in that case. This operation retains status code and headers, but clears the buffer.
+	 * Also, it strips the content-encoding header if present, as the method outcome will negotiate its own.
 	 */
 	private void resetOutputStreamIfPossible(IRestfulResponse response) {
 		if (response instanceof ServletRestfulResponse) {
-			((ServletRestfulResponse)response).getRequestDetails().getServletResponse().resetBuffer();
+			HttpServletResponse servletResponse = ((ServletRestfulResponse) response).getRequestDetails().getServletResponse();
+			Collection<String> headerNames = servletResponse.getHeaderNames();
+			Map<String, Collection<String>> oldHeaders = new HashedMap<>();
+			for (String headerName : headerNames) {
+				oldHeaders.put(headerName, servletResponse.getHeaders(headerName));
+			}
+
+			servletResponse.reset();
+			oldHeaders.entrySet().stream().filter(entry -> !entry.getKey().equals(CONTENT_ENCODING)).forEach(entry -> {
+				entry.getValue().stream().forEach(value -> {
+					servletResponse.addHeader(entry.getKey(), value);
+				});
+			});
 		}
 	}
 
