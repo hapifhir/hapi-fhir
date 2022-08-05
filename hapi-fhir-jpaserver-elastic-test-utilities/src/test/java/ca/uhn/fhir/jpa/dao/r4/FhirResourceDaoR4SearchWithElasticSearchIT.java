@@ -37,6 +37,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -52,7 +55,10 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.Matchers;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -60,6 +66,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
@@ -113,6 +120,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_PARAM_NAME;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -207,6 +215,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	@Qualifier("myQuestionnaireDaoR4")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
+
+	@Autowired
+	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
+
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoR4")
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
@@ -2628,6 +2640,335 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 
+
+
+	/**
+	 * Strategy is to test many common combined parameters use cases on the code-value-quantity
+	 * parameter and a simple equality use case with the rest of the composite parameters
+	 *
+	 * fixme mb the test
+	 */
+	@Nested
+	public class CompositeParameters {
+
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(true);
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+		}
+
+
+
+		/**
+		 * Must exec tests individually or add cleanup after each
+		 */
+		@Nested
+		public class DoubleNestingQueriesSandbox {
+
+			private final String myCodeSystemA = "http://loinc.org";
+			private final String myCode1 = "8480-6";
+			private final String myCode2 = "3421-5";
+			private final Coding myCodingA = new Coding().setSystem(myCodeSystemA).setCode(myCode1);
+			private final Coding myCodingB = new Coding().setSystem(myCodeSystemA).setCode(myCode2);
+
+			//			fixme jm: define constant
+			private final String COMP_CODE_VAL_QTY_PARAM = "component-code-value-quantity";
+			private final String COMP_CODE_VAL_QTY_PARAM_PATH = "nsp." + COMP_CODE_VAL_QTY_PARAM;
+			private final String OBS_COMPOSITE_PATH = COMP_CODE_VAL_QTY_PARAM_PATH + "." + COMPOS_PARAM_NAME;
+
+
+			/**
+			 * Search for Observations with component with token and quantity of component 1
+			 */
+			@Disabled
+			@Test
+			public void searchForSameComponent() {
+				IIdType id1 = createObservationWithComponentsWithCodeAndQty(List.of(
+					Pair.of(myCodingA, new Quantity().setValue(60.0)),
+					Pair.of(myCodingB, new Quantity().setValue(100.0)) ));
+
+				runInTransaction(() -> {
+					SearchSession searchSession = Search.session(myEntityManager);
+
+					List<ResourceTable> hits = searchSession.search( ResourceTable.class )
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.nested().objectField( COMP_CODE_VAL_QTY_PARAM_PATH )
+								.nest( f.bool()
+									.must( f.range().field( OBS_COMPOSITE_PATH + ".qty-value" )
+										.lessThan(90.0))
+									.must( f.nested().objectField(OBS_COMPOSITE_PATH + ".codes")
+										.nest( f.bool()
+											.must( f.match().field(OBS_COMPOSITE_PATH + ".codes.code-system")
+												.matching(myCodeSystemA) )
+											.must( f.match().field(OBS_COMPOSITE_PATH + ".codes.code-value")
+												.matching( myCode1 ) )
+
+										) )
+								) );
+						}) )
+						.fetchHits( 20 );
+
+					assertEquals(1, hits.size());
+					assertEquals(id1.getIdPartAsLong(), hits.get(0).getId());
+				});
+			}
+
+			/**
+			 * Search for Observations with component with quantity of component 1 but token of component 2
+			 * (shouldn't find any)
+			 */
+			@Disabled
+			@Test
+			public void searchForDifferentComponent() {
+				IIdType id1 = createObservationWithComponentsWithCodeAndQty(List.of(
+					Pair.of(myCodingA, new Quantity().setValue(60.0)),
+					Pair.of(myCodingB, new Quantity().setValue(100.0)) ));
+
+				// search for Observations with component with token and quantity of component 1
+				runInTransaction(() -> {
+					SearchSession searchSession = Search.session(myEntityManager);
+
+					List<ResourceTable> hits = searchSession.search( ResourceTable.class )
+						.where(f -> f.bool(b -> {
+							b.must(f.match().field("myResourceType").matching("Observation"));
+							b.must(f.nested().objectField( COMP_CODE_VAL_QTY_PARAM_PATH )
+								.nest( f.bool()
+									.must( f.range().field( OBS_COMPOSITE_PATH + ".qty-value" )
+										.lessThan(90.0))
+									.must( f.nested().objectField(OBS_COMPOSITE_PATH + ".codes")
+										.nest( f.bool()
+											.must( f.match().field(OBS_COMPOSITE_PATH + ".codes.code-system")
+												.matching(myCodeSystemA) )
+											.must( f.match().field(OBS_COMPOSITE_PATH + ".codes.code-value")
+												.matching( myCode2 ) )
+
+										) )
+								) );
+						}) )
+						.fetchHits( 20 );
+
+					assertEquals(0, hits.size());
+				});
+
+			}
+
+		}
+
+
+
+		@Nested
+		public class ForComponentCorrelation {
+
+			@Nested
+			public class ForCodeQuantity {
+
+				private final String myCodeSystem = "http://loinc.org";
+				private final String myCode1 = "8480-6";
+				private final String myCode2 = "3421-5";
+
+				private final Coding myCodingA = new Coding().setSystem(myCodeSystem).setCode(myCode1);
+				private final Coding myCodingB = new Coding().setSystem(myCodeSystem).setCode(myCode2);
+
+
+				@Test
+				public void sandbox() {
+					IIdType id1 = createObservationWithComponentsWithCodeAndQty(List.of(
+						Pair.of(myCodingA, new Quantity().setValue(60.0)),
+						Pair.of(myCodingB, new Quantity().setValue(100.0)) ));
+
+					// search for Observations with component with token and quantity of component 1
+
+					runInTransaction(() -> {
+						SearchSession searchSession = Search.session(myEntityManager);
+						List<Observation> hits = searchSession.search( Observation.class )
+							.where(
+								f -> f.nested().objectField( "nsp.component-code-value-quantity.obs-composite" )
+									.nest( f.bool()
+										.must( f.range().field( "nsp.component-code-value-quantity.obs-composite.qty-value" )
+											.lessThan(90))
+										.must( f.nested().objectField("nsp.component-code-value-quantity.obs-composite.codes")
+											.nest( f.bool()
+												.must( f.match().field("nsp.component-code-value-quantity.obs-composite.codes.code-system")
+													.matching( "http://loinc.org" ) )
+												.must( f.match().field("nsp.component-code-value-quantity.obs-composite.codes.code-value")
+													.matching( "3421-5" ) )
+
+											) ) ) )
+							.fetchHits( 20 );
+
+						assertThat(hits, notNullValue());
+					});
+
+				}
+
+				@Test
+				public void lessThan() {
+					IIdType id1 = createObservationWithComponentsWithCodeAndQty(List.of(
+						Pair.of(myCodingA, new Quantity().setValue(60.0)),
+						Pair.of(myCodingB, new Quantity().setValue(100.0)) ));
+
+					// search for Observations with component with token and quantity of component 1
+					{
+						TokenParam v0 = new TokenParam(myCodeSystem, myCode1);
+						QuantityParam v1 = new QuantityParam(ParamPrefixEnum.LESSTHAN, 90, null, null);
+						CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+						SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+						IBundleProvider result = myObservationDao.search(map);
+						assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getIdPart()));
+					}
+					{
+						// search for token of component 2 and quantity of component 1
+						TokenParam v0 = new TokenParam(myCodeSystem, myCode2);
+						QuantityParam v1 = new QuantityParam(ParamPrefixEnum.EQUAL, 60.0, null, null);
+						CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+						SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_COMPONENT_CODE_VALUE_QUANTITY, val);
+						IBundleProvider result = myObservationDao.search(map);
+						assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+					}
+				}
+			}
+
+			@Nested
+			public class ForObservationCorrelation {
+
+				@Nested
+				public class ForValueQuantity {
+
+					@Test
+					public void equal() {
+						IIdType obs1id = createObservationWithComponentWithCodeAndQty(new Coding().setSystem("http://loinc.org").setCode("8480-6"), new Quantity().setValue(60.0));
+						IIdType obs2id = createObservationWithComponentWithCodeAndQty(new Coding().setSystem("http://loinc.org").setCode("3421-5"), new Quantity().setValue(100.0));
+						IIdType drid = createDiagnosticReportWithObservations(new Identifier().setSystem("foo").setValue("IDENTIFIER"), List.of(obs1id, obs2id));
+
+						// search for DiagnosticReports with Observation with token and quantity (in same observation)
+						{
+							TokenParam v0 = new TokenParam("http://loinc.org", "8480-6");
+							QuantityParam v1 = new QuantityParam(ParamPrefixEnum.EQUAL, 60, null, null);
+							CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+							SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(DiagnosticReport.SP_RESULT, val);
+							IBundleProvider result = myDiagnosticReportDao.search(map);
+							assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(drid.getValue()));
+						}
+						{
+							// search DiagnosticReports with Observation with token of one Observation and quantity of the other
+							TokenParam v0 = new TokenParam("http://other.system.org", "8480-6");
+							QuantityParam v1 = new QuantityParam(ParamPrefixEnum.EQUAL, 100.0, null, null);
+							CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+							SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(DiagnosticReport.SP_RESULT, val);
+							IBundleProvider result = myDiagnosticReportDao.search(map);
+							assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+						}
+					}
+
+				}
+			}
+
+
+		}
+
+
+		//			fixme jm: enable
+		@Disabled
+		@Test
+		public void invalidThrows() {
+//				String invalidQtyParam = "|http://another.org";
+//				DataFormatException thrown = assertThrows(DataFormatException.class,
+//					() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+//
+//				assertTrue(thrown.getMessage().startsWith("HAPI-1940: Invalid"));
+//				assertTrue(thrown.getMessage().contains(invalidQtyParam));
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueString() {
+
+		}
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueDate() {
+
+		}
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void codeValueConcept() {
+
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void comboCodeValueConcept() {
+
+		}
+
+
+		//	fixme jm: complete.
+		@Disabled
+		@Test
+		public void comboCodeValueQuantity() {
+
+		}
+
+		@Nested
+		public class ContextTypeQuantity {
+
+		}
+
+		@Nested
+		public class ContextTypeValue {
+
+		}
+
+
+		/**
+		 * fixme jm: test remaining composite parameters:
+		 *
+		 * MolecularSequence-chromosome-variant-coordinate
+		 * MolecularSequence-chromosome-window-coordinate
+		 * MolecularSequence-referenceseqid-variant-coordinate
+		 * MolecularSequence-referenceseqid-window-coordinate
+		 */
+
+	}
+
+
+	private IIdType createObservationWithComponentWithCodeAndQty(Coding theCoding, Quantity theQuantity) {
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(theCoding))
+			.setValue(theQuantity);
+		return myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createObservationWithComponentsWithCodeAndQty(List<Pair<Coding, Quantity>> theCodeAndQty) {
+		Observation o1 = new Observation();
+		for (Pair<Coding, Quantity> codingQuantityPair : theCodeAndQty) {
+			o1.addComponent()
+				.setCode(new CodeableConcept().addCoding(codingQuantityPair.getLeft()))
+				.setValue(codingQuantityPair.getRight());
+		}
+		return myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createDiagnosticReportWithObservations(Identifier theDiagReportIdentifier, Collection<IIdType> theObservationIds) {
+		DiagnosticReport rpt1 = new DiagnosticReport();
+		rpt1.addIdentifier(theDiagReportIdentifier);
+		theObservationIds.forEach(id -> rpt1.addResult(new Reference(id)));
+		return myDiagnosticReportDao.create(rpt1).getId().toUnqualifiedVersionless();
+	}
 
 
 	/**

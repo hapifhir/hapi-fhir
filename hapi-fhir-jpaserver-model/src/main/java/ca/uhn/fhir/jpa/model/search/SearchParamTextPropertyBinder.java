@@ -40,6 +40,16 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_CODE_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_CODE_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_CONCEPT_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_CONCEPT_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_LOWER;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_NORMALIZED;
@@ -51,6 +61,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
+
 
 /**
  * Allows hibernate search to index
@@ -209,6 +220,24 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower");
 			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
 			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
+
+			// fixme mb make generic
+			// Observation-component
+			String obsComponentPathGlob = "*." + COMPOS_PARAM_NAME;
+			nestedSpField.objectFieldTemplate("observationComponentTemplate", ObjectStructure.FLATTENED).matchingPathGlob(obsComponentPathGlob);
+
+			String obsComponentCodePathGlob = obsComponentPathGlob + "." + "codes";
+			nestedSpField.objectFieldTemplate("observationComponentCodeTemplate", ObjectStructure.NESTED).matchingPathGlob(obsComponentCodePathGlob).multiValued();
+			nestedSpField.fieldTemplate(COMPOS_CODE_SYSTEM, 	keywordFieldType)		.matchingPathGlob(obsComponentCodePathGlob + "." + COMPOS_CODE_SYSTEM);
+			nestedSpField.fieldTemplate(COMPOS_CODE_VALUE,		keywordFieldType)		.matchingPathGlob(obsComponentCodePathGlob + "." + COMPOS_CODE_VALUE);
+
+			nestedSpField.fieldTemplate(COMPOS_QTY_SYSTEM,		keywordFieldType)		.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_QTY_SYSTEM);
+			nestedSpField.fieldTemplate(COMPOS_QTY_CODE, 		keywordFieldType)		.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_QTY_CODE);
+			nestedSpField.fieldTemplate(COMPOS_QTY_VALUE, 		bigDecimalFieldType)	.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_QTY_VALUE);
+			nestedSpField.fieldTemplate(COMPOS_QTY_CODE_NORM, 	keywordFieldType)		.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_QTY_CODE_NORM);
+			nestedSpField.fieldTemplate(COMPOS_QTY_VALUE_NORM, bigDecimalFieldType)	.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_QTY_VALUE_NORM);
+			nestedSpField.fieldTemplate(COMPOS_CONCEPT_CODE, 	keywordFieldType)		.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_CONCEPT_CODE).multiValued();
+			nestedSpField.fieldTemplate(COMPOS_CONCEPT_TEXT, 	standardAnalyzer)		.matchingPathGlob(obsComponentPathGlob + "." + COMPOS_CONCEPT_TEXT).multiValued();
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
