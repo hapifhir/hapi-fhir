@@ -63,6 +63,10 @@ public class SqlQueryUtil {
 	 * and a not split clause otherwise.
 	 */
 	public <T> String buildInListIfNeeded(String theInClause, Collection<Long> theInElements) {
+		if (theInElements.isEmpty())  {
+			return " 1=2 -- replaced empty 'in' parameter list: " + theInClause + " in () " + NL;
+		}
+
 		if ( ! isOracleDialect() || theInElements.size() <= ORACLE_MAX_IN_PARAM_ENTRIES) {
 			return  " " + theInClause + " in (" + getCsvString(theInElements) + ") ";
 		}
@@ -75,10 +79,6 @@ public class SqlQueryUtil {
 	 * Return input collection elements as a CSV string
 	 */
 	private String getCsvString(Collection<Long> theInElements) {
-		if (theInElements.isEmpty()) {
-			throw new InvalidParameterException("Input collection is empty");
-		}
-
 		return theInElements.stream()
 			.map(String::valueOf)
 			.collect(Collectors.joining(", "));
