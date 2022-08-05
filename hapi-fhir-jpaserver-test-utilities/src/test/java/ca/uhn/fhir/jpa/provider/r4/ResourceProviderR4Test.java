@@ -4839,10 +4839,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, returnedBundle.getEntry().size());
 
-		//-- check only use original quantity table to search
+		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
+		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
 	@Test
