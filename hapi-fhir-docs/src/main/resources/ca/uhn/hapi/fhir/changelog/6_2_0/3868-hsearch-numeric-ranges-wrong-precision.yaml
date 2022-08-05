@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3868
+title: "With Elastic/Lucene indexing enabled search for numbers or quantities was not always using the specified ranges,
+   because the number of significant figures was not properly calculated. This is now fixed."

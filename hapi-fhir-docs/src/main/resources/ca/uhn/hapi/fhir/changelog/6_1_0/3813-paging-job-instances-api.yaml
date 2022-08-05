@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3813
+title: "Updating the IJobCoordinator API to have a
+      pageable request.
+"

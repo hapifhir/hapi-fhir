@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -79,7 +80,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @see ca.uhn.fhir.jpa.reindex.job.ReindexJobConfig
- * @deprecated
+ * @deprecated Use the Batch2 {@link ca.uhn.fhir.batch2.api.IJobCoordinator#startInstance(JobInstanceStartRequest)} instead.
  */
 @Deprecated
 public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {

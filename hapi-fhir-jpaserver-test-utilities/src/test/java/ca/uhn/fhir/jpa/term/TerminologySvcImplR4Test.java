@@ -8,8 +8,8 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -44,7 +44,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
 
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired
+	private Batch2JobHelper myBatch2JobHelper;
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
@@ -395,6 +396,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	@Test
 	public void testUpdateCodeSystemUrlAndVersion() {
+		// create code system
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
@@ -423,7 +425,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(id.getIdPartAsLong());
 			assertEquals("1", termCodeSystem.getCurrentVersion().getCodeSystemVersionId());
-
 		});
 
 		codeSystem.setVersion("2");
@@ -431,7 +432,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		IIdType id_v2 = myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();

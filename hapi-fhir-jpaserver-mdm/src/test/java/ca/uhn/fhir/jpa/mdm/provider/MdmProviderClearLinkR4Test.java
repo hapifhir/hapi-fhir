@@ -122,7 +122,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
 	}
 
-	@Tag("Intermittent")
+	@Tag("intermittent")
 // TODO KHS I know intermittent tags aren't used by hapi but this will help me find this test when I review intermittents.
 //  Last time this test failed, this is what was in the logs:
 //	2022-07-17 19:57:27.103 [main] INFO  c.u.f.batch2.channel.BatchJobSender [BatchJobSender.java:43] Sending work notification for job[MDM_CLEAR] instance[6f6d6fc5-f74a-426f-b215-7a383893f4bc] step[generate-ranges] chunk[219e29d5-1ee7-47dd-99a1-c636b1b221ae]
@@ -196,6 +196,6 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 	@Nonnull
 	protected List<MdmLink> getPractitionerLinks() {
-		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPractitioner);
+		return (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPractitioner);
 	}
 }
