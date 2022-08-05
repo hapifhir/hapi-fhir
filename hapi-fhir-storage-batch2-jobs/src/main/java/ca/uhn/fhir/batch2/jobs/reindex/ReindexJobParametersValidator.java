@@ -21,30 +21,43 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  */
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
+import ca.uhn.fhir.util.UrlUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ReindexJobParametersValidator implements IJobParametersValidator<ReindexJobParameters> {
 
-	@Autowired
-	private IResourceReindexSvc myResourceReindexSvc;
+	private final UrlListValidator myUrlListValidator;
+
+	public ReindexJobParametersValidator(UrlListValidator theUrlListValidator) {
+		myUrlListValidator = theUrlListValidator;
+	}
 
 	@Nullable
 	@Override
-	public List<String> validate(@Nonnull ReindexJobParameters theParameters) {
-		if (theParameters.getUrl().isEmpty()) {
-			if (!myResourceReindexSvc.isAllResourceTypeSupported()) {
-				return Collections.singletonList("At least one type-specific search URL must be provided for " + ProviderConstants.OPERATION_REINDEX + " on this server");
+	public List<String> validate(@NotNull ReindexJobParameters theParameters) {
+		List<String> errors = myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
+
+		if (errors == null || errors.isEmpty()) {
+			// only check if there's no other errors (new list to fix immutable issues)
+			errors = new ArrayList<>();
+			List<PartitionedUrl> urls = theParameters.getPartitionedUrls();
+			for (PartitionedUrl purl : urls) {
+				String url = purl.getUrl();
+
+				if (url.contains(" ") || url.contains("\n") || url.contains("\t")) {
+					errors.add("Invalid URL. URL cannot contain spaces : " + url);
+				}
 			}
 		}
 
-		return Collections.emptyList();
+		return errors;
 	}
-
 }

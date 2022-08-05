@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3579
+jira: SMILE-4167
+title: "Mdm was not excluding NO_MATCH from golden-resource candidates in eid mode.  This caused mdm to produce an error
+when a Patient eid is changed after that patient's link was updated to NO_MATCH.  This has been corrected"

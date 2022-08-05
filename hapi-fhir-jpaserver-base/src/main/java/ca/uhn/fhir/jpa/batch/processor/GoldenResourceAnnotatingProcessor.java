@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.batch.processor;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
@@ -34,13 +34,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +49,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.PATIENT_BULK_EXPORT_FO
  * Reusable Item Processor which attaches an extension to any outgoing resource. This extension will contain a resource
  * reference to the golden resource patient of the given resources' patient. (e.g. Observation.subject, Immunization.patient, etc)
  */
+@Deprecated
 public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBaseResource>, List<IBaseResource>> {
 	 private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
@@ -84,7 +84,7 @@ public class GoldenResourceAnnotatingProcessor implements ItemProcessor<List<IBa
 	}
 
 	@Override
-	public List<IBaseResource> process(@NonNull List<IBaseResource> theIBaseResources) throws Exception {
+	public List<IBaseResource> process(@Nonnull List<IBaseResource> theIBaseResources) throws Exception {
 		if (shouldAnnotateResource()) {
 			lazyLoadSearchParamsAndFhirPath();
 			theIBaseResources.forEach(this::annotateBackwardsReferences);

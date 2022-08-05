@@ -84,6 +84,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init560(); // 20211027 -
 		init570(); // 20211102 -
 		init600(); // 20211102 -
+		init610();
+	}
+
+	private void init610() {
+		Builder version = forVersion(VersionEnum.V6_1_0);
+
+		// add new REPORT column to BATCH2 tables
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220601.1", "REPORT")
+			.nullable()
+			.type(ColumnTypeEnum.CLOB);
 	}
 
 	private void init600() {
@@ -345,9 +357,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20220429.2", "IDX_RES_TAG_TAG_RES")
 				.unique(false)
 				.online(true)
-				.withColumns("RES_ID", "TAG_ID", "PARTITION_ID");
+				.withColumns("TAG_ID", "RES_ID", "PARTITION_ID");
 
-			resTagTable.dropIndexOnline("20220429.4", "IDX_RESTAG_TAGID");
+			resTagTable.dropIndex("20220429.4", "IDX_RESTAG_TAGID");
 			// Weird that we don't have addConstraint.  No time to do it today.
 			Map<DriverTypeEnum, String> addResTagConstraint = new HashMap<>();
 			addResTagConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_RES_TAG ADD CONSTRAINT IDX_RESTAG_TAGID UNIQUE (RES_ID, TAG_ID)");
@@ -365,8 +377,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.online(false)
 				.withColumns("TAG_TYPE", "TAG_CODE", "TAG_SYSTEM", "TAG_ID");
 			// move constraint to new index
-			// note the constraint has fewer columns than the index.  But these engines can enforce a constraint narrower than the index.
-			tagTable.dropIndexOnline("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
+			// Ugh.  Only oracle supports using IDX_TAG_DEF_TP_CD_SYS to enforce this constraint.  The others will create another index.
+			// For Sql Server, should change the index to be unique with include columns.  Do this in 6.1
+			tagTable.dropIndex("20220429.8", "IDX_TAGDEF_TYPESYSCODE");
 			Map<DriverTypeEnum, String> addTagDefConstraint = new HashMap<>();
 			addTagDefConstraint.put(DriverTypeEnum.H2_EMBEDDED, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
 			addTagDefConstraint.put(DriverTypeEnum.MARIADB_10_1, "ALTER TABLE HFJ_TAG_DEF ADD CONSTRAINT IDX_TAGDEF_TYPESYSCODE UNIQUE (TAG_TYPE, TAG_CODE, TAG_SYSTEM)");
@@ -377,6 +390,21 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			version.executeRawSql("20220429.9", addTagDefConstraint);
 
 		}
+
+
+		// Fix for https://github.com/hapifhir/hapi-fhir-jpaserver-starter/issues/328
+		version.onTable("NPM_PACKAGE_VER")
+			.modifyColumn("20220501.1","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		version.onTable("NPM_PACKAGE_VER_RES")
+			.modifyColumn("20220501.2","FHIR_VERSION_ID").nonNullable().withType(ColumnTypeEnum.STRING, 20);
+
+		// Fix for https://gitlab.com/simpatico.ai/cdr/-/issues/3166
+		version.onTable("MPI_LINK")
+			.addIndex("20220613.1", "IDX_EMPI_MATCH_TGT_VER")
+			.unique(false)
+			.online(true)
+			.withColumns("MATCH_RESULT", "TARGET_PID", "VERSION");
 	}
 
 	/**

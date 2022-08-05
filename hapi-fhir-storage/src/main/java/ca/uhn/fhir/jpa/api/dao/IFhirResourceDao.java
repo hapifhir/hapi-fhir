@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.api.dao;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -278,6 +277,11 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Delete a list of resource Pids
+	 *
+	 * CAUTION: This list does not throw an exception if there are delete conflicts.  It should always be followed by
+	 * a call to DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(fhirContext, conflicts);
+	 * to actually throw the exception.  The reason this method doesn't do that itself is that it is expected to be
+	 * called repeatedly where an earlier conflict can be removed in a subsequent pass.
 	 *
 	 * @param theUrl             the original URL that triggered the delete
 	 * @param theResourceIds     the ids of the resources to be deleted

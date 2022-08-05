@@ -20,15 +20,17 @@ package ca.uhn.fhir.jpa.bulk.imprt.svc;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
-import ca.uhn.fhir.jpa.bulk.imprt.job.BulkImportJobConfig;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -42,10 +44,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -61,8 +60,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
@@ -73,13 +70,13 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
+
 	@Autowired
 	private ISchedulerService mySchedulerService;
+
 	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
-	@Autowired
-	@Qualifier(BatchConstants.BULK_IMPORT_JOB_NAME)
-	private org.springframework.batch.core.Job myBulkImportJob;
+	private IJobCoordinator myJobCoordinator;
+
 	@Autowired
 	private DaoConfig myDaoConfig;
 
@@ -159,15 +156,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	 */
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
-	public boolean activateNextReadyJob() {
+	public ActivateJobResult activateNextReadyJob() {
 		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
 			Logs.getBatchTroubleshootingLog().trace("Bulk import job execution is not enabled on this server. No action taken.");
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		if (!myRunningJobSemaphore.tryAcquire()) {
 			Logs.getBatchTroubleshootingLog().trace("Already have a running batch job, not going to check for more");
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		try {
@@ -177,7 +174,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}
 	}
 
-	private boolean doActivateNextReadyJob() {
+	private ActivateJobResult doActivateNextReadyJob() {
 		Optional<BulkImportJobEntity> jobToProcessOpt = Objects.requireNonNull(myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
 			Slice<BulkImportJobEntity> submittedJobs = myJobDao.findByStatus(page, BulkImportJobStatusEnum.READY);
@@ -188,14 +185,15 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}));
 
 		if (!jobToProcessOpt.isPresent()) {
-			return false;
+			return new ActivateJobResult(false, null);
 		}
 
 		BulkImportJobEntity bulkImportJobEntity = jobToProcessOpt.get();
 
 		String jobUuid = bulkImportJobEntity.getJobId();
+		String batchJobId = null;
 		try {
-			processJob(bulkImportJobEntity);
+			batchJobId = processJob(bulkImportJobEntity);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -206,11 +204,11 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 					jobEntity.setStatusMessage(e.getMessage());
 					myJobDao.save(jobEntity);
 				}
-				return false;
+				return new ActivateJobResult(false, null);
 			});
 		}
 
-		return true;
+		return new ActivateJobResult(true, batchJobId);
 	}
 
 	@Override
@@ -273,22 +271,21 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		myJobDao.delete(job);
 	}
 
-	private void processJob(BulkImportJobEntity theBulkExportJobEntity) throws JobParametersInvalidException {
+	private String processJob(BulkImportJobEntity theBulkExportJobEntity) {
 		String jobId = theBulkExportJobEntity.getJobId();
 		int batchSize = theBulkExportJobEntity.getBatchSize();
-		ValidateUtil.isTrueOrThrowInvalidRequest(batchSize > 0, "Batch size must be positive");
 
-		JobParametersBuilder parameters = new JobParametersBuilder()
-			.addString(BatchConstants.JOB_UUID_PARAMETER, jobId)
-			.addLong(BulkImportJobConfig.JOB_PARAM_COMMIT_INTERVAL, (long) batchSize);
+		Batch2BulkImportPullJobParameters jobParameters = new Batch2BulkImportPullJobParameters();
+		jobParameters.setJobId(jobId);
+		jobParameters.setBatchSize(batchSize);
 
-		if (isNotBlank(theBulkExportJobEntity.getJobDescription())) {
-			parameters.addString(BatchConstants.JOB_DESCRIPTION, theBulkExportJobEntity.getJobDescription());
-		}
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
+		request.setParameters(jobParameters);
 
 		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
 
-		myJobSubmitter.runJob(myBulkImportJob, parameters.toJobParameters());
+		return myJobCoordinator.startInstance(request).getJobId();
 	}
 
 	private void addFilesToJob(@Nonnull List<BulkImportJobFileJson> theInitialFiles, BulkImportJobEntity job, int nextSequence) {

@@ -1,0 +1,8 @@
+---
+type: add
+issue: 3776
+jira: SMILE-651
+title: "Previously, the HAPI FHIR CLI commands that made HTTP requests could only be used for HTTP endpoints. 
+This feature adds support for HTTPS endpoints by using TLS authentication for `ExampleDataUploader`, 
+`ExportConceptMapToCsvCommand`, `ImportCsvToConceptMapCommand`, `ReindexTerminologyCommand` and 
+`UploadTerminologyCommand`."

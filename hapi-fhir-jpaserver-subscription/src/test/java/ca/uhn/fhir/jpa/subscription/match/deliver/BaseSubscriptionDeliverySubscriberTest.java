@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -22,12 +23,12 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -36,12 +37,16 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
+import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -172,6 +177,41 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
+	public void testMessageSubscriber_PermitsInterceptorsToModifyOutgoingEnvelope() throws URISyntaxException {
+
+		//Given: We setup mocks, and have this mock interceptor inject those headers.
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY), ArgumentMatchers.any(HookParams.class))).thenAnswer(t -> {
+			HookParams argument = t.getArgument(1, HookParams.class);
+			ResourceModifiedJsonMessage resourceModifiedJsonMessage = argument.get(ResourceModifiedJsonMessage.class);
+			resourceModifiedJsonMessage.getHapiHeaders().getCustomHeaders().put("foo", List.of("bar", "bar2"));
+			return true;
+		});
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_MESSAGE_DELIVERY), any())).thenReturn(false);
+		when(myChannelFactory.getOrCreateProducer(any(), any(), any())).thenReturn(myChannelProducer);
+
+		CanonicalSubscription subscription = generateSubscription();
+		Patient patient = generatePatient();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		//When: We submit the message for delivery
+		myMessageSubscriber.handleMessage(payload);
+
+		//Then: The receiving channel should also receive the custom headers.
+		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
+		verify(myChannelProducer).send(captor.capture());
+		final List<ResourceModifiedJsonMessage> messages = captor.getAllValues();
+		assertThat(messages, hasSize(1));
+		ResourceModifiedJsonMessage receivedMessage = messages.get(0);
+		Collection<String> foo = (Collection<String>) receivedMessage.getHapiHeaders().getCustomHeaders().get("foo");
+
+		assertThat(foo, containsInAnyOrder("bar", "bar2"));
+	}
+
+	@Test
 	public void testRestHookDeliveryAbortedByInterceptor() {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(false);
@@ -276,14 +316,14 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 
-	@NotNull
+	@Nonnull
 	private Patient generatePatient() {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		return patient;
 	}
 
-	@NotNull
+	@Nonnull
 	private CanonicalSubscription generateSubscription() {
 		CanonicalSubscription subscription = new CanonicalSubscription();
 		subscription.setIdElement(new IdType("Subscription/123"));

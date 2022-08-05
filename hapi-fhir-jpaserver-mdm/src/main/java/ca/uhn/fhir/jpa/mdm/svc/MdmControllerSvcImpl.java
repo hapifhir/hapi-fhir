@@ -20,11 +20,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
-import ca.uhn.fhir.mdm.api.IMdmBatchJobSubmitterFactory;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkCreateSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
@@ -33,14 +36,17 @@ import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
+import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.provider.MultiUrlProcessor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -74,9 +81,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	@Autowired
 	IMdmLinkCreateSvc myIMdmLinkCreateSvc;
 	@Autowired
-	IMdmBatchJobSubmitterFactory myMdmBatchJobSubmitterFactory;
-	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+	@Autowired
+	IJobCoordinator myJobCoordinator;
 
 	public MdmControllerSvcImpl() {
 	}
@@ -167,9 +174,26 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IBaseParameters submitMdmClearJob(List<String> theUrls, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
-		MultiUrlProcessor multiUrlProcessor = new MultiUrlProcessor(myFhirContext, myMdmBatchJobSubmitterFactory.getClearJobSubmitter());
-		return multiUrlProcessor.processUrls(theUrls, multiUrlProcessor.getBatchSize(theBatchSize), theRequestDetails);
+	public IBaseParameters submitMdmClearJob(@Nonnull List<String> theResourceNames, IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+		MdmClearJobParameters params = new MdmClearJobParameters();
+		params.setResourceNames(theResourceNames);
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+			params.setBatchSize(theBatchSize.getValue().intValue());
+		}
+
+		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		params.setRequestPartitionId(requestPartition);
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(MdmClearAppCtx.JOB_MDM_CLEAR);
+		request.setParameters(params);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
+		String id = response.getJobId();
+
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		return retVal;
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.MetaUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -32,8 +33,11 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.InstantType;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -73,6 +77,13 @@ public interface ITestDataBuilder {
 			resourceDef.getChildByName("name").getMutator().addValue(t, humanName);
 		};
 	}
+
+
+	/** Patient.name.given */
+	default <T extends IBaseResource>  Consumer<T> withGiven(String theName) {
+		return withPrimitiveAttribute("name.given", theName);
+	}
+
 
 	/**
 	 * Set Patient.birthdate
@@ -135,11 +146,35 @@ public interface ITestDataBuilder {
 	}
 
 	default Consumer<IBaseResource> withTag(String theSystem, String theCode) {
-		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode).setDisplay(theCode);
+		return t -> t.getMeta().addTag().setSystem(theSystem).setCode(theCode);
+	}
+
+	default Consumer<IBaseResource> withSecurity(String theSystem, String theCode) {
+		return t -> t.getMeta().addSecurity().setSystem(theSystem).setCode(theCode);
+	}
+
+	default Consumer<IBaseResource> withProfile(String theProfile) {
+		return t -> t.getMeta().addProfile(theProfile);
+	}
+
+	default Consumer<IBaseResource> withSource(FhirContext theContext, String theSource) {
+		return t -> MetaUtil.setSource(theContext, t.getMeta(), theSource);
+	}
+
+	default Consumer<IBaseResource> withLastUpdated(Date theLastUpdated) {
+		return t -> t.getMeta().setLastUpdated(theLastUpdated);
+	}
+
+	default Consumer<IBaseResource> withLastUpdated(String theIsoDate) {
+		return t -> t.getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
+	}
+
+	default IIdType createObservation(Collection<Consumer<IBaseResource>> theModifiers) {
+		return createResource("Observation", theModifiers.toArray(new Consumer[0]));
 	}
 
 	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {
@@ -293,5 +328,4 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
-
 }

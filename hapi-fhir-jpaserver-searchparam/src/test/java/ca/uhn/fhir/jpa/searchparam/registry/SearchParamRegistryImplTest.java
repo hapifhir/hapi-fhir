@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -141,6 +142,11 @@ public class SearchParamRegistryImplTest {
 			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
 			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 			return retval;
+		}
+
+		@Bean
+		IValidationSupport validationSupport() {
+			return mock(IValidationSupport.class);
 		}
 
 	}

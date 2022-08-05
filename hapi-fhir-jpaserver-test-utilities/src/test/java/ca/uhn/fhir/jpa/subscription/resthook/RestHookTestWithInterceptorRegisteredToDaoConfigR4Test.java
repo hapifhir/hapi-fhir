@@ -200,6 +200,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigR4Test extends Base
 		assertFalse(observation2.getId().isEmpty());
 	}
 
+	// TODO KHS this test has been failing intermittently
 	@Test
 	public void testRestHookSubscriptionXml() throws Exception {
 		String payload = "application/xml";

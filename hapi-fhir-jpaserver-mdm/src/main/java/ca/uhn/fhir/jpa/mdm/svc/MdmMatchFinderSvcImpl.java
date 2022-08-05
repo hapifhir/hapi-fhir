@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +36,8 @@ import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 
 @Service
 public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
@@ -57,7 +59,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			.map(candidate -> new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
 			.collect(Collectors.toList());
 
-		ourLog.info("Found {} matched targets for {}", matches.size(), theResourceType);
+		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
 		return matches;
 	}
 

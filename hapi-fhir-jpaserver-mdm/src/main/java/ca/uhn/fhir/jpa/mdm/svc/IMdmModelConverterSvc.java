@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 
 /**
@@ -34,6 +35,6 @@ public interface IMdmModelConverterSvc {
 	 * @param theLink Link to convert
 	 * @return Returns the converted link
 	 */
-	public MdmLinkJson toJson(MdmLink theLink);
+	public MdmLinkJson toJson(IMdmLink theLink);
 
 }

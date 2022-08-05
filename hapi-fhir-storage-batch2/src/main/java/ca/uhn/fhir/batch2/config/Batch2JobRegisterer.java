@@ -20,11 +20,10 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -39,14 +38,14 @@ public class Batch2JobRegisterer {
 
 
 	@PostConstruct
-	public void start() throws DuplicateJobException {
-
+	public void start() {
 		Map<String, JobDefinition> batchJobs = myApplicationContext.getBeansOfType(JobDefinition.class);
 		JobDefinitionRegistry jobRegistry = myApplicationContext.getBean(JobDefinitionRegistry.class);
 
 		for (Map.Entry<String, JobDefinition> next : batchJobs.entrySet()) {
-			ourLog.info("Registering Batch2 Job Definition: {} / {}", next.getValue().getJobDefinitionId(), next.getValue().getJobDefinitionVersion());
-			jobRegistry.addJobDefinition(next.getValue());
+			JobDefinition<?> jobDefinition = next.getValue();
+			ourLog.info("Registering Batch2 Job Definition: {} / {}", jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion());
+			jobRegistry.addJobDefinition(jobDefinition);
 		}
 	}
 

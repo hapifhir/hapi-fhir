@@ -75,7 +75,6 @@ import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -93,12 +92,10 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.jena.sparql.engine.QueryIterator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -345,7 +342,7 @@ public class SearchBuilder implements ISearchBuilder {
 				fulltextMatchIds = queryHibernateSearchForEverythingPids();
 				resultCount = fulltextMatchIds.size();
 			} else {
-				fulltextExecutor = myFulltextSearchSvc.searchAsync(myResourceName, myParams);
+				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(myResourceName, myParams, myMaxResultsToFetch);
 			}
 
 			if (fulltextExecutor == null) {
@@ -375,17 +372,20 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.getNearDistanceParam() == null &&
 						theParams.getLastUpdated() == null &&
 						theParams.getEverythingMode() == null &&
-						theParams.getOffset() == null &&
-						// or sorting?
-						theParams.getSort() == null
+						theParams.getOffset() == null
+//						&&
+//						// or sorting?
+//						theParams.getSort() == null
 					);
 
 			if (canSkipDatabase) {
+				ourLog.trace("Query finished after HSearch.  Skip db query phase");
 				if (theMaximumResults != null) {
 					fulltextExecutor = SearchQueryExecutors.limited(fulltextExecutor, theMaximumResults);
 				}
 				queries.add(fulltextExecutor);
 			} else {
+				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
 				// wipmb change chunk to take iterator
@@ -429,7 +429,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private List<ResourcePersistentId> executeLastNAgainstIndex(Integer theMaximumResults) {
 		// Can we use our hibernate search generated index on resource to support lastN?:
-		if (myDaoConfig.isAdvancedLuceneIndexing()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing()) {
 			if (myFulltextSearchSvc == null) {
 				throw new InvalidRequestException(Msg.code(2027) + "LastN operation is not enabled on this service, can not process this request");
 			}
@@ -553,7 +553,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 			}
 
-			queryStack3.addPredicateEverythingOperation(myResourceName, targetPids.toArray(new Long[0]));
+			List<String> typeSourceResources = new ArrayList<>();
+			if (myParams.get(Constants.PARAM_TYPE) != null) {
+				typeSourceResources.addAll(extractTypeSourceResourcesFromParams());
+			}
+
+			queryStack3.addPredicateEverythingOperation(myResourceName, typeSourceResources, targetPids.toArray(new Long[0]));
 		} else {
 			/*
 			 * If we're doing a filter, always use the resource table as the root - This avoids the possibility of
@@ -636,6 +641,29 @@ public class SearchBuilder implements ISearchBuilder {
 
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
+	}
+
+	private Collection<String> extractTypeSourceResourcesFromParams() {
+
+		List<List<IQueryParameterType>> listOfList = myParams.get(Constants.PARAM_TYPE);
+
+		// first off, let's flatten the list of list
+		List<IQueryParameterType> iQueryParameterTypesList = listOfList.stream().flatMap(List::stream).collect(Collectors.toList());
+
+		// then, extract all elements of each CSV into one big list
+		List<String> resourceTypes = iQueryParameterTypesList
+			.stream()
+			.map(param -> ((StringParam) param).getValue())
+			.map(csvString -> List.of(csvString.split(",")))
+			.flatMap(List::stream).collect(Collectors.toList());
+
+		// remove leading/trailing whitespaces if any and remove duplicates
+		Set<String> retVal = resourceTypes
+			.stream()
+			.map(String::trim)
+			.collect(Collectors.toSet());
+
+		return retVal;
 	}
 
 	private boolean isPotentiallyContainedReferenceParameterExistsAtRoot(SearchParameterMap theParams) {
@@ -941,9 +969,9 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
-
 		// is storage enabled?
-		return myDaoConfig.isStoreResourceInLuceneIndex() &&
+		return myDaoConfig.isStoreResourceInHSearchIndex() &&
+			myDaoConfig.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
@@ -953,7 +981,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private List<IBaseResource> loadResourcesFromElasticSearch(Collection<ResourcePersistentId> thePids) {
 		// Do we use the fulltextsvc via hibernate-search to load resources or be backwards compatible with older ES only impl
 		// to handle lastN?
-		if (myDaoConfig.isAdvancedLuceneIndexing() && myDaoConfig.isStoreResourceInLuceneIndex()) {
+		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
 			// wipmb standardize on ResourcePersistentId
@@ -1465,7 +1493,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private ResourcePersistentId myNext;
 		private ISearchQueryExecutor myResultsIterator;
-		private boolean myStillNeedToFetchIncludes;
+		private boolean myFetchIncludesForEverythingOperation;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
 		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
@@ -1476,9 +1504,9 @@ public class SearchBuilder implements ISearchBuilder {
 			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
-			// Includes are processed inline for $everything query
-			if (myParams.getEverythingMode() != null) {
-				myStillNeedToFetchIncludes = true;
+			// Includes are processed inline for $everything query when we don't have a '_type' specified
+			if (myParams.getEverythingMode() != null && !myParams.containsKey(Constants.PARAM_TYPE)) {
+				myFetchIncludesForEverythingOperation = true;
 			}
 
 			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
@@ -1573,9 +1601,9 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 
 					if (myNext == null) {
-						if (myStillNeedToFetchIncludes) {
+						if (myFetchIncludesForEverythingOperation) {
 							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
-							myStillNeedToFetchIncludes = false;
+							myFetchIncludesForEverythingOperation = false;
 						}
 						if (myIncludesIterator != null) {
 							while (myIncludesIterator.hasNext()) {

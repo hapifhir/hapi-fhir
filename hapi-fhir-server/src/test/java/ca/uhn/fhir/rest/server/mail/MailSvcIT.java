@@ -71,8 +71,10 @@ public class MailSvcIT {
 	public void testSendMailWithInvalidToAddress() {
 		// setup
 		final Email email = withEmail("xyz");
+
 		// execute
 		fixture.sendMail(email);
+
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();

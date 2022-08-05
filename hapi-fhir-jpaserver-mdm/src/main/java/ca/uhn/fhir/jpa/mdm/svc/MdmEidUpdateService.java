@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
@@ -109,8 +111,8 @@ public class MdmEidUpdateService {
 		}
 	}
 
-	private boolean candidateIsSameAsMdmLinkGoldenResource(MdmLink theExistingMatchLink, MatchedGoldenResourceCandidate theGoldenResourceCandidate) {
-		return theExistingMatchLink.getGoldenResourcePid().equals(theGoldenResourceCandidate.getCandidateGoldenResourcePid().getIdAsLong());
+	private boolean candidateIsSameAsMdmLinkGoldenResource(IMdmLink theExistingMatchLink, MatchedGoldenResourceCandidate theGoldenResourceCandidate) {
+		return theExistingMatchLink.getGoldenResourcePersistenceId().equals(theGoldenResourceCandidate.getCandidateGoldenResourcePid());
 	}
 
 	private void createNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext, IAnyResource theOldGoldenResource) {
@@ -161,13 +163,13 @@ public class MdmEidUpdateService {
 			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedGoldenResource, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 
-			Optional<MdmLink> theExistingMatchOrPossibleMatchLink = myMdmLinkDaoSvc.getMatchedOrPossibleMatchedLinkForSource(theResource);
+			Optional<? extends IMdmLink> theExistingMatchOrPossibleMatchLink = myMdmLinkDaoSvc.getMatchedOrPossibleMatchedLinkForSource(theResource);
 			myExistingGoldenResource = null;
 
 			if (theExistingMatchOrPossibleMatchLink.isPresent()) {
-				MdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
-				Long existingGoldenResourcePid = mdmLink.getGoldenResourcePid();
-				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(new ResourcePersistentId(existingGoldenResourcePid), resourceType);
+				IMdmLink mdmLink = theExistingMatchOrPossibleMatchLink.get();
+				ResourcePersistentId existingGoldenResourcePid = mdmLink.getGoldenResourcePersistenceId();
+				myExistingGoldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(existingGoldenResourcePid, resourceType);
 				myRemainsMatchedToSameGoldenResource = candidateIsSameAsMdmLinkGoldenResource(mdmLink, theMatchedGoldenResourceCandidate);
 			} else {
 				myRemainsMatchedToSameGoldenResource = false;
@@ -182,6 +184,7 @@ public class MdmEidUpdateService {
 			return myIncomingResourceHasAnEid;
 		}
 
+		@Nullable
 		public IAnyResource getExistingGoldenResource() {
 			return myExistingGoldenResource;
 		}

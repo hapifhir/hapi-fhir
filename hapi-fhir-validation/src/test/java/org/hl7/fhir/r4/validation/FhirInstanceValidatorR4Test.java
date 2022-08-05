@@ -355,7 +355,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: 'All FHIR elements must have a @value or children' Rule 'All FHIR elements must have a @value or children' Failed", all.get(0).getMessage());
+		assertThat(all.get(0).getMessage(), containsString("All FHIR elements must have a @value or children"));
 	}
 
 	/**

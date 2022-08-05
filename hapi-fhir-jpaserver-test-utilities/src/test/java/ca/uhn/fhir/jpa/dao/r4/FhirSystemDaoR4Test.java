@@ -676,7 +676,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Test
 	public void testReindexingSingleStringHashValueIsDeleted() {
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 		Patient p = new Patient();
 		p.addName().setFamily("family1");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -1479,7 +1479,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		request.addEntry().setResource(o).getRequest().setMethod(HTTPVerb.POST);
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
-		when(mySrd.getFhirContext().getResourceType(any(Observation.class))).thenReturn("Observation");
 
 		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
@@ -1534,7 +1533,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		mySystemDao.transaction(mySrd, request1);
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
-		when(mySrd.getFhirContext().getResourceType(any(Observation.class))).thenReturn("Observation");
 
 		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override

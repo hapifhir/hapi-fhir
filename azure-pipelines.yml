@@ -47,7 +47,7 @@ jobs:
                # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
                options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
                # These are JVM options (and don't show up in the build logs)
-               mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+               mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
                jdkVersionOption: 1.11
          -  task: CopyFiles@2
             condition: always()
@@ -60,7 +60,7 @@ jobs:
             condition: always()
             inputs:
                targetPath: '$(Build.ArtifactStagingDirectory)/'
-               artifactName: 'full_logs.zip'
+               artifactName: 'full_logs_$(Build.BuildId)_$(Build.BuildNumber)_$(System.JobId).zip'
          -  script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
             displayName: 'codecov'
          -  task: PublishTestResults@2

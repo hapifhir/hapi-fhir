@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,20 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 		try {
 			myClient.create().resource(pract).execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage(), containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"));
+			String errorMessage = e.getMessage();
+			assertThat(errorMessage, CoreMatchers.allOf(
+				containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"),
+
+				// Error message should contain all resources providers
+				containsString("Patient"),
+				containsString("Practitioner"),
+				containsString("SearchParameter"),
+
+				// Error message should not contain the registered plain providers
+				Matchers.not(containsString("ValueSet")),
+				Matchers.not(containsString("CodeSystem")),
+				Matchers.not(containsString("OperationDefinition"))
+			));
 		}
 	}
 

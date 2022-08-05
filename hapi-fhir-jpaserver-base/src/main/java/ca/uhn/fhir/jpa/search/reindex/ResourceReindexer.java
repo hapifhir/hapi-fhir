@@ -41,6 +41,9 @@ import org.springframework.stereotype.Service;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * @deprecated
+ */
 @Service
 public class ResourceReindexer {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexer.class);
