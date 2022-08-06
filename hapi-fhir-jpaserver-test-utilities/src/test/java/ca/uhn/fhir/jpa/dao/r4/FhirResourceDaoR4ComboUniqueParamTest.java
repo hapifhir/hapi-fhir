@@ -843,7 +843,7 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 		Coverage cov = new Coverage();
 		cov.getBeneficiary().setReference(id2.getValue());
-		cov.addIdentifier().setSystem("urn:foo:bar").setValue("123");
+		cov.addIdentifier().setSystem("urn:foo:bar").setValue("729");
 		IIdType id3 = myCoverageDao.create(cov).getId().toUnqualifiedVersionless();
 
 		createUniqueIndexCoverageBeneficiary();
