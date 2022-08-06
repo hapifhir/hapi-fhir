@@ -168,7 +168,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}
 
 		try {
-			return doActivateNextReadyJob();
+			ActivateJobResult retval = doActivateNextReadyJob();
+			ourLog.info("Batch job submitted with batch job id {}", retval.jobId);
+			return retval;
 		} finally {
 			myRunningJobSemaphore.release();
 		}
