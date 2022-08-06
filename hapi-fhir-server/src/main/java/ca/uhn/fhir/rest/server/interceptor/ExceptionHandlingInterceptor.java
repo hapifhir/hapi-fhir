@@ -121,7 +121,7 @@ public class ExceptionHandlingInterceptor {
 	 * Also, it strips the content-encoding header if present, as the method outcome will negotiate its own.
 	 */
 	private void resetOutputStreamIfPossible(IRestfulResponse response) {
-		if (response instanceof ServletRestfulResponse) {
+		if (response instanceof HttpServletResponse) {
 			HttpServletResponse servletResponse = ((ServletRestfulResponse) response).getRequestDetails().getServletResponse();
 			Collection<String> headerNames = servletResponse.getHeaderNames();
 			Map<String, Collection<String>> oldHeaders = new HashedMap<>();
