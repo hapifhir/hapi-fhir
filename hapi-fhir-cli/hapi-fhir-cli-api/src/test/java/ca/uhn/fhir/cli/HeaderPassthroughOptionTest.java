@@ -15,6 +15,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,16 +47,19 @@ public class HeaderPassthroughOptionTest {
 	private int myPort;
 	private final String headerKey1 = "test-header-key-1";
 	private final String headerValue1 = "test header value-1";
-	private static final String myConceptsFileName = "target/concepts.csv";
-	private static File myConceptsFile = new File(myConceptsFileName);
-	private static final String myHierarchyFileName = "target/hierarchy.csv";
-	private static File myHierarchyFile = new File(myHierarchyFileName);
+	private static final String ourConceptsFileName = "target/concepts.csv";
+	private static final String ourHierarchyFileName = "target/hierarchy.csv";
 	private final CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	private final UploadTerminologyCommand testedCommand =
 		new RequestCapturingUploadTerminologyCommand(myCapturingInterceptor);
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
+
+	@BeforeAll
+	public static void beforeAll() throws IOException {
+		writeConceptAndHierarchyFiles();
+	}
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
@@ -69,21 +73,19 @@ public class HeaderPassthroughOptionTest {
 		myServer.setHandler(proxyHandler);
 		JettyUtil.startServer(myServer);
 		myPort = JettyUtil.getPortForStartedServer(myServer);
-		writeConceptAndHierarchyFiles();
 		when(myTermLoaderSvc.loadCustom(eq("http://foo"), anyList(), any()))
 			.thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 	}
 
 	@Test
 	public void oneHeader() throws Exception {
-		writeConceptAndHierarchyFiles();
-		String[] args = new String[] {
+		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName,
+			"-d", ourConceptsFileName,
+			"-d", ourHierarchyFileName,
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
 		};
 
@@ -102,16 +104,15 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersSameKey() throws Exception {
-		writeConceptAndHierarchyFiles();
 		final String headerValue2 = "test header value-2";
 
-		String[] args = new String[] {
+		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName,
+			"-d", ourConceptsFileName,
+			"-d", ourHierarchyFileName,
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
 			"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
 		};
@@ -133,17 +134,16 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersDifferentKeys() throws Exception {
-		writeConceptAndHierarchyFiles();
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 
-		String[] args = new String[] {
+		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", myConceptsFileName,
-			"-d", myHierarchyFileName,
+			"-d", ourConceptsFileName,
+			"-d", ourHierarchyFileName,
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
 			"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
 		};
@@ -164,22 +164,21 @@ public class HeaderPassthroughOptionTest {
 		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
 	}
 
-	private synchronized void writeConceptAndHierarchyFiles() throws IOException {
-		if (!myConceptsFile.exists()) {
-			try (FileWriter w = new FileWriter(myConceptsFile, false)) {
-				w.append("CODE,DISPLAY\n");
-				w.append("ANIMALS,Animals\n");
-				w.append("CATS,Cats\n");
-				w.append("DOGS,Dogs\n");
-			}
+	private static void writeConceptAndHierarchyFiles() throws IOException {
+		File conceptsFile = new File(ourConceptsFileName);
+		File hierarchyFile = new File(ourHierarchyFileName);
+
+		try (FileWriter w = new FileWriter(conceptsFile, false)) {
+			w.append("CODE,DISPLAY\n");
+			w.append("ANIMALS,Animals\n");
+			w.append("CATS,Cats\n");
+			w.append("DOGS,Dogs\n");
 		}
 
-		if (!myHierarchyFile.exists()) {
-			try (FileWriter w = new FileWriter(myHierarchyFile, false)) {
-				w.append("PARENT,CHILD\n");
-				w.append("ANIMALS,CATS\n");
-				w.append("ANIMALS,DOGS\n");
-			}
+		try (FileWriter w = new FileWriter(hierarchyFile, false)) {
+			w.append("PARENT,CHILD\n");
+			w.append("ANIMALS,CATS\n");
+			w.append("ANIMALS,DOGS\n");
 		}
 	}
 
