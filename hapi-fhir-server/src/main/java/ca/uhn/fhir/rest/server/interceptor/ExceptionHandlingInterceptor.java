@@ -108,7 +108,6 @@ public class ExceptionHandlingInterceptor {
 			resetOutputStreamIfPossible(response);
 		} catch (Throwable t) {
 			ourLog.error("HAPI-FHIR was unable to reset the output stream during exception handling. The root causes follows:", t);
-			return null;
 		}
 
 		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
@@ -121,8 +120,9 @@ public class ExceptionHandlingInterceptor {
 	 * Also, it strips the content-encoding header if present, as the method outcome will negotiate its own.
 	 */
 	private void resetOutputStreamIfPossible(IRestfulResponse response) {
-		if (response instanceof HttpServletResponse) {
-			HttpServletResponse servletResponse = ((ServletRestfulResponse) response).getRequestDetails().getServletResponse();
+		if (response.getClass().isAssignableFrom(ServletRestfulResponse.class)) {
+			ServletRestfulResponse servletRestfulResponse = (ServletRestfulResponse) response;
+			HttpServletResponse servletResponse = servletRestfulResponse.getRequestDetails().getServletResponse();
 			Collection<String> headerNames = servletResponse.getHeaderNames();
 			Map<String, Collection<String>> oldHeaders = new HashedMap<>();
 			for (String headerName : headerNames) {
