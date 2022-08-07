@@ -59,7 +59,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
-	private static final AtomicInteger myFilenameCounter = new AtomicInteger();
+	private static final AtomicInteger ourFilenameCounter = new AtomicInteger();
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
@@ -79,7 +79,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void oneHeader() throws Exception {
-		int filenameCounter = myFilenameCounter.incrementAndGet();
+		int filenameCounter = ourFilenameCounter.incrementAndGet();
 		writeConceptAndHierarchyFiles(filenameCounter);
 
 		String[] args = new String[]{
@@ -107,7 +107,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersSameKey() throws Exception {
-		int filenameCounter = myFilenameCounter.incrementAndGet();
+		int filenameCounter = ourFilenameCounter.incrementAndGet();
 		writeConceptAndHierarchyFiles(filenameCounter);
 
 		final String headerValue2 = "test header value-2";
@@ -140,7 +140,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersDifferentKeys() throws Exception {
-		int filenameCounter = myFilenameCounter.incrementAndGet();
+		int filenameCounter = ourFilenameCounter.incrementAndGet();
 		writeConceptAndHierarchyFiles(filenameCounter);
 
 		final String headerKey2 = "test-header-key-2";
