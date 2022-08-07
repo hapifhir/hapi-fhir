@@ -172,7 +172,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS") + " " + StringUtils.defaultString(theDisplay, "(null)") ;
+		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS") + " " + defaultString(theDisplay, "(null)") ;
 		return loadFromCache(myValidateCodeCache, key, t -> super.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
