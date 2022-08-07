@@ -140,8 +140,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
+				ourLog.info("Current working directory {}", System.getProperty("user.dir"));
+				File dataFile = new File(nextDataFile);
+				ourLog.info("Reading {}", dataFile.getAbsolutePath());
 
-				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
+				try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
 					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
 					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
 

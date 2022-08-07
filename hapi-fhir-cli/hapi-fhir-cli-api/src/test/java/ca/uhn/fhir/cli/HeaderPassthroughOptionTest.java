@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class HeaderPassthroughOptionTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(HeaderPassthroughOptionTest.class);
+
 	final String FHIR_VERSION = "r4";
 	private FhirContext myCtx = FhirContext.forR4();
 	private Server myServer;
@@ -165,21 +169,27 @@ public class HeaderPassthroughOptionTest {
 	}
 
 	private static void writeConceptAndHierarchyFiles() throws IOException {
+		ourLog.info("Current working directory {}", System.getProperty("user.dir"));
+
 		File conceptsFile = new File(ourConceptsFileName);
 		File hierarchyFile = new File(ourHierarchyFileName);
 
+		ourLog.info("Writing {}", conceptsFile.getAbsolutePath());
 		try (FileWriter w = new FileWriter(conceptsFile, false)) {
 			w.append("CODE,DISPLAY\n");
 			w.append("ANIMALS,Animals\n");
 			w.append("CATS,Cats\n");
 			w.append("DOGS,Dogs\n");
 		}
+		ourLog.info("Can read {}: {}", ourConceptsFileName, conceptsFile.canRead());
 
+		ourLog.info("Writing {}", hierarchyFile.getAbsolutePath());
 		try (FileWriter w = new FileWriter(hierarchyFile, false)) {
 			w.append("PARENT,CHILD\n");
 			w.append("ANIMALS,CATS\n");
 			w.append("ANIMALS,DOGS\n");
 		}
+		ourLog.info("Can read {}: {}", ourHierarchyFileName, hierarchyFile.canRead());
 	}
 
 	private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {
