@@ -166,12 +166,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
-		if (theParams.getCount() != null) {
-			return theParams.getCount();
-		}
-
 		if (theMax != null) {
 			return theMax;
+		}
+
+		// wipmb we should really pass this in.
+		if (theParams.getCount() != null) {
+			return theParams.getCount();
 		}
 
 		return DEFAULT_MAX_NON_PAGED_SIZE;
