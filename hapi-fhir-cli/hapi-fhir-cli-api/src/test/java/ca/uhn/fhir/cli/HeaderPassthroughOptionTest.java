@@ -15,7 +15,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.IdType;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,11 +59,7 @@ public class HeaderPassthroughOptionTest {
 
 	@Mock
 	protected ITermLoaderSvc myTermLoaderSvc;
-
-	@BeforeAll
-	public static void beforeAll() throws IOException {
-		writeConceptAndHierarchyFiles();
-	}
+	private static final AtomicInteger myFilenameCounter = new AtomicInteger();
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
@@ -83,13 +79,16 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void oneHeader() throws Exception {
+		int filenameCounter = myFilenameCounter.incrementAndGet();
+		writeConceptAndHierarchyFiles(filenameCounter);
+
 		String[] args = new String[]{
 			"-v", FHIR_VERSION,
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", ourConceptsFileName,
-			"-d", ourHierarchyFileName,
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\""
 		};
 
@@ -108,6 +107,9 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersSameKey() throws Exception {
+		int filenameCounter = myFilenameCounter.incrementAndGet();
+		writeConceptAndHierarchyFiles(filenameCounter);
+
 		final String headerValue2 = "test header value-2";
 
 		String[] args = new String[]{
@@ -115,8 +117,8 @@ public class HeaderPassthroughOptionTest {
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", ourConceptsFileName,
-			"-d", ourHierarchyFileName,
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
 			"-hp", "\"" + headerKey1 + ":" + headerValue2 + "\""
 		};
@@ -138,6 +140,9 @@ public class HeaderPassthroughOptionTest {
 
 	@Test
 	public void twoHeadersDifferentKeys() throws Exception {
+		int filenameCounter = myFilenameCounter.incrementAndGet();
+		writeConceptAndHierarchyFiles(filenameCounter);
+
 		final String headerKey2 = "test-header-key-2";
 		final String headerValue2 = "test header value-2";
 
@@ -146,8 +151,8 @@ public class HeaderPassthroughOptionTest {
 			"-m", "SNAPSHOT",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
-			"-d", ourConceptsFileName,
-			"-d", ourHierarchyFileName,
+			"-d", getConceptFilename(filenameCounter),
+			"-d", getHierarchyFilename(filenameCounter),
 			"-hp", "\"" + headerKey1 + ":" + headerValue1 + "\"",
 			"-hp", "\"" + headerKey2 + ":" + headerValue2 + "\""
 		};
@@ -168,11 +173,9 @@ public class HeaderPassthroughOptionTest {
 		assertThat(allHeaders.get(headerKey2), hasItems(headerValue2));
 	}
 
-	private static void writeConceptAndHierarchyFiles() throws IOException {
-		ourLog.info("Current working directory {}", System.getProperty("user.dir"));
-
-		File conceptsFile = new File(ourConceptsFileName);
-		File hierarchyFile = new File(ourHierarchyFileName);
+	private static void writeConceptAndHierarchyFiles(int theFilenameCounter) throws IOException {
+		File conceptsFile = new File(getConceptFilename(theFilenameCounter));
+		File hierarchyFile = new File(getHierarchyFilename(theFilenameCounter));
 
 		ourLog.info("Writing {}", conceptsFile.getAbsolutePath());
 		try (FileWriter w = new FileWriter(conceptsFile, false)) {
@@ -190,6 +193,14 @@ public class HeaderPassthroughOptionTest {
 			w.append("ANIMALS,DOGS\n");
 		}
 		ourLog.info("Can read {}: {}", ourHierarchyFileName, hierarchyFile.canRead());
+	}
+
+	private static String getConceptFilename(int theFilenameCounter) {
+		return ourConceptsFileName.replace(".csv", theFilenameCounter + ".csv");
+	}
+
+	private static String getHierarchyFilename(int theFilenameCounter) {
+		return ourHierarchyFileName.replace(".csv", theFilenameCounter + ".csv");
 	}
 
 	private class RequestCapturingUploadTerminologyCommand extends UploadTerminologyCommand {

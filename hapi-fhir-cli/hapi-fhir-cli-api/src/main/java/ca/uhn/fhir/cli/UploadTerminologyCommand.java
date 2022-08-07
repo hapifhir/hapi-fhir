@@ -140,7 +140,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
-				ourLog.info("Current working directory {}", System.getProperty("user.dir"));
 				File dataFile = new File(nextDataFile);
 				ourLog.info("Reading {}", dataFile.getAbsolutePath());
 
@@ -171,6 +170,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							IOUtils.copy(countingInputStream, zipOutputStream);
 							haveCompressedContents = true;
 							compressedSourceBytesCount += countingInputStream.getCount();
+							++compressedFileCount;
 
 							zipOutputStream.flush();
 							ourLog.info("Finished compressing {}", nextDataFile);
