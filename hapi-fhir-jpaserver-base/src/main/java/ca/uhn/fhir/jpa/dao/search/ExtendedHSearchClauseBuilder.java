@@ -676,7 +676,7 @@ public class ExtendedHSearchClauseBuilder {
 		CompositeParam<?, ?> compositeParam = (CompositeParam<?, ?>) theOrParam;
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(compositeParam.getRightValue());
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-		setPrefixedQuantityPredicate(theOrTerms, activePrefix, qtyParam, fieldPath + "." + COMPOS_QTY_VALUE);
+		setPrefixedNumericPredicate(theOrTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + COMPOS_QTY_VALUE, true);
 
 		if ( isNotBlank(qtyParam.getSystem()) ) {
 			theOrTerms.must(myPredicateFactory.match().field(fieldPath + "." + COMPOS_QTY_SYSTEM).matching(qtyParam.getSystem()));

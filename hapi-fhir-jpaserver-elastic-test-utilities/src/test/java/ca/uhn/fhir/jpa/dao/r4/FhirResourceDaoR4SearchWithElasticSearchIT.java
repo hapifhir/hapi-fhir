@@ -120,7 +120,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HibernateSearchIndexWriter.COMPOS_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.COMPOS_PARAM_NAME;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -2655,12 +2655,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@BeforeEach
 		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(true);
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
 		}
 
 		@AfterEach
 		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInLuceneIndex(new DaoConfig().isStoreResourceInLuceneIndex());
+			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
 		}
 
 
