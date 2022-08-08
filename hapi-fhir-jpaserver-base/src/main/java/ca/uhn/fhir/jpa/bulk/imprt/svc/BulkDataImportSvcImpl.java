@@ -27,10 +27,10 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
+import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
@@ -98,12 +98,12 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theJobDescription.getProcessingMode(), "Job File Processing mode must not be null");
 		ValidateUtil.isTrueOrThrowInvalidRequest(theJobDescription.getBatchSize() > 0, "Job File Batch Size must be > 0");
 
-		String jobId = UUID.randomUUID().toString();
+		String biJobId = UUID.randomUUID().toString();
 
-		ourLog.info("Creating new Bulk Import job with {} files, assigning job ID: {}", theInitialFiles.size(), jobId);
+		ourLog.info("Creating new Bulk Import job with {} files, assigning bijob ID: {}", theInitialFiles.size(), biJobId);
 
 		BulkImportJobEntity job = new BulkImportJobEntity();
-		job.setJobId(jobId);
+		job.setJobId(biJobId);
 		job.setFileCount(theInitialFiles.size());
 		job.setStatus(BulkImportJobStatusEnum.STAGING);
 		job.setJobDescription(theJobDescription.getJobDescription());
@@ -114,17 +114,17 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		int nextSequence = 0;
 		addFilesToJob(theInitialFiles, job, nextSequence);
 
-		return jobId;
+		return biJobId;
 	}
 
 	@Override
 	@Transactional
-	public void addFilesToJob(String theJobId, List<BulkImportJobFileJson> theFiles) {
-		ourLog.info("Adding {} files to bulk import job: {}", theFiles.size(), theJobId);
+	public void addFilesToJob(String theBiJobId, List<BulkImportJobFileJson> theFiles) {
+		ourLog.info("Adding {} files to bulk import job with bijob id {}", theFiles.size(), theBiJobId);
 
-		BulkImportJobEntity job = findJobByJobId(theJobId);
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "Job %s has status %s and can not be added to", theJobId, job.getStatus());
+		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "bijob id %s has status %s and can not be added to", theBiJobId, job.getStatus());
 
 		addFilesToJob(theFiles, job, job.getFileCount());
 
@@ -132,20 +132,20 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		myJobDao.save(job);
 	}
 
-	private BulkImportJobEntity findJobByJobId(String theJobId) {
+	private BulkImportJobEntity findJobByBiJobId(String theBiJobId) {
 		BulkImportJobEntity job = myJobDao
-			.findByJobId(theJobId)
-			.orElseThrow(() -> new InvalidRequestException("Unknown job ID: " + theJobId));
+			.findByJobId(theBiJobId)
+			.orElseThrow(() -> new InvalidRequestException("Unknown bijob id: " + theBiJobId));
 		return job;
 	}
 
 	@Override
 	@Transactional
-	public void markJobAsReadyForActivation(String theJobId) {
-		ourLog.info("Activating bulk import job {}", theJobId);
+	public void markJobAsReadyForActivation(String theBiJobId) {
+		ourLog.info("Activating bulk import bijob {}", theBiJobId);
 
-		BulkImportJobEntity job = findJobByJobId(theJobId);
-		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "Bulk import job %s can not be activated in status: %s", theJobId, job.getStatus());
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
+		ValidateUtil.isTrueOrThrowInvalidRequest(job.getStatus() == BulkImportJobStatusEnum.STAGING, "Bulk import bijob %s can not be activated in status: %s", theBiJobId, job.getStatus());
 
 		job.setStatus(BulkImportJobStatusEnum.READY);
 		myJobDao.save(job);
@@ -168,7 +168,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		}
 
 		try {
-			return doActivateNextReadyJob();
+			ActivateJobResult retval = doActivateNextReadyJob();
+			ourLog.info("Batch job submitted with batch job id {}", retval.jobId);
+			return retval;
 		} finally {
 			myRunningJobSemaphore.release();
 		}
@@ -191,9 +193,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		BulkImportJobEntity bulkImportJobEntity = jobToProcessOpt.get();
 
 		String jobUuid = bulkImportJobEntity.getJobId();
-		String batchJobId = null;
+		String biJobId = null;
 		try {
-			batchJobId = processJob(bulkImportJobEntity);
+			biJobId = processJob(bulkImportJobEntity);
 		} catch (Exception e) {
 			ourLog.error("Failure while preparing bulk export extract", e);
 			myTxTemplate.execute(t -> {
@@ -208,18 +210,18 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 			});
 		}
 
-		return new ActivateJobResult(true, batchJobId);
+		return new ActivateJobResult(true, biJobId);
 	}
 
 	@Override
 	@Transactional
-	public void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus) {
-		setJobToStatus(theJobId, theStatus, null);
+	public void setJobToStatus(String theBiJobId, BulkImportJobStatusEnum theStatus) {
+		setJobToStatus(theBiJobId, theStatus, null);
 	}
 
 	@Override
-	public void setJobToStatus(String theJobId, BulkImportJobStatusEnum theStatus, String theStatusMessage) {
-		BulkImportJobEntity job = findJobByJobId(theJobId);
+	public void setJobToStatus(String theBiJobId, BulkImportJobStatusEnum theStatus, String theStatusMessage) {
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 		job.setStatus(theStatus);
 		job.setStatusMessage(theStatusMessage);
 		myJobDao.save(job);
@@ -227,14 +229,14 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 	@Override
 	@Transactional
-	public BulkImportJobJson fetchJob(String theJobId) {
-		BulkImportJobEntity job = findJobByJobId(theJobId);
+	public BulkImportJobJson fetchJob(String theBiJobId) {
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 		return job.toJson();
 	}
 
         @Override
-        public JobInfo getJobStatus(String theJobId) {
-                BulkImportJobEntity theJob = findJobByJobId(theJobId);
+        public JobInfo getJobStatus(String theBiJobId) {
+                BulkImportJobEntity theJob = findJobByBiJobId(theBiJobId);
                 return new JobInfo()
                         .setStatus(theJob.getStatus())
                         .setStatusMessage(theJob.getStatusMessage())
@@ -243,28 +245,28 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 	@Transactional
 	@Override
-	public BulkImportJobFileJson fetchFile(String theJobId, int theFileIndex) {
-		BulkImportJobEntity job = findJobByJobId(theJobId);
+	public BulkImportJobFileJson fetchFile(String theBiJobId, int theFileIndex) {
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 
 		return myJobFileDao
 			.findForJob(job, theFileIndex)
 			.map(t -> t.toJson())
-			.orElseThrow(() -> new IllegalArgumentException("Invalid index " + theFileIndex + " for job " + theJobId));
+			.orElseThrow(() -> new IllegalArgumentException("Invalid index " + theFileIndex + " for bijob " + theBiJobId));
 	}
 
 	@Transactional
 	@Override
-	public String getFileDescription(String theJobId, int theFileIndex) {
-		BulkImportJobEntity job = findJobByJobId(theJobId);
+	public String getFileDescription(String theBiJobId, int theFileIndex) {
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
 
 		return myJobFileDao.findFileDescriptionForJob(job, theFileIndex).orElse("");
 	}
 
 	@Override
 	@Transactional
-	public void deleteJobFiles(String theJobId) {
-		BulkImportJobEntity job = findJobByJobId(theJobId);
-		List<Long> files = myJobFileDao.findAllIdsForJob(theJobId);
+	public void deleteJobFiles(String theBiJobId) {
+		BulkImportJobEntity job = findJobByBiJobId(theBiJobId);
+		List<Long> files = myJobFileDao.findAllIdsForJob(theBiJobId);
 		for (Long next : files) {
 			myJobFileDao.deleteById(next);
 		}
@@ -272,18 +274,18 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	}
 
 	private String processJob(BulkImportJobEntity theBulkExportJobEntity) {
-		String jobId = theBulkExportJobEntity.getJobId();
+		String biJobId = theBulkExportJobEntity.getJobId();
 		int batchSize = theBulkExportJobEntity.getBatchSize();
 
 		Batch2BulkImportPullJobParameters jobParameters = new Batch2BulkImportPullJobParameters();
-		jobParameters.setJobId(jobId);
+		jobParameters.setJobId(biJobId);
 		jobParameters.setBatchSize(batchSize);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
 		request.setParameters(jobParameters);
 
-		ourLog.info("Submitting bulk import job {} to job scheduler", jobId);
+		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);
 
 		return myJobCoordinator.startInstance(request).getJobId();
 	}
