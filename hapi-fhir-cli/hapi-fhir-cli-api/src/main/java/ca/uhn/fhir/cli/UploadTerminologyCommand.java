@@ -140,8 +140,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
+				File dataFile = new File(nextDataFile);
+				ourLog.info("Reading {}", dataFile.getAbsolutePath());
 
-				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
+				try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
 					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
 					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
 
@@ -168,6 +170,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							IOUtils.copy(countingInputStream, zipOutputStream);
 							haveCompressedContents = true;
 							compressedSourceBytesCount += countingInputStream.getCount();
+							++compressedFileCount;
 
 							zipOutputStream.flush();
 							ourLog.info("Finished compressing {}", nextDataFile);
