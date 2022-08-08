@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -402,8 +403,12 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		SubscriptionRegistry mySubscriptionRegistry;
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		ActiveSubscription myActiveSubscription;
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		ActiveSubscription myNonDeleteSubscription;
 		@Mock
 		CanonicalSubscription myCanonicalSubscription;
+		@Mock
+		CanonicalSubscription myNonDeleteCanonicalSubscription;
 		@Mock
 		SubscriptionCriteriaParser.SubscriptionCriteria mySubscriptionCriteria;
 
@@ -443,6 +448,31 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
 			verify(myCanonicalSubscription, atLeastOnce()).getSendDeleteMessages();
+		}
+
+		@Test
+		public void testMultipleSubscriptionsDoNotEarlyReturn() {
+			ReflectionTestUtils.setField(subscriber, "myInterceptorBroadcaster", myInterceptorBroadcaster);
+			ReflectionTestUtils.setField(subscriber, "mySubscriptionRegistry", mySubscriptionRegistry);
+
+			when(message.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.DELETE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(message.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
+			when(myNonDeleteCanonicalSubscription.getSendDeleteMessages()).thenReturn(false);
+			when(mySubscriptionRegistry.getAll()).thenReturn(List.of(myNonDeleteSubscription ,myActiveSubscription));
+			when(myActiveSubscription.getSubscription()).thenReturn(myCanonicalSubscription);
+			when(myActiveSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
+			when(myActiveSubscription.getId()).thenReturn("Patient/123");
+			when(myNonDeleteSubscription.getSubscription()).thenReturn(myNonDeleteCanonicalSubscription);
+			when(myNonDeleteSubscription.getCriteria()).thenReturn(mySubscriptionCriteria);
+			when(myNonDeleteSubscription.getId()).thenReturn("Patient/123");
+			when(mySubscriptionCriteria.getType()).thenReturn(STARTYPE_EXPRESSION);
+
+			subscriber.matchActiveSubscriptionsAndDeliver(message);
+
+			verify(myNonDeleteCanonicalSubscription, times(1)).getSendDeleteMessages();
+			verify(myCanonicalSubscription, times(1)).getSendDeleteMessages();
 		}
 
 		@Test
