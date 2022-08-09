@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -22,7 +23,7 @@ public class ParserWithValidationR4Test {
 
 	@Test
 	public void testActivityDefinitionElementsOrder() throws IOException {
-		ourCtx.setValidationSupport(getValidationSupport());
+		ourCtx.setValidationSupport(new CachingValidationSupport(getValidationSupport()));
 		MedicationRequest med_req = ourCtx.newJsonParser().parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
 
 		final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ourCtx);
@@ -31,7 +32,7 @@ public class ParserWithValidationR4Test {
 
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validationResult = validator.validateWithResult(med_req);
-		assertEquals(0, validationResult.getMessages().stream().filter(message -> message.getSeverity() == ResultSeverityEnum.ERROR));
+		assertEquals(0, validationResult.getMessages().stream().filter(message -> message.getSeverity() == ResultSeverityEnum.ERROR).count());
 
 	}
 
