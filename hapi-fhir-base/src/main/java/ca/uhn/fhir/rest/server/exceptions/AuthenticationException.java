@@ -62,12 +62,12 @@ public class AuthenticationException extends BaseServerResponseException {
 		super(STATUS_CODE, theMessage, theCause);
 	}
 	
-	public AuthenticationException(String theMessage, IBaseOperationOutcome theBaseOperationOutcome){
+	public AuthenticationException(String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(STATUS_CODE, theMessage, theBaseOperationOutcome);
 	}
 	
-	public AuthenticationException(String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome){
-		super(STATUS_CODE, theCause, IBaseOperationOutcome theBaseOperationOutcome);
+	public AuthenticationException(String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
+		super(STATUS_CODE, theMessage, theCause, theBaseOperationOutcome);
 	}
 	
 	/**
