@@ -65,7 +65,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseHasModifierExtensions;
 import org.hl7.fhir.instance.model.api.IBaseIntegerDatatype;
-import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -124,7 +123,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean addToHeldExtensions(int valueIdx, List<? extends IBaseExtension<?, ?>> ext, ArrayList<ArrayList<HeldExtension>> list, boolean theIsModifier, CompositeChildElement theChildElem,
-                                        CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theContainingElement) {
+													CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theContainingElement) {
 		boolean retVal = false;
 		if (ext.size() > 0) {
 			Boolean encodeExtension = null;
@@ -1380,6 +1379,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 		}
 	}
 
+	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
+		theWriter.write(theName, theValue);
+	}
+
 	private class HeldExtension implements Comparable<HeldExtension> {
 
 		private CompositeChildElement myChildElem;
@@ -1562,9 +1565,5 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 			theEventWriter.endObject();
 		}
-	}
-
-	private static void write(JsonLikeWriter theWriter, String theName, String theValue) throws IOException {
-		theWriter.write(theName, theValue);
 	}
 }
