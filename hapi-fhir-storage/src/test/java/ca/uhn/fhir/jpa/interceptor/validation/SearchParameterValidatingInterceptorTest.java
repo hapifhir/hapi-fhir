@@ -17,10 +17,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +44,11 @@ public class SearchParameterValidatingInterceptorTest {
 
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
+	SearchParameter mySearchParameterId1;
+
+	static String ID1 = "ID1";
+	static String ID2 = "ID2";
+
 	@BeforeEach
 	public void beforeEach(){
 
@@ -50,10 +56,13 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setFhirContext(ourFhirContext);
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
+
+		mySearchParameterId1 = aSearchParameter(ID1);
+
 	}
 
 	@Test
-	public void whenValidatingInterceptorCalledForNonSearchParamResoucre_thenNoException(){
+	public void whenValidatingInterceptorCalledForNonSearchParamResoucre_thenIsAllowed(){
 		Patient patient = new Patient();
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(patient, null);
@@ -61,12 +70,12 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	public void whenCreatingNonOverlappingSearchParam_thenNoException(){
-
+	public void whenCreatingNonOverlappingSearchParam_thenIsAllowed(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(Collections.emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter("ID1", "patient", asList("AllergyIntolerance"));
+		setPersistedSearchParameters(emptyList());
+
+		SearchParameter newSearchParam = aSearchParameter(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 
@@ -74,11 +83,11 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Test
 	public void whenCreatingOverlappingSearchParam_thenExceptionIsThrown(){
-
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(asList(new ResourcePersistentId("ID1")));
 
-		SearchParameter newSearchParam = aSearchParameter("ID2", "patient", asList("AllergyIntolerance"));
+		setPersistedSearchParameters(asList(mySearchParameterId1));
+
+		SearchParameter newSearchParam = aSearchParameter(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
@@ -90,23 +99,23 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	public void whenPutOperationToCreateNonOverlappingSearchParam_thenSuccess(){
-
+	public void whenUsingPutOperationToCreateNonOverlappingSearchParam_thenIsAllowed(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(Collections.emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter("ID1", "patient", asList("AllergyIntolerance"));
+		setPersistedSearchParameters(emptyList());
+
+		SearchParameter newSearchParam = aSearchParameter(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 	}
 
 	@Test
 	public void whenUsingPutOperationToCreateOverlappingSearchParam_thenExceptionIsThrown(){
-
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
-		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(asList(new ResourcePersistentId("ID1")));
 
-		SearchParameter newSearchParam = aSearchParameter("ID2", "patient", asList("AllergyIntolerance"));
+		setPersistedSearchParameters(asList(mySearchParameterId1));
+
+		SearchParameter newSearchParam = aSearchParameter(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
@@ -116,18 +125,39 @@ public class SearchParameterValidatingInterceptorTest {
 		}
 	}
 
+	@Test
+	public void whenUpdateSearchParam_thenIsAllowed(){
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-	private SearchParameter aSearchParameter(String id, String code, List<String> baseList) {
+		setPersistedSearchParameters(asList(mySearchParameterId1));
+
+		SearchParameter newSearchParam = aSearchParameter(ID1);
+
+		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+
+	}
+
+	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams){
+		List<ResourcePersistentId> resourcePersistentIds = theSearchParams
+			.stream()
+			.map(SearchParameter::getId)
+			.map(theS -> new ResourcePersistentId(theS))
+			.collect(Collectors.toList());
+
+		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
+	}
+
+
+	private SearchParameter aSearchParameter(String id) {
 		SearchParameter retVal = new SearchParameter();
 		retVal.setId(id);
-		retVal.setCode(code);
-		baseList.forEach(retVal::addBase);
+		retVal.setCode("patient");
+		retVal.addBase("AllergyIntolerance");
 		retVal.setStatus(Enumerations.PublicationStatus.DRAFT);
 		retVal.setType(Enumerations.SearchParamType.REFERENCE);
 		retVal.setExpression("AllergyIntolerance.patient.where(resolve() is Patient)");
 
 		return retVal;
 	}
-
 
 }

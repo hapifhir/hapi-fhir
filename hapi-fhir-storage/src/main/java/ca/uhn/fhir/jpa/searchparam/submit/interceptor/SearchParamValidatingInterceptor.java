@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Interceptor
@@ -72,15 +73,17 @@ public class SearchParamValidatingInterceptor {
 
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 
-		String resourceId = runtimeSearchParam.getId().getValueAsString();
+		if(isNotEmpty(persistedIdList)){
+			String resourceId = runtimeSearchParam.getId().getValueAsString();
 
-		boolean isNewSearchParam = persistedIdList
-			.stream()
-			.map(theResourcePersistentId -> theResourcePersistentId.getAssociatedResourceId().getValueAsString())
-			.noneMatch(theS -> theS.equals(resourceId));
+			boolean isNewSearchParam = persistedIdList
+				.stream()
+				.map(theResourcePersistentId -> theResourcePersistentId.getId().toString())
+				.noneMatch(theS -> theS.equals(resourceId));
 
-		if(isNewSearchParam){
-			throw new UnprocessableEntityException(Msg.code(2132) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			if(isNewSearchParam){
+				throw new UnprocessableEntityException(Msg.code(2132) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			}
 		}
 
 	}
@@ -94,7 +97,7 @@ public class SearchParamValidatingInterceptor {
 
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 
-		return CollectionUtils.isNotEmpty(persistedIdList);
+		return isNotEmpty(persistedIdList);
 	}
 
 	private SearchParameterMap extractSearchParameterMap(RuntimeSearchParam theRuntimeSearchParam) {
