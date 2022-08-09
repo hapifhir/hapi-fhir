@@ -59,12 +59,17 @@ public class ReindexAppCtx {
 				"load-ids",
 				"Load IDs of resources to reindex",
 				ResourceIdListWorkChunkJson.class,
-				loadIdsStep(theBatch2DaoSvc))
+				new LoadIdsStep(theBatch2DaoSvc))
 			.addLastStep("reindex",
 				"Perform the resource reindex",
 				reindexStep()
 			)
 			.build();
+	}
+
+	@Bean
+	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
+		return new GenerateRangeChunksStep();
 	}
 
 	@Bean
@@ -77,15 +82,7 @@ public class ReindexAppCtx {
 		return new ReindexStep();
 	}
 
-	@Bean
-	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
-	}
 
-	@Bean
-	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep(theBatch2DaoSvc);
-	}
 
 	@Bean
 	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {

@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchResourceProjection;
 import ca.uhn.fhir.jpa.dao.search.ExtendedHSearchSearchBuilder;
 import ca.uhn.fhir.jpa.dao.search.IHSearchSortHelper;
 import ca.uhn.fhir.jpa.dao.search.LastNOperation;
-import ca.uhn.fhir.jpa.dao.search.SearchScrollQueryExecutorAdaptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
@@ -53,7 +52,6 @@ import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.projection.dsl.CompositeProjectionOptionsStep;
 import org.hibernate.search.engine.search.projection.dsl.SearchProjectionFactory;
-import org.hibernate.search.engine.search.query.SearchScroll;
 import org.hibernate.search.engine.search.query.dsl.SearchQueryOptionsStep;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
@@ -84,6 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
+	private static final int DEFAULT_MAX_NON_PAGED_SIZE = 500;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -145,34 +144,37 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public ISearchQueryExecutor searchAsync(String theResourceName, SearchParameterMap theParams) {
-		return doSearch(theResourceName, theParams, null);
-	}
-
-	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-		// keep this in sync with supportsSomeOf();
-		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
-			// perform an offset search instead of a scroll one, which doesn't allow for offset
-			List<Long> queryFetchResult = getSearchQueryOptionsStep(
-				theResourceType, theParams, theReferencingPid).fetchHits(theParams.getOffset(), theParams.getCount());
-			// indicate param was already processed, otherwise queries DB to process it
-			theParams.setOffset(null);
-			return SearchQueryExecutors.from(queryFetchResult);
-		}
-
-		SearchScroll<Long> esResult = getSearchScroll(theResourceType, theParams, theReferencingPid);
-		return new SearchScrollQueryExecutorAdaptor(esResult);
+	public ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch) {
+		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch);
 	}
 
 
-	private SearchScroll<Long> getSearchScroll(String theResourceType, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-		// disallow scroll size lees than 50 until we fix scrolling performance
-		int scrollSize = theParams.getCount() == null ? 50 : Math.max(50, theParams.getCount());
-		if (theParams.getCount()!=null) {
-			scrollSize = theParams.getCount();
+	// keep this in sync with supportsSomeOf();
+	private ISearchQueryExecutor doSearch(String theResourceType, SearchParameterMap theParams,
+				ResourcePersistentId theReferencingPid, Integer theMaxResultsToFetch) {
+
+		int offset = theParams.getOffset() == null ? 0 : theParams.getOffset();
+		int count = getMaxFetchSize(theParams, theMaxResultsToFetch);
+
+		// perform an offset search instead of a scroll one, which doesn't allow for offset
+		List<Long> queryFetchResult = getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).fetchHits(offset, count);
+
+		// indicate param was already processed, otherwise queries DB to process it
+		theParams.setOffset(null);
+		return SearchQueryExecutors.from(queryFetchResult);
+	}
+
+
+	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
+		if (theParams.getCount() != null) {
+			return theParams.getCount();
 		}
 
-		return getSearchQueryOptionsStep(theResourceType, theParams, theReferencingPid).scroll(scrollSize);
+		if (theMax != null) {
+			return theMax;
+		}
+
+		return DEFAULT_MAX_NON_PAGED_SIZE;
 	}
 
 
@@ -261,10 +263,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-
-
 		// wipmb what about max results here?
-		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid), 10000);
+		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
 		}
@@ -297,7 +297,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Transactional()
 	@Override
 	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
-		return toList(doSearch(theResourceName, theParams, null), 500);
+		return toList(doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE), DEFAULT_MAX_NON_PAGED_SIZE);
 	}
 
 	/**
@@ -359,7 +359,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		dispatchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		List<ExtendedHSearchResourceProjection> rawResourceDataList = session.search(ResourceTable.class)
 			.select(
-				f -> buildResourceSelectClause(f)
+				this::buildResourceSelectClause
 			)
 			.where(
 				f -> f.id().matchingAny(thePids) // matches '_id' from resource index
@@ -403,11 +403,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams) {
-		int offset = 0; int limit = DEFAULT_MAX_PAGE_SIZE;
+		int offset = 0;
+		int limit = theParams.getCount() == null ? DEFAULT_MAX_PAGE_SIZE : theParams.getCount();
+
 		if (theParams.getOffset() != null && theParams.getOffset() != 0) {
 			offset = theParams.getOffset();
-			limit = theParams.getCount();
 			// indicate param was already processed, otherwise queries DB to process it
 			theParams.setOffset(null);
 		}

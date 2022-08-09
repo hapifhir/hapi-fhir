@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3770
+title: "Batch2 will have a standard error handling that will fail the job if it fails
+a chunk processing for more than 3 times.
+Further, added better validation to reindex job to disallow bad urls."

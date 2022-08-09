@@ -42,7 +42,8 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 		BASE_URL,
 		BASIC_AUTH,
 		VERBOSE_LOGGING,
-		HEADER_PASSTHROUGH
+		HEADER_PASSTHROUGH,
+		TLS_AUTH
 	}
 
 
@@ -82,16 +83,21 @@ public abstract class BaseRequestGeneratingCommand extends BaseCommand {
 			addHeaderPassthroughOption(options);
 		}
 
+		if (! theExcludeOptions.contains(BaseRequestGeneratingCommandOptions.TLS_AUTH)) {
+			addHttpsAuthOption(options);
+		}
+
+
 		return options;
 	}
 
 
 	@Override
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl,
-			String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
+			String theBasicAuthOptionName, String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 
 		IGenericClient client = super.newClientWithBaseUrl(
-			theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
+			theCommandLine, theBaseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 		registerHeaderPassthrough(theCommandLine, client);
 
 		return client;

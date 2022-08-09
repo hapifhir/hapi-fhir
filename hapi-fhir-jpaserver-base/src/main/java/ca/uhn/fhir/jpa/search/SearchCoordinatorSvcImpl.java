@@ -362,6 +362,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 //		return searchStrategy.get();
 
 		if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
+			ourLog.info("Search {} is using direct load strategy", searchUuid);
 			SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
 			return direct.get();
 		}

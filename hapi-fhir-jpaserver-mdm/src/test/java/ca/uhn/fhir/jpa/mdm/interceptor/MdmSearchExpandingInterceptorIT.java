@@ -187,6 +187,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 				null,
 				null,
 				null,
+				null,
 				theDetails
 			);
 			return res;

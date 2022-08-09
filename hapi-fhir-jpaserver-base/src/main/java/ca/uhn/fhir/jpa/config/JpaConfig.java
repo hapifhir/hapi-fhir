@@ -10,16 +10,15 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
-import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportJobSchedulingHelperImpl;
-import ca.uhn.fhir.jpa.bulk.export.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.svc.BulkDataImportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
@@ -41,10 +40,8 @@ import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.JpaIdHelperService;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
-import ca.uhn.fhir.jpa.dao.mdm.MdmLinkExpandSvc;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -119,10 +116,14 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
+import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -179,9 +180,11 @@ import java.util.Date;
 @Import({
 	BeanPostProcessorConfig.class,
 	BatchJobsConfig.class,
+	TermCodeSystemConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
-	Batch2SupportConfig.class
+	Batch2SupportConfig.class,
+	JpaBulkExportConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -426,12 +429,6 @@ public class JpaConfig {
 	}
 
 	@Bean
-	@Lazy
-	public IBulkDataExportSvc bulkDataExportSvc() {
-		return new BulkDataExportSvcImpl();
-	}
-
-	@Bean
 	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper() {
 		return new BulkDataExportJobSchedulingHelperImpl();
 	}
@@ -508,8 +505,8 @@ public class JpaConfig {
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
 	@Scope("prototype")
-	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder() {
-		return new RepositoryValidatingRuleBuilder();
+	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder(IValidationSupport theValidationSupport) {
+		return new RepositoryValidatingRuleBuilder(theValidationSupport);
 	}
 
 	@Bean
@@ -621,7 +618,7 @@ public class JpaConfig {
 		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
 	}
 
-	@Bean(name = SEARCH_BUILDER)
+	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
 	@Scope("prototype")
 	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
 		return new SearchBuilder(theDao, theResourceName, theResourceType);
@@ -640,8 +637,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IJpaIdHelperService jpaIdHelperService() {
-		return new JpaIdHelperService();
+	public IIdHelperService idHelperService () {
+		return new IdHelperService();
 	}
 
 	@Bean
@@ -721,8 +718,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public JpaResourceLoader jpaResourceLoader() {
-		return new JpaResourceLoader();
+	public ResourceLoaderImpl jpaResourceLoader() {
+		return new ResourceLoaderImpl();
 	}
 
 	@Bean

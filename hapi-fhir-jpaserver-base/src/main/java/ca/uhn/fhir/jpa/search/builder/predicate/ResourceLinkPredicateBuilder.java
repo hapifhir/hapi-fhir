@@ -38,7 +38,6 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
@@ -678,6 +677,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	private IQueryParameterType toParameterType(RuntimeSearchParam theParam, String theQualifier, String theValueAsQueryToken) {
 		IQueryParameterType qp = toParameterType(theParam);
+
 		qp.setValueAsQueryToken(getFhirContext(), theParam.getName(), theQualifier, theValueAsQueryToken);
 		return qp;
 	}
@@ -689,14 +689,24 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	@Nonnull
-	public Condition createEverythingPredicate(String theResourceName, Long... theTargetPids) {
+	public Condition createEverythingPredicate(String theResourceName, List<String> theSourceResourceNames, Long... theTargetPids) {
+		Condition condition;
+
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			return toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			condition = toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
 		} else {
 			// ... otherwise we look for resource types
-			return BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
+			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
 		}
+
+		if (!theSourceResourceNames.isEmpty()) {
+			// if source resources are provided, add on predicate for _type operation
+			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
+			condition = toAndPredicate(List.of(condition, typeCondition));
+		}
+
+		return condition;
 	}
 }

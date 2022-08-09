@@ -64,7 +64,7 @@ public class DeleteExpungeAppCtx {
 				"load-ids",
 				"Load IDs of resources to expunge",
 				ResourceIdListWorkChunkJson.class,
-				loadIdsStep(theBatch2DaoSvc))
+				new LoadIdsStep(theBatch2DaoSvc))
 			.addLastStep("expunge",
 				"Perform the resource expunge",
 				expungeStep(theHapiTransactionService, theDeleteExpungeSvc)
@@ -85,11 +85,6 @@ public class DeleteExpungeAppCtx {
 	@Bean
 	public GenerateRangeChunksStep expungeGenerateRangeChunksStep() {
 		return new GenerateRangeChunksStep();
-	}
-
-	@Bean
-	public LoadIdsStep loadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new LoadIdsStep(theBatch2DaoSvc);
 	}
 
 	@Bean

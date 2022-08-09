@@ -34,6 +34,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
@@ -76,41 +77,44 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		// TODO - does this need retry settings?
 		final String channelName = myChannelNamer.getChannelName(theChannelName, theChannelSettings);
 
-		return myChannels.computeIfAbsent(channelName, t -> {
+		return myChannels.computeIfAbsent(channelName, t -> buildLinkedBlockingChannel(theConcurrentConsumers, channelName));
+	}
 
-			String threadNamingPattern = channelName + "-%d";
+	@Nonnull
+	private LinkedBlockingChannel buildLinkedBlockingChannel(int theConcurrentConsumers, String channelName) {
+		String threadNamingPattern = channelName + "-%d";
 
-			ThreadFactory threadFactory = new BasicThreadFactory.Builder()
-				.namingPattern(threadNamingPattern)
-				.uncaughtExceptionHandler(uncaughtExceptionHandler(channelName))
-				.daemon(false)
-				.priority(Thread.NORM_PRIORITY)
-				.build();
+		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
+			.namingPattern(threadNamingPattern)
+			.uncaughtExceptionHandler(uncaughtExceptionHandler(channelName))
+			.daemon(false)
+			.priority(Thread.NORM_PRIORITY)
+			.build();
 
-			LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
-			RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", queue.size());
-				StopWatch sw = new StopWatch();
-				try {
-					queue.put(theRunnable);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
-						" rejected from " + e);
-				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
-			};
-			ThreadPoolExecutor executor = new ThreadPoolExecutor(
-				theConcurrentConsumers,
-				theConcurrentConsumers,
-				0L,
-				TimeUnit.MILLISECONDS,
-				queue,
-				threadFactory,
-				rejectedExecutionHandler);
-			return new LinkedBlockingChannel(channelName, executor, queue);
+		LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
+		RejectedExecutionHandler rejectedExecutionHandler = (theRunnable, theExecutor) -> {
+			ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", queue.size());
+			StopWatch sw = new StopWatch();
+			try {
+				queue.put(theRunnable);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RejectedExecutionException(Msg.code(568) + "Task " + theRunnable.toString() +
+					" rejected from " + e);
+			}
+			ourLog.info("Slot become available after {}ms", sw.getMillis());
+		};
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(
+			theConcurrentConsumers,
+			theConcurrentConsumers,
+			0L,
+			TimeUnit.MILLISECONDS,
+			queue,
+			threadFactory,
+			rejectedExecutionHandler);
 
-		});
+		LinkedBlockingChannel retval = new LinkedBlockingChannel(channelName, executor, queue);
+		return retval;
 	}
 
 	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler(String theChannelName) {

@@ -128,7 +128,7 @@ public class BulkImportCommand extends BaseCommand {
 
 		String targetBaseUrl = theCommandLine.getOptionValue(TARGET_BASE);
 		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
-		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT);
+		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 		client.registerInterceptor(new LoggingInterceptor(false));
 
 		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);

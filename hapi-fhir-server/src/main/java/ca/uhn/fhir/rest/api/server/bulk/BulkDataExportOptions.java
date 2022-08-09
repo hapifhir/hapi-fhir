@@ -35,6 +35,7 @@ public class BulkDataExportOptions {
 		GROUP,
 		SYSTEM
 	}
+
 	private String myOutputFormat;
 	private Set<String> myResourceTypes;
 	private Date mySince;
@@ -42,8 +43,6 @@ public class BulkDataExportOptions {
 	private ExportStyle myExportStyle;
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
-
-
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
