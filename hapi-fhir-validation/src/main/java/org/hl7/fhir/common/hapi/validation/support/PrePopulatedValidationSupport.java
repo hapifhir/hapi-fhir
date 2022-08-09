@@ -35,11 +35,12 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	private final Map<String, IBaseResource> myStructureDefinitions;
 	private final Map<String, IBaseResource> myValueSets;
 
+	private final Map<String, byte[]> myBinaries;
 	/**
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport(FhirContext theContext) {
-		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 	}
 
 
@@ -53,15 +54,22 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
 	 */
-	public PrePopulatedValidationSupport(FhirContext theFhirContext, Map<String, IBaseResource> theStructureDefinitions, Map<String, IBaseResource> theValueSets, Map<String, IBaseResource> theCodeSystems) {
+	public PrePopulatedValidationSupport(
+		FhirContext theFhirContext,
+		Map<String, IBaseResource> theStructureDefinitions,
+		Map<String, IBaseResource> theValueSets,
+		Map<String, IBaseResource> theCodeSystems,
+		Map<String, byte[]> theBinaries) {
 		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
 		Validate.notNull(theValueSets, "theValueSets must not be null");
 		Validate.notNull(theCodeSystems, "theCodeSystems must not be null");
+		Validate.notNull(theBinaries, "theBinaries must not be null");
 		myStructureDefinitions = theStructureDefinitions;
 		myValueSets = theValueSets;
 		myCodeSystems = theCodeSystems;
+		myBinaries = theBinaries;
 	}
 
 	/**

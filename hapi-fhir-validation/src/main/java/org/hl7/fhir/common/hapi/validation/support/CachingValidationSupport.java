@@ -141,6 +141,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
+	public byte[] fetchBinary(String theBinaryKey) {
+		return loadFromCache(myCache, "fetchBinary " + theBinaryKey, t -> super.fetchBinary(theBinaryKey));
+	}
+
+	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		return loadFromCache(myCache, "fetchResource " + theClass + " " + theUri,
 			t -> super.fetchResource(theClass, theUri));
