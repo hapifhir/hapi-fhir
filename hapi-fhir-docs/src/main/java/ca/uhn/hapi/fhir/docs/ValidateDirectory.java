@@ -94,7 +94,7 @@ public class ValidateDirectory {
 
       ValidationSupportChain validationSupportChain = new ValidationSupportChain();
       validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new DefaultProfileValidationSupport(ctx));
-      validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new PrePopulatedValidationSupport(ctx, structureDefinitions, valueSets, codeSystems, new HashMap<>()));
+      validationSupportChain.addValidationSupport((ca.uhn.fhir.context.support.IValidationSupport) new PrePopulatedValidationSupport(ctx, structureDefinitions, valueSets, codeSystems));
 
       instanceValidator.setValidationSupport(validationSupportChain);
 
