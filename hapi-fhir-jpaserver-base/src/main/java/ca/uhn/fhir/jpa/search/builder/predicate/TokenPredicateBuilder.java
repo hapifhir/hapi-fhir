@@ -177,7 +177,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), code);
+					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
+					valueSetExpansionOptions.setCount(1500);
+					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
 					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));

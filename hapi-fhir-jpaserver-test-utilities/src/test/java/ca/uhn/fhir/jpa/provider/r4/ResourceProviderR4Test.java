@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.ThreadPoolUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -135,6 +137,8 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
@@ -172,10 +176,13 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
+import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -3964,8 +3971,62 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(text, containsString("\"OBS1\""));
 			assertThat(text, not(containsString("\"OBS2\"")));
 		}
+	}
+
+	@Test
+	public void testCodeInWithLargeValueSet() throws IOException {
+		myDaoConfig.setMaximumExpansionSize(1500);
+
+		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder();
+		zipCollectionBuilder.addFileZip("/largecodesystem/", "concepts.csv");
+		zipCollectionBuilder.addFileZip("/largecodesystem/", "hierarchy.csv");
+
+		myTerminologyLoaderSvc.loadCustom("http://hl7.org/fhir/sid/icd-10", zipCollectionBuilder.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 
+		ValueSet valueSetOver1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV.json");
+		ValueSet valueSetUnder1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV1.json");
+
+		myClient.update().resource(valueSetOver1000).execute();
+		myClient.update().resource(valueSetUnder1000).execute();
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		await().until(() -> {
+			ValueSet expanded = myClient.operation().onType("ValueSet").named("$expand")
+				.withParameter(Parameters.class, "url", new UrlType("http://smilecdr.com/V"))
+				.returnResourceType(ValueSet.class)
+				.execute();
+			boolean hasExt = expanded.getMeta().getExtension().stream()
+				.filter(ext -> ext.getUrl().equals(EXT_VALUESET_EXPANSION_MESSAGE))
+				.anyMatch(ext -> ext.getValue().toString().contains("that was pre-calculated"));
+			if (hasExt) {
+				printResourceToConsole(expanded);
+			}
+			return hasExt;
+		});
+
+		Observation matchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-matching.json");
+		Observation nonMatchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-non-matching.json");
+		myClient.update().resource(matchingObs).execute();
+		myClient.update().resource(nonMatchingObs).execute();
+
+		//Using good VS, should be 1 in each in/not-in
+		assertOneResult(myClient.search().byUrl("Observation?code:in=http://smilecdr.com/V1").returnBundle(Bundle.class).execute());
+		assertOneResult(myClient.search().byUrl("Observation?code:not-in=http://smilecdr.com/V1").returnBundle(Bundle.class).execute());
+
+		//Using >1000 codes VS is broken
+		assertOneResult(myClient.search().byUrl("Observation?code:in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
+		assertOneResult(myClient.search().byUrl("Observation?code:not-in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
+
+	}
+	private void assertOneResult(Bundle theResponse) {
+		assertThat(theResponse.getEntry().size(), is(equalTo(1)));
+	}
+
+	private void printResourceToConsole(IBaseResource theResource) {
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
 	}
 
 	@Test
