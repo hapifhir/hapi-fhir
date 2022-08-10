@@ -1737,6 +1737,29 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
+	@Test
+	public void testDeleteNonExistingResourceReturnsOperationOutcome() {
+
+		MethodOutcome resp = myClient.delete().resourceById("Patient", "12345").execute();
+
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource 12345 does not exist."));
+	}
+
+	@Test
+	public void testDeleteAlreadyDeletedReturnsOperationOutcome() {
+		Patient p = new Patient();
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+
+		MethodOutcome resp = myClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
+
+		resp = myClient.delete().resourceById(id).execute();
+		oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource " + id.getIdPart() + " was already deleted."));
+	}
+
 	/**
 	 * See issue #52
 	 */
