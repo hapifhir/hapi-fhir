@@ -92,6 +92,8 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	public void addBinary(byte[] theBinary, String theBinaryKey) {
+		Validate.notNull(theBinary, "theBinaryKey must not be null");
+		Validate.notNull(theBinary, "the" + theBinaryKey + " must not be null");
 		myBinaries.put(theBinaryKey, theBinary);
 	}
 
@@ -252,9 +254,7 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	}
 
 	@Override
-	public byte[] fetchBinary(String theBinaryKey) {
-		return myBinaries.get(theBinaryKey);
-	}
+	public byte[] fetchBinary(String theBinaryKey) { return myBinaries.get(theBinaryKey); }
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
