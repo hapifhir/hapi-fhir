@@ -175,8 +175,7 @@ public class TestR4Config {
 			.create(retVal)
 //			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
-//			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			//TODO GGG RESET THIS
+			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.beforeQuery(getMandatoryTransactionListener())
 			.afterQuery(captureQueriesListener())
 			.afterQuery(new CurrentThreadCaptureQueriesListener())

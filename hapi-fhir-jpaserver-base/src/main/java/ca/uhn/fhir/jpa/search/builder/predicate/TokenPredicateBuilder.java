@@ -32,6 +32,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -90,6 +91,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private ModelConfig myModelConfig;
 	@Autowired
 	private FhirContext myContext;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	/**
 	 * Constructor
@@ -178,8 +181,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
-					valueSetExpansionOptions.setCount(1500);
+					valueSetExpansionOptions.setCount(myDaoConfig.getMaximumExpansionSize());
 					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
+
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
 					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
