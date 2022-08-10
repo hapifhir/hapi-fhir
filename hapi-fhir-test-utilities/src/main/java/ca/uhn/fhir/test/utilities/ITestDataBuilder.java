@@ -34,6 +34,8 @@ import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -49,6 +51,7 @@ import static org.hamcrest.Matchers.matchesPattern;
  */
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public interface ITestDataBuilder {
+	Logger ourLog = LoggerFactory.getLogger(ITestDataBuilder.class);
 
 	/**
 	 * Set Patient.active = true
@@ -192,6 +195,10 @@ public interface ITestDataBuilder {
 	default IIdType createResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Creating {}", getFhirContext().newJsonParser().encodeResourceToString(resource));
+		}
+
 		if (isNotBlank(resource.getIdElement().getValue())) {
 			return doUpdateResource(resource);
 		} else {
@@ -235,7 +242,7 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default Consumer<IBaseResource> withQuantityAtPath(String thePath, double theValue, String theSystem, String theCode) {
+	default <T extends IBase> Consumer<T> withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("value", theValue),
 			withPrimitiveAttribute("system", theSystem),
@@ -262,20 +269,28 @@ public interface ITestDataBuilder {
 		}
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+	default <T extends IBase> Consumer<T> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
+	default <T extends IBase> Consumer<T> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
+		return withElementAt("code", withCoding(theSystem, theCode, theDisplay));
+	}
+
+	default <T extends IBase> Consumer<T> withCoding(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
 		return t -> {
 			FhirTerser terser = getFhirContext().newTerser();
-			IBase coding = terser.addElement(t, "code.coding");
+			IBase coding = terser.addElement(t, "coding");
 			terser.addElement(coding, "system", theSystem);
 			terser.addElement(coding, "code", theCode);
 			if (StringUtils.isNotEmpty(theDisplay)) {
 				terser.addElement(coding, "display", theDisplay);
 			}
 		};
+	}
+
+	default Consumer<IBaseResource> withObservationComponent(Consumer<IBase>... theModifiers) {
+		return withElementAt("component", theModifiers);
 	}
 
 	default Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
