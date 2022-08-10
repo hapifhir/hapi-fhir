@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.searchparam.submit.interceptor;
 
+/*-
+ * #%L
+ * HAPI FHIR Subscription Server
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -12,15 +32,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.CollectionUtil;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -49,20 +65,23 @@ public class SearchParamValidatingInterceptor {
 		validateSearchParamOnUpdate(theNewResource, theRequestDetails);
 	}
 
-	protected void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails){
-
+	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails){
 		if( isNotSearchParameterResource(theResource) ){
 			return;
 		}
 
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 
-		if( isOverlapping(runtimeSearchParam, theRequestDetails)) {
+		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
+
+		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+
+		if( isNotEmpty(persistedIdList) ) {
 			throw new UnprocessableEntityException(Msg.code(2131) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
-	protected void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails){
+	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails){
 		if( isNotSearchParameterResource(theResource) ){
 			return;
 		}
@@ -74,30 +93,21 @@ public class SearchParamValidatingInterceptor {
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 
 		if(isNotEmpty(persistedIdList)){
-			String resourceId = runtimeSearchParam.getId().getValueAsString();
+			String resourceId = runtimeSearchParam.getId().getIdPart();
 
 			boolean isNewSearchParam = persistedIdList
 				.stream()
 				.map(theResourcePersistentId -> theResourcePersistentId.getId().toString())
-				.noneMatch(theS -> theS.equals(resourceId));
+				.noneMatch(anId -> anId.equals(resourceId));
 
 			if(isNewSearchParam){
 				throw new UnprocessableEntityException(Msg.code(2132) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 			}
 		}
-
 	}
 
 	private boolean isNotSearchParameterResource(IBaseResource theResource){
 		return ! SEARCH_PARAM.equalsIgnoreCase(myFhirContext.getResourceType(theResource));
-	}
-
-	private boolean isOverlapping(RuntimeSearchParam theRuntimeSearchParam, RequestDetails theRequestDetails){
-		SearchParameterMap searchParameterMap = extractSearchParameterMap(theRuntimeSearchParam);
-
-		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
-
-		return isNotEmpty(persistedIdList);
 	}
 
 	private SearchParameterMap extractSearchParameterMap(RuntimeSearchParam theRuntimeSearchParam) {
@@ -106,8 +116,8 @@ public class SearchParamValidatingInterceptor {
 		String theCode = theRuntimeSearchParam.getName();
 		List<String> theBases = List.copyOf(theRuntimeSearchParam.getBase());
 
-		StringAndListParam codeParam = new StringAndListParam().addAnd(new StringParam(theCode));
-		StringAndListParam basesParam = toStringAndList(theBases);
+		TokenAndListParam codeParam = new TokenAndListParam().addAnd(new TokenParam(theCode));
+		TokenAndListParam basesParam = toTokenAndList(theBases);
 
 		retVal.add("code", codeParam);
 		retVal.add("base", basesParam);
@@ -134,18 +144,25 @@ public class SearchParamValidatingInterceptor {
 		return myDaoRegistry.getResourceDao(SEARCH_PARAM);
 	}
 
-	private StringAndListParam toStringAndList(List<String> theBases) {
-		StringAndListParam retVal = new StringAndListParam();
+	private TokenAndListParam toTokenAndList(List<String> theBases) {
+		TokenAndListParam retVal = new TokenAndListParam();
+
 		if (theBases != null) {
+
+			TokenOrListParam tokenOrListParam = new TokenOrListParam();
+			retVal.addAnd(tokenOrListParam);
+
 			for (String next : theBases) {
 				if (isNotBlank(next)) {
-					retVal.addAnd(new StringOrListParam().addOr(new StringParam(next)));
+					tokenOrListParam.addOr(new TokenParam(next));
 				}
 			}
 		}
+
 		if (retVal.getValuesAsQueryTokens().isEmpty()) {
 			return null;
 		}
+
 		return retVal;
 	}
 }

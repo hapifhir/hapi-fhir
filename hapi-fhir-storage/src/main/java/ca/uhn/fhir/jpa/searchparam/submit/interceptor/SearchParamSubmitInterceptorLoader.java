@@ -31,10 +31,8 @@ public class SearchParamSubmitInterceptorLoader {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamSubmitInterceptorLoader.class);
 
-	@Autowired
 	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
-	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 	
 	@PostConstruct
@@ -42,5 +40,14 @@ public class SearchParamSubmitInterceptorLoader {
 		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
 		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
 	}
-	
+
+	@Autowired
+	public void setSearchParamValidatingInterceptor(SearchParamValidatingInterceptor theSearchParamValidatingInterceptor) {
+		mySearchParamValidatingInterceptor = theSearchParamValidatingInterceptor;
+	}
+
+	@Autowired
+	public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
+		myInterceptorRegistry = theInterceptorRegistry;
+	}
 }

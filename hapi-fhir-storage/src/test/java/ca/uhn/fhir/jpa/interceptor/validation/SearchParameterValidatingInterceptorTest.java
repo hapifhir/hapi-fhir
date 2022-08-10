@@ -147,7 +147,6 @@ public class SearchParameterValidatingInterceptorTest {
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
 
-
 	private SearchParameter aSearchParameter(String id) {
 		SearchParameter retVal = new SearchParameter();
 		retVal.setId(id);
