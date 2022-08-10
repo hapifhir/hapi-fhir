@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
@@ -12,10 +11,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * This interceptor loads and parses FHIR NPM Conformance Packages, and makes the
@@ -25,7 +22,6 @@ import java.util.Map;
  */
 public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 
-	Map<String, byte[]> binaryMap = new HashMap<>();
 	/**
 	 * Constructor
 	 */
@@ -53,18 +49,11 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 					}
 				}
 
-
 				List<String> binaries = pkg.list("other");
 				for (String binaryName : binaries) {
-					binaryMap.put(binaryName, TextFile.streamToBytes(pkg.load("other", binaryName)));
+					addBinary(TextFile.streamToBytes(pkg.load("other", binaryName)), binaryName);
 				}
 			}
-
 		}
-	}
-
-	@Override
-	public byte[] fetchBinary(String key) {
-		return binaryMap.get(key);
 	}
 }
