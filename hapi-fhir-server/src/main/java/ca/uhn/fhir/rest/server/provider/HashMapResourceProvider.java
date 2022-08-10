@@ -28,6 +28,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -393,6 +394,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(IBaseResource.class, theResource)
+						.add(RequestPartitionId.class, null) // we should add this if we want - but this is test usage
 						.add(TransactionDetails.class, theTransactionDetails);
 					interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, preStorageParams);
 

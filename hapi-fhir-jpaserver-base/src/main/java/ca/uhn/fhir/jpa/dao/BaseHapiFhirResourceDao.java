@@ -334,6 +334,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(RequestPartitionId.class, theRequestPartitionId)
 			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 

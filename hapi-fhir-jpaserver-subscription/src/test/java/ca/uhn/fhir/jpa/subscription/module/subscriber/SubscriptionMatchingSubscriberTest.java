@@ -345,6 +345,11 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	}
 
 	@Test
+	public void testCrossPartition() {
+
+	}
+
+	@Test
 	public void testCrossPartitionSubscriptionForResourceOnDifferentPartitionMatch() throws InterruptedException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myDaoConfig.setCrossPartitionSubscription(true);

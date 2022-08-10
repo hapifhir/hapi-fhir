@@ -4,8 +4,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.ex.PartitionInterceptorReadAllPartitions;
@@ -15,22 +18,28 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ExtensionUtil;
+import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -40,17 +49,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
-import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
@@ -88,6 +92,55 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
 
+	@Test
+	public void updateSubscription() {
+		// setup
+		String id = "RED";
+		ServletRequestDetails dets = new ServletRequestDetails();
+		dets.setRestOperationType(RestOperationTypeEnum.UPDATE);
+		dets.setServletRequest(new MockHttpServletRequest());
+
+		Subscription subscription = new Subscription();
+		subscription.setId("Subscription/" + id);
+		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+		subscription.addExtension(
+			HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION,
+			new BooleanType(true)
+		);
+		subscription.setCriteria("[*]");
+		Subscription.SubscriptionChannelComponent subscriptionChannelComponent =
+			new Subscription.SubscriptionChannelComponent()
+				.setType(Subscription.SubscriptionChannelType.RESTHOOK)
+				.setEndpoint("https://tinyurl.com/2p95e27r");
+		subscription.setChannel(subscriptionChannelComponent);
+
+		// set up partitioning for subscriptions
+		myDaoConfig.setCrossPartitionSubscription(true);
+
+		// register interceptors that return different partition ids
+		MySubscriptionReadInterceptor readInterceptor = new MySubscriptionReadInterceptor();
+		MySubscriptionWriteInterceptor writeInterceptor = new MySubscriptionWriteInterceptor();
+		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
+		readInterceptor.setObjectConsumer((obj) -> {
+			// we'll fail here cause it means we're calling this
+			// interceptor when we shouldn't
+			fail();
+		});
+		myInterceptorRegistry.registerInterceptor(readInterceptor);
+		myInterceptorRegistry.registerInterceptor(writeInterceptor);
+
+		// run test
+		IFhirResourceDao<Subscription> dao = myDaoRegistry.getResourceDao(Subscription.class);
+		DaoMethodOutcome outcome = dao.update(subscription, dets);
+
+		// verify
+		assertNotNull(outcome);
+		assertEquals(id, outcome.getResource().getIdElement().getIdPart());
+
+		// cleanup
+		myInterceptorRegistry.unregisterInterceptor(readInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(writeInterceptor);
+	}
 
 	@Test
 	public void testCreateNonPartionableResourceWithPartitionDate() {
@@ -260,4 +313,33 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	@Interceptor
+	public static class MySubscriptionReadInterceptor {
+
+		private Consumer<Object> myObjectConsumer;
+
+		public void setObjectConsumer(Consumer<Object> theConsumer) {
+			myObjectConsumer = theConsumer;
+		}
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId identifyForRead(ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
+			if (myObjectConsumer != null) {
+				myObjectConsumer.accept(theReadDetails);
+			}
+			return RequestPartitionId.allPartitions();
+		}
+
+	}
+
+	@Interceptor
+	public static class MySubscriptionWriteInterceptor {
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
+			assertNotNull(theResource);
+			// doesn't matter; just not allPartitions
+			return RequestPartitionId.defaultPartition(LocalDate.of(2021, 2, 22));
+		}
+	}
 }
