@@ -767,7 +767,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.36</fhir_core_version>
+        <fhir_core_version>5.6.55-SNAPSHOT</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -2791,9 +2791,7 @@
 				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-fhir-jpaserver-test-utilities</module>
-				<!-- TODO KHS temporarily disable these tests because they are blocking ci
 				<module>hapi-fhir-jpaserver-elastic-test-utilities</module>
-				-->
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>

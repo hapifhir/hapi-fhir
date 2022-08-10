@@ -176,17 +176,6 @@
 		</dependency>
 
 		<!--
-		Android includes an old version of commons-codec, so
-		we compile against the old version to make sure we can compile
-		against it
-		-->
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.1</version>
-		</dependency>
-
-		<!--
 		Gson is needed for some utility classes in org.hl7.fhir.dstu3, so
 		this is necessary for the JavaDocs to build
 		-->

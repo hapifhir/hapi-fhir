@@ -101,7 +101,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 				jobInstance.setJobDefinition(myDefinition);
 				JobInstanceProgressCalculator calculator = new JobInstanceProgressCalculator(myJobPersistence, jobInstance, new JobChunkProgressAccumulator());
 				calculator.calculateAndStoreInstanceProgress();
-			} else {
+			} else if (theDataSink.hasExactlyOneChunk()) {
 				JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) theDataSink).getOnlyChunkId());
 				myBatchJobSender.sendWorkChannelMessage(workNotification);
 			}

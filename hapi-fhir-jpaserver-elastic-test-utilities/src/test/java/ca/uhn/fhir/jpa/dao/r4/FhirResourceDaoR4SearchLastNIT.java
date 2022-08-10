@@ -11,6 +11,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +34,11 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNIT extends BaseR4SearchLastN {
+	@BeforeEach
+	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setLastNEnabled(true);
+	}
+
 	@AfterEach
 	public void reset() {
 		SearchBuilder.setMaxPageSize50ForTest(false);

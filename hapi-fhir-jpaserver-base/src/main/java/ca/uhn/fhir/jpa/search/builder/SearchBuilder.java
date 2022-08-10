@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -118,7 +119,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -953,11 +953,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Can we fast track this loading by checking elastic search?
 		if (isLoadingFromElasticSearchSupported(thePids)) {
-			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
-		} else {
-			// We only chunk because some jdbc drivers can't handle long param lists.
-			new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+			try {
+				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
+				return;
+
+			} catch (ResourceNotFoundInIndexException theE) {
+				// some resources were not found in index, so we will inform this and resort to JPA search
+				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+			}
 		}
+
+		// We only chunk because some jdbc drivers can't handle long param lists.
+		new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**
@@ -969,9 +976,9 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
-
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInHSearchIndex() &&
+			myDaoConfig.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
