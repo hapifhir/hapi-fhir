@@ -47,7 +47,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final Cache<String, Object> myExpandValueSetCache;
 
 	/**
-	 * Constuctor with default timeouts
+	 * Constructor with default timeouts
 	 *
 	 * @param theWrap The validation support module to wrap
 	 */
