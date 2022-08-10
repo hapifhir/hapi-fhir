@@ -1749,7 +1749,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testDeleteAlreadyDeletedReturnsOperationOutcome() {
 		Patient p = new Patient();
-		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		IIdType id = myClient.create().resource(p).execute().getId();
 
 		MethodOutcome resp = myClient.delete().resourceById(id).execute();
 		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();

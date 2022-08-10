@@ -521,7 +521,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setId(id);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theKey, id.getIdPart());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theKey, theId);
 		String severity = "information";
 		String code = "informational";
 		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -546,7 +546,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "notDeletedResourceNotExisting");
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getIdPart(), "deleteResourceNotExisting");
 			return outcome;
 		}
 
@@ -556,7 +556,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue(), "notDeletedResourceAlreadyDeleted");
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getIdPart(), "deleteResourceAlreadyDeleted");
 
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
