@@ -39,11 +39,16 @@ import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -144,12 +149,31 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
+		ourEndNow = false;
+
 		while (true) {
-			if (ourEndNow) {
+			ourLog.info("!!!!!!!!!!!");
+			if (UploadingIsEndNow(outcome.getIdElement().toString(), client)) {
 				break;
 			}
 		}
 
+	}
+
+	private boolean UploadingIsEndNow(String url, IGenericClient client) {
+
+		Parameters input = new Parameters();
+		input.addParameter().setName("url").setValue(new UriType(url));
+
+		IBaseParameters response = client
+			.operation()
+			.onServer()
+			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+			.withParameters(input)
+			.execute();
+
+		//There's more to add
+		return ourEndNow;
 	}
 
 	@Nonnull
