@@ -18,7 +18,7 @@ import java.io.IOException;
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ParserWithValidationR4Test {
+public class XverValidationTest {
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
