@@ -31,7 +31,9 @@ public class XverExtensionsValidationTest {
 		MedicationRequest med_req;
 		med_req = getMedicationRequest();
 		FhirValidator validator = getFhirValidator();
+
 		ValidationResult validationResult = validator.validateWithResult(med_req);
+
 		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
@@ -41,7 +43,9 @@ public class XverExtensionsValidationTest {
 		ourCtx.setValidationSupport(getValidationSupport());
 		MedicationRequest med_req = getMedicationRequest();
 		FhirValidator validator = getFhirValidator();
+
 		ValidationResult validationResult = validator.validateWithResult(med_req);
+
 		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
@@ -51,7 +55,9 @@ public class XverExtensionsValidationTest {
 		MedicationRequest med_req = getMedicationRequest();
 		med_req.getMeta().getExtension().get(0).setValue(new IntegerType().setValue(123));
 		FhirValidator validator = getFhirValidator();
+
 		ValidationResult validationResult = validator.validateWithResult(med_req);
+
 		assertEquals(1, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 		SingleValidationMessage errorMessage = validationResult.getMessages().stream().filter(errorMessagePredicate()).findFirst().get();
 		assertEquals("Extension_EXT_Type", errorMessage.getMessageId());
