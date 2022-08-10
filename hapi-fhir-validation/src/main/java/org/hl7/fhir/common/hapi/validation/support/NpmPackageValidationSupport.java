@@ -39,21 +39,28 @@ public class NpmPackageValidationSupport extends PrePopulatedValidationSupport {
 		try (InputStream is = ClasspathUtil.loadResourceAsStream(theClasspath)) {
 			NpmPackage pkg = NpmPackage.fromPackage(is);
 			if (pkg.getFolders().containsKey("package")) {
-				NpmPackage.NpmPackageFolder packageFolder = pkg.getFolders().get("package");
-
-				for (String nextFile : packageFolder.listFiles()) {
-					if (nextFile.toLowerCase(Locale.US).endsWith(".json")) {
-						String input = new String(packageFolder.getContent().get(nextFile), StandardCharsets.UTF_8);
-						IBaseResource resource = getFhirContext().newJsonParser().parseResource(input);
-						super.addResource(resource);
-					}
-				}
-
-				List<String> binaries = pkg.list("other");
-				for (String binaryName : binaries) {
-					addBinary(TextFile.streamToBytes(pkg.load("other", binaryName)), binaryName);
-				}
+				loadResourcesFromPackage(pkg);
+				loadBinariesFromPackage(pkg);
 			}
+		}
+	}
+
+	private void loadResourcesFromPackage(NpmPackage thePackage) {
+		NpmPackage.NpmPackageFolder packageFolder = thePackage.getFolders().get("package");
+
+		for (String nextFile : packageFolder.listFiles()) {
+			if (nextFile.toLowerCase(Locale.US).endsWith(".json")) {
+				String input = new String(packageFolder.getContent().get(nextFile), StandardCharsets.UTF_8);
+				IBaseResource resource = getFhirContext().newJsonParser().parseResource(input);
+				super.addResource(resource);
+			}
+		}
+	}
+
+	private void loadBinariesFromPackage(NpmPackage thePackage) throws IOException {
+		List<String> binaries = thePackage.list("other");
+		for (String binaryName : binaries) {
+			addBinary(TextFile.streamToBytes(thePackage.load("other", binaryName)), binaryName);
 		}
 	}
 }
