@@ -3986,7 +3986,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.update().resource(valueSetUnder1000).execute();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		//When: We create matching and non-matching observations for thge valuesets
+		//When: We create matching and non-matching observations for the valuesets
 		Observation matchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-matching.json");
 		Observation nonMatchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-non-matching.json");
 		myClient.update().resource(matchingObs).execute();
