@@ -77,7 +77,7 @@ public class SearchParamValidatingInterceptor {
 		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 
 		if( isNotEmpty(persistedIdList) ) {
-			throw new UnprocessableEntityException(Msg.code(2133) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			throw new UnprocessableEntityException(Msg.code(2124) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
@@ -101,7 +101,7 @@ public class SearchParamValidatingInterceptor {
 				.noneMatch(anId -> anId.equals(resourceId));
 
 			if(isNewSearchParam){
-				throw new UnprocessableEntityException(Msg.code(2134) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+				throw new UnprocessableEntityException(Msg.code(2124) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 			}
 		}
 	}
