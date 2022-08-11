@@ -152,7 +152,7 @@ public class SubscriptionValidatingInterceptor {
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
 
-			// if we hae a partition id already, we'll use that
+			// if we have a partition id already, we'll use that
 			// otherwise we might end up with READ and CREATE pointcuts
 			// returning conflicting partitions (say, all vs default)
 			RequestPartitionId toCheckPartitionId = theRequestPartitionId != null ?

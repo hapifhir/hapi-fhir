@@ -46,6 +46,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
@@ -76,6 +77,8 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
 
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+
+		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@BeforeEach
@@ -93,12 +96,14 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void updateSubscription() {
+	public void testCrossPartitionUpdate() {
 		// setup
 		String id = "RED";
 		ServletRequestDetails dets = new ServletRequestDetails();
 		dets.setRestOperationType(RestOperationTypeEnum.UPDATE);
 		dets.setServletRequest(new MockHttpServletRequest());
+		AtomicInteger readIndex = new AtomicInteger();
+		AtomicInteger writeIndex = new AtomicInteger();
 
 		Subscription subscription = new Subscription();
 		subscription.setId("Subscription/" + id);
@@ -122,9 +127,10 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		MySubscriptionWriteInterceptor writeInterceptor = new MySubscriptionWriteInterceptor();
 		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
 		readInterceptor.setObjectConsumer((obj) -> {
-			// we'll fail here cause it means we're calling this
-			// interceptor when we shouldn't
-			fail();
+			readIndex.getAndIncrement();
+		});
+		writeInterceptor.setObjectConsumer((ojb) -> {
+			writeIndex.getAndIncrement();
 		});
 		myInterceptorRegistry.registerInterceptor(readInterceptor);
 		myInterceptorRegistry.registerInterceptor(writeInterceptor);
@@ -136,10 +142,8 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		// verify
 		assertNotNull(outcome);
 		assertEquals(id, outcome.getResource().getIdElement().getIdPart());
-
-		// cleanup
-		myInterceptorRegistry.unregisterInterceptor(readInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(writeInterceptor);
+		assertEquals(0, readIndex.get()); // should be no read interactions
+		assertEquals(1, writeIndex.get());
 	}
 
 	@Test
@@ -334,10 +338,18 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 	@Interceptor
 	public static class MySubscriptionWriteInterceptor {
+		private Consumer<Object> myObjectConsumer;
+
+		public void setObjectConsumer(Consumer<Object> theConsumer) {
+			myObjectConsumer = theConsumer;
+		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
 			assertNotNull(theResource);
+			if (myObjectConsumer != null) {
+				myObjectConsumer.accept(theResource);
+			}
 			// doesn't matter; just not allPartitions
 			return RequestPartitionId.defaultPartition(LocalDate.of(2021, 2, 22));
 		}

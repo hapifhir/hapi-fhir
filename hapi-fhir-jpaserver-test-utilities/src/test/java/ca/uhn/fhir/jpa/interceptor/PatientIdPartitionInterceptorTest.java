@@ -80,11 +80,6 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		myPartitionSettings.setDefaultPartitionId(new PartitionSettings().getDefaultPartitionId());
 	}
 
-	@Test
-	public void testCrossPartition() {
-
-	}
-
 
 	@Test
 	public void testCreatePatient_ClientAssignedId() {
