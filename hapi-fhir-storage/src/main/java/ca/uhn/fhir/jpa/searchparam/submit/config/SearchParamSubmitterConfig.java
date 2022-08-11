@@ -20,16 +20,20 @@ package ca.uhn.fhir.jpa.searchparam.submit.config;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.searchparam.model.config.SearchParamModelConfig;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import(SearchParamModelConfig.class)
 public class SearchParamSubmitterConfig {
+
+	@Bean
+	public SearchParameterCanonicalizer searchParameterCanonicalizer(FhirContext theFhirContext){
+		return new SearchParameterCanonicalizer(theFhirContext);
+	}
 
 	@Bean
 	public SearchParamValidatingInterceptor searchParamValidatingInterceptor(){
