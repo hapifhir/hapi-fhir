@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -73,6 +75,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	private IAnonymousInterceptor myHook;
 	@Captor
 	private ArgumentCaptor<HookParams> myParamsCaptor;
+
+	@Autowired
+	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
 	@Override
 	@AfterEach
@@ -414,6 +419,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreate(){
+		registerSearchParameterValidatingInterceptor();
+
 		// let's make sure we don't already have a matching SearchParameter
 		Bundle bundle = myClient
 			.search()
@@ -443,11 +450,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
+			e.getMessage().contains("2124");
 		}
 	}
 
 	@Test
 	public void testSearchParamValidatingInterceptorAllowsResourceUpdate(){
+		registerSearchParameterValidatingInterceptor();
+
 		SearchParameter searchParameter = createSearchParameter();
 
 		// now, create a SearchParameter
@@ -471,6 +481,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreateWithUpdate(){
+		registerSearchParameterValidatingInterceptor();
+
 		String defaultSearchParamId = "clinical-patient";
 		String overlappingSearchParamId = "allergyintolerance-patient";
 
@@ -492,8 +504,13 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
+			e.getMessage().contains("2125");
 		}
 
+	}
+
+	private void registerSearchParameterValidatingInterceptor(){
+		ourRestServer.getInterceptorService().registerInterceptor(mySearchParamValidatingInterceptor);
 	}
 
 	private SearchParameter createSearchParameter(){
