@@ -69,8 +69,8 @@ class MdmLinkCreateSvcImplTest {
 
 		IMdmLink mdmLink = mdmLinkCaptor.getValue();
 
-		assertEquals(mdmLink.getLinkSource(), MdmLinkSourceEnum.MANUAL);
-		assertEquals(mdmLink.getMdmSourceType(), "Patient");
+		assertEquals(MdmLinkSourceEnum.MANUAL, mdmLink.getLinkSource());
+		assertEquals("Patient", mdmLink.getMdmSourceType());
 
 	}
 
