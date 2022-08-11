@@ -258,8 +258,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public void cacheResource(Resource res) {
-		//FIXME Should we implement anything here?
-		//throw new UnsupportedOperationException(Msg.code(660));
+
 	}
 
 	@Override
