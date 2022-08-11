@@ -20,14 +20,21 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.cli.client.HapiFhirCliRestfulClientFactory;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
+import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.tls.KeyStoreInfo;
+import ca.uhn.fhir.tls.TrustStoreInfo;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
@@ -56,6 +63,7 @@ import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,6 +73,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -80,6 +89,9 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	protected static final String BASE_URL_PARAM_LONGOPT = "target";
 	protected static final String BASE_URL_PARAM_NAME = "target";
 	protected static final String BASE_URL_PARAM_DESC = "Base URL for the target server (e.g. \"http://example.com/fhir\").";
+	protected static final String TLS_AUTH_PARAM_LONGOPT = "tls-auth";
+	protected static final String TLS_AUTH_PARAM_NAME = "tls-auth";
+	protected static final String TLS_AUTH_PARAM_DESC = "If specified, this parameter supplies a path and filename for a json authentication file that will be used to authenticate HTTPS requests.";
 	protected static final String BASIC_AUTH_PARAM = "b";
 	protected static final String BASIC_AUTH_PARAM_LONGOPT = "basic-auth";
 	protected static final String BASIC_AUTH_PARAM_NAME = "basic-auth";
@@ -116,6 +128,10 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 
 	protected void addThreadCountOption(Options theOptions) {
 		addOptionalOption(theOptions, null, THREAD_COUNT, "count", "If specified, this argument specifies the number of worker threads used (default is " + DEFAULT_THREAD_COUNT + ")");
+	}
+
+	protected void addHttpsAuthOption(Options theOptions){
+		addOptionalOption(theOptions, null, TLS_AUTH_PARAM_LONGOPT, TLS_AUTH_PARAM_NAME, TLS_AUTH_PARAM_DESC);
 	}
 
 
@@ -457,10 +473,11 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected IGenericClient newClient(CommandLine theCommandLine) throws ParseException {
-		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT);
+		return newClient(theCommandLine, BASE_URL_PARAM, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 	}
 
-	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
+	protected IGenericClient newClient(CommandLine theCommandLine, String theBaseUrlParamName, String theBasicAuthOptionName,
+												  String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
 		String baseUrl = theCommandLine.getOptionValue(theBaseUrlParamName);
 		if (isBlank(baseUrl)) {
 			throw new ParseException(Msg.code(1579) + "No target server (-" + BASE_URL_PARAM + ") specified.");
@@ -468,10 +485,18 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 			throw new ParseException(Msg.code(1580) + "Invalid target server specified, must begin with 'http' or 'file'.");
 		}
 
-		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName);
+		return newClientWithBaseUrl(theCommandLine, baseUrl, theBasicAuthOptionName, theBearerTokenOptionName, theTlsAuthOptionName);
 	}
 
-	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
+	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName,
+																 String theBearerTokenOptionName, String theTlsAuthOptionName) throws ParseException {
+
+		Optional<TlsAuthentication> tlsConfig = createTlsConfig(theCommandLine, theTlsAuthOptionName);
+		RestfulClientFactory restfulClientFactory = tlsConfig.isPresent()
+			? new HapiFhirCliRestfulClientFactory(myFhirCtx, tlsConfig.get())
+			: new HapiFhirCliRestfulClientFactory(myFhirCtx);
+
+		myFhirCtx.setRestfulClientFactory(restfulClientFactory);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
@@ -488,6 +513,62 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 		}
 
 		return retVal;
+	}
+
+	private Optional<TlsAuthentication> createTlsConfig(CommandLine theCommandLine, String theTlsAuthOptionName){
+		String httpAuthFilePath = theCommandLine.getOptionValue(theTlsAuthOptionName);
+		if(isBlank(httpAuthFilePath)){
+			return Optional.empty();
+		}
+
+		try(FileReader fileReader = new FileReader(httpAuthFilePath)) {
+			JsonObject json = JsonParser.parseReader(fileReader).getAsJsonObject();
+			Optional<KeyStoreInfo> keyStoreInfo = createKeyStoreInfo(json.get("keyStore").getAsJsonObject());
+			Optional<TrustStoreInfo> trustStoreInfo = createTrustStoreInfo(json.get("trustStore").getAsJsonObject());
+			if(keyStoreInfo.isEmpty() && trustStoreInfo.isEmpty()){
+				return Optional.empty();
+			}
+			return Optional.of(new TlsAuthentication(keyStoreInfo, trustStoreInfo));
+		}
+		catch(Exception e){
+			throw new RuntimeException(Msg.code(2115)+"Could not create TLS configuration options", e);
+		}
+	}
+
+	private Optional<KeyStoreInfo> createKeyStoreInfo(JsonObject theJson) throws ParseException {
+		String filePath = theJson.get("filePath").getAsString();
+		if(isBlank(filePath)){
+			return Optional.empty();
+		}
+
+		String storePass = theJson.get("storePass").getAsString();
+		if (PROMPT.equals(storePass)) {
+			storePass = trim(promptUser("Enter the store password for the keystore: "));
+		}
+		String keyPass = theJson.get("keyPass").getAsString();
+		if (PROMPT.equals(keyPass)) {
+			keyPass = trim(promptUser("Enter the key password for the keystore: "));
+		}
+		String alias = theJson.get("alias").getAsString();
+
+		KeyStoreInfo keyStoreInfo = new KeyStoreInfo(filePath, storePass, keyPass, alias);
+		return Optional.of(keyStoreInfo);
+	}
+
+	private Optional<TrustStoreInfo> createTrustStoreInfo(JsonObject theJson) throws ParseException {
+		String filePath = theJson.get("filePath").getAsString();
+		if(isBlank(filePath)){
+			return Optional.empty();
+		}
+
+		String storePass = theJson.get("storePass").getAsString();
+		if (PROMPT.equals(storePass)) {
+			storePass = trim(promptUser("Enter the store password for the truststore: "));
+		}
+
+		String alias = theJson.get("alias").getAsString();
+		TrustStoreInfo trustStoreInfo = new TrustStoreInfo(filePath, storePass, alias);
+		return Optional.of(trustStoreInfo);
 	}
 
 	private String getAndParseBearerTokenAuthHeader(CommandLine theCommandLine, String theBearerTokenOptionName) throws ParseException {

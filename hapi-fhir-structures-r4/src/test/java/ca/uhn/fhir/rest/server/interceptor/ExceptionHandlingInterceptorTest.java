@@ -1,11 +1,14 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -34,6 +37,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -75,6 +79,30 @@ public class ExceptionHandlingInterceptorTest {
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
 		}
+	}
+
+	@Test
+	public void ExceptionHandlingInterceptor_HandlesFailure_WhenWriting() throws IOException {
+
+		//Given: We have an interceptor which causes a failure after the response output stream has been started.
+		ProblemGeneratingInterceptor interceptor = new ProblemGeneratingInterceptor();
+		servlet.registerInterceptor(interceptor);
+		myInterceptor.setReturnStackTracesForExceptionTypes(Throwable.class);
+
+		//When: We make a request to the server, triggering this exception to be thrown on an otherwise successful request
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?succeed=true");
+		httpGet.setHeader("Accept-encoding", "gzip");
+		HttpResponse status = ourClient.execute(httpGet);
+		servlet.unregisterInterceptor(interceptor);
+
+		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(500, status.getStatusLine().getStatusCode());
+		OperationOutcome oo = (OperationOutcome) servlet.getFhirContext().newXmlParser().parseResource(responseContent);
+		ourLog.info(servlet.getFhirContext().newXmlParser().encodeResourceToString(oo));
+		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Simulated IOException"));
 	}
 
 	@Test
@@ -125,12 +153,21 @@ public class ExceptionHandlingInterceptorTest {
 		servlet.registerInterceptor(myInterceptor);
 	}
 
+	public static class ProblemGeneratingInterceptor {
+		@Hook(Pointcut.SERVER_OUTGOING_WRITER_CREATED)
+		public void intercept(RequestDetails theRequestDetails) throws IOException {
+			if (theRequestDetails.getUserData().get("writer_exception") == null) {
+				theRequestDetails.getUserData().put("writer_exception", "called");
+				throw new IOException("Simulated IOException");
+			}
+		}
+
+	}
 
 	/**
 	 * Created by dsotnikov on 2/25/2014.
 	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
-
 
 		@Override
 		public Class<Patient> getResourceType() {
@@ -167,7 +204,13 @@ public class ExceptionHandlingInterceptorTest {
 		public List<Patient> throwUnprocessableEntityWithMultipleMessages(@RequiredParam(name = "throwUnprocessableEntityWithMultipleMessages") StringParam theParam) {
 			throw new UnprocessableEntityException("message1", "message2", "message3");
 		}
-
+		@Search
+		public List<Patient> succeed(@RequiredParam(name = "succeed") StringParam theParam) {
+			Patient p = new Patient();
+			p.setId("Patient/123");
+			return List.of(p);
+		}
 	}
+
 
 }

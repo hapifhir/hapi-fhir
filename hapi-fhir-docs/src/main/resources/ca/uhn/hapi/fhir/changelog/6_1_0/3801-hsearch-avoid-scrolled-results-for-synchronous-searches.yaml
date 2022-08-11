@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3801
+title: "For Lucene/Elastic previously we were using scrolled results even when performing synchronous searches.
+   That has now been fixed."

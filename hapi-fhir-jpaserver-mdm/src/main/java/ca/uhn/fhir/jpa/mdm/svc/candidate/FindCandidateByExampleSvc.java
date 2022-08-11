@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 	@Autowired
-	IJpaIdHelperService myIdHelperService;
+	IIdHelperService myIdHelperService;
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -66,7 +66,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<Long> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
+		List<ResourcePersistentId> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget, (RequestPartitionId) theTarget.getUserData(Constants.RESOURCE_PARTITION_ID));
 
@@ -78,8 +78,7 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		List<String> skippedLogMessages = new ArrayList<>();
 		List<String> matchedLogMessages = new ArrayList<>();
 		for (MatchedTarget match : matchedCandidates) {
-
-			Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(match.getTarget()));
+			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
 				if (ourLog.isDebugEnabled()) {
 					skippedLogMessages.add(String.format("%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.", match.getTarget().getIdElement().toUnqualifiedVersionless()));
@@ -87,16 +86,19 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 				continue;
 			}
 
-			MdmLink matchMdmLink = optionalMdmLink.get();
-			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePid())) {
-				skippedLogMessages.add(String.format("Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH", matchMdmLink.getGoldenResourcePid()));
+
+			IMdmLink matchMdmLink = optionalMdmLink.get();
+			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePersistenceId())) {
+				skippedLogMessages.add(String.format("Skipping MDM on candidate Golden Resource with PID %s due to manual NO_MATCH", matchMdmLink.getGoldenResourcePersistenceId().toString()));
 				continue;
 			}
 
-			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(getResourcePersistentId(matchMdmLink.getGoldenResourcePid()), match.getMatchResult());
+			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(matchMdmLink.getGoldenResourcePersistenceId(), match.getMatchResult());
+
 			if (ourLog.isDebugEnabled()) {
-				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResource().getIdDt().toUnqualifiedVersionless()));
+				matchedLogMessages.add(String.format("Navigating from matched resource %s to its Golden Resource %s", match.getTarget().getIdElement().toUnqualifiedVersionless(), matchMdmLink.getGoldenResourcePersistenceId().toString()));
 			}
+
 			retval.add(candidate);
 		}
 
@@ -111,16 +113,12 @@ public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 		return retval;
 	}
 
-	private List<Long> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
-		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
+	private List<ResourcePersistentId> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
+		ResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
-			.map(MdmLink::getGoldenResourcePid)
+			.map(IMdmLink::getGoldenResourcePersistenceId)
 			.collect(Collectors.toList());
-	}
-
-	private ResourcePersistentId getResourcePersistentId(Long theGoldenResourcePid) {
-		return new ResourcePersistentId(theGoldenResourcePid);
 	}
 
 	@Override

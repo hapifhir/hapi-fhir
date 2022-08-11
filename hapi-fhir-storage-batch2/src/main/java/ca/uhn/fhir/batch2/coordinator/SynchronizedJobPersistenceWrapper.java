@@ -22,9 +22,13 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
 import java.util.List;
@@ -63,6 +67,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public synchronized List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+		return myWrap.fetchInstances(theRequest, theStart, theBatchSize);
+	}
+
+	@Override
 	public synchronized List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		return myWrap.fetchInstances(thePageSize, thePageIndex);
 	}
@@ -88,8 +97,18 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
+	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		return myWrap.fetchJobInstances(theRequest);
+	}
+
+	@Override
 	public synchronized void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
 		myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theChunkId, theErrorMessage);
+	}
+
+	@Override
+	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
+		return myWrap.markWorkChunkAsErroredAndIncrementErrorCount(theParameters);
 	}
 
 	@Override
@@ -120,6 +139,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
 		return myWrap.fetchAllWorkChunksIterator(theInstanceId, theWithData);
+	}
+
+	@Override
+	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
+		return myWrap.fetchAllWorkChunksForStepIterator(theInstanceId, theStepId);
 	}
 
 

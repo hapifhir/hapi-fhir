@@ -62,6 +62,10 @@ abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT ext
 		return myJobWorkCursor.isFirstStep && getWorkChunkCount() == 0;
 	}
 
+	public boolean hasExactlyOneChunk() {
+		return getWorkChunkCount() == 1;
+	}
+
 	public JobDefinitionStep<PT,IT,OT> getTargetStep() {
 		return myJobWorkCursor.currentStep;
 	}

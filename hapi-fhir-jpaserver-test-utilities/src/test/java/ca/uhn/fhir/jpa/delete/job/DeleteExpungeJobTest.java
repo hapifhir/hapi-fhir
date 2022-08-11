@@ -1,32 +1,28 @@
 package ca.uhn.fhir.jpa.delete.job;
 
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
-import ca.uhn.fhir.jpa.batch.job.MultiUrlJobParameterUtil;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DeleteExpungeJobTest extends BaseJpaR4Test {
 	@Autowired
-	private IBatchJobSubmitter myBatchJobSubmitter;
+	private IJobCoordinator myJobCoordinator;
 	@Autowired
-	@Qualifier(BatchConstants.DELETE_EXPUNGE_JOB_NAME)
-	private Job myDeleteExpungeJob;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private Batch2JobHelper myBatch2JobHelper;
 
 	@Test
 	public void testDeleteExpunge() throws Exception {
@@ -47,19 +43,33 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 		obsInactive.setSubject(new Reference(pDelId));
 		IIdType oDelId = myObservationDao.create(obsInactive).getId().toUnqualifiedVersionless();
 
+		DiagnosticReport diagActive = new DiagnosticReport();
+		diagActive.setSubject(new Reference(pKeepId));
+		IIdType dKeepId = myDiagnosticReportDao.create(diagActive).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport diagInactive = new DiagnosticReport();
+		diagInactive.setSubject(new Reference(pDelId));
+		IIdType dDelId = myDiagnosticReportDao.create(diagInactive).getId().toUnqualifiedVersionless();
+
 		// validate precondition
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
 
-		JobParameters jobParameters = MultiUrlJobParameterUtil.buildJobParameters("Observation?subject.active=false", "Patient?active=false");
+		DeleteExpungeJobParameters jobParameters = new DeleteExpungeJobParameters();
+		jobParameters.addUrl("Observation?subject.active=false").addUrl("DiagnosticReport?subject.active=false");
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(jobParameters);
+		startRequest.setJobDefinitionId(DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE);
 
 		// execute
-		JobExecution jobExecution = myBatchJobSubmitter.runJob(myDeleteExpungeJob, jobParameters);
-
-		myBatchJobHelper.awaitJobCompletion(jobExecution);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
-		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 	}
 }

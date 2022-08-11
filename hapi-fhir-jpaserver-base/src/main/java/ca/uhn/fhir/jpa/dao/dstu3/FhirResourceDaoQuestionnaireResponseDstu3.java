@@ -51,11 +51,11 @@ public class FhirResourceDaoQuestionnaireResponseDstu3 extends BaseHapiFhirResou
 //		}
 //	}
 //
-//	public class JpaResourceLoader implements IResourceLoader {
+//	public class ResourceLoaderImpl implements IResourceLoader {
 //
 //		private RequestDetails myRequestDetails;
 //
-//		public JpaResourceLoader(RequestDetails theRequestDetails) {
+//		public ResourceLoaderImpl(RequestDetails theRequestDetails) {
 //			super();
 //			myRequestDetails = theRequestDetails;
 //		}

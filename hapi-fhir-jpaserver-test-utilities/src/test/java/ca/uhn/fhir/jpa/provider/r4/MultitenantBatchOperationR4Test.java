@@ -7,13 +7,11 @@ import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.delete.job.ReindexTestHelper;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -25,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MultitenantBatchOperationR4Test.class);
 
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private boolean myReindexParameterCache;
 
 	@BeforeEach
 	@Override
@@ -49,6 +45,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
+
+		myReindexParameterCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
 	}
 
 	@BeforeEach
@@ -64,6 +63,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(myReindexParameterCache);
 		super.after();
 	}
 
@@ -82,7 +82,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
 
 		Parameters input = new Parameters();
-		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "/Patient?active=false");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Patient?active=false");
 
 		MyInterceptor interceptor = new MyInterceptor();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
@@ -97,8 +97,10 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 			.execute();
 
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		myBatchJobHelper.awaitAllBulkJobCompletions(BatchConstants.DELETE_EXPUNGE_JOB_NAME);
-		assertThat(interceptor.requestPartitionIds, hasSize(1));
+		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(jobId);
+
+		assertThat(interceptor.requestPartitionIds, hasSize(3));
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
 		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
 		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
@@ -106,10 +108,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
-		Long jobId = BatchHelperR4.jobIdFromParameters(response);
-
-		assertEquals(1, myBatchJobHelper.getReadCount(jobId));
-		assertEquals(1, myBatchJobHelper.getWriteCount(jobId));
+		assertEquals(1, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// validate only the false patient in TENANT_B is removed
 		assertEquals(2, getAllPatientsInTenant(TENANT_A).getTotal());

@@ -20,11 +20,11 @@ package ca.uhn.fhir.rest.client.apache;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.api.Header;
+import ca.uhn.fhir.rest.client.api.IHttpClient;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -37,11 +37,11 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.client.api.Header;
-import ca.uhn.fhir.rest.client.api.IHttpClient;
-import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * A Restful Factory to create clients, requests and responses based on the Apache httpclient library.
@@ -71,24 +71,18 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
-		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
+	protected synchronized IHttpClient getHttpClient(String theServerBase) {
+		return getHttpClient(new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
 	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
-			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
-		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
-				theHeaders);
+																 String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
+		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType, theHeaders);
 	}
 
 	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
-
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000,
-					TimeUnit.MILLISECONDS);
-			connectionManager.setMaxTotal(getPoolMaxTotal());
-			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
 
 			//TODO: Use of a deprecated method should be resolved.
 			RequestConfig defaultRequestConfig =
@@ -101,12 +95,16 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					.build();
 
 			HttpClientBuilder builder = getHttpClientBuilder()
-					.useSystemProperties()
-					.setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig)
-					.disableCookieManagement();
+				.useSystemProperties()
+				.setDefaultRequestConfig(defaultRequestConfig)
+				.disableCookieManagement();
 
-			if (myProxy != null && StringUtils.isNotBlank(getProxyUsername()) && StringUtils.isNotBlank(getProxyPassword())) {
+			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+			connectionManager.setMaxTotal(getPoolMaxTotal());
+			connectionManager.setDefaultMaxPerRoute(getPoolMaxPerRoute());
+			builder.setConnectionManager(connectionManager);
+
+			if (myProxy != null && isNotBlank(getProxyUsername()) && isNotBlank(getProxyPassword())) {
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
 				credsProvider.setCredentials(new AuthScope(myProxy.getHostName(), myProxy.getPort()),
 						new UsernamePasswordCredentials(getProxyUsername(), getProxyPassword()));
