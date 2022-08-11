@@ -444,4 +444,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 
+	@Override
+	public void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds) {
+		SearchSession session = Search.session(myEntityManager);
+		SearchIndexingPlan indexingPlan = session.indexingPlan();
+		for (Object givenId : theGivenIds) {
+			indexingPlan.purge(theClazz, givenId, null);
+		}
+		indexingPlan.process();
+		indexingPlan.execute();
+	}
 }
