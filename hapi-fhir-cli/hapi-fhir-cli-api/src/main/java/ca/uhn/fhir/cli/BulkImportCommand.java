@@ -26,10 +26,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.ParametersUtil;
-import com.mysql.cj.TransactionEventHandler;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -39,16 +40,13 @@ import org.apache.commons.io.file.PathUtils;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -112,6 +110,8 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
+		ourEndNow = false;
+
 		parseFhirContext(theCommandLine);
 
 		String baseDirectory = theCommandLine.getOptionValue(SOURCE_DIRECTORY);
@@ -149,31 +149,37 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
-		ourEndNow = false;
-
 		while (true) {
-			ourLog.info("!!!!!!!!!!!");
-			if (UploadingIsEndNow(outcome.getIdElement().toString(), client)) {
+			if (UploadingIsEndNow(outcome.getIdElement().toString(), client) || ourEndNow) {
 				break;
+			}
+			// checking the status every 3 seconds
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException theE) {
+				// ignore
 			}
 		}
 
 	}
 
 	private boolean UploadingIsEndNow(String url, IGenericClient client) {
+		Boolean uploadingEnded;
+		String jobId = url.substring(url.indexOf("=") + 1);
 
-		Parameters input = new Parameters();
-		input.addParameter().setName("url").setValue(new UriType(url));
-
-		IBaseParameters response = client
+		MethodOutcome response = client
 			.operation()
 			.onServer()
 			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-			.withParameters(input)
+			.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+			.returnMethodOutcome()
 			.execute();
 
-		//There's more to add
-		return ourEndNow;
+		Object resource = response.getResource();
+		String diagnostics = ((OperationOutcome) resource).getIssue().get(0).getDiagnostics();
+
+		uploadingEnded = (diagnostics.equals("Job is complete.")) ? true : false;
+		return uploadingEnded;
 	}
 
 	@Nonnull
