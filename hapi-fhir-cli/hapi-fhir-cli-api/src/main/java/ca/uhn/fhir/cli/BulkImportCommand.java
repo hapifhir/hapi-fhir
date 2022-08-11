@@ -150,7 +150,7 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
 		while (true) {
-			if (UploadingIsEndNow(outcome.getIdElement().toString(), client) || ourEndNow) {
+			if (checkJobComplete(outcome.getIdElement().toString(), client) || ourEndNow) {
 				break;
 			}
 			// checking the status every 3 seconds
@@ -163,8 +163,8 @@ public class BulkImportCommand extends BaseCommand {
 
 	}
 
-	private boolean UploadingIsEndNow(String url, IGenericClient client) {
-		Boolean uploadingEnded;
+	private boolean checkJobComplete(String url, IGenericClient client) {
+
 		String jobId = url.substring(url.indexOf("=") + 1);
 
 		MethodOutcome response = client
@@ -175,11 +175,9 @@ public class BulkImportCommand extends BaseCommand {
 			.returnMethodOutcome()
 			.execute();
 
-		Object resource = response.getResource();
-		String diagnostics = ((OperationOutcome) resource).getIssue().get(0).getDiagnostics();
+		String diagnostics = ((OperationOutcome) response.getResource()).getIssue().get(0).getDiagnostics();
 
-		uploadingEnded = (diagnostics.equals("Job is complete.")) ? true : false;
-		return uploadingEnded;
+		return diagnostics.equals("Job is complete.");
 	}
 
 	@Nonnull
