@@ -101,7 +101,7 @@ public class SearchParamValidatingInterceptor {
 				.noneMatch(anId -> anId.equals(resourceId));
 
 			if(isNewSearchParam){
-				throw new UnprocessableEntityException(Msg.code(2124) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+				throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 			}
 		}
 	}
