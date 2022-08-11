@@ -100,5 +100,13 @@ public interface IFulltextSearchSvc {
 
 	boolean supportsAllOf(SearchParameterMap theParams);
 
-
+	/**
+	 * Given a resource type that is indexed by hibernate search, and a list of objects reprenting the IDs you wish to delete,
+	 * this method will delete the resources from the Hibernate Search index. This is useful for situations where a deletion occurred
+	 * outside a Hibernate ORM session, leaving dangling documents in the index.
+	 *
+	 * @param theClazz The class, which must be annotated with {@link  org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed}
+	 * @param theGivenIds The list of IDs for the given document type. Note that while this is a List<Object>, the type must match the type of the `@Id` field on the given class.
+	 */
+	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
 }
