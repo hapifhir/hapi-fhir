@@ -104,7 +104,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			request.addStatus(StatusEnum.IN_PROGRESS);
 			request.addStatus(StatusEnum.COMPLETED);
 
-			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 1, 1000);
+			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
 				Collections.sort(existing, (o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));

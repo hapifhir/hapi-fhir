@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -21,6 +24,8 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	@Autowired
+	private IJobPersistence myJobPersistenceSvc;
 	private String myParams = "{\"param1\":\"value1\"}";
 	private String myJobDefinitionId = "my-job-def-id";
 	private String myInstanceId = "abc-123";
@@ -44,6 +49,27 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(myJobDefinitionId, myParams, PageRequest.of(0, 10));
 		assertThat(instances, hasSize(4));
 
+	}
+
+	@Test
+	public void testServiceLogicIsCorrectWhenNoStatusesAreUsed() {
+		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams);
+		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
+		assertThat(jobInstances, hasSize(4));
+	}
+
+	@Test
+	public void testServiceLogicIsCorrectWithStatuses() {
+		//Given
+		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams);
+		request.addStatus(StatusEnum.IN_PROGRESS);
+		request.addStatus(StatusEnum.COMPLETED);
+
+		//When
+		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
+
+		//Then
+		assertThat(jobInstances, hasSize(2));
 	}
 
 	@BeforeEach

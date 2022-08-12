@@ -160,13 +160,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int thePage, int theBatchSize) {
 		String definitionId = theRequest.getJobDefinition();
 		String params = theRequest.getParameters();
 		Set<StatusEnum> statuses = theRequest.getStatuses();
 
-		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
-
+		Pageable pageable = PageRequest.of(thePage, theBatchSize);
 
 		List<Batch2JobInstanceEntity> instanceEntities;
 
