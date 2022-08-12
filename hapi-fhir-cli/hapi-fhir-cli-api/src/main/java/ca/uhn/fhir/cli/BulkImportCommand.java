@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -45,7 +46,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -110,8 +110,6 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
-		ourEndNow = false;
-
 		parseFhirContext(theCommandLine);
 
 		String baseDirectory = theCommandLine.getOptionValue(SOURCE_DIRECTORY);
@@ -149,35 +147,41 @@ public class BulkImportCommand extends BaseCommand {
 		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
 
-		while (true) {
-			if (checkJobComplete(outcome.getIdElement().toString(), client) || ourEndNow) {
-				break;
-			}
-			// checking the status every 3 seconds
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException theE) {
-				// ignore
-			}
-		}
-
+		checkJobComplete(outcome.getIdElement().toString(), client);
 	}
 
-	private boolean checkJobComplete(String url, IGenericClient client) {
-
+	private void checkJobComplete(String url, IGenericClient client) {
 		String jobId = url.substring(url.indexOf("=") + 1);
 
-		MethodOutcome response = client
-			.operation()
-			.onServer()
-			.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
-			.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
-			.returnMethodOutcome()
-			.execute();
+		while (true) {
+			MethodOutcome response;
+			// handle NullPointerException
+			if (jobId == null) {
+				ourLog.error("The jobId cannot be null.");
+				break;
+			}
 
-		String diagnostics = ((OperationOutcome) response.getResource()).getIssue().get(0).getDiagnostics();
+			try {
+				response = client
+					.operation()
+					.onServer()
+					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+					.returnMethodOutcome()
+					.execute();
+			} catch (InternalErrorException e){
+				// handle ERRORED status
+				ourLog.error(e.getMessage());
+				break;
+			}
 
-		return diagnostics.equals("Job is complete.");
+			if (response.getResponseStatusCode() == 200) {
+				break;
+			} else {
+				// still in progress
+				continue;
+			}
+		}
 	}
 
 	@Nonnull
@@ -277,10 +281,6 @@ public class BulkImportCommand extends BaseCommand {
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(2059) + e.getMessage(), e);
 		}
-	}
-
-	public static void setEndNowForUnitTest(boolean theEndNow) {
-		ourEndNow = theEndNow;
 	}
 
 }

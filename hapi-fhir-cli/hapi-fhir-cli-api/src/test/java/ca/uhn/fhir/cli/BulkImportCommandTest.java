@@ -83,7 +83,6 @@ public class BulkImportCommandTest {
 	public void afterEach() throws IOException {
 		ourLog.info("Deleting temp directory: {}", myTempDir);
 		FileUtils.deleteDirectory(myTempDir.toFile());
-		BulkImportCommand.setEndNowForUnitTest(true);
 	}
 
 	private Batch2JobStartResponse createJobStartResponse(String theId) {
