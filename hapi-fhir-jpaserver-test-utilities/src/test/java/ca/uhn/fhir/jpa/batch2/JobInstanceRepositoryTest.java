@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 		instance.setId(instanceId);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
+		instance.setCreateTime(new Date());
 		instance.setDefinitionId(definitionId);
 		instance.setParams(params);
 
