@@ -272,7 +272,8 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		assertEquals(instances.size(), retInstances.size());
-		assertEquals(instances, retInstances);
+		assertEquals(instances.get(0).getId(),  retInstances.get(0).getInstanceId());
+		assertEquals(instances.get(1).getId(),  retInstances.get(1).getInstanceId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)
