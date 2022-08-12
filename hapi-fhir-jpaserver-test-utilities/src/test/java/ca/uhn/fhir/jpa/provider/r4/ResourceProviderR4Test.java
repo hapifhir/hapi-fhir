@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.test.utilities.MatchersUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -103,7 +104,6 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -2333,8 +2333,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> test = List.of("a", "b", "c");
 		String testString = "testAString";
 
+		//examined iterable must be of the same length as the specified collection of matchers
 		assertThat(test, not(contains("b"))); //replace with not(hasItem())
+
+		//examined Iterable yield at least one item that is matched
+		//it can contain "a", but it doesn't contain "d" so this passes
+		//really does "has one of these"
 		assertThat(test, not(hasItems("a", "d"))); //replace with individual calls to not(hasItem())
+		//MatchersUtil.assertDoesNotContainAnyOf(test, List.of("a", "d"));
+
+		//examined iterable must be of the same length as the specified collection of matchers
 		assertThat(test, not(containsInAnyOrder("a", "b"))); //replace with indiv calls to not(hasItem())
 	}
 
