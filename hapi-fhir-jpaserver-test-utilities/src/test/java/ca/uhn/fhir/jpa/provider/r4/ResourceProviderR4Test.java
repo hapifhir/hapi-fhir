@@ -2244,8 +2244,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
 			assertThat(ids, not((o2Id)));
-			assertThat(ids, not(contains(c2Id)));
-			assertThat(ids, not(contains(p2Id)));
+			assertThat(ids, not(hasItem(c2Id)));
+			assertThat(ids, not(hasItem(p2Id)));
 		}
 
 		{
@@ -2277,7 +2277,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2295,7 +2295,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2323,17 +2323,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			allresults.addAll(secondBundle);
 
 			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(allresults, not(contains(c5Id)));
+			assertThat(allresults, not(hasItem(c5Id)));
 		}
 	}
 
 	//FIXME: remove
 	@Test
 	public void testContains(){
-		List<String> test = List.of("a", "b");
+		List<String> test = List.of("a", "b", "c");
+		String testString = "testAString";
 
-		assertThat(test, not(contains("b")));
-		assertThat(test, not(hasItems("a", "d")));
+		assertThat(test, not(contains("b"))); //replace with not(hasItem())
+		assertThat(test, not(hasItems("a", "d"))); //replace with individual calls to not(hasItem())
+		assertThat(test, not(containsInAnyOrder("a", "b"))); //replace with indiv calls to not(hasItem())
 	}
 
 	@Test
@@ -2474,7 +2476,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
-			assertThat(ids, not(contains(c3Id)));
+			assertThat(ids, not(hasItem(c3Id)));
 		}
 
 
@@ -4582,7 +4584,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(contains(oid2)));
+			assertThat(ids, not(hasItem(oid2)));
 		}
 
 	}
@@ -5687,7 +5689,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(contains(id2.getValue())));
+			assertThat(ids, not(hasItem(id2.getValue())));
 		}
 
 	}

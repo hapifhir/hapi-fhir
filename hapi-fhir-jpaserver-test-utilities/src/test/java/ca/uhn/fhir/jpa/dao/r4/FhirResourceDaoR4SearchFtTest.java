@@ -30,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
@@ -415,7 +416,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(pidTypeArray));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(contains(pidTypeArray)));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(hasItems(pidTypeArray)));
 
 		myPatientDao.update(patient, null, true, mockSrd());
 

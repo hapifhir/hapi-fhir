@@ -92,6 +92,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1087,7 +1088,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.setLoadSynchronous(true);
 		params.add(Patient.SP_FAMILY, new StringDt(name));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-		assertThat(patients, not(contains(id)));
+		assertThat(patients, not(hasItem(id)));
 
 	}
 
@@ -1437,7 +1438,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IBundleProvider found = myPatientDao.search(params);
 		assertEquals(1, toList(found).size());
 		assertThat(toUnqualifiedVersionlessIds(found), contains(longId));
-		assertThat(toUnqualifiedVersionlessIds(found), not(contains(shortId)));
+		assertThat(toUnqualifiedVersionlessIds(found), not(hasItem(shortId)));
 
 	}
 

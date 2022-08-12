@@ -3696,7 +3696,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(contains(oid2)));
+			assertThat(ids, not(hasItem(oid2)));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -3883,7 +3883,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(contains(id2.getValue())));
+			assertThat(ids, not(hasItem(id2.getValue())));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}

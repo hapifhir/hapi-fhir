@@ -306,7 +306,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), contains(pId1));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), not(contains(pId1)));
+		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), not(hasItem(pId1)));
 
 		myPatientDao.update(patient, null, true, mySrd);
 
