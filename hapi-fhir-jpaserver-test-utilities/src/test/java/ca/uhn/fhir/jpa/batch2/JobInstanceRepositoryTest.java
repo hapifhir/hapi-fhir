@@ -1,11 +1,11 @@
 package ca.uhn.fhir.jpa.batch2;
 
-import ca.uhn.fhir.batch2.config.BaseBatch2Config;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -21,28 +21,70 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	private String myParams = "{\"param1\":\"value1\"}";
+	private String myJobDefinitionId = "my-job-def-id";
+	private String myInstanceId = "abc-123";
 
 	@Test
-	public void testQueryWorks() {
+	public void testSearchByJobParamsAndStatuses_SingleStatus() {
+		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
+	}
 
+	@Test
+	public void testSearchByJobParamsAndStatuses_MultiStatus() {
+		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
+		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		assertThat(instances, hasSize(2));
+	}
+
+	@Test
+	public void testSearchByJobParamsWithoutStatuses() {
+		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(myJobDefinitionId, myParams, PageRequest.of(0, 10));
+		assertThat(instances, hasSize(4));
+
+	}
+
+	@BeforeEach
+	private void beforeEach() {
+		//Create in-progress job.
 		Batch2JobInstanceEntity instance= new Batch2JobInstanceEntity();
-		String instanceId = "abc-123";
-		String definitionId = "my-job-def-id";
-		String params = "{\"param1\":\"value1\"}";
-
-		instance.setId(instanceId);
+		instance.setId(myInstanceId);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
 		instance.setCreateTime(new Date());
-		instance.setDefinitionId(definitionId);
-		instance.setParams(params);
-
-
+		instance.setDefinitionId(myJobDefinitionId);
+		instance.setParams(myParams);
 		myJobInstanceRepository.save(instance);
-		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<JobInstance> instancesByJobIdParamsAndStatus = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(definitionId, params, statuses, PageRequest.of(0, 10));
 
-		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
+		Batch2JobInstanceEntity completedInstance = new Batch2JobInstanceEntity();
+		completedInstance.setId(myInstanceId + "-2");
+		completedInstance.setStatus(StatusEnum.COMPLETED);
+		completedInstance.setCreateTime(new Date());
+		completedInstance.setDefinitionId(myJobDefinitionId);
+		completedInstance.setParams(myParams);
+		myJobInstanceRepository.save(completedInstance);
 
+		Batch2JobInstanceEntity cancelledInstance = new Batch2JobInstanceEntity();
+		cancelledInstance.setId(myInstanceId + "-3");
+		cancelledInstance.setStatus(StatusEnum.CANCELLED);
+		cancelledInstance.setCreateTime(new Date());
+		cancelledInstance.setDefinitionId(myJobDefinitionId);
+		cancelledInstance.setParams(myParams);
+		myJobInstanceRepository.save(cancelledInstance);
+
+		Batch2JobInstanceEntity failedInstance = new Batch2JobInstanceEntity();
+		failedInstance.setId(myInstanceId + "-4");
+		failedInstance.setStatus(StatusEnum.FAILED);
+		failedInstance.setCreateTime(new Date());
+		failedInstance.setDefinitionId(myJobDefinitionId);
+		failedInstance.setParams(myParams);
+		myJobInstanceRepository.save(failedInstance);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		myJobInstanceRepository.deleteAll();
 	}
 
 }
