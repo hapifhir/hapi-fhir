@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -11,10 +12,10 @@ import java.util.stream.Collectors;
 
 public class IsSameGoldenResourceAs extends BaseGoldenResourceMatcher {
 
-	private List<Long> goldenResourcePidsToMatch;
-	private Long incomingGoldenResourcePid;
+	private List<ResourcePersistentId> goldenResourcePidsToMatch;
+	private ResourcePersistentId incomingGoldenResourcePid;
 
-	public IsSameGoldenResourceAs(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public IsSameGoldenResourceAs(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
@@ -40,7 +41,7 @@ public class IsSameGoldenResourceAs extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText(String.format(" was actually linked to %s/%s", myTargetType, incomingGoldenResourcePid));
 	}
 
-	public static Matcher<IAnyResource> sameGoldenResourceAs(IJpaIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> sameGoldenResourceAs(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsSameGoldenResourceAs(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

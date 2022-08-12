@@ -35,6 +35,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
@@ -65,6 +66,10 @@ public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
 
+	@AfterEach
+	public void purgeUniqueIndexes() {
+		myResourceIndexedCompositeStringUniqueDao.deleteAll();
+	}
 
 	private void createUniqueBirthdateAndGenderSps() {
 		SearchParameter sp = new SearchParameter();

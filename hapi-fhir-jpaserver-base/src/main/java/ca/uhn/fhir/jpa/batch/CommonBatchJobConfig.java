@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@Deprecated
 public class CommonBatchJobConfig {
 	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
 

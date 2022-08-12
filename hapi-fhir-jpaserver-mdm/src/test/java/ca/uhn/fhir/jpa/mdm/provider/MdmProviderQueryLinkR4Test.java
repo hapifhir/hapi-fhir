@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.StopWatch;
@@ -56,12 +58,15 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
 		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
-		Long sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(sourcePatient1));
+		ResourcePersistentId sourcePatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient1));
 		Patient sourcePatient2 = createGoldenPatient();
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
-		Long sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(sourcePatient2));
+		ResourcePersistentId sourcePatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), sourcePatient2));
 
-		MdmLink possibleDuplicateMdmLink = myMdmLinkDaoSvc.newMdmLink().setGoldenResourcePid(sourcePatient1Pid).setSourcePid(sourcePatient2Pid).setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
+		MdmLink possibleDuplicateMdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		possibleDuplicateMdmLink.setGoldenResourcePersistenceId(sourcePatient1Pid);
+		possibleDuplicateMdmLink.setSourcePersistenceId(sourcePatient2Pid);
+		possibleDuplicateMdmLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateMdmLink);
 	}
 

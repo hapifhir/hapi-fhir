@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
@@ -21,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR5ConceptMapTest.class);
 
@@ -28,7 +28,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	public void testTranslateWithConceptMapUrlAndVersion() {
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
-		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+		conceptMap1.setUrl(CM_URL).setVersion("v1").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
 		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
@@ -46,7 +46,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	
 		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
-		conceptMap2.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+		conceptMap2.setUrl(CM_URL).setVersion("v2").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
 		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
@@ -111,7 +111,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		
 		//- conceptMap1 v1
 		ConceptMap conceptMap1 = new ConceptMap();
-		conceptMap1.setUrl(CM_URL).setVersion("v1").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+		conceptMap1.setUrl(CM_URL).setVersion("v1").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group1 = conceptMap1.addGroup();
 		group1.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
@@ -129,7 +129,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 	
 		//- conceptMap1 v2
 		ConceptMap conceptMap2 = new ConceptMap();
-		conceptMap2.setUrl(CM_URL).setVersion("v2").setSource(new UriType(VS_URL)).setTarget(new UriType(VS_URL_2));
+		conceptMap2.setUrl(CM_URL).setVersion("v2").setSourceScope(new UriType(VS_URL)).setTargetScope(new UriType(VS_URL_2));
 		
 		ConceptMapGroupComponent group2 = conceptMap2.addGroup();
 		group2.setSource(CS_URL + "|" + "Version 1").setTarget(CS_URL_2 + "|" + "Version 2");
