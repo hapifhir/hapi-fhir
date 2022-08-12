@@ -34,14 +34,14 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	private final Map<String, IBaseResource> myCodeSystems;
 	private final Map<String, IBaseResource> myStructureDefinitions;
 	private final Map<String, IBaseResource> myValueSets;
+	private final Map<String, byte[]> myBinaries;
 
 	/**
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport(FhirContext theContext) {
-		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>());
+		this(theContext, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
 	}
-
 
 	/**
 	 * Constructor
@@ -52,16 +52,49 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	 *                                the resource itself.
 	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
 	 *                                the resource itself.
+	 **/
+	public PrePopulatedValidationSupport(
+		FhirContext theFhirContext,
+		Map<String, IBaseResource> theStructureDefinitions,
+		Map<String, IBaseResource> theValueSets,
+		Map<String, IBaseResource> theCodeSystems) {
+		this(theFhirContext, theStructureDefinitions, theValueSets, theCodeSystems, new HashMap<>());
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theStructureDefinitions The StructureDefinitions to be returned by this module. Keys are the logical URL for the resource, and
+	 *                                values are the resource itself.
+	 * @param theValueSets            The ValueSets to be returned by this module. Keys are the logical URL for the resource, and values are
+	 *                                the resource itself.
+	 * @param theCodeSystems          The CodeSystems to be returned by this module. Keys are the logical URL for the resource, and values are
+	 *                                the resource itself.
+	 * @param theBinaries				 The binary files to be returned by this module. Keys are the unique filename for the binary, and values
+	 *                                are the contents of the file as a byte array.
 	 */
-	public PrePopulatedValidationSupport(FhirContext theFhirContext, Map<String, IBaseResource> theStructureDefinitions, Map<String, IBaseResource> theValueSets, Map<String, IBaseResource> theCodeSystems) {
+	public PrePopulatedValidationSupport(
+		FhirContext theFhirContext,
+		Map<String, IBaseResource> theStructureDefinitions,
+		Map<String, IBaseResource> theValueSets,
+		Map<String, IBaseResource> theCodeSystems,
+		Map<String, byte[]> theBinaries) {
 		super(theFhirContext);
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 		Validate.notNull(theStructureDefinitions, "theStructureDefinitions must not be null");
 		Validate.notNull(theValueSets, "theValueSets must not be null");
 		Validate.notNull(theCodeSystems, "theCodeSystems must not be null");
+		Validate.notNull(theBinaries, "theBinaries must not be null");
 		myStructureDefinitions = theStructureDefinitions;
 		myValueSets = theValueSets;
 		myCodeSystems = theCodeSystems;
+		myBinaries = theBinaries;
+	}
+
+	public void addBinary(byte[] theBinary, String theBinaryKey) {
+		Validate.notNull(theBinary, "theBinaryKey must not be null");
+		Validate.notNull(theBinary, "the" + theBinaryKey + " must not be null");
+		myBinaries.put(theBinaryKey, theBinary);
 	}
 
 	/**
@@ -219,6 +252,9 @@ public class PrePopulatedValidationSupport extends BaseStaticResourceValidationS
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		return myStructureDefinitions.get(theUrl);
 	}
+
+	@Override
+	public byte[] fetchBinary(String theBinaryKey) { return myBinaries.get(theBinaryKey); }
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
