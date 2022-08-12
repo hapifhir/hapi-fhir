@@ -107,12 +107,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 1, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
-				Collections.sort(existing, new Comparator<JobInstance>() {
-					@Override
-					public int compare(JobInstance o1, JobInstance o2) {
-						return -(o1.getStatus().ordinal() - o2.getStatus().ordinal());
-					}
-				});
+				Collections.sort(existing, (o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
 
 				JobInstance first = existing.stream().findFirst().get();
 
