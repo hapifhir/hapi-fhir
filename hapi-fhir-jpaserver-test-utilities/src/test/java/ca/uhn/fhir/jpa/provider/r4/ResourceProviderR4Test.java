@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -103,7 +104,6 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -151,6 +151,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -175,7 +176,6 @@ import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORM
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -183,10 +183,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -3964,8 +3966,46 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(text, containsString("\"OBS1\""));
 			assertThat(text, not(containsString("\"OBS2\"")));
 		}
+	}
+
+	@Test
+	public void testCodeInWithLargeValueSet() throws IOException {
+		//Given: We load a large codesystem
+		myDaoConfig.setMaximumExpansionSize(1000);
+		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder();
+		zipCollectionBuilder.addFileZip("/largecodesystem/", "concepts.csv");
+		zipCollectionBuilder.addFileZip("/largecodesystem/", "hierarchy.csv");
+		myTerminologyLoaderSvc.loadCustom("http://hl7.org/fhir/sid/icd-10", zipCollectionBuilder.getFiles(), mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 
+		//And Given: We create two valuesets based on the CodeSystem, one with >1000 codes and one with <1000 codes
+		ValueSet valueSetOver1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV.json");
+		ValueSet valueSetUnder1000 = loadResourceFromClasspath(ValueSet.class, "/largecodesystem/ValueSetV1.json");
+		myClient.update().resource(valueSetOver1000).execute();
+		myClient.update().resource(valueSetUnder1000).execute();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		//When: We create matching and non-matching observations for the valuesets
+		Observation matchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-matching.json");
+		Observation nonMatchingObs = loadResourceFromClasspath(Observation.class, "/largecodesystem/observation-non-matching.json");
+		myClient.update().resource(matchingObs).execute();
+		myClient.update().resource(nonMatchingObs).execute();
+
+		//Then: Results should return the same, regardless of count of concepts in the ValueSet
+		assertOneResult(myClient.search().byUrl("Observation?code:in=http://smilecdr.com/V1").returnBundle(Bundle.class).execute());
+		assertOneResult(myClient.search().byUrl("Observation?code:not-in=http://smilecdr.com/V1").returnBundle(Bundle.class).execute());
+		assertOneResult(myClient.search().byUrl("Observation?code:in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
+		assertOneResult(myClient.search().byUrl("Observation?code:not-in=http://smilecdr.com/V").returnBundle(Bundle.class).execute());
+
+		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
+	}
+	private void assertOneResult(Bundle theResponse) {
+		assertThat(theResponse.getEntry().size(), is(equalTo(1)));
+	}
+
+	private void printResourceToConsole(IBaseResource theResource) {
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource));
 	}
 
 	@Test
