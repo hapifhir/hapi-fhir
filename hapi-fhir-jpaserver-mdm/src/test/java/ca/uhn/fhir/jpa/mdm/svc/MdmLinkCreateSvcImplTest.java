@@ -15,6 +15,7 @@ import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -52,8 +53,6 @@ class MdmLinkCreateSvcImplTest {
 
 	@Test
 	public void testCreateLink(){
-		setup();
-
 		ArgumentCaptor<IMdmLink> mdmLinkCaptor = ArgumentCaptor.forClass(IMdmLink.class);
 
 		when(myMdmLinkDaoSvc.save(mdmLinkCaptor.capture())).thenReturn(new MdmLink());
@@ -74,6 +73,7 @@ class MdmLinkCreateSvcImplTest {
 
 	}
 
+	@BeforeEach
 	private void setup() {
 		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
 		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
