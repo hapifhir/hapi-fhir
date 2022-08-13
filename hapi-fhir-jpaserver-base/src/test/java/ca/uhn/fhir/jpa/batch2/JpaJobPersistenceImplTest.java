@@ -254,10 +254,11 @@ class JpaJobPersistenceImplTest {
 		// setup
 		int pageStart = 1;
 		int pageSize = 132;
-		JobInstance job1 = createJobInstanceWithDemoData();
-		FetchJobInstancesRequest req = new FetchJobInstancesRequest(job1.getInstanceId(), "params");
-		JobInstance job2 = createJobInstanceWithDemoData();
-		List<JobInstance> instances = Arrays.asList(job1, job2);
+		Batch2JobInstanceEntity job1 = createBatch2JobInstanceEntity();
+		FetchJobInstancesRequest req = new FetchJobInstancesRequest(job1.getId(), "params");
+		Batch2JobInstanceEntity job2 = createBatch2JobInstanceEntity();
+
+		List<Batch2JobInstanceEntity> instances = Arrays.asList(job1, job2);
 
 		// when
 		when(myJobInstanceRepository
@@ -271,7 +272,8 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		assertEquals(instances.size(), retInstances.size());
-		assertEquals(instances, retInstances);
+		assertEquals(instances.get(0).getId(),  retInstances.get(0).getInstanceId());
+		assertEquals(instances.get(1).getId(),  retInstances.get(1).getInstanceId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)

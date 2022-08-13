@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.submit.config;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
