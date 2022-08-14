@@ -34,8 +34,10 @@ import org.apache.commons.lang3.Validate;
  */
 @Interceptor
 public class ForceOffsetSearchModeInterceptor {
+	// This number should be at least as high as the number of default search parameters (158) so search paramters
+	// can be loaded into the SearchParamRegistry if this interceptor is enabled
 
-	private Integer myDefaultCount = 100;
+	private Integer myDefaultCount = 200;
 
 	public void setDefaultCount(Integer theDefaultCount) {
 		Validate.notNull(theDefaultCount, "theDefaultCount must not be null");
