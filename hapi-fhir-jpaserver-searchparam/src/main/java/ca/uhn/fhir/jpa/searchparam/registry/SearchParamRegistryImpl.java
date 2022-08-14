@@ -157,7 +157,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		ourLog.trace("Loaded {} search params from the DB", allSearchParams.size());
 
 		if (size == null) {
-			ourLog.error("Only {} search parameters have been loaded, but there are more than that in the repository.  Is offset search configured on this server?  If so, ensure the default count is higher than the total number of search parameters.", allSearchParams.size());
+			ourLog.error("Only {} search parameters have been loaded, but there are more than that in the repository.  Is offset search configured on this server?", allSearchParams.size());
 		} else if (size >= MAX_MANAGED_PARAM_COUNT) {
 			ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
 		}
