@@ -104,6 +104,11 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
+		public boolean outgoingGraphQLResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails, String GraphQL_Query, String GraphQL_Response, HttpServletRequest theHttpServletRequest, HttpServletResponse theHttpServletResponse) throws AuthenticationException {
+			return true;
+	}
+	
+	@Override
 	public BaseServerResponseException preProcessOutgoingException(RequestDetails theRequestDetails, Throwable theException, HttpServletRequest theServletRequest) throws ServletException {
 		return null;
 	}
