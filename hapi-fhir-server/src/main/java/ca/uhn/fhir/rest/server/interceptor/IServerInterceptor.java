@@ -250,6 +250,53 @@ public interface IServerInterceptor {
 	boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException;
 
 	/**
+	 * <b>Server Hook:</b>
+	 * This method is called after the server implementation method has been called, but before any attempt
+	 * to stream the response back to the client, specifically for GraphQL requests (as these do not fit
+	 * cleanly into the model provided by {@link #SERVER_OUTGOING_RESPONSE}).
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * java.lang.String - The GraphQL query
+	 * </li>
+	 * <li>
+	 * java.lang.String - The GraphQL response
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hook methods may return <code>true</code> or <code>void</code> if processing should continue normally.
+	 * This is generally the right thing to do. If your interceptor is providing a response rather than
+	 * letting HAPI handle the response normally, you must return <code>false</code>. In this case,
+	 * no further processing will occur and no further interceptors will be called.
+	 * </p>
+	 * <p>
+	 * Hook methods may also throw {@link AuthenticationException} to indicate that the interceptor
+	 * has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401
+	 * will be returned to the client.
+	 */
+	@Hook(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE)
+	boolean outgoingGraphQLResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails, String GraphQL_Query, String GraphQL_Response, HttpServletRequest theHttpServletRequest, HttpServletResponse theHttpServletResponse) throws AuthenticationException;
+	
+	/**
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes
 	 * any exceptions thrown within resource provider methods (e.g. {@link Search} and {@link Read} methods) as well as
 	 * any runtime exceptions thrown by the server itself. This method is invoked for each interceptor (until one of them
