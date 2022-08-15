@@ -431,6 +431,7 @@
 			"description": "Infrastructure based on HAPI FHIR + GNU Health to simplify data exchange between medical professionals, patients and EHRs systems Making technology work as service throught standards.",
 			"company": "SOLUTEMA, SRL",
 			"contactName": "José Arturo García",
+			"contactEmail": "jgarcia@solutema.com",
 			"link": "https://www.solutema.com",
 			"city": "Santo Domingo, Dominican Repúblic",
 			"lat": 18.483402,
