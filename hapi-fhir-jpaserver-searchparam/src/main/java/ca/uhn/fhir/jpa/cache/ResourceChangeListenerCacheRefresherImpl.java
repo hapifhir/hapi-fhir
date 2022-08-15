@@ -31,9 +31,11 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,7 +65,8 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
-	@PostConstruct
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	@Order
 	public void start() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());

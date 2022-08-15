@@ -24,8 +24,9 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.Order;
 
 public class SearchParamSubmitInterceptorLoader {
 
@@ -34,8 +35,9 @@ public class SearchParamSubmitInterceptorLoader {
 	private SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
 	private IInterceptorService myInterceptorRegistry;
-	
-	@PostConstruct
+
+	@EventListener(classes = {ContextRefreshedEvent.class})
+	@Order
 	public void start() {
 		ourLog.info("Registering SearchParamValidatingInterceptor interceptor");
 		myInterceptorRegistry.registerInterceptor(mySearchParamValidatingInterceptor);
