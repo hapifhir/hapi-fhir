@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,5 +50,11 @@ public interface IAuthRuleFinished {
 	 * @param theTester The tester to add, or <code>null</code>
 	 */
 	IAuthRuleFinished withTester(@Nullable IAuthRuleTester theTester);
+
+	/**
+	 * Narrow this rule to resources matching the given FHIR query.
+	 * @param theQueryParameters a FHIR query parameter string.  E.g. category=laboratory&date=ge2021
+	 */
+	IAuthRuleFinished withFilterTester(String theQueryParameters);
 
 }

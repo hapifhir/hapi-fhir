@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3469
+title: "Previously, `or` expressions were not being properly validated in FHIRPath in STU3 due to a bug with expression path splitting. This has been corrected."

@@ -1,7 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -12,21 +13,20 @@ import java.util.stream.Collectors;
 /**
  * A Matcher which allows us to check that a target patient/practitioner at a given link level.
  * is linked to a set of patients/practitioners via a golden resource.
- *
  */
 public class IsLinkedTo extends BaseGoldenResourceMatcher {
 
-	private List<Long> baseResourceGoldenResourcePids;
-	private Long incomingResourceGoldenResourcePid;
+	private List<ResourcePersistentId> baseResourceGoldenResourcePids;
+	private ResourcePersistentId incomingResourceGoldenResourcePid;
 
-	protected IsLinkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsLinkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		incomingResourceGoldenResourcePid =  getMatchedResourcePidFromResource(theIncomingResource);
+		incomingResourceGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
 		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
 		baseResourceGoldenResourcePids = myBaseResources.stream()
@@ -42,7 +42,7 @@ public class IsLinkedTo extends BaseGoldenResourceMatcher {
 	public void describeTo(Description theDescription) {
 	}
 
-	public static Matcher<IAnyResource> linkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> linkedTo(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsLinkedTo(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

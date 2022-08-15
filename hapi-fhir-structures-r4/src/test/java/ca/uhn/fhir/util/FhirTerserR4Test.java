@@ -3,7 +3,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumeration;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MarkdownType;
 import org.hl7.fhir.r4.model.Medication;
@@ -51,6 +52,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,7 +73,7 @@ import static org.mockito.Mockito.when;
 public class FhirTerserR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserR4Test.class);
-	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@Test
 	public void testAddElement() {
@@ -97,7 +102,7 @@ public class FhirTerserR4Test {
 			myCtx.newTerser().addElement(patient, "Patient.name", "FOO");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Element at path Patient.name is not a primitive datatype. Found: HumanName", e.getMessage());
+			assertEquals(Msg.code(1800) + "Element at path Patient.name is not a primitive datatype. Found: HumanName", e.getMessage());
 		}
 
 	}
@@ -110,7 +115,7 @@ public class FhirTerserR4Test {
 			myCtx.newTerser().addElements(patient, "Patient.name.family", Lists.newArrayList("FOO", "BAR"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Can not add multiple values at path Patient.name.family: Element does not repeat", e.getMessage());
+			assertEquals(Msg.code(1798) + "Can not add multiple values at path Patient.name.family: Element does not repeat", e.getMessage());
 		}
 
 	}
@@ -140,7 +145,7 @@ public class FhirTerserR4Test {
 			myCtx.newTerser().addElement(patient, "Patient.name.family");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Element at path Patient.name.family is not repeatable and not empty", e.getMessage());
+			assertEquals(Msg.code(1797) +"Element at path Patient.name.family is not repeatable and not empty", e.getMessage());
 		}
 	}
 
@@ -154,28 +159,28 @@ public class FhirTerserR4Test {
 			myCtx.newTerser().addElement(patient, "foo");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid path foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
+			assertEquals(Msg.code(1796) + "Invalid path foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
 		}
 
 		try {
 			myCtx.newTerser().addElement(patient, "Patient.foo");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid path Patient.foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
+			assertEquals(Msg.code(1796) + "Invalid path Patient.foo: Element of type Patient has no child named foo. Valid names: active, address, birthDate, communication, contact, contained, deceased, extension, gender, generalPractitioner, id, identifier, implicitRules, language, link, managingOrganization, maritalStatus, meta, modifierExtension, multipleBirth, name, photo, telecom, text", e.getMessage());
 		}
 
 		try {
 			myCtx.newTerser().addElement(patient, "Patient.name.foo");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid path Patient.name.foo: Element of type HumanName has no child named foo. Valid names: extension, family, given, id, period, prefix, suffix, text, use", e.getMessage());
+			assertEquals(Msg.code(1796) + "Invalid path Patient.name.foo: Element of type HumanName has no child named foo. Valid names: extension, family, given, id, period, prefix, suffix, text, use", e.getMessage());
 		}
 
 		try {
 			myCtx.newTerser().addElement(patient, "Patient.name.family.foo");
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Invalid path Patient.name.family.foo: Element of type HumanName has no child named family (this is a primitive type)", e.getMessage());
+			assertEquals(Msg.code(1799) + "Invalid path Patient.name.family.foo: Element of type HumanName has no child named family (this is a primitive type)", e.getMessage());
 		}
 	}
 
@@ -1427,6 +1432,40 @@ public class FhirTerserR4Test {
 		assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
 	}
 
+	@Test
+	public void testConcurrentTerserCalls() throws ExecutionException, InterruptedException {
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		try {
+
+			FhirContext ctx = FhirContext.forR4();
+
+			List<Future<?>> futures = new ArrayList<>();
+			for (int i = 0; i < 10; i++) {
+
+				Runnable runnable = () -> {
+
+					Observation observation = new Observation();
+					observation.setSubject(new Reference("Patient/123"));
+					HashSet<String> additionalCompartmentParamNames = new HashSet<>();
+					additionalCompartmentParamNames.add("test");
+					boolean outcome = ctx.newTerser().isSourceInCompartmentForTarget("Patient", observation, new IdType("Patient/123"), additionalCompartmentParamNames);
+					assertTrue(outcome);
+
+				};
+				Future<?> future = executor.submit(runnable);
+				futures.add(future);
+			}
+
+			for (var next : futures) {
+				next.get();
+			}
+
+		}finally {
+			executor.shutdown();
+		}
+	}
+
+
 
 	private List<String> toStrings(List<StringType> theStrings) {
 		ArrayList<String> retVal = new ArrayList<>();
@@ -1458,7 +1497,7 @@ public class FhirTerserR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	/**

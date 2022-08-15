@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -94,7 +95,7 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 					nextTargetNarrative.setStatusAsString("generated");
 					retVal = true;
 				} catch (Exception e) {
-					throw new InternalErrorException(e);
+					throw new InternalErrorException(Msg.code(1865) + e);
 				}
 			}
 

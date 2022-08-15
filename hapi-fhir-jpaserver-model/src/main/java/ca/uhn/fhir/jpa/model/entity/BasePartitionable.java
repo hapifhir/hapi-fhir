@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -28,8 +29,11 @@ import javax.persistence.Embedded;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @MappedSuperclass
 public class BasePartitionable implements Serializable {
+
 
 	@Embedded
 	private PartitionablePartitionId myPartitionId;
@@ -50,13 +54,11 @@ public class BasePartitionable implements Serializable {
 		myPartitionId = thePartitionId;
 	}
 
-	public void setPartitionId(@Nullable RequestPartitionId theRequestPartitionId) {
-		if (theRequestPartitionId != null) {
-			myPartitionId = new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
-		} else {
-			myPartitionId = null;
-		}
+	@Override
+	public String toString() {
+		return "BasePartitionable{" +
+			"myPartitionId=" + myPartitionId +
+			", myPartitionIdValue=" + myPartitionIdValue +
+			'}';
 	}
-
-
 }

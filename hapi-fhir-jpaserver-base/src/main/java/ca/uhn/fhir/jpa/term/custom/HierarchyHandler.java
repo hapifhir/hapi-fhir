@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.custom;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.custom;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.csv.CSVRecord;
 
@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class HierarchyHandler implements IRecordHandler {
+public class HierarchyHandler implements IZipContentsHandlerCsv {
 
 	public static final String PARENT = "PARENT";
 	public static final String CHILD = "CHILD";

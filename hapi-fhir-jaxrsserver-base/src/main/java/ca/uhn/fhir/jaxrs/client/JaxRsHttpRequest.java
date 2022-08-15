@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.client;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jaxrs.client;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.BaseHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -126,7 +127,7 @@ public class JaxRsHttpRequest extends BaseHttpRequest implements IHttpRequest {
 
 	@Override
 	public void setUri(String theUrl) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(606));
 	}
 
 }

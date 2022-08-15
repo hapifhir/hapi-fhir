@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2829
+title: "Add DSTU3 Support To UploadTerminologyCommand."

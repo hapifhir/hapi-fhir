@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2851
+title: "Allows to upload not-current version of LOINC ValueSet(s)."

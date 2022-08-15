@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -72,7 +74,7 @@ public class NpmPackageVersionResourceEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "FHIR_VERSION", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
 	private FhirVersionEnum myFhirVersion;
-	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_LENGTH, nullable = false)
+	@Column(name = "FHIR_VERSION_ID", length = NpmPackageVersionEntity.FHIR_VERSION_ID_LENGTH, nullable = false)
 	private String myFhirVersionId;
 	@Column(name = "RES_SIZE_BYTES", nullable = false)
 	private long myResSizeBytes;
@@ -155,6 +157,22 @@ public class NpmPackageVersionResourceEntity {
 
 	public void setCanonicalUrl(String theCanonicalUrl) {
 		myCanonicalUrl = theCanonicalUrl;
+	}
+
+	@Override
+	public String toString() {
+
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("myId", myId)
+			.append("myCanonicalUrl", myCanonicalUrl)
+			.append("myCanonicalVersion", myCanonicalVersion)
+			.append("myResourceType", myResourceType)
+			.append("myDirectory", myDirectory)
+			.append("myFilename", myFilename)
+			.append("myPackageVersion", myPackageVersion)
+			.append("myResSizeBytes", myResSizeBytes)
+			.append("myVersion", myVersion)
+			.toString();
 	}
 
 }

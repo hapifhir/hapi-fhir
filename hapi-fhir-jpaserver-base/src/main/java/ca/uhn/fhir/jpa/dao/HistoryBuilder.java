@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,14 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
@@ -46,10 +49,12 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.LegacySearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.toPredicateArray;
+
 
 /**
  * The HistoryBuilder is responsible for building history queries
@@ -70,7 +75,7 @@ public class HistoryBuilder {
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	/**
 	 * Constructor
@@ -95,7 +100,7 @@ public class HistoryBuilder {
 	}
 
 	@SuppressWarnings("OptionalIsPresent")
-	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, int theFromIndex, int theToIndex) {
+	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, Integer theOffset, int theFromIndex, int theToIndex) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> criteriaQuery = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
@@ -108,21 +113,27 @@ public class HistoryBuilder {
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 
-		query.setFirstResult(theFromIndex);
+		int startIndex = theFromIndex;
+		if (theOffset != null) {
+			startIndex += theOffset;
+		}
+		query.setFirstResult(startIndex);
+
 		query.setMaxResults(theToIndex - theFromIndex);
 
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-
-			Map<Long, Optional<String>> pidToForcedId = myIdHelperService.translatePidsToForcedIds(resourceIdToHistoryEntries.keySet());
-			ourLog.trace("Translated IDs: {}", pidToForcedId);
+			Set<ResourcePersistentId> pids  = resourceIdToHistoryEntries.keySet().stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
+			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
 				String resourceId;
-				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
+
+				Optional<String> forcedId = pidToForcedId.get(new ResourcePersistentId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 				} else {
@@ -179,7 +190,7 @@ public class HistoryBuilder {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			if (thePartitionId.isAllPartitions()) {
 				String msg = myCtx.getLocalizer().getMessage(HistoryBuilder.class, "noSystemOrTypeHistoryForPartitionAwareServer");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(953) + msg);
 			}
 		}
 	}

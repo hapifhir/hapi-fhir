@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,9 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import org.slf4j.LoggerFactory;
+import ca.uhn.fhir.i18n.Msg;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -52,58 +45,10 @@ public class TestUtil {
 	 * tons of memory being used by the end and the JVM crashes in Travis. Manually clearing all of the
 	 * static fields seems to solve this.
 	 */
-	public static void clearAllStaticFieldsForUnitTest() {
+	public static void randomizeLocaleAndTimezone() {
 		HapiLocalizer.setOurFailOnMissingMessage(true);
 
-		Class<?> theType;
-		try {
-			throw new Exception();
-		} catch (Exception e) {
-			StackTraceElement[] st = e.getStackTrace();
-			StackTraceElement elem = st[1];
-			String clazzName = elem.getClassName();
-			try {
-				theType = Class.forName(clazzName);
-			} catch (ClassNotFoundException e1) {
-				throw new Error(e);
-			}
-		}
-
-		for (Field next : Arrays.asList(theType.getDeclaredFields())) {
-			if (Modifier.isStatic(next.getModifiers())) {
-				if (!Modifier.isFinal(next.getModifiers()) && !next.getType().isPrimitive()) {
-					ourLog.info("Clearing value of field: {}", next.toString());
-					try {
-						next.setAccessible(true);
-						next.set(theType, null);
-					} catch (Exception e) {
-						throw new Error(e);
-					}
-				}
-				if (Modifier.isFinal(next.getModifiers())) {
-					if (next.getType().equals(FhirContext.class)) {
-						throw new Error("Test has final field of type FhirContext: " + next);
-					}
-				}
-			}
-
-		}
-
-		randomizeLocale();
-
-		/*
-		 * If we're running a CI build, set all loggers to TRACE level to ensure coverage
-		 * on trace blocks
-		 */
-		try {
-			if ("true".equals(System.getProperty("ci"))) {
-				for (Logger next : ((LoggerContext) LoggerFactory.getILoggerFactory()).getLoggerList()) {
-					next.setLevel(Level.TRACE);
-				}
-			}
-		} catch (NoClassDefFoundError e) {
-			// ignore
-		}
+		doRandomizeLocaleAndTimezone();
 	}
 
 	/**
@@ -111,7 +56,7 @@ public class TestUtil {
 	 * but it helps us make sure we don't have any tests that depend on a particular
 	 * environment
 	 */
-	public static void randomizeLocale() {
+	public static void doRandomizeLocaleAndTimezone() {
 //		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale[] availableLocales = {Locale.US};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
@@ -147,11 +92,11 @@ public class TestUtil {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
-				throw new Error(theE);
+				throw new Error(Msg.code(1778) + theE);
 			}
 		}
 		if ((System.currentTimeMillis() - start) >= 15000) {
-			throw new IllegalStateException("Size " + theInteger.get() + " is != target " + theTarget);
+			throw new IllegalStateException(Msg.code(1779) + "Size " + theInteger.get() + " is != target " + theTarget);
 		}
 	}
 
@@ -166,11 +111,11 @@ public class TestUtil {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException theE) {
-				throw new Error(theE);
+				throw new Error(Msg.code(1780) + theE);
 			}
 		}
 		if ((System.currentTimeMillis() - start) >= 15000) {
-			throw new IllegalStateException("Size " + theSource.call() + " is != target " + theTarget);
+			throw new IllegalStateException(Msg.code(1781) + "Size " + theSource.call() + " is != target " + theTarget);
 		}
 	}
 
@@ -192,4 +137,26 @@ public class TestUtil {
 		return stripReturns(theString).replace(" ", "");
 	}
 
+	public static void sleepAtLeast(long theMillis) {
+		sleepAtLeast(theMillis, true);
+	}
+
+
+	@SuppressWarnings("BusyWait")
+	public static void sleepAtLeast(long theMillis, boolean theLogProgress) {
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis() <= start + theMillis) {
+			try {
+				long timeSinceStarted = System.currentTimeMillis() - start;
+				long timeToSleep = Math.max(0, theMillis - timeSinceStarted);
+				if (theLogProgress) {
+					ourLog.info("Sleeping for {}ms", timeToSleep);
+				}
+				Thread.sleep(timeToSleep);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				ourLog.error("Interrupted", e);
+			}
+		}
+	}
 }

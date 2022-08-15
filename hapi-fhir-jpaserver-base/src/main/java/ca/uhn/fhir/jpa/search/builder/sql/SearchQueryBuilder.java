@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,21 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -43,9 +45,10 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -67,7 +70,6 @@ import org.hibernate.engine.spi.RowSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -77,6 +79,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
@@ -101,12 +104,13 @@ public class SearchQueryBuilder {
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
+	private boolean myNeedResourceTableRoot;
 
 	/**
 	 * Constructor
 	 */
 	public SearchQueryBuilder(FhirContext theFhirContext, ModelConfig theModelConfig, PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, SqlObjectFactory theSqlBuilderFactory, HibernatePropertiesProvider theDialectProvider, boolean theCountQuery) {
-		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID().toString() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
+		this(theFhirContext, theModelConfig, thePartitionSettings, theRequestPartitionId, theResourceType, theSqlBuilderFactory, UUID.randomUUID() + "-", theDialectProvider.getDialect(), theCountQuery, new ArrayList<>());
 	}
 
 	/**
@@ -144,12 +148,20 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
 	 */
-	public CompositeUniqueSearchParameterPredicateBuilder addCompositeUniquePredicateBuilder() {
-		CompositeUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newCompositeUniqueSearchParameterPredicateBuilder(this);
+	public ComboUniqueSearchParameterPredicateBuilder addComboUniquePredicateBuilder() {
+		ComboUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboUniqueSearchParameterPredicateBuilder(this);
 		addTable(retVal, null);
 		return retVal;
 	}
 
+	/**
+	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a Composite Unique search parameter
+	 */
+	public ComboNonUniqueSearchParameterPredicateBuilder addComboNonUniquePredicateBuilder() {
+		ComboNonUniqueSearchParameterPredicateBuilder retVal = mySqlBuilderFactory.newComboNonUniqueSearchParameterPredicateBuilder(this);
+		addTable(retVal, null);
+		return retVal;
+	}
 
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a COORDS search parameter
@@ -310,11 +322,16 @@ public class SearchQueryBuilder {
 			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
 		} else {
 			if (myFirstPredicateBuilder == null) {
-				ResourceTablePredicateBuilder root;
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
-					root = (ResourceTablePredicateBuilder) thePredicateBuilder;
+
+				BaseJoiningPredicateBuilder root;
+				if (!myNeedResourceTableRoot) {
+					root = thePredicateBuilder;
 				} else {
-					root = mySqlBuilderFactory.resourceTable(this);
+					if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+						root = thePredicateBuilder;
+					} else {
+						root = mySqlBuilderFactory.resourceTable(this);
+					}
 				}
 
 				if (myCountQuery) {
@@ -325,7 +342,7 @@ public class SearchQueryBuilder {
 				mySelect.addFromTable(root.getTable());
 				myFirstPredicateBuilder = root;
 
-				if (thePredicateBuilder instanceof ResourceTablePredicateBuilder) {
+				if (!myNeedResourceTableRoot || (thePredicateBuilder instanceof ResourceTablePredicateBuilder)) {
 					return;
 				}
 			}
@@ -393,7 +410,7 @@ public class SearchQueryBuilder {
 				// The SQLServerDialect has a bunch of one-off processing to deal with rules on when
 				// a limit can be used, so we can't rely on the flags that the limithandler exposes since
 				// the exact structure of the query depends on the parameters
-				if (sql.contains("TOP(?)")) {
+				if (sql.contains("top(?)")) {
 					bindVariables.add(0, maxResultsToFetch);
 				}
 				if (sql.contains("offset 0 rows fetch next ? rows only")) {
@@ -403,7 +420,7 @@ public class SearchQueryBuilder {
 					bindVariables.add(theOffset);
 					bindVariables.add(maxResultsToFetch);
 				}
-				if (offset != null && sql.contains("__hibernate_row_nr__")) {
+				if (offset != null && sql.contains("__row__")) {
 					bindVariables.add(theOffset + 1);
 					bindVariables.add(theOffset + maxResultsToFetch + 1);
 				}
@@ -422,7 +439,6 @@ public class SearchQueryBuilder {
 					startOfQueryParameterIndex = bindOffsetParameter(bindVariables, offset, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
 					bindCountParameter(bindVariables, maxResultsToFetch, limitHandler, startOfQueryParameterIndex, bindLimitParametersFirst);
 				}
-
 			}
 		}
 
@@ -455,18 +471,31 @@ public class SearchQueryBuilder {
 	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
 	 */
 	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder() {
+		return getOrCreateFirstPredicateBuilder(true);
+	}
+
+	/**
+	 * If at least one predicate builder already exists, return the last one added to the chain. If none has been selected, create a builder on HFJ_RESOURCE, add it and return it.
+	 */
+	public BaseJoiningPredicateBuilder getOrCreateFirstPredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myFirstPredicateBuilder == null) {
-			getOrCreateResourceTablePredicateBuilder();
+			getOrCreateResourceTablePredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 		}
 		return myFirstPredicateBuilder;
 	}
 
 	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder() {
+		return getOrCreateResourceTablePredicateBuilder(true);
+	}
+
+	public ResourceTablePredicateBuilder getOrCreateResourceTablePredicateBuilder(boolean theIncludeResourceTypeAndNonDeletedFlag) {
 		if (myResourceTableRoot == null) {
 			ResourceTablePredicateBuilder resourceTable = mySqlBuilderFactory.resourceTable(this);
 			addTable(resourceTable, null);
-			Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
-			addPredicate(typeAndDeletionPredicate);
+			if (theIncludeResourceTypeAndNonDeletedFlag) {
+				Condition typeAndDeletionPredicate = resourceTable.createResourceTypeAndNonDeletedPredicates();
+				addPredicate(typeAndDeletionPredicate);
+			}
 			myResourceTableRoot = resourceTable;
 		}
 		return myResourceTableRoot;
@@ -488,6 +517,10 @@ public class SearchQueryBuilder {
 			.stream()
 			.map(t -> generatePlaceholder(t))
 			.collect(Collectors.toList());
+	}
+
+	public int countBindVariables() {
+		return myBindVariableValues.size();
 	}
 
 
@@ -522,20 +555,39 @@ public class SearchQueryBuilder {
 	}
 
 	public ComboCondition addPredicateLastUpdated(DateRangeParam theDateRange) {
-		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder();
-
+		ResourceTablePredicateBuilder resourceTableRoot = getOrCreateResourceTablePredicateBuilder(false);
 		List<Condition> conditions = new ArrayList<>(2);
+		BinaryCondition condition;
+
+		if (isNotEqualsComparator(theDateRange)) {
+			condition = createConditionForValueWithComparator(LESSTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			conditions.add(condition);
+			condition = createConditionForValueWithComparator(GREATERTHAN, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			conditions.add(condition);
+			return ComboCondition.or(conditions.toArray(new Condition[0]));
+		}
+
 		if (theDateRange.getLowerBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
+			condition = createConditionForValueWithComparator(GREATERTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getLowerBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		if (theDateRange.getUpperBoundAsInstant() != null) {
-			BinaryCondition condition = createConditionForValueWithComparator(ParamPrefixEnum.LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
+			condition = createConditionForValueWithComparator(LESSTHAN_OR_EQUALS, resourceTableRoot.getLastUpdatedColumn(), theDateRange.getUpperBoundAsInstant());
 			conditions.add(condition);
 		}
 
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
+	}
+
+	private boolean isNotEqualsComparator(DateRangeParam theDateRange) {
+		if (theDateRange != null) {
+			DateParam lb = theDateRange.getLowerBound();
+			DateParam ub = theDateRange.getUpperBound();
+
+			return lb != null && ub != null && lb.getPrefix().equals(NOT_EQUAL) && ub.getPrefix().equals(NOT_EQUAL);
+		}
+		return false;
 	}
 
 
@@ -571,8 +623,10 @@ public class SearchQueryBuilder {
 				return BinaryCondition.greaterThan(theColumn, generatePlaceholder(theValue));
 			case GREATERTHAN_OR_EQUALS:
 				return BinaryCondition.greaterThanOrEq(theColumn, generatePlaceholder(theValue));
+			case NOT_EQUAL:
+				return BinaryCondition.notEqualTo(theColumn, generatePlaceholder(theValue));
 			default:
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException(Msg.code(1263));
 		}
 	}
 
@@ -680,4 +734,15 @@ public class SearchQueryBuilder {
 		mySelect.addCustomOrderings(orderObject);
 	}
 
+	/**
+	 * If set to true (default is false), force the generated SQL to start
+	 * with the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE}
+	 * table at the root of the query.
+	 *
+	 * This seems to perform better if there are multiple joins on the
+	 * resource ID table.
+	 */
+	public void setNeedResourceTableRoot(boolean theNeedResourceTableRoot) {
+		myNeedResourceTableRoot = theNeedResourceTableRoot;
+	}
 }

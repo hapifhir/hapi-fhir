@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;

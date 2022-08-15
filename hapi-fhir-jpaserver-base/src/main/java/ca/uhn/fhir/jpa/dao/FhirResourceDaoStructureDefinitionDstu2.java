@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -27,7 +28,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class FhirResourceDaoStructureDefinitionDstu2 extends BaseHapiFhirResourceDao<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
-		throw new InvalidRequestException("Snapshot generation not supported for DSTU2");
+		throw new InvalidRequestException(Msg.code(943) + "Snapshot generation not supported for DSTU2");
 	}
 
 }

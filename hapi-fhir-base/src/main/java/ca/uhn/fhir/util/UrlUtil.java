@@ -2,6 +2,7 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
@@ -39,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +61,10 @@ public class UrlUtil {
 
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
+
+	public static String sanitizeBaseUrl(String theBaseUrl) {
+		return theBaseUrl.replaceAll("[^a-zA-Z0-9:/._-]", "");
+	}
 
 	public static class UrlParts {
 		private String myParams;
@@ -249,8 +254,16 @@ public class UrlUtil {
 	}
 
 	public static RuntimeResourceDefinition parseUrlResourceType(FhirContext theCtx, String theUrl) throws DataFormatException {
-		int paramIndex = theUrl.indexOf('?');
-		String resourceName = theUrl.substring(0, paramIndex);
+		String url = theUrl;
+		int paramIndex = url.indexOf('?');
+
+		// Change pattern of "Observation/?param=foo" into "Observation?param=foo"
+		if (paramIndex > 0 && url.charAt(paramIndex - 1) == '/') {
+			url = url.substring(0, paramIndex - 1) + url.substring(paramIndex);
+			paramIndex--;
+		}
+
+		String resourceName = url.substring(0, paramIndex);
 		if (resourceName.contains("/")) {
 			resourceName = resourceName.substring(resourceName.lastIndexOf('/') + 1);
 		}
@@ -337,10 +350,6 @@ public class UrlUtil {
 		String url = theUrl;
 		UrlParts retVal = new UrlParts();
 		if (url.startsWith("http")) {
-			if (url.startsWith("/")) {
-				url = url.substring(1);
-			}
-
 			int qmIdx = url.indexOf('?');
 			if (qmIdx != -1) {
 				retVal.setParams(defaultIfBlank(url.substring(qmIdx + 1), null));
@@ -363,10 +372,7 @@ public class UrlUtil {
 			}
 		}
 
-		if (url.length() > 1 && url.charAt(0) == '/' && Character.isLetter(url.charAt(1)) && url.contains("?")) {
-			url = url.substring(1);
-		}
-		int nextStart = 0;
+		int nextStart = parsingStart;
 		boolean nextIsHistory = false;
 
 		for (int idx = parsingStart; idx < url.length(); idx++) {
@@ -385,7 +391,7 @@ public class UrlUtil {
 					if (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
 						nextIsHistory = true;
 					} else {
-						throw new InvalidRequestException("Invalid FHIR resource URL: " + url);
+						throw new InvalidRequestException(Msg.code(1742) + "Invalid FHIR resource URL: " + url);
 					}
 				}
 				if (nextChar == '?') {
@@ -513,7 +519,7 @@ public class UrlUtil {
 					// method that takes Charset is JDK10+ only... sigh....
 					return URLDecoder.decode(theString, "UTF-8");
 				} catch (UnsupportedEncodingException e) {
-					throw new Error("UTF-8 not supported, this shouldn't happen", e);
+					throw new Error(Msg.code(1743) + "UTF-8 not supported, this shouldn't happen", e);
 				}
 			}
 		}
@@ -527,13 +533,26 @@ public class UrlUtil {
 		if (questionMarkIndex != -1) {
 			matchUrl = matchUrl.substring(questionMarkIndex + 1);
 		}
-		matchUrl = matchUrl.replace("|", "%7C");
-		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-		matchUrl = matchUrl.replace("=>", "=%3E");
-		matchUrl = matchUrl.replace("=<", "=%3C");
+
+		final String[] searchList = new String[]{
+			"+",
+			"|",
+			"=>=",
+			"=<=",
+			"=>",
+			"=<"
+		};
+		final String[] replacementList = new String[]{
+			"%2B",
+			"%7C",
+			"=%3E%3D",
+			"=%3C%3D",
+			"=%3E",
+			"=%3C"
+		};
+		matchUrl = StringUtils.replaceEach(matchUrl, searchList, replacementList);
 		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
+			throw new InvalidRequestException(Msg.code(1744) + "Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');

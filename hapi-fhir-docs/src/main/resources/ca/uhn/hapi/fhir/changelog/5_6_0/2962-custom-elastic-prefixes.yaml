@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2962
+jira: SMILE-720
+title: "Added a new DaoConfig setting called `setElasticSearchIndexPrefix(String prefix)` which will cause Hibernate search to prefix all of its tables with the provided value."

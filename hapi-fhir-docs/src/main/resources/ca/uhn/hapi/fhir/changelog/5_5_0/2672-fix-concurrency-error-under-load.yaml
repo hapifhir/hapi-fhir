@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2672
+backport: 5.4.1
+title: "A concurrency error was fixed when using client assigned IDs on a highly concurrent server
+  with resource deletion disabled."

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2794
+title: "When providing links for placeholder creation, DaoResourceLinkResolver expects just a single 'identifier=value' param, but it can be additional data, s.a. tags, extra identifiers, etc."

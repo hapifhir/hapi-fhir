@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2521
+title: "The server generated CapabilityStatement now reflects whether RDF/Turtle is supported by
+  the server. In addition, the ResponseHighlightingInterceptor will now provide some TTL support."

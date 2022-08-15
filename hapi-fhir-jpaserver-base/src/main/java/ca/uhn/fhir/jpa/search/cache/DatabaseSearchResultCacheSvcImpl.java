@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	public void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 
-		ourLog.trace("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+		ourLog.debug("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
 		int order = thePreviouslyStoredResourcePids.size();
 		for (ResourcePersistentId nextPid : theNewResourcePids) {

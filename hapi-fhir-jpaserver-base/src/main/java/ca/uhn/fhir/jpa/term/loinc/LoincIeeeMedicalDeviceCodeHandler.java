@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -36,18 +36,19 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYS
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String LOINC_IEEE_CM_ID = "loinc-to-ieee-11073-10101";
 	public static final String LOINC_IEEE_CM_URI = "http://loinc.org/cm/loinc-to-ieee-11073-10101";
 	public static final String LOINC_IEEE_CM_NAME = "LOINC/IEEE Device Code Mappings";
-	private static final String CM_COPYRIGHT = "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC/IEEE Medical Device Code Mapping Table contains content from IEEE (http://ieee.org), copyright © 2017 IEEE.";
+	private static final String CM_COPYRIGHT = "The LOINC/IEEE Medical Device Code Mapping Table contains content from IEEE (http://ieee.org), copyright © 2017 IEEE.";
 
 	/**
 	 * Constructor
 	 */
-	public LoincIeeeMedicalDeviceCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincIeeeMedicalDeviceCodeHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets,
+			List<ConceptMap> theConceptMaps, Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 	}
 
 	@Override
@@ -88,8 +89,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 				.setTargetCode(ieeeCode)
 				.setTargetDisplay(ieeeDisplayName)
 				.setEquivalence(Enumerations.ConceptMapEquivalence.EQUAL),
-				CM_COPYRIGHT);
-
+			myLoincCopyrightStatement + " " + CM_COPYRIGHT);
 	}
 
 

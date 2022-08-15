@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -53,7 +54,8 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
 		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
-		@OperationParam(name="version", min=0, max=1) StringType theVersion,
+		@OperationParam(name = "version", min=0, max=1) StringType theVersion,
+		@OperationParam(name = "displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
 		@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 		RequestDetails theRequestDetails
 	) {
@@ -63,14 +65,14 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IValidationSupport.LookupCodeResult result;
 			if (theVersion != null) {
-				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theDisplayLanguage, theRequestDetails);
 			} else {
-				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+				result = dao.lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, theRequestDetails);
 			}
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1153) + e);
 		} finally {
 			endRequest(theServletRequest);
 		}

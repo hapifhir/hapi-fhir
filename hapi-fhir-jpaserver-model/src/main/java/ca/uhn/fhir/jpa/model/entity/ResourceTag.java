@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -39,8 +40,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "HFJ_RES_TAG", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
+@Table(
+	name = "HFJ_RES_TAG",
+   indexes = {
+		@Index(name = "IDX_RES_TAG_RES_TAG", columnList = "RES_ID, TAG_ID, PARTITION_ID"),
+		@Index(name = "IDX_RES_TAG_TAG_RES", columnList = "TAG_ID, RES_ID, PARTITION_ID")
+	},
+	uniqueConstraints = { @UniqueConstraint(name = "IDX_RESTAG_TAGID", columnNames = {"RES_ID", "TAG_ID"})
 })
 public class ResourceTag extends BaseTag {
 
@@ -133,6 +139,9 @@ public class ResourceTag extends BaseTag {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (getPartitionId() != null) {
+			b.append("partition", getPartitionId().getPartitionId());
+		}
 		b.append("resId", getResourceId());
 		b.append("tag", getTag().getId());
 		return b.build();

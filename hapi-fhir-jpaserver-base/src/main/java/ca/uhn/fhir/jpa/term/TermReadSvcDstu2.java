@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -34,7 +34,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,9 +42,6 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
-
-	@Autowired
-	private IValidationSupport myValidationSupport;
 
 	private void addAllChildren(String theSystemString, ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -72,27 +68,27 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Override
 	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(852));
 	}
 
 	@Override
 	protected ValueSet toCanonicalValueSet(IBaseResource theValueSet) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(853));
 	}
 
 	@Override
 	protected CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(854));
 	}
 
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(855));
 	}
 
 	@Override
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(856));
 	}
 
 	private void findCodesAbove(ca.uhn.fhir.model.dstu2.resource.ValueSet theSystem, String theSystemString, String theCode, List<FhirVersionIndependentConcept> theListToPopulate) {
@@ -105,7 +101,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
@@ -130,7 +126,7 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	@Override
 	public List<FhirVersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) myValidationSupport.fetchCodeSystem(theSystem);
+		ca.uhn.fhir.model.dstu2.resource.ValueSet system = (ca.uhn.fhir.model.dstu2.resource.ValueSet) provideValidationSupport().fetchCodeSystem(theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}
@@ -176,11 +172,11 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Override
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(857));
 	}
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(858));
 	}
 }

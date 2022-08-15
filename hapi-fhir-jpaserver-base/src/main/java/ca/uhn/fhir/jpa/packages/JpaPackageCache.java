@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,13 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -65,7 +69,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -85,7 +88,11 @@ import javax.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,7 +103,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.LegacySearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.toPredicateArray;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -123,7 +130,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired(required = false)//It is possible that some implementers will not create such a bean.
+	private IBinaryStorageSvc myBinaryStorageSvc;
+
 	@Override
+	@Transactional
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> packageVersion = loadPackageVersionEntity(theId, theVersion);
 		if (!packageVersion.isPresent() && theVersion.endsWith(".x")) {
@@ -164,20 +175,44 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		try {
 			return NpmPackage.fromPackage(inputStream);
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1294) + e);
 		}
 	}
 
 	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
 		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
+		try {
+			byte[] content = fetchBlobFromBinary(binary);
+			PackageContents retVal = new PackageContents()
+				.setBytes(content)
+				.setPackageId(thePackageVersion.getPackageId())
+				.setVersion(thePackageVersion.getVersionId())
+				.setLastModified(thePackageVersion.getUpdatedTime());
+			return retVal;
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(1295) + "Failed to load package. There was a problem reading binaries", e);
+		}
+	}
 
-		PackageContents retVal = new PackageContents()
-			.setBytes(binary.getContent())
-			.setPackageId(thePackageVersion.getPackageId())
-			.setVersion(thePackageVersion.getVersionId())
-			.setLastModified(thePackageVersion.getUpdatedTime());
-		return retVal;
+	/**
+	 * Helper method which will attempt to use the IBinaryStorageSvc to resolve the binary blob if available. If
+	 * the bean is unavailable, fallback to assuming we are using an embedded base64 in the data element.
+	 * @param theBinary the Binary who's `data` blob you want to retrieve
+	 * @return a byte array containing the blob.
+	 *
+	 * @throws IOException
+	 */
+	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
+		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
+			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
+		} else {
+			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
+			if (value == null) {
+				throw new InternalErrorException(Msg.code(1296) + "Failed to fetch blob from Binary/" + theBinary.getIdElement());
+			}
+			return value;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -196,17 +231,17 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		ourLog.info("Parsing package .tar.gz ({} bytes) from {}", bytes.length, theSourceDesc);
 
 		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
-		if (!npmPackage.id().equals(thePackageId)) {
-			throw new InvalidRequestException("Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
+		if (!npmPackage.id().equalsIgnoreCase(thePackageId)) {
+			throw new InvalidRequestException(Msg.code(1297) + "Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
 		}
 		if (!PackageVersionComparator.isEquivalent(thePackageVersionId, npmPackage.version())) {
-			throw new InvalidRequestException("Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
+			throw new InvalidRequestException(Msg.code(1298) + "Package ID " + npmPackage.version() + " doesn't match expected: " + thePackageVersionId);
 		}
 
 		String packageVersionId = npmPackage.version();
 		FhirVersionEnum fhirVersion = FhirVersionEnum.forVersionString(npmPackage.fhirVersion());
 		if (fhirVersion == null) {
-			throw new InvalidRequestException("Unknown FHIR version: " + npmPackage.fhirVersion());
+			throw new InvalidRequestException(Msg.code(1299) + "Unknown FHIR version: " + npmPackage.fhirVersion());
 		}
 		FhirContext packageContext = getFhirContext(fhirVersion);
 
@@ -268,7 +303,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 						contents = packageFolder.fetchFile(nextFile);
 						contentsString = toUtf8String(contents);
 					} catch (IOException e) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(1300) + e);
 					}
 
 					IBaseResource resource;
@@ -332,9 +367,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			if (myPartitionSettings.isUnnamedPartitionMode() && myPartitionSettings.getDefaultPartitionId() != null) {
+				requestDetails.setRequestPartitionId(RequestPartitionId.fromPartitionId(myPartitionSettings.getDefaultPartitionId()));
+			} else {
+				requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			}
 			return (ResourceTable) getBinaryDao().create(theResourceBinary, requestDetails).getEntity();
- 		} else {
+		} else {
 			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
 		}
 	}
@@ -384,6 +423,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
+	@Transactional
 	public NpmPackage loadPackage(String thePackageId, String thePackageVersion) throws FHIRException, IOException {
 		NpmPackage cachedPackage = loadPackageFromCacheOnly(thePackageId, thePackageVersion);
 		if (cachedPackage != null) {
@@ -392,7 +432,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		InputStreamWithSrc pkg = super.loadFromPackageServer(thePackageId, thePackageVersion);
 		if (pkg == null) {
-			throw new ResourceNotFoundException("Unable to locate package " + thePackageId + "#" + thePackageVersion);
+			throw new ResourceNotFoundException(Msg.code(1301) + "Unable to locate package " + thePackageId + "#" + thePackageVersion);
 		}
 
 		try {
@@ -410,6 +450,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	@Override
+	@Transactional(Transactional.TxType.NEVER)
 	public NpmPackage installPackage(PackageInstallationSpec theInstallationSpec) throws IOException {
 		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
@@ -425,12 +466,25 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return addPackageToCache(theInstallationSpec.getName(), theInstallationSpec.getVersion(), new ByteArrayInputStream(theInstallationSpec.getPackageContents()), sourceDescription);
 		}
 
-		return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+		return newTxTemplate().execute(tx -> {
+			try {
+				return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
+			} catch (IOException e) {
+				throw new InternalErrorException(Msg.code(1302) + e);
+			}
+		});
 	}
 
 	protected byte[] loadPackageUrlContents(String thePackageUrl) {
 		if (thePackageUrl.startsWith("classpath:")) {
-			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:".length()));
+			return ClasspathUtil.loadResourceAsByteArray(thePackageUrl.substring("classpath:" .length()));
+		} else if (thePackageUrl.startsWith("file:")) {
+			try {
+				byte[] bytes = Files.readAllBytes(Paths.get(new URI(thePackageUrl)));
+				return bytes;
+			} catch (IOException | URISyntaxException e) {
+				throw new InternalErrorException(Msg.code(2031) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+			}
 		} else {
 			HttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 			try (CloseableHttpResponse request = HttpClientBuilder
@@ -439,11 +493,11 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 				.build()
 				.execute(new HttpGet(thePackageUrl))) {
 				if (request.getStatusLine().getStatusCode() != 200) {
-					throw new ResourceNotFoundException("Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
+					throw new ResourceNotFoundException(Msg.code(1303) + "Received HTTP " + request.getStatusLine().getStatusCode() + " from URL: " + thePackageUrl);
 				}
 				return IOUtils.toByteArray(request.getEntity().getContent());
 			} catch (IOException e) {
-				throw new InternalErrorException("Error loading \"" + thePackageUrl + "\": " + e.getMessage());
+				throw new InternalErrorException(Msg.code(1304) + "Error loading \"" + thePackageUrl + "\": " + e.getMessage());
 			}
 		}
 	}
@@ -473,13 +527,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	}
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
-		ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
-		IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
-		byte[] resourceContentsBytes = BinaryUtil.getOrCreateData(myCtx, binary).getValue();
-		String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
-
-		FhirContext packageContext = getFhirContext(contents.getFhirVersion());
-		return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+		try {
+			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
+			byte[] resourceContentsBytes= fetchBlobFromBinary(binary);
+			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);
+			FhirContext packageContext = getFhirContext(contents.getFhirVersion());
+			return EncodingEnum.detectEncoding(resourceContents).newParser(packageContext).parseResource(resourceContents);
+		} catch (Exception e) {
+			throw new RuntimeException(Msg.code(1305) + "Failed to load package resource " + contents, e);
+		}
 	}
 
 	@Override
@@ -489,7 +546,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		Optional<NpmPackageEntity> pkg = myPackageDao.findByPackageId(thePackageId);
 		if (!pkg.isPresent()) {
-			throw new ResourceNotFoundException("Unknown package ID: " + thePackageId);
+			throw new ResourceNotFoundException(Msg.code(1306) + "Unknown package ID: " + thePackageId);
 		}
 
 		List<NpmPackageVersionEntity> packageVersions = new ArrayList<>(myPackageVersionDao.findByPackageId(thePackageId));
@@ -651,20 +708,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	public List<IBaseResource> loadPackageAssetsByType(FhirVersionEnum theFhirVersion, String theResourceType) {
 //		List<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findAll();
 		Slice<NpmPackageVersionResourceEntity> outcome = myPackageVersionResourceDao.findCurrentVersionByResourceType(PageRequest.of(0, 1000), theFhirVersion, theResourceType);
-		return outcome.stream().map(t->loadPackageEntity(t)).collect(Collectors.toList());
+		return outcome.stream().map(t -> loadPackageEntity(t)).collect(Collectors.toList());
 	}
 
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
-
-		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails requestDetails = new SystemRequestDetails();
-			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
-			getBinaryDao().delete(theResourceBinaryId, requestDetails).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
-		} else {
-			getBinaryDao().delete(theResourceBinaryId).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, null);
-		}
+		getBinaryDao().delete(theResourceBinaryId, new SystemRequestDetails()).getEntity();
+		getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, new SystemRequestDetails());
 	}
 
 

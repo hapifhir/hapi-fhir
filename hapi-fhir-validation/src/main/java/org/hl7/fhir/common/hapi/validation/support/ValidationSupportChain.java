@@ -8,6 +8,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -15,13 +16,13 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValidationSupportChain implements IValidationSupport {
 
@@ -135,7 +136,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		if (theValidationSupport.getFhirContext() == null) {
 			String message = "Can not add validation support: getFhirContext() returns null";
-			throw new ConfigurationException(message);
+			throw new ConfigurationException(Msg.code(708) + message);
 		}
 
 		FhirContext existingFhirContext = getFhirContext();
@@ -144,7 +145,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			FhirVersionEnum existingVersion = existingFhirContext.getVersion().getVersion();
 			if (!existingVersion.equals(newVersion)) {
 				String message = "Trying to add validation support of version " + newVersion + " to chain with " + myChain.size() + " entries of version " + existingVersion;
-				throw new ConfigurationException(message);
+				throw new ConfigurationException(Msg.code(709) + message);
 			}
 		}
 
@@ -169,6 +170,17 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isRemoteTerminologyServiceConfigured() {
+		if (myChain != null) {
+			Optional<IValidationSupport> remoteTerminologyService = myChain.stream().filter(RemoteTerminologyServiceValidationSupport.class::isInstance).findFirst();
+			if (remoteTerminologyService.isPresent()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -246,6 +258,17 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public byte[] fetchBinary(String key) {
+		for (IValidationSupport next : myChain) {
+			byte[] retVal = next.fetchBinary(key);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.fetchStructureDefinition(theUrl);
@@ -267,14 +290,12 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (isBlank(theValueSetUrl) || next.isValueSetSupported(theValidationSupportContext, theValueSetUrl)) {
-				if (theOptions.isInferSystem() || (theCodeSystem != null && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem))) {
-					CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
-					if (retVal != null) {
-						return retVal;
-					}
+			if ((isBlank(theValueSetUrl) && next.isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) || (isNotBlank(theValueSetUrl) && next.isValueSetSupported(theValidationSupportContext, theValueSetUrl))) {
+				CodeValidationResult retVal = next.validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+				if (retVal != null) {
+					return retVal;
 				}
 			}
 		}
@@ -296,14 +317,12 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theValidationSupportContext, theSystem)) {
-				return next.lookupCode(theValidationSupportContext, theSystem, theCode);
+				return next.lookupCode(theValidationSupportContext, theSystem, theCode, theDisplayLanguage);
 			}
 		}
 		return null;
 	}
-
-
 }

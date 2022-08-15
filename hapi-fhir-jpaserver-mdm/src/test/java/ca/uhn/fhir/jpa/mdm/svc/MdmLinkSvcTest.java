@@ -1,11 +1,18 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.IdType;
@@ -30,6 +37,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 	private static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
+	@Autowired
+	ExpungeEverythingService myExpungeEverythingService;
 
 	@Override
 	@AfterEach
@@ -81,10 +90,10 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
-		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		ResourcePersistentId goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
+		ResourcePersistentId goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getIdAsLong(), goldenPatient2Pid.getIdAsLong()).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getIdAsLong(), goldenPatient1Pid.getIdAsLong()).isPresent());
 
 		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
@@ -99,10 +108,10 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
-		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		ResourcePersistentId goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
+		ResourcePersistentId goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getIdAsLong(), goldenPatient2Pid.getIdAsLong()).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getIdAsLong(), goldenPatient1Pid.getIdAsLong()).isPresent());
 
 		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 
@@ -111,12 +120,11 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		assertLinkCount(1);
 	}
 
-	private void saveNoMatchLink(Long theGoldenResourcePid, Long theTargetPid) {
-		MdmLink noMatchLink = myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePid(theGoldenResourcePid)
-			.setSourcePid(theTargetPid)
-			.setLinkSource(MdmLinkSourceEnum.MANUAL)
-			.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+	private void saveNoMatchLink(ResourcePersistentId theGoldenResourcePid, ResourcePersistentId theTargetPid) {
+		MdmLink noMatchLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
+		noMatchLink.setGoldenResourcePersistenceId(theGoldenResourcePid);
+		noMatchLink.setSourcePersistenceId(theTargetPid);
+		noMatchLink.setLinkSource(MdmLinkSourceEnum.MANUAL).setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		saveLink(noMatchLink);
 	}
 
@@ -130,7 +138,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo("MDM system is not allowed to modify links on manually created links")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(760) + "MDM system is not allowed to modify links on manually created links")));
 		}
 	}
 
@@ -144,7 +152,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
 			fail();
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage(), is(equalTo("MDM system is not allowed to automatically NO_MATCH a resource")));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource")));
 		}
 	}
 
@@ -158,7 +166,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
+		List<? extends IMdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertFalse(targets.isEmpty());
 		assertEquals(2, targets.size());
 
@@ -166,7 +174,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
 		List<String> actual = targets
 			.stream()
-			.map(link -> link.getSourcePid().toString())
+			.map(link -> link.getSourcePersistenceId().getId().toString())
 			.collect(Collectors.toList());
 
 		List<String> expected = Arrays.asList(patient1, patient2)
@@ -177,5 +185,20 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		System.out.println(expected);
 
 		assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
+	}
+
+	@Test
+	public void testMdmLinksHasPartitionIdForResourceOnNonDefaultPartition() {
+		Patient goldenPatient = createGoldenPatient(buildJanePatient());
+		Patient patient1 = createPatient(buildJanePatient());
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		patient1.setUserData(Constants.RESOURCE_PARTITION_ID, requestPartitionId);
+		assertEquals(0, myMdmLinkDao.count());
+
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		List<? extends IMdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
+		assertFalse(targets.isEmpty());
+		assertEquals(1, targets.size());
+		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId().getPartitionId());
 	}
 }

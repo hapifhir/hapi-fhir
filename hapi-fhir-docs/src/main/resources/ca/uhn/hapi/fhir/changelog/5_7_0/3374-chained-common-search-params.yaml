@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3374
+backport: 5.5.6
+title: "Chained searches will handle common search parameters correctly when the `Index Contained Resources` configuration parameter is enabled."

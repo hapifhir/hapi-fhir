@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,16 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -111,7 +111,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 						.add(RequestDetails.class, theRequestDetails)
 						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 						.add(StorageProcessingMessage.class, message);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
+					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
 
 					Collection<String> candidates = myResourceIndexedSearchParamUriDao.findAllByResourceTypeAndParamName(getResourceType(), theParamName);
 					List<String> toFind = new ArrayList<>();
@@ -161,7 +161,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					} else if (theOperation == SearchFilterParser.CompareOperation.ew) {
 						uriPredicate = BinaryCondition.like(myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
 					} else {
-						throw new IllegalArgumentException(String.format("Unsupported operator specified in _filter clause, %s",
+						throw new IllegalArgumentException(Msg.code(1226) + String.format("Unsupported operator specified in _filter clause, %s",
 							theOperation.toString()));
 					}
 
@@ -169,7 +169,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 
 			} else {
-				throw new IllegalArgumentException("Invalid URI type: " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1227) + "Invalid URI type: " + nextOr.getClass());
 			}
 
 		}

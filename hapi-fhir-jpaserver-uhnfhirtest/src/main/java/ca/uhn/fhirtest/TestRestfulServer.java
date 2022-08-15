@@ -1,25 +1,29 @@
 package ca.uhn.fhirtest;
 
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
-import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -30,14 +34,17 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.FhirPathFilterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
 import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -79,11 +86,11 @@ public class TestRestfulServer extends RestfulServer {
 		WebApplicationContext parentAppCtx = ContextLoaderListener.getCurrentWebApplicationContext();
 
 		// These two parmeters are also declared in web.xml
-		String implDesc = getInitParameter("ImplementationDescription");
 		String fhirVersionParam = getInitParameter("FhirVersion");
-		if (StringUtils.isBlank(fhirVersionParam)) {
-			fhirVersionParam = "DSTU1";
-		}
+		Validate.notNull(fhirVersionParam);
+
+		setImplementationDescription("HAPI FHIR Test/Demo Server " + fhirVersionParam + " Endpoint");
+		setCopyright("This server is **Open Source Software**, licensed under the terms of the [Apache Software License 2.0](https://www.apache.org/licenses/LICENSE-2.0).");
 
 		// Depending on the version this server is supporing, we will
 		// retrieve all the appropriate resource providers and the
@@ -110,7 +117,6 @@ public class TestRestfulServer extends RestfulServer {
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
-				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				break;
 			}
@@ -127,7 +133,6 @@ public class TestRestfulServer extends RestfulServer {
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
-				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
@@ -147,7 +152,6 @@ public class TestRestfulServer extends RestfulServer {
 				etagSupport = ETagSupportEnum.ENABLED;
 				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
-				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 				providers.add(myAppCtx.getBean(GraphQLProvider.class));
@@ -173,7 +177,7 @@ public class TestRestfulServer extends RestfulServer {
 				break;
 			}
 			default:
-				throw new ServletException("Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
+				throw new ServletException(Msg.code(1975) + "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
 
 		/*
@@ -243,7 +247,7 @@ public class TestRestfulServer extends RestfulServer {
 			// Try to fall back in case the property isn't set
 			baseUrl = System.getProperty("fhir.baseurl");
 			if (StringUtils.isBlank(baseUrl)) {
-				throw new ServletException("Missing system property: " + baseUrlProperty);
+				throw new ServletException(Msg.code(1976) + "Missing system property: " + baseUrlProperty);
 			}
 		}
 		setServerAddressStrategy(new MyHardcodedServerAddressStrategy(baseUrl));
@@ -262,15 +266,25 @@ public class TestRestfulServer extends RestfulServer {
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*
-		 * Bulk Export
+		 * Register some providers
 		 */
 		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
+		registerProvider(myAppCtx.getBean(ReindexProvider.class));
+		registerProvider(myAppCtx.getBean(DiffProvider.class));
+		registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 		/*
-		 * $diff operation
+		 * OpenAPI
 		 */
-		registerProvider(myAppCtx.getBean(DiffProvider.class));
+		registerInterceptor(new OpenApiInterceptor());
 
+		// Logging for request type
+		LoggingInterceptor loggingInterceptor = new LoggingInterceptor();
+		loggingInterceptor.setMessageFormat("${operationType} Content-Type: ${requestHeader.content-type} - Accept: ${responseEncodingNoDefault} \"${requestHeader.accept}\" - Agent: ${requestHeader.user-agent}");
+		registerInterceptor(loggingInterceptor);
+
+		// SQL Capturing
+		registerInterceptor(myAppCtx.getBean(SqlCaptureInterceptor.class));
 	}
 
 	/**

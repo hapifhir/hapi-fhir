@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2547
+title: "Added new NUMERIC mdm matcher for matching phone numbers.  Also added NUMERIC phonetic encoder to support
+adding NUMERIC encoded search parameter (e.g. if searching for matching phone numbers is required by mdm candidate searching)."

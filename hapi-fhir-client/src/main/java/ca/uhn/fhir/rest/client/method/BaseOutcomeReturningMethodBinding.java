@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
@@ -46,7 +47,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException(Msg.code(1413) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3392
+title: "When cross-partition reference Mode is used, the rest-hook subscriptions on a partition enabled server would
+   cause a NPE. Cause of this is from the reloading of the subscription when the server is restarted.
+   This issue has been fixed. Also fixed issue with revinclude for rest-hook subscription not working."

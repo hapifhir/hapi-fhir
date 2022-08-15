@@ -112,23 +112,17 @@ public class ${className}ResourceProvider extends
 			@RawParam
 			Map<String, List<String>> theAdditionalRawParams,
 
-#if ( $version != 'dstu' )
-			@IncludeParam(reverse=true)
-			Set<Include> theRevIncludes,
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OptionalParam(name="_lastUpdated")
 			DateRangeParam theLastUpdated, 
-#end
 
-			@IncludeParam(allow= {
-#foreach ( $include in $includes )
-				"${include.path}",
-#end
-				"*"
-			})
+			@IncludeParam
 			Set<Include> theIncludes,
-			
-			@Sort 
+
+			@IncludeParam(reverse=true)
+			Set<Include> theRevIncludes,
+
+			@Sort
 			SortSpec theSort,
 			
 			@ca.uhn.fhir.rest.annotation.Count

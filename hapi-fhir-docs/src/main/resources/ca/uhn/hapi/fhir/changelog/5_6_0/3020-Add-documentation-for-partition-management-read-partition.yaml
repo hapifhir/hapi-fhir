@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3020
+jira: SMILE-685,SMILE-3146
+title: "Added documentation for `$partition-management-read-partition`. Added `$partition-management-list-partitions` operation and documentation."

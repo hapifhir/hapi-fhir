@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class RuleImplPatch extends BaseRule {
 		if (myAllRequests) {
 			if (theOperation == RestOperationTypeEnum.PATCH) {
 				if (theInputResource == null && theOutputResource == null) {
-					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+					return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 				}
 			}
 		}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -42,10 +44,16 @@ import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
+	public static final String CACHE_THREAD_PREFIX = "capabilitystatement-cache-";
 	/*
 	 * Note: This caching mechanism should probably be configurable and maybe
 	 * even applicable to other bindings. It's particularly important for this
@@ -53,6 +61,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 */
 	private final AtomicReference<IBaseConformance> myCachedResponse = new AtomicReference<>();
 	private final AtomicLong myCachedResponseExpires = new AtomicLong(0L);
+	private final ExecutorService myThreadPool;
 	private long myCacheMillis = 60 * 1000;
 
 	ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -61,7 +70,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
-			throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
+			throw new ConfigurationException(Msg.code(387) + "Conformance resource provider method '" + theMethod.getName() + "' should return a Conformance resource class, returns: " + theMethod.getReturnType());
 		}
 
 		Metadata metadata = theMethod.getAnnotation(Metadata.class);
@@ -69,6 +78,17 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			setCacheMillis(metadata.cacheMillis());
 		}
 
+		ThreadFactory threadFactory = r -> {
+			Thread t = new Thread(r);
+			t.setName(CACHE_THREAD_PREFIX + t.getId());
+			t.setDaemon(false);
+			return t;
+		};
+		myThreadPool = new ThreadPoolExecutor(1, 1,
+			0L, TimeUnit.MILLISECONDS,
+			new LinkedBlockingQueue<>(1),
+			threadFactory,
+			new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
 	/**
@@ -91,13 +111,20 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	 * @see Metadata#cacheMillis()
 	 * @since 4.1.0
 	 */
-	private void setCacheMillis(long theCacheMillis) {
+	public void setCacheMillis(long theCacheMillis) {
 		myCacheMillis = theCacheMillis;
 	}
 
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return ReturnTypeEnum.RESOURCE;
+	}
+
+	@Override
+	public void close() {
+		super.close();
+
+		myThreadPool.shutdown();
 	}
 
 	@Override
@@ -116,7 +143,8 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			if (conf != null) {
 				long expires = myCachedResponseExpires.get();
 				if (expires < System.currentTimeMillis()) {
-					conf = null;
+					myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
+					myThreadPool.submit(() -> createCapabilityStatement(theRequest, theMethodParams));
 				}
 			}
 		}
@@ -141,30 +169,35 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (conf == null) {
-			conf = (IBaseConformance) invokeServerMethod(theRequest, theMethodParams);
-			if (myCacheMillis > 0) {
-
-				// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
-				if (theRequest.getInterceptorBroadcaster() != null) {
-					HookParams params = new HookParams();
-					params.add(IBaseConformance.class, conf);
-					params.add(RequestDetails.class, theRequest);
-					params.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					IBaseConformance outcome = (IBaseConformance) theRequest
-						.getInterceptorBroadcaster()
-						.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
-					if (outcome != null) {
-						conf = outcome;
-					}
-				}
-
-
-				myCachedResponse.set(conf);
-				myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
-			}
+			conf = createCapabilityStatement(theRequest, theMethodParams);
 		}
 
 		return new SimpleBundleProvider(conf);
+	}
+
+	private IBaseConformance createCapabilityStatement(RequestDetails theRequest, Object[] theMethodParams) {
+		IBaseConformance conf = (IBaseConformance) invokeServerMethod(theRequest, theMethodParams);
+
+		// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			HookParams params = new HookParams();
+			params.add(IBaseConformance.class, conf);
+			params.add(RequestDetails.class, theRequest);
+			params.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			IBaseConformance outcome = (IBaseConformance) theRequest
+				.getInterceptorBroadcaster()
+				.callHooksAndReturnObject(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED, params);
+			if (outcome != null) {
+				conf = outcome;
+			}
+		}
+
+		if (myCacheMillis > 0) {
+			myCachedResponse.set(conf);
+			myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
+		}
+		
+		return conf;
 	}
 
 	@Override
@@ -183,7 +216,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 				return MethodMatchEnum.EXACT;
 			}
-			throw new MethodNotAllowedException("/metadata request must use HTTP GET", RequestTypeEnum.GET);
+			throw new MethodNotAllowedException(Msg.code(388) + "/metadata request must use HTTP GET", RequestTypeEnum.GET);
 		}
 
 		return MethodMatchEnum.NONE;
@@ -198,6 +231,15 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	@Override
 	protected BundleTypeEnum getResponseBundleType() {
 		return null;
+	}
+
+	/**
+	 * Create and return the server's CapabilityStatement
+	 */
+	public IBaseConformance provideCapabilityStatement(RestfulServer theServer, RequestDetails theRequest) {
+		Object[] params = createMethodParams(theRequest);
+		IBundleProvider resultObj = invokeServer(theServer, theRequest, params);
+		return (IBaseConformance) resultObj.getResources(0,1).get(0);
 	}
 
 }

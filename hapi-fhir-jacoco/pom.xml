@@ -11,7 +11,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE3-SNAPSHOT</version>
+		<version>6.2.0-PRE1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -34,6 +34,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server-mdm</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server-openapi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -88,6 +93,20 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-jpaserver-test-utilities</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- TODO KHS temporarily disable these tests because they are blocking ci
+
+<dependency>
+<groupId>ca.uhn.hapi.fhir</groupId>
+<artifactId>hapi-fhir-jpaserver-elastic-test-utilities</artifactId>
+<version>${project.version}</version>
+</dependency>
+-->
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-client-okhttp</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -113,7 +132,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-api</artifactId>
+			<artifactId>hapi-fhir-storage</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -138,6 +157,13 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

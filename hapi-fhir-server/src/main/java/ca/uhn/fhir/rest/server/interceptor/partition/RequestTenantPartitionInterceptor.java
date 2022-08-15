@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.partition;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ package ca.uhn.fhir.rest.server.interceptor.partition;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 
 import javax.annotation.Nonnull;
@@ -48,12 +48,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RequestTenantPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-	public RequestPartitionId PartitionIdentifyCreate(RequestDetails theRequestDetails) {
+	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId PartitionIdentifyRead(RequestDetails theRequestDetails) {
+	public RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
@@ -63,7 +63,7 @@ public class RequestTenantPartitionInterceptor {
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
-			throw new InternalErrorException("No tenant ID has been specified");
+			throw new InternalErrorException(Msg.code(343) + "No tenant ID has been specified");
 		}
 
 		return RequestPartitionId.fromPartitionName(tenantId);

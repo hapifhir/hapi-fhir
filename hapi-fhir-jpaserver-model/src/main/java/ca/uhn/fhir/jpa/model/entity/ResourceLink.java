@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import java.util.Date;
 })
 public class ResourceLink extends BaseResourceIndex {
 
-	public static final int SRC_PATH_LENGTH = 200;
+	public static final int SRC_PATH_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	@SequenceGenerator(name = "SEQ_RESLINK_ID", sequenceName = "SEQ_RESLINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESLINK_ID")
@@ -117,6 +117,10 @@ public class ResourceLink extends BaseResourceIndex {
 		return myTargetResourceId;
 	}
 
+	public String getSourceResourceType() {
+		return mySourceResourceType;
+	}
+
 	public String getTargetResourceType() {
 		return myTargetResourceType;
 	}
@@ -138,6 +142,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourceResource, obj.mySourceResource);
 		b.append(myTargetResourceUrl, obj.myTargetResourceUrl);
 		b.append(myTargetResourceType, obj.myTargetResourceType);
+		b.append(myTargetResourceVersion, obj.myTargetResourceVersion);
 		b.append(getTargetResourceId(), obj.getTargetResourceId());
 		return b.isEquals();
 	}
@@ -150,6 +155,7 @@ public class ResourceLink extends BaseResourceIndex {
 		myTargetResourceId = source.getTargetResourceId();
 		myTargetResourcePid = source.getTargetResourcePid();
 		myTargetResourceType = source.getTargetResourceType();
+		myTargetResourceVersion = source.getTargetResourceVersion();
 		myTargetResourceUrl = source.getTargetResourceUrl();
 	}
 
@@ -234,6 +240,11 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	@Override
+	public void clearHashes() {
+		// nothing right now
+	}
+
+	@Override
 	public void calculateHashes() {
 		// nothing right now
 	}
@@ -244,6 +255,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(mySourcePath);
 		b.append(mySourceResource);
 		b.append(myTargetResourceUrl);
+		b.append(myTargetResourceVersion);
 		b.append(getTargetResourceType());
 		b.append(getTargetResourceId());
 		return b.toHashCode();
@@ -257,6 +269,7 @@ public class ResourceLink extends BaseResourceIndex {
 		b.append(", src=").append(mySourceResourcePid);
 		b.append(", target=").append(myTargetResourcePid);
 		b.append(", targetType=").append(myTargetResourceType);
+		b.append(", targetVersion=").append(myTargetResourceVersion);
 		b.append(", targetUrl=").append(myTargetResourceUrl);
 
 		b.append("]");

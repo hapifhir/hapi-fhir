@@ -1,22 +1,20 @@
 package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,12 +41,11 @@ public class IndexStressTest {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, searchParamRegistry);
 		extractor.start();
 
-		Map<String, RuntimeSearchParam> spMap = ctx
-			.getResourceDefinition("Patient")
+		ResourceSearchParams resourceSearchParams = new ResourceSearchParams("Patient");
+		ctx.getResourceDefinition("Patient")
 			.getSearchParams()
-			.stream()
-			.collect(Collectors.toMap(RuntimeSearchParam::getName, t -> t));
-		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(spMap);
+			.forEach(t -> resourceSearchParams.put(t.getName(), t));
+		when(searchParamRegistry.getActiveSearchParams(eq("Patient"))).thenReturn(resourceSearchParams);
 
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(p);
 

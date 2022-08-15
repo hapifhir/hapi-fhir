@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2577
+title: "When running the `$apply-codesystem-delta-add` operation, code properties were not correctly
+   saved. Thanks to Hanan Awwad for the pull request!"

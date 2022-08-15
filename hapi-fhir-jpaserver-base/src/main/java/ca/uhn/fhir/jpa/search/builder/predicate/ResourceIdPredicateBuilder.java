@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -49,7 +49,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdPredicateBuilder.class);
 
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IIdHelperService myIdHelperService;
 
 	/**
 	 * Constructor
@@ -65,6 +65,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 		Set<ResourcePersistentId> allOrPids = null;
 		SearchFilterParser.CompareOperation defaultOperation = SearchFilterParser.CompareOperation.eq;
 
+		boolean allIdsAreForcedIds = true;
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<ResourcePersistentId> orPids = new HashSet<>();
 			boolean haveValue = false;
@@ -76,9 +77,13 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
+					if (!myIdHelperService.idRequiresForcedId(valueAsId.getIdPart()) && allIdsAreForcedIds) {
+						allIdsAreForcedIds = false;
+					}
 					haveValue = true;
 					try {
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart());
+						boolean excludeDeleted = true;
+						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, theResourceName, valueAsId.getIdPart(), excludeDeleted);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matches
@@ -114,7 +119,7 @@ public class ResourceIdPredicateBuilder extends BasePredicateBuilder {
 
 			List<Long> resourceIds = ResourcePersistentId.toLongList(allOrPids);
 			if (theSourceJoinColumn == null) {
-				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable();
+				BaseJoiningPredicateBuilder queryRootTable = super.getOrCreateQueryRootTable(!allIdsAreForcedIds);
 				Condition predicate;
 				switch (operation) {
 					default:

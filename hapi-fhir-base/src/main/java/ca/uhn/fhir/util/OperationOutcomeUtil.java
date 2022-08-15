@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,18 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
@@ -114,9 +121,9 @@ public class OperationOutcomeUtil {
 		try {
 			return (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
 		} catch (InstantiationException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1803) + "Unable to instantiate OperationOutcome", e);
 		} catch (IllegalAccessException e) {
-			throw new InternalErrorException("Unable to instantiate OperationOutcome", e);
+			throw new InternalErrorException(Msg.code(1804) + "Unable to instantiate OperationOutcome", e);
 		}
 	}
 
@@ -152,5 +159,27 @@ public class OperationOutcomeUtil {
 			locationElem.setValueAsString(theLocation);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
+	}
+
+	public static IBase addIssueWithMessageId(FhirContext myCtx, IBaseOperationOutcome theOperationOutcome, String severity, String message, String messageId, String location, String theCode) {
+		IBase issue = addIssue(myCtx, theOperationOutcome, severity, message, location, theCode);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition(issue.getClass());
+		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
+
+		IPrimitiveType<?> system = (IPrimitiveType<?>) myCtx.getElementDefinition("uri").newInstance();
+		system.setValueAsString(Constants.JAVA_VALIDATOR_DETAILS_SYSTEM);
+		IPrimitiveType<?> code = (IPrimitiveType<?>) myCtx.getElementDefinition("code").newInstance();
+		code.setValueAsString(messageId);
+
+		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("Coding");
+		ICompositeType coding = (ICompositeType) codingDef.newInstance();
+		codingDef.getChildByName("system").getMutator().addValue(coding, system);
+		codingDef.getChildByName("code").getMutator().addValue(coding, code);
+		BaseRuntimeElementCompositeDefinition<?> ccDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("CodeableConcept");
+		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
+		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+
+		detailsChildDef.getMutator().addValue(issue, codeableConcept);
+		return issue;
 	}
 }

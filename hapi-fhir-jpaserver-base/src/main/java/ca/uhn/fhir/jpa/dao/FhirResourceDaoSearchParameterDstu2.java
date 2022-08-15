@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,16 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
-import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
-import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
-import ca.uhn.fhir.model.primitive.BoundCodeDt;
-import org.hl7.fhir.convertors.conv10_40.SearchParameter10_40;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.collect.Lists;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_40;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_40;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -47,29 +43,30 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 	private ISearchParamExtractor mySearchParamExtractor;
 	private FhirContext myDstu2Hl7OrgContext = FhirContext.forDstu2Hl7Org();
 
-	protected void markAffectedResources(SearchParameter theResource) {
+	protected void reindexAffectedResources(SearchParameter theResource, RequestDetails theRequestDetails) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
 		String expression = theResource != null ? theResource.getXpath() : null;
-		markResourcesMatchingExpressionAsNeedingReindexing(reindex, expression);
+		List<String> base = theResource != null ? Lists.newArrayList(theResource.getBase()) : null;
+		requestReindexForRelatedResources(reindex, base, theRequestDetails);
 	}
 
 	@Override
-	protected void postPersist(ResourceTable theEntity, SearchParameter theResource) {
-		super.postPersist(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postPersist(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 
 	}
 
 	@Override
-	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource) {
-		super.postUpdate(theEntity, theResource);
-		markAffectedResources(theResource);
+	protected void postUpdate(ResourceTable theEntity, SearchParameter theResource, RequestDetails theRequestDetails) {
+		super.postUpdate(theEntity, theResource, theRequestDetails);
+		reindexAffectedResources(theResource, theRequestDetails);
 	}
 
 	@Override
-	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
-		markAffectedResources(theResourceToDelete);
+	protected void preDelete(SearchParameter theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
+		reindexAffectedResources(theResourceToDelete, theRequestDetails);
 	}
 
 	@Override
@@ -79,7 +76,7 @@ public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao
 		String encoded = getContext().newJsonParser().encodeResourceToString(theResource);
 		org.hl7.fhir.dstu2.model.SearchParameter hl7Org = myDstu2Hl7OrgContext.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.SearchParameter.class, encoded);
 
-		org.hl7.fhir.r4.model.SearchParameter convertedSp = SearchParameter10_40.convertSearchParameter(hl7Org);
+		org.hl7.fhir.r4.model.SearchParameter convertedSp = (org.hl7.fhir.r4.model.SearchParameter) VersionConvertorFactory_10_40.convertResource(hl7Org, new BaseAdvisor_10_40(false));
 		if (isBlank(convertedSp.getExpression()) && isNotBlank(hl7Org.getXpath())) {
 			convertedSp.setExpression(hl7Org.getXpath());
 		}

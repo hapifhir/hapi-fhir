@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,48 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,16 +70,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
+	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_LANG", columnList = "RES_TYPE,RES_LANGUAGE"),
-	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
-	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
+	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
+@NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
 	public static final int RESTYPE_LEN = 40;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
@@ -99,6 +118,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Long myIndexStatus;
 
+	// TODO: Removed in 5.5.0. Drop in a future release.
 	@Column(name = "RES_LANGUAGE", length = MAX_LANGUAGE_LENGTH, nullable = true)
 	@OptimisticLock(excluded = true)
 	private String myLanguage;
@@ -114,6 +134,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
+
+	@Transient
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
+	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
+	private ExtendedHSearchIndexData myLuceneIndexData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -191,11 +216,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	// Added in 3.0.0 - Should make this a primitive Boolean at some point
 	@OptimisticLock(excluded = true)
 	@Column(name = "SP_CMPSTR_UNIQ_PRESENT")
-	private Boolean myParamsCompositeStringUniquePresent = false;
+	private Boolean myParamsComboStringUniquePresent = false;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
-	private Collection<ResourceIndexedCompositeStringUnique> myParamsCompositeStringUnique;
+	private Collection<ResourceIndexedComboStringUnique> myParamsComboStringUnique;
+
+	// Added in 5.5.0 - Should make this a primitive Boolean at some point
+	@OptimisticLock(excluded = true)
+	@Column(name = "SP_CMPTOKS_PRESENT")
+	private Boolean myParamsComboTokensNonUniquePresent = false;
+
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedComboTokenNonUnique> myParamsComboTokensNonUnique;
 
 	@OneToMany(mappedBy = "mySourceResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -230,7 +264,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
-	private Collection<SearchParamPresent> mySearchParamPresents;
+	private Collection<SearchParamPresentEntity> mySearchParamPresents;
 
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
@@ -250,7 +284,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	@OneToOne(optional = true, fetch = FetchType.EAGER, cascade = {}, orphanRemoval = false, mappedBy = "myResource")
+	@OptimisticLock(excluded = true)
 	private ForcedId myForcedId;
+
+	@Transient
+	private volatile String myCreatedByMatchUrl;
 
 	/**
 	 * Constructor
@@ -297,22 +335,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myIndexStatus = theIndexStatus;
 	}
 
-	public String getLanguage() {
-		return myLanguage;
+	public Collection<ResourceIndexedComboStringUnique> getParamsComboStringUnique() {
+		if (myParamsComboStringUnique == null) {
+			myParamsComboStringUnique = new ArrayList<>();
+		}
+		return myParamsComboStringUnique;
 	}
 
-	public void setLanguage(String theLanguage) {
-		if (defaultString(theLanguage).length() > MAX_LANGUAGE_LENGTH) {
-			throw new UnprocessableEntityException("Language exceeds maximum length of " + MAX_LANGUAGE_LENGTH + " chars: " + theLanguage);
+	public Collection<ResourceIndexedComboTokenNonUnique> getmyParamsComboTokensNonUnique() {
+		if (myParamsComboTokensNonUnique == null) {
+			myParamsComboTokensNonUnique = new ArrayList<>();
 		}
-		myLanguage = theLanguage;
-	}
-
-	public Collection<ResourceIndexedCompositeStringUnique> getParamsCompositeStringUnique() {
-		if (myParamsCompositeStringUnique == null) {
-			myParamsCompositeStringUnique = new ArrayList<>();
-		}
-		return myParamsCompositeStringUnique;
+		return myParamsComboTokensNonUnique;
 	}
 
 	public Collection<ResourceIndexedSearchParamCoords> getParamsCoords() {
@@ -490,15 +524,26 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myHasLinks = theHasLinks;
 	}
 
-	public boolean isParamsCompositeStringUniquePresent() {
-		if (myParamsCompositeStringUniquePresent == null) {
+	public boolean isParamsComboStringUniquePresent() {
+		if (myParamsComboStringUniquePresent == null) {
 			return false;
 		}
-		return myParamsCompositeStringUniquePresent;
+		return myParamsComboStringUniquePresent;
 	}
 
-	public void setParamsCompositeStringUniquePresent(boolean theParamsCompositeStringUniquePresent) {
-		myParamsCompositeStringUniquePresent = theParamsCompositeStringUniquePresent;
+	public void setParamsComboStringUniquePresent(boolean theParamsComboStringUniquePresent) {
+		myParamsComboStringUniquePresent = theParamsComboStringUniquePresent;
+	}
+
+	public boolean isParamsComboTokensNonUniquePresent() {
+		if (myParamsComboTokensNonUniquePresent == null) {
+			return false;
+		}
+		return myParamsComboTokensNonUniquePresent;
+	}
+
+	public void setParamsComboTokensNonUniquePresent(boolean theParamsComboTokensNonUniquePresent) {
+		myParamsComboStringUniquePresent = theParamsComboTokensNonUniquePresent;
 	}
 
 	public boolean isParamsCoordsPopulated() {
@@ -600,7 +645,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myNarrativeText = theNarrativeText;
 	}
 
-	public ResourceHistoryTable toHistory() {
+	public ResourceHistoryTable toHistory(boolean theCreateVersionTags) {
 		ResourceHistoryTable retVal = new ResourceHistoryTable();
 
 		retVal.setResourceId(myId);
@@ -608,8 +653,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setVersion(myVersion);
 		retVal.setTransientForcedId(getTransientForcedId());
 
-		retVal.setPublished(getPublished());
-		retVal.setUpdated(getUpdated());
+		retVal.setPublished(getPublishedDate());
+		retVal.setUpdated(getUpdatedDate());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setDeleted(getDeleted());
 		retVal.setResourceTable(this);
@@ -619,7 +664,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.getTags().clear();
 
 		retVal.setHasTags(isHasTags());
-		if (isHasTags()) {
+		if (isHasTags() && theCreateVersionTags) {
 			for (ResourceTag next : getTags()) {
 				retVal.addTag(next);
 			}
@@ -633,6 +678,10 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
 		b.append("resourceType", myResourceType);
+		b.append("version", myVersion);
+		if (getPartitionId() != null) {
+			b.append("partitionId", getPartitionId().getPartitionId());
+		}
 		b.append("lastUpdated", getUpdated().getValueAsString());
 		if (getDeleted() != null) {
 			b.append("deleted");
@@ -686,17 +735,51 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myForcedId = theForcedId;
 	}
 
+
+
 	@Override
 	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = this.getResourceId();
-			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else {
-			// Avoid a join query if possible
-			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
-			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		}
+		IdDt retVal = new IdDt();
+		populateId(retVal);
+		return retVal;
 	}
 
 
+	public IIdType getIdType(FhirContext theContext) {
+		IIdType retVal = theContext.getVersion().newIdType();
+		populateId(retVal);
+		return retVal;
+	}
+
+	private void populateId(IIdType retVal) {
+		if (getTransientForcedId() != null) {
+			// Avoid a join query if possible
+			retVal.setValue(getResourceType() + '/' + getTransientForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else if (getForcedId() == null) {
+			Long id = this.getResourceId();
+			retVal.setValue(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			String forcedId = getForcedId().getForcedId();
+			retVal.setValue(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
+
+	public void setCreatedByMatchUrl(String theCreatedByMatchUrl) {
+		myCreatedByMatchUrl = theCreatedByMatchUrl;
+	}
+
+	public String getCreatedByMatchUrl() {
+		return myCreatedByMatchUrl;
+	}
+
+	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
+		myLuceneIndexData = theLuceneIndexData;
+	}
+
+	public Collection<SearchParamPresentEntity> getSearchParamPresents() {
+		if (mySearchParamPresents == null) {
+			mySearchParamPresents = new ArrayList<>();
+		}
+		return mySearchParamPresents;
+	}
 }

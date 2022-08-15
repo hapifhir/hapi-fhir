@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	@Column(name = "SOURCE_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "SOURCE_DISPLAY", length = TermConcept.MAX_DISP_LENGTH)
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
@@ -114,7 +114,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	}
 
 	public TermConceptMapGroupElement setDisplay(String theDisplay) {
-		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
+		myDisplay = left(theDisplay, TermConcept.MAX_DISP_LENGTH);
 		return this;
 	}
 

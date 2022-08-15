@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -60,7 +61,7 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 
 	@Override
 	public <T extends IElement> List<T> getAllPopulatedChildElementsOfType(Class<T> theType) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(1488));
 	}
 
 	@Override

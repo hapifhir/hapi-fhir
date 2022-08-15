@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
-import java.util.List;
-import java.util.Map;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IRestfulClientFactory {
 

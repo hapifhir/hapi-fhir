@@ -1,19 +1,23 @@
 package ca.uhn.fhir.rest.api.server;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.context.ConfigurationException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +91,25 @@ public interface IBundleProvider {
 	}
 
 	/**
+	 * If the results in this bundle were produced using an offset query (as opposed to a query using
+	 * continuation pointers, page IDs, etc.) the page offset can be returned here. The server
+	 * should then attempt to form paging links that use <code>_offset</code> instead of
+	 * opaque page IDs.
+	 */
+	default Integer getCurrentPageOffset() {
+		return null;
+	}
+
+	/**
+	 * If {@link #getCurrentPageOffset()} returns a non-null value, this method must also return
+	 * the actual page size used
+	 */
+	default Integer getCurrentPageSize() {
+		return null;
+	}
+
+
+	/**
 	 * Returns the instant as of which this result was created. The
 	 * result of this value is used to populate the <code>lastUpdated</code>
 	 * value on search result/history result bundles.
@@ -112,6 +135,26 @@ public interface IBundleProvider {
 	 */
 	@Nonnull
 	List<IBaseResource> getResources(int theFromIndex, int theToIndex);
+
+	/**
+	 * Get all resources
+	 *
+	 * @return <code>getResources(0, this.size())</code>.  Return an empty list if <code>this.size()</code> is zero.
+	 * @throws ConfigurationException if size() is null
+	 */
+	@Nonnull
+	default List<IBaseResource> getAllResources() {
+		List<IBaseResource> retval = new ArrayList<>();
+
+		Integer size = size();
+		if (size == null) {
+			throw new ConfigurationException(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
+		}
+		if (size > 0) {
+			retval.addAll(getResources(0, size));
+		}
+		return retval;
+	}
 
 	/**
 	 * Returns the UUID associated with this search. Note that this
@@ -165,11 +208,18 @@ public interface IBundleProvider {
 	}
 
 	/**
-	 * Returns the value of {@link #size()} and throws a {@link NullPointerException} of it is null
+	 * @return the value of {@link #size()} and throws a {@link NullPointerException} of it is null
 	 */
 	default int sizeOrThrowNpe() {
 		Integer retVal = size();
 		Validate.notNull(retVal, "size() returned null");
 		return retVal;
+	}
+
+	/**
+	 * @return the list of ids of all resources in the bundle
+	 */
+	default List<String> getAllResourceIds() {
+		return getAllResources().stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 	}
 }

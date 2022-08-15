@@ -1,0 +1,6 @@
+"LOINC_NUM","COMPONENT","PROPERTY","TIME_ASPCT","SYSTEM","SCALE_TYP","METHOD_TYP","CLASS","SHORTNAME","LONG_COMMON_NAME","RELATEDNAMES2","LinguisticVariantDisplayName"
+"61438-8","Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","",""
+"11704-4","Gliale nucléaire de type 1 , IgG","Titre","Temps ponctuel","LCR","Quantitatif","Immunofluorescence","Sérologie","","","",""
+,"Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif",,,"","","",""
+"17787-3","Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","",""
+"17788-1","Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif",,,"","","",""

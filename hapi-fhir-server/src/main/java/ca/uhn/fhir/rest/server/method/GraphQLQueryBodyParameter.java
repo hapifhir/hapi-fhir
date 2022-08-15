@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,16 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.parser.json.JsonLikeObject;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeValue;
-import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Method;
@@ -44,6 +39,8 @@ import java.util.Collection;
 import static ca.uhn.fhir.rest.api.Constants.CT_GRAPHQL;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
 import static ca.uhn.fhir.rest.server.method.ResourceParameter.createRequestReader;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class GraphQLQueryBodyParameter implements IParameter {
 
@@ -51,8 +48,15 @@ public class GraphQLQueryBodyParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+		String ctValue = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
 		Reader requestReader = createRequestReader(theRequest);
+
+		// Trim off "; charset=FOO" from the content-type header
+		int semicolonIdx = ctValue.indexOf(';');
+		if (semicolonIdx != -1) {
+			ctValue = ctValue.substring(0, semicolonIdx);
+		}
+		ctValue = trim(ctValue);
 
 		if (CT_JSON.equals(ctValue)) {
 			try {
@@ -62,7 +66,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 					return jsonNode.get("query").asText();
 				}
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(356) + e);
 			}
 		}
 
@@ -70,7 +74,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 			try {
 				return IOUtils.toString(requestReader);
 			} catch (IOException e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(357) + e);
 			}
 		}
 
@@ -80,10 +84,10 @@ public class GraphQLQueryBodyParameter implements IParameter {
 	@Override
 	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
 		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
+			throw new ConfigurationException(Msg.code(358) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but can not be of collection type");
 		}
 		if (!String.class.equals(theParameterType)) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
+			throw new ConfigurationException(Msg.code(359) + "Method '" + theMethod.getName() + "' in type '" +theMethod.getDeclaringClass().getCanonicalName()+ "' is annotated with @" + Count.class.getName() + " but type '" + theParameterType + "' is an invalid type, must be one of Integer or IntegerType");
 		}
 		myType = theParameterType;
 	}

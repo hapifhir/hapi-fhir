@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.param.binder;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ package ca.uhn.fhir.rest.param.binder;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import ca.uhn.fhir.context.ConfigurationException;
 
 public class CollectionBinder
 // implements IParamBinder
@@ -44,7 +45,7 @@ public class CollectionBinder
 		} else if (theCollectionType.equals(Collection.class)) {
 			return (Class<? extends Collection>) ArrayList.class;
 		} else {
-			throw new ConfigurationException("Unsupported binding collection type '" + theCollectionType.getCanonicalName() + "' for " + thePositionDescription);
+			throw new ConfigurationException(Msg.code(1956) + "Unsupported binding collection type '" + theCollectionType.getCanonicalName() + "' for " + thePositionDescription);
 		}
 	}
 
@@ -60,7 +61,7 @@ public class CollectionBinder
 	// } else if (theCollectionType == Collection.class) {
 	// myCollectionType = ArrayList.class;
 	// } else {
-	// throw new ConfigurationException("Unsupported binding collection type: " + theCollectionType.getCanonicalName());
+	// throw new ConfigurationException(Msg.code(1957) + "Unsupported binding collection type: " + theCollectionType.getCanonicalName());
 	// }
 	// }
 
@@ -85,7 +86,7 @@ public class CollectionBinder
 	// try {
 	// retVal = (Collection<Object>) myCollectionType.newInstance();
 	// } catch (Exception e) {
-	// throw new InternalErrorException("Failed to instantiate " + myCollectionType, e);
+	// throw new InternalErrorException(Msg.code(1958) + "Failed to instantiate " + myCollectionType, e);
 	// }
 	//
 	// List<String> params = QueryUtil.splitQueryStringByCommasIgnoreEscape(theString);

@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -42,9 +44,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConceptMapCommand {
+	public static final String COMMAND = "export-conceptmap-to-csv";
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommand.class);
 
@@ -60,14 +62,10 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 
-		this.addFhirVersionOption(options);
-		addBaseUrlOption(options);
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
-		addBasicAuthOption(options);
-		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -114,9 +112,9 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 
 	private void convertConceptMapToCsv(org.hl7.fhir.dstu3.model.ConceptMap theConceptMap) throws ExecutionException {
 		try {
-			convertConceptMapToCsv(convertConceptMap(theConceptMap));
+			convertConceptMapToCsv((ConceptMap) VersionConvertorFactory_30_40.convertResource(theConceptMap));
 		} catch (FHIRException fe) {
-			throw new ExecutionException(fe);
+			throw new ExecutionException(Msg.code(1563), fe);
 		}
 	}
 
@@ -153,7 +151,7 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 				csvPrinter.flush();
 			}
 		} catch (IOException ioe) {
-			throw new InternalErrorException(ioe);
+			throw new InternalErrorException(Msg.code(1564) + ioe);
 		}
 
 		ourLog.info("Finished exporting to {}", file);

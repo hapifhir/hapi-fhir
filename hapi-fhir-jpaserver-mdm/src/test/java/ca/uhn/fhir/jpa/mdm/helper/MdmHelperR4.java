@@ -5,9 +5,14 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
-
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.Nonnull;
+
+import static ca.uhn.fhir.mdm.api.MdmConstants.CODE_GOLDEN_RECORD;
+import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 
 public class MdmHelperR4 extends BaseMdmHelper {
 	@Autowired
@@ -50,6 +55,13 @@ public class MdmHelperR4 extends BaseMdmHelper {
 		return isExternalHttpRequest ? dao.update(theResource, myMockSrd): dao.create(theResource);
 	}
 
+
+	@Nonnull
+	public Patient buildGoldenPatient() {
+		Patient patient = new Patient();
+		patient.getMeta().addTag(SYSTEM_GOLDEN_RECORD_STATUS, CODE_GOLDEN_RECORD, "Golden Record");
+		return patient;
+	}
 	/**
 	 * OutcomeAndLogMessageWrapper is a simple wrapper class which is _excellent_. It allows us to skip the fact that java doesn't allow
 	 * multiple returns, and wraps both the Method Outcome of the DAO, _and_ the TransactionLogMessages that were passed to the pointcut

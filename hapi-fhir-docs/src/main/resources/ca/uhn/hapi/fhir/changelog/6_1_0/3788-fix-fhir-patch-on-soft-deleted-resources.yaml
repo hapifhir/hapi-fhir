@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3788
+jira: SMILE-4321
+title: "Previously, if a FHIR patch was performed on a soft deleted resource, the patch was successfully applied 
+and the resource was undeleted and populated with only the data contained in the patch. This has been fixed 
+so that patch on deleted resources now issues a HTTP 410 response."

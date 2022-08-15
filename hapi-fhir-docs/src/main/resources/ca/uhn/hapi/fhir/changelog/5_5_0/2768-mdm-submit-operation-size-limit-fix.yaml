@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2768
+title: "$mdm-submit operation was only submitting 100 resources and then stopping.  It now correctly submits all
+requested resources."

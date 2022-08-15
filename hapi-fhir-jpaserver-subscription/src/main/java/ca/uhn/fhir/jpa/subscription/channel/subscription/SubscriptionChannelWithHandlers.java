@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.channel.subscription;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,13 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 	public void removeHandler(MessageHandler theMessageHandler) {
 		if (mySubscribableChannel != null) {
 			mySubscribableChannel.unsubscribe(theMessageHandler);
+		}
+		if (theMessageHandler instanceof DisposableBean) {
+			try {
+				((DisposableBean) theMessageHandler).destroy();
+			} catch (Exception e) {
+				ourLog.warn("Could not destroy {} handler for {}", theMessageHandler.getClass().getSimpleName(), myChannelName, e);
+			}
 		}
 	}
 

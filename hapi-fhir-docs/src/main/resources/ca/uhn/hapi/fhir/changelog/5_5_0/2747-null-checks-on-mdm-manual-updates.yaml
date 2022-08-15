@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2747
+backport: 5.4.2
+title: "Added null checks to MDM resource interceptor in order to avoid NPEs."

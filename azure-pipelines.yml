@@ -1,69 +1,78 @@
 # HAPI FHIR Build Pipeline
 
 variables:
-  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
-  #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
-  #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-  MAVEN_OPTS: ''
+   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+   #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
+   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+   MAVEN_OPTS: ''
 
 trigger:
-- master
+   - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+   vmImage: 'ubuntu-latest'
 
 jobs:
-  - job: Build
-    timeoutInMinutes: 360
-    container: maven:3-openjdk-15
-    steps:
-      - task: DockerInstaller@0
-        displayName: Docker Installer
-        inputs:
-           dockerVersion: 17.09.0-ce
-           releaseType: stable
-      - task: Cache@2
-        inputs:
-          key: 'maven | "$(Agent.OS)" | ./pom.xml'
-          path: $(MAVEN_CACHE_FOLDER)
-      - task: Bash@3
-        inputs:
-          targetType: 'inline'
-          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
-      - task: Maven@3
-        env:
-          JAVA_HOME_11_X64: /usr/java/openjdk-15
-        inputs:
-          goals: 'clean install'
-          # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-          # These are JVM options (and don't show up in the build logs)
-          mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-          jdkVersionOption: 1.11
-      - task: CopyFiles@2
-        condition: always()
-        inputs:
-          sourceFolder: '$(System.DefaultWorkingDirectory)/'
-          contents: '**/target/*output.txt'
-          targetFolder: '$(Build.ArtifactStagingDirectory)'
-      - task: PublishPipelineArtifact@1
-        displayName: 'Publish Full Test Output'
-        condition: always()
-        inputs:
-          targetPath: '$(Build.ArtifactStagingDirectory)/'
-          artifactName: 'full_logs.zip'
-      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
-        displayName: 'codecov'
-      - task: PublishTestResults@2
-        inputs:
-          testResultsFormat: 'JUnit'
-          testResultsFiles: '**/TEST-*.xml'
-      - task: PublishCodeCoverageResults@1
-        inputs:
-          codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
-          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
-          failIfCoverageEmpty: false
+   -  job: Build
+      timeoutInMinutes: 360
+      container: maven:3.8-openjdk-17
+      steps:
+         -  task: Cache@2
+            inputs:
+               key: 'maven | "$(Agent.OS)" | ./pom.xml'
+               path: $(MAVEN_CACHE_FOLDER)
+         -  task: Maven@3
+            env:
+               JAVA_HOME_11_X64: /usr/java/openjdk-17
+            displayName: Checkstyle Build
+            inputs:
+               mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
+               goals: 'clean install'
+               options: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+               jdkVersionOption: 1.11
+         -  task: DockerInstaller@0
+            displayName: Docker Installer
+            inputs:
+               dockerVersion: 17.09.0-ce
+               releaseType: stable
+         -  task: Bash@3
+            inputs:
+               targetType: 'inline'
+               script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+         -  task: Maven@3
+            env:
+               JAVA_HOME_11_X64: /usr/java/openjdk-17
+            inputs:
+               goals: 'clean install'
+               # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+               options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+               # These are JVM options (and don't show up in the build logs)
+               mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+               jdkVersionOption: 1.11
+         -  task: CopyFiles@2
+            condition: always()
+            inputs:
+               sourceFolder: '$(System.DefaultWorkingDirectory)/'
+               contents: '**/target/*-reports/*.txt'
+               targetFolder: '$(Build.ArtifactStagingDirectory)'
+         -  task: PublishPipelineArtifact@1
+            displayName: 'Publish Full Test Output'
+            condition: always()
+            inputs:
+               targetPath: '$(Build.ArtifactStagingDirectory)/'
+               artifactName: 'full_logs_$(Build.BuildId)_$(Build.BuildNumber)_$(System.JobId).zip'
+         -  script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+            displayName: 'codecov'
+         -  task: PublishTestResults@2
+            inputs:
+               testResultsFormat: 'JUnit'
+               testResultsFiles: '**/TEST-*.xml'
+         -  task: PublishCodeCoverageResults@1
+            inputs:
+               codeCoverageTool: 'JaCoCo'
+               summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
+               reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
+               failIfCoverageEmpty: false
 
 # Potential Additional Maven3 Options:
 #publishJUnitResults: true

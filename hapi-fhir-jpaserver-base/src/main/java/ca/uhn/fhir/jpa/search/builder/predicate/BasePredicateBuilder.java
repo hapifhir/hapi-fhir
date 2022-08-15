@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,8 +82,8 @@ public class BasePredicateBuilder {
 		return mySearchSqlBuilder.createConditionForValueWithComparator(theComparator, theColumn, theValue);
 	}
 
-	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable() {
-		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder();
+	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable(boolean theIncludeResourceTypeAndNonDeletedFlag) {
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder(theIncludeResourceTypeAndNonDeletedFlag);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {

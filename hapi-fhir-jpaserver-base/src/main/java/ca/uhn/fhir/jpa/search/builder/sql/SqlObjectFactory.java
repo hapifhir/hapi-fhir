@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  */
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
@@ -45,9 +46,14 @@ public class SqlObjectFactory {
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	public CompositeUniqueSearchParameterPredicateBuilder newCompositeUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		return myApplicationContext.getBean(CompositeUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
+	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ComboUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
 	}
+
+	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(ComboNonUniqueSearchParameterPredicateBuilder.class, theSearchSqlBuilder);
+	}
+
 
 	public CoordsPredicateBuilder coordsPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		return myApplicationContext.getBean(CoordsPredicateBuilder.class, theSearchSqlBuilder);
@@ -112,4 +118,5 @@ public class SqlObjectFactory {
 	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
 		return myApplicationContext.getBean(SearchQueryExecutor.class, theGeneratedSql, theMaxResultsToFetch);
 	}
+
 }

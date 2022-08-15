@@ -6,7 +6,7 @@ import java.util.Collection;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 
-public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long> {
+public interface IResourceSearchViewDao extends JpaRepository<ResourceSearchView, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT v FROM ResourceSearchView v WHERE v.myResourceId in (:pids)")
 	Collection<ResourceSearchView> findByResourceIds(@Param("pids") Collection<Long> pids);

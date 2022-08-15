@@ -8,7 +8,6 @@ import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -19,7 +18,7 @@ class ExtendedOrganizationResourceTest {
 
    @Test
    fun makeSureSearchDoesNotThrowOnIncludeParam() {
-      val response = ResteasyClientBuilder()
+      val response = org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl()
          .build()
          .target("http://localhost:$ourPort/Organization?_id=1")
          .request()
@@ -40,7 +39,7 @@ class ExtendedOrganizationResourceTest {
       @Throws(Exception::class)
       fun afterClassClearContext() {
          JettyUtil.closeServer(jettyServer)
-         TestUtil.clearAllStaticFieldsForUnitTest()
+         TestUtil.randomizeLocaleAndTimezone()
       }
 
       @JvmStatic

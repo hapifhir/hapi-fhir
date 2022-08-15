@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.triggering;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,17 @@ package ca.uhn.fhir.jpa.subscription.triggering;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
@@ -76,6 +79,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_RESOURCE_ID;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -100,11 +107,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private ISchedulerService mySchedulerService;
 
+	@Autowired
+	private ISearchSvc mySearchService;
+
 	@Override
 	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
 
 		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
-			throw new PreconditionFailedException("Subscription processing not active on this server");
+			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 
 		// Throw a 404 if the subscription doesn't exist
@@ -114,15 +124,15 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			if (!subscriptionId.hasResourceType()) {
 				subscriptionId = subscriptionId.withResourceType(ResourceTypeEnum.SUBSCRIPTION.getCode());
 			}
-			subscriptionDao.read(subscriptionId);
+			subscriptionDao.read(subscriptionId, SystemRequestDetails.forAllPartitions());
 		}
 
-		List<IPrimitiveType<String>> resourceIds = ObjectUtils.defaultIfNull(theResourceIds, Collections.emptyList());
-		List<IPrimitiveType<String>> searchUrls = ObjectUtils.defaultIfNull(theSearchUrls, Collections.emptyList());
+		List<IPrimitiveType<String>> resourceIds = defaultIfNull(theResourceIds, Collections.emptyList());
+		List<IPrimitiveType<String>> searchUrls = defaultIfNull(theSearchUrls, Collections.emptyList());
 
 		// Make sure we have at least one resource ID or search URL
 		if (resourceIds.size() == 0 && searchUrls.size() == 0) {
-			throw new InvalidRequestException("No resource IDs or search URLs specified for triggering");
+			throw new InvalidRequestException(Msg.code(23) + "No resource IDs or search URLs specified for triggering");
 		}
 
 		// Resource URLs must be compete
@@ -135,7 +145,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		// Search URLs must be valid
 		for (IPrimitiveType<String> next : searchUrls) {
 			if (!next.getValue().contains("?")) {
-				throw new InvalidRequestException("Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
+				throw new InvalidRequestException(Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
 			}
 		}
 
@@ -180,7 +190,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			// If the job is complete, remove it from the queue
 			if (activeJob.getRemainingResourceIds().isEmpty()) {
 				if (activeJob.getRemainingSearchUrls().isEmpty()) {
-					if (isBlank(activeJob.myCurrentSearchUuid)) {
+					if (jobHasCompleted(activeJob)) {
 						myActiveJobs.remove(0);
 						String remainingJobsMsg = "";
 						if (myActiveJobs.size() > 0) {
@@ -214,26 +224,106 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			return;
 		}
 
-		// If we don't have an active search started, and one needs to be.. start it
-		if (isBlank(theJobDetails.getCurrentSearchUuid()) && theJobDetails.getRemainingSearchUrls().size() > 0 && totalSubmitted < myMaxSubmitPerPass) {
+		IBundleProvider search = null;
+
+		// This is the job initial step where we set ourselves up to do the actual re-submitting of resources
+		// to the broker.  Note that querying of resource can be done synchronously or asynchronously
+		if ( isInitialStep(theJobDetails) && isNotEmpty(theJobDetails.getRemainingSearchUrls()) && totalSubmitted < myMaxSubmitPerPass){
+
 			String nextSearchUrl = theJobDetails.getRemainingSearchUrls().remove(0);
 			RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, nextSearchUrl);
 			String queryPart = nextSearchUrl.substring(nextSearchUrl.indexOf('?'));
-			String resourceType = resourceDef.getName();
-
-			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 			SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
+
+			String resourceType = resourceDef.getName();
+			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
 
-			IBundleProvider search = mySearchCoordinatorSvc.registerSearch(callingDao, params, resourceType, new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-			theJobDetails.setCurrentSearchUuid(search.getUuid());
+			search = mySearchCoordinatorSvc.registerSearch(callingDao, params, resourceType, new CacheControlDirective(), null, RequestPartitionId.allPartitions());
+
+			if (isNull(search.getUuid())) {
+				// we don't have a search uuid i.e. we're setting up for synchronous processing
+				theJobDetails.setCurrentSearchUrl(nextSearchUrl);
+				theJobDetails.setCurrentOffset(params.getOffset());
+
+			} else {
+				// populate properties for asynchronous path
+				theJobDetails.setCurrentSearchUuid(search.getUuid());
+			}
+
 			theJobDetails.setCurrentSearchResourceType(resourceType);
 			theJobDetails.setCurrentSearchCount(params.getCount());
 			theJobDetails.setCurrentSearchLastUploadedIndex(-1);
 		}
 
-		// If we have an active search going, submit resources from it
+		// processing step for synchronous processing mode
+		if (isNotBlank(theJobDetails.getCurrentSearchUrl()) && totalSubmitted < myMaxSubmitPerPass) {
+			List<IBaseResource> allCurrentResources;
+
+			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
+
+			String searchUrl = theJobDetails.getCurrentSearchUrl();
+
+			ourLog.info("Triggered job [{}] - Starting synchronous processing at offset {} and index {}", theJobDetails.getJobId(), theJobDetails.getCurrentOffset(), fromIndex );
+
+			int submittableCount = myMaxSubmitPerPass - totalSubmitted;
+			int toIndex = fromIndex + submittableCount;
+
+			if (nonNull(search) && !search.isEmpty()) {
+
+				// we already have data from the initial step so process as much as we can.
+				ourLog.info("Triggered job[{}] will process up to {} resources", theJobDetails.getJobId(), toIndex);
+				allCurrentResources = search.getResources(0, toIndex);
+
+			} else {
+				if (theJobDetails.getCurrentSearchCount() != null) {
+					toIndex = Math.min(toIndex, theJobDetails.getCurrentSearchCount());
+				}
+
+				RuntimeResourceDefinition resourceDef = UrlUtil.parseUrlResourceType(myFhirContext, searchUrl);
+				String queryPart = searchUrl.substring(searchUrl.indexOf('?'));
+				SearchParameterMap params = myMatchUrlService.translateMatchUrl(queryPart, resourceDef);
+				int offset = theJobDetails.getCurrentOffset() + fromIndex;
+				params.setOffset(offset);
+				params.setCount(toIndex);
+
+				ourLog.info("Triggered job[{}] requesting {} resources from offset {}", theJobDetails.getJobId(), toIndex, offset);
+
+				search = mySearchService.executeQuery(resourceDef.getName(), params, RequestPartitionId.allPartitions());
+				allCurrentResources = search.getAllResources();
+			}
+
+			ourLog.info("Triggered job[{}] delivering {} resources", theJobDetails.getJobId(), allCurrentResources.size());
+			int highestIndexSubmitted = theJobDetails.getCurrentSearchLastUploadedIndex();
+
+
+			for (IBaseResource nextResource : allCurrentResources) {
+				Future<Void> future = submitResource(theJobDetails.getSubscriptionId(), nextResource);
+				futures.add(Pair.of(nextResource.getIdElement().getIdPart(), future));
+				totalSubmitted++;
+				highestIndexSubmitted++;
+			}
+
+			if (validateFuturesAndReturnTrueIfWeShouldAbort(futures)) {
+				return;
+			}
+
+			theJobDetails.setCurrentSearchLastUploadedIndex(highestIndexSubmitted);
+
+			ourLog.info("Triggered job[{}] lastUploadedIndex is {}", theJobDetails.getJobId(), theJobDetails.getCurrentSearchLastUploadedIndex());
+
+			if (allCurrentResources.isEmpty() || nonNull(theJobDetails.getCurrentSearchCount()) && toIndex >= theJobDetails.getCurrentSearchCount()) {
+				ourLog.info("Triggered job[{}] for search URL {} has completed ", theJobDetails.getJobId(), theJobDetails.getCurrentSearchUrl());
+				theJobDetails.setCurrentSearchResourceType(null);
+				theJobDetails.clearCurrentSearchUrl();
+				theJobDetails.setCurrentSearchLastUploadedIndex(-1);
+				theJobDetails.setCurrentSearchCount(null);
+			}
+
+		}
+
+		// processing step for asynchronous processing mode
 		if (isNotBlank(theJobDetails.getCurrentSearchUuid()) && totalSubmitted < myMaxSubmitPerPass) {
 			int fromIndex = theJobDetails.getCurrentSearchLastUploadedIndex() + 1;
 
@@ -276,6 +366,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ourLog.info("Subscription trigger job[{}] triggered {} resources in {}ms ({} res / second)", theJobDetails.getJobId(), totalSubmitted, sw.getMillis(), sw.getThroughput(totalSubmitted, TimeUnit.SECONDS));
 	}
 
+	private boolean isInitialStep(SubscriptionTriggeringJobDetails theJobDetails) {
+		return isBlank(theJobDetails.myCurrentSearchUuid) && isBlank(theJobDetails.myCurrentSearchUrl);
+	}
+
+	private boolean jobHasCompleted(SubscriptionTriggeringJobDetails theJobDetails){
+		return isInitialStep(theJobDetails);
+	}
+
 	private boolean validateFuturesAndReturnTrueIfWeShouldAbort(List<Pair<String, Future<Void>>> theIdToFutures) {
 
 		for (Pair<String, Future<Void>> next : theIdToFutures) {
@@ -298,7 +396,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private Future<Void> submitResource(String theSubscriptionId, String theResourceIdToTrigger) {
 		org.hl7.fhir.r4.model.IdType resourceId = new org.hl7.fhir.r4.model.IdType(theResourceIdToTrigger);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceId.getResourceType());
-		IBaseResource resourceToTrigger = dao.read(resourceId);
+		IBaseResource resourceToTrigger = dao.read(resourceId, SystemRequestDetails.forAllPartitions());
 
 		return submitResource(theSubscriptionId, resourceToTrigger);
 	}
@@ -317,7 +415,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 					break;
 				} catch (Exception e) {
 					if (i >= 3) {
-						throw new InternalErrorException(e);
+						throw new InternalErrorException(Msg.code(25) + e);
 					}
 
 					ourLog.warn("Exception while retriggering subscriptions (going to sleep and retry): {}", e.toString());
@@ -371,7 +469,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				} catch (InterruptedException theE) {
 					// Restore interrupted state...
 					Thread.currentThread().interrupt();
-					throw new RejectedExecutionException("Task " + theRunnable.toString() +
+					throw new RejectedExecutionException(Msg.code(26) + "Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
 				ourLog.info("Slot become available after {}ms", sw.getMillis());
@@ -417,9 +515,11 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		private List<String> myRemainingResourceIds;
 		private List<String> myRemainingSearchUrls;
 		private String myCurrentSearchUuid;
+		private String myCurrentSearchUrl;
 		private Integer myCurrentSearchCount;
 		private String myCurrentSearchResourceType;
 		private int myCurrentSearchLastUploadedIndex;
+		private int myCurrentOffset;
 
 		Integer getCurrentSearchCount() {
 			return myCurrentSearchCount;
@@ -477,12 +577,32 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			myCurrentSearchUuid = theCurrentSearchUuid;
 		}
 
+		public String getCurrentSearchUrl() {
+			return myCurrentSearchUrl;
+		}
+
+		public void setCurrentSearchUrl(String theCurrentSearchUrl) {
+			this.myCurrentSearchUrl = theCurrentSearchUrl;
+		}
+
 		int getCurrentSearchLastUploadedIndex() {
 			return myCurrentSearchLastUploadedIndex;
 		}
 
 		void setCurrentSearchLastUploadedIndex(int theCurrentSearchLastUploadedIndex) {
 			myCurrentSearchLastUploadedIndex = theCurrentSearchLastUploadedIndex;
+		}
+
+		public void clearCurrentSearchUrl(){
+			myCurrentSearchUrl = null;
+		}
+
+		public int getCurrentOffset(){
+			return myCurrentOffset;
+		}
+
+		public void setCurrentOffset(Integer theCurrentOffset) {
+			myCurrentOffset = ObjectUtils.defaultIfNull(theCurrentOffset, 0);
 		}
 	}
 

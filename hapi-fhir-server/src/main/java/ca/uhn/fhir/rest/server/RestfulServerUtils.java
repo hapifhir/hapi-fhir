@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -166,7 +167,7 @@ public class RestfulServerUtils {
 		// _elements
 		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
-			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
+			throw new InvalidRequestException(Msg.code(304) + "Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
 
 		// _elements:exclude
@@ -249,6 +250,13 @@ public class RestfulServerUtils {
 
 
 	public static String createLinkSelf(String theServerBase, RequestDetails theRequest) {
+		return createLinkSelfWithoutGivenParameters(theServerBase, theRequest, null);
+	}
+
+	/**
+	 * This function will create a self link but omit any parameters passed in via the excludedParameterNames list.
+	 */
+	public static String createLinkSelfWithoutGivenParameters(String theServerBase, RequestDetails theRequest, List<String> excludedParameterNames) {
 		StringBuilder b = new StringBuilder();
 		b.append(theServerBase);
 
@@ -265,21 +273,24 @@ public class RestfulServerUtils {
 			boolean first = true;
 			Map<String, String[]> parameters = theRequest.getParameters();
 			for (String nextParamName : new TreeSet<>(parameters.keySet())) {
-				for (String nextParamValue : parameters.get(nextParamName)) {
-					if (first) {
-						b.append('?');
-						first = false;
-					} else {
-						b.append('&');
+				if (excludedParameterNames == null || !excludedParameterNames.contains(nextParamName)) {
+					for (String nextParamValue : parameters.get(nextParamName)) {
+						if (first) {
+							b.append('?');
+							first = false;
+						} else {
+							b.append('&');
+						}
+						b.append(UrlUtil.escapeUrlParam(nextParamName));
+						b.append('=');
+						b.append(UrlUtil.escapeUrlParam(nextParamValue));
 					}
-					b.append(UrlUtil.escapeUrlParam(nextParamName));
-					b.append('=');
-					b.append(UrlUtil.escapeUrlParam(nextParamValue));
 				}
 			}
 		}
 
 		return b.toString();
+
 	}
 
 	public static String createOffsetPagingLink(BundleLinks theBundleLinks, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {
@@ -1015,7 +1026,7 @@ public class RestfulServerUtils {
 			try {
 				writer.append(((IDomainResource) theResource).getText().getDivAsString());
 			} catch (Exception e) {
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(305) + e);
 			}
 		} else {
 			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
@@ -1045,7 +1056,7 @@ public class RestfulServerUtils {
 
 	public static void validateResourceListNotNull(List<? extends IBaseResource> theResourceList) {
 		if (theResourceList == null) {
-			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
+			throw new InternalErrorException(Msg.code(306) + "IBundleProvider returned a null list of resources - This is not allowed");
 		}
 	}
 

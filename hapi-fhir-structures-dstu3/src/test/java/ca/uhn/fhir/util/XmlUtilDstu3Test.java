@@ -4,10 +4,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -81,9 +81,11 @@ public class XmlUtilDstu3Test {
 	public void testEncodePrettyPrint() throws IOException, SAXException, TransformerException {
 		String input = "<document><tag id=\"1\"/></document>";
 		Document parsed = XmlUtil.parseDocument(input);
-		String output = XmlUtil.encodeDocument(parsed, true);
+		String output = XmlUtil.encodeDocument(parsed, true)
+			.replace("\r\n", "\n")
+			.replaceAll("^ *", "");
 		assertEquals("<document>\n" +
-			"   <tag id=\"1\"/>\n" +
+			"<tag id=\"1\"/>\n" +
 			"</document>\n", output);
 	}
 
@@ -97,7 +99,7 @@ public class XmlUtilDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 	
 }

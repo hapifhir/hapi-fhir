@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2499
+title: "When using the _mdm parameter during Group Bulk Export, resources written out will now contain an extension with the
+   url `https://hapifhir.org/associated-patient-golden-resource/` identifying which golden resource the target resource belongs to."
+

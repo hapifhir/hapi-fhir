@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,15 +61,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
 		this.myCompartmentName = StringUtils.defaultIfBlank(search.compartmentName(), null);
 		this.myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-
-		Description desc = theMethod.getAnnotation(Description.class);
-		if (desc != null) {
-			if (isNotBlank(desc.formalDefinition())) {
-				myDescription = StringUtils.defaultIfBlank(desc.formalDefinition(), null);
-			} else {
-				myDescription = StringUtils.defaultIfBlank(desc.shortDefinition(), null);
-			}
-		}
+		this.myDescription = ParametersUtil.extractDescription(theMethod);
 
 		/*
 		 * Check for parameter combinations and names that are invalid
@@ -85,7 +79,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 				if (ALLOWED_PARAMS.contains(sp.getName())) {
 					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
 							sp.getName());
-					throw new ConfigurationException(msg);
+					throw new ConfigurationException(Msg.code(1442) + msg);
 				}
 			}
 
@@ -101,7 +95,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
 			String msg = theContext.getLocalizer().getMessage(getClass().getName() + ".idWithoutCompartment", theMethod.getName(), theMethod.getDeclaringClass());
-			throw new ConfigurationException(msg);
+			throw new ConfigurationException(Msg.code(1443) + msg);
 		}
 
 	}
@@ -193,7 +187,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theCompartmentName != null) {
 			if (theId == null || !theId.hasIdPart()) {
 				String msg = theContext.getLocalizer().getMessage(SearchMethodBinding.class.getName() + ".idNullForCompartmentSearch");
-				throw new InvalidRequestException(msg);
+				throw new InvalidRequestException(Msg.code(1444) + msg);
 			}
 			compartmentSearch = true;
 		}

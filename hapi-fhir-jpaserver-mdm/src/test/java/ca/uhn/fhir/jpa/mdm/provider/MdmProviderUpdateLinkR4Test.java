@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -34,7 +37,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
-		List<MdmLink> links = getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 		assertEquals(MdmLinkSourceEnum.AUTO, links.get(1).getLinkSource());
@@ -48,9 +51,55 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(1);
 
-		List<MdmLink> links = getPatientLinks();
+		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
+	}
+
+	@Test
+	public void testUpdateLinkMatchOnSamePartition() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Patient patient = createPatientAndUpdateLinksOnPartition(buildFrankPatient(), requestPartitionId);
+		StringType patientId = new StringType(patient.getIdElement().getValue());
+
+		Patient sourcePatient = getGoldenResourceFromTargetResource(patient);
+		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
+		saveLink(link);
+		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
+		assertLinkCount(2);
+		myMdmProvider.updateLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
+		assertLinkCount(2);
+
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
+		assertNotNull(links.get(0).getPartitionId());
+		assertEquals(1, links.get(0).getPartitionId().getPartitionId());
+	}
+
+	@Test
+	public void testUpdateLinkMatchOnDifferentPartitions() {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
+		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
+		RequestPartitionId requestPartitionId1 = RequestPartitionId.fromPartitionId(1);
+		RequestPartitionId requestPartitionId2 = RequestPartitionId.fromPartitionId(2);
+		Patient patient = createPatientOnPartition(buildFrankPatient(), true, false, requestPartitionId1);
+		StringType patientId = new StringType(patient.getIdElement().getValue());
+
+		Patient sourcePatient = createPatientOnPartition(buildJanePatient(), true, false, requestPartitionId2);
+		StringType sourcePatientId = new StringType(sourcePatient.getIdElement().getValue());
+		assertLinkCount(1);
+		try {
+			myMdmProvider.updateLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), endsWith("This operation is only available for resources on the same partition."));
+		}
 	}
 
 	@Test
@@ -63,7 +112,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), matchesPattern("Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
 		}
 	}
 
@@ -90,7 +139,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage(), matchesPattern("Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
+			assertThat(e.getMessage(), matchesPattern(Msg.code(1501) + "Requested resource Patient/\\d+/_history/1 is not the latest version.  Latest version is Patient/\\d+/_history/2"));
 		}
 	}
 
@@ -100,7 +149,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -110,14 +159,14 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testUpdateIllegalSecondArg() {
 		try {
-			myMdmProvider.updateLink(myPatientId, new StringType(""), NO_MATCH_RESULT, myRequestDetails);
+			myMdmProvider.updateLink(myVersionlessGodlenResourceId, new StringType(""), NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith(" must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource"));
@@ -140,7 +189,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, mySourcePatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), startsWith("No link"));
+			assertThat(e.getMessage(), startsWith(Msg.code(738) + "No link"));
 		}
 	}
 
@@ -151,8 +200,8 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(new StringType(patient.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			String expectedMessage = myMessageHelper.getMessageForUnmanagedResource();
-			assertEquals(expectedMessage, e.getMessage());
+			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getIdElement().getValue());
+			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
 		}
 	}
 
@@ -165,7 +214,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
+			assertEquals(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }

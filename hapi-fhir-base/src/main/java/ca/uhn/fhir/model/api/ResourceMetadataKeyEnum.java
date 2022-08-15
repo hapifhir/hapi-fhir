@@ -4,7 +4,7 @@ package ca.uhn.fhir.model.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -31,7 +32,11 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -386,7 +391,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			} else if (retValObj instanceof ExtensionDt) {
 				return (ExtensionDt) retValObj;
 			}
-			throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName()
+			throw new InternalErrorException(Msg.code(1890) + "Found an object of type '" + retValObj.getClass().getCanonicalName()
 				+ "' in resource metadata for key " + this.name() + " - Expected "
 				+ ExtensionDt.class.getCanonicalName());
 		}
@@ -409,7 +414,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof String) {
 			return theBinder.fromCodeString((String) retValObj);
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+		throw new InternalErrorException(Msg.code(1891) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 			+ InstantDt.class.getCanonicalName());
 	}
 
@@ -452,7 +457,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			}
 			return (InstantDt) retValObj;
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+		throw new InternalErrorException(Msg.code(1892) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 			+ InstantDt.class.getCanonicalName());
 	}
 
@@ -466,7 +471,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 			}
 			return (String) retValObj;
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+		throw new InternalErrorException(Msg.code(1893) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 			+ String.class.getCanonicalName());
 	}
 
@@ -486,7 +491,7 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		} else if (retValObj instanceof Number) {
 			return new IdDt(retValObj.toString());
 		}
-		throw new InternalErrorException("Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
+		throw new InternalErrorException(Msg.code(1894) + "Found an object of type '" + retValObj.getClass().getCanonicalName() + "' in resource metadata for key " + theKey.name() + " - Expected "
 			+ IdDt.class.getCanonicalName());
 	}
 

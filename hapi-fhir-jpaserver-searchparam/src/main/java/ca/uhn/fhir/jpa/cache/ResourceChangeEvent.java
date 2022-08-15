@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.cache;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,6 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 		myDeletedResourceIds = copyFrom(theDeletedResourceIds);
 	}
 
-	public static ResourceChangeEvent fromCreatedResourceIds(Collection<IIdType> theCreatedResourceIds) {
-		return new ResourceChangeEvent(theCreatedResourceIds, Collections.emptyList(), Collections.emptyList());
-	}
-
 	public static ResourceChangeEvent fromCreatedUpdatedDeletedResourceIds(List<IIdType> theCreatedResourceIds, List<IIdType> theUpdatedResourceIds, List<IIdType> theDeletedResourceIds) {
 		return new ResourceChangeEvent(theCreatedResourceIds, theUpdatedResourceIds, theDeletedResourceIds);
 	}
@@ -72,6 +68,7 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 		return myDeletedResourceIds;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return myCreatedResourceIds.isEmpty() && myUpdatedResourceIds.isEmpty() && myDeletedResourceIds.isEmpty();
 	}

@@ -1,8 +1,11 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang.WordUtils;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -67,11 +70,20 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 			
 			for (RuntimeSearchParam nextSearchParam : def.getSearchParams()) {
 				SearchParameter param = new SearchParameter(getVersion(), def.getName());
-				
+
+				List<RuntimeSearchParam> compositeOfParams = nextSearchParam
+					.getComponents()
+					.stream()
+					.map(t -> def.getSearchParams().stream().filter(y -> y.getUri().equals(t.getReference())).findFirst().orElseThrow(() -> new IllegalStateException()))
+					.collect(Collectors.toList());
+				if (nextSearchParam.getParamType() == RestSearchParameterTypeEnum.COMPOSITE && compositeOfParams.size() != 2) {
+					throw new IllegalStateException(Msg.code(163) + "Search param " + nextSearchParam.getName() + " on base " + nextSearchParam.getBase() + " has components: " + nextSearchParam.getComponents());
+				}
+
 				param.setName(nextSearchParam.getName());
 				param.setDescription(nextSearchParam.getDescription());
-				param.setCompositeOf(toCompositeOfStrings(nextSearchParam.getCompositeOf()));
-				param.setCompositeTypes(toCompositeOfTypes(nextSearchParam.getCompositeOf()));
+				param.setCompositeOf(toCompositeOfStrings(compositeOfParams));
+				param.setCompositeTypes(toCompositeOfTypes(compositeOfParams));
 				param.setPath(nextSearchParam.getPath());
 				param.setType(nextSearchParam.getParamType().getCode());
 				

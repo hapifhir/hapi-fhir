@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2695
+backport: 5.4.1
+title: "Bulk import batch jobs are now activated in a local scheduled task, making bulk import
+   jobs better able to take advantage of large clusters."

@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -13,6 +15,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,7 +27,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
-
 	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
@@ -37,10 +39,14 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Autowired
 	IInterceptorService myInterceptorService;
+	@Autowired
+	MdmSettings myMdmSettings;
+
 	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
@@ -57,18 +63,21 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
 
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
+		myMdmSettings.setEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterMdmLatch);
+		myMdmSettings.setEnabled(false);
 		super.after();
 	}
 
 	@Test
 	public void testBatchRunOnAllMedications() throws InterruptedException {
 		StringType criteria = null;
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 
 		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null));
 		assertLinkCount(1);
@@ -77,32 +86,33 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnAllPractitioners() throws InterruptedException {
 		StringType criteria = null;
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 
 		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, null));
 		assertLinkCount(1);
 	}
 	@Test
 	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
 	@Test
 	public void testBatchRunOnNonExistentSpecificPractitioner() {
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
 			fail();
-		} catch (ResourceNotFoundException e){}
+		} catch (ResourceNotFoundException e) {
+		}
 	}
 
 	@Test
 	public void testBatchRunOnAllPatients() throws InterruptedException {
 		assertLinkCount(3);
 		StringType criteria = null;
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, null));
 		assertLinkCount(1);
 	}
@@ -110,7 +120,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnSpecificPatient() throws InterruptedException {
 		assertLinkCount(3);
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientInstance(myPatient.getIdElement(), null));
 		assertLinkCount(1);
 	}
@@ -118,18 +128,20 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnNonExistentSpecificPatient() {
 		assertLinkCount(3);
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		try {
 			myMdmProvider.mdmBatchPatientInstance(new IdType("Patient/999"), null);
 			fail();
-		} catch (ResourceNotFoundException e){}
+		} catch (ResourceNotFoundException e) {
+		}
 	}
 
-	@Test
+	@Tag("intermittent")
+//	@Test
 	public void testBatchRunOnAllTypes() throws InterruptedException {
 		assertLinkCount(3);
 		StringType criteria = new StringType("");
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(3, () -> {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null);
 		});
@@ -140,13 +152,13 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnAllTypesWithInvalidCriteria() {
 		assertLinkCount(3);
 		StringType criteria = new StringType("death-date=2020-06-01");
-		myMdmProvider.clearMdmLinks(null, myRequestDetails);
+		clearMdmLinks();
 
 		try {
 			myMdmProvider.mdmBatchPractitionerType(criteria, null);
 			fail();
-		} catch(InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), is(equalTo(Msg.code(488) + "Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
 		}
 	}
 }

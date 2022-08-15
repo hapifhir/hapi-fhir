@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -128,7 +129,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 				Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
 
 				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-					throw new IllegalStateException("Can't change to LOADING because state is " + theSearch.getStatus());
+					throw new IllegalStateException(Msg.code(1167) + "Can't change to LOADING because state is " + theSearch.getStatus());
 				}
 				search.setStatus(SearchStatusEnum.LOADING);
 				Search newSearch = mySearchDao.save(search);

@@ -1,0 +1,7 @@
+---
+type: perf
+backport: 5.4.2
+issue: 2717
+title: "FHIR transactions in the JPA server that perform writes will now aggressively pre-fetch as many entities
+   as possible at the very start of transaction processing. This can drastically reduce the number of
+   round-trips, especially as the number of resources in a transaction gets bigger."

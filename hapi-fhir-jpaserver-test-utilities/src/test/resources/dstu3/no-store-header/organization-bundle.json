@@ -1,0 +1,469 @@
+{
+	"resourceType": "Bundle",
+	"id": "PROD-DEMO-DATA",
+	"type": "batch",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "O182901",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:16:08.324-04:00"
+				},
+				"extension": [
+					{
+						"url": "Organization#effectiveDate",
+						"valueDate": "2006-03-31"
+					},
+					{
+						"url": "Organization#timeZoneId",
+						"valueString": "America/New_York"
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "XX",
+									"display": "Organization identifier"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.1.1",
+						"value": "O182901"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "NPI",
+									"display": "National provider identifier"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "112323111"
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ECCInstance",
+								"code": "C",
+								"display": "Instance C"
+							}
+						],
+						"text": "Instance C"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+								"code": "DL",
+								"display": "Dialysis Location"
+							}
+						],
+						"text": "Dialysis Location"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgOwnershipType",
+								"code": "JOINT VENTURE",
+								"display": "JOINT VENTURE"
+							}
+						],
+						"text": "JOINT VENTURE"
+					}
+				],
+				"name": "Demo Clinic A",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-000-0001"
+					},
+					{
+						"system": "fax",
+						"value": "800-000-0001"
+					}
+				],
+				"address": [
+					{
+						"type": "physical",
+						"line": [
+							"test st3"
+						],
+						"city": "Cleveland",
+						"district": "test district1",
+						"state": "OH",
+						"postalCode": "02130"
+					},
+					{
+						"type": "postal",
+						"line": [
+							"test st3"
+						],
+						"city": "CLEVELAND",
+						"district": "test district1",
+						"state": "OH",
+						"postalCode": "02130"
+					}
+				],
+				"contact": [
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "ADMIN",
+									"display": "Administrative"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationAdminthree",
+							"given": [
+								"Demo Clinic A"
+							]
+						}
+					},
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "MEDICAL_DIR_INCENTER",
+									"display": "MEDICAL DIRECTOR INCENTER"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationOne",
+							"given": [
+								"test1"
+							]
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Organization/O182901"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "O182902",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:16:09.599-04:00"
+				},
+				"extension": [
+					{
+						"url": "Organization#effectiveDate",
+						"valueDate": "2006-03-31"
+					},
+					{
+						"url": "Organization#timeZoneId",
+						"valueString": "America/New_York"
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "XX",
+									"display": "Organization identifier"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.1.1",
+						"value": "O182902"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "NPI",
+									"display": "National provider identifier"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "112323222"
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ECCInstance",
+								"code": "C",
+								"display": "Instance C"
+							}
+						],
+						"text": "Instance C"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+								"code": "DL",
+								"display": "Dialysis Location"
+							}
+						],
+						"text": "Dialysis Location"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgOwnershipType",
+								"code": "JOINT VENTURE",
+								"display": "JOINT VENTURE"
+							}
+						],
+						"text": "JOINT VENTURE"
+					}
+				],
+				"name": "Demo Clinic B",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-000-0002"
+					},
+					{
+						"system": "fax",
+						"value": "800-000-0002"
+					}
+				],
+				"address": [
+					{
+						"type": "physical",
+						"line": [
+							"test st2"
+						],
+						"city": "Cleveland",
+						"district": "test district2",
+						"state": "OH",
+						"postalCode": "02130"
+					},
+					{
+						"type": "postal",
+						"line": [
+							"test st2"
+						],
+						"city": "CLEVELAND",
+						"district": "test district2",
+						"state": "OH",
+						"postalCode": "02130"
+					}
+				],
+				"contact": [
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "ADMIN",
+									"display": "Administrative"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationAdminthree",
+							"given": [
+								"Demo Clinic B"
+							]
+						}
+					},
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "MEDICAL_DIR_INCENTER",
+									"display": "MEDICAL DIRECTOR INCENTER"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationTwo",
+							"given": [
+								"test2"
+							]
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Organization/O182902"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "O182903",
+				"meta": {
+					"versionId": "1",
+					"lastUpdated": "2019-03-23T11:16:09.643-04:00"
+				},
+				"extension": [
+					{
+						"url": "Organization#effectiveDate",
+						"valueDate": "2006-03-31"
+					},
+					{
+						"url": "Organization#timeZoneId",
+						"valueString": "America/New_York"
+					}
+				],
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "XX",
+									"display": "Organization identifier"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.3.7418.1.1",
+						"value": "O182903"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/v2/0203",
+									"code": "NPI",
+									"display": "National provider identifier"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "112323333"
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/ECCInstance",
+								"code": "C",
+								"display": "Instance C"
+							}
+						],
+						"text": "Instance C"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgHierarchy",
+								"code": "DL",
+								"display": "Dialysis Location"
+							}
+						],
+						"text": "Dialysis Location"
+					},
+					{
+						"coding": [
+							{
+								"system": "http://mydomain.org/fhir/cs/OrgOwnershipType",
+								"code": "JOINT VENTURE",
+								"display": "JOINT VENTURE"
+							}
+						],
+						"text": "JOINT VENTURE"
+					}
+				],
+				"name": "Demo Clinic C",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "800-000-0003"
+					},
+					{
+						"system": "fax",
+						"value": "800-000-0003"
+					}
+				],
+				"address": [
+					{
+						"type": "physical",
+						"line": [
+							"test st3"
+						],
+						"city": "Cleveland",
+						"district": "test district3",
+						"state": "OH",
+						"postalCode": "02130"
+					},
+					{
+						"type": "postal",
+						"line": [
+							"test st3"
+						],
+						"city": "CLEVELAND",
+						"district": "test district3",
+						"state": "OH",
+						"postalCode": "02130"
+					}
+				],
+				"contact": [
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "ADMIN",
+									"display": "Administrative"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationAdminthree",
+							"given": [
+								"Demo Clinic C"
+							]
+						}
+					},
+					{
+						"purpose": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/contactentity-type",
+									"code": "MEDICAL_DIR_INCENTER",
+									"display": "MEDICAL DIRECTOR INCENTER"
+								}
+							]
+						},
+						"name": {
+							"family": "OrganizationThree",
+							"given": [
+								"test3"
+							]
+						}
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Organization/O182903"
+			}
+		}
+	]
+}

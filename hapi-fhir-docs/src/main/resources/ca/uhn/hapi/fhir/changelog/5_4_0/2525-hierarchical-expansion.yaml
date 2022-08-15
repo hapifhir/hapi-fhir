@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2525
+title: "A new optional parameter has been added to the `ValueSet/$expand` operation. When provided a value of `true`, the
+  operation will include the concept hierarchy in the expansion response."
+

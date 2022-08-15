@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3295
+title: "When $mdm-clear operation batch was split into multiple threads, ResourceVersionConflictExceptions were being
+   thrown. This issue has been fixed."

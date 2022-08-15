@@ -1,0 +1,4 @@
+type: add
+issue: 3557
+jira: SMILE-4062
+title: "Group Bulk Export (e.g. Group/123/$export)  now additionally supports Organization and Practitioner as valid _type parameters. This works internally by querying using a `_has` parameter"

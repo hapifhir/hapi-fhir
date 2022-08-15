@@ -1,0 +1,3 @@
+type: add
+issue: 3521
+title: "Added a helper method to BundleUtil, to support the creation of a new bundle entry and to set the value for one of the fields."

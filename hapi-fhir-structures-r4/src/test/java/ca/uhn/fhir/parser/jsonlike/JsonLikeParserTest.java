@@ -28,10 +28,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,7 +98,7 @@ public class JsonLikeParserTest {
 		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
 	
 	}
-	
+
 	/**
 	 * Repeat the "View" tests with custom JSON-Like structure
 	 */
@@ -154,7 +154,7 @@ public class JsonLikeParserTest {
 	
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 	
 	
@@ -537,8 +537,8 @@ public class JsonLikeParserTest {
 			}
 
 			@Override
-			public Set<String> keySet() {
-				return nativeObject.keySet();
+			public Iterator<String> keyIterator() {
+				return nativeObject.keySet().iterator();
 			}
 
 			@Override

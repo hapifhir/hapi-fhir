@@ -17,7 +17,7 @@ public class DateTypeTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@Test
@@ -44,12 +44,12 @@ public class DateTypeTest {
 		try {
 			new DateType(1974, 2, 0);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+			assertEquals("theDay must be between 1 and 31", e.getMessage());
 		}
 		try {
 			new DateType(1974, 2, 32);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+			assertEquals("theDay must be between 1 and 31", e.getMessage());
 		}
 		new DateType(1974, 1, 31);
 	}

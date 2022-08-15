@@ -31,7 +31,7 @@
     title: "JSON parser no longer allows the resource ID to be specified in an element called \"_id\" (the correct one is \"id\"). Previously _id was allowed because some early FHIR examples used that form, but this was never actually valid so it is now being removed."
 - item:
     type: "add"
-    title: "JPA server now allows \"forced IDs\" (ids containing non-numeric, client assigned IDs) to use the same logical ID part on different resource types. E.g. A server may now have both Patient/foo and Obervation/foo on the same server. <br/><br/> Note that existing databases will need to modify index \"IDX_FORCEDID\" as it is no longer unique, and perform a reindexing pass."
+    title: "JPA server now allows \"forced IDs\" (ids containing non-numeric, client assigned IDs) to use the same logical ID part on different resource types. E.g. A server may now have both Patient/foo and Observation/foo on the same server. <br/><br/> Note that existing databases will need to modify index \"IDX_FORCEDID\" as it is no longer unique, and perform a reindexing pass."
 - item:
     issue: "350"
     type: "fix"

@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.common.retrieve;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.fhir.retrieve.SearchParamFhirRetrieveProvider;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterMap;
@@ -45,21 +46,23 @@ import java.util.stream.Collectors;
 @Component
 public class JpaFhirRetrieveProvider extends SearchParamFhirRetrieveProvider {
 
-    private static final Logger logger = LoggerFactory.getLogger(JpaFhirRetrieveProvider.class);
+	private static final Logger logger = LoggerFactory.getLogger(JpaFhirRetrieveProvider.class);
 
-    DaoRegistry registry;
+	private final DaoRegistry registry;
+	private final RequestDetails myRequestDetails;
 
-    @Autowired
-    public JpaFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver) {
-        super(searchParameterResolver);
-        this.registry = registry;
-    }
+	@Autowired
+	public JpaFhirRetrieveProvider(DaoRegistry registry, SearchParameterResolver searchParameterResolver, RequestDetails theRequestDetails) {
+		super(searchParameterResolver);
+		this.registry = registry;
+		myRequestDetails = theRequestDetails;
+	}
 
-    @Override
-    protected Iterable<Object> executeQueries(String dataType, List<SearchParameterMap> queries) {
-        if (queries == null || queries.isEmpty()) {
-            return Collections.emptyList();
-        }
+	@Override
+	protected Iterable<Object> executeQueries(String dataType, List<SearchParameterMap> queries) {
+		if (queries == null || queries.isEmpty()) {
+			return Collections.emptyList();
+		}
 
         List<Object> objects = new ArrayList<>();
         for (SearchParameterMap map : queries) {
@@ -72,7 +75,7 @@ public class JpaFhirRetrieveProvider extends SearchParamFhirRetrieveProvider {
     protected Collection<Object> executeQuery(String dataType, SearchParameterMap map) {
         // TODO: Once HAPI breaks this out from the server dependencies
         // we can include it on its own.
-        ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = new ca.uhn.fhir.jpa.searchparam.SearchParameterMap();
+        ca.uhn.fhir.jpa.searchparam.SearchParameterMap hapiMap = ca.uhn.fhir.jpa.searchparam.SearchParameterMap.newSynchronous();
         try {
 
             Method[] methods = hapiMap.getClass().getDeclaredMethods();
@@ -91,14 +94,11 @@ public class JpaFhirRetrieveProvider extends SearchParamFhirRetrieveProvider {
 
         IFhirResourceDao<?> dao = this.registry.getResourceDao(dataType);
 
-        IBundleProvider bundleProvider = dao.search(hapiMap);
+		 IBundleProvider bundleProvider = dao.search(hapiMap, myRequestDetails);
         if (bundleProvider.size() == null) {
             return resolveResourceList(bundleProvider.getResources(0, 10000));
         }
-        if (bundleProvider.size() == 0) {
-            return new ArrayList<>();
-        }
-        List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
+        List<IBaseResource> resourceList = bundleProvider.getAllResources();
         return resolveResourceList(resourceList);
     }
 

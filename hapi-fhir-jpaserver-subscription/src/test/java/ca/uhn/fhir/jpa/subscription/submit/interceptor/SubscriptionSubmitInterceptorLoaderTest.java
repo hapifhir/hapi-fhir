@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -53,6 +54,8 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
+	@MockBean
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	/**
 	 * It should be possible to run only the {@link SubscriptionSubmitterConfig} without the

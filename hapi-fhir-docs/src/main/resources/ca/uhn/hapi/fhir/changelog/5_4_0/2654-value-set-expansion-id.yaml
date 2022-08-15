@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2654
+title: "The id of ValueSet resources in ValueSet expansions was null.  This has been corrected.  The id of the expanded
+value set is now the same as the id of the value set that was expanded."

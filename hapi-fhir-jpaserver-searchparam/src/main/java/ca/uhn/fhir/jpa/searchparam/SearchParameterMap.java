@@ -13,14 +13,18 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.util.ObjectUtil;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +38,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -41,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,13 +65,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class SearchParameterMap implements Serializable {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 	public static final Integer INTEGER_0 = 0;
-
-	private final HashMap<String, List<List<IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
 	private static final long serialVersionUID = 1L;
-
+	private final HashMap<String, List<List<IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
 	private Integer myCount;
 	private Integer myOffset;
 	private EverythingModeEnum myEverythingMode = null;
@@ -81,7 +85,7 @@ public class SearchParameterMap implements Serializable {
 	private Integer myLastNMax;
 	private boolean myDeleteExpunge;
 	private SearchContainedModeEnum mySearchContainedMode = SearchContainedModeEnum.FALSE;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -94,6 +98,44 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public SearchParameterMap(String theName, IQueryParameterType theParam) {
 		add(theName, theParam);
+	}
+
+	/**
+	 * Creates and returns a copy of this map
+	 */
+	@JsonIgnore
+	@Override
+	public SearchParameterMap clone() {
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSummaryMode(getSummaryMode());
+		map.setSort(getSort());
+		map.setSearchTotalMode(getSearchTotalMode());
+		map.setRevIncludes(getRevIncludes());
+		map.setIncludes(getIncludes());
+		map.setEverythingMode(getEverythingMode());
+		map.setCount(getCount());
+		map.setDeleteExpunge(isDeleteExpunge());
+		map.setLastN(isLastN());
+		map.setLastNMax(getLastNMax());
+		map.setLastUpdated(getLastUpdated());
+		map.setLoadSynchronous(isLoadSynchronous());
+		map.setNearDistanceParam(getNearDistanceParam());
+		map.setLoadSynchronousUpTo(getLoadSynchronousUpTo());
+		map.setOffset(getOffset());
+		map.setSearchContainedMode(getSearchContainedMode());
+
+		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : mySearchParameterMap.entrySet()) {
+			List<List<IQueryParameterType>> andParams = entry.getValue();
+			List<List<IQueryParameterType>> newAndParams = new ArrayList<>();
+			for (List<IQueryParameterType> orParams : andParams) {
+				List<IQueryParameterType> newOrParams = new ArrayList<>(orParams);
+				newAndParams.add(newOrParams);
+			}
+			map.put(entry.getKey(), newAndParams);
+		}
+
+
+		return map;
 	}
 
 	public SummaryEnum getSummaryMode() {
@@ -117,9 +159,9 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	public void add(String theName, IQueryParameterAnd<?> theAnd) {
+	public SearchParameterMap add(String theName, IQueryParameterAnd<?> theAnd) {
 		if (theAnd == null) {
-			return;
+			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
@@ -131,17 +173,19 @@ public class SearchParameterMap implements Serializable {
 			}
 			get(theName).add((List<IQueryParameterType>) next.getValuesAsQueryTokens());
 		}
+		return this;
 	}
 
-	public void add(String theName, IQueryParameterOr<?> theOr) {
+	public SearchParameterMap add(String theName, IQueryParameterOr<?> theOr) {
 		if (theOr == null) {
-			return;
+			return this;
 		}
 		if (!containsKey(theName)) {
 			put(theName, new ArrayList<>());
 		}
 
 		get(theName).add((List<IQueryParameterType>) theOr.getValuesAsQueryTokens());
+		return this;
 	}
 
 	public Collection<List<List<IQueryParameterType>>> values() {
@@ -169,12 +213,13 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	private void addLastUpdateParam(StringBuilder b, DateParam date) {
-		if (date != null && isNotBlank(date.getValueAsString())) {
-			addUrlParamSeparator(b);
-			b.append(Constants.PARAM_LASTUPDATED);
-			b.append('=');
-			b.append(date.getValueAsString());
+	private void addLastUpdateParam(StringBuilder theBuilder, ParamPrefixEnum thePrefix, DateParam theDateParam) {
+		if (theDateParam != null && isNotBlank(theDateParam.getValueAsString())) {
+			addUrlParamSeparator(theBuilder);
+			theBuilder.append(Constants.PARAM_LASTUPDATED);
+			theBuilder.append('=');
+			theBuilder.append(thePrefix.getValue());
+			theBuilder.append(theDateParam.getValueAsString());
 		}
 	}
 
@@ -190,6 +235,9 @@ public class SearchParameterMap implements Serializable {
 		for (Include nextInclude : list) {
 			addUrlParamSeparator(b);
 			b.append(paramName);
+			if (nextInclude.isRecurse()) {
+				b.append(Constants.PARAM_INCLUDE_QUALIFIER_RECURSE);
+			}
 			b.append('=');
 			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 			b.append(':');
@@ -213,8 +261,9 @@ public class SearchParameterMap implements Serializable {
 		return myCount;
 	}
 
-	public void setCount(Integer theCount) {
+	public SearchParameterMap setCount(Integer theCount) {
 		myCount = theCount;
+		return this;
 	}
 
 	public Integer getOffset() {
@@ -394,11 +443,8 @@ public class SearchParameterMap implements Serializable {
 			for (List<? extends IQueryParameterType> nextValuesAndIn : nextValuesAndsIn) {
 
 				List<IQueryParameterType> nextValuesOrsOut = new ArrayList<>();
-				for (IQueryParameterType nextValueOrIn : nextValuesAndIn) {
-					if (nextValueOrIn.getMissing() != null || isNotBlank(nextValueOrIn.getValueAsQueryToken(theCtx))) {
-						nextValuesOrsOut.add(nextValueOrIn);
-					}
-				}
+
+				nextValuesOrsOut.addAll(nextValuesAndIn);
 
 				nextValuesOrsOut.sort(new QueryParameterTypeComparator(theCtx));
 
@@ -467,14 +513,21 @@ public class SearchParameterMap implements Serializable {
 			sort = sort.getChain();
 		}
 
-		addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
+		if (hasIncludes()) {
+			addUrlIncludeParams(b, Constants.PARAM_INCLUDE, getIncludes());
+		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
 		if (getLastUpdated() != null) {
 			DateParam lb = getLastUpdated().getLowerBound();
-			addLastUpdateParam(b, lb);
 			DateParam ub = getLastUpdated().getUpperBound();
-			addLastUpdateParam(b, ub);
+
+			if (isNotEqualsComparator(lb, ub)) {
+				addLastUpdateParam(b, NOT_EQUAL, getLastUpdated().getLowerBound());
+			} else {
+				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
+				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+			}
 		}
 
 		if (getCount() != null) {
@@ -507,6 +560,15 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchTotalMode().getCode());
 		}
 
+		//Contained mode
+		//For some reason, instead of null here, we default to false. That said, ommitting it is identical to setting it to false.
+		if (getSearchContainedMode() != SearchContainedModeEnum.FALSE) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_CONTAINED);
+			b.append("=");
+			b.append(getSearchContainedMode().getCode());
+		}
+
 		if (b.length() == 0) {
 			b.append('?');
 		}
@@ -514,13 +576,24 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
+	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
+		return theLowerBound != null && theUpperBound != null && theLowerBound.getPrefix().equals(NOT_EQUAL) && theUpperBound.getPrefix().equals(NOT_EQUAL);
+	}
+
+	/**
+	 * @since 5.5.0
+	 */
+	public boolean hasIncludes() {
+		return myIncludes != null && !myIncludes.isEmpty();
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		if (isEmpty() == false) {
+		if (!isEmpty()) {
 			b.append("params", mySearchParameterMap);
 		}
-		if (getIncludes().isEmpty() == false) {
+		if (!getIncludes().isEmpty()) {
 			b.append("includes", getIncludes());
 		}
 		return b.toString();
@@ -555,12 +628,12 @@ public class SearchParameterMap implements Serializable {
 		theAndOrParams.removeIf(List::isEmpty);
 	}
 
-	public void setNearDistanceParam(QuantityParam theQuantityParam) {
-		myNearDistanceParam = theQuantityParam;
-	}
-
 	public QuantityParam getNearDistanceParam() {
 		return myNearDistanceParam;
+	}
+
+	public void setNearDistanceParam(QuantityParam theQuantityParam) {
+		myNearDistanceParam = theQuantityParam;
 	}
 
 	public boolean isWantOnlyCount() {
@@ -574,6 +647,144 @@ public class SearchParameterMap implements Serializable {
 	public SearchParameterMap setDeleteExpunge(boolean theDeleteExpunge) {
 		myDeleteExpunge = theDeleteExpunge;
 		return this;
+	}
+
+	public List<List<IQueryParameterType>> get(String theName) {
+		return mySearchParameterMap.get(theName);
+	}
+
+	public void put(String theName, List<List<IQueryParameterType>> theParams) {
+		mySearchParameterMap.put(theName, theParams);
+	}
+
+	public boolean containsKey(String theName) {
+		return mySearchParameterMap.containsKey(theName);
+	}
+
+	public Set<String> keySet() {
+		return mySearchParameterMap.keySet();
+	}
+
+	public boolean isEmpty() {
+		return mySearchParameterMap.isEmpty();
+	}
+
+	// Wrapper methods
+
+	public Set<Map.Entry<String, List<List<IQueryParameterType>>>> entrySet() {
+		return mySearchParameterMap.entrySet();
+	}
+
+	public List<List<IQueryParameterType>> remove(String theName) {
+		return mySearchParameterMap.remove(theName);
+	}
+
+	/**
+	 * Variant of removeByNameAndModifier for unmodified params.
+	 *
+	 * @param theName the query parameter key
+	 * @return an And/Or List of Query Parameters matching the name with no modifier.
+	 */
+	public List<List<IQueryParameterType>> removeByNameUnmodified(String theName) {
+		return this.removeByNameAndModifier(theName, "");
+	}
+
+	/**
+	 * Given a search parameter name and modifier (e.g. :text),
+	 * get and remove all Search Parameters matching this name and modifier
+	 *
+	 * @param theName     the query parameter key
+	 * @param theModifier the qualifier you want to remove - nullable for unmodified params.
+	 * @return an And/Or List of Query Parameters matching the qualifier.
+	 */
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, String theModifier) {
+		theModifier = StringUtils.defaultString(theModifier, "");
+
+		List<List<IQueryParameterType>> remainderParameters = new ArrayList<>();
+		List<List<IQueryParameterType>> matchingParameters = new ArrayList<>();
+
+		// pull all of them out, partition by match against the qualifier
+		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
+		if (andList != null) {
+			for (List<IQueryParameterType> orList : andList) {
+				if (!orList.isEmpty() &&
+					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+						.equals(theModifier)) {
+					matchingParameters.add(orList);
+				} else {
+					remainderParameters.add(orList);
+				}
+			}
+		}
+
+		// put the unmatched back in.
+		if (!remainderParameters.isEmpty()) {
+			mySearchParameterMap.put(theName, remainderParameters);
+		}
+		return matchingParameters;
+
+	}
+
+	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, @Nonnull TokenParamModifier theModifier) {
+		return removeByNameAndModifier(theName, theModifier.getValue());
+	}
+
+	/**
+	 * For each search parameter in the map, extract any which have the given qualifier.
+	 * e.g. Take the url: Observation?code:text=abc&code=123&code:text=def&reason:text=somereason
+	 * <p>
+	 * If we call this function with `:text`, it will return a map that looks like:
+	 * <p>
+	 * code -> [[code:text=abc], [code:text=def]]
+	 * reason -> [[reason:text=somereason]]
+	 * <p>
+	 * and the remaining search parameters in the map will be:
+	 * <p>
+	 * code -> [[code=123]]
+	 *
+	 * @param theQualifier
+	 * @return
+	 */
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(String theQualifier) {
+
+		Map<String, List<List<IQueryParameterType>>> retVal = new HashMap<>();
+		Set<String> parameterNames = mySearchParameterMap.keySet();
+		for (String parameterName : parameterNames) {
+			List<List<IQueryParameterType>> paramsWithQualifier = removeByNameAndModifier(parameterName, theQualifier);
+			retVal.put(parameterName, paramsWithQualifier);
+		}
+
+		return retVal;
+
+	}
+
+	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(@Nonnull TokenParamModifier theModifier) {
+		return removeByQualifier(theModifier.getValue());
+	}
+
+	public int size() {
+		return mySearchParameterMap.size();
+	}
+
+	public SearchContainedModeEnum getSearchContainedMode() {
+		return mySearchContainedMode;
+	}
+
+	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
+		if (theSearchContainedMode == null) {
+			mySearchContainedMode = SearchContainedModeEnum.FALSE;
+		} else {
+			this.mySearchContainedMode = theSearchContainedMode;
+		}
+	}
+
+	/**
+	 * Returns true if {@link #getOffset()} and {@link #getCount()} both return a non null response
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isOffsetQuery() {
+		return getOffset() != null && getCount() != null;
 	}
 
 	public enum EverythingModeEnum {
@@ -609,6 +820,30 @@ public class SearchParameterMap implements Serializable {
 		public boolean isPatient() {
 			return myPatient;
 		}
+	}
+
+	static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
+		CompareToBuilder b = new CompareToBuilder();
+		b.append(theO1.getMissing(), theO2.getMissing());
+		b.append(theO1.getQueryParameterQualifier(), theO2.getQueryParameterQualifier());
+		if (b.toComparison() == 0) {
+			b.append(theO1.getValueAsQueryToken(theCtx), theO2.getValueAsQueryToken(theCtx));
+		}
+
+		return b.toComparison();
+	}
+
+	public static SearchParameterMap newSynchronous() {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		return retVal;
+	}
+
+	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
+		SearchParameterMap retVal = new SearchParameterMap();
+		retVal.setLoadSynchronous(true);
+		retVal.add(theName, theParam);
+		return retVal;
 	}
 
 	public static class IncludeComparator implements Comparator<Include> {
@@ -657,96 +892,5 @@ public class SearchParameterMap implements Serializable {
 
 	}
 
-	private static int compare(FhirContext theCtx, IQueryParameterType theO1, IQueryParameterType theO2) {
-		int retVal;
-		if (theO1.getMissing() == null && theO2.getMissing() == null) {
-			retVal = 0;
-		} else if (theO1.getMissing() == null) {
-			retVal = -1;
-		} else if (theO2.getMissing() == null) {
-			retVal = 1;
-		} else if (ObjectUtil.equals(theO1.getMissing(), theO2.getMissing())) {
-			retVal = 0;
-		} else {
-			if (theO1.getMissing()) {
-				retVal = 1;
-			} else {
-				retVal = -1;
-			}
-		}
 
-		if (retVal == 0) {
-			String q1 = theO1.getQueryParameterQualifier();
-			String q2 = theO2.getQueryParameterQualifier();
-			retVal = StringUtils.compare(q1, q2);
-		}
-
-		if (retVal == 0) {
-			String v1 = theO1.getValueAsQueryToken(theCtx);
-			String v2 = theO2.getValueAsQueryToken(theCtx);
-			retVal = StringUtils.compare(v1, v2);
-		}
-		return retVal;
-	}
-
-	// Wrapper methods
-
-	public List<List<IQueryParameterType>> get(String theName) {
-		return mySearchParameterMap.get(theName);
-	}
-
-	public void put(String theName, List<List<IQueryParameterType>> theParams) {
-		mySearchParameterMap.put(theName, theParams);
-	}
-
-	public boolean containsKey(String theName) {
-		return mySearchParameterMap.containsKey(theName);
-	}
-
-	public Set<String> keySet() {
-		return mySearchParameterMap.keySet();
-	}
-
-	public boolean isEmpty() {
-		return mySearchParameterMap.isEmpty();
-	}
-
-	public Set<Map.Entry<String, List<List<IQueryParameterType>>>> entrySet() {
-		return mySearchParameterMap.entrySet();
-	}
-
-	public List<List<IQueryParameterType>> remove(String theName) {
-		return mySearchParameterMap.remove(theName);
-	}
-
-	public int size() {
-		return mySearchParameterMap.size();
-	}
-
-	public static SearchParameterMap newSynchronous() {
-		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronous(true);
-		return retVal;
-	}
-
-	public static SearchParameterMap newSynchronous(String theName, IQueryParameterType theParam) {
-		SearchParameterMap retVal = new SearchParameterMap();
-		retVal.setLoadSynchronous(true);
-		retVal.add(theName, theParam);
-		return retVal;
-	}
-
-	public SearchContainedModeEnum getSearchContainedMode() {
-		return mySearchContainedMode;
-	}
-
-	public void setSearchContainedMode(SearchContainedModeEnum theSearchContainedMode) {
-		if (theSearchContainedMode == null) {
-			mySearchContainedMode = SearchContainedModeEnum.FALSE;
-		} else {
-			this.mySearchContainedMode = theSearchContainedMode;
-		}
-	}
-
-	
 }

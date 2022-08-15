@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.common.provider;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,19 @@ package ca.uhn.fhir.cql.common.provider;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 
 // TODO: This interface is a partial duplicate of the provider factory interface
 // in the cql service layer. We need another round of refactoring to consolidate that.
 public interface EvaluationProviderFactory {
-	public DataProvider createDataProvider(String model, String version);
+	DataProvider createDataProvider(String model, String version, RequestDetails theRequestDetails);
 
-	public DataProvider createDataProvider(String model, String version, String url, String user, String pass);
+	DataProvider createDataProvider(String model, String version, String url, String user, String pass, RequestDetails theRequestDetails);
 
-	public DataProvider createDataProvider(String model, String version, TerminologyProvider terminologyProvider);
+	DataProvider createDataProvider(String model, String version, TerminologyProvider terminologyProvider, RequestDetails theRequestDetails);
 
-	public TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,
-																		  String pass);
+	TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,
+																 String pass);
 }

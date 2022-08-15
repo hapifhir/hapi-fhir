@@ -13,14 +13,10 @@ import org.cqframework.cql.cql2elm.NamespaceManager;
 import org.cqframework.cql.elm.execution.Library;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -33,8 +29,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.reset;
@@ -61,7 +60,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 
 	//@BeforeEach
 	//@BeforeAll
-	@Before
+	@BeforeEach
 	public void createMocks() {
 		MockitoAnnotations.openMocks(this);
 		//libraryManager = Mockito.mock(LibraryManager.class);
@@ -85,7 +84,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		when(libraryManager.getNamespaceManager()).thenReturn(namespaceManager);
 		when(namespaceManager.hasNamespaces()).thenReturn(false);
 		CqlTranslator translator = TranslatorHelper.getTranslator(sampleCql, libraryManager, modelManager);
-		assertNotNull("translator should not be NULL!", translator);
+		assertNotNull(translator, "translator should not be NULL!");
 	}
 
 	//@Test
@@ -95,7 +94,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		when(libraryManager.getLibrarySourceLoader()).thenReturn(librarySourceLoader);
 		when(namespaceManager.hasNamespaces()).thenReturn(true);
 		CqlTranslator translator = TranslatorHelper.getTranslator(sampleCql, libraryManager, modelManager);
-		assertNotNull("translator should not be NULL!", translator);
+		assertNotNull(translator, "translator should not be NULL!");
 	}
 
 	//@Test
@@ -108,8 +107,8 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		try {
 			translator = TranslatorHelper.getTranslator("   ", libraryManager, modelManager);
 			fail();
-		} catch(NullPointerException e) {
-			assertNull("translator should be NULL!", translator);
+		} catch (NullPointerException e) {
+			assertNull(translator, "translator should be NULL!");
 		}
 	}
 
@@ -130,12 +129,12 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		CqlTranslator translator = null;
 		try {
 			MockedStatic<CqlTranslator> cqlTranslator = mockStatic(CqlTranslator.class);
-			when(CqlTranslator.fromStream(any(InputStream.class), any(ModelManager.class), any(LibraryManager.class), Matchers.<CqlTranslator.Options>anyVararg())).thenThrow(IOException.class);
+			when(CqlTranslator.fromStream(any(InputStream.class), any(ModelManager.class), any(LibraryManager.class), any())).thenThrow(IOException.class);
 			translator = TranslatorHelper.getTranslator(new ByteArrayInputStream("INVALID-FILENAME".getBytes(StandardCharsets.UTF_8)), libraryManager, modelManager);
 			fail();
-		} catch(IllegalArgumentException | IOException e) {
+		} catch (IllegalArgumentException | IOException e) {
 			assertTrue(e instanceof IllegalArgumentException);
-			assertNull("translator should be NULL!", translator);
+			assertNull(translator, "translator should be NULL!");
 		}
 	}
 
@@ -153,11 +152,11 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		Library library = null;
 		try {
 			library = TranslatorHelper.translateLibrary("INVALID-FILENAME", libraryManager, modelManager);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
-		assertNotNull("library should not be NULL!", library);
+		assertNotNull(library, "library should not be NULL!");
 	}
 
 	@Test
@@ -166,8 +165,8 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		try {
 			library = TranslatorHelper.readLibrary(new ByteArrayInputStream("INVALID-XML-DOCUMENT".getBytes()));
 			fail();
-		} catch(IllegalArgumentException e) {
-			assertNull("library should be NULL!", library);
+		} catch (IllegalArgumentException e) {
+			assertNull(library, "library should be NULL!");
 		}
 	}
 
@@ -181,7 +180,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		assertNotNull("library should not be NULL!", library);
+		assertNotNull(library, "library should not be NULL!");
 	}
 
 	@Test
@@ -204,7 +203,7 @@ public class TranslatorHelperTest implements CqlProviderTestBase {
 	}
 
 	@Override
-	public FhirContext getFhirContext() {
+	public FhirContext getTestFhirContext() {
 		return null;
 	}
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long> {
+public interface ISubscriptionTableDao extends JpaRepository<SubscriptionTable, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM SubscriptionTable t WHERE t.mySubscriptionResource = :subscription ")

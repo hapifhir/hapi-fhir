@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public enum LoincUploadPropertiesEnum {
 	 */
 
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
+	LOINC_XML_FILE("loinc.xml"),
 
 	/*
 	 * MANDATORY
@@ -101,6 +102,9 @@ public enum LoincUploadPropertiesEnum {
 	// This is the version identifier for the LOINC code system
 	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
 
+	// Indicates if loading version has to become current
+	LOINC_CODESYSTEM_MAKE_CURRENT("loinc.codesystem.make.current"),
+
 	// This is the version identifier for the answer list file
 	LOINC_ANSWERLIST_VERSION("loinc.answerlist.version"),
 
@@ -116,6 +120,18 @@ public enum LoincUploadPropertiesEnum {
 	// Parent group
 	LOINC_PARENT_GROUP_FILE("loinc.parent.group.file"),
 	LOINC_PARENT_GROUP_FILE_DEFAULT("AccessoryFiles/GroupFile/ParentGroup.csv"),
+
+	// Consumer Name
+	LOINC_CONSUMER_NAME_FILE("loinc.consumer.name.file"),
+	LOINC_CONSUMER_NAME_FILE_DEFAULT("AccessoryFiles/ConsumerName/ConsumerName.csv"),
+
+	// Linguistic Variants
+	LOINC_LINGUISTIC_VARIANTS_FILE("loinc.linguistic.variants.file"),
+	LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT("AccessoryFiles/LinguisticVariants/LinguisticVariants.csv"),
+
+	// Linguistic Variants Folder Path which contains variants for different languages
+	LOINC_LINGUISTIC_VARIANTS_PATH("loinc.linguistic.variants.path"),
+	LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT("AccessoryFiles/LinguisticVariants/"),
 
 	/*
 	 * DUPLICATES

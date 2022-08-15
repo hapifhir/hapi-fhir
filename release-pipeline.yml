@@ -1,0 +1,180 @@
+# HAPI FHIR Release Pipeline
+
+variables:
+   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+   MAVEN_OPTS: ''
+   NEW_RELEASE_VERSION:
+   BRANCH:
+
+trigger: none
+pr: none
+
+pool:
+   vmImage: ubuntu-latest
+
+jobs:
+   - job: get_release_version
+     timeoutInMinutes: 5
+     steps:
+        - task: PowerShell@2
+           # This task pulls the <version> value from the hapi-fhir project pom.xml file. All modules are released as
+           # the same version, at the same time, as defined in the root level pom.xml.
+          inputs:
+             targetType: 'inline'
+             script: |
+                [xml]$pomXml = Get-Content -Path .\pom.xml
+                # version
+                Write-Host $pomXml.project.version
+                $version_from_pom=$pomXml.project.version
+                Write-Host "##vso[task.setvariable variable=version_from_pom]$version_from_pom"
+          displayName: Save pom file version to local variable.
+        - task: Bash@3
+           # Prints out the pom version, for debugging purposes
+          inputs:
+             targetType: 'inline'
+             script: echo Pulled version from pom.xml => $(version_from_pom)
+          displayName: Print out pom version.
+        - task: Bash@3
+           # Determines the new release tag label. For existing release branches, this is straightforward,
+           # as we just take the current project pom version (ie. 5.7.1). However, for the current master
+           # branch we often have a branch name like "6.1.5-PRE2-SNAPSHOT", in which case, we need to normalize
+           # the release label from that project version to get the "maj.min.patch" version we will release.
+          inputs:
+             targetType: 'inline'
+             script: |
+                echo Current project version set as $version_from_pom
+                if [[ "$(Build.SourceBranchName)" == "master" ]]; 
+                then
+                  echo On master branch. We need to remove PRE tag from pom version.
+                  new_release_version="${version_from_pom%-PRE*}"
+                else
+                  new_release_version=$(version_from_pom)
+                fi
+                echo "##vso[task.setvariable variable=NEW_RELEASE_VERSION]$new_release_version"
+                echo release HAPI version $new_release_version
+          displayName: Determine new release version.
+        - task: Bash@3
+          # Here we check if the tag we plan to release is already tagged in git, if it is we bomb out
+          inputs:
+             targetType: 'inline'
+             script: |
+                tag_label="v${NEW_RELEASE_VERSION}"
+                echo verifying that release version $tag_label does not already exist in git project...
+                if git rev-list $tag_label >/dev/null
+                then
+                  echo tag $tag_label already exists in project, please update you pom version and try again
+                  exit 1
+                else
+                  echo 'tag does not already exist in project, proceeding...'
+                fi
+          displayName: Check if deployment already exists.
+        - task: Bash@3
+           # Azure pipelines cannot pass variables between pipelines, but it can pass files, so we
+           # pass the determined build tag (ex: 5.7.4) as a string in a file.
+           # This is used in the release pipeline, so we create it here.
+          inputs:
+             targetType: 'inline'
+             script: |
+                echo $(NEW_RELEASE_VERSION)
+                echo "$(NEW_RELEASE_VERSION)" > $(System.DefaultWorkingDirectory)/NEW_RELEASE_VERSION
+          displayName: Save release label to file.
+        - task: CopyFiles@2
+           # Copies the NEW_RELEASE_VERSION file containing the pom version to the staging directory
+          inputs:
+             SourceFolder: '$(System.Defaultworkingdirectory)'
+             Contents: "$(System.DefaultWorkingDirectory)/NEW_RELEASE_VERSION"
+             TargetFolder: '$(build.artifactstagingdirectory)'
+          displayName: Copy the version file to the artifact staging directory.
+        - task: PublishBuildArtifacts@1
+           # Publishes the files we've moved into the staging directory, so they can be accessed by the
+           # release pipeline.
+          displayName: 'Publish Build Artifacts'
+          inputs:
+             PathtoPublish: '$(build.artifactstagingdirectory)'
+   - job: get_branch_id
+     timeoutInMinutes: 5
+     steps:
+        - task: PowerShell@2
+           # This task pulls the branch name from the azure build environment and sets as a job-level variable.
+          inputs:
+             targetType: 'inline'
+             script: |
+                $branch_name = '$(Build.SourceBranchName)'
+                Write-Host "##vso[task.setvariable variable=branch_name]$branch_name"
+          displayName: Save branch name to local variable.
+        - task: Bash@3
+           # Prints out the branch name, for debugging purposes
+          inputs:
+             targetType: 'inline'
+             script: echo Current branch name => $(branch_name)
+          displayName: Print out the branch name.
+        - task: Bash@3
+           # Azure pipelines cannot pass variables between pipelines, but it can pass files, so we
+           # pass the branch name (ex: rel_2022_05) as a string in a file.
+           # This is used in the release pipeline, so we create it here.
+          inputs:
+             targetType: 'inline'
+             script: |
+                echo $(branch_name)
+                BRANCH=$(branch_name)
+                echo "$BRANCH" > $(System.DefaultWorkingDirectory)/BRANCH
+          displayName: Save branch name to file.
+        - task: CopyFiles@2
+           # Copies the BRANCH file containing the pom version to the staging directory
+          inputs:
+             SourceFolder: '$(System.Defaultworkingdirectory)'
+             Contents: "$(System.DefaultWorkingDirectory)/BRANCH"
+             TargetFolder: '$(build.artifactstagingdirectory)'
+          displayName: Copy the branch name file to the artifact staging directory.
+        - task: PublishBuildArtifacts@1
+           # Publishes the files we've moved into the staging directory, so they can be accessed by the
+           # release pipeline.
+          displayName: 'Publish Build Artifacts'
+          inputs:
+             PathtoPublish: '$(build.artifactstagingdirectory)'
+
+   - job: buildaroni
+      # We're going to do a full build, including all unit and intergration tests. We do this here, before any
+      # actual release pipeilne kicks off, and we don't do it again at any point in the release pipeline. The assumption here
+      # is that once we pull the code, it won't change again on this branch until the release is complete. We
+      # want to fail fast if there is an issue, and avoid running the tests more than once so it doesn't take all day.
+     timeoutInMinutes: 360
+     dependsOn: ['get_release_version', 'get_branch_id']
+     container: maven:3.8-openjdk-17
+     steps:
+        - task: Cache@2
+          inputs:
+             key: 'maven | "$(Agent.OS)" | ./pom.xml'
+             path: $(MAVEN_CACHE_FOLDER)
+        - task: DockerInstaller@0
+          displayName: Docker Installer
+          inputs:
+             dockerVersion: 17.09.0-ce
+             releaseType: stable
+        - task: Maven@3
+          env:
+             JAVA_HOME_11_X64: /usr/java/openjdk-17
+          displayName: Checkstyle Build
+          inputs:
+             mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
+             goals: 'clean install'
+             options: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+             jdkVersionOption: 1.11
+        - task: Bash@3
+          inputs:
+             targetType: 'inline'
+             script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+        - task: Maven@3
+          env:
+             JAVA_HOME_11_X64: /usr/java/openjdk-17
+          inputs:
+             goals: 'clean install'
+             # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+             options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false -Dstyle.color=always -Djansi.force=true'
+             # These are JVM options (and don't show up in the build logs)
+             mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+             jdkVersionOption: 1.11
+
+
+
+

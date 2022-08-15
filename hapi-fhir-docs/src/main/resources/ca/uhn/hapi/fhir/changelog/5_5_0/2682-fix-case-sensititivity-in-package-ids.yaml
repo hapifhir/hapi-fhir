@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2682
+backport: 5.4.1
+title: "Fixes the problem that FHIR package IDs were incorrectly treated as case sensitive when being loaded, causing loads to fail when dependencies were declared with a different case than in the package itself."

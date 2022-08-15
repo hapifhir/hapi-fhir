@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2790
+title: "The SearchParameter canonical URLs exported by the JPA server have been adjusted to match the URLs
+  specified in the FHIR specification."

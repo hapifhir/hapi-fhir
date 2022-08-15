@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2675
+backport: 5.4.1
+title: "A new interceptor ValidationMessageSuppressingInterceptor has been added. This interceptor can be used
+   to selectively suppress specific vaLidation messages."

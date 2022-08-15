@@ -1,0 +1,4 @@
+---
+type: change
+jira: SMILE-3128
+title: "Prevent _expunge and _cascade from being used on the same DELETE operation"

@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public enum MdmMatcherEnum {
 	NYSIIS(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.NYSIIS))),
 	REFINED_SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.REFINED_SOUNDEX))),
 	SOUNDEX(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.SOUNDEX))),
+	NICKNAME(new HapiStringMatcher(new NicknameMatcher())),
 
 	STRING(new HapiStringMatcher()),
 	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
@@ -51,7 +52,8 @@ public enum MdmMatcherEnum {
 	IDENTIFIER(new IdentifierMatcher()),
 
 	EMPTY_FIELD(new EmptyFieldMatcher()),
-	EXTENSION_ANY_ORDER(new ExtensionMatcher());
+	EXTENSION_ANY_ORDER(new ExtensionMatcher()),
+	NUMERIC(new HapiStringMatcher(new NumericMatcher()));
 
 	private final IMdmFieldMatcher myMdmFieldMatcher;
 

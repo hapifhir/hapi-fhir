@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3590
+title: "When searching with the `_lastUpdated` parameter and using the `ne` prefix, search would fail with HAPI-1928 error. This has been fixed."

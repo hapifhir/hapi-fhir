@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface IBinaryStorageEntityDao extends JpaRepository<BinaryStorageEntity, String> {
+public interface IBinaryStorageEntityDao extends JpaRepository<BinaryStorageEntity, String>, IHapiFhirJpaRepository {
 
 	@Query("SELECT e FROM BinaryStorageEntity e WHERE e.myBlobId = :blob_id AND e.myResourceId = :resource_id")
 	Optional<BinaryStorageEntity> findByIdAndResourceId(@Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);

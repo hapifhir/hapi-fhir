@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -56,7 +56,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);

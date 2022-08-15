@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -318,7 +319,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
             }
           } else if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               // Only add each operation (by name) once
               rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -353,7 +354,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
           if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               ourLog.debug("Found bound operation: {}", opName);
               rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -460,13 +461,13 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
   @Read(type = OperationDefinition.class)
   public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
     if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(628) + theId);
     }
 
     RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
     Bindings bindings = serverConfiguration.provideBindings();
 
-    List<OperationMethodBinding> operationBindings = bindings.getOperationNameToBindings().get(theId.getIdPart());
+    List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(theId.getIdPart());
     if (operationBindings != null && !operationBindings.isEmpty()) {
         return readOperationDefinitionForOperation(operationBindings);
     }
@@ -474,7 +475,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     if (searchBindings != null && !searchBindings.isEmpty()) {
         return readOperationDefinitionForNamedSearch(searchBindings);
     }
-    throw new ResourceNotFoundException(theId);
+    throw new ResourceNotFoundException(Msg.code(1985) + theId);
   }
   
   private OperationDefinition readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
@@ -572,10 +573,10 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
       for (IParameter nextParamUntyped : sharedDescription.getParameters()) {
         if (nextParamUntyped instanceof OperationParameter) {
           OperationParameter nextParam = (OperationParameter) nextParamUntyped;
-          OperationDefinitionParameterComponent param = op.addParameter();
           if (!inParams.add(nextParam.getName())) {
             continue;
           }
+          OperationDefinitionParameterComponent param = op.addParameter();
           param.setUse(OperationParameterUse.IN);
           if (nextParam.getParamType() != null) {
             param.setType(nextParam.getParamType());

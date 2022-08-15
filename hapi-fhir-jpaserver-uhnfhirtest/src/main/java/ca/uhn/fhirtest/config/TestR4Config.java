@@ -1,29 +1,29 @@
 package ca.uhn.fhirtest.config;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.config.BaseJavaConfigR4;
+import ca.uhn.fhir.jpa.config.HapiJpaConfig;
+import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
+import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
+import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
-import ca.uhn.fhir.rest.client.interceptor.ThreadLocalCapturingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.dialect.PostgreSQL94Dialect;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
-import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hl7.fhir.dstu2.model.Subscription;
-import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.annotation.Value;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -40,22 +40,15 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-@Import(CommonConfig.class)
+@Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
 @EnableTransactionManagement()
-public class TestR4Config extends BaseJavaConfigR4 {
-	public static final String FHIR_DB_USERNAME = "${fhir.db.username}";
-	public static final String FHIR_DB_PASSWORD = "${fhir.db.password}";
-	public static final String FHIR_LUCENE_LOCATION_R4 = "${fhir.lucene.location.r4}";
+public class TestR4Config {
+	public static final String FHIR_LUCENE_LOCATION_R4 = "fhir.lucene.location.r4";
 	public static final Integer COUNT_SEARCH_RESULTS_UP_TO = 50000;
 
-	@Value(TestR4Config.FHIR_DB_USERNAME)
-	private String myDbUsername;
-
-	@Value(TestR4Config.FHIR_DB_PASSWORD)
-	private String myDbPassword;
-
-	@Value(FHIR_LUCENE_LOCATION_R4)
-	private String myFhirLuceneLocation;
+	private String myDbUsername = System.getProperty(TestR5Config.FHIR_DB_USERNAME);
+	private String myDbPassword = System.getProperty(TestR5Config.FHIR_DB_PASSWORD);
+	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R4);
 
 	@Bean
 	public DaoConfig daoConfig() {
@@ -84,24 +77,25 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	@Bean
 	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
-	}
-
-
-	@Override
-	@Bean
-	public ValidationSettings validationSettings() {
-		ValidationSettings retVal = super.validationSettings();
-		retVal.setLocalReferenceValidationDefaultPolicy(IResourceValidator.ReferenceValidationPolicy.CHECK_VALID);
+		ModelConfig retVal = daoConfig().getModelConfig();
+		retVal.setIndexIdentifierOfType(true);
 		return retVal;
 	}
 
 
-	@Bean(name = "myPersistenceDataSourceR4", destroyMethod = "close")
+	@Bean
+	public ValidationSettings validationSettings() {
+		ValidationSettings retVal = new ValidationSettings();
+		retVal.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.CHECK_VALID);
+		return retVal;
+	}
+
+
+	@Bean(name = "myPersistenceDataSourceR4")
 	public DataSource dataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		if (CommonConfig.isLocalTestMode()) {
-			retVal.setUrl("jdbc:derby:memory:fhirtest_r4;create=true");
+			retVal.setUrl("jdbc:h2:mem:fhirtest_r4");
 		} else {
 			retVal.setDriver(new org.postgresql.Driver());
 			retVal.setUrl("jdbc:postgresql://localhost/fhirtest_r4");
@@ -109,7 +103,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
 		retVal.setDefaultQueryTimeout(20);
-		retVal.setMaxConnLifetimeMillis(5 * DateUtils.MILLIS_PER_MINUTE);
+		retVal.setTestOnBorrow(true);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
@@ -122,19 +116,17 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return dataSource;
 	}
 
-	@Override
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
-		DatabaseBackedPagingProvider retVal = super.databaseBackedPagingProvider();
+		DatabaseBackedPagingProvider retVal = new DatabaseBackedPagingProvider();
 		retVal.setDefaultPageSize(20);
 		retVal.setMaximumPageSize(500);
 		return retVal;
 	}
 
-	@Override
 	@Bean
-	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
-		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
+	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext) {
+		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
@@ -144,9 +136,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	private Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		if (CommonConfig.isLocalTestMode()) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
 		} else {
-			extraProperties.put("hibernate.dialect", PostgreSQL94Dialect.class.getName());
+			extraProperties.put("hibernate.dialect", HapiFhirPostgres94Dialect.class.getName());
 		}
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
@@ -158,7 +150,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER),
+			HapiHSearchAnalysisConfigurers.HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
@@ -167,15 +160,17 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 	/**
 	 * Bean which validates incoming requests
+	 *
+	 * @param theFhirInstanceValidator
 	 */
 	@Bean
 	@Lazy
-	public RequestValidatingInterceptor requestValidatingInterceptor() {
+	public RequestValidatingInterceptor requestValidatingInterceptor(IInstanceValidatorModule theFhirInstanceValidator) {
 		RequestValidatingInterceptor requestValidator = new RequestValidatingInterceptor();
 		requestValidator.setFailOnSeverity(null);
 		requestValidator.setAddResponseHeaderOnSeverity(null);
 		requestValidator.setAddResponseOutcomeHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		requestValidator.addValidatorModule(instanceValidator());
+		requestValidator.addValidatorModule(theFhirInstanceValidator);
 		requestValidator.setIgnoreValidatorExceptions(true);
 
 		return requestValidator;
@@ -201,7 +196,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
 	}
-
 
 
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,38 @@ public enum VersionEnum {
 	V5_2_0,
 	V5_2_1,
 	V5_3_0,
-	V5_4_0;
+	V5_3_1,
+	V5_3_2,
+	V5_3_3,
+	V5_4_0,
+	V5_4_1,
+	V5_4_2,
+	V5_5_0,
+	V5_5_1,
+	V5_5_2,
+	V5_5_3,
+	V5_5_4,
+	V5_5_5,
+	V5_5_6,
+	V5_5_7,
+	V5_6_0,
+	V5_6_1,
+	V5_6_2,
+	V5_6_3,
+	V5_6_4,
+	V5_7_0,
+	V5_7_1,
+	V5_7_2,
+	V5_7_3,
+	V5_7_4,
+	V5_7_5,
+	V5_7_6,
+	V6_0_0,
+	V6_0_1,
+	V6_0_2,
+	V6_1_0,
+	V6_2_0,
+	;
 
 	public static VersionEnum latestVersion() {
 		VersionEnum[] values = VersionEnum.values();

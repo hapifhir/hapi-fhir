@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2521
+title: "The automatically generated CapabilityStatement for R4+ will now incude the list of supported
+  revinclude values."

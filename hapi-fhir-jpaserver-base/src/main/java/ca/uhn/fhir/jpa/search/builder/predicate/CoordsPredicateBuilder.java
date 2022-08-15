@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  */
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -69,12 +70,12 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			String value = param.getValue();
 			String[] parts = value.split(":");
 			if (parts.length != 2) {
-				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
+				throw new IllegalArgumentException(Msg.code(1228) + "Invalid position format '" + value + "'.  Required format is 'latitude:longitude'");
 			}
 			latitudeValue = parts[0];
 			longitudeValue = parts[1];
 			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+				throw new IllegalArgumentException(Msg.code(1229) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
 			}
 			QuantityParam distanceParam = theParams.getNearDistanceParam();
 			if (distanceParam != null) {
@@ -85,12 +86,12 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			String value = param.getValue();
 			String[] parts = value.split("\\|");
 			if (parts.length < 2 || parts.length > 4) {
-				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
+				throw new IllegalArgumentException(Msg.code(1230) + "Invalid position format '" + value + "'.  Required format is 'latitude|longitude' or 'latitude|longitude|distance' or 'latitude|longitude|distance|units'");
 			}
 			latitudeValue = parts[0];
 			longitudeValue = parts[1];
 			if (isBlank(latitudeValue) || isBlank(longitudeValue)) {
-				throw new IllegalArgumentException("Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
+				throw new IllegalArgumentException(Msg.code(1231) + "Invalid position format '" + value + "'.  Both latitude and longitude must be provided.");
 			}
 			if (parts.length >= 3) {
 				String distanceString = parts[2];
@@ -99,7 +100,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				}
 			}
 		} else {
-			throw new IllegalArgumentException("Invalid position type: " + theParam.getClass());
+			throw new IllegalArgumentException(Msg.code(1232) + "Invalid position type: " + theParam.getClass());
 		}
 
 		Condition latitudePredicate;
@@ -108,9 +109,9 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			latitudePredicate = theFrom.createPredicateLatitudeExact(latitudeValue);
 			longitudePredicate = theFrom.createPredicateLongitudeExact(longitudeValue);
 		} else if (distanceKm < 0.0) {
-			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
+			throw new IllegalArgumentException(Msg.code(1233) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be >= 0.0");
 		} else if (distanceKm > CoordCalculator.MAX_SUPPORTED_DISTANCE_KM) {
-			throw new IllegalArgumentException("Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
+			throw new IllegalArgumentException(Msg.code(1234) + "Invalid " + Location.SP_NEAR_DISTANCE + " parameter '" + distanceKm + "' must be <= " + CoordCalculator.MAX_SUPPORTED_DISTANCE_KM);
 		} else {
 			double latitudeDegrees = Double.parseDouble(latitudeValue);
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
@@ -145,10 +146,11 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude())),
 				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude()))
 			);
+		} else {
+			return ComboCondition.and(
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
+			);
 		}
-		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
-			BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
-		);
 	}
 }

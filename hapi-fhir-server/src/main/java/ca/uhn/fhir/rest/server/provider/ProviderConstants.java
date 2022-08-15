@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.provider;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,11 @@ public class ProviderConstants {
 	 */
 	public static final String PARTITION_MANAGEMENT_READ_PARTITION = "$partition-management-read-partition";
 
+	/**
+	 * Operation name: list partitions
+	 */
+	public static final String PARTITION_MANAGEMENT_LIST_PARTITIONS = "$partition-management-list-partitions";
+
 	public static final String PARTITION_MANAGEMENT_PARTITION_ID = "id";
 	public static final String PARTITION_MANAGEMENT_PARTITION_NAME = "name";
 	public static final String PARTITION_MANAGEMENT_PARTITION_DESC = "description";
@@ -75,26 +80,129 @@ public class ProviderConstants {
 	public static final String MDM_UPDATE_LINK_RESOURCE_ID = "resourceId";
 	public static final String MDM_UPDATE_LINK_MATCH_RESULT = "matchResult";
 
+	public static final String MDM_CREATE_LINK = "$mdm-create-link";
+	public static final String MDM_CREATE_LINK_GOLDEN_RESOURCE_ID = "goldenResourceId";
+	public static final String MDM_CREATE_LINK_RESOURCE_ID = "resourceId";
+	public static final String MDM_CREATE_LINK_MATCH_RESULT = "matchResult";
+
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
+	public static final String MDM_QUERY_PARTITION_IDS = "partitionIds";
 	public static final String MDM_QUERY_LINKS_MATCH_RESULT = "matchResult";
 	public static final String MDM_QUERY_LINKS_LINK_SOURCE = "linkSource";
 
 	public static final String MDM_DUPLICATE_GOLDEN_RESOURCES = "$mdm-duplicate-golden-resources";
 	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
-	public static final String MDM_CLEAR = "$mdm-clear";
-	public static final String MDM_CLEAR_SOURCE_TYPE = "sourceType";
+	public static final String OPERATION_MDM_CLEAR = "$mdm-clear";
+	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
+	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
-	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
-	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
-   public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
+	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
-
 	/**
 	 * CQL Operations
 	 */
 	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
 
+	/**
+	 * Operation name for the $meta operation
+	 */
+	public static final String OPERATION_META = "$meta";
+
+	/**
+	 *  Operation name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE = "$expunge";
+
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	/**
+	 * Parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	/**
+	 * Output parameter name for the $expunge operation
+	 */
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+
+	/**
+	 * Operation name for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE = "$delete-expunge";
+
+	/**
+	 * url of resources to delete for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_EXPUNGE_URL = "url";
+
+	/**
+	 * Number of resources to delete at a time for the $delete-expunge operation
+	 */
+	public static final String OPERATION_DELETE_BATCH_SIZE = "batchSize";
+
+	/**
+	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
+	 */
+	public static final String OPERATION_BATCH_RESPONSE_JOB_ID = "jobId";
+
+	/**
+	 * Operation name for the $reindex operation
+	 */
+	public static final String OPERATION_REINDEX = "$reindex";
+
+	/**
+	 * Operation name for the $invalidate-expansion operation
+	 */
+	public static final String OPERATION_INVALIDATE_EXPANSION = "$invalidate-expansion";
+
+	/**
+	 * url of resources to delete for the $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_PARAM_URL = "url";
+
+	/**
+	 * Number of resources to delete at a time for the $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_PARAM_BATCH_SIZE = "batchSize";
+
+	/**
+	 * Whether all resource types should be reindexed
+	 */
+	public static final String OPERATION_REINDEX_PARAM_EVERYTHING = "everything";
+
+	/**
+	 * The Spring Batch job id of the delete expunge job created by a $delete-expunge operation
+	 */
+	public static final String OPERATION_REINDEX_RESPONSE_JOB_ID = "jobId";
+
+	/**
+	 * Operation name for the $member-match operation
+	 */
+	public static final String OPERATION_MEMBER_MATCH = "$member-match";
+
+	/**
+	 * Operation name for the $reindex-terminology operation
+	 */
+	public static final String OPERATION_REINDEX_TERMINOLOGY = "$reindex-terminology";
+
+	@Deprecated
+	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
+	/**
+	 * @see ProviderConstants#OPERATION_REINDEX
+	 * @deprecated
+	 */
+	@Deprecated
+	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
 }

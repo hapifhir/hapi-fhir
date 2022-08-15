@@ -1,20 +1,16 @@
 package ca.uhn.fhir.rest.param;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import ca.uhn.fhir.context.FhirContext;
-
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,9 +20,13 @@ import ca.uhn.fhir.context.FhirContext;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Base class for RESTful operation parameter types
@@ -51,7 +51,7 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	@Override
 	public final String getQueryParameterQualifier() {
-		if (myMissing != null && myMissing.booleanValue()) {
+		if (myMissing != null) {
 			return Constants.PARAMQUALIFIER_MISSING;
 		}
 		return doGetQueryParameterQualifier();
@@ -74,7 +74,7 @@ public abstract class BaseParam implements IQueryParameterType {
 
 	/**
 	 * If set to non-null value, indicates that this parameter has been populated
-	 * with a "[name]:missing=true" or "[name]:missing=false" vale instead of a
+	 * with a "[name]:missing=true" or "[name]:missing=false" value instead of a
 	 * normal value
 	 * 
 	 * @return Returns a reference to <code>this</code> for easier method chaining
@@ -94,7 +94,7 @@ public abstract class BaseParam implements IQueryParameterType {
 			if (isNotBlank(theQualifier) && theQualifier.charAt(0) == '.') {
 				if (!isSupportsChain()) {
 					String msg = theContext.getLocalizer().getMessage(BaseParam.class, "chainNotSupported", theParamName + theQualifier, theQualifier);
-					throw new InvalidRequestException(msg);
+					throw new InvalidRequestException(Msg.code(1935) + msg);
 				}
 			}
 

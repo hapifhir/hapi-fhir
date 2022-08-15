@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -72,7 +74,7 @@ import java.util.zip.ZipInputStream;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class ExampleDataUploader extends BaseCommand {
+public class ExampleDataUploader extends BaseRequestGeneratingCommand {
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExampleDataUploader.class);
 
@@ -85,7 +87,7 @@ public class ExampleDataUploader extends BaseCommand {
 			case R4:
 				return getBundleFromFileR4(theLimit, theSuppliedFile, theCtx);
 			default:
-				throw new ParseException("Invalid spec version for this command: " + theCtx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1607) + "Invalid spec version for this command: " + theCtx.getVersion().getVersion());
 		}
 	}
 
@@ -200,8 +202,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (result.isSuccessful() == false) {
-				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
+			if (! result.isSuccessful()) {
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
@@ -284,8 +286,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("Found example {} - {} - {} chars", nextEntry.getName(), parsed.getClass().getSimpleName(), exampleString.length());
 
 			ValidationResult result = val.validateWithResult(parsed);
-			if (result.isSuccessful() == false) {
-				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result.toString());
+			if (! result.isSuccessful()) {
+				ourLog.info("FAILED to validate example {} - {}", nextEntry.getName(), result);
 				continue;
 			}
 
@@ -334,14 +336,8 @@ public class ExampleDataUploader extends BaseCommand {
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 		Option opt;
-
-		addFhirVersionOption(options);
-
-		opt = new Option("t", "target", true, "Base URL for the target server (e.g. \"http://example.com/fhir\")");
-		opt.setRequired(true);
-		options.addOption(opt);
 
 		opt = new Option("l", "limit", true, "Sets a limit to the number of resources the uploader will try to upload");
 		opt.setRequired(false);
@@ -356,9 +352,15 @@ public class ExampleDataUploader extends BaseCommand {
 		opt.setRequired(false);
 		options.addOption(opt);
 
-		addBasicAuthOption(options);
-
 		return options;
+	}
+
+
+	@Override
+	protected Collection<Object> getFilterOutVersions() {
+		Collection<Object> filterOutCollection = super.getFilterOutVersions();
+		filterOutCollection.add(FhirVersionEnum.R5);
+		return filterOutCollection;
 	}
 
 	private void processBundle(FhirContext ctx, IBaseBundle bundle) {
@@ -373,7 +375,7 @@ public class ExampleDataUploader extends BaseCommand {
 				processBundleR4(ctx, (org.hl7.fhir.r4.model.Bundle) bundle);
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(Msg.code(1608));
 		}
 	}
 
@@ -608,9 +610,9 @@ public class ExampleDataUploader extends BaseCommand {
 
 		String targetServer = theCommandLine.getOptionValue("t");
 		if (isBlank(targetServer)) {
-			throw new ParseException("No target server (-t) specified");
-		} else if (targetServer.startsWith("http") == false && targetServer.startsWith("file") == false) {
-			throw new ParseException("Invalid target server specified, must begin with 'http' or 'file'");
+			throw new ParseException(Msg.code(1609) + "No target server (-t) specified");
+		} else if (! targetServer.startsWith("http") && ! targetServer.startsWith("file")) {
+			throw new ParseException(Msg.code(1610) + "Invalid target server specified, must begin with 'http' or 'file'");
 		}
 
 		Integer limit = null;
@@ -619,7 +621,7 @@ public class ExampleDataUploader extends BaseCommand {
 			try {
 				limit = Integer.parseInt(limitString);
 			} catch (NumberFormatException e) {
-				throw new ParseException("Invalid number for limit (-l) option, must be a number: " + limitString);
+				throw new ParseException(Msg.code(1611) + "Invalid number for limit (-l) option, must be a number: " + limitString);
 			}
 		}
 
@@ -635,7 +637,7 @@ public class ExampleDataUploader extends BaseCommand {
 				specUrl = "http://build.fhir.org/examples-json.zip";
 				break;
 			default:
-				throw new ParseException("Invalid spec version for this command: " + ctx.getVersion().getVersion());
+				throw new ParseException(Msg.code(1612) + "Invalid spec version for this command: " + ctx.getVersion().getVersion());
 		}
 
 		String filepath = theCommandLine.getOptionValue('d');
@@ -651,7 +653,7 @@ public class ExampleDataUploader extends BaseCommand {
 				sendBundleToTarget(targetServer, ctx, bundle, theCommandLine);
 			}
 		} catch (Exception e) {
-			throw new CommandFailureException(e);
+			throw new CommandFailureException(Msg.code(1613) + e);
 		}
 
 
@@ -697,7 +699,7 @@ public class ExampleDataUploader extends BaseCommand {
 					String nextTarget = nextRefResourceType + "/EX" + nextRefIdPart;
 					nextRef.getResourceReference().setResource(null);
 					nextRef.getResourceReference().setReference(nextTarget);
-					if (checkedTargets.add(nextTarget) == false) {
+					if (! checkedTargets.add(nextTarget)) {
 						continue;
 					}
 
@@ -732,7 +734,7 @@ public class ExampleDataUploader extends BaseCommand {
 				ourLog.info("Writing bundle to: {}", path);
 				File file = new File(path);
 				if (file.exists()) {
-					throw new Exception("File already exists: " + file.getAbsolutePath());
+					throw new Exception(Msg.code(1614) + "File already exists: " + file.getAbsolutePath());
 				}
 				FileWriter w = new FileWriter(file, false);
 				w.append(encoded);

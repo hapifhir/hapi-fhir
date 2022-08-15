@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.util;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.util;
  */
 
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 
 public class JpaConstants {
@@ -39,37 +40,41 @@ public class JpaConstants {
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE = "$apply-codesystem-delta-remove";
 	/**
 	 * Operation name for the $expunge operation
-	 */
-	public static final String OPERATION_EXPUNGE = "$expunge";
-	/**
-	 * Operation name for the $match operation
-	 */
-	public static final String OPERATION_MATCH = "$match";
-	/**
-	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
+	 *
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE}
 	 */
 	@Deprecated
-	public static final String OPERATION_NAME_EXPUNGE = OPERATION_EXPUNGE;
+	public static final String OPERATION_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = "limit";
+	@Deprecated
+	public static final String OPERATION_NAME_EXPUNGE = ProviderConstants.OPERATION_EXPUNGE;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = "expungeDeletedResources";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_LIMIT = ProviderConstants.OPERATION_EXPUNGE_PARAM_LIMIT;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = "expungePreviousVersions";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES;
 	/**
-	 * Parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = "expungeEverything";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS;
 	/**
-	 * Output parameter name for the $expunge operation
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
 	 */
-	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = "count";
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING = ProviderConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_EVERYTHING;
+	/**
+	 * @deprecated Replace with {@link ProviderConstants#OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT}
+	 */
+	@Deprecated
+	public static final String OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT = ProviderConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT;
 	/**
 	 * Header name for the "X-Meta-Snapshot-Mode" header, which
 	 * specifies that properties in meta (tags, profiles, security labels)
@@ -93,10 +98,6 @@ public class JpaConstants {
 	 * Operation name for the $get-resource-counts operation
 	 */
 	public static final String OPERATION_GET_RESOURCE_COUNTS = "$get-resource-counts";
-	/**
-	 * Operation name for the $meta operation
-	 */
-	public static final String OPERATION_META = "$meta";
 	/**
 	 * Operation name for the $validate operation
 	 */
@@ -151,6 +152,14 @@ public class JpaConstants {
 	 */
 	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 	/**
+	 * Operation name for the "$import" operation
+	 */
+	public static final String OPERATION_IMPORT = "$import";
+	/**
+	 * Operation name for the "$import-poll-status" operation
+	 */
+	public static final String OPERATION_IMPORT_POLL_STATUS = "$import-poll-status";
+	/**
 	 * Operation name for the "$export" operation
 	 */
 	public static final String OPERATION_EXPORT = "$export";
@@ -185,6 +194,27 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 
 	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_POLL_STATUS_JOB_ID = "_jobId";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_JOB_DESCRIPTION = "_jobDescription";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_PROCESSING_MODE = "_processingMode";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_FILE_COUNT = "_fileCount";
+	/**
+	 * Parameter for the $import operation
+	 */
+	public static final String PARAM_IMPORT_BATCH_SIZE = "_batchSize";
+
+	/**
 	 * The [id] of the group when $export is called on /Group/[id]/$export
 	 */
 	public static final String PARAM_EXPORT_GROUP_ID = "_groupId";
@@ -217,6 +247,25 @@ public class JpaConstants {
 	 * The name of the default partition
 	 */
 	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+
+	/**
+	 * The name of the collection of all partitions
+	 */
+	public static final String ALL_PARTITIONS_NAME = "ALL_PARTITIONS";
+
+	/**
+	 * Parameter for the $expand operation
+	 */
+	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
+	public static final String OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE = "displayLanguage";
+	public static final String HEADER_UPSERT_EXISTENCE_CHECK = "X-Upsert-Extistence-Check";
+	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
+
+
+	/**
+	 * Parameters for the rewrite history operation
+	 */
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 
 	/**
 	 * Non-instantiable

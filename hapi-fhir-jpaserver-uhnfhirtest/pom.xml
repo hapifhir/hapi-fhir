@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>5.4.0-PRE3-SNAPSHOT</version>
+		<version>6.2.0-PRE1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -19,6 +19,7 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
@@ -47,6 +48,11 @@
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-server-openapi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -97,6 +103,12 @@
 		</dependency>
 
 		<!-- TEST DEPS -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-servlets</artifactId>
@@ -164,7 +176,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-converter</artifactId>
-			<version>5.4.0-PRE3-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 	</dependencies>
@@ -181,20 +193,6 @@
 							<contextPath>/</contextPath>
 							<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
 						</webApp>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<!-- 
-							This project is built to 1.8 since our public
-							server runs on a 1.8 JDK. If you are using this
-							project as a basis for your own work, you could
-							probably safely reduce this if needed
-						-->
-						<source>1.8</source>
-						<target>1.8</target>
 					</configuration>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 

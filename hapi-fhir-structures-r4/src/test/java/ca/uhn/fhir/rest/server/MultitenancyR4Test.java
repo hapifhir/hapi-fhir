@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -102,7 +103,7 @@ public class MultitenancyR4Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("\"diagnostics\":\"This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\""));
+			assertThat(responseContent, containsString("\"diagnostics\":\""+ Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -111,7 +112,7 @@ public class MultitenancyR4Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll

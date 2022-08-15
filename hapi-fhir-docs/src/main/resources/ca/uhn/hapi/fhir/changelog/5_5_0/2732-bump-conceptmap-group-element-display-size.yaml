@@ -1,0 +1,5 @@
+---
+type: change
+backport: 5.4.2
+issue: 2732
+title: "The ConceptMap.group.element.display storage size limit has been increased to 500 characters."

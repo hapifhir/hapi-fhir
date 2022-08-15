@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.batch;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,49 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.bulk.job.BulkExportJobConfig;
+import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.batch.svc.BatchJobSubmitterImpl;
+import ca.uhn.fhir.jpa.config.BatchJobRegisterer;
+import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-//When you define a new batch job, add it here.
+@EnableBatchProcessing
 @Import({
-	CommonBatchJobConfig.class,
-	BulkExportJobConfig.class
+	CommonBatchJobConfig.class
+  // When you define a new batch job, add it here.
 })
+@Deprecated
+/**
+ * @deprecated Use Batch2JobsConfig
+ */
 public class BatchJobsConfig {
-	public static final String BULK_EXPORT_JOB_NAME = "bulkExportJob";
-	public static final String GROUP_BULK_EXPORT_JOB_NAME = "groupBulkExportJob";
-	public static final String PATIENT_BULK_EXPORT_JOB_NAME = "patientBulkExportJob";
+	@Bean
+	public IBatchJobSubmitter batchJobSubmitter() {
+		return new BatchJobSubmitterImpl();
+	}
+
+	@Bean
+	public BatchJobRegisterer batchJobRegisterer() {
+		return new BatchJobRegisterer();
+	}
+
+	@Bean
+	public SimpleJobOperator jobOperator(JobExplorer theJobExplorer, JobRepository theJobRepository, JobRegistry theJobRegistry, JobLauncher theJobLauncher) {
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+
+		jobOperator.setJobExplorer(theJobExplorer);
+		jobOperator.setJobRepository(theJobRepository);
+		jobOperator.setJobRegistry(theJobRegistry);
+		jobOperator.setJobLauncher(theJobLauncher);
+
+		return jobOperator;
+	}
 }

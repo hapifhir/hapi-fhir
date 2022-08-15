@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2384
+title: "When a REST server returns a failure because no method matched the request parameters, the
+  resulting OperationOutcome will now correctly set the issue type to `not-supported`. Thanks
+  to Jari Maijenburg for the pull request!"

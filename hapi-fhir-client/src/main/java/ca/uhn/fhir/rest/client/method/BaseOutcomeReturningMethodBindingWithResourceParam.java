@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.client.method;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import java.lang.reflect.Method;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,7 +46,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 			if (next instanceof ResourceParameter) {
 				resourceParameter = (ResourceParameter) next;
 				if (myResourceType != null) {
-					throw new ConfigurationException("Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
+					throw new ConfigurationException(Msg.code(1468) + "Method " + theMethod.getName() + " on type " + theMethod.getDeclaringClass() + " has more than one @ResourceParam. Only one is allowed.");
 				}
 
 				myResourceType = resourceParameter.getResourceType();
@@ -56,13 +57,13 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		if (myResourceType == null) {
-			throw new ConfigurationException("Unable to determine resource type for method: " + theMethod);
+			throw new ConfigurationException(Msg.code(1469) + "Unable to determine resource type for method: " + theMethod);
 		}
 
 		myResourceName = theContext.getResourceType(myResourceType);
 
 		if (resourceParameter == null) {
-			throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
+			throw new ConfigurationException(Msg.code(1470) + "Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a resource parameter annotated with @" + ResourceParam.class.getSimpleName());
 		}
 
 	}
@@ -77,7 +78,7 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	public BaseHttpClientInvocation invokeClient(Object[] theArgs) throws InternalErrorException {
 		IBaseResource resource = (IBaseResource) theArgs[myResourceParameterIndex];
 		if (resource == null) {
-			throw new NullPointerException("Resource can not be null");
+			throw new NullPointerException(Msg.code(1471) + "Resource can not be null");
 		}
 
 		BaseHttpClientInvocation retVal = createClientInvocation(theArgs, resource);

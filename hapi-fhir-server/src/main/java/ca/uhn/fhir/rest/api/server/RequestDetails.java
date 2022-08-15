@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
@@ -33,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
 
-	private final StopWatch myRequestStopwatch = new StopWatch();
+	private final StopWatch myRequestStopwatch;
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
 	private String myCompartmentName;
@@ -75,12 +76,44 @@ public abstract class RequestDetails {
 	private String myRequestId;
 	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
+	private boolean myRewriteHistory;
 
 	/**
 	 * Constructor
 	 */
 	public RequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myRequestStopwatch = new StopWatch();
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public RequestDetails(ServletRequestDetails theRequestDetails) {
+		myInterceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
+		myRequestStopwatch = theRequestDetails.getRequestStopwatch();
+		myTenantId = theRequestDetails.getTenantId();
+		myCompartmentName = theRequestDetails.getCompartmentName();
+		myCompleteUrl = theRequestDetails.getCompleteUrl();
+		myFhirServerBase = theRequestDetails.getFhirServerBase();
+		myId = theRequestDetails.getId();
+		myOperation = theRequestDetails.getOperation();
+		myParameters = theRequestDetails.getParameters();
+		myRequestContents = theRequestDetails.getRequestContentsIfLoaded();
+		myRequestPath = theRequestDetails.getRequestPath();
+		myRequestType = theRequestDetails.getRequestType();
+		myResourceName = theRequestDetails.getResourceName();
+		myRespondGzip = theRequestDetails.isRespondGzip();
+		myResponse = theRequestDetails.getResponse();
+		myRestOperationType = theRequestDetails.getRestOperationType();
+		mySecondaryOperation = theRequestDetails.getSecondaryOperation();
+		mySubRequest = theRequestDetails.isSubRequest();
+		myUnqualifiedToQualifiedNames = theRequestDetails.getUnqualifiedToQualifiedNames();
+		myUserData = theRequestDetails.getUserData();
+		myResource = theRequestDetails.getResource();
+		myRequestId = theRequestDetails.getRequestId();
+		myTransactionGuid = theRequestDetails.getTransactionGuid();
+		myFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
 	}
 
 	public String getFixedConditionalUrl() {
@@ -502,4 +535,11 @@ public abstract class RequestDetails {
 	}
 
 
+	public boolean isRewriteHistory() {
+		return myRewriteHistory;
+	}
+
+	public void setRewriteHistory(boolean theRewriteHistory) {
+		myRewriteHistory = theRewriteHistory;
+	}
 }

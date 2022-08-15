@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.common.helper;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.helper;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.DateTimeType;
 
@@ -32,14 +33,13 @@ import java.util.Date;
 public class DateHelper {
 
 	/**
-	 *
 	 * @param date A date String in the format YYYY-MM-DD.
 	 * @return A {@link java.util.Date} object representing the String data that was passed in.
 	 */
-    public static Date resolveRequestDate(String date) {
-		 if (StringUtils.isBlank(date)) {
-			 throw new IllegalArgumentException("date parameter cannot be blank!");
-		 }
-		 return new DateTimeType(date).getValue();
-    }
+	public static Date resolveRequestDate(String paramName, String date) {
+		if (StringUtils.isBlank(date)) {
+			throw new IllegalArgumentException(Msg.code(1662) + paramName + " parameter cannot be blank!");
+		}
+		return new DateTimeType(date).getValue();
+	}
 }

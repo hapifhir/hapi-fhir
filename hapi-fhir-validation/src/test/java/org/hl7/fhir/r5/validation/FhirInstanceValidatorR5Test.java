@@ -21,10 +21,33 @@ import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerVali
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.Base64BinaryType;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.ContactPoint;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.DocumentReference;
+import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.Extension;
+import org.hl7.fhir.r5.model.Narrative;
+import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Period;
+import org.hl7.fhir.r5.model.Practitioner;
+import org.hl7.fhir.r5.model.Procedure;
+import org.hl7.fhir.r5.model.QuestionnaireResponse;
+import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.RelatedPerson;
+import org.hl7.fhir.r5.model.StringType;
+import org.hl7.fhir.r5.model.StructureDefinition;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IResourceValidator;
+import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
+import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -255,7 +278,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: 'All FHIR elements must have a @value or children' failed", all.get(0).getMessage());
+		assertThat(all.get(0).getMessage(), containsString("All FHIR elements must have a @value or children"));
 	}
 
 	/**
@@ -285,7 +308,7 @@ public class FhirInstanceValidatorR5Test {
 		// With BPs enabled
 		val = ourCtx.newValidator();
 		instanceModule = new FhirInstanceValidator(myValidationSupport);
-		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
+		BestPracticeWarningLevel level = BestPracticeWarningLevel.Error;
 		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
@@ -344,7 +367,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(1, errors.size());
+		assertEquals(1, errors.size(), ()->errors.toString());
 		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
 
 	}
@@ -364,7 +387,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, errors.size());
+		assertEquals(0, errors.size(), ()->errors.toString());
 
 	}
 
@@ -427,14 +450,17 @@ public class FhirInstanceValidatorR5Test {
 
 		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/vitals.json"), Charsets.UTF_8);
 
-		IResourceValidator.IValidatorResourceFetcher resourceFetcher = mock(IResourceValidator.IValidatorResourceFetcher.class);
-		when(resourceFetcher.validationPolicy(any(),anyString(), anyString())).thenReturn(IResourceValidator.ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
+		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
+		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
+
+		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
+		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString());
-		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
-		verify(resourceFetcher, times(3)).fetch(any(), anyString());
+		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
 	}
 
 	@Test
@@ -614,8 +640,8 @@ public class FhirInstanceValidatorR5Test {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' failed"));
+		assertThat(messages.get(1).getMessage(), containsString("All FHIR elements must have a @value or children"));
+		assertThat(messages.get(2).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 	}
 
 	@Test
@@ -651,7 +677,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals("A code with no system has no defined meaning. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test
@@ -841,9 +867,10 @@ public class FhirInstanceValidatorR5Test {
 				"</Observation>";
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.5.0 (http://hl7.org/fhir/ValueSet/observation-status), and a code is required from this value set) (error message = Unknown code 'notvalidcode')",
-			output.getMessages().get(0).getMessage());
+		assertThat(
+			output.getMessages().get(0).getMessage(),
+			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.6.0), and a code is required from this value set) (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			);
 	}
 
 	@Test
@@ -945,7 +972,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a code should come from this value set unless it has no suitable code and the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
+			"None of the codings provided are in the value set 'IdentifierType' (http://hl7.org/fhir/ValueSet/identifier-type), and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
@@ -1006,7 +1033,7 @@ public class FhirInstanceValidatorR5Test {
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 

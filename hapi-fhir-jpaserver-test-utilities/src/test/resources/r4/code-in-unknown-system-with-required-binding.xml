@@ -1,0 +1,58 @@
+<Condition xmlns="http://hl7.org/fhir">
+	<text>
+		<status value="generated"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">Severe burn of left ear (Date: 24-May 2012)</div>
+	</text>
+	<clinicalStatus>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/condition-clinical/wrong-system"/>
+			<code value="notrealcode"/>
+		</coding>
+	</clinicalStatus>
+
+	<verificationStatus>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/condition-ver-status"/>
+			<code value="confirmed"/>
+		</coding>
+	</verificationStatus>
+	<category>
+		<coding>
+			<system value="http://terminology.hl7.org/CodeSystem/condition-category"/>
+			<code value="encounter-diagnosis"/>
+			<display value="Encounter Diagnosis"/>
+		</coding>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="439401001"/>
+			<display value="Diagnosis"/>
+		</coding>
+	</category>
+	<severity>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="24484000"/>
+			<display value="Severe"/>
+		</coding>
+	</severity>
+	<code>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="39065001"/>
+			<display value="Burn of ear"/>
+		</coding>
+		<text value="Burnt Ear"/>
+	</code>
+	<bodySite>
+		<coding>
+			<system value="http://snomed.info/sct"/>
+			<code value="49521004"/>
+			<display value="Left external ear structure"/>
+		</coding>
+		<text value="Left Ear"/>
+	</bodySite>
+	<subject>
+		<reference value="Patient/22"/>
+	</subject>
+	<onsetDateTime value="2012-05-24"/>
+</Condition>

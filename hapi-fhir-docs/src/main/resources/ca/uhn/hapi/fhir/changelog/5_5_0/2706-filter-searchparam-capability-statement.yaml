@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2695
+backport: 5.4.1
+title: "The _filter search parameter was incorrectly included in the server capability statement if it was disabled
+on the server.  This has been corrected."

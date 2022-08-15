@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class ResponseTerminologyDisplayPopulationInterceptor extends BaseRespons
 				if (myValidationSupport.isCodeSystemSupported(validationSupportContext, system)) {
 
 					IValidationSupport.LookupCodeResult lookupCodeResult = myValidationSupport.lookupCode(validationSupportContext, system, code);
-					if (lookupCodeResult.isFound()) {
+					if (lookupCodeResult != null && lookupCodeResult.isFound()) {
 						String newDisplay = lookupCodeResult.getCodeDisplay();
 						IPrimitiveType<?> newString = myStringDefinition.newInstance(newDisplay);
 						myCodingDisplayChild.getMutator().addValue(theElement, newString);

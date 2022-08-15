@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.model;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,11 +111,7 @@ public class CanonicalEID {
 
 	@Override
 	public String toString() {
-		return "CanonicalEID{" +
-			"mySystem='" + mySystem + '\'' +
-			", myUse='" + myUse + '\'' +
-			", myValue='" + myValue + '\'' +
-			'}';
+		return mySystem + '|' + myValue;
 	}
 
 

@@ -71,7 +71,7 @@ public class ExceptionPropertiesTest {
 				continue;
 			}
 			if (next == ResourceVersionNotSpecifiedException.class) {
-				// This one is deprocated
+				// This one is deprecated
 				continue;
 			}
 
@@ -82,7 +82,7 @@ public class ExceptionPropertiesTest {
 			}
 
 			try {
-				next.getConstructor(String.class, IBaseOperationOutcome.class);
+				assertNotNull(next.getConstructor(String.class, IBaseOperationOutcome.class));
 			} catch (NoSuchMethodException e) {
 				fail(classInfo.getBeanClassName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}
@@ -93,7 +93,7 @@ public class ExceptionPropertiesTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

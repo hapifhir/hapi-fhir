@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2904
+title: "Change getPathItem method in OpenApiInterceptor from private to protected"

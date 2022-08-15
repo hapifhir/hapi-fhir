@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
+import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -57,7 +58,7 @@ public class MdmResourceFilteringSvc {
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
 		if (MdmResourceUtil.isMdmManaged(theResource)) {
-			ourLog.debug("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource);
+			ourLog.trace("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource.getId());
 			return false;
 		}
 

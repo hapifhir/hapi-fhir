@@ -1,0 +1,8 @@
+---
+type: add
+issue: 2748
+backport: 5.4.2
+title: "A new tag storage mode called **Inline Tag Mode** tas been added. In this mode, all tags are stored directly
+  in the serialized resource body in the database, instead of using dedicated tables. This has significant performance
+  advantages when storing resources with many distinct tags (i.e. many tags that are unique to each resource, as opposed
+  to being reused across multiple resources)."

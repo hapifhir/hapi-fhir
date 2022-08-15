@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3158
+backport: 5.6.1
+title: "Resource links were previously not being consistently created in cases where references were versioned and
+  pointing to recently auto-created placeholder resources."

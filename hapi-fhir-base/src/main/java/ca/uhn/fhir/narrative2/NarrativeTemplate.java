@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative2;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
@@ -34,7 +35,7 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	private Set<String> myAppliesToProfiles = new HashSet<>();
 	private Set<String> myAppliesToResourceTypes = new HashSet<>();
 	private Set<String> myAppliesToDataTypes = new HashSet<>();
-	private Set<Class<? extends IBase>> myAppliesToResourceClasses = new HashSet<>();
+	private Set<Class<? extends IBase>> myAppliesToClasses = new HashSet<>();
 	private TemplateTypeEnum myTemplateType = TemplateTypeEnum.THYMELEAF;
 	private String myContextPath;
 	private String myTemplateName;
@@ -79,12 +80,12 @@ public class NarrativeTemplate implements INarrativeTemplate {
 	}
 
 	@Override
-	public Set<Class<? extends IBase>> getAppliesToResourceClasses() {
-		return Collections.unmodifiableSet(myAppliesToResourceClasses);
+	public Set<Class<? extends IBase>> getAppliesToClasses() {
+		return Collections.unmodifiableSet(myAppliesToClasses);
 	}
 
-	void addAppliesToResourceClass(Class<? extends IBase> theAppliesToResourceClass) {
-		myAppliesToResourceClasses.add(theAppliesToResourceClass);
+	void addAppliesToClass(Class<? extends IBase> theAppliesToClass) {
+		myAppliesToClasses.add(theAppliesToClass);
 	}
 
 	@Override
@@ -111,11 +112,12 @@ public class NarrativeTemplate implements INarrativeTemplate {
 		try {
 			return NarrativeTemplateManifest.loadResource(getTemplateFileName());
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1866) + e);
 		}
 	}
 
 	void addAppliesToDatatype(String theDataType) {
 		myAppliesToDataTypes.add(theDataType);
 	}
+
 }

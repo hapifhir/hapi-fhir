@@ -1,0 +1,986 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "ExplanationOfBenefit",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-ExplanationOfBenefit-Professional-NonClinician"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+									"code": "payerid"
+								}
+							]
+						},
+						"system": "https://hl7.org/fhir/sid/payerid",
+						"value": "5824473976"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+									"code": "uc"
+								}
+							]
+						},
+						"system": "https://hl7.org/fhir/sid/claimid",
+						"value": "1234094"
+					}
+				],
+				"status": "active",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/claim-type",
+							"code": "professional"
+						}
+					]
+				},
+				"use": "claim",
+				"patient": {
+					"reference": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
+				},
+				"billablePeriod": {
+					"start": "2017-01-08",
+					"end": "2017-01-08"
+				},
+				"created": "2017-01-11T00:00:00-08:00",
+				"insurer": {
+					"reference": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
+				},
+				"provider": {
+					"reference": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
+				},
+				"payee": {
+					"type": {
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/payeetype",
+								"code": "provider"
+							}
+						],
+						"text": "Claim paid to VENDOR"
+					},
+					"party": {
+						"reference": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
+					}
+				},
+				"outcome": "complete",
+				"disposition": "PAID",
+				"careTeam": [
+					{
+						"sequence": 1,
+						"provider": {
+							"reference": "Practitioner/23eccc61-ab67-bf8a-e464-6260f7989556"
+						},
+						"responsible": false,
+						"role": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/claimcareteamrole",
+									"code": "primary"
+								}
+							]
+						}
+					},
+					{
+						"sequence": 2,
+						"provider": {
+							"reference": "Practitioner/dbbc9a06-f685-b481-d739-133755af138e"
+						},
+						"responsible": false,
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+									"code": "referring"
+								}
+							]
+						}
+					},
+					{
+						"sequence": 3,
+						"provider": {
+							"reference": "Practitioner/39b9250c-0d01-cbb0-ea89-0de9c74af511"
+						},
+						"responsible": true,
+						"role": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBClaimCareTeamRole",
+									"code": "performing"
+								}
+							]
+						}
+					}
+				],
+				"supportingInfo": [
+					{
+						"sequence": 1,
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+									"code": "clmrecvddate"
+								}
+							]
+						},
+						"timingDate": "2017-01-11"
+					},
+					{
+						"sequence": 2,
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBSupportingInfoType",
+									"code": "billingnetworkcontractingstatus"
+								}
+							]
+						},
+						"code": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+									"code": "other"
+								}
+							]
+						}
+					}
+				],
+				"diagnosis": [
+					{
+						"sequence": 4,
+						"diagnosisCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/sid/icd-10-cm",
+									"code": "I27.2",
+									"display": "Other secondary pulmonary hypertension"
+								}
+							],
+							"text": "Other secondary pulmonary hypertension"
+						}
+					}
+				],
+				"procedure": [
+					{
+						"sequence": 1,
+						"date": "2017-01-08T00:00:00-08:00",
+						"procedureCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://www.ama-assn.org/go/cpt",
+									"code": "99233",
+									"display": "Subsequent hospital care for severe problem"
+								}
+							],
+							"text": "SBSQ HOSPITAL CARE/DAY 35 MINUTES"
+						}
+					}
+				],
+				"insurance": [
+					{
+						"focal": true,
+						"coverage": {
+							"reference": "urn:uuid:175dbf4a-7ee2-446d-9938-82eea27871a7"
+						}
+					}
+				],
+				"item": [
+					{
+						"sequence": 1,
+						"diagnosisSequence": [
+							4
+						],
+						"procedureSequence": [
+							1
+						],
+						"productOrService": {
+							"coding": [
+								{
+									"system": "http://www.ama-assn.org/go/cpt",
+									"code": "99233",
+									"display": "Subsequent hospital care for severe problem"
+								}
+							],
+							"text": "SBSQ HOSPITAL CARE/DAY 35 MINUTES"
+						},
+						"servicedPeriod": {
+							"start": "2017-01-08",
+							"end": "2017-01-08"
+						},
+						"locationCodeableConcept": {
+							"coding": [
+								{
+									"system": "https://www.cms.gov/Medicare/Coding/place-of-service-codes/Place_of_Service_Code_Set",
+									"code": "99"
+								}
+							]
+						},
+						"quantity": {
+							"value": 1,
+							"unit": "Units",
+							"system": "http://unitsofmeasure.org",
+							"code": "[arb'U]"
+						},
+						"net": {
+							"value": 317.00,
+							"currency": "USD"
+						},
+						"adjudication": [
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+											"code": "submitted"
+										}
+									]
+								},
+								"amount": {
+									"value": 317.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+											"code": "benefit"
+										}
+									]
+								},
+								"amount": {
+									"value": 124.69,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+											"code": "copay"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+											"code": "deductible"
+										}
+									]
+								},
+								"amount": {
+									"value": 124.69,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+											"code": "coinsurance"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+											"code": "memberliability"
+										}
+									]
+								},
+								"amount": {
+									"value": 124.69,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+											"code": "noncovered"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+											"code": "priorpayerpaid"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+											"code": "paidtoprovider"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							},
+							{
+								"category": {
+									"coding": [
+										{
+											"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBPayerAdjudicationStatus",
+											"code": "outofnetwork"
+										}
+									]
+								},
+								"amount": {
+									"value": 0.00,
+									"currency": "USD"
+								}
+							}
+						]
+					}
+				],
+				"total": [
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+									"code": "submitted"
+								}
+							]
+						},
+						"amount": {
+							"value": 317.00,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+									"code": "benefit"
+								}
+							]
+						},
+						"amount": {
+							"value": 124.69,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+									"code": "copay"
+								}
+							]
+						},
+						"amount": {
+							"value": 0.00,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/adjudication",
+									"code": "deductible"
+								}
+							]
+						},
+						"amount": {
+							"value": 124.69,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+									"code": "coinsurance"
+								}
+							]
+						},
+						"amount": {
+							"value": 0.00,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+									"code": "memberliability"
+								}
+							]
+						},
+						"amount": {
+							"value": 124.69,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+									"code": "noncovered"
+								}
+							]
+						},
+						"amount": {
+							"value": 0.00,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+									"code": "priorpayerpaid"
+								}
+							]
+						},
+						"amount": {
+							"value": 0.00,
+							"currency": "USD"
+						}
+					},
+					{
+						"category": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBAdjudication",
+									"code": "paidtoprovider"
+								}
+							]
+						},
+						"amount": {
+							"value": 0.00,
+							"currency": "USD"
+						}
+					}
+				],
+				"payment": {
+					"date": "2017-02-02",
+					"amount": {
+						"value": 0.00,
+						"currency": "USD"
+					}
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "ExplanationOfBenefit?identifier=5824473976"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "d1a47e2c-509b-e326-deab-597e3f598ca5",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR"
+								}
+							]
+						},
+						"system": "https://example.org/front-door",
+						"value": "412563524-CO"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"text": "HYOHWAN MGUIRRE",
+						"family": "MGUIRRE",
+						"given": [
+							"HYOHWAN"
+						]
+					}
+				],
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "719-654-0220",
+						"use": "home"
+					}
+				],
+				"gender": "unknown",
+				"birthDate": "1958-05-12",
+				"address": [
+					{
+						"use": "home",
+						"type": "postal",
+						"line": [
+							"20360 East 45Th Court",
+							"PO Box 523"
+						],
+						"city": "COLORADO SPRINGS",
+						"postalCode": "80922-4166"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
+			}
+		},
+		{
+			"fullUrl": "urn:uuid:175dbf4a-7ee2-446d-9938-82eea27871a7",
+			"resource": {
+				"resourceType": "Coverage",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Coverage"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "FILL"
+								}
+							]
+						},
+						"system": "https://hl7.org/fhir/sid/coverageid",
+						"value": "412563524-CO-80001"
+					}
+				],
+				"status": "active",
+				"type": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+							"code": "HMO",
+							"display": "health maintenance organization policy"
+						}
+					],
+					"text": "HMO - HMO COMMERCIAL-HDHP-Signature"
+				},
+				"subscriberId": "412563524",
+				"beneficiary": {
+					"reference": "Patient/d1a47e2c-509b-e326-deab-597e3f598ca5"
+				},
+				"relationship": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+							"code": "self",
+							"display": "Self"
+						}
+					],
+					"text": "The Beneficiary is the Subscriber"
+				},
+				"period": {
+					"start": "2016-01-01",
+					"end": "2017-07-01"
+				},
+				"payor": [
+					{
+						"reference": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
+					}
+				],
+				"class": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+									"code": "group",
+									"display": "Group"
+								}
+							],
+							"text": "An employee group"
+						},
+						"value": "80001",
+						"name": "CS BRZ HDHP 5500/30%/0 ONX S-NON-MEDICARE"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Coverage?identifier=412563524-CO-80001"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "68ae4f74-afdc-6242-c50e-02ef776d8e5d",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
+					]
+				},
+				"identifier": [
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://hl7.org/fhir/us/carin-bb/CodeSystem/C4BBIdentifierType",
+									"code": "npi"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1407833767"
+					},
+					{
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "TAX"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.4.4"
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/organization-type",
+								"code": "prov"
+							}
+						]
+					}
+				],
+				"name": "PIKES PEAK NEPHROLOGY ASSOCIATES PC",
+				"address": [
+					{
+						"use": "work",
+						"type": "physical",
+						"line": [
+							"1914 LELARAY STREET"
+						],
+						"city": "COLORADO SPRINGS",
+						"postalCode": "80909",
+						"country": "USA"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Organization/68ae4f74-afdc-6242-c50e-02ef776d8e5d"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Organization",
+				"id": "5954a17b-0779-334c-4f1c-e894e45d15fb",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/carin-bb/StructureDefinition/C4BB-Organization"
+					]
+				},
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "FILL"
+								}
+							]
+						},
+						"system": "https://hl7.org/fhir/sid/organizationid",
+						"value": "NATLTAP CO-KFHP-PAY-CO"
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/organization-type",
+								"code": "pay",
+								"display": "Payer"
+							}
+						]
+					}
+				],
+				"name": "KAISER FOUNDATION HEALTHPLAN, INC",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "1-800-382-4661",
+						"use": "work"
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"type": "postal",
+						"line": [
+							"NATIONAL CLAIMS ADMINISTRATION COLORADO",
+							"PO Box 629028"
+						],
+						"city": "El Dorado Hills",
+						"state": "CA",
+						"postalCode": "95762-9028"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Organization/5954a17b-0779-334c-4f1c-e894e45d15fb"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "23eccc61-ab67-bf8a-e464-6260f7989556",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "NPI"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1497983654"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"text": "CASSIDY, HEATHER M (MD)",
+						"family": "CASSIDY",
+						"given": [
+							"HEATHER"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"Briargate",
+							"1405 Briargate Pkwy #141"
+						],
+						"city": "Colorado Springs",
+						"postalCode": "80920"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/23eccc61-ab67-bf8a-e464-6260f7989556"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "dbbc9a06-f685-b481-d739-133755af138e",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "NPI"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1568467280"
+					},
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "TAX"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.4.4",
+						"value": "311669909"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"text": "MOHNSSEN, STEVEN R (MD)",
+						"family": "MOHNSSEN",
+						"given": [
+							"STEVEN"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"1725 E Boulder St",
+							"Ste 204"
+						],
+						"city": "Colorado Springs",
+						"postalCode": "80909"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/dbbc9a06-f685-b481-d739-133755af138e"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "39b9250c-0d01-cbb0-ea89-0de9c74af511",
+				"meta": {
+					"lastUpdated": "2021-06-30",
+					"profile": [
+						"http://hl7.org/fhir/us/core/StructureDefinition/us-core-practitioner"
+					]
+				},
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "NPI"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "1679605265"
+					},
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "TAX"
+								}
+							]
+						},
+						"system": "urn:oid:2.16.840.1.113883.4.4",
+						"value": "840629252"
+					}
+				],
+				"name": [
+					{
+						"use": "usual",
+						"text": "ROSS, MICHAEL D (MD)",
+						"family": "ROSS",
+						"given": [
+							"MICHAEL"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				],
+				"address": [
+					{
+						"use": "work",
+						"line": [
+							"1914 Lelaray St"
+						],
+						"city": "Colorado Springs",
+						"postalCode": "80909"
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Practitioner/39b9250c-0d01-cbb0-ea89-0de9c74af511"
+			}
+		}
+	]
+}

@@ -24,7 +24,7 @@ public class ServerUsingOldTypesDstu3Test {
 	private static FhirContext ourCtx = FhirContext.forDstu3();
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@Test

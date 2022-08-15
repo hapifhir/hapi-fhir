@@ -28,11 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -47,7 +49,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final String ID_VS_SCHOOLTYPE = "ValueSet/schooltype";
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
@@ -158,12 +160,14 @@ public class QuestionnaireResponseValidatorR4Test {
 				.thenReturn(new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code"));
 			when(myValSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), nullable(ValueSet.class)))
 				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
+			when(myValSupport.validateCode(any(), any(), any(), any(), any(), nullable(String.class)))
+				.thenReturn(new IValidationSupport.CodeValidationResult().setCode("code0"));
 
 
 			ValidationResult errors = myVal.validateWithResult(qa);
 
 			ourLog.info(errors.toString());
-			assertThat("index[" + i + "]: " + errors.toString(), errors.getMessages(), empty());
+			assertThat("index[" + i + "]: " + errors, errors.getMessages(), empty());
 		}
 	}
 
@@ -627,10 +631,14 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue(questionnaireRef);
-		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay("Hello"));
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
-		ourLog.info(errors.toString());
-		assertThat(errors.getMessages(), empty());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
+		assertThat(warningsAndErrors, is(empty()));
 
 		// Missing String answer
 
@@ -653,6 +661,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		List<Questionnaire.QuestionnaireItemAnswerOptionComponent> options = new ArrayList<>();
 		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://foo", "foo", "FOOOO")));
 		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://bar", "bar", "FOOOO")));
+		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new StringType("Hello")));
 
 		Questionnaire q = new Questionnaire();
 		QuestionnaireItemComponent item = q.addItem();
@@ -681,7 +690,12 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertEquals(true, errors.isSuccessful());
+		List<SingleValidationMessage> warningsAndErrors = errors
+			.getMessages()
+			.stream()
+			.filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal())
+			.collect(Collectors.toList());
+		assertThat(warningsAndErrors, is(empty()));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -806,7 +820,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	public static void afterClassClearContext() {
 		myDefaultValidationSupport.flush();
 		myDefaultValidationSupport = null;
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 

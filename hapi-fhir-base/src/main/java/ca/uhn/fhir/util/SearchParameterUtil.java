@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -57,8 +58,8 @@ public class SearchParameterUtil {
 	 * 1. Attempt to find one called 'patient'
 	 * 2. If that fails, find one called 'subject'
 	 * 3. If that fails, find find by Patient Compartment.
-	 *    3.1 If that returns >1 result, throw an error
-	 *    3.2 If that returns 1 result, return it
+	 * 3.1 If that returns >1 result, throw an error
+	 * 3.2 If that returns 1 result, return it
 	 */
 	public static Optional<RuntimeSearchParam> getOnlyPatientSearchParamForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeSearchParam myPatientSearchParam = null;
@@ -87,12 +88,12 @@ public class SearchParameterUtil {
 		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
 		if (searchParams == null || searchParams.size() == 0) {
 			String errorMessage = String.format("Resource type [%s] is not eligible for this type of export, as it contains no Patient compartment, and no `patient` or `subject` search parameter", runtimeResourceDefinition.getId());
-			throw new IllegalArgumentException(errorMessage);
+			throw new IllegalArgumentException(Msg.code(1774) + errorMessage);
 		} else if (searchParams.size() == 1) {
 			patientSearchParam = searchParams.get(0);
 		} else {
 			String errorMessage = String.format("Resource type %s has more than one Search Param which references a patient compartment. We are unable to disambiguate which patient search parameter we should be searching by.", runtimeResourceDefinition.getId());
-			throw new IllegalArgumentException(errorMessage);
+			throw new IllegalArgumentException(Msg.code(1775) + errorMessage);
 		}
 		return patientSearchParam;
 	}
@@ -109,9 +110,23 @@ public class SearchParameterUtil {
 	}
 
 
+	/**
+	 * Return true if any search parameter in the resource can point at a patient, false otherwise
+	 */
+	public static boolean isResourceTypeInPatientCompartment(FhirContext theFhirContext, String theResourceType) {
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition).size() > 0;
+	}
+
+
 	@Nullable
 	public static String getCode(FhirContext theContext, IBaseResource theResource) {
 		return getStringChild(theContext, theResource, "code");
+	}
+
+	@Nullable
+	public static String getURL(FhirContext theContext, IBaseResource theResource) {
+		return getStringChild(theContext, theResource, "url");
 	}
 
 	@Nullable
@@ -131,5 +146,16 @@ public class SearchParameterUtil {
 			.map(t -> ((IPrimitiveType<?>) t))
 			.map(t -> t.getValueAsString())
 			.orElse(null);
+	}
+
+	public static String stripModifier(String theSearchParam) {
+		String retval;
+		int colonIndex = theSearchParam.indexOf(":");
+		if (colonIndex == -1) {
+			retval = theSearchParam;
+		} else {
+			retval = theSearchParam.substring(0, colonIndex);
+		}
+		return retval;
 	}
 }

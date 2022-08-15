@@ -5,7 +5,21 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.Create;
+import ca.uhn.fhir.rest.annotation.Delete;
+import ca.uhn.fhir.rest.annotation.History;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Update;
+import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -14,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -30,7 +45,8 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestOperationComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
@@ -38,10 +54,18 @@ import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResou
 import org.hl7.fhir.dstu3.model.CapabilityStatement.ConditionalDeleteStatus;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.SystemRestfulInteraction;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.TypeRestfulInteraction;
+import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.DateType;
+import org.hl7.fhir.dstu3.model.DiagnosticReport;
+import org.hl7.fhir.dstu3.model.Encounter;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -50,6 +74,7 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -338,55 +363,26 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(4, conformance.getRest().get(0).getOperation().size());
+		assertEquals(2, conformance.getRest().get(0).getOperation().size());
 		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
-		assertThat(operationNames, containsInAnyOrder("someOp", "validate", "someOp", "validate"));
+		assertThat(operationNames, containsInAnyOrder("someOp", "validate"));
 
 		List<String> operationIdParts = toOperationIdParts(conformance.getRest().get(0).getOperation());
-		assertThat(operationIdParts, containsInAnyOrder("Patient-i-someOp", "Encounter-i-someOp", "Patient-i-validate", "Encounter-i-validate"));
+		assertThat(operationIdParts, containsInAnyOrder("EncounterPatient-i-someOp", "EncounterPatient-i-validate"));
 
 		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-someOp"), createRequestDetails(rs));
+			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-someOp"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
 			assertEquals("someOp", opDef.getCode());
 			assertEquals(true, opDef.getInstance());
 			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
+			assertThat(types, containsInAnyOrder("Patient", "Encounter"));
 			assertEquals(2, opDef.getParameter().size());
 			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
 			assertEquals("date", opDef.getParameter().get(0).getType());
 			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Patient", opDef.getParameter().get(1).getType());
-		}
-		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Encounter-i-someOp"), createRequestDetails(rs));
-			validate(opDef);
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("someOp", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Encounter"));
-			assertEquals(2, opDef.getParameter().size());
-			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
-			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Encounter", opDef.getParameter().get(1).getType());
-		}
-		{
-			OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-validate"), createRequestDetails(rs));
-			validate(opDef);
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
-			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("validate", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
-			assertThat(types, containsInAnyOrder("Patient"));
-			assertEquals(1, opDef.getParameter().size());
-			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Patient", opDef.getParameter().get(0).getType());
 		}
 	}
 	
@@ -411,45 +407,6 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	}
 
 	@Test
-	public void testOperationOnNoTypes() throws Exception {
-		RestfulServer rs = new RestfulServer(ourCtx);
-		rs.setProviders(new PlainProviderWithExtendedOperationOnNoType());
-
-		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider() {
-			@Override
-			public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-				return super.getServerConformance(theRequest, createRequestDetails(rs));
-			}
-		};
-		rs.setServerConformanceProvider(sc);
-
-		rs.init(createServletConfig());
-
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
-		validate(opDef);
-
-		assertEquals("plain", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent());
-		assertEquals(3, opDef.getParameter().size());
-
-		assertTrue(opDef.getParameter().get(0).hasName());
-		assertEquals("start", opDef.getParameter().get(0).getName());
-		assertEquals("in", opDef.getParameter().get(0).getUse().toCode());
-		assertEquals("0", opDef.getParameter().get(0).getMinElement().getValueAsString());
-		assertEquals("date", opDef.getParameter().get(0).getTypeElement().getValueAsString());
-
-		assertEquals("out1", opDef.getParameter().get(2).getName());
-		assertEquals("out", opDef.getParameter().get(2).getUse().toCode());
-		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
-		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
-		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
-
-		assertThat(opDef.getSystem(), is(true));
-		assertThat(opDef.getType(), is(false));
-		assertThat(opDef.getInstance(), is(true));
-	}
-
-	@Test
 	public void testProviderWithRequiredAndOptional() throws Exception {
 
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -462,6 +419,36 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
+		CapabilityStatementRestResourceComponent res = rest.getResource().get(0);
+		assertEquals("DiagnosticReport", res.getType());
+
+		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
+//		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
+
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+
+		assertEquals(1, res.getSearchInclude().size());
+		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
+	}
+
+	@Test
+	public void testIncludesAndRevIncludes() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new ProviderWithObservationSubjectSearch(), new ReadProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		String conf = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
@@ -726,6 +713,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	}
 
 	@Test
+	@Disabled // This was working incorrectly previously
 	public void testSystemLevelNamedQueryWithParameters() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
 		rs.setProviders(new NamedQueryPlainProvider());
@@ -1061,7 +1049,16 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
+	}
 
+	public static class ProviderWithObservationSubjectSearch {
+
+		@Search
+		public List<DiagnosticReport> findDiAgnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT) ReferenceParam thePatientId,
+																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+																						 @IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unused")
@@ -1224,7 +1221,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
   
   public static class ProfiledPatientProvider implements IResourceProvider {
@@ -1272,7 +1269,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
   public static class PatientTripleSub extends PatientSubSub {}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		ServletRequestDetails retVal = new ServletRequestDetails();
 		retVal.setServer(theServer);
 		return retVal;
 	}

@@ -1,13 +1,17 @@
 package org.hl7.fhir.r4.model;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ModelR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ModelR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Test
@@ -29,5 +33,11 @@ public class ModelR4Test {
 		}
 	}
 
+	@Test
+	public void testCompositeRuntimeSearchParamHasComponents() {
+		RuntimeSearchParam searchParam = ourCtx.getResourceDefinition("Observation").getSearchParam("code-value-concept");
+		ourLog.info("Have params: {}", searchParam.getComponents().toString());
+		assertEquals(2, searchParam.getComponents().size());
+	}
 
 }

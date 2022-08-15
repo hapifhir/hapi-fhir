@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -42,8 +43,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Set;
 
-public class GraphQLMethodBinding extends BaseMethodBinding<String> {
+public class GraphQLMethodBinding extends OperationMethodBinding {
 
 	private final Integer myIdParamIndex;
 	private final Integer myQueryUrlParamIndex;
@@ -51,7 +54,7 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	private final RequestTypeEnum myMethodRequestType;
 
 	public GraphQLMethodBinding(Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
-		super(theMethod, theContext, theProvider);
+		super(null, null, theMethod, theContext, theProvider, true, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null, true);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
 		myQueryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
@@ -71,8 +74,28 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	}
 
 	@Override
-	public boolean isGlobalMethod() {
+	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
+		return getRestOperationType();
+	}
+
+	@Override
+	protected Set<Class<?>> provideExpectedReturnTypes() {
+		return Collections.singleton(String.class);
+	}
+
+	@Override
+	public boolean isCanOperateAtServerLevel() {
 		return true;
+	}
+
+	@Override
+	public boolean isCanOperateAtTypeLevel() {
+		return false;
+	}
+
+	@Override
+	public boolean isCanOperateAtInstanceLevel() {
+		return myIdParamIndex != null;
 	}
 
 	@Override
@@ -87,8 +110,10 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 	private String getQueryValue(Object[] methodParams) {
 		switch (myMethodRequestType) {
 			case POST:
+				Validate.notNull(myQueryBodyParamIndex, "GraphQL method does not have @" + GraphQLQueryBody.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryBodyParamIndex];
 			case GET:
+				Validate.notNull(myQueryUrlParamIndex, "GraphQL method does not have @" + GraphQLQueryUrl.class.getSimpleName() + " parameter");
 				return (String) methodParams[myQueryUrlParamIndex];
 		}
 		return null;

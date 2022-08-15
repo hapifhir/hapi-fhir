@@ -1,6 +1,7 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -15,17 +16,48 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
 import org.hl7.fhir.dstu2016may.model.Address.AddressUse;
-import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Appointment;
+import org.hl7.fhir.dstu2016may.model.AuditEvent;
+import org.hl7.fhir.dstu2016may.model.Binary;
+import org.hl7.fhir.dstu2016may.model.Bundle;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleType;
+import org.hl7.fhir.dstu2016may.model.CodeType;
+import org.hl7.fhir.dstu2016may.model.CodeableConcept;
+import org.hl7.fhir.dstu2016may.model.Coding;
+import org.hl7.fhir.dstu2016may.model.Condition;
 import org.hl7.fhir.dstu2016may.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu2016may.model.DateTimeType;
+import org.hl7.fhir.dstu2016may.model.DateType;
+import org.hl7.fhir.dstu2016may.model.DiagnosticReport;
 import org.hl7.fhir.dstu2016may.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.dstu2016may.model.DocumentManifest;
+import org.hl7.fhir.dstu2016may.model.Duration;
+import org.hl7.fhir.dstu2016may.model.Encounter;
 import org.hl7.fhir.dstu2016may.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu2016may.model.Enumerations.DocumentReferenceStatus;
+import org.hl7.fhir.dstu2016may.model.Extension;
+import org.hl7.fhir.dstu2016may.model.HumanName;
 import org.hl7.fhir.dstu2016may.model.HumanName.NameUse;
+import org.hl7.fhir.dstu2016may.model.IdType;
+import org.hl7.fhir.dstu2016may.model.Identifier;
 import org.hl7.fhir.dstu2016may.model.Identifier.IdentifierUse;
+import org.hl7.fhir.dstu2016may.model.InstantType;
+import org.hl7.fhir.dstu2016may.model.Location;
+import org.hl7.fhir.dstu2016may.model.Medication;
+import org.hl7.fhir.dstu2016may.model.MedicationOrder;
+import org.hl7.fhir.dstu2016may.model.Observation;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationRelationshipType;
 import org.hl7.fhir.dstu2016may.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu2016may.model.Organization;
+import org.hl7.fhir.dstu2016may.model.Patient;
+import org.hl7.fhir.dstu2016may.model.PrimitiveType;
+import org.hl7.fhir.dstu2016may.model.Quantity;
+import org.hl7.fhir.dstu2016may.model.Reference;
+import org.hl7.fhir.dstu2016may.model.Resource;
+import org.hl7.fhir.dstu2016may.model.SampledData;
+import org.hl7.fhir.dstu2016may.model.SimpleQuantity;
+import org.hl7.fhir.dstu2016may.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
@@ -145,7 +177,7 @@ public class XmlParserDstu2_1Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 		
 	}
@@ -177,7 +209,7 @@ public class XmlParserDstu2_1Test {
 			parser.parseResource(input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 		
 	}
@@ -939,7 +971,7 @@ public class XmlParserDstu2_1Test {
 	}
 
 	@Test
-	public void testEncodeContainedWithNarrativeIsSuppresed() throws Exception {
+	public void testEncodeContainedWithNarrative() throws Exception {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 
 		// Create an organization, note that the organization does not have an ID
@@ -958,9 +990,9 @@ public class XmlParserDstu2_1Test {
 		ourLog.info(encoded);
 		
 		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
-		assertThat(encoded, not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
+		assertThat(encoded, stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization"));
 		
-		assertThat(encoded, not(containsString("FOOBAR")));
+		assertThat(encoded, (containsString("FOOBAR")));
 		assertThat(encoded, (containsString("BARFOO")));
 
 	}
@@ -2286,7 +2318,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(resource);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: [element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 		
 		LenientErrorHandler errorHandler = new LenientErrorHandler();
@@ -2509,7 +2541,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(encoded.replace("Observation", "observation"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [1,1]]: Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'",
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [1,1]]: " + Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'",
 					e.getMessage());
 		}
 
@@ -2517,7 +2549,7 @@ public class XmlParserDstu2_1Test {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("DataFormatException at [[row,col {unknown-source}]: [2,4]]: Unknown element 'valueSampleddata' found during parse", e.getMessage());
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
 
@@ -2577,7 +2609,7 @@ public class XmlParserDstu2_1Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	public static void compareXml(String content, String reEncoded) {

@@ -16,7 +16,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface ISearchDao extends JpaRepository<Search, Long> {
+public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
 	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
 	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
@@ -43,7 +43,7 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
 	Slice<Long> findDeleted(Pageable thePage);
 
-	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = false AND s.myStatus <> 'FAILED'")
+	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
 
 	@Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")

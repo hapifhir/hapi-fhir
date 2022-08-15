@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,18 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +49,15 @@ import javax.annotation.Nonnull;
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
 public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscriptionResources implements MessageHandler {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegisteringSubscriber.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * Constructor
@@ -71,24 +80,58 @@ public class SubscriptionRegisteringSubscriber extends BaseSubscriberForSubscrip
 		}
 
 		switch (payload.getOperationType()) {
-			case DELETE:
-				mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
-				break;
+			case MANUALLY_TRIGGERED:
+			case TRANSACTION:
+				return;
 			case CREATE:
 			case UPDATE:
-				IBaseResource subscription = payload.getNewPayload(myFhirContext);
-				String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(subscription);
-				if ("active".equals(statusString)) {
-					mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payload.getNewPayload(myFhirContext));
-				} else {
-					mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payload.getId(myFhirContext).getIdPart());
-				}
-				break;
-			case MANUALLY_TRIGGERED:
-			default:
+			case DELETE:
 				break;
 		}
 
+		// We read the resource back from the DB instead of using the supplied copy for
+		// two reasons:
+		// - in order to store partition id in the userdata of the resource for partitioned subscriptions
+		// - in case we're processing out of order and a create-then-delete has been processed backwards (or vice versa)
+
+		IBaseResource payloadResource;
+		IIdType payloadId = payload.getPayloadId(myFhirContext).toUnqualifiedVersionless();
+		try {
+			IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getResourceDao("Subscription");
+			RequestDetails systemRequestDetails = getPartitionAwareRequestDetails(payload);
+			payloadResource = subscriptionDao.read(payloadId, systemRequestDetails);
+			if (payloadResource == null) {
+				// Only for unit test
+				payloadResource = payload.getPayload(myFhirContext);
+			}
+		} catch (ResourceGoneException e) {
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+			return;
+		}
+
+		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(payloadResource);
+		if ("active".equals(statusString)) {
+			mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(payloadResource);
+		} else {
+			mySubscriptionRegistry.unregisterSubscriptionIfRegistered(payloadId.getIdPart());
+		}
+
+	}
+
+	/**
+	 * There were some situations where the RequestDetails attempted to use the default partition
+	 * and the partition name was a list containing null values (i.e. using the package installer to STORE_AND_INSTALL
+	 * Subscriptions while partitioning was enabled). If any partition matches these criteria,
+	 * {@link RequestPartitionId#defaultPartition()} is used to obtain the default partition.
+	 */
+	private RequestDetails getPartitionAwareRequestDetails(ResourceModifiedMessage payload) {
+		RequestPartitionId payloadPartitionId = payload.getPartitionId();
+		if (payloadPartitionId == null || payloadPartitionId.isDefaultPartition()) {
+			// This may look redundant but the package installer STORE_AND_INSTALL Subscriptions when partitioning is enabled
+			// creates a corrupt default partition.  This resets it to a clean one.
+			payloadPartitionId = RequestPartitionId.defaultPartition();
+		}
+		return new SystemRequestDetails().setRequestPartitionId(payloadPartitionId);
 	}
 
 }

@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 2457
+title: "A regression in HAPI FHIR 5.3.0 resulted in concurrent searches being executed in a sequential
+  (and not parallel) fashion in some circumstances."

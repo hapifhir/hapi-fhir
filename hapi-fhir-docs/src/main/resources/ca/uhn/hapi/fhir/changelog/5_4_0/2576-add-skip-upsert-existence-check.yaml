@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2576
+title: "A new header called `X-Upsert-Extistence-Check` can now be added to JPA server *Create with Client-Assigned ID* operations
+  (aka Upsert) in order to improve performance when loading data that is known to not exist by skipping the resource existence check."

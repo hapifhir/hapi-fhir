@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2579
+title: "When using the JPA server in offset mode, the count+offset information is now passed to the 
+  SQL query, resulting in better performance. Thanks to Tuomo Ala-Vannesluoma for the pull request!"

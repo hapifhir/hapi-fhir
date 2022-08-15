@@ -1,0 +1,4 @@
+This package contains the BCP47 Language Registry from
+https://github.com/mattcg/language-subtag-registry
+
+Used under the terms of the Open Data Commons Attribution License (ODC-BY).

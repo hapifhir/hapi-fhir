@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -17,15 +18,15 @@ import java.util.stream.Collectors;
  */
 public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 
-	protected IsPossibleMatchWith(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected IsPossibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		List<MdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
+		List<? extends IMdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 
-		List<Long> goldenResourcePidsToMatch = myBaseResources.stream()
+		List<ResourcePersistentId> goldenResourcePidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
@@ -36,8 +37,8 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 				.collect(Collectors.toList());
 		}
 
-		List<Long> mdmLinkGoldenResourcePids = mdmLinks
-			.stream().map(MdmLink::getGoldenResourcePid)
+		List<ResourcePersistentId> mdmLinkGoldenResourcePids = mdmLinks
+			.stream().map(IMdmLink::getGoldenResourcePersistenceId)
 			.collect(Collectors.toList());
 
 		return mdmLinkGoldenResourcePids.containsAll(goldenResourcePidsToMatch);
@@ -54,7 +55,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 		mismatchDescription.appendText("No MDM Link With POSSIBLE_MATCH was found");
 	}
 
-	public static Matcher<IAnyResource> possibleMatchWith(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public static Matcher<IAnyResource> possibleMatchWith(IIdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		return new IsPossibleMatchWith(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

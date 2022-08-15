@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,19 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.TolerantJsonParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -48,7 +53,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -68,21 +72,30 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
-import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.xcontent.XContentType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ElasticsearchSvcImpl implements IElasticsearchSvc {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(ElasticsearchSvcImpl.class);
 
 	// Index Constants
 	public static final String OBSERVATION_INDEX = "observation_index";
@@ -93,29 +106,31 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public static final String OBSERVATION_CODE_INDEX_SCHEMA_FILE = "ObservationCodeIndexSchema.json";
 
 	// Aggregation Constants
-	private final String GROUP_BY_SUBJECT = "group_by_subject";
-	private final String GROUP_BY_SYSTEM = "group_by_system";
-	private final String GROUP_BY_CODE = "group_by_code";
-	private final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
+	private static final String GROUP_BY_SUBJECT = "group_by_subject";
+	private static final String GROUP_BY_SYSTEM = "group_by_system";
+	private static final String GROUP_BY_CODE = "group_by_code";
+	private static final String MOST_RECENT_EFFECTIVE = "most_recent_effective";
 
 	// Observation index document element names
-	private final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
-	private final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
-	private final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
-	private final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
-	private final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
-	private final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
-	private final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
-	private final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
-	private final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
-	private final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
-	private final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
-	private final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
-	private final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
+	private static final String OBSERVATION_IDENTIFIER_FIELD_NAME = "identifier";
+	private static final String OBSERVATION_SUBJECT_FIELD_NAME = "subject";
+	private static final String OBSERVATION_CODEVALUE_FIELD_NAME = "codeconceptcodingcode";
+	private static final String OBSERVATION_CODESYSTEM_FIELD_NAME = "codeconceptcodingsystem";
+	private static final String OBSERVATION_CODEHASH_FIELD_NAME = "codeconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CODEDISPLAY_FIELD_NAME = "codeconceptcodingdisplay";
+	private static final String OBSERVATION_CODE_TEXT_FIELD_NAME = "codeconcepttext";
+	private static final String OBSERVATION_EFFECTIVEDTM_FIELD_NAME = "effectivedtm";
+	private static final String OBSERVATION_CATEGORYHASH_FIELD_NAME = "categoryconceptcodingcode_system_hash";
+	private static final String OBSERVATION_CATEGORYVALUE_FIELD_NAME = "categoryconceptcodingcode";
+	private static final String OBSERVATION_CATEGORYSYSTEM_FIELD_NAME = "categoryconceptcodingsystem";
+	private static final String OBSERVATION_CATEGORYDISPLAY_FIELD_NAME = "categoryconceptcodingdisplay";
+	private static final String OBSERVATION_CATEGORYTEXT_FIELD_NAME = "categoryconcepttext";
 
 	// Code index document element names
-	private final String CODE_HASH = "codingcode_system_hash";
-	private final String CODE_TEXT = "text";
+	private static final String CODE_HASH = "codingcode_system_hash";
+	private static final String CODE_TEXT = "text";
+
+	private static final String OBSERVATION_RESOURCE_NAME = "Observation";
 
 	private final RestHighLevelClient myRestHighLevelClient;
 
@@ -124,20 +139,23 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
+	@Autowired
+	private FhirContext myContext;
+
 	//This constructor used to inject a dummy partitionsettings in test.
-	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theHostname, int thePort, String theUsername, String thePassword) {
-		this(theHostname, thePort, theUsername, thePassword);
+	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		this(theProtocol, theHostname, theUsername, thePassword);
 		this.myPartitionSettings = thePartitionSetings;
 	}
 
-	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
-		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
+	public ElasticsearchSvcImpl(String theProtocol, String theHostname, @Nullable String theUsername, @Nullable String thePassword) {
+		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHostname, theUsername, thePassword);
 
 		try {
 			createObservationIndexIfMissing();
 			createObservationCodeIndexIfMissing();
 		} catch (IOException theE) {
-			throw new RuntimeException("Failed to create document index", theE);
+			throw new RuntimeException(Msg.code(1175) + "Failed to create document index", theE);
 		}
 	}
 
@@ -159,7 +177,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 		String observationMapping = getIndexSchema(OBSERVATION_INDEX_SCHEMA_FILE);
 		if (!createIndex(OBSERVATION_INDEX, observationMapping)) {
-			throw new RuntimeException("Failed to create observation index");
+			throw new RuntimeException(Msg.code(1176) + "Failed to create observation index");
 		}
 	}
 
@@ -169,7 +187,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		}
 		String observationCodeMapping = getIndexSchema(OBSERVATION_CODE_INDEX_SCHEMA_FILE);
 		if (!createIndex(OBSERVATION_CODE_INDEX, observationCodeMapping)) {
-			throw new RuntimeException("Failed to create observation code index");
+			throw new RuntimeException(Msg.code(1177) + "Failed to create observation code index");
 		}
 
 	}
@@ -209,23 +227,25 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 				}
 				SearchRequest myLastNRequest = buildObservationsSearchRequest(subject, theSearchParameterMap, theFhirContext,
 					createObservationSubjectAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+				ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 				try {
 					SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 					searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
 						theMaxResultsToFetch));
 				} catch (IOException theE) {
-					throw new InvalidRequestException("Unable to execute LastN request", theE);
+					throw new InvalidRequestException(Msg.code(1178) + "Unable to execute LastN request", theE);
 				}
 			}
 		} else {
 			SearchRequest myLastNRequest = buildObservationsSearchRequest(theSearchParameterMap, theFhirContext,
 				createObservationCodeAggregationBuilder(getMaxParameter(theSearchParameterMap), topHitsInclude));
+			ourLog.debug("ElasticSearch query: {}", myLastNRequest.source().toString());
 			try {
 				SearchResponse lastnResponse = executeSearchRequest(myLastNRequest);
 				searchResults.addAll(buildObservationList(lastnResponse, setValue, theSearchParameterMap, theFhirContext,
 					theMaxResultsToFetch));
 			} catch (IOException theE) {
-				throw new InvalidRequestException("Unable to execute LastN request", theE);
+				throw new InvalidRequestException(Msg.code(1179) + "Unable to execute LastN request", theE);
 			}
 		}
 		return searchResults;
@@ -266,7 +286,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					referenceList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1180) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());
 			}
 		}
 		return referenceList;
@@ -471,7 +491,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					codeSystemHashList.add(String.valueOf(CodeSystemHash.hashCodeSystem(ref.getSystem(), ref.getValue())));
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1181) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return codeSystemHashList;
@@ -487,7 +507,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					codeOnlyList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1182) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return codeOnlyList;
@@ -503,7 +523,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					systemOnlyList.add(ref.getSystem());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1183) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return systemOnlyList;
@@ -519,7 +539,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 					textOnlyList.add(ref.getValue());
 				}
 			} else {
-				throw new IllegalArgumentException("Invalid token type (expecting TokenParam): " + nextOr.getClass());
+				throw new IllegalArgumentException(Msg.code(1184) + "Invalid token type (expecting TokenParam): " + nextOr.getClass());
 			}
 		}
 		return textOnlyList;
@@ -625,7 +645,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Override
 	public ObservationJson getObservationDocument(String theDocumentID) {
 		if (theDocumentID == null) {
-			throw new InvalidRequestException("Require non-null document ID for observation document query");
+			throw new InvalidRequestException(Msg.code(1185) + "Require non-null document ID for observation document query");
 		}
 		SearchRequest theSearchRequest = buildSingleObservationSearchRequest(theDocumentID);
 		ObservationJson observationDocumentJson = null;
@@ -639,7 +659,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute observation document query for ID " + theDocumentID, theE);
+			throw new InvalidRequestException(Msg.code(1186) + "Unable to execute observation document query for ID " + theDocumentID, theE);
 		}
 
 		return observationDocumentJson;
@@ -661,7 +681,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	@Override
 	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
 		if (theCodeSystemHash == null && theText == null) {
-			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
+			throw new InvalidRequestException(Msg.code(1187) + "Require a non-null code system hash value or display value for observation code document query");
 		}
 		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
 		CodeJson observationCodeDocumentJson = null;
@@ -675,7 +695,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			}
 
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to execute observation code document query hash code or display", theE);
+			throw new InvalidRequestException(Msg.code(1188) + "Unable to execute observation code document query hash code or display", theE);
 		}
 
 		return observationCodeDocumentJson;
@@ -705,7 +725,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
 			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to persist Observation document " + theDocumentId);
+			throw new InvalidRequestException(Msg.code(1189) + "Unable to persist Observation document " + theDocumentId);
 		}
 	}
 
@@ -715,7 +735,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationCodeDocument);
 			return performIndex(OBSERVATION_CODE_INDEX, theCodeableConceptID, documentToIndex, ElasticsearchSvcImpl.CODE_DOCUMENT_TYPE);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to persist Observation Code document " + theCodeableConceptID);
+			throw new InvalidRequestException(Msg.code(1190) + "Unable to persist Observation Code document " + theCodeableConceptID);
 		}
 	}
 
@@ -731,6 +751,49 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		myRestHighLevelClient.close();
 	}
 
+	@Override
+	public List<IBaseResource> getObservationResources(Collection<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = buildObservationResourceSearchRequest(thePids);
+		try {
+			SearchResponse observationDocumentResponse = executeSearchRequest(searchRequest);
+			SearchHit[] observationDocumentHits = observationDocumentResponse.getHits().getHits();
+			IParser parser = TolerantJsonParser.createWithLenientErrorHandling(myContext, null);
+			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(OBSERVATION_RESOURCE_NAME).getImplementingClass();
+			/**
+			 * @see ca.uhn.fhir.jpa.dao.BaseHapiFhirDao#toResource(Class, IBaseResourceEntity, Collection, boolean) for
+			 * details about parsing raw json to BaseResource
+			 */
+			return Arrays.stream(observationDocumentHits)
+				.map(this::parseObservationJson)
+				.map(observationJson -> parser.parseResource(resourceType, observationJson.getResource()))
+				.collect(Collectors.toList());
+		} catch (IOException theE) {
+			throw new InvalidRequestException(Msg.code(2003) + "Unable to execute observation document query for provided IDs " + thePids, theE);
+		}
+	}
+
+	private ObservationJson parseObservationJson(SearchHit theSearchHit) {
+		try {
+			return objectMapper.readValue(theSearchHit.getSourceAsString(), ObservationJson.class);
+		} catch (JsonProcessingException exp) {
+			throw new InvalidRequestException(Msg.code(2004) + "Unable to parse the observation resource json", exp);
+		}
+	}
+
+	private SearchRequest buildObservationResourceSearchRequest(Collection<ResourcePersistentId> thePids) {
+		SearchRequest searchRequest = new SearchRequest(OBSERVATION_INDEX);
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+		// Query
+		BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+		List<String> pidParams = thePids.stream().map(Object::toString).collect(Collectors.toList());
+		boolQueryBuilder.must(QueryBuilders.termsQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, pidParams));
+		searchSourceBuilder.query(boolQueryBuilder);
+		searchSourceBuilder.size(thePids.size());
+		searchRequest.source(searchSourceBuilder);
+		return searchRequest;
+	}
+
+
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
 		IndexRequest request = new IndexRequest(theIndexName);
 		request.id(theDocumentId);
@@ -745,7 +808,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		try {
 			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+			throw new InvalidRequestException(Msg.code(1191) + "Unable to delete Observation " + theDocumentId);
 		}
 	}
 

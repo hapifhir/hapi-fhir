@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -49,31 +51,30 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
 import static ca.uhn.fhir.jpa.util.LogicUtil.multiXor;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueSet>
-		implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
+	implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
+
+	private static FhirContext ourRiCtx;
 
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	private IValidationSupport myJpaValidationSupport;
 
-	@Autowired
-	@Qualifier("myFhirContextDstu2Hl7Org")
-	private FhirContext myRiCtx;
 	@Autowired
 	private FhirContext myFhirContext;
 
@@ -104,20 +105,21 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequest) {
+	public ValueSet expand(IIdType theId, ValueSetExpansionOptions theOptions, RequestDetails theRequest) {
 		ValueSet source = loadValueSetForExpansion(theId, theRequest);
-		return expand(source, theFilter);
+		return expand(source, theOptions);
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequest) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValueSet expand(ValueSet source, String theFilter) {
+	public ValueSet expand(ValueSet source, ValueSetExpansionOptions theOptions) {
 		ValueSet retVal = new ValueSet();
 		retVal.setDate(DateTimeDt.withCurrentTime());
+
+
+		String filter = null;
+		if (theOptions != null) {
+			filter = theOptions.getFilter();
+		}
 
 		/*
 		 * Add composed concepts
@@ -125,10 +127,10 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 
 		for (ComposeInclude nextInclude : source.getCompose().getInclude()) {
 			for (ComposeIncludeConcept next : nextInclude.getConcept()) {
-				if (isBlank(theFilter)) {
+				if (isBlank(filter)) {
 					addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
 				} else {
-					String filter = theFilter.toLowerCase();
+					filter = filter.toLowerCase();
 					if (next.getDisplay().toLowerCase().contains(filter) || next.getCode().toLowerCase().contains(filter)) {
 						addCompose(retVal, nextInclude.getSystem(), next.getCode(), next.getDisplay());
 					}
@@ -141,44 +143,34 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		 */
 
 		for (CodeSystemConcept next : source.getCodeSystem().getConcept()) {
-			addCompose(theFilter, retVal, source, next);
+			addCompose(filter, retVal, source, next);
 		}
 
 		return retVal;
 	}
 
 	@Override
-	public ValueSet expand(ValueSet source, String theFilter, int theOffset, int theCount) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter) {
+	public ValueSet expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
+			throw new InvalidRequestException(Msg.code(946) + "URI must not be blank or missing");
 		}
 		ValueSet source;
 
 		ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(ValueSet.class, theUri);
 		if (defaultValueSet != null) {
-			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
+			source = getContext().newJsonParser().parseResource(ValueSet.class, getRiCtx().newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
 			params.add(ValueSet.SP_URL, new UriParam(theUri));
 			IBundleProvider ids = search(params);
 			if (ids.size() == 0) {
-				throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
+				throw new InvalidRequestException(Msg.code(947) + "Unknown ValueSet URI: " + theUri);
 			}
 			source = (ValueSet) ids.getResources(0, 1).get(0);
 		}
 
-		return expand(source, theFilter);
-	}
-
-	@Override
-	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		throw new UnsupportedOperationException();
+		return expand(source, theOptions);
 	}
 
 	@Override
@@ -188,7 +180,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		}
 
 		List<IIdType> valueSetIds;
-		Set<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		List<ResourcePersistentId> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<>();
 		for (ResourcePersistentId next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "ValueSet", next);
@@ -201,15 +193,22 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
 			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
 			if (valueSet != null) {
-				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
+				return getContext().newJsonParser().parseResource(ValueSet.class, getRiCtx().newJsonParser().encodeResourceToString(valueSet));
 			}
 		}
 		BaseHasResource sourceEntity = readEntity(theId, theRequest);
 		if (sourceEntity == null) {
-			throw new ResourceNotFoundException(theId);
+			throw new ResourceNotFoundException(Msg.code(2002) + theId);
 		}
 		ValueSet source = (ValueSet) toResource(sourceEntity, false);
 		return source;
+	}
+
+	private FhirContext getRiCtx() {
+		if (ourRiCtx == null) {
+			ourRiCtx = FhirContext.forDstu2Hl7Org();
+		}
+		return ourRiCtx;
 	}
 
 	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
@@ -236,17 +235,26 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		return null;
 	}
 
+	@Nonnull
 	@Override
-	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	@Transactional
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding,  RequestDetails theRequest) {
+		return lookupCode(theCode, theSystem, theCoding, null, theRequest);
+	}
+	
+	@Nonnull
+	@Override
+	@Transactional
+	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(949) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException("$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(950) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
@@ -294,20 +302,20 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		// nothing
 	}
 
-	public static String toStringOrNull(IPrimitiveType<String> thePrimitive) {
-		return thePrimitive != null ? thePrimitive.getValue() : null;
-	}
-
 	@Override
 	public IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequest) {
+																					IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequest) {
 		return myTerminologySvc.validateCode(vsValidateCodeOptions(), theId, toStringOrNull(theValueSetIdentifier), toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, 
-			IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
-		throw new UnsupportedOperationException();
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode,
+														  IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
+		throw new UnsupportedOperationException(Msg.code(951));
+	}
+
+	public static String toStringOrNull(IPrimitiveType<String> thePrimitive) {
+		return thePrimitive != null ? thePrimitive.getValue() : null;
 	}
 
 }

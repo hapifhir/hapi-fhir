@@ -1,0 +1,5 @@
+---
+issue: 3242
+type: fix
+title: "Fixed bug that caused queries that checked Elasticsearch when setting `_total=accurate` searches to return all
+      values when using _content or _text parameters"

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2659
+title: "The MSSQL-specific index definition for the ForcedId table in the JPA server has been enhanced
+   to include an INCLUDE() clause, which should significantly improve performance."

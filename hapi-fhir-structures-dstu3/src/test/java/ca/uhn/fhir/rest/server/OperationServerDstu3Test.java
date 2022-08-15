@@ -25,14 +25,23 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestOperationComponent;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.IntegerType;
+import org.hl7.fhir.dstu3.model.Money;
+import org.hl7.fhir.dstu3.model.OperationDefinition;
 import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.dstu3.model.Parameters;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -102,7 +111,7 @@ public class OperationServerDstu3Test {
 	 */
 	@Test
 	public void testOperationDefinition() {
-		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient--OP_TYPE").execute();
+		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId("OperationDefinition/Patient-t-OP_TYPE").execute();
 		
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(def));
 		
@@ -534,7 +543,7 @@ public class OperationServerDstu3Test {
 	@AfterAll
 	public static void afterClassClearContext() throws Exception {
 		JettyUtil.closeServer(ourServer);
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 	@BeforeAll
@@ -550,7 +559,7 @@ public class OperationServerDstu3Test {
 		
 		servlet.setFhirContext(ourCtx);
 		servlet.setResourceProviders(new PatientProvider());
-		servlet.setPlainProviders(new PlainProvider());
+		servlet.registerProvider(new PlainProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
@@ -565,14 +574,6 @@ public class OperationServerDstu3Test {
 	}
 
 	
-	public static void main(String[] theValue) {
-		Parameters p = new Parameters();
-		p.addParameter().setName("start").setValue(new DateTimeType("2001-01-02"));
-		p.addParameter().setName("end").setValue(new DateTimeType("2015-07-10"));
-		String inParamsStr = FhirContext.forDstu2().newXmlParser().encodeResourceToString(p);
-		ourLog.info(inParamsStr.replace("\"", "\\\""));
-	}
-
 	public static class PatientProvider implements IResourceProvider {
 
 		@Override
@@ -675,7 +676,7 @@ public class OperationServerDstu3Test {
 				) {
 			//@formatter:on
 
-			ourLastMethod = "$OP_TYPE";
+			ourLastMethod = "$OP_TYPE_ONLY_STRING";
 			ourLastParam1 = theParam1;
 
 			Parameters retVal = new Parameters();

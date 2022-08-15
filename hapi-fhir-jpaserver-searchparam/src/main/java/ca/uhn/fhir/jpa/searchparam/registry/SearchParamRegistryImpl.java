@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
@@ -31,13 +31,15 @@ import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,22 +48,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
+public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener, ISearchParamRegistryController {
+
+	public static final Set<String> NON_DISABLEABLE_SEARCH_PARAMS = Collections.unmodifiableSet(Sets.newHashSet(
+		"*:url",
+		"Subscription:*",
+		"SearchParameter:*"
+	));
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
-	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+	private static final long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 
+	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -71,16 +83,21 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Autowired
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
+	private IInterceptorService myInterceptorBroadcaster;
+	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
+	private IResourceChangeListenerCache myResourceChangeListenerCache;
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
-	private final JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
 	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
-	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
-	private IResourceChangeListenerCache myResourceChangeListenerCache;
+	/**
+	 * Constructor
+	 */
+	public SearchParamRegistryImpl() {
+		super();
+	}
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
@@ -94,8 +111,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		}
 	}
 
+	@Nonnull
 	@Override
-	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+	public ResourceSearchParams getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
 		return getActiveSearchParams().getSearchParamMap(theResourceName);
 	}
@@ -107,13 +125,23 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName);
 	}
 
 	@Override
-	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
+	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, Set<String> theParamNames) {
+		return myJpaSearchParamCache.getActiveComboSearchParams(theResourceName, theParamNames);
+	}
+
+	@Nullable
+	@Override
+	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		if (myActiveSearchParams != null) {
+			return myActiveSearchParams.getByUrl(theUrl);
+		} else {
+			return null;
+		}
 	}
 
 	private void rebuildActiveSearchParams() {
@@ -122,23 +150,25 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
-		int size = allSearchParamsBp.size();
+
+		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, MAX_MANAGED_PARAM_COUNT);
+		int size = allSearchParamsBp.sizeOrThrowNpe();
 
 		ourLog.trace("Loaded {} search params from the DB", size);
 
 		// Just in case..
 		if (size >= MAX_MANAGED_PARAM_COUNT) {
 			ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
-			size = MAX_MANAGED_PARAM_COUNT;
 		}
-		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
+
 		initializeActiveSearchParams(allSearchParams);
 	}
 
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
-		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltInSearchParams());
+		ReadOnlySearchParamCache builtInSearchParams = getBuiltInSearchParams();
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParamCache(builtInSearchParams);
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);
@@ -155,15 +185,20 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private ReadOnlySearchParamCache getBuiltInSearchParams() {
 		if (myBuiltInSearchParams == null) {
-			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
+			if (myModelConfig.isAutoSupportDefaultSearchParams()) {
+				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext, mySearchParameterCanonicalizer);
+			} else {
+				// Only the built-in search params that can not be disabled will be supported automatically
+				myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext, mySearchParameterCanonicalizer, NON_DISABLEABLE_SEARCH_PARAMS);
+			}
 		}
 		return myBuiltInSearchParams;
 	}
 
 	private void removeInactiveSearchParams(RuntimeSearchParamCache theSearchParams) {
 		for (String resourceName : theSearchParams.getResourceNameKeys()) {
-			Map<String, RuntimeSearchParam> map = theSearchParams.getSearchParamMap(resourceName);
-			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+			ResourceSearchParams resourceSearchParams = theSearchParams.getSearchParamMap(resourceName);
+			resourceSearchParams.removeInactive();
 		}
 	}
 
@@ -203,24 +238,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 				continue;
 			}
 
-			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
 			String name = runtimeSp.getName();
+
+			theSearchParams.add(nextBaseName, name, runtimeSp);
 			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-			searchParamMap.put(name, runtimeSp);
 			retval++;
 		}
 		return retval;
-	}
-
-	@Override
-	public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-		Map<String, RuntimeSearchParam> params = getActiveSearchParams(theResourceDef.getName());
-		return params.get(theParamName);
-	}
-
-	@Override
-	public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
 	@Override
@@ -243,9 +267,17 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerRegistry = theResourceChangeListenerRegistry;
 	}
 
+
+	/**
+	 *
+	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
+	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
+	 * until ContextRefreshedEvent.
+	 *
+	 */
 	@PostConstruct
 	public void registerListener() {
-		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
+ 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy
@@ -253,11 +285,10 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
-	@Override
 	public ReadOnlySearchParamCache getActiveSearchParams() {
 		requiresActiveSearchParams();
 		if (myActiveSearchParams == null) {
-			throw new IllegalStateException("SearchParamRegistry has not been initialized");
+			throw new IllegalStateException(Msg.code(511) + "SearchParamRegistry has not been initialized");
 		}
 		return ReadOnlySearchParamCache.fromRuntimeSearchParamCache(myActiveSearchParams);
 	}
@@ -285,15 +316,24 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 		ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
 		if (result.created > 0) {
-			ourLog.info("Adding {} search parameters to SearchParamRegistry", result.created);
+			ourLog.info("Adding {} search parameters to SearchParamRegistry: {}", result.created, unqualified(theResourceChangeEvent.getCreatedResourceIds()));
 		}
 		if (result.updated > 0) {
-			ourLog.info("Updating {} search parameters in SearchParamRegistry", result.updated);
+			ourLog.info("Updating {} search parameters in SearchParamRegistry: {}", result.updated, unqualified(theResourceChangeEvent.getUpdatedResourceIds()));
 		}
-		if (result.created > 0) {
-			ourLog.info("Deleting {} search parameters from SearchParamRegistry", result.deleted);
+		if (result.deleted > 0) {
+			ourLog.info("Deleting {} search parameters from SearchParamRegistry: {}", result.deleted, unqualified(theResourceChangeEvent.getDeletedResourceIds()));
 		}
 		rebuildActiveSearchParams();
+	}
+
+	private String unqualified(List<IIdType> theIds) {
+		Iterator<String> unqualifiedIds = theIds.stream()
+			.map(IIdType::toUnqualifiedVersionless)
+			.map(IIdType::getValue)
+			.iterator();
+
+		return StringUtils.join(unqualifiedIds, ", ");
 	}
 
 	@Override
@@ -312,6 +352,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@VisibleForTesting
 	public void resetForUnitTest() {
+		myBuiltInSearchParams = null;
 		handleInit(Collections.emptyList());
 	}
+
+	@VisibleForTesting
+	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
+		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
+	}
+
 }

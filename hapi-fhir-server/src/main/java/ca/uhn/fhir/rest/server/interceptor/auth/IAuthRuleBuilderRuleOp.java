@@ -8,7 +8,7 @@ import java.util.Collection;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthR
 	 * <li><b><code>Patient/123</code></b> - Any Patient resource with the ID "123" will be matched</li>
 	 * <li><b><code>123</code></b> - Any resource of any type with the ID "123" will be matched</li>
 	 * </ul>
-	 *
+	 >*
 	 * @param theId The ID of the resource to apply  (e.g. <code>Patient/123</code>)
 	 * @throws IllegalArgumentException If theId does not contain an ID with at least an ID part
 	 * @throws NullPointerException     If theId is null

@@ -22,6 +22,7 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu2Test.class);
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private final FhirContext myCtx = FhirContext.forDstu2Cached();
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@BeforeEach
@@ -43,8 +44,14 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
 
-		ourCtx.setNarrativeGenerator(myGen);
+		myCtx.setNarrativeGenerator(myGen);
 	}
+
+	@AfterEach
+	public void after() {
+		myCtx.setNarrativeGenerator(null);
+	}
+
 
 	@Test
 	public void testGeneratePatient() throws DataFormatException {
@@ -57,7 +64,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -69,7 +76,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Parameters value = new Parameters();
 		value.setId("123");
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, not(containsString("narrative")));
@@ -89,9 +96,9 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 			"   </issue>\n" +
 			"</OperationOutcome>";
 
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
+		OperationOutcome oo = myCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-		myGen.populateResourceNarrative(ourCtx, oo);
+		myGen.populateResourceNarrative(myCtx, oo);
 		String output = oo.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -129,7 +136,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -137,7 +144,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		// Now try it with the parser
 
-		output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
+		output = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(value);
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
 	}
@@ -154,7 +161,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 
-		myGen.populateResourceNarrative(ourCtx, mp);
+		myGen.populateResourceNarrative(myCtx, mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
 		assertTrue(output.contains("ciprofloaxin"), "Expected medication name of ciprofloaxin within narrative: " + output);
@@ -167,7 +174,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.populateResourceNarrative(ourCtx, med);
+		myGen.populateResourceNarrative(myCtx, med);
 		String output = med.getText().getDiv().getValueAsString();
 		assertThat(output, containsString("ciproflaxin"));
 
@@ -175,7 +182,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

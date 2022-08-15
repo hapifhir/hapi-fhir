@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,27 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.util.DateUtils;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -35,31 +49,23 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.r4.model.DateTimeType;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import java.util.Date;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.util.DateUtils;
 
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_DATE", indexes = {
 	// We previously had an index called IDX_SP_DATE - Dont reuse
-	@Index(name = "IDX_SP_DATE_HASH", columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH"),
-	@Index(name = "IDX_SP_DATE_HASH_LOW", columnList = "HASH_IDENTITY,SP_VALUE_LOW"),
-	@Index(name = "IDX_SP_DATE_HASH_HIGH", columnList = "HASH_IDENTITY,SP_VALUE_HIGH"),
-	@Index(name = "IDX_SP_DATE_ORD_HASH", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL"),
-	@Index(name = "IDX_SP_DATE_ORD_HASH_LOW", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL"),
-	@Index(name = "IDX_SP_DATE_RESID", columnList = "RES_ID"),
-	@Index(name = "IDX_SP_DATE_UPDATED", columnList = "SP_UPDATED"),
+	@Index(name = "IDX_SP_DATE_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_DATE_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_DATE_ORD_HASH_V2", columnList = "HASH_IDENTITY,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_DATE_ORD_HASH_HIGH_V2", columnList = "HASH_IDENTITY,SP_VALUE_HIGH_DATE_ORDINAL,RES_ID,PARTITION_ID"),
+	@Index(name = "IDX_SP_DATE_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,SP_VALUE_LOW_DATE_ORDINAL,SP_VALUE_HIGH_DATE_ORDINAL,PARTITION_ID"),
 })
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
@@ -91,11 +97,20 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_DATE")
 	@Column(name = "SP_ID")
 	private Long myId;
+
 	/**
+	 * Composite of resourceType, paramName, and partition info if configured.
+	 * Combined with the various date fields for a query.
 	 * @since 3.5.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_IDENTITY", nullable = true)
 	private Long myHashIdentity;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn( nullable = false,
+		name = "RES_ID", referencedColumnName = "RES_ID",
+		foreignKey = @ForeignKey(name="FK_SP_DATE_RES"))
+	private ResourceTable myResource;
 
 	/**
 	 * Constructor
@@ -121,27 +136,59 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
+		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
 		if (!StringUtils.isBlank(theHigh)) {
-			this.myValueHighDateOrdinal = generateOrdinalDateInteger(theHigh);
+			this.myValueHighDateOrdinal = generateHighOrdinalDateInteger(theHigh);
 		}
 	}
 
-	private int generateOrdinalDateInteger(String theDateString) {
+	private void reComputeValueHighDate(Date theHigh, String theHighString) {
+		if (StringUtils.isBlank(theHighString) || theHigh == null)
+			return;
+		// FT : 2021-09-10 not very comfortable to set the high value to the last second
+		// Timezone? existing data?
+		// if YYYY or YYYY-MM or YYYY-MM-DD add the last second
+		if (theHighString.length() == 4 || theHighString.length() == 7 || theHighString.length() == 10) {
+			
+			String theCompleteDateStr =  DateUtils.getCompletedDate(theHighString).getRight();
+			try {
+				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);  
+			    this.myValueHigh = DateUtils.getEndOfDay(complateDate);
+			} catch (ParseException e) {
+				// do nothing; 
+			}
+		}
+		
+	}
+	private int generateLowOrdinalDateInteger(String theDateString) {
 		if (theDateString.contains("T")) {
 			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
 		}
+		
+		theDateString = DateUtils.getCompletedDate(theDateString).getLeft();
 		theDateString = theDateString.replace("-", "");
 		return Integer.valueOf(theDateString);
 	}
 
+	private int generateHighOrdinalDateInteger(String theDateString) {
+		
+		if (theDateString.contains("T")) {
+			theDateString = theDateString.substring(0, theDateString.indexOf("T"));
+		}
+		
+		theDateString = DateUtils.getCompletedDate(theDateString).getRight();
+		theDateString = theDateString.replace("-", "");
+		return Integer.valueOf(theDateString);
+	}
+	
 	private void computeValueLowDateOrdinal(String theLow) {
 		if (StringUtils.isNotBlank(theLow)) {
-			this.myValueLowDateOrdinal = generateOrdinalDateInteger(theLow);
+			this.myValueLowDateOrdinal = generateLowOrdinalDateInteger(theLow);
 		}
 	}
 
@@ -165,7 +212,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	}
 
 	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
+
+	@Override
 	public void calculateHashes() {
+		if (myHashIdentity != null) {
+			return;
+		}
+
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
@@ -333,4 +389,15 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return (long) DateUtils.convertDateToDayInteger(theDate);
 	}
 
+	@Override
+	public ResourceTable getResource() {
+		return myResource;
+	}
+
+	@Override
+	public BaseResourceIndexedSearchParam setResource(ResourceTable theResource) {
+		myResource = theResource;
+		setResourceType(theResource.getResourceType());
+		return this;
+	}
 }

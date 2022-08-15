@@ -20,6 +20,7 @@ package org.hl7.fhir.dstu2.hapi.rest.server;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -263,7 +264,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
                 (SearchMethodBinding) nextMethodBinding, theRequestDetails);
           } else if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               // Only add each operation (by name) once
               rest.addOperation().setName(methodBinding.getName()).getDefinition()
@@ -299,7 +300,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
           checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
           if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-            String opName = bindings.getOperationBindingToName().get(methodBinding);
+            String opName = bindings.getOperationBindingToId().get(methodBinding);
             if (operationNames.add(opName)) {
               rest.addOperation().setName(methodBinding.getName()).getDefinition()
                   .setReference("OperationDefinition/" + opName);
@@ -410,11 +411,11 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
   @Read(type = OperationDefinition.class)
   public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
     if (theId == null || theId.hasIdPart() == false) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(1986) + theId);
     }
-    List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationNameToBindings().get(theId.getIdPart());
+    List<OperationMethodBinding> sharedDescriptions = getServerConfiguration(theRequestDetails).provideBindings().getOperationIdToBindings().get(theId.getIdPart());
     if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
-      throw new ResourceNotFoundException(theId);
+      throw new ResourceNotFoundException(Msg.code(1987) + theId);
     }
 
     OperationDefinition op = new OperationDefinition();

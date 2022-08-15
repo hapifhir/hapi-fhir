@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.servlet;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -36,7 +38,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -49,9 +56,30 @@ public class ServletRequestDetails extends RequestDetails {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 
+	/**
+	 * Constructor for testing only
+	 */
+	public ServletRequestDetails() {
+		this((IInterceptorBroadcaster) null);
+	}
+
+	/**
+	 * Constructor
+	 */
 	public ServletRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
 		setResponse(new ServletRestfulResponse(this));
+	}
+
+	/**
+	 * Copy constructor
+	 */
+	public ServletRequestDetails(ServletRequestDetails theRequestDetails) {
+		super(theRequestDetails);
+
+		myServer = theRequestDetails.getServer();
+		myServletRequest = theRequestDetails.getServletRequest();
+		myServletResponse = theRequestDetails.getServletResponse();
 	}
 
 	@Override
@@ -73,7 +101,7 @@ public class ServletRequestDetails extends RequestDetails {
 			return requestContents;
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
-			throw new InvalidRequestException(String.format("Could not load request resource: %s", e.getMessage()));
+			throw new InvalidRequestException(Msg.code(308) + String.format("Could not load request resource: %s", e.getMessage()));
 		}
 	}
 
@@ -149,15 +177,21 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServer = theServer;
 	}
 
-	public void setServletRequest(HttpServletRequest myServletRequest) {
+	public ServletRequestDetails setServletRequest(@Nonnull HttpServletRequest myServletRequest) {
 		this.myServletRequest = myServletRequest;
+
+		// TODO KHS move a bunch of other initialization from RestfulServer into this method
+		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
+			setRewriteHistory(true);
+		}
+		return this;
 	}
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
 		this.myServletResponse = myServletResponse;
 	}
 
-	public Map<String,List<String>> getHeaders() {
+	public Map<String, List<String>> getHeaders() {
 		Map<String, List<String>> retVal = new HashMap<>();
 		Enumeration<String> names = myServletRequest.getHeaderNames();
 		while (names.hasMoreElements()) {
@@ -171,4 +205,5 @@ public class ServletRequestDetails extends RequestDetails {
 		}
 		return Collections.unmodifiableMap(retVal);
 	}
+
 }

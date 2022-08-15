@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,21 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +74,9 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
 	private Long myValueSetPid;
 
+	@Column(name = "INDEX_STATUS", nullable = true)
+	private Long myIndexStatus;
+
 	@Column(name = "VALUESET_ORDER", nullable = false)
 	private int myOrder;
 
@@ -68,6 +85,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private String myValueSetName;
+
+	@Column(name = "SOURCE_PID", nullable = true)
+	private Long mySourceConceptPid;
+
+	@Lob
+	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
+	private String mySourceConceptDirectParentPids;
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
@@ -86,6 +110,13 @@ public class TermValueSetConcept implements Serializable {
 
 	@Transient
 	private transient Integer myHashCode;
+
+	/**
+	 * Constructor
+	 */
+	public TermValueSetConcept() {
+		super();
+	}
 
 	public Long getId() {
 		return myId;
@@ -207,16 +238,33 @@ public class TermValueSetConcept implements Serializable {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myId", myId)
-			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
-			.append("myValueSetPid", myValueSetPid)
-			.append("myOrder", myOrder)
-			.append("myValueSetUrl", this.getValueSetUrl())
-			.append("myValueSetName", this.getValueSetName())
-			.append("mySystem", mySystem)
-			.append("myCode", myCode)
-			.append("myDisplay", myDisplay)
-			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
+			.append("id", myId)
+			.append("order", myOrder)
+			.append("system", mySystem)
+			.append("code", myCode)
+			.append("valueSet", myValueSet != null ? myValueSet.getId() : "(null)")
+			.append("valueSetPid", myValueSetPid)
+			.append("valueSetUrl", this.getValueSetUrl())
+			.append("valueSetName", this.getValueSetName())
+			.append("display", myDisplay)
+			.append("designationCount", myDesignations != null ? myDesignations.size() : "(null)")
+			.append("parentPids", mySourceConceptDirectParentPids)
 			.toString();
+	}
+
+	public Long getIndexStatus() {
+		return myIndexStatus;
+	}
+
+	public void setIndexStatus(Long theIndexStatus) {
+		myIndexStatus = theIndexStatus;
+	}
+
+	public void setSourceConceptPid(Long theSourceConceptPid) {
+		mySourceConceptPid = theSourceConceptPid;
+	}
+
+	public void setSourceConceptDirectParentPids(String theSourceConceptDirectParentPids) {
+		mySourceConceptDirectParentPids = theSourceConceptDirectParentPids;
 	}
 }

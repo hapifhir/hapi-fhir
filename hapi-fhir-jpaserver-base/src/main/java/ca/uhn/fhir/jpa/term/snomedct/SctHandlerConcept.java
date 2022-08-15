@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.snomedct;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,14 @@ package ca.uhn.fhir.jpa.term.snomedct;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class SctHandlerConcept implements IRecordHandler {
+public final class SctHandlerConcept implements IZipContentsHandlerCsv {
 
    private Set<String> myValidConceptIds;
    private Map<String, String> myConceptIdToMostRecentDate = new HashMap<String, String>();

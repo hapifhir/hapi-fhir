@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.rules.json;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 
@@ -79,7 +80,7 @@ public class VectorMatchResultMap {
 		for (String fieldMatchName : splitFieldMatchNames(theFieldMatchNames)) {
 			int index = getFieldMatchIndex(fieldMatchName);
 			if (index == -1) {
-				throw new ConfigurationException("There is no matchField with name " + fieldMatchName);
+				throw new ConfigurationException(Msg.code(1523) + "There is no matchField with name " + fieldMatchName);
 			}
 			retval |= (1 << index);
 		}

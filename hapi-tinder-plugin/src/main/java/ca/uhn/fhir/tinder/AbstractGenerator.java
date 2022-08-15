@@ -19,6 +19,7 @@ package ca.uhn.fhir.tinder;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
@@ -52,7 +53,7 @@ public abstract class AbstractGenerator {
 			fhirContext = FhirContext.forR4();
 			packageSuffix = ".r4";
 		} else {
-			throw new FailureException("Unknown version configured: " + context.getVersion());
+			throw new FailureException(Msg.code(95) + "Unknown version configured: " + context.getVersion());
 		}
 		context.setPackageSuffix(packageSuffix);
 		
@@ -71,7 +72,7 @@ public abstract class AbstractGenerator {
 			try {
 				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
 			} catch (IOException e) {
-				throw new FailureException("Failed to load version property file", e);
+				throw new FailureException(Msg.code(96) + "Failed to load version property file", e);
 			}
 
 			logDebug("Property file contains: "+p);
@@ -120,7 +121,7 @@ public abstract class AbstractGenerator {
 			try {
 				vsp.parse();
 			} catch (Exception e) {
-				throw new FailureException("Failed to load valuesets", e);
+				throw new FailureException(Msg.code(97) + "Failed to load valuesets", e);
 			}
 	
 			/*
@@ -137,7 +138,7 @@ public abstract class AbstractGenerator {
 				dtp.parse();
 				dtp.markResourcesForImports();
 			} catch (Exception e) {
-				throw new FailureException("Failed to load datatypes", e);
+				throw new FailureException(Msg.code(98) + "Failed to load datatypes", e);
 			}
 			dtp.bindValueSets(vsp);
 	
@@ -181,7 +182,7 @@ public abstract class AbstractGenerator {
 				}
 			}
 		} catch (Exception e) {
-			throw new FailureException("Failed to load resources", e);
+			throw new FailureException(Msg.code(99) + "Failed to load resources", e);
 		}
 
 	}

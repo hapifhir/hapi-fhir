@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3360
+title: "Performance for JPA Server ValueSet expansion has been significantly optimized
+   in order to minimize database lookups, especially with large expansions."

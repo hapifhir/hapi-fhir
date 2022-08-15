@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2520
+title: "Add support for `:mdm` search parameter qualifier on reference search parameters. Details about enabling this feature
+can be found [in the documentation](/hapi-fhir/docs/server_jpa_mdm/mdm_expansion.html)."

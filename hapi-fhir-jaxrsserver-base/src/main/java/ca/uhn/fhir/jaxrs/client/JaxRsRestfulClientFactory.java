@@ -1,16 +1,10 @@
 package ca.uhn.fhir.jaxrs.client;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +21,20 @@ import javax.ws.rs.client.ClientBuilder;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
+import ca.uhn.fhir.tls.TlsAuthentication;
+
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A Restful Client Factory, based on Jax Rs
@@ -66,11 +70,11 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 			myNativeClient = builder.build();
 		}
 
-    if (registeredComponents != null && !registeredComponents.isEmpty()) {
-      for (Class<?> c : registeredComponents) {
-        myNativeClient = myNativeClient.register(c);
-      }
-    }
+		if (registeredComponents != null && !registeredComponents.isEmpty()) {
+			for (Class<?> c : registeredComponents) {
+			  myNativeClient = myNativeClient.register(c);
+			}
+		}
 
 		return myNativeClient;
 	}
@@ -89,7 +93,7 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
   */
 	@Override
 	public void setProxy(String theHost, Integer thePort) {
-		throw new UnsupportedOperationException("Proxies are not supported yet in JAX-RS client");
+		throw new UnsupportedOperationException(Msg.code(605) + "Proxies are not supported yet in JAX-RS client");
 	}
   
   /**
@@ -115,8 +119,8 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
 		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
-  
-  @Override
+
+	@Override
   protected void resetHttpClient() {
     if (myNativeClient != null) 
       myNativeClient.close(); // close client to avoid memory leak

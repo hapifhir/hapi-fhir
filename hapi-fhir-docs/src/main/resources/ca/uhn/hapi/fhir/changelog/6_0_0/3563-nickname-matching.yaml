@@ -1,0 +1,5 @@
+type: add
+issue: 3563
+title: "Added search parameter modifier :nickname that can be used with 'name' or 'given' search parameters.
+E.g. ?Patient?given:nickname=Kenny will match a patient with the given name Kenneth.  Also added MDM matching
+algorithm named NICKNAME that matches based this."

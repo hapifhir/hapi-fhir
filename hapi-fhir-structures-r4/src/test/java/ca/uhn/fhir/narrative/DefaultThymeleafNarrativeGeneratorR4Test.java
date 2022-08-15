@@ -4,11 +4,24 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hamcrest.core.StringContains;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportStatus;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MedicationRequest.MedicationRequestStatus;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SimpleQuantity;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -21,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorR4Test.class);
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 	private DefaultThymeleafNarrativeGenerator myGen;
 
 	@BeforeEach
@@ -29,7 +42,12 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
 
-		ourCtx.setNarrativeGenerator(myGen);
+		myCtx.setNarrativeGenerator(myGen);
+	}
+
+	@AfterEach
+	public void after() {
+		myCtx.setNarrativeGenerator(null);
 	}
 
 	@Test
@@ -44,7 +62,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 
 		value.setBirthDate(new Date());
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -60,7 +78,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		value.addResult().setReference("Observation/2");
 		value.addResult().setReference("Observation/3");
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -82,13 +100,13 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 			"</OperationOutcome>";
 		//@formatter:on
 
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
+		OperationOutcome oo = myCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
 		// String output = gen.generateTitle(oo);
 		// ourLog.info(output);
 		// assertEquals("Operation Outcome (2 issues)", output);
 
-		myGen.populateResourceNarrative(ourCtx, oo);
+		myGen.populateResourceNarrative(myCtx, oo);
 		String output = oo.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -108,7 +126,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 			Observation obs = new Observation();
 			obs.getCode().addCoding().setCode("1938HB").setDisplay("Hemoglobin");
 			obs.setValue(new Quantity(null, 2.223, null, null, "mg/L"));
-			obs.addReferenceRange().setLow((SimpleQuantity) new SimpleQuantity().setValue(2.20)).setHigh((SimpleQuantity) new SimpleQuantity().setValue(2.99));
+			obs.addReferenceRange().setLow(new SimpleQuantity().setValue(2.20)).setHigh(new SimpleQuantity().setValue(2.99));
 			obs.setStatus(ObservationStatus.FINAL);
 			obs.addNote().setText("This is a result comment");
 
@@ -126,7 +144,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.populateResourceNarrative(ourCtx, value);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -189,8 +207,8 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 			"         }";
 
 
-		DiagnosticReport value = ourCtx.newJsonParser().parseResource(DiagnosticReport.class, input);
-		myGen.populateResourceNarrative(ourCtx, value);
+		DiagnosticReport value = myCtx.newJsonParser().parseResource(DiagnosticReport.class, input);
+		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -210,7 +228,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		mp.setStatus(MedicationRequestStatus.ACTIVE);
 		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
-		myGen.populateResourceNarrative(ourCtx, mp);
+		myGen.populateResourceNarrative(myCtx, mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
 		assertTrue(output.contains("ciprofloaxin"), "Expected medication name of ciprofloaxin within narrative: " + output);
@@ -223,7 +241,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.populateResourceNarrative(ourCtx, med);
+		myGen.populateResourceNarrative(myCtx, med);
 
 		String output = med.getText().getDiv().getValueAsString();
 		assertThat(output, containsString("ciproflaxin"));
@@ -232,7 +250,7 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

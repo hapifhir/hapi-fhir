@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Patient;
@@ -26,7 +27,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
-	IMdmStorageInterceptor myMdmStorageInterceptor;
+    IMdmStorageInterceptor myMdmStorageInterceptor;
 	@Autowired
 	DaoConfig myDaoConfig;
 	private ResourceTable myTargetEntity;
@@ -41,13 +42,15 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		myTargetId = myTargetEntity.getIdDt().toVersionless();
 		mySourceEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 
-		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
+		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink();
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setGoldenResourcePid(mySourceEntity.getId());
 		mdmLink.setSourcePid(myTargetEntity.getId());
 		saveLink(mdmLink);
 	}
+
+
 
 	@Test
 	public void testUninterceptedDeleteRemovesMdmReference() {

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2887
+jira: SMILE-2896
+title: "Fixed a bug where the search results cache was ignoring the value of `_contained` parameter when assigning a cache key.
+      This was causing queries run in a short period of time to return wrong cached results if one query used `_contained=true` and the other did not."

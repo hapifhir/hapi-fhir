@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
 import javax.annotation.Nonnull;
@@ -45,6 +46,7 @@ import java.util.Set;
  * <li>SERVER_xxx: Hooks on the HAPI FHIR Server framework</li>
  * <li>SUBSCRIPTION_xxx: Hooks on the HAPI FHIR Subscription framework</li>
  * <li>STORAGE_xxx: Hooks on the storage engine</li>
+ * <li>VALIDATION_xxx: Hooks on the HAPI FHIR Validation framework</li>
  * <li>JPA_PERFTRACE_xxx: Performance tracing hooks on the JPA server</li>
  * </ul>
  * </p>
@@ -869,11 +871,15 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may make changes to the delivery payload, or make changes to the
 	 * canonical subscription such as adding headers, modifying the channel
 	 * endpoint, etc.
+	 * Furthermore, you may modify the outgoing message wrapper, for example adding headers via ResourceModifiedJsonMessage field.
+	 *
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
+	 *
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -881,7 +887,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
 
 
 	/**
@@ -1003,6 +1009,43 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource"
 	),
 
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a Bulk Export job is being kicked off. Hook methods may modify
+	 * the request, or raise an exception to prevent it from being initiated.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.bulk.export.api.BulkDataExportOptions - The details of the job being kicked off
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>, and can throw exceptions.
+	 * </p>
+	 */
+	STORAGE_INITIATE_BULK_EXPORT(
+		void.class,
+		"ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 	/**
 	 * <b>Storage Hook:</b>
 	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
@@ -1202,6 +1245,9 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1210,7 +1256,8 @@ public enum Pointcut implements IPointcut {
 	STORAGE_PRESEARCH_REGISTERED(void.class,
 		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap"
 	),
 
 	/**
@@ -1300,6 +1347,34 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before client-assigned id is created.
+	 * <p>
+	 * Hooks will have access to the contents of the resource being created
+	 * so that client-assigned ids can be allowed/denied. These changes will
+	 * be reflected in permanent storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails"
 	),
 
 	/**
@@ -1416,6 +1491,12 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
+	 * <li>
+	 * Boolean - Whether this pointcut invocation was deferred or not(since 5.4.0)
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1425,7 +1506,8 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
 	),
 
 	/**
@@ -1442,7 +1524,7 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The previous contents of the resource</li>
-	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The proposed new new contents of the resource</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The proposed new contents of the resource</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1459,6 +1541,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1469,7 +1554,8 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
 	),
 
 
@@ -1499,6 +1585,9 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum - The timing at which the invocation of the interceptor took place. Options are ACTIVE and DEFERRED.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>void</code>.
@@ -1508,6 +1597,100 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked after all entries in a transaction bundle have been executed
+	 * <p>
+	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the
+	 * processing of the transaction bundle
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts- A collection of pointcut invocations and their parameters which were deferred.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_TRANSACTION_PROCESSED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseBundle",
+		"ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during a FHIR transaction, immediately before processing all write operations (i.e. immediately
+	 * before a database transaction will be opened)
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails - Contains details about the transaction that is about to start
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked during a FHIR transaction, immediately after processing all write operations (i.e. immediately
+	 * after the transaction has been committed or rolled back). This hook will always be called if
+	 * {@link #STORAGE_TRANSACTION_WRITE_OPERATIONS_PRE} has been called, regardless of whether the operation
+	 * succeeded or failed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails - Contains details about the transaction that is about to start
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.storage.TransactionDetails - The outer transaction details object (since 5.0.0)
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_TRANSACTION_WRITE_OPERATIONS_POST(void.class,
+		"ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails",
 		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
 	),
 
@@ -1697,6 +1880,7 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails - Contains details about what is being read</li>
 	 * </ul>
 	 * <p>
 	 * Hooks must return an instance of <code>ca.uhn.fhir.interceptor.model.RequestPartitionId</code>.
@@ -1707,7 +1891,8 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		// Params
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails"
 	),
 
 	/**
@@ -1739,6 +1924,9 @@ public enum Pointcut implements IPointcut {
 	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.context.RuntimeResourceDefinition - the resource type being accessed
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks must return void.
@@ -1750,7 +1938,8 @@ public enum Pointcut implements IPointcut {
 		// Params
 		"ca.uhn.fhir.interceptor.model.RequestPartitionId",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.context.RuntimeResourceDefinition"
 	),
 
 	/**
@@ -1790,6 +1979,54 @@ public enum Pointcut implements IPointcut {
 	),
 
 	/**
+	 * <b>Validation Hook:</b>
+	 * This hook is called after validation has completed, regardless of whether the validation was successful or failed.
+	 * Typically this is used to modify validation results.
+	 * <p>
+	 * <b>Note on validation Pointcuts:</b> The HAPI FHIR interceptor framework is a part of the client and server frameworks and
+	 * not a part of the core FhirContext. Therefore this Pointcut is invoked by the
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseResource - The resource being validated, if a parsed version is available (null otherwise)
+	 * </li>
+	 * <li>
+	 * java.lang.String - The resource being validated, if a raw version is available (null otherwise)
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.validation.ValidationResult - The outcome of the validation. Hooks methods should not modify this object, but they can return a new one.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * Hook methods may return an instance of {@link ca.uhn.fhir.validation.ValidationResult} if they wish to override the validation results, or they may return <code>null</code> or <code>void</code> otherwise.
+	 */
+	VALIDATION_COMPLETED(ValidationResult.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"java.lang.String",
+		"ca.uhn.fhir.validation.ValidationResult"
+	),
+
+	/**
+	 * <b>MDM(EMPI) Hook:</b>
+	 * Invoked when a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) enters the MDM module. The purpose of the pointcut is to permit a pseudo
+	 * modification of the resource elements to influence the MDM linking process.  Any modifications to the resource are not persisted.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_BEFORE_PERSISTED_RESOURCE_CHECKED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
 	 * <b>MDM(EMPI) Hook:</b>
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been matched against related resources and MDM links have been updated.
@@ -1798,13 +2035,17 @@ public enum Pointcut implements IPointcut {
 	 * <ul>
 	 * <li>ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
 	 * <li>ca.uhn.fhir.rest.server.TransactionLogMessages - This parameter is for informational messages provided by the MDM module during MDM processing.</li>
+	 * <li>ca.uhn.fhir.mdm.api.MdmLinkChangeEvent - Contains information about the change event, including target and golden resource IDs and the operation type.</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
+	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class,
+		"ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage",
+		"ca.uhn.fhir.rest.server.TransactionLogMessages",
+		"ca.uhn.fhir.mdm.api.MdmLinkEvent"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

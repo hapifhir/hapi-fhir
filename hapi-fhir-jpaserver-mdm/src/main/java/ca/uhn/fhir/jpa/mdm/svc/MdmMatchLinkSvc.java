@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,24 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,7 @@ import java.util.List;
  */
 @Service
 public class MdmMatchLinkSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -62,10 +65,11 @@ public class MdmMatchLinkSvc {
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
 	 * Does nothing if resource is determined to be not managed by MDM.
 	 *
-	 * @param theResource the incoming MDM source, which can be any supported MDM type.
+	 * @param theResource              the incoming MDM source, which can be any supported MDM type.
 	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */
+	@Transactional
 	public MdmTransactionContext updateMdmLinksForMdmSource(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		if (MdmResourceUtil.isMdmAllowed(theResource)) {
 			return doMdmUpdate(theResource, theMdmTransactionContext);
@@ -89,15 +93,16 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedGoldenResourceCandidate firstMatch = theCandidateList.getFirstMatch();
-		Long sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid().getIdAsLong();
+		ResourcePersistentId sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid();
 		boolean allSameGoldenResource = theCandidateList.stream()
-			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().getIdAsLong().equals(sampleGoldenResourcePid));
+			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().equals(sampleGoldenResourcePid));
 
 		if (allSameGoldenResource) {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, but they are all linked to the same Golden Resource.");
 			handleMdmWithSingleCandidate(theResource, firstMatch, theMdmTransactionContext);
 		} else {
 			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> goldenResources = new ArrayList<>();
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
@@ -111,6 +116,7 @@ public class MdmMatchLinkSvc {
 
 			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
 			IAnyResource firstGoldenResource = goldenResources.get(0);
+
 			goldenResources.subList(1, goldenResources.size())
 				.forEach(possibleDuplicateGoldenResource -> {
 					MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
@@ -121,35 +127,40 @@ public class MdmMatchLinkSvc {
 	}
 
 	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s.", theResource.getIdElement().getResourceType()));
+		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s Golden Resource.", theResource.getIdElement().getResourceType()));
 		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
+
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
-	private void handleMdmCreate(IAnyResource theSourceResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
-		IAnyResource golenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
+	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource goldenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
-		if (myGoldenResourceHelper.isPotentialDuplicate(golenResource, theSourceResource)) {
+		if (myGoldenResourceHelper.isPotentialDuplicate(goldenResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theSourceResource, theMdmTransactionContext);
-			myMdmLinkSvc.updateLink(newGoldenResource, theSourceResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-			myMdmLinkSvc.updateLink(newGoldenResource, golenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theTargetResource, theMdmTransactionContext);
+
+			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myMdmLinkSvc.updateLink(newGoldenResource, goldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
+			log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
+
 			if (theGoldenResourceCandidate.isMatch()) {
-				myGoldenResourceHelper.handleExternalEidAddition(golenResource, theSourceResource, theMdmTransactionContext);
+				myGoldenResourceHelper.handleExternalEidAddition(goldenResource, theTargetResource, theMdmTransactionContext);
+				myEidUpdateService.applySurvivorshipRulesAndSaveGoldenResource(theTargetResource, goldenResource, theMdmTransactionContext);
 			}
-			myMdmLinkSvc.updateLink(golenResource, theSourceResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+
+			myMdmLinkSvc.updateLink(goldenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}
 
 	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
+			log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 			myEidUpdateService.handleMdmUpdate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		} else {
 			handleMdmCreate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);

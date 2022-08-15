@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Override
 	public Integer size() {
-		ourLog.trace("Waiting for initial sync");
+		ourLog.trace("size() - Waiting for initial sync");
 		Integer size = mySearchTask.awaitInitialSync();
-		ourLog.trace("Finished waiting for local sync");
+		ourLog.trace("size() - Finished waiting for local sync");
 
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 		if (size != null) {

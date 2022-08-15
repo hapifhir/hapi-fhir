@@ -74,10 +74,9 @@ The generator class is version-specific, so you will need to extend the class ap
 
 * DSTU3: [ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider](/hapi-fhir/apidocs/hapi-fhir-structures-dstu2/ca/uhn/fhir/rest/server/provider/dstu2/ServerConformanceProvider.html)
 * DSTU3: [org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-dstu3/org/hl7/fhir/dstu3/hapi/rest/server/ServerCapabilityStatementProvider.html)
-* R4: [org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html)
-* R5: [org.hl7.fhir.r5.hapi.rest.server.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-structures-r5/org/hl7/fhir/r5/hapi/rest/server/ServerCapabilityStatementProvider.html)
+* R4 and later: [ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/provider/ServerCapabilityStatementProvider.html)
 
-In your own class extending this class, you can override the [`getServerConformance()`](/hapi-fhir/apidocs/hapi-fhir-structures-r4/org/hl7/fhir/r4/hapi/rest/server/ServerCapabilityStatementProvider.html#getServerConformance(javax.servlet.http.HttpServletRequest,ca.uhn.fhir.rest.api.server.RequestDetails)) method to provide your own implementation. In this method, call `super.getServerConformance()` to obtain the built-in conformance statement and then add your own information to it.  
+In your own class extending this class, you can override the `getServerConformance()` method to obtain the built-in conformance statement and then add your own information to it.  
 
 
 # Controlling Response Contents / Encoding / Formatting

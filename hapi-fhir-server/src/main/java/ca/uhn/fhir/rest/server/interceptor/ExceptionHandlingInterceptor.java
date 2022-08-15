@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  * limitations under the License.
  * #L%
  */
+import ca.uhn.fhir.i18n.Msg;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.Closeable;
@@ -162,7 +163,7 @@ public class ExceptionHandlingInterceptor {
 				}
 			} catch (Exception e1) {
 				ourLog.error("Failed to instantiate OperationOutcome resource instance", e1);
-				throw new ServletException("Failed to instantiate OperationOutcome resource instance", e1);
+				throw new ServletException(Msg.code(328) + "Failed to instantiate OperationOutcome resource instance", e1);
 			}
 		} else {
 			ourLog.error("Unknown error during processing", theException);

@@ -3,7 +3,7 @@ package ca.uhn.fhir.model;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Appointment;
@@ -79,7 +79,7 @@ public class ModelDstu3Test {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 
@@ -98,7 +98,7 @@ public class ModelDstu3Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals("Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
+			assertEquals(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
 	
@@ -161,7 +161,7 @@ public class ModelDstu3Test {
 		try {
 			new InstantType("2019-01-01T00:00Z");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}

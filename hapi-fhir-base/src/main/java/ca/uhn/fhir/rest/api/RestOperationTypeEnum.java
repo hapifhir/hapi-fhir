@@ -5,7 +5,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 
 @CoverageIgnore
 public enum RestOperationTypeEnum {
@@ -144,12 +143,16 @@ public enum RestOperationTypeEnum {
 	 * $meta-delete extended operation
 	 */
 	META_DELETE("$meta-delete", false, false, false),
-	
+
 	/**
 	 * Patch operation
 	 */
 	PATCH("patch", false, false, true),
 
+	/**
+	 * Code Value: <b>update-rewrite-history</b>
+	 */
+	UPDATE_REWRITE_HISTORY("update-rewrite-history", false, false, true),
 	;
 
 	private static final Map<String, RestOperationTypeEnum> CODE_TO_ENUM = new HashMap<String, RestOperationTypeEnum>();

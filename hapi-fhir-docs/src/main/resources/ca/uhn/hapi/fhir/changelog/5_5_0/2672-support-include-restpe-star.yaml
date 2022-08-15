@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2672
+backport: 5.4.1
+title: "Support has been added to the JPA server for `_include` and `_revinclude` where the
+    value is a qualified star, e.g. `_include=Observation:*`."

@@ -5,6 +5,11 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -65,6 +70,11 @@ public abstract class BaseSubscriptionTest {
 		@Bean
 		public DaoConfig daoConfig() {
 			return new DaoConfig();
+		}
+
+		@Bean
+		public IChannelFactory channelFactory(IChannelNamer theNamer) {
+			return new LinkedBlockingChannelFactory(theNamer);
 		}
 
 		@Bean

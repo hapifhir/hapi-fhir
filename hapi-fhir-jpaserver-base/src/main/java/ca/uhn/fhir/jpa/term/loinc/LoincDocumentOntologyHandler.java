@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.IRecordHandler;
+import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -36,15 +37,17 @@ import java.util.Properties;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IRecordHandler {
+public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IZipContentsHandlerCsv {
 
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_ID = "loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_URI = "http://loinc.org/vs/loinc-document-ontology";
 	public static final String DOCUMENT_ONTOLOGY_CODES_VS_NAME = "LOINC Document Ontology Codes";
 	private final Map<String, TermConcept> myCode2Concept;
 
-	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String, CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
-		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties);
+	public LoincDocumentOntologyHandler(Map<String, TermConcept> theCode2concept, Map<String,
+			CodeSystem.PropertyType> thePropertyNames, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps,
+			Properties theUploadProperties, String theCopyrightStatement) {
+		super(theCode2concept, theValueSets, theConceptMaps, theUploadProperties, theCopyrightStatement);
 		myCode2Concept = theCode2concept;
 	}
 
@@ -87,7 +90,7 @@ public class LoincDocumentOntologyHandler extends BaseLoincHandler implements IR
 				loincCodePropName = "document-type-of-service";
 				break;
 			default:
-				throw new InternalErrorException("Unknown PartTypeName: " + partTypeName);
+				throw new InternalErrorException(Msg.code(917) + "Unknown PartTypeName: " + partTypeName);
 		}
 
 		TermConcept code = myCode2Concept.get(loincNumber);

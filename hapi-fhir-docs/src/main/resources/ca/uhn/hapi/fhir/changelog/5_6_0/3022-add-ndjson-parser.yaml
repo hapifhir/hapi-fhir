@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3022
+title: A new parser that naticaly handles NDJSON format (automatically converting to/from FHIR Bundle resources in order to 
+   represent the collection being parsed/serialized) as been added. Thanks to Ben Li-Sauerwine for the contribution!

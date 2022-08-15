@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,21 +23,21 @@ package ca.uhn.fhir.jpa.demo;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -46,8 +46,9 @@ import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -89,7 +90,7 @@ public class JpaServerDemo extends RestfulServer {
 			resourceProviderBeanName = "myResourceProvidersR4";
 			break;
 		default:
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1532));
 		}
 
 		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
@@ -108,9 +109,9 @@ public class JpaServerDemo extends RestfulServer {
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
-			systemProvider.add(myAppCtx.getBean(BaseConfig.GRAPHQL_PROVIDER_NAME));
+			systemProvider.add(myAppCtx.getBean(JpaConfig.GRAPHQL_PROVIDER_NAME));
 		} else {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1533));
 		}
 		registerProviders(systemProvider);
 
@@ -141,7 +142,7 @@ public class JpaServerDemo extends RestfulServer {
 			confProvider.setImplementationDescription("Example Server");
 			setServerConformanceProvider(confProvider);
 		} else {
-			throw new IllegalStateException();
+			throw new IllegalStateException(Msg.code(1534));
 		}
 
 		/*
@@ -184,7 +185,6 @@ public class JpaServerDemo extends RestfulServer {
 		getInterceptorService().registerInterceptor(new ResponseHighlighterInterceptor());
 
 		registerProvider(myAppCtx.getBean(BinaryAccessProvider.class));
-
 	}
 
 }

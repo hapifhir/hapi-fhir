@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.util.SubscriptionUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
-	private Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
+	private final Logger ourLog = LoggerFactory.getLogger(DaoSubscriptionMatcher.class);
 
 	@Autowired
 	DaoRegistry myDaoRegistry;
@@ -50,15 +51,13 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
-		IIdType id = theMsg.getId(myCtx);
-		String resourceType = id.getResourceType();
-		String resourceId = id.getIdPart();
+		IIdType id = theMsg.getPayloadId(myCtx);
 		String criteria = theSubscription.getCriteriaString();
 
-		// run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
-		criteria += "&_id=" + resourceType + "/" + resourceId;
+		// Run the subscriptions query and look for matches, add the id as part of the criteria to avoid getting matches of previous resources rather than the recent resource
+		criteria += "&_id=" + id.toUnqualifiedVersionless().getValue();
 
-		IBundleProvider results = performSearch(criteria);
+		IBundleProvider results = performSearch(criteria, theSubscription);
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
@@ -68,7 +67,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	/**
 	 * Search based on a query criteria
 	 */
-	private IBundleProvider performSearch(String theCriteria) {
+	private IBundleProvider performSearch(String theCriteria, CanonicalSubscription theSubscription) {
 		IFhirResourceDao<?> subscriptionDao = myDaoRegistry.getSubscriptionDao();
 		RuntimeResourceDefinition responseResourceDef = subscriptionDao.validateCriteriaAndReturnResourceDefinition(theCriteria);
 		SearchParameterMap responseCriteriaUrl = myMatchUrlService.translateMatchUrl(theCriteria, responseResourceDef);
@@ -76,7 +75,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 		IFhirResourceDao<? extends IBaseResource> responseDao = myDaoRegistry.getResourceDao(responseResourceDef.getImplementingClass());
 		responseCriteriaUrl.setLoadSynchronousUpTo(1);
 
-		return responseDao.search(responseCriteriaUrl);
+		return responseDao.search(responseCriteriaUrl, SubscriptionUtil.createRequestDetailForPartitionedRequest(theSubscription));
 	}
 
 }

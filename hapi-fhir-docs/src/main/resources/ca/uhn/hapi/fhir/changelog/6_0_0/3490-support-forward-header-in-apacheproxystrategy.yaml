@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3490
+title: "When using ApacheProxyAddressStrategy as a server address strategy, the `Forward`
+  header will now be respected. Thanks to Thomas Papke for the pull request!"

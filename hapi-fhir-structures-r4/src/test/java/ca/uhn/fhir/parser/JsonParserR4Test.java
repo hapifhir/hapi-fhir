@@ -2,6 +2,8 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.PerformanceOptionsEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
@@ -11,6 +13,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
@@ -25,8 +29,10 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
@@ -37,23 +43,35 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
@@ -73,6 +91,32 @@ public class JsonParserR4Test extends BaseTest {
 		return b;
 	}
 
+	@AfterEach
+	public void afterEach() {
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+	}
+
+	@Test
+	public void testNonDomainResourcesHaveIdResourceTypeParsed() {
+		//Test a non-domain resource
+		String binaryPayload = "{\n" +
+			"  \"resourceType\": \"Binary\",\n" +
+			"  \"id\": \"b123\"\n" +
+			"}\n";
+		IBaseResource iBaseResource = ourCtx.newJsonParser().parseResource(binaryPayload);
+		String resourceType = iBaseResource.getIdElement().getResourceType();
+		assertThat(resourceType, is(equalTo("Binary")));
+
+		//Test a domain resource.
+		String observationPayload = "{\n" +
+			"  \"resourceType\": \"Observation\",\n" +
+			"  \"id\": \"o123\"\n" +
+			"}\n";
+		IBaseResource obs = ourCtx.newJsonParser().parseResource(observationPayload);
+		resourceType = obs.getIdElement().getResourceType();
+		assertThat(resourceType, is(equalTo("Observation")));
+	}
+
 	@Test
 	public void testEntitiesNotConverted() throws IOException {
 		Device input = loadResource(ourCtx, Device.class, "/entities-from-cerner.json");
@@ -90,7 +134,7 @@ public class JsonParserR4Test extends BaseTest {
 			ourCtx.newJsonParser().encodeResourceToString(p);
 			fail();
 		} catch (ConfigurationException e) {
-			assertEquals("Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
+			assertEquals(Msg.code(1844) + "Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
 		}
 	}
 
@@ -192,6 +236,25 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testContainedResourcesNotAutoContainedWhenConfiguredNotToDoSo() {
+		MedicationDispense md = new MedicationDispense();
+		md.addIdentifier().setValue("DISPENSE");
+
+		Medication med = new Medication();
+		med.getCode().setText("MED");
+		md.setMedication(new Reference(med));
+
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+		assertEquals("{\"resourceType\":\"MedicationDispense\",\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{}}", encoded);
+
+		ourCtx.getParserOptions().setAutoContainReferenceTargetsWithNoId(true);
+		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(md);
+		assertEquals("{\"resourceType\":\"MedicationDispense\",\"contained\":[{\"resourceType\":\"Medication\",\"id\":\"1\",\"code\":{\"text\":\"MED\"}}],\"identifier\":[{\"value\":\"DISPENSE\"}],\"medicationReference\":{\"reference\":\"#1\"}}", encoded);
+
+	}
+
+	@Test
 	public void testParseBundleWithMultipleNestedContainedResources() throws Exception {
 		String text = loadResource("/bundle-with-two-patient-resources.json");
 
@@ -269,6 +332,50 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals(-1, idx);
 
 	}
+
+	/**
+	 * Make sure we can perform parallel parse/encodes against the same
+	 * FhirContext instance when deferred model scanning is enabled without
+	 * running into threading issues.
+	 */
+	@Test
+	public void testEncodeAndDecodeMultithreadedWithDeferredModelScanning() throws IOException, ExecutionException, InterruptedException {
+		String input = loadResource("/multi-thread-parsing-issue-bundle.json");
+
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		for (int pass = 0; pass < 10; pass++) {
+			ourLog.info("Starting pass: {}", pass);
+
+			FhirContext parseCtx = FhirContext.forR4();
+			parseCtx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+			List<Future<Bundle>> bundleFutures = new ArrayList<>();
+			for (int readIdx = 0; readIdx < 10; readIdx++) {
+				bundleFutures.add(executor.submit(()->parseCtx.newJsonParser().parseResource(Bundle.class, input)));
+			}
+
+			List<Bundle> parsedBundles = new ArrayList<>();
+			for (Future<Bundle> nextFuture : bundleFutures) {
+				Bundle nextBundle = nextFuture.get();
+				parsedBundles.add(nextBundle);
+			}
+
+			FhirContext encodeCtx = FhirContext.forR4();
+			encodeCtx.setPerformanceOptions(PerformanceOptionsEnum.DEFERRED_MODEL_SCANNING);
+			List<Future<String>> encodeFutures = new ArrayList<>();
+			for (Bundle nextBundle : parsedBundles) {
+				encodeFutures.add(executor.submit(()->encodeCtx.newJsonParser().encodeResourceToString(nextBundle)));
+			}
+
+			List<String> outputs = new ArrayList<>();
+			for (Future<String> nextFuture : encodeFutures) {
+				outputs.add(nextFuture.get());
+			}
+
+			assertEquals(outputs.get(0), outputs.get(1));
+		}
+	}
+
+
 
 	@Test
 	public void testEncodeAndParseUnicodeCharacterInNarrative() {
@@ -357,7 +464,7 @@ public class JsonParserR4Test extends BaseTest {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
 	}
@@ -389,7 +496,7 @@ public class JsonParserR4Test extends BaseTest {
 			parser.encodeResourceToString(p);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
+			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -629,9 +736,34 @@ public class JsonParserR4Test extends BaseTest {
 			jsonParser.parseResource(Patient.class, input);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals("[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
+			assertEquals(Msg.code(1821) + "[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
 		}
 
+	}
+
+	/**
+	 * See #3890
+	 */
+	@Test
+	public void testEncodeExtensionWithReferenceObjectValue() {
+
+		Appointment appointment = new Appointment();
+		appointment.setId("123");
+
+		Meta meta = new Meta();
+		Extension extension = new Extension();
+		extension.setUrl("http://example-source-team.com");
+		extension.setValue(new Reference(new Organization().setId("546")));
+		meta.addExtension(extension);
+		appointment.setMeta(meta);
+
+		var parser = ourCtx.newJsonParser();
+		String output = parser.encodeResourceToString(appointment);
+		ourLog.info("Output: {}", output);
+
+		Appointment input = parser.parseResource(Appointment.class, output);
+
+		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
 	}
 
 	@Test
@@ -1006,7 +1138,7 @@ public class JsonParserR4Test extends BaseTest {
 
 	@AfterAll
 	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		TestUtil.randomizeLocaleAndTimezone();
 	}
 
 }

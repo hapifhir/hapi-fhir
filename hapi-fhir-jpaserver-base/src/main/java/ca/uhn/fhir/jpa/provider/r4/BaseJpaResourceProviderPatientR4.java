@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -16,12 +18,22 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -29,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +58,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
+
+	@Autowired
+	private MemberMatcherR4Helper myMemberMatcherR4Helper;
+
 
 	/**
 	 * Patient/123/$everything
@@ -82,6 +98,10 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<StringType> theTypes,
+
 		@Sort
 			SortSpec theSortSpec,
 
@@ -90,7 +110,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -128,6 +148,14 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<StringType> theTypes,
+
+		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
+		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<IdType> theId,
+
 		@Sort
 			SortSpec theSortSpec,
 
@@ -136,11 +164,108 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
 
+	}
+
+
+	/**
+	 * /Patient/$member-match operation
+	 * Basic implementation matching by coverage id or by coverage identifier. Not matching by
+	 * Beneficiary (Patient) demographics in this version
+	 */
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
+		@OperationParam(name = "MemberIdentifier", typeName = "string")
+	})
+	public Parameters patientMemberMatch(
+		javax.servlet.http.HttpServletRequest theServletRequest,
+
+		@Description(shortDefinition = "The target of the operation. Will be returned with Identifier for matched coverage added.")
+		@OperationParam(name = Constants.PARAM_MEMBER_PATIENT, min = 1, max = 1)
+		Patient theMemberPatient,
+
+		@Description(shortDefinition = "Old coverage information as extracted from beneficiary's card.")
+		@OperationParam(name = Constants.PARAM_OLD_COVERAGE, min = 1, max = 1)
+		Coverage oldCoverage,
+
+		@Description(shortDefinition = "New Coverage information. Provided as a reference. Optionally returned unmodified.")
+		@OperationParam(name = Constants.PARAM_NEW_COVERAGE, min = 1, max = 1)
+		Coverage newCoverage,
+
+		RequestDetails theRequestDetails
+	) {
+		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theRequestDetails);
+	}
+
+
+	private Parameters doMemberMatchOperation(HttpServletRequest theServletRequest, Patient theMemberPatient,
+				Coverage theCoverageToMatch, Coverage theCoverageToLink, RequestDetails theRequestDetails) {
+
+		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink);
+
+		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
+		if ( ! coverageOpt.isPresent()) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.coverage.not.found");
+			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
+		}
+		Coverage coverage = coverageOpt.get();
+
+		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage);
+		if (! patientOpt.isPresent()) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.beneficiary.not.found");
+			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
+		}
+		Patient patient = patientOpt.get();
+
+		if (patient.getIdentifier().isEmpty()) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.beneficiary.without.identifier");
+			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
+		}
+
+		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
+	}
+
+
+	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage) {
+		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
+		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
+		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+	}
+
+
+	private void validateParam(Object theParam, String theParamName) {
+		if (theParam == null) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.missing.parameter", theParamName);
+			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
+		}
+	}
+
+
+	/**
+	 * Given a list of string types, return only the ID portions of any parameters passed in.
+	 */
+	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdType> theId) {
+		TokenOrListParam retVal = new TokenOrListParam();
+		if (theId != null) {
+			for (IdType next: theId) {
+				if (isNotBlank(next.getValue())) {
+					String[] split = next.getValueAsString().split(",");
+					Arrays.stream(split).map(IdType::new).forEach(id -> {
+						retVal.addOr(new TokenParam(id.getIdPart()));
+					});
+				}
+			}
+		}
+		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
 	}
 
 	private StringAndListParam toStringAndList(List<StringType> theNarrative) {

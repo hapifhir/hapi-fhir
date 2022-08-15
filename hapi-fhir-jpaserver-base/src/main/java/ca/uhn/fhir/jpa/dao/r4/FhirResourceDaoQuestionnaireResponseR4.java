@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 
@@ -46,15 +47,15 @@ public class FhirResourceDaoQuestionnaireResponseR4 extends BaseHapiFhirResource
 //		ValidationResult result = val.validateWithResult(getContext().newJsonParser().parseResource(getContext().newJsonParser().encodeResourceToString(theResource)));
 //		if (!result.isSuccessful()) {
 //			IBaseOperationOutcome oo = getContext().newJsonParser().parseResource(OperationOutcome.class, getContext().newJsonParser().encodeResourceToString(result.toOperationOutcome()));
-//			throw new UnprocessableEntityException(getContext(), oo);
+//			throw new UnprocessableEntityException(Msg.code(1104) + getContext(), oo);
 //		}
 //	}
 //
-//	public class JpaResourceLoader implements IResourceLoader {
+//	public class ResourceLoaderImpl implements IResourceLoader {
 //
 //		private RequestDetails myRequestDetails;
 //
-//		public JpaResourceLoader(RequestDetails theRequestDetails) {
+//		public ResourceLoaderImpl(RequestDetails theRequestDetails) {
 //			super();
 //			myRequestDetails = theRequestDetails;
 //		}
@@ -76,7 +77,7 @@ public class FhirResourceDaoQuestionnaireResponseR4 extends BaseHapiFhirResource
 //				return (T) vs;
 //			} else {
 //				// Should not happen, validator will only ask for these two
-//				throw new IllegalStateException("Unexpected request to load resource of type " + theType);
+//				throw new IllegalStateException(Msg.code(1105) + "Unexpected request to load resource of type " + theType);
 //			}
 //
 //		}

@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -28,6 +29,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
@@ -47,9 +49,10 @@ import java.util.concurrent.ExecutionException;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.convertors.conv30_40.ConceptMap30_40.convertConceptMap;
 
 public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConceptMapCommand {
+	public static final String COMMAND = "import-csv-to-conceptmap";
+
 	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommand.class);
 
@@ -80,18 +83,14 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 	@Override
 	public Options getOptions() {
-		Options options = new Options();
+		Options options = super.getOptions();
 
-		this.addFhirVersionOption(options);
-		addBaseUrlOption(options);
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
 		// </editor-fold desc="Additional parameters.">
 		addOptionalOption(options, SOURCE_VALUE_SET_PARAM, SOURCE_VALUE_SET_PARAM_LONGOPT, SOURCE_VALUE_SET_PARAM_NAME, SOURCE_VALUE_SET_PARAM_DESC);
 		addOptionalOption(options, TARGET_VALUE_SET_PARAM, TARGET_VALUE_SET_PARAM_LONGOPT, TARGET_VALUE_SET_PARAM_NAME, TARGET_VALUE_SET_PARAM_DESC);
 		// </editor-fold>
 		addRequiredOption(options, FILE_PARAM, FILE_PARAM_LONGOPT, FILE_PARAM_NAME, FILE_PARAM_DESC);
-		addBasicAuthOption(options);
-		addVerboseLoggingOption(options);
 
 		return options;
 	}
@@ -156,9 +155,9 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 	private org.hl7.fhir.dstu3.model.ConceptMap convertCsvToConceptMapDstu3() throws ExecutionException {
 		try {
-			return convertConceptMap(convertCsvToConceptMapR4());
+			return (org.hl7.fhir.dstu3.model.ConceptMap) VersionConvertorFactory_30_40.convertResource(convertCsvToConceptMapR4());
 		} catch (FHIRException fe) {
-			throw new ExecutionException(fe);
+			throw new ExecutionException(Msg.code(1604), fe);
 		}
 	}
 
@@ -251,7 +250,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 							try {
 								targetElementComponent.setEquivalence(Enumerations.ConceptMapEquivalence.fromCode(temporaryConceptMapGroupElementTarget.getEquivalence()));
 							} catch (FHIRException fe) {
-								throw new ExecutionException(fe);
+								throw new ExecutionException(Msg.code(1605), fe);
 							}
 						}
 
@@ -276,7 +275,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 				}
 			}
 		} catch (IOException e) {
-			throw new InternalErrorException(e);
+			throw new InternalErrorException(Msg.code(1606) + e);
 		}
 
 		ourLog.info("Finished converting CSV to ConceptMap.");

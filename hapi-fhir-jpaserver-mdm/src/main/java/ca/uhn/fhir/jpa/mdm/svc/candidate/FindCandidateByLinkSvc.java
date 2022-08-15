@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.api.IMdmLink;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -45,11 +47,11 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		Long targetPid = myIdHelperService.getPidOrNull(theTarget);
+		ResourcePersistentId targetPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theTarget);
 		if (targetPid != null) {
-			Optional<MdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
+			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
 			if (oLink.isPresent()) {
-				ResourcePersistentId goldenResourcePid = new ResourcePersistentId(oLink.get().getGoldenResourcePid());
+				ResourcePersistentId goldenResourcePid = new ResourcePersistentId(oLink.get().getGoldenResourcePersistenceId().getIdAsLong());
 				ourLog.debug("Resource previously linked. Using existing link.");
 					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}

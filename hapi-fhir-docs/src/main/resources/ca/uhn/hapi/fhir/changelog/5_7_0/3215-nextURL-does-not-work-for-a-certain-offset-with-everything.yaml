@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3215
+backport: 5.6.1
+title: "$everything operation returns a 500 error when querying for a page when _getpagesoffset is greater than or equal to 300. This has been corrected."

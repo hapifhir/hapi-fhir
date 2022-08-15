@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.util;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ package ca.uhn.fhir.mdm.util;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,5 +89,35 @@ public class MessageHelper {
 
 	public String getMessageForNoLink(String theGoldenRecord, String theSourceResource) {
 		return "No link exists between " + theGoldenRecord + " and " + theSourceResource;
+	}
+
+	public String getMessageForPresentLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForPresentLink(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForPresentLink(String theGoldenRecord, String theSourceResource) {
+		return "Link already exists between " + theGoldenRecord + " and " + theSourceResource + ". Use $mdm-update-link instead.";
+	}
+
+	public String getMessageForMultipleGoldenRecords(IAnyResource theSourceResource) {
+		return getMessageForMultipleGoldenRecords(theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForMultipleGoldenRecords(String theSourceResource) {
+		return theSourceResource + " already has matched golden resource. Use $mdm-query-links to see more details.";
+	}
+
+	public String getMessageForFailedGoldenResourceLoad(String theParamName, String theGoldenResourceId) {
+		return theGoldenResourceId + " used as parameter [" + theParamName + "] could not be loaded as a golden resource, as it appears to be lacking the golden resource meta tags.";
+	}
+
+	public String getMessageForMismatchPartition(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
+		return getMessageForMismatchPartition(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theSourceResource.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForMismatchPartition(String theGoldenRecord, String theSourceResource) {
+		return theGoldenRecord + " and " + theSourceResource + " are stored in different partitions. This operation is only available for resources on the same partition.";
 	}
 }

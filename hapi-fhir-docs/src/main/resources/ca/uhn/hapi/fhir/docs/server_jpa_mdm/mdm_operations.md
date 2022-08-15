@@ -4,6 +4,53 @@ MDM links are managed by MDM Operations. These operations are supplied by a [pla
 
 In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Patient/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of mdm links.
 
+## Pagination
+
+In both the `$query-links` operation, and the `$mdm-duplicate-golden-resources` paging is supported via `_count` and `_offset` parameters. By default, if you omit page information from your query, default pagination values will be used.
+The response will return you the next/self/previous links as part of the parameters response. Here are examples of pagination in these MDM queries.
+
+```http request
+GET http://example.com/$mdm-query-links?_offset=0&_count=2
+```
+
+Or if you are making a POST request
+
+```http request
+POST http://example.com/$mdm-query-links
+```
+
+With request body: 
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "_offset",
+    "valueInteger": 10
+  }, {
+    "name": "_count",
+    "valueInteger": 10
+  } ]
+}
+```
+
+The returning response will contain links to the current, next, and previous pages. If there is no previous/next link, it means there is no previous/next page of data available.
+
+```text
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "prev",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=0&_count=10"
+  }, {
+    "name": "self",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=10&_count=10"
+  }, {
+    "name": "next",
+    "valueUri": "http://example.com/$mdm-query-links?_offset=20&_count=10"
+  },...(truncated) 
+```
+
 ## Query links
 
 Use the `$mdm-query-links` operation to view MDM links. The results returned are based on the parameters provided. All parameters are optional.  This operation takes the following parameters:
@@ -50,6 +97,22 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
                 AUTO, MANUAL.
             </td>
         </tr>
+        <tr>
+            <td>_offset</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                the offset to begin returning records at.
+            </td>
+        </tr>
+        <tr>
+            <td>_count</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                The number of links to be returned in a page. 
+            </td>
+        </tr>
     </tbody>
 </table>
 
@@ -58,7 +121,7 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
 Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$mdm-query-links
+http://example.com/$mdm-query-links?_offset=10&_count=2
 ```
 
 The following request body could be used to find all POSSIBLE_MATCH links in the system:
@@ -67,6 +130,15 @@ The following request body could be used to find all POSSIBLE_MATCH links in the
 {
   "resourceType": "Parameters",
   "parameter": [ {
+     "name": "prev",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=8_count=2"
+  }, {
+     "name": "self",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=10_count=2"
+  }, {
+     "name": "next",
+     "valueUri": "http://example.com/$mdm-query-links?_offset=12_count=2"
+  }, {
     "name": "matchResult",
     "valueString": "POSSIBLE_MATCH"
   } ]
@@ -79,6 +151,15 @@ This operation returns a `Parameters` resource that looks like the following:
 {
   "resourceType": "Parameters",
   "parameter": [ {
+     "name": "prev",
+     "valueUri": "http://example.com$mdm-query-links?_offset=8_count=2"
+    },  {
+     "name": "self",
+     "valueUri": "http://example.com$mdm-query-links?_offset=10_count=10"
+    }, {
+     "name": "next",
+     "valueUri": "http://example.com$mdm-query-links?_offset=20_count=10"
+    }, {
     "name": "link",
     "part": [ {
       "name": "goldenResourceId",
@@ -118,6 +199,37 @@ Use an HTTP GET to the following URL to invoke this operation:
 ```url
 http://example.com/$mdm-duplicate-golden-resources
 ```
+
+The following is a table of the request parameters supported by this GET operation.
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>_offset</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                the offset to begin returning records at.
+            </td>
+        </tr>
+        <tr>
+            <td>_count</td>
+            <td>int</td>
+            <td>0..1</td>
+            <td>
+                The number of links to be returned in a page. 
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 This operation returns `Parameters` similar to `$mdm-query-links`:
 
@@ -284,6 +396,78 @@ Any supported MDM type can be used. The following request body shows how to upda
 
 The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
+## Create Link
+
+Use the `$mdm-create-link` operation to create an MDM link from a Golden Resource to a Target Resource without the need for any pre-existing matching data within the two resources. This operation takes the following parameters:
+
+<table class="table table-striped table-condensed">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Cardinality</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>goldenResourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the Golden Resource.
+            </td>
+        </tr>
+        <tr>
+            <td>resourceId</td>
+            <td>String</td>
+            <td>1..1</td>
+            <td>
+                The id of the target resource.
+            </td>
+        </tr>
+         <tr>
+            <td>matchResult</td>
+            <td>String</td>
+            <td>0..1</td>
+            <td>
+                Optional matchResult. If omitted, it  automatically set the default to MATCH, otherwise the value should be
+MATCH, POSSIBLE_MATCH or NO_MATCH.
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+MDM links created in this way will automatically have their `linkSource` set to `MANUAL`.
+
+### Example
+
+Use an HTTP POST to the following URL to invoke this operation:
+
+```url
+http://example.com/$mdm-create-link
+```
+
+Any supported MDM type can be used. The following request body shows how to update link on the Patient resource type:
+
+```json
+{
+  "resourceType": "Parameters",
+  "parameter": [ {
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
+  }, {
+    "name": "resourceId",
+    "valueString": "Patient/456"
+  }, {
+     "name": "matchResult",
+     "valueString": "MATCH"
+  } ]
+}
+```
+
+The operation returns the Golden Resource. For the query above, `Patient` will be returned.
+
 ## Merge Golden Resources
 
 The `$mdm-merge-golden-resources` operation can be used to merge one Golden Resource with another. When doing this, you will need to decide which resource to merge from and which one to merge to. 
@@ -358,7 +542,7 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 ## Querying the Patient Resource
 
-When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient and Practitioner resources.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient resources.
 
 This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
@@ -445,6 +629,10 @@ Content-Type: application/fhir+json; charset=UTF-8
                 "resourceType":"Orgaization",
                 "name": "McMaster Family Practice"
             }
+        },
+        {
+            "name":"resourceType",
+            "valueString": "Orgaization"
         }
     ]
 }
@@ -455,11 +643,15 @@ Note that the request goes to the root of the FHIR server, and not the `Organiza
 
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and Golden Resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This
+operation is intended to be used during the rules-tuning phase of the MDM implementation so that you can quickly test
+your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links
+and Golden Resources.
 
-After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
+After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources
+are deleted and expunged from the server.
 
-This operation takes a single optional Parameter.
+This operation takes two optional Parameters.
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -472,11 +664,21 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>sourceType</td>
+            <td>resourceType</td>
             <td>String</td>
+            <td>0..*</td>
+            <td>
+                The Source resource types you would like to clear. If omitted, all resource types will be cleared.
+            </td>
+        </tr>
+        <tr>
+            <td>batchSize</td>
+            <td>Integer</td>
             <td>0..1</td>
             <td>
-                The Source Resource type you would like to clear. If omitted, will operate over all links.
+                The number of links that should be deleted at a time.  If omitted, then the batch size will be determined by the value
+of [Reindex Batch Size](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/DaoConfig.html#getReindexBatchSize())
+property.
             </td>
         </tr>
     </tbody>
@@ -486,33 +688,27 @@ This operation takes a single optional Parameter.
 
 Use an HTTP POST to the following URL to invoke this operation:
 
-```url
-http://example.com/$mdm-clear
-```
+```http
+POST /$mdm-clear
+Content-Type: application/fhir+json
 
-The following request body could be used:
-
-```json
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "sourceType",
+    "name": "resourceType",
     "valueString": "Patient"
+  }, {
+    "name": "resourceType",
+    "valueString": "Practitioner"
+  }, {
+    "name": "batchSize",
+    "valueDecimal": 1000
   } ]
 }
 ```
 
-This operation returns the number of MDM links that were cleared. The following is a sample response:
-
-```json
-{
-  "resourceType": "Parameters",
-  "parameter": [ {
-    "name": "reset",
-    "valueDecimal": 5
-  } ]
-}
-```
+This operation returns the job execution id of the Spring Batch job that will be run to remove all the links and their
+golden resources.
 
 ## Batch-creating MDM Links
 

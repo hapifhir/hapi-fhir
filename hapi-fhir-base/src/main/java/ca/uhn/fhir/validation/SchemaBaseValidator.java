@@ -4,7 +4,7 @@ package ca.uhn.fhir.validation;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.validation;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,6 +52,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaBaseValidator.class);
 	private static final Set<String> SCHEMA_NAMES;
+	private static boolean ourJaxp15Supported;
 
 	static {
 		HashSet<String> sn = new HashSet<>();
@@ -107,7 +109,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 			theContext.addValidationMessage(message);
 		} catch (SAXException | IOException e) {
 			// Catch all
-			throw new ConfigurationException("Could not load/parse schema file", e);
+			throw new ConfigurationException(Msg.code(1967) + "Could not load/parse schema file", e);
 		}
 	}
 
@@ -132,12 +134,14 @@ public class SchemaBaseValidator implements IValidatorModule {
 					 * https://www.owasp.org/index.php/XML_External_Entity_(XXE)_Processing
 					 */
 					schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+					ourJaxp15Supported = true;
 				} catch (SAXNotRecognizedException e) {
+					ourJaxp15Supported = false;
 					ourLog.warn("Jaxp 1.5 Support not found.", e);
 				}
 				schema = schemaFactory.newSchema(new Source[]{baseSource});
 			} catch (SAXException e) {
-				throw new ConfigurationException("Could not load/parse schema file: " + "fhir-single.xsd", e);
+				throw new ConfigurationException(Msg.code(1968) + "Could not load/parse schema file: " + "fhir-single.xsd", e);
 			}
 			myKeyToSchema.put(key, schema);
 			return schema;
@@ -178,7 +182,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 
 			}
 
-			throw new ConfigurationException("Unknown schema: " + theSystemId);
+			throw new ConfigurationException(Msg.code(1969) + "Unknown schema: " + theSystemId);
 		}
 	}
 
@@ -214,6 +218,10 @@ public class SchemaBaseValidator implements IValidatorModule {
 			addIssue(theException, ResultSeverityEnum.WARNING);
 		}
 
+	}
+
+	public static boolean isJaxp15Supported() {
+		return ourJaxp15Supported;
 	}
 
 }

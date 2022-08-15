@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder.parser;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -8,10 +9,18 @@ import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.tinder.TinderResourceGeneratorMojo;
 import ca.uhn.fhir.tinder.TinderStructuresMojo;
 import ca.uhn.fhir.tinder.ValueSetGenerator;
 import ca.uhn.fhir.tinder.VelocityHelper;
-import ca.uhn.fhir.tinder.model.*;
+import ca.uhn.fhir.tinder.model.BaseElement;
+import ca.uhn.fhir.tinder.model.BaseRootType;
+import ca.uhn.fhir.tinder.model.Child;
+import ca.uhn.fhir.tinder.model.Composite;
+import ca.uhn.fhir.tinder.model.Extension;
+import ca.uhn.fhir.tinder.model.Resource;
+import ca.uhn.fhir.tinder.model.ResourceBlock;
+import ca.uhn.fhir.tinder.model.SimpleChild;
 import ca.uhn.fhir.tinder.model.SimpleSetter.Parameter;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -22,15 +31,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -70,7 +94,7 @@ public abstract class BaseStructureParser {
 		} else if (myVersion.equals("r5")) {
 			myCtx = FhirContext.forR5();
 		} else {
-			throw new MojoFailureException("Unknown version: " + myVersion);
+			throw new MojoFailureException(Msg.code(151) + "Unknown version: " + myVersion);
 		}
 
 		myIsRi = myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
@@ -212,7 +236,7 @@ public abstract class BaseStructureParser {
 										if (file.exists()) {
 											return "ca.uhn.fhir.model.primitive." + nextType;
 										}
-										throw new MojoFailureException("Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
+										throw new MojoFailureException(Msg.code(152) + "Unknown type: " + nextType + " - Have locally defined names: " + new TreeSet<String>(myLocallyDefinedClassNames.keySet()));
 									}
 								}
 							}
@@ -229,7 +253,7 @@ public abstract class BaseStructureParser {
 				return (ca.uhn.fhir.model.api.annotation.SimpleSetter.Parameter) next;
 			}
 		}
-		throw new IllegalArgumentException(theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
+		throw new IllegalArgumentException(Msg.code(153) + theBase.getCanonicalName() + " has @" + SimpleSetter.class.getCanonicalName() + " constructor with no/invalid parameter annotation");
 	}
 
 	/**
@@ -311,7 +335,7 @@ public abstract class BaseStructureParser {
 		return myTemplateFile;
 	}
 
-	public void setTemplateFile (File theTemplateFile) {
+	public void setTemplateFile(File theTemplateFile) {
 		myTemplateFile = theTemplateFile;
 	}
 
@@ -338,7 +362,7 @@ public abstract class BaseStructureParser {
 			} else if (next instanceof Composite) {
 				myLocallyDefinedClassNames.put(next.getName() + "Dt", "composite");
 			} else {
-				throw new IllegalStateException(next.getClass() + "");
+				throw new IllegalStateException(Msg.code(154) + next.getClass() + "");
 			}
 		}
 	}
@@ -519,7 +543,7 @@ public abstract class BaseStructureParser {
 		ctx.put("searchParamsReference", (theResource.getSearchParametersResource()));
 		ctx.put("searchParamsWithoutComposite", (theResource.getSearchParametersWithoutComposite()));
 		ctx.put("includes", (theResource.getIncludes()));
-		ctx.put("esc", new EscapeTool());
+		ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 		ctx.put("isRi", determineVersionEnum().isRi());
 
 		String capitalize = WordUtils.capitalize(myVersion);
@@ -569,7 +593,7 @@ public abstract class BaseStructureParser {
 			fos.flush();
 		}
 	}
-	
+
 	public void writeAll(File theOutputDirectory, File theResourceOutputDirectory, String thePackageBase) throws MojoFailureException {
 		writeAll(TargetType.SOURCE, theOutputDirectory, theResourceOutputDirectory, thePackageBase);
 	}
@@ -581,14 +605,14 @@ public abstract class BaseStructureParser {
 			theOutputDirectory.mkdirs();
 		}
 		if (!theOutputDirectory.isDirectory()) {
-			throw new MojoFailureException(theOutputDirectory + " is not a directory");
+			throw new MojoFailureException(Msg.code(155) + theOutputDirectory + " is not a directory");
 		}
 		if (theResourceOutputDirectory != null) {
 			if (!theResourceOutputDirectory.exists()) {
 				theResourceOutputDirectory.mkdirs();
 			}
 			if (!theResourceOutputDirectory.isDirectory()) {
-				throw new MojoFailureException(theResourceOutputDirectory + " is not a directory");
+				throw new MojoFailureException(Msg.code(156) + theResourceOutputDirectory + " is not a directory");
 			}
 		}
 
@@ -625,7 +649,7 @@ public abstract class BaseStructureParser {
 			try {
 				write(next, f, thePackageBase);
 			} catch (IOException e) {
-				throw new MojoFailureException("Failed to write structure", e);
+				throw new MojoFailureException(Msg.code(157) + "Failed to write structure", e);
 			}
 
 			if (next instanceof Resource) {
@@ -633,7 +657,7 @@ public abstract class BaseStructureParser {
 			} else if (next instanceof Composite) {
 				myNameToDatatypeClass.put(next.getElementName(), thePackageBase + ".composite." + className);
 			} else {
-				throw new IllegalStateException(next.getClass().toString());
+				throw new IllegalStateException(Msg.code(158) + next.getClass().toString());
 			}
 		}
 
@@ -664,7 +688,7 @@ public abstract class BaseStructureParser {
 				ctx.put("nameToDatatypeClass", myNameToDatatypeClass);
 				ctx.put("version", myVersion.replace(".", ""));
 				ctx.put("versionEnumName", determineVersionEnum().name());
-				ctx.put("esc", new EscapeTool());
+				ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 				ctx.put("isRi", determineVersionEnum().isRi());
 				ctx.put("package_suffix", packageSuffix);
 				String capitalize = WordUtils.capitalize(myVersion);
@@ -674,9 +698,9 @@ public abstract class BaseStructureParser {
 				ctx.put("versionCapitalized", capitalize);
 
 				VelocityEngine v = new VelocityEngine();
-				v.setProperty("resource.loader", "cp");
-				v.setProperty("cp.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-				v.setProperty("runtime.references.strict", Boolean.TRUE);
+				v.setProperty(RuntimeConstants.RESOURCE_LOADERS, "cp");
+				v.setProperty("resource.loader.cp.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+				v.setProperty("runtime.strict_mode.enable", Boolean.TRUE);
 
 				InputStream templateIs = ResourceGeneratorUsingSpreadsheet.class.getResourceAsStream("/vm/fhirversion_properties.vm");
 				InputStreamReader templateReader = new InputStreamReader(templateIs);
@@ -684,7 +708,7 @@ public abstract class BaseStructureParser {
 
 				w.close();
 			} catch (IOException e) {
-				throw new MojoFailureException(e.getMessage(), e);
+				throw new MojoFailureException(Msg.code(159) + e.getMessage(), e);
 			}
 		}
 	}
@@ -727,7 +751,7 @@ public abstract class BaseStructureParser {
 		} else if ("r5".equals(version)) {
 			versionEnum = FhirVersionEnum.R5;
 		} else {
-			throw new IllegalArgumentException("Unknown version: " + version);
+			throw new IllegalArgumentException(Msg.code(160) + "Unknown version: " + version);
 		}
 		return versionEnum;
 	}

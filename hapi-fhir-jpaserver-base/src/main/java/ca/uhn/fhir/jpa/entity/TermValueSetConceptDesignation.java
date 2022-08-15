@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,10 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_C_DESIGNATION")
+@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
+	// must have same name that indexed FK or SchemaMigrationTest complains because H2 sets this index automatically
+	@Index(name = "FK_TRM_VALUESET_CONCEPT_PID",  columnList = "VALUESET_CONCEPT_PID", unique = false)
+})
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.tinder;
 
+import ca.uhn.fhir.i18n.Msg;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -22,7 +23,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.tools.generic.EscapeTool;
 
 import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
 import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
@@ -274,13 +274,13 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			context.setValueSetFiles(valueSetFiles);
 			if (ResourceSource.MODEL.equals(context.getResourceSource())) {
 				if (generateDatatypes) {
-					throw new MojoFailureException("Cannot use \"generateDatatypes\" when resourceSource=model");
+					throw new MojoFailureException(Msg.code(120) + "Cannot use \"generateDatatypes\" when resourceSource=model");
 				}
 			}
 
 			generator.prepare(context);
 		} catch (FailureException e) {
-			throw new MojoFailureException(e.getMessage(), e.getCause());
+			throw new MojoFailureException(Msg.code(121) + e.getMessage(), e.getCause());
 		}
 		
 		try {
@@ -290,15 +290,15 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			TargetType targetType;
 			File targetDirectory = null;
 			if (null == targetFile) {
-				throw new MojoFailureException("The [targetFile] parameter is required.");
+				throw new MojoFailureException(Msg.code(122) + "The [targetFile] parameter is required.");
 			}
 			if (targetSourceDirectory != null) {
 				if (targetResourceDirectory != null) {
-					throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+					throw new MojoFailureException(Msg.code(123) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 				}
 				targetType = TargetType.SOURCE;
 				if (null == targetPackage) {
-					throw new MojoFailureException("The [targetPackage] property must be specified when generating Java source code.");
+					throw new MojoFailureException(Msg.code(124) + "The [targetPackage] property must be specified when generating Java source code.");
 				}
 				targetDirectory = new File(targetSourceDirectory, targetPackage.replace('.', File.separatorChar));
 				if (!targetFile.endsWith(".java")) {
@@ -307,7 +307,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			} else
 			if (targetResourceDirectory != null) {
 				if (targetSourceDirectory != null) {
-					throw new MojoFailureException("Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
+					throw new MojoFailureException(Msg.code(125) + "Both [targetSourceDirectory] and [targetResourceDirectory] are specified. Please choose just one.");
 				}
 				targetType = TargetType.RESOURCE;
 				if (targetFolder != null) {
@@ -321,7 +321,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 					targetPackage = "";
 				}
 			} else {
-				throw new MojoFailureException("Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
+				throw new MojoFailureException(Msg.code(126) + "Either [targetSourceDirectory] or [targetResourceDirectory] must be specified.");
 			}
 			ourLog.info(" * Output ["+targetType.toString()+"] file ["+targetFile+"] in directory: " + targetDirectory.getAbsolutePath());
 			targetDirectory.mkdirs();
@@ -360,7 +360,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			ctx.put("version", version);
 			ctx.put("isRi", BaseStructureParser.determineVersionEnum(version).isRi());
 			ctx.put("hash", "#");
-			ctx.put("esc", new EscapeTool());
+			ctx.put("esc", new TinderResourceGeneratorMojo.EscapeTool());
 			if (BaseStructureParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 			} else {
@@ -412,7 +412,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			}
 
 		} catch (Exception e) {
-			throw new MojoFailureException("Failed to generate file", e);
+			throw new MojoFailureException(Msg.code(127) + "Failed to generate file", e);
 		}
 	}
 

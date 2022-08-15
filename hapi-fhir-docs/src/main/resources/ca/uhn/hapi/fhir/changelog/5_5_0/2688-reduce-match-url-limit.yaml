@@ -1,0 +1,6 @@
+---
+type: perf
+issue: 2688
+backport: 5.4.1
+title: "Conditional URL lookups in the JPA server will now explicitly specify a maximum fetch size of 2, avoiding
+   fetching more data that won't be used inadvertently in some situations."

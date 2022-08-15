@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.submit.interceptor;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
@@ -41,8 +40,6 @@ public class SubscriptionSubmitInterceptorLoader {
 	private SubscriptionValidatingInterceptor mySubscriptionValidatingInterceptor;
 	@Autowired
 	private DaoConfig myDaoConfig;
-	@Autowired
-	private ApplicationContext myApplicationContext;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 

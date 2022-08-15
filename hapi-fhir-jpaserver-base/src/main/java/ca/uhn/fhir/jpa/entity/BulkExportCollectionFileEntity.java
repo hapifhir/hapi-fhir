@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,17 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 
+
+/*
+ * These classes are no longer needed.
+ * Metadata on the job is contained in the job itself
+ * (no separate storage required).
+ *
+ * See the BulkExportAppCtx for job details
+ */
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLFILE")
+@Deprecated
 public class BulkExportCollectionFileEntity implements Serializable {
 
 	@Id

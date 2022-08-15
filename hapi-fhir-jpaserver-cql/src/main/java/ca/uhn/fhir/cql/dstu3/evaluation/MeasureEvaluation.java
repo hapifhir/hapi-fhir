@@ -4,7 +4,7 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #%L
  * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,14 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.evaluation.MeasurePopulationType;
 import ca.uhn.fhir.cql.common.evaluation.MeasureScoring;
 import ca.uhn.fhir.cql.dstu3.builder.MeasureReportBuilder;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.cqframework.cql.elm.execution.ExpressionDef;
 import org.cqframework.cql.elm.execution.FunctionDef;
@@ -33,12 +35,12 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.ListResource;
 import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.Quantity;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -64,27 +66,27 @@ import java.util.stream.Collectors;
 
 public class MeasureEvaluation {
 
-    private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
+	private static final Logger logger = LoggerFactory.getLogger(MeasureEvaluation.class);
 
-    private Interval measurementPeriod;
-    private DaoRegistry registry;
+	private final Interval measurementPeriod;
+	private final DaoRegistry registry;
 
-    public MeasureEvaluation(DaoRegistry registry, Interval measurementPeriod) {
-        this.registry = registry;
-        this.measurementPeriod = measurementPeriod;
-    }
+	public MeasureEvaluation(DaoRegistry registry, Interval measurementPeriod) {
+		this.registry = registry;
+		this.measurementPeriod = measurementPeriod;
+	}
 
-    public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId) {
-        logger.info("Generating individual report");
+	public MeasureReport evaluatePatientMeasure(Measure measure, Context context, String patientId, RequestDetails theRequestDetails) {
+		logger.info("Generating individual report");
 
-        if (patientId == null) {
-            return evaluatePopulationMeasure(measure, context);
-        }
+		if (patientId == null) {
+			return evaluatePopulationMeasure(measure, context, theRequestDetails);
+		}
 
-        Patient patient = registry.getResourceDao(Patient.class).read(new IdType(patientId));
-        // Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id",
-        // patientId, "Patient", null, null, null, null, null, null, null, null);
-        // Patient patient = null;
+		Patient patient = registry.getResourceDao(Patient.class).read(new IdType(patientId), theRequestDetails);
+		// Iterable<Object> patientRetrieve = provider.retrieve("Patient", "id",
+		// patientId, "Patient", null, null, null, null, null, null, null, null);
+		// Patient patient = null;
         // if (patientRetrieve.iterator().hasNext()) {
         // patient = (Patient) patientRetrieve.iterator().next();
         // }
@@ -92,45 +94,47 @@ public class MeasureEvaluation {
 
 
         boolean isSingle = true;
-        return evaluate(measure, context,
+
+
+		return evaluate(measure, context,
                 patient == null ? Collections.emptyList() : Collections.singletonList(patient),
                 MeasureReport.MeasureReportType.INDIVIDUAL, isSingle);
     }
 
-    public MeasureReport evaluatePatientListMeasure(Measure measure, Context context, String practitionerRef) {
-        logger.info("Generating patient-list report");
+	public MeasureReport evaluatePatientListMeasure(Measure measure, Context context, String practitionerRef, RequestDetails theRequestDetails) {
+		logger.info("Generating patient-list report");
 
-        List<Patient> patients = practitionerRef == null ? getAllPatients() : getPractitionerPatients(practitionerRef);
-        boolean isSingle = false;
-        return evaluate(measure, context, patients, MeasureReport.MeasureReportType.PATIENTLIST, isSingle);
-    }
+		List<Patient> patients = practitionerRef == null ? getAllPatients(theRequestDetails) : getPractitionerPatients(practitionerRef, theRequestDetails);
+		boolean isSingle = false;
+		return evaluate(measure, context, patients, MeasureReport.MeasureReportType.PATIENTLIST, isSingle);
+	}
 
-    private List<Patient> getPractitionerPatients(String practitionerRef) {
-        SearchParameterMap map = new SearchParameterMap();
-        map.add("general-practitioner", new ReferenceParam(
-                practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
+	private List<Patient> getPractitionerPatients(String practitionerRef, RequestDetails theRequestDetails) {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add("general-practitioner", new ReferenceParam(
+			practitionerRef.startsWith("Practitioner/") ? practitionerRef : "Practitioner/" + practitionerRef));
 
-        List<Patient> patients = new ArrayList<>();
-        IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map);
-        List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
-        patientList.forEach(x -> patients.add((Patient) x));
-        return patients;
-    }
+		List<Patient> patients = new ArrayList<>();
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(map, theRequestDetails);
+		List<IBaseResource> patientList = patientProvider.getAllResources();
+		patientList.forEach(x -> patients.add((Patient) x));
+		return patients;
+	}
 
-    private List<Patient> getAllPatients() {
-        List<Patient> patients = new ArrayList<>();
-        IBundleProvider patientProvider = registry.getResourceDao("Patient").search(new SearchParameterMap());
-        List<IBaseResource> patientList = patientProvider.getResources(0, patientProvider.size());
-        patientList.forEach(x -> patients.add((Patient) x));
-        return patients;
-    }
+	private List<Patient> getAllPatients(RequestDetails theRequestDetails) {
+		List<Patient> patients = new ArrayList<>();
+		IBundleProvider patientProvider = registry.getResourceDao("Patient").search(SearchParameterMap.newSynchronous(), theRequestDetails);
+		List<IBaseResource> patientList = patientProvider.getAllResources();
+		patientList.forEach(x -> patients.add((Patient) x));
+		return patients;
+	}
 
-    public MeasureReport evaluatePopulationMeasure(Measure measure, Context context) {
-        logger.info("Generating summary report");
+	public MeasureReport evaluatePopulationMeasure(Measure measure, Context context, RequestDetails theRequestDetails) {
+		logger.info("Generating summary report");
 
-        boolean isSingle = false;
-        return evaluate(measure, context, getAllPatients(), MeasureReport.MeasureReportType.SUMMARY, isSingle);
-    }
+		boolean isSingle = false;
+		return evaluate(measure, context, getAllPatients(theRequestDetails), MeasureReport.MeasureReportType.SUMMARY, isSingle);
+	}
 
     @SuppressWarnings("unchecked")
     private void clearExpressionCache(Context context) {
@@ -159,7 +163,7 @@ public class MeasureEvaluation {
         String observationName = pop.getCriteria();
         ExpressionDef ed = context.resolveExpressionRef(observationName);
         if (!(ed instanceof FunctionDef)) {
-            throw new IllegalArgumentException(String.format("Measure observation %s does not reference a function definition", observationName));
+            throw new IllegalArgumentException(Msg.code(1648) + String.format("Measure observation %s does not reference a function definition", observationName));
         }
 
         Object result = null;
@@ -302,7 +306,7 @@ public class MeasureEvaluation {
 
         MeasureScoring measureScoring = MeasureScoring.fromCode(measure.getScoring().getCodingFirstRep().getCode());
         if (measureScoring == null) {
-            throw new RuntimeException("Measure scoring is required in order to calculate.");
+            throw new RuntimeException(Msg.code(1649) + "Measure scoring is required in order to calculate.");
         }
 
         List<Measure.MeasureSupplementalDataComponent> sde = new ArrayList<>();
@@ -566,8 +570,8 @@ public class MeasureEvaluation {
             }
 
             if (!list.isEmpty()) {
-                list.setId("List/" + UUID.randomUUID().toString());
-                list.setTitle(key);
+					list.setId("List/" + UUID.randomUUID());
+					list.setTitle(key);
                 resources.put(list.getId(), list);
                 list.getEntry().forEach(listResource -> evaluatedResourcesList.add(listResource.getItem().getReference()));
             }
@@ -677,7 +681,7 @@ public class MeasureEvaluation {
                         .setValue(new StringType(sdeKey));
                 obsExtension.addExtension(extExtPop);
                 obs.addExtension(obsExtension);
-                obs.setValue(new IntegerType(sdeAccumulatorValue));
+                obs.setValue(new Quantity(sdeAccumulatorValue));
                 if(!isSingle) {
                     valueCoding.setCode(sdeAccumulatorKey);
                     obsCodeableConcept.setCoding(Collections.singletonList(valueCoding));
@@ -712,17 +716,15 @@ public class MeasureEvaluation {
 
         for (Object o : context.getEvaluatedResources()) {
             if (o instanceof Resource) {
-                Resource r = (Resource) o;
-                String id = (r.getIdElement().getResourceType() != null ? (r.getIdElement().getResourceType() + "/")
-                        : "") + r.getIdElement().getIdPart();
-                if (!codeHashSet.contains(id)) {
-                    codeHashSet.add(id);
-                }
+					Resource r = (Resource) o;
+					String id = (r.getIdElement().getResourceType() != null ? (r.getIdElement().getResourceType() + "/")
+						: "") + r.getIdElement().getIdPart();
+					codeHashSet.add(id);
 
-                if (!resources.containsKey(id)) {
-                    resources.put(id, r);
-                }
-            }
+					if (!resources.containsKey(id)) {
+						resources.put(id, r);
+					}
+				}
         }
 
         context.clearEvaluatedResources();

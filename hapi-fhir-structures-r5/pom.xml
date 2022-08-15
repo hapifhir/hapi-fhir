@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>5.4.0-PRE3-SNAPSHOT</version>
+		<version>6.2.0-PRE1-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -15,6 +15,10 @@
 	<name>HAPI FHIR Structures - FHIR R5</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -110,24 +114,34 @@
 		Optional dependencies used by org.hl7.fhir.r5
 		We include these here to get the aggregate JavaDoc to work
 		-->
+
 		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>4.0.1</version>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>4.0.1</version>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.22</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>ooxml-schemas</artifactId>
-			<version>1.4</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -260,11 +274,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -289,6 +298,17 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<show>public</show>
+					<includeDependencySources>true</includeDependencySources>
+					<dependencySourceIncludes>
+						<include>ca.uhn.hapi.fhir:org.hl7.fhir.r5</include>
+					</dependencySourceIncludes>
+					<additionalDependencies>
+						<dependency>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${okhttp_version}</version>
+						</dependency>
+					</additionalDependencies>
 				</configuration>
 			</plugin>
 		</plugins>

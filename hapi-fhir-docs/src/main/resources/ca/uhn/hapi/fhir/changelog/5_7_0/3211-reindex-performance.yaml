@@ -1,0 +1,5 @@
+---
+type: fix
+backport: 5.6.1,5.5.4
+jira: SMILE-3472
+title: "Fixed a serious performance issue with the `$reindex` operation."

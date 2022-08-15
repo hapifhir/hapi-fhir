@@ -4,7 +4,7 @@ package ca.uhn.fhir.mdm.api;
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.api;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 
 import java.util.stream.Collectors;
@@ -52,4 +53,6 @@ public interface IMdmSettings {
 	default String getSupportedMdmTypes() {
 		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
+
+	int getCandidateSearchLimit();
 }

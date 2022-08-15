@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
@@ -34,12 +36,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.Iterator;
 
-public class SearchQueryExecutor implements Iterator<Long>, Closeable {
+public class SearchQueryExecutor implements ISearchQueryExecutor {
 
 	private static final Long NO_MORE = -1L;
 	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
@@ -135,7 +135,7 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
-				throw new InternalErrorException(e);
+				throw new InternalErrorException(Msg.code(1262) + e);
 			}
 		}
 	}
