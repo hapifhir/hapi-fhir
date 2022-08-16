@@ -34,20 +34,22 @@ public class MetadataSource {
 	public boolean isOnlineIndexSupported(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 
 		switch (theConnectionProperties.getDriverType()) {
-			case ORACLE_12C:
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
 				return true;
 			case MSSQL_2012:
-				String edition = getEdition(theConnectionProperties);
-				return edition.startsWith("Enterprise");
+				String mssqlEdition = getEdition(theConnectionProperties);
+				return mssqlEdition.startsWith("Enterprise");
+			case ORACLE_12C:
+				String oracleEdition = getEdition(theConnectionProperties);
+				return oracleEdition.contains("Enterprise");
 			default:
 				return false;
 		}
 	}
 
 	/**
-	 * Get the MS Sql Server edition.  Other databases are not supported yet.
+	 * Get the MS Sql Server or Oracle Server edition.  Other databases are not supported yet.
 	 *
 	 * @param theConnectionProperties the database to inspect
 	 * @return the edition string (e.g. Standard, Enterprise, Developer, etc.)
@@ -56,6 +58,8 @@ public class MetadataSource {
 		final String result;
 		if (theConnectionProperties.getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT SERVERPROPERTY ('edition')", String.class);
+		} else if (theConnectionProperties.getDriverType() == DriverTypeEnum.ORACLE_12C) {
+			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT * FROM v$version WHERE banner LIKE 'Oracle%';", String.class);
 		} else {
 			throw new UnsupportedOperationException(Msg.code(2084) + "We only know about MSSQL editions.");
 		}
