@@ -1,19 +1,15 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import static com.healthmarketscience.sqlbuilder.Conditions.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -24,12 +20,9 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Condition;
 import org.hl7.fhir.r5.model.DateTimeType;
-import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Medication;
 import org.hl7.fhir.r5.model.MedicationRequest;
 import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Observation.ObservationComponentComponent;
@@ -44,15 +37,19 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
-import ca.uhn.fhir.util.UrlUtil;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -381,7 +378,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testEverythingPatientInstanceWithTypeParameter() {
-		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -412,7 +409,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -443,7 +440,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -534,5 +531,22 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			}
 		}
 		return retVal;
+	}
+
+	@Test
+	public void testEverythingWithTypeParamAndUnknownTypeThrowsError() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "NotAResource");
+
+		try {
+			myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
+		}
+	}
+
+	private String getTestName() {
+		return new Exception().getStackTrace()[1].getMethodName();
 	}
 }

@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -835,7 +836,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCreateResourceConditional() throws IOException {
-		String methodName = "testCreateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -978,7 +979,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCreateWithForcedId() {
-		String methodName = "testCreateWithForcedId";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
@@ -1026,7 +1027,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteConditionalMultiple() {
-		String methodName = "testDeleteConditionalMultiple";
+		String methodName = getTestName();
 
 		myDaoConfig.setAllowMultipleDelete(false);
 
@@ -1086,7 +1087,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteConditionalNoMatches() throws Exception {
-		String methodName = "testDeleteConditionalNoMatches";
+		String methodName = getTestName();
 
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?identifier=" + methodName);
 		CloseableHttpResponse resp = ourHttpClient.execute(delete);
@@ -1140,7 +1141,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
-		String methodName = "testDeleteResourceConditional1";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1205,7 +1206,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testDeleteResourceConditional2() throws Exception {
-		String methodName = "testDeleteResourceConditional2";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1333,7 +1334,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingEncounterInstance() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1397,7 +1398,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingEncounterType() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1580,7 +1581,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testEverythingPatientIncludesBackReferences() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
@@ -1639,7 +1640,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientOperation() {
-		String methodName = "testEverythingOperation";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1684,7 +1685,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientType() {
-		String methodName = "testEverythingPatientType";
+		String methodName = getTestName();
 
 		Organization o1 = new Organization();
 		o1.setName(methodName + "1");
@@ -1725,7 +1726,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientInstanceWithTypeParameter() {
-		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1756,7 +1757,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1787,7 +1788,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1871,8 +1872,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testEverythingWithTypeParamAndUnknownTypeThrowsError() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("NotAResource"));
+
+		try {
+			ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
+		}
+	}
+
+	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
-		String methodName = "testEverythingWithLastUpdatedAndSort";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2165,7 +2179,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -2241,7 +2255,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testHistoryWithAtParameter() throws Exception {
-		String methodName = "testHistoryWithFromAndTo";
+		String methodName = getTestName();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -2284,7 +2298,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() {
-		String methodName = "testHistoryWithDeletedResource";
+		String methodName = getTestName();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -2315,7 +2329,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIdAndVersionInBodyForCreate() throws IOException {
-		String methodName = "testIdAndVersionInBodyForCreate";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -2357,7 +2371,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIdAndVersionInBodyForUpdate() throws IOException {
-		String methodName = "testIdAndVersionInBodyForUpdate";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -2467,7 +2481,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testMetaOperations() {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 		ourClient.setPrettyPrint(true);
 		IValidatorModule module = new FhirInstanceValidator(myFhirContext);
@@ -2968,7 +2982,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSearchByLastUpdated() throws Exception {
-		String methodName = "testSearchByLastUpdated";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName + "1");
@@ -3106,7 +3120,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParamRp";
+		String methodName = getTestName();
 
 		int sleep = 100;
 		Thread.sleep(sleep);
@@ -3232,7 +3246,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchPagingKeepsOldSearches() {
-		String methodName = "testSearchPagingKeepsOldSearches";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3789,7 +3803,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchWithMissing() {
 		ourLog.info("Starting testSearchWithMissing");
 
-		String methodName = "testSearchWithMissing";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		IIdType deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
@@ -3941,7 +3955,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSortFromResourceProvider() {
 		Patient p;
-		String methodName = "testSortFromResourceProvider";
+		String methodName = getTestName();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -4120,7 +4134,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateInvalidReference() throws Exception {
-		String methodName = "testUpdateInvalidReference";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4143,7 +4157,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateInvalidReference2() throws Exception {
-		String methodName = "testUpdateInvalidReference2";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("2");
@@ -4170,7 +4184,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
-		String methodName = "testUpdateNoIdInBody";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4280,7 +4294,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
-		String methodName = "testUpdateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4359,7 +4373,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateResourceWithPrefer() throws Exception {
-		String methodName = "testUpdateResourceWithPrefer";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4460,7 +4474,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateWithETag() throws Exception {
-		String methodName = "testUpdateWithETag";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4501,7 +4515,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
-		String methodName = "testUpdateWrongIdInBody";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("333");
@@ -4776,5 +4790,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
-
+	private String getTestName() {
+		return new Exception().getStackTrace()[1].getMethodName();
+	}
 }
