@@ -239,7 +239,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			// test will fail and the line above should be restored
 			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, respString);
 			assertEquals(1, oo.getIssue().size());
-			assertEquals("The value provided ('5.0.0-snapshot1') is not in the value set 'FHIRVersion' (http://hl7.org/fhir/ValueSet/FHIR-version|4.6.0), and a code is required from this value set) (error message = Unknown code '5.0.0-snapshot1' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/FHIR-version')", oo.getIssue().get(0).getDiagnostics());
+			assertThat(oo.getIssue().get(0).getDiagnostics(), containsString("is not in the value set 'FHIRVersion'"));
 
 		}
 	}

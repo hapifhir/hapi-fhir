@@ -57,6 +57,11 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	}
 
 	@Override
+	public byte[] fetchBinary(String theBinaryKey) {
+		return myWrap.fetchBinary(theBinaryKey);
+	}
+
+	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return myWrap.isCodeSystemSupported(theValidationSupportContext, theSystem);
 	}

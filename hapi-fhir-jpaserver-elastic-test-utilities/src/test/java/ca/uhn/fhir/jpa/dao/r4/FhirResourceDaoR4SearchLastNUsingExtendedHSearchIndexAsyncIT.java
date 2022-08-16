@@ -15,6 +15,7 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexAsyncIT extend
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setLastNEnabled(true);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 	}
 

@@ -47,7 +47,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	private final Cache<String, Object> myExpandValueSetCache;
 
 	/**
-	 * Constuctor with default timeouts
+	 * Constructor with default timeouts
 	 *
 	 * @param theWrap The validation support module to wrap
 	 */
@@ -138,6 +138,11 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		return loadFromCache(myCache, "fetchStructureDefinition " + theUrl, t -> super.fetchStructureDefinition(theUrl));
+	}
+
+	@Override
+	public byte[] fetchBinary(String theBinaryKey) {
+		return loadFromCache(myCache, "fetchBinary " + theBinaryKey, t -> super.fetchBinary(theBinaryKey));
 	}
 
 	@Override

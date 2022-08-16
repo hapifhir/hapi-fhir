@@ -1739,6 +1739,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
+	@Test
+	public void testDeleteNonExistingResourceReturnsOperationOutcome() {
+		String resourceType = "Patient";
+		String logicalID = "12345";
+
+		MethodOutcome resp = myClient.delete().resourceById(resourceType, logicalID).execute();
+
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource " + resourceType + "/" + logicalID + " does not exist."));
+	}
+
+	@Test
+	public void testDeleteAlreadyDeletedReturnsOperationOutcome() {
+		Patient p = new Patient();
+		IIdType id = myClient.create().resource(p).execute().getId();
+
+		MethodOutcome resp = myClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
+
+		resp = myClient.delete().resourceById(id).execute();
+		oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource "));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), endsWith("was already deleted."));
+	}
+
 	/**
 	 * See issue #52
 	 */
@@ -4879,10 +4905,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, returnedBundle.getEntry().size());
 
-		//-- check only use original quantity table to search
+		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
+		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
 	@Test

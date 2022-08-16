@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
@@ -28,8 +29,10 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
@@ -67,6 +70,8 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JsonParserR4Test extends BaseTest {
@@ -734,6 +739,31 @@ public class JsonParserR4Test extends BaseTest {
 			assertEquals(Msg.code(1821) + "[element=\"value\"] Invalid attribute value \"\": Attribute value must not be empty (\"\")", e.getMessage());
 		}
 
+	}
+
+	/**
+	 * See #3890
+	 */
+	@Test
+	public void testEncodeExtensionWithReferenceObjectValue() {
+
+		Appointment appointment = new Appointment();
+		appointment.setId("123");
+
+		Meta meta = new Meta();
+		Extension extension = new Extension();
+		extension.setUrl("http://example-source-team.com");
+		extension.setValue(new Reference(new Organization().setId("546")));
+		meta.addExtension(extension);
+		appointment.setMeta(meta);
+
+		var parser = ourCtx.newJsonParser();
+		String output = parser.encodeResourceToString(appointment);
+		ourLog.info("Output: {}", output);
+
+		Appointment input = parser.parseResource(Appointment.class, output);
+
+		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
 	}
 
 	@Test

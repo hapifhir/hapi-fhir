@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -14,8 +15,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -51,7 +50,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";

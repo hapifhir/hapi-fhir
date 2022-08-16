@@ -249,7 +249,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private void clearJobExecutions() {
-		for (String id : myJobExecutions) {
+		for (String id : new ArrayList<>(myJobExecutions)) {
 			myJobCoordinator.cancelInstance(id);
 		}
 		myJobExecutions.clear();

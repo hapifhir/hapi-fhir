@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao.search;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -36,6 +38,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
  * Builds lastN aggregation, and parse the results
  */
 public class LastNAggregation {
+	private static final Logger ourLog = LoggerFactory.getLogger(LastNAggregation.class);
 	static final String SP_SUBJECT = SEARCH_PARAM_ROOT + ".subject.reference.value";
 	private static final String SP_CODE_TOKEN_CODE_AND_SYSTEM = SEARCH_PARAM_ROOT + ".code.token.code-system";
 	private static final String SP_DATE_DT_UPPER = SEARCH_PARAM_ROOT + ".date.dt.upper";
@@ -167,6 +170,7 @@ public class LastNAggregation {
 	 * </pre>
 	 */
 	public List<Long> extractResourceIds(@Nonnull JsonObject theAggregationResult) {
+		ourLog.trace("extractResourceIds - hasSubject {} aggregation {}", myAggregateOnSubject, theAggregationResult);
 		Stream<JsonObject> resultBuckets = Stream.of(theAggregationResult);
 
 		// was it grouped by subject?
