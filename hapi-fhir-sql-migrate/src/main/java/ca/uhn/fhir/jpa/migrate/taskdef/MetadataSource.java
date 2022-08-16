@@ -59,7 +59,7 @@ public class MetadataSource {
 		if (theConnectionProperties.getDriverType() == DriverTypeEnum.MSSQL_2012) {
 			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT SERVERPROPERTY ('edition')", String.class);
 		} else if (theConnectionProperties.getDriverType() == DriverTypeEnum.ORACLE_12C) {
-			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT * FROM v$version WHERE banner LIKE 'Oracle%'", String.class);
+			result = theConnectionProperties.newJdbcTemplate().queryForObject("SELECT BANNER FROM v$version WHERE banner LIKE 'Oracle%'", String.class);
 		} else {
 			throw new UnsupportedOperationException(Msg.code(2084) + "We only know about MSSQL editions.");
 		}
