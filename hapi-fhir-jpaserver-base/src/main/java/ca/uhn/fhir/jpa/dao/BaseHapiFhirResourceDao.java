@@ -978,7 +978,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected void requestReindexForRelatedResources(Boolean theCurrentlyReindexing, List<String> theBase, RequestDetails theRequestDetails) {
 		// Avoid endless loops
-		if (Boolean.TRUE.equals(theCurrentlyReindexing)) {
+		if (Boolean.TRUE.equals(theCurrentlyReindexing) || isInternalCall(theRequestDetails)) {
 			return;
 		}
 
@@ -1004,6 +1004,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		mySearchParamRegistry.requestRefresh();
+	}
+
+	private boolean isInternalCall(RequestDetails theRequestDetails) {
+		return theRequestDetails == null || isSystemRequest(theRequestDetails);
 	}
 
 	private void addAllResourcesTypesToReindex(List<String> theBase, RequestDetails theRequestDetails, ReindexJobParameters params) {
