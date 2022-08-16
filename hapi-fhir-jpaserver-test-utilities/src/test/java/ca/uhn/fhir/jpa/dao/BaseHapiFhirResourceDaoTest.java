@@ -196,7 +196,7 @@ class BaseHapiFhirResourceDaoTest {
 			return partitionedUrl;
 		});
 
-		mySvc.requestReindexForRelatedResources(false, base, null);
+		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 
 		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
@@ -215,7 +215,7 @@ class BaseHapiFhirResourceDaoTest {
 	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
 		List<String> base = Lists.newArrayList("Resource");
 
-		mySvc.requestReindexForRelatedResources(false, base, null);
+		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
 
 		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
