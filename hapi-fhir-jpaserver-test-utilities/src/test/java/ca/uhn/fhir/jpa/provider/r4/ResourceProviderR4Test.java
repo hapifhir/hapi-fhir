@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -103,7 +104,6 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -175,7 +175,6 @@ import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORM
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -1249,7 +1248,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateResourceConditional() throws IOException {
-		String methodName = "testCreateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1392,7 +1391,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateWithForcedId() {
-		String methodName = "testCreateWithForcedId";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
@@ -1479,7 +1478,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteConditionalMultiple() {
-		String methodName = "testDeleteConditionalMultiple";
+		String methodName = getTestName();
 
 		myDaoConfig.setAllowMultipleDelete(false);
 
@@ -1537,9 +1536,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+
 	@Test
 	public void testDeleteConditionalNoMatches() throws Exception {
-		String methodName = "testDeleteConditionalNoMatches";
+		String methodName = getTestName();
 
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?identifier=" + methodName);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(delete)) {
@@ -1600,7 +1600,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
-		String methodName = "testDeleteResourceConditional1";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1665,7 +1665,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testDeleteResourceConditional2() throws Exception {
-		String methodName = "testDeleteResourceConditional2";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1834,7 +1834,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingEncounterInstance() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1896,7 +1896,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingEncounterType() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -2077,7 +2077,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingPatientIncludesBackReferences() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
@@ -2136,7 +2136,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientOperation() {
-		String methodName = "testEverythingOperation";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -2179,7 +2179,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientType() {
-		String methodName = "testEverythingPatientType";
+		String methodName = getTestName();
 
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType o2Id = createOrganization(methodName, "2");
@@ -2205,7 +2205,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientTypeWithIdParameter() {
-		String methodName = "testEverythingPatientTypeWithIdParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2329,7 +2329,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientInstanceWithTypeParameter() {
-		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2360,7 +2360,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2391,7 +2391,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+		String methodName = getTestName();
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2431,8 +2431,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testEverythingWithTypeParamAndUnknownTypeThrowsError() {
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "NotAResource");
+
+		try {
+			myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
+		}
+	}
+
+	@Test
 	public void testEverythingPatientWorksWithForcedId() {
-		String methodName = "testEverythingPatientType";
+		String methodName = getTestName();
 
 		//Given
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2480,7 +2493,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	// retest
 	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
-		String methodName = "testEverythingWithLastUpdatedAndSort";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2903,7 +2916,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -2973,7 +2986,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testHistoryWithAtParameter() throws Exception {
-		String methodName = "testHistoryWithFromAndTo";
+		String methodName = getTestName();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -3017,7 +3030,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() {
-		String methodName = "testHistoryWithDeletedResource";
+		String methodName = getTestName();
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -3177,7 +3190,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIdAndVersionInBodyForCreate() throws IOException {
-		String methodName = "testIdAndVersionInBodyForCreate";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -3219,7 +3232,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIdAndVersionInBodyForUpdate() throws IOException {
-		String methodName = "testIdAndVersionInBodyForUpdate";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -3373,7 +3386,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testMetaOperations() {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -3562,7 +3575,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3590,7 +3603,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckBad() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckBad";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3618,7 +3631,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckGood() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckGood";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3647,7 +3660,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingXmlPatch() throws Exception {
-		String methodName = "testPatchUsingXmlPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -4241,7 +4254,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByLastUpdated() throws Exception {
-		String methodName = "testSearchByLastUpdated";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName + "1");
@@ -4436,7 +4449,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParamRp";
+		String methodName = getTestName();
 
 		int sleep = 100;
 		Thread.sleep(sleep);
@@ -4581,7 +4594,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchPagingKeepsOldSearches() {
-		String methodName = "testSearchPagingKeepsOldSearches";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -5582,7 +5595,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		ourLog.info("Starting testSearchWithMissing");
 
-		String methodName = "testSearchWithMissing";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		IIdType deletedIdMissingTrue = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
@@ -5841,7 +5854,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSortFromResourceProvider() {
 		Patient p;
-		String methodName = "testSortFromResourceProvider";
+		String methodName = getTestName();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -6017,7 +6030,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateInvalidReference() throws Exception {
-		String methodName = "testUpdateInvalidReference";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6037,7 +6050,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateInvalidReference2() throws Exception {
-		String methodName = "testUpdateInvalidReference2";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("2");
@@ -6061,7 +6074,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
-		String methodName = "testUpdateNoIdInBody";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6168,7 +6181,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
-		String methodName = "testUpdateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6247,7 +6260,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateResourceWithPrefer() throws Exception {
-		String methodName = "testUpdateResourceWithPrefer";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6417,7 +6430,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWithETag() throws Exception {
-		String methodName = "testUpdateWithETag";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6458,7 +6471,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
-		String methodName = "testUpdateWrongIdInBody";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.setId("333");
@@ -7081,6 +7094,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
+	}
+
+	private String getTestName() {
+		return new Exception().getStackTrace()[1].getMethodName();
 	}
 
 }
