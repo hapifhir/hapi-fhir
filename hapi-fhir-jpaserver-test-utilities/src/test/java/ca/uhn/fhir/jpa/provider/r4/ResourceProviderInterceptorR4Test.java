@@ -476,7 +476,30 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertNotNull(methodOutcome);
+	}
+	@Test
+	public void testSearchParamValidationOnUpdateWithClientAssignedId() {
+		registerSearchParameterValidatingInterceptor();
 
+		SearchParameter searchParameter = createSearchParameter();
+		searchParameter.setId("my-custom-id");
+
+		// now, create a SearchParameter
+		MethodOutcome methodOutcome = myClient
+			.update()
+			.resource(searchParameter)
+			.execute();
+
+		assertTrue(methodOutcome.getCreated());
+		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
+
+		createdSearchParameter.setUrl("newUrl");
+		methodOutcome = myClient
+			.update()
+			.resource(createdSearchParameter)
+			.execute();
+
+		assertNotNull(methodOutcome);
 	}
 
 	@Test
