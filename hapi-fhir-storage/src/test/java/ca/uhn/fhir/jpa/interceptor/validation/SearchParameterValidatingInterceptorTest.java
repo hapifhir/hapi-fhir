@@ -135,6 +135,7 @@ public class SearchParameterValidatingInterceptorTest {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameters(asList(mySearchParameterId1));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(mySearchParameterId1.getId()));
 
 
 		SearchParameter newSearchParam = aSearchParameter(ID1);
@@ -152,7 +153,6 @@ public class SearchParameterValidatingInterceptorTest {
 		Set<String> ids = theSearchParams.stream().map(sp -> sp.getId()).collect(Collectors.toSet());
 
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
-		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(ids);
 	}
 
 	private SearchParameter aSearchParameter(String id) {
