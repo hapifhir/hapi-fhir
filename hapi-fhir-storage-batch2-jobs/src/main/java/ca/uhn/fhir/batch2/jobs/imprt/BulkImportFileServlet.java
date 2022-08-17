@@ -56,6 +56,10 @@ public class BulkImportFileServlet extends HttpServlet {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportFileServlet.class);
 	private final Map<String, IFileSupplier> myFileIds = new HashMap<>();
 
+	public static String DEFAULT_HEADER_CONTENT_TYPE = CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX;
+
+	private String myHeaderContentType = DEFAULT_HEADER_CONTENT_TYPE;
+
 	@Override
 	protected void doGet(HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		try {
@@ -95,7 +99,7 @@ public class BulkImportFileServlet extends HttpServlet {
 
 		ourLog.info("Serving Bulk Import NDJSON file index: {}", indexParam);
 
-		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, CT_FHIR_NDJSON + CHARSET_UTF8_CTSUFFIX);
+		theResponse.addHeader(Constants.HEADER_CONTENT_TYPE, myHeaderContentType);
 
 		IFileSupplier supplier = myFileIds.get(indexParam);
 		if (supplier.isGzip()) {
@@ -111,6 +115,10 @@ public class BulkImportFileServlet extends HttpServlet {
 			IOUtils.copy(reader, theResponse.getOutputStream());
 		}
 
+	}
+
+	public void setHeaderContentType(String theHeaderContentType) {
+		myHeaderContentType = theHeaderContentType;
 	}
 
 	public void clearFiles() {

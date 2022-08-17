@@ -8,18 +8,23 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkImportFileServletTest {
 
 	private BulkImportFileServlet mySvc = new BulkImportFileServlet();
+
+	static final String ourInput = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
+		"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
 
 	@RegisterExtension
 	private HttpServletExtension myServletExtension = new HttpServletExtension()
@@ -34,20 +39,41 @@ public class BulkImportFileServletTest {
 
 	@Test
 	public void testDownloadFile() throws IOException {
-		String input = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
-			"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
-		String index = mySvc.registerFileByContents(input);
 
-		CloseableHttpClient client = myServletExtension.getHttpClient();
+		String index = mySvc.registerFileByContents(ourInput);
 
 		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
-		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
 
+		executeAndAssert(url, BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE);
+
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {CT_APP_NDJSON, CT_JSON, CT_TEXT})
+	public void testDownloadFileWithReturnedHeaderContentTypeOf(String theContentType) throws IOException {
+
+		mySvc.setHeaderContentType(theContentType);
+		String index = mySvc.registerFileByContents(ourInput);
+
+		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
+
+		executeAndAssert(url, theContentType);
+	}
+
+
+	private void executeAndAssert(String theUrl, String theExpectedHeaderContentType)  throws IOException{
+		CloseableHttpClient client = myServletExtension.getHttpClient();
+
+		try (CloseableHttpResponse response = client.execute(new HttpGet(theUrl))) {
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(input, responseBody);
+			String responseHeaderContentType = response.getFirstHeader("content-type").getValue();
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(theExpectedHeaderContentType, responseHeaderContentType);
+			assertEquals(ourInput, responseBody);
 		}
 	}
+
 
 	@Test
 	public void testInvalidRequests() throws IOException {

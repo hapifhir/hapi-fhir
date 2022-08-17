@@ -9,12 +9,19 @@ import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Base64Utils;
 
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,11 +46,12 @@ public class FetchFilesStepTest {
 	@Mock
 	private IJobDataSink<NdJsonFileJson> myJobDataSink;
 
-	@Test
-	public void testFetchWithBasicAuth() {
+	@ParameterizedTest
+	@ValueSource(strings = {CT_FHIR_NDJSON, CT_FHIR_JSON_NEW, CT_APP_NDJSON, CT_JSON, CT_TEXT})
+	public void testFetchWithBasicAuth(String theHeaderContentType) {
 
 		// Setup
-
+		myBulkImportFileServlet.setHeaderContentType(theHeaderContentType);
 		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
