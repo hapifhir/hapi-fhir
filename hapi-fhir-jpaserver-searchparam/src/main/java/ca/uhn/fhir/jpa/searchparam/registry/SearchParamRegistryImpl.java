@@ -148,6 +148,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		ourLog.info("Rebuilding SearchParamRegistry");
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+		params.setCount(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
 
