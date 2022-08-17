@@ -47,6 +47,7 @@ public class ForceOffsetSearchModeInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void storagePreSearchRegistered(SearchParameterMap theMap, RequestDetails theRequestDetails) {
+
 		if (theMap.getOffset() == null) {
 			theMap.setOffset(0);
 		}
