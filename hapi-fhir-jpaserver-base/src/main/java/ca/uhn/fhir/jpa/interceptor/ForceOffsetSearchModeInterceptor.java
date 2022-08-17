@@ -47,9 +47,6 @@ public class ForceOffsetSearchModeInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
 	public void storagePreSearchRegistered(SearchParameterMap theMap, RequestDetails theRequestDetails) {
-		if (isInternalCall(theRequestDetails)) {
-			return;
-		}
 
 		if (theMap.getOffset() == null) {
 			theMap.setOffset(0);
@@ -57,10 +54,6 @@ public class ForceOffsetSearchModeInterceptor {
 		if (theMap.getCount() == null) {
 			theMap.setCount(myDefaultCount);
 		}
-	}
-
-	private boolean isInternalCall(RequestDetails theRequestDetails) {
-		return theRequestDetails == null || theRequestDetails instanceof SystemRequestDetails;
 	}
 
 }
