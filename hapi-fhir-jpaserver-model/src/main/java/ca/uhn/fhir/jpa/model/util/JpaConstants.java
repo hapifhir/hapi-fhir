@@ -267,6 +267,8 @@ public class JpaConstants {
 	 */
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 
+	public static final String SKIP_REINDEX_ON_UPDATE = "SKIP-REINDEX-ON-UPDATE";
+
 	/**
 	 * Non-instantiable
 	 */

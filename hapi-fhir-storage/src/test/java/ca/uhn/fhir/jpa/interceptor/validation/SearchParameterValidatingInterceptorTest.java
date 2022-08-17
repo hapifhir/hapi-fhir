@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -41,6 +43,8 @@ public class SearchParameterValidatingInterceptorTest {
 
 	@Mock
 	DaoRegistry myDaoRegistry;
+	@Mock
+	IIdHelperService myIdHelperService;
 
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
@@ -55,6 +59,7 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor = new SearchParamValidatingInterceptor();
 		mySearchParamValidatingInterceptor.setFhirContext(ourFhirContext);
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
+		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
 
 		mySearchParameterId1 = aSearchParameter(ID1);
@@ -130,6 +135,8 @@ public class SearchParameterValidatingInterceptorTest {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameters(asList(mySearchParameterId1));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(mySearchParameterId1.getId()));
+
 
 		SearchParameter newSearchParam = aSearchParameter(ID1);
 
@@ -143,6 +150,7 @@ public class SearchParameterValidatingInterceptorTest {
 			.map(SearchParameter::getId)
 			.map(theS -> new ResourcePersistentId(theS))
 			.collect(Collectors.toList());
+		Set<String> ids = theSearchParams.stream().map(sp -> sp.getId()).collect(Collectors.toSet());
 
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}

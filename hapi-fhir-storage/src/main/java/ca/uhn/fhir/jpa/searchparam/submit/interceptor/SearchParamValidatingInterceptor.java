@@ -28,8 +28,10 @@ import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -39,7 +41,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -54,6 +59,8 @@ public class SearchParamValidatingInterceptor {
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 
 	private DaoRegistry myDaoRegistry;
+
+	private IIdHelperService myIdHelperService;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
@@ -90,15 +97,15 @@ public class SearchParamValidatingInterceptor {
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
-		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		List<ResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 
-		if(isNotEmpty(persistedIdList)){
-			String resourceId = runtimeSearchParam.getId().getIdPart();
+		if(isNotEmpty(pidList)){
+			Set<String> resolvedResourceIds = myIdHelperService.translatePidsToFhirResourceIds(new HashSet<>(pidList));
+			String incomingResourceId = runtimeSearchParam.getId().getIdPart();
 
-			boolean isNewSearchParam = persistedIdList
+			boolean isNewSearchParam = resolvedResourceIds
 				.stream()
-				.map(theResourcePersistentId -> theResourcePersistentId.getId().toString())
-				.noneMatch(anId -> anId.equals(resourceId));
+				.noneMatch(resId -> resId.equals(incomingResourceId));
 
 			if(isNewSearchParam){
 				throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
@@ -138,6 +145,11 @@ public class SearchParamValidatingInterceptor {
 	@Autowired
 	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+	}
+
+	@Autowired
+	public void setIIDHelperService(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 
 	private IFhirResourceDao getDao() {

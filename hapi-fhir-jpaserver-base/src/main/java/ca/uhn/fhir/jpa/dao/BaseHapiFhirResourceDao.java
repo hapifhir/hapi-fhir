@@ -978,7 +978,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected void requestReindexForRelatedResources(Boolean theCurrentlyReindexing, List<String> theBase, RequestDetails theRequestDetails) {
 		// Avoid endless loops
-		if (Boolean.TRUE.equals(theCurrentlyReindexing) || isInternalCall(theRequestDetails)) {
+		if (Boolean.TRUE.equals(theCurrentlyReindexing) || shouldSkipReindex(theRequestDetails)) {
 			return;
 		}
 
@@ -1006,8 +1006,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySearchParamRegistry.requestRefresh();
 	}
 
-	private boolean isInternalCall(RequestDetails theRequestDetails) {
-		return theRequestDetails == null || isSystemRequest(theRequestDetails);
+	private boolean shouldSkipReindex(RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return false;
+		}
+		Object shouldSkip = theRequestDetails.getUserData().getOrDefault(JpaConstants.SKIP_REINDEX_ON_UPDATE, false);
+		return Boolean.parseBoolean(shouldSkip.toString());
 	}
 
 	private void addAllResourcesTypesToReindex(List<String> theBase, RequestDetails theRequestDetails, ReindexJobParameters params) {

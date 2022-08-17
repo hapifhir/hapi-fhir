@@ -750,7 +750,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(true, versionEntity.isCurrentVersion());
 		});
-
 	}
 
 	@Test
