@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -45,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,8 +115,8 @@ public class SubscriptionCanonicalizer {
 		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES)
 			.stream()
 			.map(ExtensionDt::getValue)
-			.map(BooleanDt.class::cast)
-			.map(BasePrimitive::getValue)
+			.map(value -> (org.hl7.fhir.dstu2.model.BooleanType) value)
+			.map(org.hl7.fhir.dstu2.model.BooleanType::booleanValue)
 			.findFirst()
 			.orElse(false);
 	}
@@ -312,7 +314,7 @@ public class SubscriptionCanonicalizer {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
-		org.hl7.fhir.r5.model.Enumerations.SubscriptionState status = subscription.getStatus();
+		Enumerations.SubscriptionStatusCodes status = subscription.getStatus();
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}

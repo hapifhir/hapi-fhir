@@ -42,4 +42,9 @@ public interface IRuleApplier {
 
 	@Nullable
 	IValidationSupport getValidationSupport();
+
+	@Nullable
+	default IAuthorizationSearchParamMatcher getSearchParamMatcher() {
+		return null;
+	};
 }

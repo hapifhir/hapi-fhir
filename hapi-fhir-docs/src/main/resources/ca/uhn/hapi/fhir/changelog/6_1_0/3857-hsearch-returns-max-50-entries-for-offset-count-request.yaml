@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3857
+title: "Previously a lucene/elastic enabled search including offset=0 and count > 50 was returning only 50 resources
+   this has now been fixed."
+

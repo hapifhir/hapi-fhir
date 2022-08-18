@@ -8,9 +8,9 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.collect.Lists;
@@ -99,7 +99,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown job ID: ABCDEFG", e.getMessage());
+			assertEquals("Unknown bijob id: ABCDEFG", e.getMessage());
 		}
 	}
 
@@ -119,7 +119,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1769) + "Job ABCDEFG has status RUNNING and can not be added to", e.getMessage());
+			assertEquals(Msg.code(1769) + "bijob id ABCDEFG has status RUNNING and can not be added to", e.getMessage());
 		}
 	}
 

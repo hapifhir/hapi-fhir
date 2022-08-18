@@ -199,7 +199,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+		return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 	}
 
 	/**

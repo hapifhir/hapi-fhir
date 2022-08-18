@@ -7,30 +7,32 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.mdm.provider.BaseLinkR4Test;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,15 +55,24 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 	@Autowired
-	private BatchJobHelper myBatchJobHelper;
+	private Batch2JobHelper myBatch2JobHelper;
+	@Autowired
+	private MdmSettings myMdmSettings;
 
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
 		myInterceptorService.registerInterceptor(new RequestTenantPartitionInterceptor());
+		myMdmSettings.setEnabled(true);
+	}
+
+	@AfterEach
+	public void after() throws IOException {
+		myMdmSettings.setEnabled(false);
+		super.after();
 	}
 
 	@Test
@@ -74,7 +85,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
@@ -102,7 +113,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 
 		getGoldenResourceFromTargetResource(patient);
 
-		MdmLink link = myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
+		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 		saveLink(link);
 		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
@@ -130,14 +141,13 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		assertLinkCount(3);
 
 		List<String> urls = new ArrayList<>();
-		urls.add("Practitioner?");
+		urls.add("Practitioner");
 		IPrimitiveType<BigDecimal> batchSize = new DecimalType(new BigDecimal(100));
 		ServletRequestDetails details = new ServletRequestDetails();
 		details.setTenantId(PARTITION_2);
 		IBaseParameters clearJob = myMdmControllerSvc.submitMdmClearJob(urls, batchSize, details);
-		Long jobId = Long.valueOf(((DecimalType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString());
-		JobExecution jobExecution = myBatchJobHelper.awaitJobExecution(jobId);
-		assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+		String jobId = ((StringType) ((Parameters) clearJob).getParameter("jobId")).getValueAsString();
+		myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		assertLinkCount(2);
 	}

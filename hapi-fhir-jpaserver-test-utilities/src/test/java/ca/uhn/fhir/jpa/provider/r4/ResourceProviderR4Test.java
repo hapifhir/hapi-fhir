@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -44,6 +45,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -101,6 +103,7 @@ import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Media;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
@@ -139,12 +142,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -169,6 +175,7 @@ import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORM
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
@@ -224,6 +231,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
 	}
 
 	@BeforeEach
@@ -241,7 +249,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -263,7 +271,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.addBase("BodyStructure").addBase("Procedure");
 		searchParameter.setCode("focalAccess");
 		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
@@ -1729,6 +1737,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
 	}
 
+	@Test
+	public void testDeleteNonExistingResourceReturnsOperationOutcome() {
+		String resourceType = "Patient";
+		String logicalID = "12345";
+
+		MethodOutcome resp = myClient.delete().resourceById(resourceType, logicalID).execute();
+
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource " + resourceType + "/" + logicalID + " does not exist."));
+	}
+
+	@Test
+	public void testDeleteAlreadyDeletedReturnsOperationOutcome() {
+		Patient p = new Patient();
+		IIdType id = myClient.create().resource(p).execute().getId();
+
+		MethodOutcome resp = myClient.delete().resourceById(id).execute();
+		OperationOutcome oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Successfully deleted 1 resource(s) in "));
+
+		resp = myClient.delete().resourceById(id).execute();
+		oo = (OperationOutcome) resp.getOperationOutcome();
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), startsWith("Not deleted, resource "));
+		assertThat(oo.getIssueFirstRep().getDiagnostics(), endsWith("was already deleted."));
+	}
+
 	/**
 	 * See issue #52
 	 */
@@ -2291,6 +2325,109 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
 			assertThat(allresults, not(contains(c5Id)));
 		}
+	}
+
+	@Test
+	public void testEverythingPatientInstanceWithTypeParameter() {
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Test for only one patient
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+	}
+
+	@Test
+	public void testEverythingPatientTypeWithTypeAndIdParameter() {
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
+
+		//Patient 1 stuff.
+		IIdType o1Id = createOrganization(methodName, "1");
+		IIdType p1Id = createPatientWithIndexAtOrganization(methodName, "1", o1Id);
+		IIdType c1Id = createConditionForPatient(methodName, "1", p1Id);
+		IIdType obs1Id = createObservationForPatient(p1Id, "1");
+		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
+
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
+		//Test for only patient 1
+		Parameters parameters = new Parameters();
+		parameters.addParameter("_type", "Condition, Observation");
+		parameters.addParameter("_id", p1Id.getIdPart());
+
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+
+		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
+		assertThat(ids, not(hasItem(o1Id)));
+		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids, not(hasItem(p2Id)));
+		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
@@ -3984,6 +4121,74 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchByIdForDeletedResourceWithClientAssignedId() throws IOException {
+		// Create with client assigned ID
+		Patient p = new Patient();
+		String patientId = "AAA";
+		p.setId(patientId);
+
+		MethodOutcome outcome = myClient.update().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
+	}
+
+	@Test
+	public void testSearchByIdForDeletedResourceWithServerAssignedId() throws IOException {
+		// Create with server assigned ID
+		Patient p = new Patient();
+		MethodOutcome outcome = myClient.create().resource(p).execute();
+		assertTrue(outcome.getCreated());
+
+		Patient createdPatient = (Patient) outcome.getResource();
+		String patientId = createdPatient.getIdElement().getIdPart();
+
+		// Search
+		Bundle search1 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertEquals(1, search1.getTotal());
+		assertEquals(patientId, search1.getEntry().get(0).getResource().getIdElement().getIdPart());
+
+		// Delete
+		outcome = myClient.delete().resource(createdPatient).execute();
+		assertNull(outcome.getResource());
+
+		// Search
+		Bundle search2 = (Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.RES_ID.exactly().identifier(patientId))
+			.execute();
+
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
+		assertEquals(0, search2.getTotal());
+	}
+
+	@Test
 	public void testSearchByIdentifier() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testSearchByIdentifier01");
@@ -4660,10 +4865,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, returnedBundle.getEntry().size());
 
-		//-- check only use original quantity table to search
+		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
-		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
+		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
 	@Test
@@ -5521,6 +5726,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		testSearchReturnsResults("/Observation?code%3Atext=this_is_the_");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_DISPLAY");
 		testSearchReturnsResults("/Observation?code%3Atext=THIS_IS_THE_disp");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
+	public void testSearchTagWithInvalidTokenParam(String searchParam){
+
+		try {
+			myClient
+				.search()
+				.byUrl("Patient?" + searchParam + "=someSystem|")
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException ex){
+			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
+		}
+
 	}
 
 	@Test
@@ -6690,6 +6912,134 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testUpdateHistoryRewriteWithIdNoHistoryVersion() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		IIdType id = createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId(id).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId("1234").execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+
+		p.setId(id);
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("ID must contain a history version"));
+		}
+	}
+
+	@Test
+	public void testUpdateHistoryRewriteWithIdNull() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId((IIdType) null).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("can not be null"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId((String) null).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("can not be null"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
+		}
+	}
+
+	@Test
+	public void testUpdateHistoryRewriteWithIdNoIdPart() {
+		myDaoConfig.setUpdateWithHistoryRewriteEnabled(true);
+		String testFamilyNameModified = "Jackson";
+
+		// setup
+		createNewPatientWithHistory();
+
+		// execute updates
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addName().setFamily(testFamilyNameModified);
+
+		IIdType noIdPartId = new IdDt();
+		try {
+			myClient.update().resource(p).historyRewrite().withId(noIdPartId).execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
+		}
+
+		try {
+			myClient.update().resource(p).historyRewrite().withId("").execute();
+			fail();
+		} catch (NullPointerException e) {
+			assertThat(e.getMessage(), containsString("must not be blank and must contain an ID"));
+		}
+
+		p.setId(noIdPartId);
+		try {
+			myClient.update().resource(p).historyRewrite().execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
+		}
+	}
+
+	@Nonnull
+	private IIdType createNewPatientWithHistory() {
+		String TEST_SYSTEM_NAME = "testHistoryRewrite";
+		String TEST_FAMILY_NAME = "Johnson";
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
+		ourLog.info("Created patient, got it: {}", id);
+
+		p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setSystem("urn:system").setValue(TEST_SYSTEM_NAME);
+		p.addName().setFamily(TEST_FAMILY_NAME);
+		p.setId("Patient/" + id.getIdPart());
+
+		myClient.update().resource(p).execute();
+		return id;
+	}
+
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
@@ -6711,6 +7061,26 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 		return cId;
+	}
+
+	private IIdType createMedicationRequestForPatient(IIdType thePatientId, String theIndex) {
+		MedicationRequest m = new MedicationRequest();
+		m.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			m.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType mId = myClient.create().resource(m).execute().getId().toUnqualifiedVersionless();
+		return mId;
+	}
+
+	private IIdType createObservationForPatient(IIdType thePatientId, String theIndex) {
+		Observation o = new Observation();
+		o.addIdentifier().setValue(theIndex);
+		if (thePatientId != null) {
+			o.getSubject().setReferenceElement(thePatientId);
+		}
+		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		return oId;
 	}
 
 }

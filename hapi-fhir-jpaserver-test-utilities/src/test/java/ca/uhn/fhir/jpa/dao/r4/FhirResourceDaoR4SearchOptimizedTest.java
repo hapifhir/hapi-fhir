@@ -94,7 +94,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		myDaoConfig.setAdvancedLuceneIndexing(false);
+		myDaoConfig.setAdvancedHSearchIndexing(false);
 	}
 
 	@AfterEach
@@ -877,8 +877,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
 		}
 
-		// Delete the resource - The searches should generate similar SQL now, but
-		// not actually return the result
+		// Delete the resource - There should only be one search performed because deleted resources will
+		//		be filtered out in the query that resolves forced ids to persistent ids
 		myObservationDao.delete(new IdType("Observation/A"));
 		myObservationDao.delete(new IdType("Observation/" + obs2id));
 
@@ -892,14 +892,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(0, outcome.getResources(0, 999).size());
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
+			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.resource_type='observation'"), selectQuery);
 			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "forcedid0_.forced_id in ('a')"), selectQuery);
-
-			selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
-			assertEquals(1, StringUtils.countMatches(selectQuery.toLowerCase(), "select t0.res_id from hfj_resource t0"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_type = 'observation'"), selectQuery);
-			assertEquals(0, StringUtils.countMatches(selectQuery.toLowerCase(), "t0.res_deleted_at is null"), selectQuery);
 		}
 
 		// Search by ID where at least one ID is a numeric ID
@@ -958,7 +954,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// See this PR for a similar type of Fix: https://github.com/hapifhir/hapi-fhir/pull/2909
 		// SearchParam - focalAccess
 		SearchParameter searchParameter1 = new SearchParameter();
-		searchParameter1.addBase("BodySite").addBase("Procedure");
+		searchParameter1.addBase("BodyStructure").addBase("Procedure");
 		searchParameter1.setCode("focalAccess");
 		searchParameter1.setType(Enumerations.SearchParamType.REFERENCE);
 		searchParameter1.setExpression("Procedure.extension('Procedure#focalAccess')");

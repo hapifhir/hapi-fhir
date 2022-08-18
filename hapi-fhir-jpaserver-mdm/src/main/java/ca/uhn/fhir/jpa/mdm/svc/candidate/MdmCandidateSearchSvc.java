@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateSearcher.idOrType;
 import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 @Service
@@ -54,7 +55,7 @@ public class MdmCandidateSearchSvc {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 	@Autowired
-	private IJpaIdHelperService myJpaIdHelperService;
+	private IIdHelperService myIdHelperService;
 	@Autowired
 	private MdmCandidateSearchCriteriaBuilderSvc myMdmCandidateSearchCriteriaBuilderSvc;
 	@Autowired
@@ -74,7 +75,7 @@ public class MdmCandidateSearchSvc {
 	 */
 	@Transactional
 	public Collection<IAnyResource> findCandidates(String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		Map<Long, IAnyResource> matchedPidsToResources = new HashMap<>();
+		Map<ResourcePersistentId, IAnyResource> matchedPidsToResources = new HashMap<>();
 		List<MdmFilterSearchParamJson> filterSearchParams = myMdmSettings.getMdmRules().getCandidateFilterSearchParams();
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
@@ -93,14 +94,16 @@ public class MdmCandidateSearchSvc {
 				searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, resourceSearchParam, theRequestPartitionId);
 			}
 		}
-		//Obviously we don't want to consider the freshly added resource as a potential candidate.
-		//Sometimes, we are running this function on a resource that has not yet been persisted,
-		//so it may not have an ID yet, precluding the need to remove it.
+		// Obviously we don't want to consider the incoming resource as a potential candidate.
+		// Sometimes, we are running this function on a resource that has not yet been persisted,
+		// so it may not have an ID yet, precluding the need to remove it.
 		if (theResource.getIdElement().getIdPart() != null) {
-			matchedPidsToResources.remove(myJpaIdHelperService.getPidOrNull(theResource));
+			if (matchedPidsToResources.remove(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource)) != null) {
+				ourLog.debug("Removing incoming resource {} from list of candidates.", theResource.getIdElement().toUnqualifiedVersionless());
+			}
 		}
 
-		ourLog.info("Found {} resources for {}", matchedPidsToResources.size(), theResourceType);
+		ourLog.info("Candidate search found {} matching resources for {}", matchedPidsToResources.size(), idOrType(theResource, theResourceType));
 		return matchedPidsToResources.values();
 	}
 
@@ -117,7 +120,7 @@ public class MdmCandidateSearchSvc {
 	 * 4. Store all results in `theMatchedPidsToResources`
 	 */
 	@SuppressWarnings("rawtypes")
-	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<Long, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
+	private void searchForIdsAndAddToMap(String theResourceType, IAnyResource theResource, Map<ResourcePersistentId, IAnyResource> theMatchedPidsToResources, List<String> theFilterCriteria, MdmResourceSearchParamJson resourceSearchParam, RequestPartitionId theRequestPartitionId) {
 		//1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(theResourceType, theResource, theFilterCriteria, resourceSearchParam);
 		if (!oResourceCriteria.isPresent()) {
@@ -136,7 +139,7 @@ public class MdmCandidateSearchSvc {
 		int initialSize = theMatchedPidsToResources.size();
 
 		//4.
-		resources.forEach(resource -> theMatchedPidsToResources.put(myJpaIdHelperService.getPidOrNull(resource), (IAnyResource) resource));
+		resources.forEach(resource -> theMatchedPidsToResources.put(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), resource), (IAnyResource) resource));
 
 		int newSize = theMatchedPidsToResources.size();
 

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3674
+title: "The rule system has been extended to support optional fhir-expressions that narrow the application of a rule.
+  A matching RuleFilteringConsentService implements post-query support for this filtering using an in-memory matcher."

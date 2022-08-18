@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -36,7 +37,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
@@ -46,7 +47,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
 		myVersionlessGodlenResourceId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 
-		myLink = getOnlyPatientLink();
+		myLink = (MdmLink) getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(myLink);
@@ -65,12 +66,12 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	}
 
 	@Nonnull
-	protected MdmLink getOnlyPatientLink() {
+	protected IMdmLink getOnlyPatientLink() {
 		return myMdmLinkDaoSvc.findMdmLinkBySource(myPatient).get();
 	}
 
 	@Nonnull
-	protected List<MdmLink> getPatientLinks() {
+	protected List<? extends IMdmLink> getPatientLinks() {
 		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPatient);
 	}
 }

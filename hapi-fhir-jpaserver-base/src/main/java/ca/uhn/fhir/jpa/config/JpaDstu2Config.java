@@ -5,7 +5,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.TransactionProcessorVersionAdapterDstu2;
 import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import org.springframework.context.annotation.Bean;
@@ -44,6 +46,11 @@ public class JpaDstu2Config {
 	@Bean
 	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
 		return new TransactionProcessorVersionAdapterDstu2();
+	}
+
+	@Bean
+	public ITermVersionAdapterSvc translationAdaptorVersion() {
+		return new TermVersionAdapterSvcDstu2();
 	}
 
 	@Bean(name = "mySystemDaoDstu2")

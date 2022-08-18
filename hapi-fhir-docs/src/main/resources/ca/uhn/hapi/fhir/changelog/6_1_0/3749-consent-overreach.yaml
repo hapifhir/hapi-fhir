@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3749
+title: "Fixed a regression in 6.0.0 which caused the SearchNarrowingInterceptor to occcasionally be applied to non-search operations."

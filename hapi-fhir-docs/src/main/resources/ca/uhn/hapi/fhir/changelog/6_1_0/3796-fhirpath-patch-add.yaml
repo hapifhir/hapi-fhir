@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3796
+jira: SMILE-4328
+title: "Previously, the FHIRPath PATCH operation type `add` was replacing the entire element as opposed to adding the new element to the existing element. This has been corrected."

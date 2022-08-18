@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -14,6 +15,7 @@ import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -27,8 +29,9 @@ import static org.mockito.Mockito.when;
 public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StorageInterceptorEventsR5Test.class);
 
-	@Test
+	@BeforeEach
 	public void before() {
+		myDaoConfig.setExpungeEnabled(true);
 	}
 
 	@Test
@@ -123,6 +126,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterAllInterceptors();
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
 

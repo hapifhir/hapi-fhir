@@ -79,7 +79,7 @@ public class SearchPreferHandlingInterceptorTest {
 			try (CloseableHttpResponse result = client.execute(new HttpGet("http://localhost:" + myPort + "/BadResource?foo=bar"))) {
 				assertEquals(404, result.getStatusLine().getStatusCode());
 				String response = IOUtils.toString(result.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertThat(response, containsString("Unknown resource type 'BadResource' - Server knows how to handle: [Patient, OperationDefinition]"));
+				assertThat(response, containsString("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]"));
 			}
 		}
 	}

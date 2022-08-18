@@ -32,7 +32,6 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -49,9 +48,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -340,11 +337,11 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		String systemDesc = defaultIfBlank(theSystem, "(missing)");
 		String codeDesc = defaultIfBlank(theCode, "(missing)");
 		if (isBlank(theCode)) {
-			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
+			String msg = getFhirContext().getLocalizer().getMessage(TokenPredicateBuilder.class, "invalidCodeMissingSystem", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(Msg.code(1239) + msg);
 		}
 		if (isBlank(theSystem)) {
-			String msg = getFhirContext().getLocalizer().getMessage(LegacySearchBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
+			String msg = getFhirContext().getLocalizer().getMessage(TokenPredicateBuilder.class, "invalidCodeMissingCode", theParamName, systemDesc, codeDesc);
 			throw new InvalidRequestException(Msg.code(1240) + msg);
 		}
 	}

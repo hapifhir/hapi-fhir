@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3700
+jira: SMILE-4488
+title: "Previously, Group Bulk Export would expand into other groups, due to the nature of `Group.member` being part of the patient search compartment.
+This has been fixed, and now, Group Bulk Export will only ever export the Group resource specified in the request, regardless of patient membership."

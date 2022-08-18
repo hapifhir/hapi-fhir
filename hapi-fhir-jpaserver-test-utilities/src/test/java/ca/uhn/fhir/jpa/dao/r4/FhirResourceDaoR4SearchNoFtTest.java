@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.test.config.TestHibernateSearchAddInConfig;
+import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
@@ -100,6 +100,7 @@ import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationAdministration;
 import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.MolecularSequence;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -131,6 +132,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -194,7 +196,7 @@ import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestHibernateSearchAddInConfig.NoFT.class})
+@ContextConfiguration(classes = {TestHSearchAddInConfig.NoFT.class})
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 	@Autowired
@@ -850,7 +852,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd, null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, null, mySrd, null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -858,12 +860,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 
 		// Specific patient ID with no linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(patId2, orgId));
 
 	}
@@ -892,7 +894,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, null, mySrd);
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, null, null, mySrd);
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
@@ -5657,6 +5659,96 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(Msg.code(2016) + "Invalid _include parameter value: \"Patient:organization:Foo\". Invalid/unsupported resource type: \"Foo\"", e.getMessage());
 		}
 	}
+
+
+	@Nested
+	public class TagBelowTests {
+
+		@Test
+		public void testTagProfile() {
+			Patient p1 = new Patient();
+			p1.setActive(true);
+			p1.setMeta(new Meta().addProfile("http://acme.com/some-profile|1.0"));
+			IIdType p1Id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+			Patient p2 = new Patient();
+			p2.setActive(true);
+			p2.setMeta(new Meta().addProfile("http://acme.com/some-profile|1.1"));
+			IIdType p2Id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+			Patient p3 = new Patient();
+			p3.setActive(true);
+			p3.setMeta(new Meta().addProfile("http://acme.com/some-profile|2.0"));
+			IIdType p3Id = myPatientDao.create(p3).getId().toUnqualifiedVersionless();
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add(PARAM_PROFILE, new UriParam(
+				"http://acme.com/some-profile|1").setQualifier(UriParamQualifierEnum.BELOW));
+			IBundleProvider results = myPatientDao.search(params);
+			List<String> values = toUnqualifiedVersionlessIdValues(results);
+
+			assertThat(values.toString(), values, containsInAnyOrder(p1Id.getValue(), p2Id.getValue()));
+		}
+
+		@Test
+		public void testTagTag() {
+			Patient p1 = new Patient();
+			p1.setActive(true);
+			p1.setMeta(new Meta().addTag("http://acme.com", "some-code", "some-display"));
+			IIdType p1Id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+			Patient p2 = new Patient();
+			p2.setActive(true);
+			p2.setMeta(new Meta().addTag("http://acme.com", "some-code-2", "some-display-2"));
+			IIdType p2Id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+			Patient p3 = new Patient();
+			p3.setActive(true);
+			p3.setMeta(new Meta().addTag("http://acme.com", "another-code", "another-display"));
+			IIdType p3Id = myPatientDao.create(p3).getId().toUnqualifiedVersionless();
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add(PARAM_TAG, new TokenParam("http://acme.com", "some").setModifier(TokenParamModifier.BELOW));
+			IBundleProvider results = myPatientDao.search(params);
+			List<String> values = toUnqualifiedVersionlessIdValues(results);
+
+			assertThat(values.toString(), values, containsInAnyOrder(p1Id.getValue(), p2Id.getValue()));
+		}
+
+		@Test
+		public void testSecurityLabelTag() {
+			Patient p1 = new Patient();
+			p1.setActive(true);
+			p1.setMeta(new Meta().addSecurity(
+				"http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "DELAU", "delete after use"));
+			IIdType p1Id = myPatientDao.create(p1).getId().toUnqualifiedVersionless();
+
+			Patient p2 = new Patient();
+			p2.setActive(true);
+			p2.setMeta(new Meta().addSecurity(
+				"http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "DELBU", "delete before use"));
+			IIdType p2Id = myPatientDao.create(p2).getId().toUnqualifiedVersionless();
+
+			Patient p3 = new Patient();
+			p3.setActive(true);
+			p3.setMeta(new Meta().addSecurity(
+				"http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "R", "restricted"));
+			IIdType p3Id = myPatientDao.create(p3).getId().toUnqualifiedVersionless();
+
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			params.add(PARAM_SECURITY, new TokenParam(
+				"http://terminology.hl7.org/CodeSystem/v3-Confidentiality", "DEL").setModifier(TokenParamModifier.BELOW));
+			IBundleProvider results = myPatientDao.search(params);
+			List<String> values = toUnqualifiedVersionlessIdValues(results);
+
+			assertThat(values.toString(), values, containsInAnyOrder(p1Id.getValue(), p2Id.getValue()));
+		}
+
+	}
+
 
 	private String toStringMultiline(List<?> theResults) {
 		StringBuilder b = new StringBuilder();

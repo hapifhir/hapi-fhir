@@ -62,8 +62,8 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 
 
 	@Override
-	protected void postPersist(ResourceTable theEntity, Subscription theSubscription) {
-		super.postPersist(theEntity, theSubscription);
+	protected void postPersist(ResourceTable theEntity, Subscription theSubscription, RequestDetails theRequestDetails) {
+		super.postPersist(theEntity, theSubscription, theRequestDetails);
 
 		createSubscriptionTable(theEntity, theSubscription);
 	}

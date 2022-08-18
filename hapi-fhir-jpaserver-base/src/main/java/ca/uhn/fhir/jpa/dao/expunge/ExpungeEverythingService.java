@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.BulkImportJobFileEntity;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
@@ -68,9 +69,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,6 +106,8 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+
+	private int deletedResourceEntityCount;
 
 	@PostConstruct
 	public void initTxTemplate() {
@@ -177,8 +180,12 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(TagDefinition.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceHistoryProvenanceEntity.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceHistoryTable.class));
+		int counterBefore = counter.get();
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(ResourceTable.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(PartitionEntity.class));
+
+		deletedResourceEntityCount = counter.get() - counterBefore;
+
 		myTxTemplate.execute(t -> {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 			return null;
@@ -189,7 +196,12 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
 	}
 
-        private void purgeAllCaches() {
+	@Override
+	public int getExpungeDeletedEntityCount() {
+		return deletedResourceEntityCount;
+	}
+
+	private void purgeAllCaches() {
                 myTxTemplate.execute(t -> {
                         myMemoryCacheService.invalidateAllCaches();
                         return null;
@@ -230,6 +242,11 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
                 int result = expungeEverythingByTypeWithoutPurging(theEntityType);
                 purgeAllCaches();
                 return result;
+	}
+
+	@Override
+	public int expungeEverythingMdmLinks() {
+		return expungeEverythingByType(MdmLink.class);
 	}
 
 	private int doExpungeEverythingQuery(String theQuery) {

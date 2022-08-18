@@ -49,6 +49,7 @@ public class ExpungeService {
 
 	public ExpungeOutcome expunge(String theResourceName, ResourcePersistentId theResourceId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId != null ? theResourceId.getId() : null, theResourceId != null ? theResourceId.getVersion() : null, theExpungeOptions);
+		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 
 		if (theExpungeOptions.getLimit() < 1) {
 			throw new InvalidRequestException(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
@@ -57,10 +58,10 @@ public class ExpungeService {
 		if (theResourceName == null && (theResourceId == null || (theResourceId.getId() == null && theResourceId.getVersion() == null))) {
 			if (theExpungeOptions.isExpungeEverything()) {
 				myExpungeEverythingService.expungeEverything(theRequest);
+				return new ExpungeOutcome().setDeletedCount(myExpungeEverythingService.getExpungeDeletedEntityCount());
 			}
 		}
 
-		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequest);
 		return expungeOperation.call();
 	}
 

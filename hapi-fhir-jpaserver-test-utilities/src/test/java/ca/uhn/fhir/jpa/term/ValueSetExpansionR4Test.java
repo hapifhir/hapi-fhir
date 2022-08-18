@@ -631,6 +631,46 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	}
 
 	@Test
+	public void testExpandTermValueSetAndChildrenWithCountWithDisplayLanguage() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
+			.setOffset(0)
+			.setCount(23)
+			.setTheDisplayLanguage("nl");
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
+		ourLog.info("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
+
+		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 1);
+		assertThat(concept.getDesignation().size() , is(equalTo(1)));
+		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+
+		//It is enough to test that the sublist returned is the correct one.
+		assertThat(ValueSetTestUtil.toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(0, 23))));
+	}
+
+	@Test
 	public void testExpandTermValueSetAndChildrenWithCount() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 

@@ -102,6 +102,7 @@ public class AddTableByColumnTask extends BaseTableTask {
 			case ORACLE_12C:
 			case MSSQL_2012:
 			case H2_EMBEDDED:
+			case COCKROACHDB_21_1:
 				break;
 		}
 

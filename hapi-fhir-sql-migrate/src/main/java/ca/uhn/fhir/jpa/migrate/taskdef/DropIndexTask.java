@@ -94,6 +94,9 @@ public class DropIndexTask extends BaseTableTask {
 					sql.add("drop index " + (myOnline?"CONCURRENTLY ":"") + "if exists " + myIndexName + " cascade");
 					setTransactional(!myOnline);
 					break;
+				case COCKROACHDB_21_1:
+					sql.add("drop index if exists " + getTableName() + "@" + myIndexName + " cascade");
+					break;
 			}
 		} else {
 			// Drop index
@@ -115,6 +118,9 @@ public class DropIndexTask extends BaseTableTask {
 					break;
 				case MSSQL_2012:
 					sql.add("drop index " + getTableName() + "." + myIndexName );
+					break;
+				case COCKROACHDB_21_1:
+					sql.add("drop index " + getTableName() + "@" + myIndexName);
 					break;
 			}
 		}

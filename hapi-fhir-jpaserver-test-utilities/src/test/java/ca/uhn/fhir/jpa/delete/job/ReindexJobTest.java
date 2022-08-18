@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -44,6 +45,10 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	public void testReindex_ByUrl() {
 		// setup
 
+		// make sure the resources don't get auto-reindexed when the search parameter is created
+		boolean reindexPropertyCache = myDaoConfig.isMarkResourcesForReindexingUponSearchParameterChange();
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(false);
+
 		IIdType obsFinalId = myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 		myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.CANCELLED);
 
@@ -61,8 +66,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		String id = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitJobCompletion(id);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(res);
 
 		// validate
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
@@ -71,6 +76,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
 		assertThat(alleleObservationIds, hasSize(1));
 		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
+
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
 	}
 
 	@Test
@@ -94,8 +101,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitJobCompletion(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse);
 
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
@@ -123,13 +130,13 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
 
 		// Verify
 
 		assertEquals(StatusEnum.ERRORED, outcome.getStatus());
-		assertEquals("java.lang.NullPointerException: foo message", outcome.getErrorMessage());
+		assertEquals("foo message", outcome.getErrorMessage());
 	}
 
 	@Test
@@ -151,8 +158,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
-		String id = myJobCoordinator.startInstance(startRequest);
-		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(id);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
+		JobInstance outcome = myBatch2JobHelper.awaitJobFailure(startResponse);
 
 		// Verify
 

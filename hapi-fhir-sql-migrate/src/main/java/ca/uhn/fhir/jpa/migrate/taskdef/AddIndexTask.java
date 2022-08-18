@@ -44,7 +44,10 @@ public class AddIndexTask extends BaseTableTask {
 	private List<String> myColumns;
 	private Boolean myUnique;
 	private List<String> myIncludeColumns = Collections.emptyList();
+	/** Should the operation avoid taking a lock on the table */
 	private boolean myOnline;
+
+	private MetadataSource myMetadataSource = new MetadataSource();
 
 	public AddIndexTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
@@ -105,6 +108,7 @@ public class AddIndexTask extends BaseTableTask {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 				case MSSQL_2012:
+				case COCKROACHDB_21_1:
 					includeClause = " INCLUDE (" + String.join(", ", myIncludeColumns) + ")";
 					break;
 				case H2_EMBEDDED:
@@ -119,20 +123,15 @@ public class AddIndexTask extends BaseTableTask {
 			}
 		}
 		if (myUnique && getDriverType() == DriverTypeEnum.MSSQL_2012) {
-			mssqlWhereClause = " WHERE (";
-			for (int i = 0; i < myColumns.size(); i++) {
-				mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
-				if (i < myColumns.size() - 1) {
-					mssqlWhereClause += "AND ";
-				}
-			}
-			mssqlWhereClause += ")";
+			mssqlWhereClause = buildMSSqlNotNullWhereClause();
 		}
+		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
 		String postgresOnline = "";
 		String oracleOnlineDeferred = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
+				case COCKROACHDB_21_1:
 					postgresOnline = "CONCURRENTLY ";
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
@@ -141,7 +140,9 @@ public class AddIndexTask extends BaseTableTask {
 					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
 					break;
 				case MSSQL_2012:
-					oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
+						oracleOnlineDeferred = " WITH (ONLINE = ON)";
+					}
 					break;
 				default:
 			}
@@ -152,6 +153,20 @@ public class AddIndexTask extends BaseTableTask {
 			"create " + unique + "index " + postgresOnline + myIndexName +
 			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
 		return sql;
+	}
+
+	@Nonnull
+	private String buildMSSqlNotNullWhereClause() {
+		String mssqlWhereClause;
+		mssqlWhereClause = " WHERE (";
+		for (int i = 0; i < myColumns.size(); i++) {
+			mssqlWhereClause += myColumns.get(i) + " IS NOT NULL ";
+			if (i < myColumns.size() - 1) {
+				mssqlWhereClause += "AND ";
+			}
+		}
+		mssqlWhereClause += ")";
+		return mssqlWhereClause;
 	}
 
 	public void setColumns(String... theColumns) {
@@ -195,4 +210,7 @@ public class AddIndexTask extends BaseTableTask {
 		theBuilder.append(myOnline);
 	}
 
+	public void setMetadataSource(MetadataSource theMetadataSource) {
+		myMetadataSource = theMetadataSource;
+	}
 }

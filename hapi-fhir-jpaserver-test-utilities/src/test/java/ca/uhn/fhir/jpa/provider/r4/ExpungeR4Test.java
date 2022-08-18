@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -18,6 +19,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -77,6 +79,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
@@ -85,6 +88,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@BeforeEach
 	public void beforeEnableExpunge() {
 		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
 	private void assertExpunged(IIdType theId) {
@@ -518,6 +522,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testExpungeSystemEverythingDeletedResourceCount() {
+		createStandardPatients();
+
+		ExpungeOutcome outcome = mySystemDao.expunge(new ExpungeOptions()
+			.setExpungeEverything(true), null);
+
+		// Make sure the deleted resource entities count is correct
+		assertEquals(8, outcome.getDeletedCount());
+	}
+
+	@Test
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		createStandardPatients();
 
@@ -680,4 +695,55 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+	@Test
+	public void testExpungeOperationRespectsConfiguration() {
+		// set up
+		myDaoConfig.setExpungeEnabled(false);
+		myDaoConfig.setAllowMultipleDelete(false);
+
+		createStandardPatients();
+
+		// execute
+		try {
+			myPatientDao.expunge(myOneVersionPatientId,
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			myPatientDao.expunge(myOneVersionPatientId.toVersionless(),
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			myPatientDao.expunge(null,
+				new ExpungeOptions().setExpungeOldVersions(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		try {
+			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
+		}
+
+		myDaoConfig.setExpungeEnabled(true);
+		try {
+			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-2081: Multiple delete is not enabled on this server", e.getMessage());
+		}
+
+		// re-enable multi-delete for clean-up
+		myDaoConfig.setAllowMultipleDelete(true);
+	}
 }

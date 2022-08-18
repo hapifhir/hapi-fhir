@@ -1,41 +1,47 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
-import ca.uhn.fhir.jpa.api.svc.IResourceReindexSvc;
-import org.hamcrest.Matchers;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.mockito.Mockito.when;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 public class ReindexJobParametersValidatorTest {
 
 	@Mock
-	private IResourceReindexSvc myResourceReindexSvc;
+	private UrlListValidator myListValidator;
 
 	@InjectMocks
-	private ReindexJobParametersValidator mySvc;
+	private ReindexJobParametersValidator myValidator;
 
-	@Test
-	public void testAllResourceTypeSupportedTrue() {
-		when(myResourceReindexSvc.isAllResourceTypeSupported()).thenReturn(true);
+	@ParameterizedTest
+	@ValueSource(strings = { "\n", " ", "\t" })
+	public void validate_urlWithSpace_fails(String theWhiteSpaceChar) {
+		List<String> errors = runTestWithUrl("Patient," + theWhiteSpaceChar + "Practitioner");
 
-		assertThat(mySvc.validate(new ReindexJobParameters()), empty());
-		assertThat(mySvc.validate(new ReindexJobParameters().addUrl("Patient?")), empty());
+		// verify
+		assertFalse(errors.isEmpty());
+		assertTrue(errors.get(0).contains("Invalid URL. URL cannot contain spaces"));
 	}
 
-	@Test
-	public void testAllResourceTypeSupportedFalse() {
-		when(myResourceReindexSvc.isAllResourceTypeSupported()).thenReturn(false);
+	private List<String> runTestWithUrl(String theUrl) {
+		// setup
+		ReindexJobParameters parameters = new ReindexJobParameters();
+		parameters.addUrl(theUrl);
 
-		assertThat(mySvc.validate(new ReindexJobParameters()), Matchers.contains("At least one type-specific search URL must be provided for $reindex on this server"));
-		assertThat(mySvc.validate(new ReindexJobParameters().addUrl("Patient?")), empty());
+		// test
+		List<String> errors = myValidator.validate(parameters);
+
+		return errors;
 	}
-
 }

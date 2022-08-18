@@ -22,10 +22,16 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 public interface IJobCoordinator {
 
@@ -36,7 +42,7 @@ public interface IJobCoordinator {
 	 * @return Returns a unique ID for this job execution
 	 * @throws InvalidRequestException If the request is invalid (incorrect/missing parameters, etc)
 	 */
-	String startInstance(JobInstanceStartRequest theStartRequest) throws InvalidRequestException;
+	Batch2JobStartResponse startInstance(JobInstanceStartRequest theStartRequest) throws InvalidRequestException;
 
 	/**
 	 * Fetch details about a job instance
@@ -53,10 +59,28 @@ public interface IJobCoordinator {
 	List<JobInstance> getInstances(int thePageSize, int thePageIndex);
 
 	/**
-	 * Fetch job instances
+	 * Fetch recent job instances
 	 */
 	List<JobInstance> getRecentInstances(int theCount, int theStart);
 
-	void cancelInstance(String theInstanceId) throws ResourceNotFoundException;
+	JobOperationResultJson cancelInstance(String theInstanceId) throws ResourceNotFoundException;
 
+	List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart);
+
+	/**
+	 * Fetches all job instances tht meet the FetchRequest criteria
+	 * @param theFetchRequest - fetch request
+	 * @return - page of job instances
+	 */
+	Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest);
+
+	/**
+	 * Fetches all job instances by job definition id and statuses
+	 */
+	List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart);
+
+	/**
+	 * Fetches all jobs by job definition id
+	 */
+	List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
 }
