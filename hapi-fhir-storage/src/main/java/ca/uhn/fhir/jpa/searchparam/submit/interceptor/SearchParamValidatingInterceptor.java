@@ -78,6 +78,9 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
+		if (runtimeSearchParam == null) {
+			return;
+		}
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
