@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.searchquery.SearchBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;

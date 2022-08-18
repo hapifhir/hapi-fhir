@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.search.builder;
+package ca.uhn.fhir.jpa.search.builder.searchquery;
 
 /*
  * #%L
@@ -54,6 +54,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
+import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.SearchQueryExecutors;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
@@ -150,7 +153,6 @@ public class SearchBuilder implements ISearchBuilder {
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
-	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
@@ -202,7 +204,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-
 	/**
 	 * Constructor
 	 */
@@ -211,6 +212,45 @@ public class SearchBuilder implements ISearchBuilder {
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
 	}
+
+	// protected for interaction with QueryInterator
+
+	void setHasNextIteratorQuery(boolean theHasNextIteratorQuery) {
+		myHasNextIteratorQuery = theHasNextIteratorQuery;
+	}
+
+	IInterceptorBroadcaster getInterceptorBroadcaster() {
+		return myInterceptorBroadcaster;
+	}
+
+	DaoConfig getDaoConfig() {
+		return myDaoConfig;
+	}
+
+	EntityManager getEntityManager() {
+		return myEntityManager;
+	}
+
+	FhirContext getContext() {
+		return myContext;
+	}
+
+	List<ResourcePersistentId> getAlsoIncludePids() {
+		if (myAlsoIncludePids == null) {
+			myAlsoIncludePids = new ArrayList<>();
+		}
+		return myAlsoIncludePids;
+	}
+
+	Set<ResourcePersistentId> getPreviouslyAddedResourceIds() {
+		return myPidSet;
+	}
+
+	String getSearchUuid() {
+		return mySearchUuid;
+	}
+
+	// end QueryIterator section
 
 	@Override
 	public void setMaxResultsToFetch(Integer theMaxResultsToFetch) {
@@ -315,9 +355,15 @@ public class SearchBuilder implements ISearchBuilder {
 			myPidSet = new HashSet<>();
 		}
 
-		return new QueryIterator(theSearchRuntimeDetails, theRequest);
+		QueryIteratorParameters qip = new QueryIteratorParameters(
+			theSearchRuntimeDetails,
+			theRequest,
+			this, // the QueryIterator is tied to the SearchBuilder
+			myParams,
+			myMaxResultsToFetch
+		);
+		return new QueryIterator(qip);
 	}
-
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
@@ -326,7 +372,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest,
+	List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest,
 																		 SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
@@ -1442,301 +1488,6 @@ public class SearchBuilder implements ISearchBuilder {
 	@VisibleForTesting
 	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
-	}
-
-	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
-
-		private final RequestDetails myRequest;
-		private final Set<ResourcePersistentId> myCurrentPids;
-		private Iterator<ResourcePersistentId> myCurrentIterator;
-		private ResourcePersistentId myNext;
-
-		IncludesIterator(Set<ResourcePersistentId> thePidSet, RequestDetails theRequest) {
-			myCurrentPids = new HashSet<>(thePidSet);
-			myCurrentIterator = null;
-			myRequest = theRequest;
-		}
-
-		private void fetchNext() {
-			while (myNext == null) {
-
-				if (myCurrentIterator == null) {
-					Set<Include> includes = Collections.singleton(new Include("*", true));
-					Set<ResourcePersistentId> newPids = loadIncludes(myContext, myEntityManager, myCurrentPids, includes, false, getParams().getLastUpdated(), mySearchUuid, myRequest, null);
-					myCurrentIterator = newPids.iterator();
-				}
-
-				if (myCurrentIterator.hasNext()) {
-					myNext = myCurrentIterator.next();
-				} else {
-					myNext = NO_MORE;
-				}
-
-			}
-		}
-
-		@Override
-		public boolean hasNext() {
-			fetchNext();
-			return !NO_MORE.equals(myNext);
-		}
-
-		@Override
-		public ResourcePersistentId next() {
-			fetchNext();
-			ResourcePersistentId retVal = myNext;
-			myNext = null;
-			return retVal;
-		}
-
-	}
-
-	private final class QueryIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
-
-		private final SearchRuntimeDetails mySearchRuntimeDetails;
-		private final RequestDetails myRequest;
-		private final boolean myHaveRawSqlHooks;
-		private final boolean myHavePerfTraceFoundIdHook;
-		private final SortSpec mySort;
-		private final Integer myOffset;
-		private boolean myFirst = true;
-		private IncludesIterator myIncludesIterator;
-		private ResourcePersistentId myNext;
-		private ISearchQueryExecutor myResultsIterator;
-		private boolean myFetchIncludesForEverythingOperation;
-		private int mySkipCount = 0;
-		private int myNonSkipCount = 0;
-		private List<ISearchQueryExecutor> myQueryList = new ArrayList<>();
-
-		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
-			mySearchRuntimeDetails = theSearchRuntimeDetails;
-			mySort = myParams.getSort();
-			myOffset = myParams.getOffset();
-			myRequest = theRequest;
-
-			// Includes are processed inline for $everything query when we don't have a '_type' specified
-			if (myParams.getEverythingMode() != null && !myParams.containsKey(Constants.PARAM_TYPE)) {
-				myFetchIncludesForEverythingOperation = true;
-			}
-
-			myHavePerfTraceFoundIdHook = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, myInterceptorBroadcaster, myRequest);
-			myHaveRawSqlHooks = CompositeInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_RAW_SQL, myInterceptorBroadcaster, myRequest);
-
-		}
-
-		private void fetchNext() {
-			try {
-				if (myHaveRawSqlHooks) {
-					CurrentThreadCaptureQueriesListener.startCapturing();
-				}
-
-				// If we don't have a query yet, create one
-				if (myResultsIterator == null) {
-					if (myMaxResultsToFetch == null) {
-						if (myParams.getLoadSynchronousUpTo() != null) {
-							myMaxResultsToFetch = myParams.getLoadSynchronousUpTo();
-						} else if (myParams.getOffset() != null && myParams.getCount() != null) {
-							myMaxResultsToFetch = myParams.getCount();
-						} else {
-							myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
-						}
-					}
-
-					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-
-					if (myAlsoIncludePids == null) {
-						myAlsoIncludePids = new ArrayList<>();
-					}
-				}
-
-				if (myNext == null) {
-
-
-					for (Iterator<ResourcePersistentId> myPreResultsIterator = myAlsoIncludePids.iterator(); myPreResultsIterator.hasNext(); ) {
-						ResourcePersistentId next = myPreResultsIterator.next();
-						if (next != null)
-							if (myPidSet.add(next)) {
-								myNext = next;
-								break;
-							}
-					}
-
-					if (myNext == null) {
-						while (myResultsIterator.hasNext() || !myQueryList.isEmpty()) {
-							// Update iterator with next chunk if necessary.
-							if (!myResultsIterator.hasNext()) {
-								retrieveNextIteratorQuery();
-							}
-
-							Long nextLong = myResultsIterator.next();
-							if (myHavePerfTraceFoundIdHook) {
-								HookParams params = new HookParams()
-									.add(Integer.class, System.identityHashCode(this))
-									.add(Object.class, nextLong);
-								CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FOUND_ID, params);
-							}
-
-							if (nextLong != null) {
-								ResourcePersistentId next = new ResourcePersistentId(nextLong);
-								if (myPidSet.add(next)) {
-									myNext = next;
-									myNonSkipCount++;
-									break;
-								} else {
-									mySkipCount++;
-								}
-							}
-
-							if (!myResultsIterator.hasNext()) {
-								if (myMaxResultsToFetch != null && (mySkipCount + myNonSkipCount == myMaxResultsToFetch)) {
-									if (mySkipCount > 0 && myNonSkipCount == 0) {
-
-										StorageProcessingMessage message = new StorageProcessingMessage();
-										String msg = "Pass completed with no matching results seeking rows " + myPidSet.size() + "-" + mySkipCount + ". This indicates an inefficient query! Retrying with new max count of " + myMaxResultsToFetch;
-										ourLog.warn(msg);
-										message.setMessage(msg);
-										HookParams params = new HookParams()
-											.add(RequestDetails.class, myRequest)
-											.addIfMatchesType(ServletRequestDetails.class, myRequest)
-											.add(StorageProcessingMessage.class, message);
-										CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
-
-										myMaxResultsToFetch += 1000;
-										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
-									}
-								}
-							}
-						}
-					}
-
-					if (myNext == null) {
-						if (myFetchIncludesForEverythingOperation) {
-							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
-							myFetchIncludesForEverythingOperation = false;
-						}
-						if (myIncludesIterator != null) {
-							while (myIncludesIterator.hasNext()) {
-								ResourcePersistentId next = myIncludesIterator.next();
-								if (next != null)
-									if (myPidSet.add(next)) {
-										myNext = next;
-										break;
-									}
-							}
-							if (myNext == null) {
-								myNext = NO_MORE;
-							}
-						} else {
-							myNext = NO_MORE;
-						}
-					}
-
-				} // if we need to fetch the next result
-
-				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
-
-			} finally {
-				if (myHaveRawSqlHooks) {
-					SqlQueryList capturedQueries = CurrentThreadCaptureQueriesListener.getCurrentQueueAndStopCapturing();
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, myRequest)
-						.addIfMatchesType(ServletRequestDetails.class, myRequest)
-						.add(SqlQueryList.class, capturedQueries);
-					CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_RAW_SQL, params);
-				}
-			}
-
-			if (myFirst) {
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
-				myFirst = false;
-			}
-
-			if (NO_MORE.equals(myNext)) {
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, myRequest)
-					.addIfMatchesType(ServletRequestDetails.class, myRequest)
-					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
-			}
-
-		}
-
-		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
-			if (myQueryList.isEmpty()) {
-				// wipmb what is this?
-				// Capture times for Lucene/Elasticsearch queries as well
-				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-				myQueryList = createQuery(myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
-			}
-
-			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-
-			retrieveNextIteratorQuery();
-
-			mySkipCount = 0;
-			myNonSkipCount = 0;
-		}
-
-		private void retrieveNextIteratorQuery() {
-			close();
-			if (myQueryList != null && myQueryList.size() > 0) {
-				myResultsIterator = myQueryList.remove(0);
-				myHasNextIteratorQuery = true;
-			} else {
-				myResultsIterator = SearchQueryExecutor.emptyExecutor();
-				myHasNextIteratorQuery = false;
-			}
-
-		}
-
-		@Override
-		public boolean hasNext() {
-			if (myNext == null) {
-				fetchNext();
-			}
-			return !NO_MORE.equals(myNext);
-		}
-
-		@Override
-		public ResourcePersistentId next() {
-			fetchNext();
-			ResourcePersistentId retVal = myNext;
-			myNext = null;
-			Validate.isTrue(!NO_MORE.equals(retVal), "No more elements");
-			return retVal;
-		}
-
-		@Override
-		public int getSkippedCount() {
-			return mySkipCount;
-		}
-
-		@Override
-		public int getNonSkippedCount() {
-			return myNonSkipCount;
-		}
-
-		@Override
-		public Collection<ResourcePersistentId> getNextResultBatch(long theBatchSize) {
-			Collection<ResourcePersistentId> batch = new ArrayList<>();
-			while (this.hasNext() && batch.size() < theBatchSize) {
-				batch.add(this.next());
-			}
-			return batch;
-		}
-
-		@Override
-		public void close() {
-			if (myResultsIterator != null) {
-				myResultsIterator.close();
-			}
-			myResultsIterator = null;
-		}
-
 	}
 
 	public static int getMaximumPageSize() {

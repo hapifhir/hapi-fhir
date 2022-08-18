@@ -5577,7 +5577,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(oid2, list.get(3));
 	}
 
-
 	@Test
 	public void testSearchWithMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
