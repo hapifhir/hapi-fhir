@@ -188,12 +188,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
 	}
 
-	@Override
-	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
-		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, "myCreateTime");
-		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
-	}
-
 	private WorkChunk toChunk(Batch2WorkChunkEntity theEntity, boolean theIncludeData) {
 		return JobInstanceUtil.fromEntityToWorkChunk(theEntity, theIncludeData);
 	}
