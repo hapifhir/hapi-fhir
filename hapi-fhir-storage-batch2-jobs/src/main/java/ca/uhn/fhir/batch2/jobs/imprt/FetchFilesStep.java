@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -82,8 +83,7 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 
 					String contentType = response.getEntity().getContentType().getValue();
-					EncodingEnum encoding = EncodingEnum.forContentType(contentType);
-					Validate.isTrue(encoding == EncodingEnum.NDJSON, "Received non-NDJSON content type \"%s\" from URL: %s", contentType, nextUrl);
+					Validate.isTrue(isValidContentType(contentType), "Received non-NDJSON content type \"%s\" from URL: %s", contentType, nextUrl);
 
 					try (InputStream inputStream = response.getEntity().getContent()) {
 						try (LineIterator lineIterator = new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -148,6 +148,13 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		}
 
 		return builder.build();
+	}
+
+	private boolean isValidContentType(String contentType) {
+		EncodingEnum encoding = EncodingEnum.forContentType(contentType);
+		return encoding == EncodingEnum.NDJSON
+			|| contentType.equals(Constants.CT_JSON)
+			|| contentType.equals(Constants.CT_TEXT);
 	}
 
 }

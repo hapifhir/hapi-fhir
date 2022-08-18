@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3929
+title: "When a ndjson file is imported, the response content type text/plain and application/json are now acceptable."
