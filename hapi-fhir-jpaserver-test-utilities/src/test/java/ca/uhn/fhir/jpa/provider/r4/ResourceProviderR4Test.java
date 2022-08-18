@@ -768,9 +768,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void checkParamMissing(String paramName) throws IOException {
 		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		resp.getEntity().getContent().close();
-		assertEquals(200, resp.getStatusLine().getStatusCode());
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			resp.getEntity().getContent().close();
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
 	}
 
 
@@ -5646,6 +5647,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
 		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));
 		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
+	}
+
+	@Test
+	public void testMissingEx() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
+		String methodName = new Exception().getStackTrace()[0].getMethodName();
+		Organization org = new Organization();
+		org.addIdentifier().setSystem("urn:system:rpr4").setValue(methodName + "01");
+		IIdType orgMissing = myClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+		//@formatter:off
+		Bundle found = myClient
+			.search()
+			.forResource(Organization.class)
+			.where(Organization.NAME.isMissing(true))
+			.count(100)
+			.prettyPrint()
+			.returnBundle(Bundle.class)
+			.execute();
+		//@formatter:on
+
+		List<IIdType> list = toUnqualifiedVersionlessIds(found);
+		ourLog.info(list.get(0).toString());
 	}
 
 	@Test

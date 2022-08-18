@@ -97,6 +97,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
 			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
 		);
+
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
 
 	}

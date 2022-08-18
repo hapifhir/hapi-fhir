@@ -302,7 +302,10 @@ public class SearchBuilder implements ISearchBuilder {
 
 	@SuppressWarnings("ConstantConditions")
 	@Override
-	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+	public IResultIterator createQuery(SearchParameterMap theParams,
+												  SearchRuntimeDetails theSearchRuntimeDetails,
+												  RequestDetails theRequest,
+												  @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
@@ -1522,7 +1525,6 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		private void fetchNext() {
-
 			try {
 				if (myHaveRawSqlHooks) {
 					CurrentThreadCaptureQueriesListener.startCapturing();
