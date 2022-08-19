@@ -113,6 +113,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private JobInstanceStartRequest createStartRequest(Batch2BaseJobParameters theParameters) {
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(theParameters.getJobDefinitionId());
+		request.setUseCache(theParameters.isUseExistingJobsFirst());
 		return request;
 	}
 }

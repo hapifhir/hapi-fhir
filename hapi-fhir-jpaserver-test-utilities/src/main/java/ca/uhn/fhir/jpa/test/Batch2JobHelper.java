@@ -57,11 +57,16 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(String theId) {
+		return awaitJobCompletion(theId, 10);
+	}
+
+	public JobInstance awaitJobCompletion(String theId, int theSecondsToWait) {
 		await()
+			.atMost(theSecondsToWait, TimeUnit.SECONDS)
 			.until(() -> {
-			myJobMaintenanceService.runMaintenancePass();
-			return myJobCoordinator.getInstance(theId).getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+				myJobMaintenanceService.runMaintenancePass();
+				return myJobCoordinator.getInstance(theId).getStatus();
+			}, equalTo(StatusEnum.COMPLETED));
 		return myJobCoordinator.getInstance(theId);
 	}
 

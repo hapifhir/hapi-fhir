@@ -229,7 +229,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "integer")
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, typeName = "integer")
 	})
 	public IBaseParameters mdmBatchOnAllSourceResources(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
@@ -298,7 +298,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 */
 	public IBaseParameters buildMdmOutParametersWithCount(long theCount) {
 		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, theCount);
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED, theCount);
 		return retval;
 	}
 

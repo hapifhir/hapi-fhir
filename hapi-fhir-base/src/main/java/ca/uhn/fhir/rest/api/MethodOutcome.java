@@ -39,6 +39,7 @@ public class MethodOutcome {
 	private IBaseResource myResource;
 	private Map<String, List<String>> myResponseHeaders;
 	private Collection<Runnable> myResourceViewCallbacks;
+	private int myResponseStatusCode;
 
 	/**
 	 * Constructor
@@ -238,4 +239,11 @@ public class MethodOutcome {
 		return myResource != null;
 	}
 
+	public void setStatusCode(int theResponseStatusCode) {
+		myResponseStatusCode = theResponseStatusCode;
+	}
+
+	public int getResponseStatusCode() {
+		return myResponseStatusCode;
+	}
 }
