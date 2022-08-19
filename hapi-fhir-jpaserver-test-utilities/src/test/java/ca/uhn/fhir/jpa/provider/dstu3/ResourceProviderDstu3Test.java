@@ -1596,9 +1596,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patId);
 		ourLog.info(ids.toString());
 		assertThat(ids, containsInAnyOrder(patId, medId, moId));
 	}
@@ -1675,9 +1673,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		enc.getSubject().setReferenceElement(patientId);
 		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patientId);
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
 
 		ourLog.info(ids.toString());
@@ -1714,11 +1710,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		c3.addIdentifier().setValue(methodName + "3");
 		IIdType c3Id = ourClient.create().resource(c3).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(null);
 
 		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
@@ -1735,24 +1727,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
 		//Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = ourClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(parameters, p1Id);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids, not(hasItem(p2Id)));
+		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
@@ -1770,16 +1762,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
@@ -1809,22 +1792,40 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 		parameters.addParameter().setName(Constants.PARAM_ID).setValue(new IdType(p1Id.getIdPart()));
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
 		assertThat(ids, not(hasItem(p2Id)));
 		assertThat(ids, not(hasItem(o2Id)));
+	}
+
+	private List<IIdType> doPatientEverythingTypeOperation(Parameters theParameters) {
+		Parameters output;
+		if (theParameters == null) {
+			output = ourClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
+		} else {
+			output = ourClient.operation().onType(Patient.class).named("everything").withParameters(theParameters).execute();
+		}
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> doPatientEverythingInstanceOperation(Parameters theParameters, IIdType theId) {
+		Parameters output;
+		if (theParameters == null) {
+			output = ourClient.operation().onInstance(theId).named("everything").withNoParameters(Parameters.class).execute();
+		} else {
+			output = ourClient.operation().onInstance(theId).named("everything").withParameters(theParameters).execute();
+		}
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> getListOfIds(Parameters output) {
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		return toUnqualifiedVersionlessIds(b);
 	}
 
 	private IIdType createOrganization(String methodName, String s) {

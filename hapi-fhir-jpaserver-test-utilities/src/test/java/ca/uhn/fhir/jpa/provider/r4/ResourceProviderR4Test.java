@@ -2092,9 +2092,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
-		Parameters output = myClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patId);
 		ourLog.info(ids.toString());
 		assertThat(ids, containsInAnyOrder(patId, medId, moId));
 	}
@@ -2169,9 +2167,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		enc.getSubject().setReferenceElement(patientId);
 		IIdType encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patientId);
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
 
 		ourLog.info(ids.toString());
@@ -2192,11 +2188,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		IIdType c3Id = createConditionForPatient(methodName, "3", null);
 
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(null);
 
 		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
@@ -2236,11 +2228,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Parameters parameters = new Parameters();
 			parameters.addParameter("_id", p1Id.getIdPart());
 
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-			assertEquals(BundleType.SEARCHSET, b.getType());
-			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
 			assertThat(ids, not((o2Id)));
@@ -2255,11 +2243,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", p1Id.getIdPart());
 			parameters.addParameter("_id", p2Id.getIdPart());
 
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-			assertEquals(BundleType.SEARCHSET, b.getType());
-			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
 		}
@@ -2270,11 +2254,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Parameters parameters = new Parameters();
 			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
 
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-			assertEquals(BundleType.SEARCHSET, b.getType());
-			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
 			assertThat(ids, not(contains(c5Id)));
@@ -2288,11 +2268,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
 			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(20)));
 
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-			assertEquals(BundleType.SEARCHSET, b.getType());
-			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
 			assertThat(ids, not(contains(c5Id)));
@@ -2338,24 +2314,24 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
 		//Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(parameters, p1Id);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
+		assertThat(ids, not(hasItem(p2Id)));
+		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
@@ -2373,16 +2349,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
@@ -2412,22 +2379,40 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		parameters.addParameter("_type", "Condition, Observation");
 		parameters.addParameter("_id", p1Id.getIdPart());
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
 		assertThat(ids, not(hasItem(p2Id)));
 		assertThat(ids, not(hasItem(o2Id)));
+	}
+
+	private List<IIdType> doPatientEverythingTypeOperation(Parameters theParameters) {
+		Parameters output;
+		if (theParameters == null) {
+			output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
+		} else {
+			output = myClient.operation().onType(Patient.class).named("everything").withParameters(theParameters).execute();
+		}
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> doPatientEverythingInstanceOperation(Parameters theParameters, IIdType theId) {
+		Parameters output;
+		if (theParameters == null) {
+			output = myClient.operation().onInstance(theId).named("everything").withNoParameters(Parameters.class).execute();
+		} else {
+			output = myClient.operation().onInstance(theId).named("everything").withParameters(theParameters).execute();
+		}
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> getListOfIds(Parameters theResult) {
+		Bundle b = (Bundle) theResult.getParameter().get(0).getResource();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		return toUnqualifiedVersionlessIds(b);
 	}
 
 	@Test
@@ -2471,12 +2456,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", "Patient/abc,Patient/def");
 
 			//When
-			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 			//Then
-			assertEquals(BundleType.SEARCHSET, b.getType());
-			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
 			assertThat(ids, not(contains(c3Id)));
 		}

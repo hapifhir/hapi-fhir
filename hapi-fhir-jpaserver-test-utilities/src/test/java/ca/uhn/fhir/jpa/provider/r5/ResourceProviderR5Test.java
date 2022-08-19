@@ -387,20 +387,18 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
+		//Patient 2 stuff.
+		IIdType o2Id = createOrganization(methodName, "2");
+		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
+		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
+		IIdType obs2Id = createObservationForPatient(p2Id, "2");
+		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
+
 		//Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingInstanceOperation(parameters, p1Id);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
@@ -422,16 +420,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
@@ -461,16 +450,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		parameters.addParameter("_type", "Condition, Observation");
 		parameters.addParameter("_id", p1Id.getIdPart());
 
-		myCaptureQueriesListener.clear();
-
-		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		myCaptureQueriesListener.logSelectQueries();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
+		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
@@ -544,6 +524,23 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		} catch (ResourceNotFoundException e) {
 			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
 		}
+	}
+
+	private List<IIdType> doPatientEverythingTypeOperation(Parameters theParameters) {
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(theParameters).execute();
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> doPatientEverythingInstanceOperation(Parameters theParameters, IIdType theId) {
+		Parameters output = myClient.operation().onInstance(theId).named("everything").withParameters(theParameters).execute();
+		return getListOfIds(output);
+	}
+
+	private List<IIdType> getListOfIds(Parameters theResult) {
+		Bundle b = (Bundle) theResult.getParameter().get(0).getResource();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		return toUnqualifiedVersionlessIds(b);
 	}
 
 	private String getTestName() {
