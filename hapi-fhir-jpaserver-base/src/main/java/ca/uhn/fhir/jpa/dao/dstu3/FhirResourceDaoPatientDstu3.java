@@ -91,11 +91,11 @@ public class FhirResourceDaoPatientDstu3 extends BaseHapiFhirResourceDao<Patient
 	@Override
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, IIdType theId) {
 		TokenOrListParam id = new TokenOrListParam().addOr(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theQueryParams.theCount(), theQueryParams.theOffset(), theQueryParams.theLastUpdated(), theQueryParams.theSort(), theQueryParams.theContent(), theQueryParams.theNarrative(), theQueryParams.theFilter(), theQueryParams.theTypes(), theRequestDetails);
+		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
 
 	@Override
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, TokenOrListParam theId) {
-		return doEverythingOperation(theId, theQueryParams.theCount(), theQueryParams.theOffset(), theQueryParams.theLastUpdated(), theQueryParams.theSort(), theQueryParams.theContent(), theQueryParams.theNarrative(), theQueryParams.theFilter(), theQueryParams.theTypes(), theRequestDetails);
+		return doEverythingOperation(theId, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
 }

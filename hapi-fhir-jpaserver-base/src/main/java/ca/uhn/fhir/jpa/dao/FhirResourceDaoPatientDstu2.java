@@ -92,7 +92,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, requestDetails);
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theQueryParams.theCount(), theQueryParams.theOffset(), theQueryParams.theLastUpdated(), theQueryParams.theSort(), theQueryParams.theContent(), theQueryParams.theNarrative(), theQueryParams.theFilter(), theQueryParams.theTypes(), theRequestDetails);
+		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);
 
-		return doEverythingOperation(theIds, theQueryParams.theCount(), theQueryParams.theOffset(), theQueryParams.theLastUpdated(), theQueryParams.theSort(), theQueryParams.theContent(), theQueryParams.theNarrative(), theQueryParams.theFilter(), theQueryParams.theTypes(), theRequestDetails);
+		return doEverythingOperation(theIds, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
 
 }
