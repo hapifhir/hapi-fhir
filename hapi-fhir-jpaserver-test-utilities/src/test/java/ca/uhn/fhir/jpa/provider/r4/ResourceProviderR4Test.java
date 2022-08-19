@@ -82,6 +82,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -1781,6 +1782,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, not(containsString("<Diagn")));
 			ourLog.info(output);
 		}
+	}
+
+	@Test
+	public void testSearchWithIncludeAndTargetResourceParameterWillSucceed() {
+
+		Coverage coverage = new Coverage();
+		coverage.getMeta().addProfile("http://foo");
+		coverage.setId(IdType.newRandomUuid());
+		coverage.addIdentifier().setSystem("http://coverage").setValue("12345");
+		coverage.setStatus(Coverage.CoverageStatus.ACTIVE);
+		coverage.setType(new CodeableConcept().addCoding(new Coding("http://coverage-type", "12345", null)));
+
+		MethodOutcome methodOutcome = myClient.create().resource(coverage).execute();
+
+		Bundle returnedBundle = myClient.search().byUrl("Coverage?_include=Coverage:payor:Patient&_include=Coverage:payor:Organization").returnBundle(Bundle.class).execute();
+
+		IIdType createdCoverageId = methodOutcome.getId();
+		String entryId = returnedBundle.getEntry().get(0).getResource().getId();
+
+		assertEquals(createdCoverageId.getValue(), entryId);
+
 	}
 
 	@Test
