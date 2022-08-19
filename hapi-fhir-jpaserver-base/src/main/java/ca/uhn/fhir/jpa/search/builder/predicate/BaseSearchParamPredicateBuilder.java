@@ -26,6 +26,8 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 
@@ -94,10 +96,16 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	public Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
 		ComboCondition condition = ComboCondition.and(
 			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),
-			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName)),
-			BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
+			BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName))
 		);
 
+
+//		Condition unaryCondition = UnaryCondition.exists();
+//		if (theMissing) {
+//			unaryCondition = new NotCondition(unaryCondition);
+//		}
+
+		//BinaryCondition.equalTo(getMissingColumn(), generatePlaceholder(theMissing))
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
 
 	}

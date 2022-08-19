@@ -97,10 +97,10 @@ public class SearchTask implements Callable<Void> {
 	private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
 	private Integer myMaxResultsToFetch;
 
-	private Consumer<String> myOnRemove;
+	private final Consumer<String> myOnRemove;
 
-	private int mySyncSize;
-	private Integer myLoadingThrottleForUnitTests;
+	private final int mySyncSize;
+	private final Integer myLoadingThrottleForUnitTests;
 
 	private boolean myCustomIsolationSupported;
 
@@ -609,7 +609,7 @@ public class SearchTask implements Callable<Void> {
 		 * createQuery
 		 * Construct the SQL query we'll be sending to the database
 		 *
-		 * NB: (See createCountQuery above)
+		 * NB: (See SearchBuilder.createCountQuery)
 		 * We will pass the original myParams here (not a copy)
 		 * because we actually _want_ the mutation of the myParams to happen.
 		 * Specifically because SearchBuilder itself will _expect_
