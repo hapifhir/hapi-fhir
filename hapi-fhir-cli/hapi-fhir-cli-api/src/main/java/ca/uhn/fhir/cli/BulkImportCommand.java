@@ -177,9 +177,13 @@ public class BulkImportCommand extends BaseCommand {
 
 			if (response.getResponseStatusCode() == 200) {
 				break;
-			} else {
+			} else if (response.getResponseStatusCode() == 202){
 				// still in progress
 				continue;
+			}
+			else {
+				ourLog.error("Unexpected response status code.");
+				break;
 			}
 		}
 	}
