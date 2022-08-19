@@ -122,7 +122,6 @@ public class TransactionProcessorTest {
 		}
 	}
 
-
 	@Configuration
 	public static class MyConfig {
 

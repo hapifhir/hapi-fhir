@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
+import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
@@ -180,7 +181,8 @@ public class FhirAutoConfiguration {
 		@Import({
 			SubscriptionChannelConfig.class,
 			SubscriptionProcessorConfig.class,
-			SubscriptionSubmitterConfig.class
+			SubscriptionSubmitterConfig.class,
+			SearchParamSubmitterConfig.class
 		})
 		static class FhirJpaDaoConfiguration {
 

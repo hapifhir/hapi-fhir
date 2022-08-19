@@ -74,6 +74,8 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 			theHttpResponse.addHeader(Constants.HEADER_CONTENT_ENCODING, Constants.ENCODING_GZIP);
 			return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
 		}
+
+//		return new OutputStreamWriter(new GZIPOutputStream(theHttpResponse.getOutputStream()), StandardCharsets.UTF_8);
 		return theHttpResponse.getWriter();
 	}
 
