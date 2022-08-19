@@ -9,10 +9,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
@@ -27,15 +30,19 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -43,12 +50,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -65,6 +75,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	private IAnonymousInterceptor myHook;
 	@Captor
 	private ArgumentCaptor<HookParams> myParamsCaptor;
+
+	@Autowired
+	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
 	@Override
 	@AfterEach
@@ -402,6 +415,138 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			ourRestServer.unregisterInterceptor(interceptor);
 		}
 
+	}
+
+	@Test
+	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreate(){
+		registerSearchParameterValidatingInterceptor();
+
+		// let's make sure we don't already have a matching SearchParameter
+		Bundle bundle = myClient
+			.search()
+			.byUrl("SearchParameter?base=AllergyIntolerance&code=patient")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertTrue(bundle.getEntry().isEmpty());
+
+		SearchParameter searchParameter = createSearchParameter();
+
+		// now, create a SearchParameter
+		MethodOutcome methodOutcome = myClient
+			.create()
+			.resource(searchParameter)
+			.execute();
+
+		assertTrue(methodOutcome.getCreated());
+
+		// attempting to create an overlapping SearchParameter should fail
+		try {
+			methodOutcome = myClient
+				.create()
+				.resource(searchParameter)
+				.execute();
+
+			fail();
+		}catch (UnprocessableEntityException e){
+			// all is good
+			assertTrue(e.getMessage().contains("2131"));
+		}
+	}
+
+	@Test
+	public void testSearchParamValidatingInterceptorAllowsResourceUpdate(){
+		registerSearchParameterValidatingInterceptor();
+
+		SearchParameter searchParameter = createSearchParameter();
+
+		// now, create a SearchParameter
+		MethodOutcome methodOutcome = myClient
+			.create()
+			.resource(searchParameter)
+			.execute();
+
+		assertTrue(methodOutcome.getCreated());
+		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
+
+		createdSearchParameter.setUrl("newUrl");
+		methodOutcome = myClient
+			.update()
+			.resource(createdSearchParameter)
+			.execute();
+
+		assertNotNull(methodOutcome);
+	}
+	@Test
+	public void testSearchParamValidationOnUpdateWithClientAssignedId() {
+		registerSearchParameterValidatingInterceptor();
+
+		SearchParameter searchParameter = createSearchParameter();
+		searchParameter.setId("my-custom-id");
+
+		// now, create a SearchParameter
+		MethodOutcome methodOutcome = myClient
+			.update()
+			.resource(searchParameter)
+			.execute();
+
+		assertTrue(methodOutcome.getCreated());
+		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
+
+		createdSearchParameter.setUrl("newUrl");
+		methodOutcome = myClient
+			.update()
+			.resource(createdSearchParameter)
+			.execute();
+
+		assertNotNull(methodOutcome);
+	}
+
+	@Test
+	public void testSearchParamValidatingInterceptorNotAllowingOverlappingOnCreateWithUpdate(){
+		registerSearchParameterValidatingInterceptor();
+
+		String defaultSearchParamId = "clinical-patient";
+		String overlappingSearchParamId = "allergyintolerance-patient";
+
+		SearchParameter defaultSearchParameter = createSearchParameter();
+		defaultSearchParameter.setId(defaultSearchParamId);
+
+		// now, create a SearchParameter with a PUT operation
+		MethodOutcome methodOutcome = myClient
+			.update(defaultSearchParamId, defaultSearchParameter);
+
+		assertTrue(methodOutcome.getCreated());
+
+		SearchParameter overlappingSearchParameter = createSearchParameter();
+		overlappingSearchParameter.setId(overlappingSearchParamId);
+		overlappingSearchParameter.setBase(asList(new CodeType("AllergyIntolerance")));
+
+		try {
+			myClient.update(overlappingSearchParamId, overlappingSearchParameter);
+			fail();
+		} catch (UnprocessableEntityException e){
+			// this is good
+			assertTrue(e.getMessage().contains("2131"));
+		}
+
+	}
+
+	private void registerSearchParameterValidatingInterceptor(){
+		ourRestServer.getInterceptorService().registerInterceptor(mySearchParamValidatingInterceptor);
+	}
+
+	private SearchParameter createSearchParameter(){
+		SearchParameter retVal = new SearchParameter()
+			.setUrl("http://hl7.org/fhir/SearchParameter/clinical-patient")
+			.setStatus(Enumerations.PublicationStatus.ACTIVE)
+			.setDescription("someDescription")
+			.setCode("patient")
+			.addBase("DiagnosticReport").addBase("ImagingStudy").addBase("DocumentManifest").addBase("AllergyIntolerance")
+			.setType(Enumerations.SearchParamType.REFERENCE)
+			.setExpression("someExpression");
+
+		return retVal;
 
 	}
 

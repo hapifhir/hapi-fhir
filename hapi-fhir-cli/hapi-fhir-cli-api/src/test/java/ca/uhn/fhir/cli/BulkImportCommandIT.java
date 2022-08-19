@@ -3,7 +3,9 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -13,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,20 +37,22 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class BulkImportCommandTest {
+public class BulkImportCommandIT {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandIT.class);
 
 	static {
 		System.setProperty("test", "true");
@@ -78,7 +83,6 @@ public class BulkImportCommandTest {
 	public void afterEach() throws IOException {
 		ourLog.info("Deleting temp directory: {}", myTempDir);
 		FileUtils.deleteDirectory(myTempDir.toFile());
-		BulkImportCommand.setEndNowForUnitTest(true);
 	}
 
 	private Batch2JobStartResponse createJobStartResponse(String theId) {
@@ -90,13 +94,19 @@ public class BulkImportCommandTest {
 	@Test
 	public void testBulkImport() throws IOException {
 
+		JobInstance jobInfo = new JobInstance()
+			.setStatus(StatusEnum.COMPLETED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+
+		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
+
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
 		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myJobCoordinator.startInstance(any()))
-			.thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -124,6 +134,13 @@ public class BulkImportCommandTest {
 
 	@Test
 	public void testBulkImport_GzippedFile() throws IOException {
+
+		JobInstance jobInfo = new JobInstance()
+			.setStatus(StatusEnum.COMPLETED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+
+		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
 
 		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
 		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
@@ -176,6 +193,9 @@ public class BulkImportCommandTest {
 				w.append(theContents);
 			}
 		}
+	}
+	private Date parseDate(String theString) {
+		return new InstantType(theString).getValue();
 	}
 
 

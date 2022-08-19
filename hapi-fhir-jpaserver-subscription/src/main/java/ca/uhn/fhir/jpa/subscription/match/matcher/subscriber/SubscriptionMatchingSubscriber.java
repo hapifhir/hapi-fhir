@@ -122,98 +122,107 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
-		boolean resourceMatched = false;
+		boolean anySubscriptionsMatchedResource = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
-			// skip if the partitions don't match
-			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
-			if (subscription != null && theMsg.getPartitionId() != null &&
-				theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
-				!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
-				continue;
-			}
-			String nextSubscriptionId = getId(nextActiveSubscription);
-
-			if (isNotBlank(theMsg.getSubscriptionId())) {
-				if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
-					// TODO KHS we should use a hash to look it up instead of this full table scan
-					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
-					continue;
-				}
-			}
-
-			if (!resourceTypeIsAppropriateForSubscription(nextActiveSubscription, resourceId)) {
-				continue;
-			}
-
-			if (theMsg.getOperationType().equals(DELETE)) {
-				if (!nextActiveSubscription.getSubscription().getSendDeleteMessages()) {
-					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
-					return;
-				}
-			}
-
-			InMemoryMatchResult matchResult;
-			if (nextActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-				matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
-				if (!matchResult.matched()) {
-					ourLog.trace("Subscription {} was not matched by resource {} {}",
-						nextActiveSubscription.getId(),
-						resourceId.toUnqualifiedVersionless().getValue(),
-						matchResult.isInMemory() ? "in-memory" : "by querying the repository");
-					continue;
-				}
-				ourLog.debug("Subscription {} was matched by resource {} {}",
-					nextActiveSubscription.getId(),
-					resourceId.toUnqualifiedVersionless().getValue(),
-					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
-			} else {
-				ourLog.trace("Subscription {} was not matched by resource {} - No search expression",
-					nextActiveSubscription.getId(),
-					resourceId.toUnqualifiedVersionless().getValue());
-				matchResult = InMemoryMatchResult.successfulMatch();
-				matchResult.setInMemory(true);
-			}
-
-			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
-
-			EncodingEnum encoding = null;
-			if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
-				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
-			}
-			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
-
-			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPartitionId(theMsg.getPartitionId());
-
-			if (payload != null) {
-				deliveryMsg.setPayload(myFhirContext, payload, encoding);
-			} else {
-				deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
-			}
-			deliveryMsg.setSubscription(subscription);
-			deliveryMsg.setOperationType(theMsg.getOperationType());
-			deliveryMsg.setTransactionId(theMsg.getTransactionId());
-			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-
-			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			HookParams params = new HookParams()
-				.add(CanonicalSubscription.class, nextActiveSubscription.getSubscription())
-				.add(ResourceDeliveryMessage.class, deliveryMsg)
-				.add(InMemoryMatchResult.class, matchResult);
-			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
-				return;
-			}
-
-			resourceMatched |= sendToDeliveryChannel(nextActiveSubscription, deliveryMsg);
+			anySubscriptionsMatchedResource |= processSubscription(theMsg, resourceId, nextActiveSubscription);
 		}
 
-		if (!resourceMatched) {
+		if (!anySubscriptionsMatchedResource) {
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 			HookParams params = new HookParams()
 				.add(ResourceModifiedMessage.class, theMsg);
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);
 		}
+	}
+
+	/**
+	 * Returns true if subscription matched, and processing completed successfully, and the message was sent to the delivery channel. False otherwise.
+	 *
+	 */
+	private boolean processSubscription(ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
+		// skip if the partitions don't match
+		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
+		if (subscription != null && theMsg.getPartitionId() != null &&
+			theMsg.getPartitionId().hasPartitionIds() && !subscription.getCrossPartitionEnabled() &&
+			!theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
+			return false;
+		}
+		String nextSubscriptionId = getId(theActiveSubscription);
+
+		if (isNotBlank(theMsg.getSubscriptionId())) {
+			if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
+				// TODO KHS we should use a hash to look it up instead of this full table scan
+				ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
+				return false;
+			}
+		}
+
+		if (!resourceTypeIsAppropriateForSubscription(theActiveSubscription, theResourceId)) {
+			return false;
+		}
+
+		if (theMsg.getOperationType().equals(DELETE)) {
+			if (!theActiveSubscription.getSubscription().getSendDeleteMessages()) {
+				ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
+				return false;
+			}
+		}
+
+		InMemoryMatchResult matchResult;
+		if (theActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
+			matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
+			if (!matchResult.matched()) {
+				ourLog.trace("Subscription {} was not matched by resource {} {}",
+					theActiveSubscription.getId(),
+					theResourceId.toUnqualifiedVersionless().getValue(),
+					matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+				return false;
+			}
+			ourLog.debug("Subscription {} was matched by resource {} {}",
+				theActiveSubscription.getId(),
+				theResourceId.toUnqualifiedVersionless().getValue(),
+				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
+		} else {
+			ourLog.trace("Subscription {} was not matched by resource {} - No search expression",
+				theActiveSubscription.getId(),
+				theResourceId.toUnqualifiedVersionless().getValue());
+			matchResult = InMemoryMatchResult.successfulMatch();
+			matchResult.setInMemory(true);
+		}
+
+		IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+
+		EncodingEnum encoding = null;
+		if (subscription != null && subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+			encoding = EncodingEnum.forContentType(subscription.getPayloadString());
+		}
+		encoding = defaultIfNull(encoding, EncodingEnum.JSON);
+
+		ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
+		deliveryMsg.setPartitionId(theMsg.getPartitionId());
+
+		if (payload != null) {
+			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+		} else {
+			deliveryMsg.setPayloadId(theMsg.getPayloadId(myFhirContext));
+		}
+		deliveryMsg.setSubscription(subscription);
+		deliveryMsg.setOperationType(theMsg.getOperationType());
+		deliveryMsg.setTransactionId(theMsg.getTransactionId());
+		deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
+
+		// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
+		HookParams params = new HookParams()
+			.add(CanonicalSubscription.class, theActiveSubscription.getSubscription())
+			.add(ResourceDeliveryMessage.class, deliveryMsg)
+			.add(InMemoryMatchResult.class, matchResult);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
+			ourLog.info("Interceptor has decided to abort processing of subscription {}", nextSubscriptionId);
+			return false;
+		}
+
+		return sendToDeliveryChannel(theActiveSubscription, deliveryMsg);
 	}
 
 	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
