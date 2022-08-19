@@ -62,32 +62,34 @@ public class SubscriptionValidatingInterceptor {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
-	@Autowired
+
 	private FhirContext myFhirContext;
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
-		validateSubmittedSubscription(theResource, theRequestDetails);
+	public void resourcePreCreate(IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreCreate(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails) {
-		validateSubmittedSubscription(theResource, theRequestDetails);
+	public void resourcePreCreate(IBaseResource theOldResource, IBaseResource theResource, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
+		validateSubmittedSubscription(theResource, theRequestDetails, theRequestPartitionId);
 	}
 
-	@VisibleForTesting
-	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+	@Autowired
+	public void setFhirContext(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
 
 	@Deprecated
 	public void validateSubmittedSubscription(IBaseResource theSubscription) {
-		validateSubmittedSubscription(theSubscription, null);
+		validateSubmittedSubscription(theSubscription, null, null);
 	}
 
-	public void validateSubmittedSubscription(IBaseResource theSubscription, RequestDetails theRequestDetails) {
+	public void validateSubmittedSubscription(IBaseResource theSubscription,
+															RequestDetails theRequestDetails,
+															RequestPartitionId theRequestPartitionId) {
 		if (!"Subscription".equals(myFhirContext.getResourceType(theSubscription))) {
 			return;
 		}
@@ -109,7 +111,7 @@ public class SubscriptionValidatingInterceptor {
 				break;
 		}
 
-		validatePermissions(theSubscription, subscription, theRequestDetails);
+		validatePermissions(theSubscription, subscription, theRequestDetails, theRequestPartitionId);
 
 		mySubscriptionCanonicalizer.setMatchingStrategyTag(theSubscription, null);
 
@@ -140,14 +142,24 @@ public class SubscriptionValidatingInterceptor {
 		}
 	}
 
-	protected void validatePermissions(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription, RequestDetails theRequestDetails) {
+	protected void validatePermissions(IBaseResource theSubscription,
+												  CanonicalSubscription theCanonicalSubscription,
+												  RequestDetails theRequestDetails,
+												  RequestPartitionId theRequestPartitionId) {
 		// If the subscription has the cross partition tag
 		if (SubscriptionUtil.isCrossPartition(theSubscription) && !(theRequestDetails instanceof SystemRequestDetails)) {
-			if (!myDaoConfig.isCrossPartitionSubscription()){
+			if (!myDaoConfig.isCrossPartitionSubscriptionEnabled()){
 				throw new UnprocessableEntityException(Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
 
-			if (!determinePartition(theRequestDetails, theSubscription).isDefaultPartition()) {
+			// if we have a partition id already, we'll use that
+			// otherwise we might end up with READ and CREATE pointcuts
+			// returning conflicting partitions (say, all vs default)
+			RequestPartitionId toCheckPartitionId = theRequestPartitionId != null ?
+				theRequestPartitionId :
+				determinePartition(theRequestDetails, theSubscription);
+
+			if (!toCheckPartitionId.isDefaultPartition()) {
 				throw new UnprocessableEntityException(Msg.code(2010) + "Cross partition subscription must be created on the default partition");
 			}
 		}

@@ -2807,7 +2807,7 @@ public class DaoConfig {
 	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
 	 * @since 7.5.0
 	 */
-	public boolean isCrossPartitionSubscription() {
+	public boolean isCrossPartitionSubscriptionEnabled() {
 		return this.myModelConfig.isCrossPartitionSubscription();
 	}
 

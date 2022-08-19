@@ -95,7 +95,6 @@ public class DeleteExpungeStep implements IJobStepWorker<ReindexJobParameters, R
 			List<ResourcePersistentId> persistentIds = myData.getResourcePersistentIds();
 
 			ourLog.info("Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]", persistentIds.size(), myInstanceId, myChunkId);
-			StopWatch sw = new StopWatch();
 
 			myDeleteExpungeSvc.deleteExpunge(persistentIds);
 
