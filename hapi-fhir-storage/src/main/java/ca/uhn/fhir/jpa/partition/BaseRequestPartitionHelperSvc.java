@@ -33,20 +33,16 @@ import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,7 +97,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		boolean nonPartitionableResource = myNonPartitionableResourceNames.contains(theResourceType);
+		boolean nonPartitionableResource = !isResourcePartitionable(theResourceType);
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
 			//TODO GGG eventually, theRequest will not be allowed to be null here, and we will pass through SystemRequestDetails instead.
@@ -264,6 +260,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		}
 	}
 
+	@Override
+	public boolean isResourcePartitionable(String theResourceType) {
+		return !myNonPartitionableResourceNames.contains(theResourceType);
+	}
+
 	protected abstract RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId);
 
 	protected abstract RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId);
@@ -279,7 +280,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		// Make sure we're not using one of the conformance resources in a non-default partition
 		if ((theRequestPartitionId.hasPartitionIds() && !theRequestPartitionId.getPartitionIds().contains(null)) || (theRequestPartitionId.hasPartitionNames() && !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
 
-			if (myNonPartitionableResourceNames.contains(theResourceName)) {
+			if (!isResourcePartitionable(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(BaseRequestPartitionHelperSvc.class, "nonDefaultPartitionSelectedForNonPartitionable", theResourceName);
 				throw new UnprocessableEntityException(Msg.code(1318) + msg);
 			}
