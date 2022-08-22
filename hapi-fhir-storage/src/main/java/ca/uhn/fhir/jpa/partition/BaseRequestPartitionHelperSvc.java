@@ -236,10 +236,12 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, @Nonnull String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
-		if (retVal.getPartitionNames() != null) {
-			retVal = validateAndNormalizePartitionNames(retVal);
-		} else if (retVal.hasPartitionIds()) {
-			retVal = validateAndNormalizePartitionIds(retVal);
+		if (!myPartitionSettings.isUnnamedPartitionMode()) {
+			if (retVal.getPartitionNames() != null) {
+				retVal = validateAndNormalizePartitionNames(retVal);
+			} else if (retVal.hasPartitionIds()) {
+				retVal = validateAndNormalizePartitionIds(retVal);
+			}
 		}
 
 		// Note: It's still possible that the partition only has a date but no name/id
