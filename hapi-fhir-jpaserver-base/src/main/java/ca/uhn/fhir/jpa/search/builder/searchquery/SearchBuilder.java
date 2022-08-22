@@ -341,7 +341,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	@Override
+	@Override // TODO - rename to CreateQueryIterator
 	public IResultIterator createQuery(SearchParameterMap theParams,
 												  SearchRuntimeDetails theSearchRuntimeDetails,
 												  RequestDetails theRequest,

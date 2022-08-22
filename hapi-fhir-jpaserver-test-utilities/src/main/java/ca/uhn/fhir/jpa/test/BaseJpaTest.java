@@ -146,7 +146,8 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE,
+	"spring.h2.console.enabled=true"
 })
 public abstract class BaseJpaTest extends BaseTest {
 

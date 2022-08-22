@@ -105,7 +105,6 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
 		return inResourceIds;
-
 	}
 
 	public static List<Integer> replaceDefaultPartitionIdIfNonNull(PartitionSettings thePartitionSettings, List<Integer> thePartitionIds) {
@@ -118,6 +117,4 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		}
 		return partitionIds;
 	}
-
-
 }

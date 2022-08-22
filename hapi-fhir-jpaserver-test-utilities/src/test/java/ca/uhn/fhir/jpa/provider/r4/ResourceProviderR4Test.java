@@ -5708,7 +5708,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
+		IParser parser = myFhirContext.newJsonParser();
+		parser.setPrettyPrint(true);
+		ourLog.info(parser.encodeResourceToString(found));
+
+//		assertFalse(found.isEmpty());
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
+		ourLog.info(list.size() + " resources found");
 		ourLog.info(list.get(0).toString());
 	}
 

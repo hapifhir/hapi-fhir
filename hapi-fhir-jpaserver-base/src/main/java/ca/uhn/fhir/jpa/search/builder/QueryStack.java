@@ -33,6 +33,9 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -1184,11 +1187,32 @@ public class QueryStack {
 														String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 														SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId,
 														SearchQueryBuilder theSqlBuilder) {
-
+		Boolean isMissing = theList.get(0).getMissing();
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+
+		if (isMissing != null) {
+			ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
+
+//			Condition condition = table.createPartitionIdPredicate(theRequestPartitionId);
+
+			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING,
+				theSourceJoinColumn,
+				paramName,
+				() -> theSqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
+
+			return join.createPredicateParamMissingValue(
+				table,
+				isMissing,
+				paramName,
+				theRequestPartitionId
+			);
+			// TODO - add the other unitary condition here
+		}
+
 
 		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, paramName, () -> theSqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
 
+		// TODO - need the table from mySelect
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
@@ -1437,9 +1461,7 @@ public class QueryStack {
 
 			default:
 				return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId);
-
 		}
-
 	}
 
 	@Nullable
@@ -1627,66 +1649,6 @@ public class QueryStack {
 				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
 		return qp;
-	}
-
-	private enum PredicateBuilderTypeEnum {
-		DATE, COORDS, NUMBER, QUANTITY, REFERENCE, SOURCE, STRING, TOKEN, TAG
-	}
-
-	private static class PredicateBuilderCacheLookupResult<T extends BaseJoiningPredicateBuilder> {
-		private final boolean myCacheHit;
-		private final T myResult;
-
-		private PredicateBuilderCacheLookupResult(boolean theCacheHit, T theResult) {
-			myCacheHit = theCacheHit;
-			myResult = theResult;
-		}
-
-		public boolean isCacheHit() {
-			return myCacheHit;
-		}
-
-		public T getResult() {
-			return myResult;
-		}
-	}
-
-	private static class PredicateBuilderCacheKey {
-		private final DbColumn myDbColumn;
-		private final PredicateBuilderTypeEnum myType;
-		private final String myParamName;
-		private final int myHashCode;
-
-		private PredicateBuilderCacheKey(DbColumn theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
-			myDbColumn = theDbColumn;
-			myType = theType;
-			myParamName = theParamName;
-			myHashCode = new HashCodeBuilder().append(myDbColumn).append(myType).append(myParamName).toHashCode();
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-
-			PredicateBuilderCacheKey that = (PredicateBuilderCacheKey) theO;
-
-			return new EqualsBuilder()
-				.append(myDbColumn, that.myDbColumn)
-				.append(myType, that.myType)
-				.append(myParamName, that.myParamName)
-				.isEquals();
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
-		}
 	}
 
 	@Nullable

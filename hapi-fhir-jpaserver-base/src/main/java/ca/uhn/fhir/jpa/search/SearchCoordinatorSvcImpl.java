@@ -364,7 +364,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public IBundleProvider registerSearch(final IFhirResourceDao<?> theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails, RequestPartitionId theRequestPartitionId) {
 		final String searchUuid = UUID.randomUUID().toString();
 
-		//?name:missing=true
+		// ?name:missing=true
 		final String queryString = theParams.toNormalizedQueryString(myContext);
 		ourLog.debug("Registering new search {}", searchUuid);
 
