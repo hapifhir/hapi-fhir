@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -193,7 +194,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testPatchUsingJsonPatch_Transaction() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();

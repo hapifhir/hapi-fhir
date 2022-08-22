@@ -87,6 +87,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -128,7 +129,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testEverythingTimings() throws Exception {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -801,7 +802,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchLastUpdatedParam() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParam";
+		String methodName = getTestName();
 
 		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
 		TestUtil.sleepOneClick();
@@ -1094,7 +1095,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = "testSearchPractitionerPhoneAndEmailParam";
+		String methodName = getTestName();
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
@@ -1200,7 +1201,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchResourceLinkWithChainDouble() {
-		String methodName = "testSearchResourceLinkWithChainDouble";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -1414,7 +1415,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = "testSearchStringParamReallyLong";
+		String methodName = getTestName();
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		IIdType longId;
@@ -1585,7 +1586,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = "testSearchValueQuantity";
+		String methodName = getTestName();
 
 		QuantityParam param;
 		List<ResourcePersistentId> found;
@@ -1632,7 +1633,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludes() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
@@ -1764,7 +1765,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterNoRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1806,7 +1807,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1848,7 +1849,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludesStarNoRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1889,7 +1890,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludesStarRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2158,7 +2159,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
-		String methodName = "testSearchWithSecurityAndProfileParams";
+		String methodName = getTestName();
 
 		IIdType tag1id;
 		{
@@ -2198,7 +2199,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithTagParameter() {
-		String methodName = "testSearchWithTagParameter";
+		String methodName = getTestName();
 
 		IIdType tag1id;
 		{

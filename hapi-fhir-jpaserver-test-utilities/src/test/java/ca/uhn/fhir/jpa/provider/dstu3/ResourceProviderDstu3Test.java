@@ -152,6 +152,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -4789,9 +4790,5 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
-	}
-
-	private String getTestName() {
-		return new Exception().getStackTrace()[1].getMethodName();
 	}
 }

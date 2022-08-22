@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,7 +76,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testFhirPatch_Transaction() throws Exception {
-		String methodName = "testFhirPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -116,7 +117,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testFhirPatch_TransactionWithSearchParameter() throws Exception {
-		String methodName = "testFhirPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -231,7 +232,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -260,7 +261,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch_Transaction() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -301,7 +302,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch_Conditional_Success() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -329,7 +330,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch_Conditional_NoMatch() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -356,7 +357,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch_Conditional_MultipleMatch() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
+		String methodName = getTestName();
 		{
 			Patient patient = new Patient();
 			patient.setActive(true);
@@ -424,7 +425,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckBad() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckBad";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -452,7 +453,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckGood() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckGood";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -481,7 +482,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingXmlPatch() throws Exception {
-		String methodName = "testPatchUsingXmlPatch";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -511,7 +512,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingXmlPatch_Transaction() throws Exception {
-		String methodName = "testPatchUsingXmlPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -554,7 +555,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchInTransaction_MissingContentType() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -592,7 +593,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchInTransaction_MissingBody() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -630,7 +631,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchInTransaction_InvalidContentType_NonFhir() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -668,7 +669,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchInTransaction_InvalidContentType_Fhir() throws Exception {
-		String methodName = "testPatchUsingJsonPatch_Transaction";
+		String methodName = getTestName();
 		IIdType pid1;
 		{
 			Patient patient = new Patient();

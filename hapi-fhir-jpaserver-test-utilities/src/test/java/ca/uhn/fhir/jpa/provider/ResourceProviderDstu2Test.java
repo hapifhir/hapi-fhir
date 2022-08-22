@@ -109,6 +109,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -409,7 +410,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testCreateResourceConditional() throws IOException {
-		String methodName = "testCreateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -577,7 +578,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testCreateWithForcedId() {
-		String methodName = "testCreateWithForcedId";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addName().addFamily(methodName);
@@ -626,7 +627,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testDeleteConditionalMultiple() {
-		String methodName = "testDeleteConditionalMultiple";
+		String methodName = getTestName();
 
 		myDaoConfig.setAllowMultipleDelete(false);
 
@@ -698,7 +699,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
-		String methodName = "testDeleteResourceConditional1";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -741,7 +742,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 */
 	@Test
 	public void testDeleteResourceConditional2() throws Exception {
-		String methodName = "testDeleteResourceConditional2";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -900,7 +901,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingEncounterInstance() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -964,7 +965,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingEncounterType() {
-		String methodName = "testEverythingEncounterInstance";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1145,7 +1146,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 */
 	@Test
 	public void testEverythingPatientIncludesBackReferences() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
@@ -1204,7 +1205,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingPatientOperation() {
-		String methodName = "testEverythingOperation";
+		String methodName = getTestName();
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1249,7 +1250,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingPatientType() {
-		String methodName = "testEverythingPatientType";
+		String methodName = getTestName();
 
 		Organization o1 = new Organization();
 		o1.setName(methodName + "1");
@@ -1289,7 +1290,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	// retest
 	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
-		String methodName = "testEverythingWithLastUpdatedAndSort";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -1440,7 +1441,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -1464,7 +1465,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() {
-		String methodName = "testHistoryWithDeletedResource";
+		String methodName = getTestName();
 
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
@@ -1563,7 +1564,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testMetaOperations() {
-		String methodName = "testMetaOperations";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -1973,7 +1974,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = "testSearchLastUpdatedParamRp";
+		String methodName = getTestName();
 		ourLog.info("Starting " + methodName);
 
 		int sleep = 100;
@@ -2275,7 +2276,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	public void testSearchWithMissing() {
 		ourLog.info("Starting testSearchWithMissing");
 
-		String methodName = "testSearchWithMissing";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		IdDt deletedIdMissingTrue = (IdDt) ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
@@ -2392,7 +2393,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	@Test
 	public void testSortFromResourceProvider() {
 		Patient p;
-		String methodName = "testSortFromResourceProvider";
+		String methodName = getTestName();
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -2571,7 +2572,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testUpdateInvalidUrl() throws Exception {
-		String methodName = "testUpdateInvalidReference";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -2619,7 +2620,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
-		String methodName = "testUpdateResourceConditional";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
@@ -2698,7 +2699,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testUpdateResourceWithPrefer() throws Exception {
-		String methodName = "testUpdateResourceWithPrefer";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);

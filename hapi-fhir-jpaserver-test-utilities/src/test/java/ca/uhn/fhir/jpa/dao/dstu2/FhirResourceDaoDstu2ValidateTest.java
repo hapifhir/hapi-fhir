@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Collections;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -46,7 +47,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
-		String methodName = "testValidateResourceContainingProfileDeclarationJson";
+		String methodName = getTestName();
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -58,7 +59,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
-		String methodName = "testValidateResourceContainingProfileDeclarationXml";
+		String methodName = getTestName();
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -122,7 +123,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationInvalid() {
-		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
+		String methodName = getTestName();
 
 		Observation input = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
@@ -149,7 +150,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateForCreate() {
-		String methodName = "testValidateForCreate";
+		String methodName = getTestName();
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -169,7 +170,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateForUpdate() {
-		String methodName = "testValidateForUpdate";
+		String methodName = getTestName();
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -189,7 +190,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateForUpdateWithContained() {
-		String methodName = "testValidateForUpdate";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setId("#123");
@@ -217,7 +218,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testValidateForDelete() {
-		String methodName = "testValidateForDelete";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);

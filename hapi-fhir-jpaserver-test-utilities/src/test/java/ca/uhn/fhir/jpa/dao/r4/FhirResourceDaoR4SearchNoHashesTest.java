@@ -120,6 +120,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -358,7 +359,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testEverythingTimings() {
-		String methodName = "testEverythingTimings";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -1437,7 +1438,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParam() {
-		String methodName = "testSearchLastUpdatedParam";
+		String methodName = getTestName();
 
 		TestUtil.sleepOneClick();
 
@@ -1764,7 +1765,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = "testSearchPractitionerPhoneAndEmailParam";
+		String methodName = getTestName();
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
@@ -1893,7 +1894,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchResourceLinkWithChainDouble() {
-		String methodName = "testSearchResourceLinkWithChainDouble";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2158,7 +2159,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = "testSearchStringParamReallyLong";
+		String methodName = getTestName();
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		IIdType longId;
@@ -2447,7 +2448,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = "testSearchValueQuantity";
+		String methodName = getTestName();
 
 		String id1;
 		{
@@ -2637,7 +2638,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludes() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
@@ -2744,7 +2745,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterNoRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2786,7 +2787,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2828,7 +2829,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarNoRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2869,7 +2870,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarRecurse() {
-		String methodName = "testSearchWithIncludes";
+		String methodName = getTestName();
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2976,7 +2977,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithRevIncludes() {
-		final String methodName = "testSearchWithRevIncludes";
+		final String methodName = getTestName();
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
@@ -3006,7 +3007,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
-		String methodName = "testSearchWithSecurityAndProfileParams";
+		String methodName = getTestName();
 
 		IIdType tag1id;
 		{
@@ -3038,7 +3039,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameter() {
-		String methodName = "testSearchWithTagParameter";
+		String methodName = getTestName();
 
 		IIdType tag1id;
 		{
@@ -3124,7 +3125,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameterMissing() {
-		String methodName = "testSearchWithTagParameterMissing";
+		String methodName = getTestName();
 
 		IIdType tag1id;
 		{

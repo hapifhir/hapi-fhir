@@ -83,6 +83,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -560,7 +561,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		List<Coding> published = meta.getTag();
 		assertEquals(0, published.size());
 
-		String methodName = "testSystemMetaOperation";
+		String methodName = getTestName();
 		IIdType id1;
 		{
 			Patient patient = new Patient();
@@ -641,7 +642,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionBatchWithFailingRead() {
-		String methodName = "testTransactionBatchWithFailingRead";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 		request.setType(BundleType.BATCH);
 
@@ -684,7 +685,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithNoMatches() {
-		String methodName = "testTransactionCreateInlineMatchUrlWithNoMatches";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
@@ -704,7 +705,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
-		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
@@ -737,7 +738,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch2() {
-		String methodName = "testTransactionCreateInlineMatchUrlWithOneMatch2";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
@@ -805,7 +806,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithTwoMatches() {
-		String methodName = "testTransactionCreateInlineMatchUrlWithTwoMatches";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		myDaoConfig.setAllowInlineMatchUrlReferences(true);
@@ -833,7 +834,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateMatchUrlWithOneMatch() {
-		String methodName = "testTransactionCreateMatchUrlWithOneMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -875,7 +876,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateMatchUrlWithTwoMatch() {
-		String methodName = "testTransactionCreateMatchUrlWithTwoMatch";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -909,7 +910,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateMatchUrlWithZeroMatch() {
-		String methodName = "testTransactionCreateMatchUrlWithZeroMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -1016,7 +1017,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithDuplicateMatchUrl02() {
-		String methodName = "testTransactionCreateWithDuplicateMatchUrl02";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p;
@@ -1039,7 +1040,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithInvalidMatchUrl() {
-		String methodName = "testTransactionCreateWithInvalidMatchUrl";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p;
@@ -1074,7 +1075,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithInvalidReferenceNumeric() {
-		String methodName = "testTransactionCreateWithInvalidReferenceNumeric";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -1093,7 +1094,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithInvalidReferenceTextual() {
-		String methodName = "testTransactionCreateWithInvalidReferenceTextual";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -1112,7 +1113,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionCreateWithPutUsingUrl() {
-		String methodName = "testTransactionCreateWithPutUsingUrl";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 		request.setType(BundleType.TRANSACTION);
 
@@ -1138,7 +1139,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDeleteByResourceId() {
-		String methodName = "testTransactionDeleteByResourceId";
+		String methodName = getTestName();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1186,7 +1187,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	 */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetFirst() {
-		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
+		String methodName = getTestName();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1245,7 +1246,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	 */
 	@Test
 	public void testTransactionDeleteIsOrderIndependantTargetLast() {
-		String methodName = "testTransactionDeleteIsOrderIndependantTargetFirst";
+		String methodName = getTestName();
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1301,7 +1302,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithOneMatch() {
-		String methodName = "testTransactionDeleteMatchUrlWithOneMatch";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1344,7 +1345,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	public void testTransactionDeleteMatchUrlWithTwoMatch() {
 		myDaoConfig.setAllowMultipleDelete(false);
 
-		String methodName = "testTransactionDeleteMatchUrlWithTwoMatch";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1374,7 +1375,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDeleteMatchUrlWithZeroMatch() {
-		String methodName = "testTransactionDeleteMatchUrlWithZeroMatch";
+		String methodName = getTestName();
 
 		Bundle request = new Bundle();
 		request.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
@@ -1392,7 +1393,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionDeleteNoMatchUrl() {
-		String methodName = "testTransactionDeleteNoMatchUrl";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1770,7 +1771,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionOrdering() {
-		String methodName = "testTransactionOrdering";
+		String methodName = getTestName();
 
 		//@formatter:off
 		/*
@@ -1873,7 +1874,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionReadWithIfNoneMatch() {
-		String methodName = "testTransactionReadWithIfNoneMatch";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1918,7 +1919,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionSearchWithCount() {
-		String methodName = "testTransactionSearchWithCount";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1981,7 +1982,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithOneMatch() {
-		String methodName = "testTransactionUpdateMatchUrlWithOneMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -2022,7 +2023,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithTwoMatch() {
-		String methodName = "testTransactionUpdateMatchUrlWithTwoMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -2056,7 +2057,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionUpdateMatchUrlWithZeroMatch() {
-		String methodName = "testTransactionUpdateMatchUrlWithZeroMatch";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();
@@ -2094,7 +2095,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionUpdateNoMatchUrl() {
-		String methodName = "testTransactionUpdateNoMatchUrl";
+		String methodName = getTestName();
 		Bundle request = new Bundle();
 
 		Patient p = new Patient();

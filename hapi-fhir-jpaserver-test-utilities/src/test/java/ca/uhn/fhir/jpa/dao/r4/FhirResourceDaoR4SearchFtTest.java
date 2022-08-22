@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -456,7 +457,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithChainedParams() {
-		String methodName = "testSearchWithChainedParams";
+		String methodName = getTestName();
 		IIdType pId1;
 		{
 			Patient patient = new Patient();

@@ -59,6 +59,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -160,7 +161,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 	@Test
 	public void testSearchWithContent() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -178,7 +179,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 	@Test
 	public void testSearchWithRegularParam() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -192,7 +193,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 	@Test
 	public void testSearchWithText() {
-		String methodName = "testEverythingIncludesBackReferences";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName(methodName);

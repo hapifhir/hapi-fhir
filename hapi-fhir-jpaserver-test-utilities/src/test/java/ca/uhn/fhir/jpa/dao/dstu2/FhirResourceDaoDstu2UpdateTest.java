@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -41,7 +42,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testUpdateByUrl() {
-		String methodName = "testUpdateByUrl";
+		String methodName = getTestName();
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -66,7 +67,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 	@Test
 	public void testUpdateCreatesTextualIdIfItDoesntAlreadyExist() {
 		Patient p = new Patient();
-		String methodName = "testUpdateCreatesTextualIdIfItDoesntAlreadyExist";
+		String methodName = getTestName();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().addFamily("Hello");
 		p.setId("Patient/" + methodName);
@@ -80,7 +81,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testUpdateDoesntFailForUnknownIdWithNumberThenText() {
-		String methodName = "testUpdateFailsForUnknownIdWithNumberThenText";
+		String methodName = getTestName();
 		Patient p = new Patient();
 		p.setId("0" + methodName);
 		p.addName().addFamily(methodName);
@@ -105,7 +106,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 	 */
 	@Test
 	public void testUpdateMaintainsTagsAndSecurityLabels() {
-		String methodName = "testUpdateMaintainsTagsAndSecurityLabels";
+		String methodName = getTestName();
 
 		IIdType p1id;
 		{

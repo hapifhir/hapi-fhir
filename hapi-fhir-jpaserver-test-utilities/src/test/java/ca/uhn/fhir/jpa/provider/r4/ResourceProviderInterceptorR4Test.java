@@ -50,6 +50,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -136,7 +137,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateConditionalNoOpResourceInTransaction() throws Exception {
-		String methodName = "foo";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -177,7 +178,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateResource() throws IOException {
-		String methodName = "testCreateResource";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -204,7 +205,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateResourceInTransaction() throws IOException {
-		String methodName = "testCreateResourceInTransaction";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -259,7 +260,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testCreateResourceWithVersionedReference() throws IOException, ServletException {
-		String methodName = "testCreateResourceWithVersionedReference";
+		String methodName = getTestName();
 
 		Organization org = new Organization();
 		org.setName("orgName");
@@ -300,7 +301,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testUpdateNoOpResourceInTransaction() throws Exception {
-		String methodName = "foo";
+		String methodName = getTestName();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);

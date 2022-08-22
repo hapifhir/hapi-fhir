@@ -152,7 +152,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -174,6 +173,7 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -7119,9 +7119,4 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
 	}
-
-	private String getTestName() {
-		return new Exception().getStackTrace()[1].getMethodName();
-	}
-
 }

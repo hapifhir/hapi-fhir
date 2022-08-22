@@ -20,6 +20,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -351,7 +352,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithChainedParams() {
-		String methodName = "testSearchWithChainedParams";
+		String methodName = getTestName();
 		IIdType pId1;
 		{
 			Patient patient = new Patient();
