@@ -655,4 +655,41 @@ public class BulkDataExportProviderTest {
 		assertThat(parameters.isUseExistingJobsFirst(), is(equalTo(false)));
 	}
 
+
+	@Test
+	public void testProviderReturnsSameIdForSameJob() throws IOException {
+		// given
+		Batch2JobStartResponse startResponse = createJobStartResponse();
+		startResponse.setUsesCachedResult(true);
+		startResponse.setJobId(A_JOB_ID);
+		when(myJobRunner.startNewJob(any(Batch2BaseJobParameters.class)))
+			.thenReturn(startResponse);
+
+		// when
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
+
+		// then
+		callExportAndAssertJobId(input, A_JOB_ID);
+		callExportAndAssertJobId(input, A_JOB_ID);
+
+	}
+
+	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
+		HttpPost post;
+		post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
+		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+	}
+
+
 }

@@ -596,13 +596,16 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
 					myInCompartmentName = theCompartmentName;
 					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
-					Optional<RuleImplOp> oRule = findMatchingRule();
-					if (oRule.isPresent()) {
-						RuleImplOp rule = oRule.get();
-						rule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
-						rule.addClassifierCompartmentOwner(theIdElement);
-						return new RuleBuilderFinished(rule);
-					}
+					// todo JR/MB this is a quick and dirty fix at the last minute before the release.
+					//  We should revisit approach so that findMatchingRule() takes the filters into account
+					//  and only merges the rules if the filters are compatible
+//					Optional<RuleImplOp> oRule = findMatchingRule();
+//					if (oRule.isPresent()) {
+//						RuleImplOp rule = oRule.get();
+//						rule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+//						rule.addClassifierCompartmentOwner(theIdElement);
+//						return new RuleBuilderFinished(rule);
+//					}
 					myInCompartmentOwners = Collections.singletonList(theIdElement);
 
 					RuleBuilderFinished result = finished();

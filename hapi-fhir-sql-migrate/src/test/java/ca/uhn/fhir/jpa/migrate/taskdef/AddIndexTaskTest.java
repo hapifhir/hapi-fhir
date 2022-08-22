@@ -217,6 +217,22 @@ public class AddIndexTaskTest extends BaseTest {
 					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 				}
 			}
+
+			@ParameterizedTest(name = "{index}: {0}")
+			@ValueSource(booleans = { true, false } )
+			public void offForUnsupportedVersionsOfOracleServer(boolean theSupportedFlag) {
+				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
+				myTask.setOnline(true);
+				myTask.setMetadataSource(mockMetadataSource);
+				Mockito.when(mockMetadataSource.isOnlineIndexSupported(Mockito.any())).thenReturn(theSupportedFlag);
+
+				mySql = myTask.generateSql();
+				if (theSupportedFlag) {
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
+				} else {
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
+				}
+			}
 		}
 	}
 }

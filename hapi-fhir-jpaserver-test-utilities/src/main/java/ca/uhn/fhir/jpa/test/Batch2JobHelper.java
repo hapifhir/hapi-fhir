@@ -64,10 +64,15 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(String theId) {
+		return awaitJobCompletion(theId, 10);
+	}
+
+	public JobInstance awaitJobCompletion(String theId, int theSecondsToWait) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		try {
 			await()
+			.atMost(theSecondsToWait, TimeUnit.SECONDS)
 				.until(() -> {
 					myJobMaintenanceService.runMaintenancePass();
 					return myJobCoordinator.getInstance(theId).getStatus();

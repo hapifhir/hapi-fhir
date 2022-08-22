@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
+import org.hibernate.engine.jdbc.batch.spi.Batch;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -46,22 +47,16 @@ public interface IBatch2JobInstanceRepository extends JpaRepository<Batch2JobIns
 	@Query("UPDATE Batch2JobInstanceEntity e SET e.myCurrentGatedStepId = :currentGatedStepId WHERE e.myId = :id")
 	void updateInstanceCurrentGatedStepId(@Param("id") String theInstanceId, @Param("currentGatedStepId") String theCurrentGatedStepId);
 
-	@Query(
-		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params AND STAT IN( :stats )",
-		nativeQuery = true
-	)
-	List<JobInstance> findInstancesByJobIdParamsAndStatus(
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND b.myParamsJson = :params AND b.myStatus IN( :stats )")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdParamsAndStatus(
 		@Param("defId") String theDefinitionId,
 		@Param("params") String theParams,
 		@Param("stats") Set<StatusEnum> theStatus,
 		Pageable thePageable
 	);
 
-	@Query(
-		value = "SELECT * from Batch2JobInstanceEntity WHERE DEFINITION_ID = :defId AND PARAMS_JSON = :params",
-		nativeQuery = true
-	)
-	List<JobInstance> findInstancesByJobIdAndParams(
+	@Query("SELECT b from Batch2JobInstanceEntity b WHERE b.myDefinitionId = :defId AND b.myParamsJson = :params")
+	List<Batch2JobInstanceEntity> findInstancesByJobIdAndParams(
 		@Param("defId") String theDefinitionId,
 		@Param("params") String theParams,
 		Pageable thePageable
