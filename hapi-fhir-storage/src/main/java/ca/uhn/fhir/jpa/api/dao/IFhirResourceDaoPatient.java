@@ -32,12 +32,12 @@ public interface IFhirResourceDaoPatient<T extends IBaseResource> extends IFhirR
 
 	IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest,
 															RequestDetails theRequestDetails,
-															FhirResourceDaoPatientQueryParameters theQueryParams,
+															PatientEverythingParameters theQueryParams,
 															IIdType theId);
 
 	IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest,
 													  RequestDetails theRequestDetails,
-													  FhirResourceDaoPatientQueryParameters theQueryParams,
+													  PatientEverythingParameters theQueryParams,
 													  TokenOrListParam theId);
 
 

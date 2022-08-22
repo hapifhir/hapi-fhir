@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -110,7 +110,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, new FhirResourceDaoPatientQueryParameters(theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes)), theId);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, new PatientEverythingParameters().setCount(theCount).setOffset(theOffset).setLastUpdated(theLastUpdated).setSort(theSortSpec).setContent(toStringAndList(theContent)).setNarrative(toStringAndList(theNarrative)).setFilter(toStringAndList(theFilter)).setTypes(toStringAndList(theTypes)).createFhirResourceDaoPatientQueryParameters(), theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -164,7 +164,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, new FhirResourceDaoPatientQueryParameters(theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes)), toFlattenedPatientIdTokenParamList(theId));
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, new PatientEverythingParameters().setCount(theCount).setOffset(theOffset).setLastUpdated(theLastUpdated).setSort(theSortSpec).setContent(toStringAndList(theContent)).setNarrative(toStringAndList(theNarrative)).setFilter(toStringAndList(theFilter)).setTypes(toStringAndList(theTypes)).createFhirResourceDaoPatientQueryParameters(), toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -87,7 +87,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, IIdType theId) {
+	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE, requestDetails);
@@ -96,7 +96,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, TokenOrListParam theIds) {
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, TokenOrListParam theIds) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
 		notifyInterceptors(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, requestDetails);

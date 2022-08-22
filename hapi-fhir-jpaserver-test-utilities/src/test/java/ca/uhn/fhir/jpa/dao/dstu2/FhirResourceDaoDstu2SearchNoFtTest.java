@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -154,11 +154,11 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType moId = myMedicationOrderDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), null);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), patId);
+		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), patId);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 

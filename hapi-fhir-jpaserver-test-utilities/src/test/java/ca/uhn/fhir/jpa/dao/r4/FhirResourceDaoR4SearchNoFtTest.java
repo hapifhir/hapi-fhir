@@ -7,7 +7,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -871,7 +871,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -879,12 +879,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), patId);
+		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), patId);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 
 		// Specific patient ID with no linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), patId2);
+		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), patId2);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(patId2, orgId));
 
 	}
@@ -913,7 +913,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, new FhirResourceDaoPatientQueryParameters(count, null, null, null, null, null, null, null), new IdType("Patient/A161443"));
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, new PatientEverythingParameters().setCount(count).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), new IdType("Patient/A161443"));
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));

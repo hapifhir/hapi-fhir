@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -89,13 +89,13 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 	}
 
 	@Override
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, IIdType theId) {
+	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
 		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getTypes(), theRequestDetails);
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, FhirResourceDaoPatientQueryParameters theQueryParams, TokenOrListParam theId) {
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, TokenOrListParam theId) {
 		return doEverythingOperation(theId, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getTypes(), theRequestDetails);
 	}
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.FhirResourceDaoPatientQueryParameters;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -179,7 +179,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		IBundleProvider outcome = runInTransaction(() -> {
 			IBundleProvider res =  dao.patientInstanceEverything(
 				req,
-                    theDetails, new FhirResourceDaoPatientQueryParameters(null, null, null, null, null, null, null, null), new IdDt(id)
+                    theDetails, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), new IdDt(id)
             );
 			return res;
 		});
