@@ -179,7 +179,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		IBundleProvider outcome = runInTransaction(() -> {
 			IBundleProvider res =  dao.patientInstanceEverything(
 				req,
-                    theDetails, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), new IdDt(id)
+                    theDetails, new PatientEverythingParameters(), new IdDt(id)
             );
 			return res;
 		});

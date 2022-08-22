@@ -97,7 +97,17 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, new PatientEverythingParameters().setCount(theCount).setOffset(theOffset).setLastUpdated(theLastUpdated).setSort(theSortSpec).setContent(toStringAndList(theContent)).setNarrative(toStringAndList(theNarrative)).setFilter(toStringAndList(theFilter)).setTypes(toStringAndList(theTypes)).createFhirResourceDaoPatientQueryParameters(), theId);
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -151,7 +161,17 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, new PatientEverythingParameters().setCount(theCount).setOffset(theOffset).setLastUpdated(theLastUpdated).setSort(theSortSpec).setContent(toStringAndList(theContent)).setNarrative(toStringAndList(theNarrative)).setFilter(toStringAndList(theFilter)).setTypes(toStringAndList(theTypes)).createFhirResourceDaoPatientQueryParameters(), toFlattenedPatientIdTokenParamList(theId));
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, everythingParams, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}

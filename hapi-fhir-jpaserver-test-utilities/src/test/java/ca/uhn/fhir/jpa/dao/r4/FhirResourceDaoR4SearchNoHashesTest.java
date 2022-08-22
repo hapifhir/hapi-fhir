@@ -384,11 +384,11 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters(), null);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters().setCount(null).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), patId);
+		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters(), patId);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -416,7 +416,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, new PatientEverythingParameters().setCount(count).setOffset(null).setLastUpdated(null).setSort(null).setContent(null).setNarrative(null).setFilter(null).setTypes(null).createFhirResourceDaoPatientQueryParameters(), new IdType("Patient/A161443"));
+		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+		everythingParams.setCount(count);
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, everythingParams, new IdType("Patient/A161443"));
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));

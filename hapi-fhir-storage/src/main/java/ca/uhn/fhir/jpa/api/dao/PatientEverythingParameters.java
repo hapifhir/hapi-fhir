@@ -15,28 +15,6 @@ public final class PatientEverythingParameters {
 	private StringAndListParam theFilter;
 	private StringAndListParam theTypes;
 
-	public PatientEverythingParameters(IPrimitiveType<Integer> theCount,
-												  IPrimitiveType<Integer> theOffset,
-												  DateRangeParam theLastUpdated,
-												  SortSpec theSort,
-												  StringAndListParam theContent,
-												  StringAndListParam theNarrative,
-												  StringAndListParam theFilter,
-												  StringAndListParam theTypes) {
-		this.theCount = theCount;
-		this.theOffset = theOffset;
-		this.theLastUpdated = theLastUpdated;
-		this.theSort = theSort;
-		this.theContent = theContent;
-		this.theNarrative = theNarrative;
-		this.theFilter = theFilter;
-		this.theTypes = theTypes;
-	}
-
-	public PatientEverythingParameters() {
-
-	}
-
 	public IPrimitiveType<Integer> getCount() {
 		return theCount;
 	}
@@ -69,57 +47,35 @@ public final class PatientEverythingParameters {
 		return theTypes;
 	}
 
-	public PatientEverythingParameters setCount(IPrimitiveType<Integer> theCount) {
+	public void setCount(IPrimitiveType<Integer> theCount) {
 		this.theCount = theCount;
-		return this;
 	}
 
-	public PatientEverythingParameters setOffset(IPrimitiveType<Integer> theOffset) {
+	public void setOffset(IPrimitiveType<Integer> theOffset) {
 		this.theOffset = theOffset;
-		return this;
 	}
 
-	public PatientEverythingParameters setLastUpdated(DateRangeParam theLastUpdated) {
+	public void setLastUpdated(DateRangeParam theLastUpdated) {
 		this.theLastUpdated = theLastUpdated;
-		return this;
 	}
 
-	public PatientEverythingParameters setSort(SortSpec theSort) {
+	public void setSort(SortSpec theSort) {
 		this.theSort = theSort;
-		return this;
 	}
 
-	public PatientEverythingParameters setContent(StringAndListParam theContent) {
+	public void setContent(StringAndListParam theContent) {
 		this.theContent = theContent;
-		return this;
 	}
 
-	public PatientEverythingParameters setNarrative(StringAndListParam theNarrative) {
+	public void setNarrative(StringAndListParam theNarrative) {
 		this.theNarrative = theNarrative;
-		return this;
 	}
 
-	public PatientEverythingParameters setFilter(StringAndListParam theFilter) {
+	public void setFilter(StringAndListParam theFilter) {
 		this.theFilter = theFilter;
-		return this;
 	}
 
-	public PatientEverythingParameters setTypes(StringAndListParam theTypes) {
+	public void setTypes(StringAndListParam theTypes) {
 		this.theTypes = theTypes;
-		return this;
-	}
-
-//	PatientEverythingParameters everythingParams = new PatientEverythingParameters();
-//			everythingParams.setCount(theCount);
-//			everythingParams.setOffset(theOffset);
-//			everythingParams.setLastUpdated(theLastUpdated);
-//			everythingParams.setSort(theSortSpec);
-//			everythingParams.setContent(toStringAndList(theContent));
-//			everythingParams.setNarrative(toStringAndList(theNarrative));
-//			everythingParams.setFilter(toStringAndList(theFilter));
-//			everythingParams.setTypes(toStringAndList(theTypes));
-
-	public PatientEverythingParameters createFhirResourceDaoPatientQueryParameters() {
-		return new PatientEverythingParameters(theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theTypes);
 	}
 }
