@@ -18,6 +18,7 @@ import org.springframework.util.Base64Utils;
 import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
@@ -47,7 +48,7 @@ public class FetchFilesStepTest {
 	private IJobDataSink<NdJsonFileJson> myJobDataSink;
 
 	@ParameterizedTest
-	@ValueSource(strings = {CT_FHIR_NDJSON, CT_FHIR_JSON_NEW, CT_APP_NDJSON, CT_JSON, CT_TEXT})
+	@ValueSource(strings = {CT_FHIR_NDJSON, CT_FHIR_JSON, CT_FHIR_JSON_NEW, CT_APP_NDJSON, CT_JSON, CT_TEXT})
 	public void testFetchWithBasicAuth(String theHeaderContentType) {
 
 		// Setup

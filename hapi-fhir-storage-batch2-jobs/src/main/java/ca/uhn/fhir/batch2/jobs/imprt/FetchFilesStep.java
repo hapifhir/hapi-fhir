@@ -153,6 +153,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 	private boolean isValidContentType(String contentType) {
 		EncodingEnum encoding = EncodingEnum.forContentType(contentType);
 		return encoding == EncodingEnum.NDJSON
+			|| contentType.equals(Constants.CT_FHIR_JSON)
+			|| contentType.equals(Constants.CT_FHIR_JSON_NEW)
 			|| contentType.equals(Constants.CT_JSON)
 			|| contentType.equals(Constants.CT_TEXT);
 	}
