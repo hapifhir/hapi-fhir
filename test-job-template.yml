@@ -133,7 +133,7 @@ jobs:
          -  bash: |
                curl -Os https://uploader.codecov.io/latest/linux/codecov
                chmod +x codecov
-               ./codecov -t ca6ed1e9-373f-4eac-8848-45c814772d3f -R hapi-fhir-jacoco/target/site/jacoco-aggregate/
+               ./codecov -t $(CODECOV_TOKEN) -R hapi-fhir-jacoco/target/site/jacoco-aggregate/
             displayName: 'codecov'
          -  task: PublishTestResults@2
             inputs:
