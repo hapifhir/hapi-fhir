@@ -18,6 +18,12 @@ stages:
          -  template: test-job-template.yml
             parameters:
                modules:
+                  -  name: hapi_fhir_jpaserver_test_utilities
+                     module: hapi-fhir-jpaserver-test-utilities
+                  -  name: hapi_fhir_structures_r4
+                     module: hapi-fhir-structures-r4
+                  -  name: hapi_fhir_jpaserver_base
+                     module: hapi-fhir-jpaserver-base
                   -  name: hapi_deployable_pom
                      module: hapi-deployable-pom
                   -  name: hapi_fhir_android
@@ -46,8 +52,9 @@ stages:
                      module: hapi-fhir-jaxrsserver-base
                   -  name: hapi_fhir_jpa
                      module: hapi-fhir-jpa
-                  -  name: hapi_fhir_jpaserver_base
-                     module: hapi-fhir-jpaserver-base
+#                  Put to top, but kept in order here
+#                  -  name: hapi_fhir_jpaserver_base
+#                     module: hapi-fhir-jpaserver-base
                   -  name: hapi_fhir_jpaserver_cql
                      module: hapi-fhir-jpaserver-cql
                   -  name: hapi_fhir_jpaserver_elastic_test_utilities
@@ -60,8 +67,9 @@ stages:
                      module: hapi-fhir-jpaserver-searchparam
                   -  name: hapi_fhir_jpaserver_subscription
                      module: hapi-fhir-jpaserver-subscription
-                  -  name: hapi_fhir_jpaserver_test_utilities
-                     module: hapi-fhir-jpaserver-test-utilities
+#                  Put to top, but kept in order here
+#                  -  name: hapi_fhir_jpaserver_test_utilities
+#                     module: hapi-fhir-jpaserver-test-utilities
                   -  name: hapi_fhir_jpaserver_uhnfhirtest
                      module: hapi-fhir-jpaserver-uhnfhirtest
                   -  name: hapi_fhir_server
@@ -92,8 +100,9 @@ stages:
                      module: hapi-fhir-structures-dstu3
                   -  name: hapi_fhir_structures_hl7org_dstu2
                      module: hapi-fhir-structures-hl7org-dstu2
-                  -  name: hapi_fhir_structures_r4
-                     module: hapi-fhir-structures-r4
+#                  Put to top, but kept in order here
+#                  -  name: hapi_fhir_structures_r4
+#                     module: hapi-fhir-structures-r4
                   -  name: hapi_fhir_structures_r5
                      module: hapi-fhir-structures-r5
                   -  name: hapi_fhir_test_utilities
