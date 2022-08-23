@@ -269,6 +269,11 @@ public class SearchQueryBuilder {
 		return retVal;
 	}
 
+	public StringPredicateBuilder createStringPredicateBuilder(DbColumn theSourceColumn) {
+		StringPredicateBuilder sp = mySqlBuilderFactory.stringIndexTable(this);
+		return sp;
+	}
+
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */

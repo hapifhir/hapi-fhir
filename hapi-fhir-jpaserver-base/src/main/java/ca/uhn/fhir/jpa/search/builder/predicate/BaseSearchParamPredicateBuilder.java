@@ -103,12 +103,21 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		SelectQuery subquery = new SelectQuery();
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(getTable());
+
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+			getPartitionSettings(),
+			theRequestPartitionId,
+			theResourceTablePredicateBuilder.getResourceType(),
+			theParamName
+		);
 		subquery.addCondition(
 			ComboCondition.and(
 				BinaryCondition.equalTo(getResourceIdColumn(),
 					theResourceTablePredicateBuilder.getResourceIdColumn()
 				),
-				BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName))
+				BinaryCondition.equalTo(getColumnHashIdentity(),
+					generatePlaceholder(hashIdentity))
+//				BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName))
 			)
 		);
 

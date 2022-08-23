@@ -101,8 +101,6 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -1191,21 +1189,35 @@ public class QueryStack {
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		if (isMissing != null) {
+			// we will use the base resource table
 			ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-//			Condition condition = table.createPartitionIdPredicate(theRequestPartitionId);
-
-			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING,
-				theSourceJoinColumn,
-				paramName,
-				() -> theSqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
-
-			return join.createPredicateParamMissingValue(
+			// create an inner query
+			StringPredicateBuilder innerQuery = theSqlBuilder.createStringPredicateBuilder(theSourceJoinColumn);
+			return innerQuery.createPredicateParamMissingValue(
 				table,
 				isMissing,
 				paramName,
 				theRequestPartitionId
 			);
+
+
+//			Condition condition = table.createPartitionIdPredicate(theRequestPartitionId);
+
+//			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING,
+//				theSourceJoinColumn,
+//				paramName,
+//				() -> theSqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
+
+//			StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING);
+//
+//
+//			return join.createPredicateParamMissingValue(
+//				table,
+//				isMissing,
+//				paramName,
+//				theRequestPartitionId
+//			);
 			// TODO - add the other unitary condition here
 		}
 
@@ -1510,6 +1522,7 @@ public class QueryStack {
 					break;
 				case STRING:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						// TODO - pass down table?
 						andPredicates.add(createPredicateString(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, SearchFilterParser.CompareOperation.sw, theRequestPartitionId));
 					}
 					break;
