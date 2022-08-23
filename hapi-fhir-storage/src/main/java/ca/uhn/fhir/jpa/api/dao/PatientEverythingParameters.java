@@ -1,81 +1,97 @@
 package ca.uhn.fhir.jpa.api.dao;
 
+import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 public final class PatientEverythingParameters {
-	private IPrimitiveType<Integer> theCount;
-	private IPrimitiveType<Integer> theOffset;
-	private DateRangeParam theLastUpdated;
-	private SortSpec theSort;
-	private StringAndListParam theContent;
-	private StringAndListParam theNarrative;
-	private StringAndListParam theFilter;
-	private StringAndListParam theTypes;
+	@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+	private IPrimitiveType<Integer> myCount;
+
+	@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+	private IPrimitiveType<Integer> myOffset;
+
+	@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
+	private DateRangeParam myLastUpdated;
+
+	@Description(shortDefinition="The order in which to sort the rsults by")
+	private SortSpec mySort;
+
+	@Description(shortDefinition="Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+	private StringAndListParam myContent;
+
+	@Description(shortDefinition="Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+	private StringAndListParam myNarrative;
+
+	@Description(shortDefinition = "Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+	private StringAndListParam myFilter;
+
+	@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+	private StringAndListParam myTypes;
 
 	public IPrimitiveType<Integer> getCount() {
-		return theCount;
+		return myCount;
 	}
 
 	public IPrimitiveType<Integer> getOffset() {
-		return theOffset;
+		return myOffset;
 	}
 
 	public DateRangeParam getLastUpdated() {
-		return theLastUpdated;
+		return myLastUpdated;
 	}
 
 	public SortSpec getSort() {
-		return theSort;
+		return mySort;
 	}
 
 	public StringAndListParam getContent() {
-		return theContent;
+		return myContent;
 	}
 
 	public StringAndListParam getNarrative() {
-		return theNarrative;
+		return myNarrative;
 	}
 
 	public StringAndListParam getFilter() {
-		return theFilter;
+		return myFilter;
 	}
 
 	public StringAndListParam getTypes() {
-		return theTypes;
+		return myTypes;
 	}
 
 	public void setCount(IPrimitiveType<Integer> theCount) {
-		this.theCount = theCount;
+		this.myCount = theCount;
 	}
 
 	public void setOffset(IPrimitiveType<Integer> theOffset) {
-		this.theOffset = theOffset;
+		this.myOffset = theOffset;
 	}
 
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
-		this.theLastUpdated = theLastUpdated;
+		this.myLastUpdated = theLastUpdated;
 	}
 
 	public void setSort(SortSpec theSort) {
-		this.theSort = theSort;
+		this.mySort = theSort;
 	}
 
 	public void setContent(StringAndListParam theContent) {
-		this.theContent = theContent;
+		this.myContent = theContent;
 	}
 
 	public void setNarrative(StringAndListParam theNarrative) {
-		this.theNarrative = theNarrative;
+		this.myNarrative = theNarrative;
 	}
 
 	public void setFilter(StringAndListParam theFilter) {
-		this.theFilter = theFilter;
+		this.myFilter = theFilter;
 	}
 
 	public void setTypes(StringAndListParam theTypes) {
-		this.theTypes = theTypes;
+		this.myTypes = theTypes;
 	}
 }

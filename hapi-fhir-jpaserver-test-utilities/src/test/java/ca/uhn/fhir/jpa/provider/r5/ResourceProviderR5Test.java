@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -541,9 +542,5 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		return toUnqualifiedVersionlessIds(b);
-	}
-
-	private String getTestName() {
-		return new Exception().getStackTrace()[1].getMethodName();
 	}
 }
