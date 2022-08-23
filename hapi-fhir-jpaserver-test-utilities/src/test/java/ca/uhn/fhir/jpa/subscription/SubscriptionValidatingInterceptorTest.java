@@ -57,7 +57,7 @@ public class SubscriptionValidatingInterceptorTest {
 		mySvc.setSubscriptionCanonicalizerForUnitTest(new SubscriptionCanonicalizer(myCtx));
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
-		mySvc.setFhirContextForUnitTest(myCtx);
+		mySvc.setFhirContext(myCtx);
 		mySvc.setDaoConfigForUnitTest(myDaoConfig);
 		mySvc.setRequestPartitionHelperSvcForUnitTest(myRequestPartitionHelperSvc);
 	}
@@ -195,7 +195,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@Test
 	public void testValidate_Cross_Partition_Subscription() {
 		when(myDaoRegistry.isResourceTypeSupported(eq("Patient"))).thenReturn(true);
-		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
+		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.defaultPartition());
 
 		Subscription subscription = new Subscription();
@@ -211,15 +211,15 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails));
-		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscription();
+		assertDoesNotThrow(() -> mySvc.validateSubmittedSubscription(subscription, requestDetails, null));
+		Mockito.verify(myDaoConfig, times(1)).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, times(1)).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"));
 	}
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_On_Wrong_Partition() {
-		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(true);
+		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(true);
 		when(myRequestPartitionHelperSvc.determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Subscription.class), eq("Subscription"))).thenReturn(RequestPartitionId.fromPartitionId(1));
 
 		Subscription subscription = new Subscription();
@@ -234,7 +234,7 @@ public class SubscriptionValidatingInterceptorTest {
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription, requestDetails);
+			mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2010) + "Cross partition subscription must be created on the default partition", theUnprocessableEntityException.getMessage());
@@ -243,7 +243,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	@Test
 	public void testValidate_Cross_Partition_Subscription_Without_Setting() {
-		when(myDaoConfig.isCrossPartitionSubscription()).thenReturn(false);
+		when(myDaoConfig.isCrossPartitionSubscriptionEnabled()).thenReturn(false);
 
 		Subscription subscription = new Subscription();
 		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
@@ -257,7 +257,7 @@ public class SubscriptionValidatingInterceptorTest {
 		requestDetails.setRestOperationType(RestOperationTypeEnum.CREATE);
 
 		try {
-			mySvc.validateSubmittedSubscription(subscription, requestDetails);
+			mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
 			fail();
 		} catch (UnprocessableEntityException theUnprocessableEntityException) {
 			assertEquals(Msg.code(2009) + "Cross partition subscription is not enabled on this server", theUnprocessableEntityException.getMessage());
@@ -281,8 +281,8 @@ public class SubscriptionValidatingInterceptorTest {
 
 		// No asserts here because the function should throw an UnprocessableEntityException exception if the subscription
 		// is invalid
-		mySvc.validateSubmittedSubscription(subscription, requestDetails);
-		Mockito.verify(myDaoConfig, never()).isCrossPartitionSubscription();
+		mySvc.validateSubmittedSubscription(subscription, requestDetails, null);
+		Mockito.verify(myDaoConfig, never()).isCrossPartitionSubscriptionEnabled();
 		Mockito.verify(myDaoRegistry, times(1)).isResourceTypeSupported(eq("Patient"));
 		Mockito.verify(myRequestPartitionHelperSvc, never()).determineCreatePartitionForRequest(isA(RequestDetails.class), isA(Patient.class), eq("Patient"));
 	}

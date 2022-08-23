@@ -148,16 +148,18 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		ourLog.info("Rebuilding SearchParamRegistry");
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+		params.setCount(MAX_MANAGED_PARAM_COUNT);
 
 		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
 
 		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, MAX_MANAGED_PARAM_COUNT);
-		int size = allSearchParamsBp.sizeOrThrowNpe();
+		Integer size = allSearchParamsBp.size();
 
-		ourLog.trace("Loaded {} search params from the DB", size);
+		ourLog.trace("Loaded {} search params from the DB", allSearchParams.size());
 
-		// Just in case..
-		if (size >= MAX_MANAGED_PARAM_COUNT) {
+		if (size == null) {
+			ourLog.error("Only {} search parameters have been loaded, but there are more than that in the repository.  Is offset search configured on this server?", allSearchParams.size());
+		} else if (size >= MAX_MANAGED_PARAM_COUNT) {
 			ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
 		}
 
@@ -269,11 +271,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 
 	/**
-	 *
 	 * There is a circular reference between this class and the ResourceChangeListenerRegistry:
 	 * SearchParamRegistryImpl -> ResourceChangeListenerRegistry -> InMemoryResourceMatcher -> SearchParamRegistryImpl. Sicne we only need this once on boot-up, we delay
 	 * until ContextRefreshedEvent.
-	 *
 	 */
 	@PostConstruct
 	public void registerListener() {

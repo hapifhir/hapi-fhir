@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 3915
+title: "When multiple permissions exist for a user, granting access to the same compartment for different
+owners, the permissions will be collapsed into one rule. Previously, if these permissions had filters, only the
+the filter of the first permission in the list would be applied, but it would apply to all of the owners.
+This has been fixed by turning off the collapse function for permissions with filters, converting each one
+to a separate rule."

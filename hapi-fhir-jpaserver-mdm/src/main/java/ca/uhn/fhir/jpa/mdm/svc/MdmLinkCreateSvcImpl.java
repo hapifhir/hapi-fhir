@@ -89,6 +89,7 @@ public class MdmLinkCreateSvcImpl implements IMdmLinkCreateSvc {
 
 		IMdmLink mdmLink = myMdmLinkDaoSvc.getOrCreateMdmLinkByGoldenResourceAndSourceResource(theGoldenResource, theSourceResource);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
+		mdmLink.setMdmSourceType(sourceType);
 		if (theMatchResult == null) {
 			mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		} else {

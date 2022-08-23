@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3854
+title: "Previously, command prompt was not returned after initiating bulk import operation and even when the importing was completed.
+This has been fixed, and the command prompt will return after the uploading process finished."
