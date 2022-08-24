@@ -274,6 +274,16 @@ public class SearchQueryBuilder {
 		return sp;
 	}
 
+	public NumberPredicateBuilder createNumberPredicateBuilder() {
+		NumberPredicateBuilder np = mySqlBuilderFactory.numberIndexTable(this);
+		return np;
+	}
+
+	public QuantityPredicateBuilder createQuantityPredicateBuilder() {
+		QuantityPredicateBuilder qp = mySqlBuilderFactory.quantityIndexTable(this);
+		return qp;
+	}
+
 	public CoordsPredicateBuilder createCoordsPredicateBuilder() {
 		CoordsPredicateBuilder cp = mySqlBuilderFactory.coordsPredicateBuilder(this);
 		return cp;

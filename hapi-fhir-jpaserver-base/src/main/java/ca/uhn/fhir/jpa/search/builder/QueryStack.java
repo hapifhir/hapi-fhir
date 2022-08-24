@@ -47,6 +47,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityBasePredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -614,11 +615,22 @@ public class QueryStack {
 
 		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
-		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, paramName, () -> theSqlBuilder.addNumberPredicateBuilder(theSourceJoinColumn)).getResult();
+		Boolean isMissing = theList.get(0).getMissing();
+		if (isMissing != null) {
+			ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-		if (theList.get(0).getMissing() != null) {
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
+			NumberPredicateBuilder np = theSqlBuilder.createNumberPredicateBuilder();
+
+			return np.createPredicateParamMissingValue(
+				table,
+				isMissing,
+				paramName,
+				theRequestPartitionId
+			);
+//			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
 		}
+
+		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, paramName, () -> theSqlBuilder.addNumberPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		List<Condition> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
@@ -661,9 +673,18 @@ public class QueryStack {
 
 		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
-		if (theList.get(0).getMissing() != null) {
-			QuantityBasePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> theSqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
-			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
+		Boolean isMissing = theList.get(0).getMissing();
+		if (isMissing != null) {
+			ResourceTablePredicateBuilder table = theSqlBuilder.getOrCreateResourceTablePredicateBuilder();
+
+			QuantityPredicateBuilder qp = theSqlBuilder.createQuantityPredicateBuilder();
+
+			return qp.createPredicateParamMissingValue(
+				table,
+				isMissing,
+				paramName,
+				theRequestPartitionId
+			);
 		}
 
 		List<QuantityParam> quantityParams = theList

@@ -30,6 +30,8 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.BaseClientParam;
 import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.IParam;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -5719,17 +5721,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Nested
 	public class MissingSearchParameterTests {
 
-		private void createSearchParameter(Enumerations.SearchParamType theType) {
-			SearchParameter searchParameter = new SearchParameter();
-			searchParameter.addBase("BodyStructure").addBase("Procedure");
-			searchParameter.setCode("focalAccess");
-			searchParameter.setType(theType);
-			searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
-			searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
-			searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			myClient.create().resource(searchParameter).execute();
-		}
-
+		/**
+		 * Verifies that the returned Bundle contains the resource
+		 * with the id provided.
+		 * @param theBundle - returned bundle
+		 * @param theType - provided resource id
+		 */
 		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
 			IParser parser = myFhirContext.newJsonParser();
 			parser.setPrettyPrint(true);
@@ -5742,6 +5739,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(theType.toString(), type.toString());
 		}
 
+		/**
+		 * Runs the search on the given resource type with the given (missing) criteria
+		 * @param theResourceClass - the resource type class
+		 * @param theCriteria - the missing critia to use
+		 * @return - the found bundle
+		 */
 		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
 			//@formatter:off
 			return myClient
@@ -5794,7 +5797,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		public void testMissingTokenClientParameter() {
 			// setup
 			Patient patient = new Patient();
-			patient.setActive(true);
 
 			IIdType missing = myClient.create().resource(patient)
 				.prettyPrint()
@@ -5868,7 +5870,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			verifyFoundBundle(found, missing);
 		}
 
-
 		@Test
 		public void testMissingQuantityClientParameter () {
 			// setup
@@ -5888,6 +5889,59 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			verifyFoundBundle(found, missing);
 		}
 
+		private void createSearchParameter(Enumerations.SearchParamType theType) {
+			SearchParameter searchParameter = new SearchParameter();
+			searchParameter.addBase("BodyStructure").addBase("Procedure");
+			searchParameter.setCode("focalAccess");
+			searchParameter.setType(theType);
+			searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+			searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+			searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myClient.create().resource(searchParameter).execute();
+		}
+
+		@Test
+		public void testMissingNumberClientParameter () {
+			// setup
+			String methodName = new Exception().getStackTrace()[0].getMethodName();
+
+			/*
+			 * We'll create the SearchParameter first, since
+			 * there's no default NumberParamType search parameter.
+			 * We'll use MolecularSequence here.
+			 */
+			SearchParameter searchParameter = new SearchParameter();
+			searchParameter.addBase("MolecularSequence");
+			searchParameter.setCode(methodName);
+			searchParameter.setType(Enumerations.SearchParamType.NUMBER);
+			searchParameter.setExpression("MolecularSequence.variant-end");
+			searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+			searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myClient.create().resource(searchParameter).execute();
+
+			NumberClientParam numberClientParam = new NumberClientParam("variant-end");
+
+			// now we'll make our resource (that has nothing on it - so everything is missing!)
+			MolecularSequence enc = new MolecularSequence();
+//			enc.setVariant(Arrays.asList(
+//				new MolecularSequence.MolecularSequenceVariantComponent().setEnd(1)
+//			));
+			IIdType missing = myClient.create().resource(enc)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(
+				MolecularSequence.class,
+				numberClientParam.isMissing(true)
+			);
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
 	}
 
 	@Test

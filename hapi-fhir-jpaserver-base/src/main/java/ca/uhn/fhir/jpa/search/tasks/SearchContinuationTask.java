@@ -77,7 +77,7 @@ public class SearchContinuationTask extends SearchTask {
 		return super.call();
 	}
 
-	// Copy pasta - find a better way
+	// Copy pasta (see SearchCoordinatorSvcImpl)
 	@Nonnull
 	private ResourceGoneException newResourceGoneException(String theUuid) {
 		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);

@@ -352,7 +352,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return pids;
 	}
 
-	// copy pasta (see SearchContinuationTask); find a better way
+	// copy pasta (see SearchContinuationTask)
 	@Nonnull
 	private ResourceGoneException newResourceGoneException(String theUuid) {
 		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
