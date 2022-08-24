@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Base64Utils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON;
@@ -38,7 +39,7 @@ public class FetchFilesStepTest {
 	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 	public static final String CHUNK_ID = "chunk-id";
 
-	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
+	private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet = new ContentTypeHeaderModifiableBulkImportFileServlet();
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
 		.withServlet(myBulkImportFileServlet);
@@ -52,7 +53,7 @@ public class FetchFilesStepTest {
 	public void testFetchWithBasicAuth(String theHeaderContentType) {
 
 		// Setup
-		myBulkImportFileServlet.setHeaderContentType(theHeaderContentType);
+		myBulkImportFileServlet.setHeaderContentTypeValue(theHeaderContentType);
 		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
@@ -115,4 +116,20 @@ public class FetchFilesStepTest {
 
 		assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
 	}
+
+	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet{
+
+		public String myContentTypeValue;
+
+
+		public void setHeaderContentTypeValue(String theContentTypeValue) {
+			myContentTypeValue = theContentTypeValue;
+		}
+
+		@Override
+		public String getHeaderContentType() {
+			return Objects.nonNull(myContentTypeValue) ? myContentTypeValue : super.getHeaderContentType();
+		}
+	}
+
 }

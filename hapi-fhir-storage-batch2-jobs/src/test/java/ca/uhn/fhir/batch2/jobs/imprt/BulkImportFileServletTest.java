@@ -48,18 +48,6 @@ public class BulkImportFileServletTest {
 
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {CT_APP_NDJSON, CT_JSON, CT_TEXT})
-	public void testDownloadFileWithReturnedHeaderContentTypeOf(String theContentType) throws IOException {
-
-		mySvc.setHeaderContentType(theContentType);
-		String index = mySvc.registerFileByContents(ourInput);
-
-		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
-
-		executeAndAssert(url, theContentType);
-	}
-
 
 	private void executeAndAssert(String theUrl, String theExpectedHeaderContentType)  throws IOException{
 		CloseableHttpClient client = myServletExtension.getHttpClient();
