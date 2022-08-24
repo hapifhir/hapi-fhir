@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -35,8 +36,6 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
 
 public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredicateBuilder {
 
@@ -84,7 +83,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		andPredicates.add(hashIdentityPredicate);
 		andPredicates.add(thePredicate);
 
-		return toAndPredicate(andPredicates);
+		return QueryParameterUtils.toAndPredicate(andPredicates);
 	}
 
 	@Nonnull
@@ -117,7 +116,6 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 				),
 				BinaryCondition.equalTo(getColumnHashIdentity(),
 					generatePlaceholder(hashIdentity))
-//				BinaryCondition.equalTo(getColumnParamName(), generatePlaceholder(theParamName))
 			)
 		);
 

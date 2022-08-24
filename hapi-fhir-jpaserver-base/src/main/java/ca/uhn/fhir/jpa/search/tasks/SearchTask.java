@@ -127,7 +127,6 @@ public class SearchTask implements Callable<Void> {
 	// injected beans
 	protected final PlatformTransactionManager myManagedTxManager;
 	protected final FhirContext myContext;
-	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final SearchBuilderFactory mySearchBuilderFactory;
 	protected final ISearchResultCacheSvc mySearchResultCacheSvc;
@@ -153,7 +152,6 @@ public class SearchTask implements Callable<Void> {
 		// beans
 		myManagedTxManager = theManagedTxManager;
 		myContext = theContext;
-		mySearchStrategyFactory = theSearchStrategyFactory;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
@@ -183,7 +181,8 @@ public class SearchTask implements Callable<Void> {
 				myCustomIsolationSupported = true;
 			}
 		}
-		if (myCustomIsolationSupported == false) {
+
+		if (!myCustomIsolationSupported) {
 			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
 		}
 	}
@@ -343,7 +342,7 @@ public class SearchTask implements Callable<Void> {
 					mySyncedPids.addAll(unsyncedPids);
 					unsyncedPids.clear();
 
-					if (theResultIter.hasNext() == false) {
+					if (!theResultIter.hasNext()) {
 						int skippedCount = theResultIter.getSkippedCount();
 						int nonSkippedCount = theResultIter.getNonSkippedCount();
 						int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
@@ -389,7 +388,7 @@ public class SearchTask implements Callable<Void> {
 	}
 
 	boolean isNotAborted() {
-		return myAbortRequested == false;
+		return !myAbortRequested;
 	}
 
 	void markComplete() {
@@ -460,6 +459,7 @@ public class SearchTask implements Callable<Void> {
 			 */
 			boolean logged = false;
 			if (t instanceof BaseServerResponseException) {
+				@SuppressWarnings("PatternVariableCanBeUsed")
 				BaseServerResponseException exception = (BaseServerResponseException) t;
 				if (exception.getStatusCode() >= 400 && exception.getStatusCode() < 500) {
 					logged = true;
@@ -499,13 +499,10 @@ public class SearchTask implements Callable<Void> {
 			saveSearch();
 			span.captureException(t);
 		} finally {
-
-//			myIdToSearchTask.remove(mySearch.getUuid());
 			myOnRemove.accept(mySearch.getUuid());
 			myInitialCollectionLatch.countDown();
 			markComplete();
 			span.end();
-
 		}
 		return null;
 	}
@@ -647,11 +644,10 @@ public class SearchTask implements Callable<Void> {
 			 * matching the search off of the disk and into memory. After
 			 * every X results, we commit to the HFJ_SEARCH table.
 			 */
-			int syncSize = mySyncSize;
 			while (resultIterator.hasNext()) {
 				myUnsyncedPids.add(resultIterator.next());
 
-				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
+				boolean shouldSync = myUnsyncedPids.size() >= mySyncSize;
 
 				if (myDaoConfig.getCountSearchResultsUpTo() != null &&
 					myDaoConfig.getCountSearchResultsUpTo() > 0 &&

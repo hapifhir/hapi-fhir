@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeChildChoiceDefinition;
 import ca.uhn.fhir.context.RuntimeChildResourceDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -91,9 +92,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -241,13 +239,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
 			List<String> placeholders = generatePlaceholders(theTargetPidList);
-			targetPidCondition = toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
+			targetPidCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
 		}
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
 			List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
-			targetUrlsCondition = toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
+			targetUrlsCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
 		}
 
 		Condition joinedCondition;
@@ -267,7 +265,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
-		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
+		return QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
 	public Condition createPredicateSourcePaths(String theResourceName, String theParamName, List<String> theQualifiers) {
@@ -338,7 +336,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 			Condition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theReferenceParam.getValue()));
 
-			return toAndPredicate(typeCondition, condition);
+			return QueryParameterUtils.toAndPredicate(typeCondition, condition);
 		}
 
 		boolean foundChainMatch = false;
@@ -415,7 +413,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
 			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE));
 
-			orPredicates.add(toAndPredicate(andPredicates));
+			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
@@ -429,14 +427,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		// If :not modifier for a token, switch OR with AND in the multi-type case
 		Condition multiTypePredicate;
 		if (paramInverted) {
-			multiTypePredicate = toAndPredicate(orPredicates);
+			multiTypePredicate = QueryParameterUtils.toAndPredicate(orPredicates);
 		} else {
-			multiTypePredicate = toOrPredicate(orPredicates);
+			multiTypePredicate = QueryParameterUtils.toOrPredicate(orPredicates);
 		}
 		
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
-		return toAndPredicate(pathPredicate, multiTypePredicate);
+		return QueryParameterUtils.toAndPredicate(pathPredicate, multiTypePredicate);
 	}
 
 	@Nonnull
@@ -695,7 +693,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			condition = toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			condition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
@@ -703,8 +701,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 		if (!theSourceResourceNames.isEmpty()) {
 			// if source resources are provided, add on predicate for _type operation
-			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
-			condition = toAndPredicate(List.of(condition, typeCondition));
+			Condition typeCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
+			condition = QueryParameterUtils.toAndPredicate(List.of(condition, typeCondition));
 		}
 
 		return condition;

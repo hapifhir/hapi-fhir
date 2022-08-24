@@ -23,7 +23,7 @@ package ca.uhn.fhir.rest.gclient;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 
-abstract class BaseClientParam implements IParam {
+public abstract class BaseClientParam implements IParam {
 
 	@Override
 	public ICriterion<?> isMissing(boolean theMissing) {
@@ -32,7 +32,7 @@ abstract class BaseClientParam implements IParam {
 
 	private class MissingCriterion implements ICriterion<IParam>, ICriterionInternal
 	{
-		private String myParameterValue;
+		private final String myParameterValue;
 
 
 		public MissingCriterion(String theParameterValue) {

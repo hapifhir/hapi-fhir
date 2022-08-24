@@ -269,9 +269,19 @@ public class SearchQueryBuilder {
 		return retVal;
 	}
 
-	public StringPredicateBuilder createStringPredicateBuilder(DbColumn theSourceColumn) {
+	public StringPredicateBuilder createStringPredicateBuilder() {
 		StringPredicateBuilder sp = mySqlBuilderFactory.stringIndexTable(this);
 		return sp;
+	}
+
+	public CoordsPredicateBuilder createCoordsPredicateBuilder() {
+		CoordsPredicateBuilder cp = mySqlBuilderFactory.coordsPredicateBuilder(this);
+		return cp;
+	}
+
+	public DatePredicateBuilder createDatePredicateBuilder() {
+		DatePredicateBuilder dp = mySqlBuilderFactory.dateIndexTable(this);
+		return dp;
 	}
 
 	/**

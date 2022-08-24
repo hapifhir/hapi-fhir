@@ -292,7 +292,16 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId, searchContainedMode);
+
+			// TODO - get the parent table here?
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(null,
+				myResourceName,
+				nextParamName,
+				andOrParams,
+				theRequest,
+				myRequestPartitionId,
+				searchContainedMode
+			);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
@@ -394,7 +403,7 @@ public class SearchBuilder implements ISearchBuilder {
 				fulltextExecutor = myFulltextSearchSvc.searchNotScrolled(myResourceName, myParams, myMaxResultsToFetch);
 			}
 
-			if (fulltextExecutor == null) {
+			if (fulltextMatchIds != null) {
 				fulltextExecutor = SearchQueryExecutors.from(fulltextMatchIds);
 			}
 
@@ -526,7 +535,6 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Combs through the params for any _id parameters and extracts the PIDs for them
 	 *
-	 * @param theTargetPids
 	 */
 	private void extractTargetPidsFromIdParams(HashSet<Long> theTargetPids) {
 		// get all the IQueryParameterType objects
@@ -828,11 +836,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Recurse
 		createSort(theQueryStack, theSort.getChain());
-
 	}
 
 	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
-
 		switch (theParamType) {
 			case STRING:
 				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending);
@@ -855,7 +861,6 @@ public class SearchBuilder implements ISearchBuilder {
 			default:
 				throw new InvalidRequestException(Msg.code(1198) + "Don't know how to handle composite parameter with type of " + theParamType + " on _sort=" + theParamName);
 		}
-
 	}
 
 	private void doLoadPids(Collection<ResourcePersistentId> thePids, Collection<ResourcePersistentId> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation,
@@ -1087,7 +1092,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			for (Iterator<Include> iter = includes.iterator(); iter.hasNext(); ) {
 				Include nextInclude = iter.next();
-				if (nextInclude.isRecurse() == false) {
+				if (!nextInclude.isRecurse()) {
 					iter.remove();
 				}
 

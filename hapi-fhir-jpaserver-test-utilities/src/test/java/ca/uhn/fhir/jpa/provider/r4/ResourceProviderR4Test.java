@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.BaseClientParam;
+import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -65,12 +67,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.convertors.analytics.SearchParameterAnalysis;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -142,6 +146,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -770,7 +775,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void checkParamMissing(String paramName) throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=false");
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?" + paramName + ":missing=true");
+		get.setHeader("Content-Type", "application/json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			resp.getEntity().getContent().close();
 			assertEquals(200, resp.getStatusLine().getStatusCode());
@@ -5710,44 +5716,197 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
 	}
 
-	@Test
-	public void testMissingEx() {
-		//myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+	@Nested
+	public class MissingSearchParameterTests {
 
-		String methodName = new Exception().getStackTrace()[0].getMethodName();
-		Organization org = new Organization();
-		org.addIdentifier().setSystem("urn:system:rpr4").setValue(methodName + "01");
-		IIdType orgMissing = myClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+		private void createSearchParameter(Enumerations.SearchParamType theType) {
+			SearchParameter searchParameter = new SearchParameter();
+			searchParameter.addBase("BodyStructure").addBase("Procedure");
+			searchParameter.setCode("focalAccess");
+			searchParameter.setType(theType);
+			searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+			searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+			searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myClient.create().resource(searchParameter).execute();
+		}
 
-		//@formatter:off
-		Bundle found = myClient
-			.search()
-			.forResource(Organization.class)
-			.where(Organization.NAME.isMissing(true))
-			.count(100)
-			.prettyPrint()
-			.returnBundle(Bundle.class)
-			.execute();
-		//@formatter:on
+		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
+			IParser parser = myFhirContext.newJsonParser();
+			parser.setPrettyPrint(true);
+			ourLog.info(parser.encodeResourceToString(theBundle));
 
-		IParser parser = myFhirContext.newJsonParser();
-		parser.setPrettyPrint(true);
-		ourLog.info(parser.encodeResourceToString(found));
+			assertFalse(theBundle.isEmpty());
+			List<IIdType> list = toUnqualifiedVersionlessIds(theBundle);
+			ourLog.info(list.size() + " resources found");
+			IIdType type = list.get(0);
+			assertEquals(theType.toString(), type.toString());
+		}
 
-//		assertFalse(found.isEmpty());
-		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		ourLog.info(list.size() + " resources found");
-		ourLog.info(list.get(0).toString());
+		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
+			//@formatter:off
+			return myClient
+				.search()
+				.forResource(theResourceClass)
+				.where(theCriteria)
+				.count(100)
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			//@formatter:on
+		}
+
+		@Test
+		public void testMissingStringParameter() {
+			// setup
+			String methodName = new Exception().getStackTrace()[0].getMethodName();
+			Organization org = new Organization();
+			org.addIdentifier().setSystem("urn:system:rpr4").setValue(methodName + "01");
+			IIdType orgMissing = myClient.create().resource(org).prettyPrint().encodedXml().execute().getId().toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Organization.class, Organization.NAME.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, orgMissing);
+		}
+
+		@Test
+		public void testMissingDateParameter() {
+			// setup
+			Patient patient = new Patient();
+			patient.setActive(true);
+
+			IIdType missing = myClient.create().resource(patient)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Patient.class, Patient.BIRTHDATE.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
+		@Test
+		public void testMissingTokenClientParameter() {
+			// setup
+			Patient patient = new Patient();
+			patient.setActive(true);
+
+			IIdType missing = myClient.create().resource(patient)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Patient.class, Patient.DECEASED.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
+		@Test
+		public void testMissingReferenceClientParameter() {
+			// setup
+			Patient patient = new Patient();
+			patient.setActive(true);
+
+			IIdType missing = myClient.create().resource(patient)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Patient.class, Patient.GENERAL_PRACTITIONER.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
+		@Test
+		public void testMissingReferenceClientParameter2() {
+			// setup
+			Observation obs = new Observation();
+
+			IIdType missing = myClient.create().resource(obs)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Observation.class, Observation.ENCOUNTER.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
+		@Test
+		public void testMissingURLParameter() {
+			// setup
+			SearchParameter sp = new SearchParameter();
+
+			IIdType missing = myClient.create().resource(sp)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(SearchParameter.class, SearchParameter.URL.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
+
+		@Test
+		public void testMissingQuantityClientParameter () {
+			// setup
+			Observation obs = new Observation();
+
+			IIdType missing = myClient.create().resource(obs)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+
+			// test
+			Bundle found = doSearch(Observation.class, Observation.VALUE_QUANTITY.isMissing(true));
+
+			// verify
+			verifyFoundBundle(found, missing);
+		}
+
 	}
 
 	@Test
-	public void testSearchWithMissing2() throws Exception {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+	@ParameterizedTest
+	@ValueSource(strings = {
+		Observation.SP_CODE,
+		Observation.SP_CATEGORY,
+		Observation.SP_VALUE_STRING,
+		Observation.SP_ENCOUNTER,
+		Observation.SP_DATE
+	})
+	public void testSearchWithMissing2(String theMissingParam) throws Exception {
+		//myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		checkParamMissing(Observation.SP_CODE);
 		checkParamMissing(Observation.SP_CATEGORY);
-		checkParamMissing(Observation.SP_VALUE_STRING);
+//		checkParamMissing(Observation.SP_VALUE_STRING);
 		checkParamMissing(Observation.SP_ENCOUNTER);
-		checkParamMissing(Observation.SP_DATE);
+//		checkParamMissing(Observation.SP_DATE);
+		checkParamMissing(theMissingParam);
 	}
 
 	@Test
