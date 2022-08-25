@@ -156,6 +156,6 @@ class PackageInstallerSvcImplTest {
 		boolean result = mySvc.validForUpload(codeSystem);
 		
 		//Assert
-		assertTrue(result);
+		assertFalse(result);
 	}
 }
