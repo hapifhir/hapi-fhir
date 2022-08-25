@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
@@ -549,7 +550,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(output.size());
 				}
-				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
+				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
 
 			}
 
@@ -822,7 +823,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
-		List<Long> versionlessPids = ResourcePersistentId.toLongList(thePids);
+		List<Long> versionlessPids = JpaPid.toLongList(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
 			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
 		}
@@ -1082,7 +1083,7 @@ public class SearchBuilder implements ISearchBuilder {
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
 						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
-						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+						q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 						if (wantResourceType != null) {
 							q.setParameter("want_resource_type", wantResourceType);
 						}
@@ -1197,7 +1198,7 @@ public class SearchBuilder implements ISearchBuilder {
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
 							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
-							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+							q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 							if (targetResourceType != null) {
 								q.setParameter("target_resource_type", targetResourceType);
 							} else if (haveTargetTypesDefinedByParam) {
@@ -1783,12 +1784,12 @@ public class SearchBuilder implements ISearchBuilder {
 		cq.select(from.get("myId").as(Long.class));
 
 		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(thePids)));
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(JpaPid.toLongList(thePids)));
 
 		cq.where(SearchBuilder.toPredicateArray(lastUpdatedPredicates));
 		TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
-		return ResourcePersistentId.fromLongList(query.getResultList());
+		return JpaPid.fromLongList(query.getResultList());
 	}
 
 	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {

@@ -23,29 +23,30 @@ package ca.uhn.fhir.rest.api.server.storage;
 import ca.uhn.fhir.util.ObjectUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
  */
-public class ResourcePersistentId {
-	private Object myId;
+public class ResourcePersistentId<T> {
+	private T myId;
 	private Long myVersion;
 	private IIdType myAssociatedResourceId;
 
-	public ResourcePersistentId(Object theId) {
+	/**
+	 * @deprecated use subclass
+	 */
+	public ResourcePersistentId(T theId) {
 		this(theId, null);
 	}
 
 	/**
+	 * @deprecated use subclass
 	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
 	 *                   leave this as <code>null</code>
 	 */
-	public ResourcePersistentId(Object theId, Long theVersion) {
+	public ResourcePersistentId(T theId, Long theVersion) {
 		assert !(theId instanceof Optional);
 		myId = theId;
 		myVersion = theVersion;
@@ -81,14 +82,16 @@ public class ResourcePersistentId {
 		return retVal;
 	}
 
-	public Object getId() {
+	/**
+	 * @deprecated use getId() method of subclass
+	 */
+	public T getId() {
 		return myId;
 	}
 
-	public void setId(Object theId) {
-		myId = theId;
-	}
-
+	/**
+	 * @deprecated use getId() method of subclass
+	 */
 	public Long getIdAsLong() {
 		if (myId instanceof String) {
 			return Long.parseLong((String) myId);
@@ -113,19 +116,4 @@ public class ResourcePersistentId {
 		myVersion = theVersion;
 	}
 
-	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {
-		List<Long> retVal = new ArrayList<>(thePids.size());
-		for (ResourcePersistentId next : thePids) {
-			retVal.add(next.getIdAsLong());
-		}
-		return retVal;
-	}
-
-	public static List<ResourcePersistentId> fromLongList(List<Long> theResultList) {
-		List<ResourcePersistentId> retVal = new ArrayList<>(theResultList.size());
-		for (Long next : theResultList) {
-			retVal.add(new ResourcePersistentId(next));
-		}
-		return retVal;
-	}
 }

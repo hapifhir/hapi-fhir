@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
@@ -79,7 +80,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
@@ -603,7 +608,7 @@ public class SearchQueryBuilder {
 		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
 			return;
 		
-		List<Long> excludePids = ResourcePersistentId.toLongList(theExsitinghPidSetToExclude);
+		List<Long> excludePids = JpaPid.toLongList(theExsitinghPidSetToExclude);
 		
 		ourLog.trace("excludePids = " + excludePids);
 		
