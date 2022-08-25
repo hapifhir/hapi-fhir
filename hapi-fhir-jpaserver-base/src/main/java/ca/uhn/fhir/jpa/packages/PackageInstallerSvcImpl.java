@@ -555,4 +555,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		myFhirContext = theCtx;
 	}
 
+	@VisibleForTesting
+	void setBlacklistInterceptorForUnitTest(Optional<IIGBlacklistInterceptor> theBlacklistInterceptor) {
+		blacklistInterceptor = theBlacklistInterceptor;
+	}
+
 }
