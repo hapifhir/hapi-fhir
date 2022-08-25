@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.services;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -73,6 +74,15 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 			throw new ResourceNotFoundException(Msg.code(2102) + " : " + theJobId);
 		}
 		return fromJobInstanceToBatch2JobInfo(instance);
+	}
+
+	@Override
+	public String cancelInstance(String theJobId) throws ResourceNotFoundException {
+		JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
+		if (cancelResult == null) {
+			throw new ResourceNotFoundException(Msg.code(2131) + " : " + theJobId);
+		}
+		return cancelResult.getMessage();
 	}
 
 	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {

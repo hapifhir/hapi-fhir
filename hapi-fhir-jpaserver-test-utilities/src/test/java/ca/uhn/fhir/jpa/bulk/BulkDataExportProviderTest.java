@@ -21,6 +21,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -65,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -674,6 +676,38 @@ public class BulkDataExportProviderTest {
 		callExportAndAssertJobId(input, A_JOB_ID);
 		callExportAndAssertJobId(input, A_JOB_ID);
 
+	}
+
+	@Test
+	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJob() throws IOException {
+		// setup
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+		info.setEndTime(InstantType.now().getValue());
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+
+		// call
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpDelete delete = new HttpDelete(url);
+		try (CloseableHttpResponse response = myClient.execute(delete)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("ACCEPTED", response.getStatusLine().getReasonPhrase());
+
+			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
+			if (response.getEntity() != null && response.getEntity().getContent() != null) {
+				String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+				ourLog.info("Response content: {}", responseContent);
+
+				assertThat(responseContent, containsString("successfully cancelled."));
+			}
+		}
 	}
 
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
