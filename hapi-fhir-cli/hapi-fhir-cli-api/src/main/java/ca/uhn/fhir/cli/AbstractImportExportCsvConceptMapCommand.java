@@ -59,11 +59,16 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 	protected static final String FILE_PARAM_LONGOPT = "filename";
 	protected static final String FILE_PARAM_NAME = "filename";
 	protected static final String FILE_PARAM_DESC = "The path and filename of the CSV file to be imported/exported (e.g. ./input.csv, ./output.csv, etc.).";
+	protected static final String CONCEPTMAP_STATUS_PARAM = "s";
+	protected static final String CONCEPTMAP_STATUS_PARAM_LONGOPT = "status";
+	protected static final String CONCEPTMAP_STATUS_PARAM_NAME = "status";
+	protected static final String CONCEPTMAP_STATUS_PARAM_DESC = "The status of the ConceptMap resource to be imported/exported (i.e. ConceptMap.status).";
 
 	protected IGenericClient client;
 	protected String conceptMapUrl;
 	protected FhirVersionEnum fhirVersion;
 	protected String file;
+	protected String status;
 
 
 	@Override
@@ -121,6 +126,15 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		if (!file.endsWith(".csv")) {
 			file = file.concat(".csv");
 		}
+
+		status = theCommandLine.getOptionValue(CONCEPTMAP_STATUS_PARAM);
+		if (isBlank(status)) {
+			throw new ParseException(Msg.code(1586) + "No status (" + FILE_PARAM + ") specified.");
+		} //TODO change the number code
+		//TODO: validate
+		// cannot be empty
+		// one of: draft | active | retired | unknown
+		// actually, might already do this in setStatus fromCode
 
 		parseAdditionalParameters(theCommandLine);
 

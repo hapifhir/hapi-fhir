@@ -86,6 +86,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		Options options = super.getOptions();
 
 		addRequiredOption(options, CONCEPTMAP_URL_PARAM, CONCEPTMAP_URL_PARAM_LONGOPT, CONCEPTMAP_URL_PARAM_NAME, CONCEPTMAP_URL_PARAM_DESC);
+		addRequiredOption(options, CONCEPTMAP_STATUS_PARAM, CONCEPTMAP_STATUS_PARAM_LONGOPT, CONCEPTMAP_STATUS_PARAM_NAME, CONCEPTMAP_STATUS_PARAM_DESC);
 		// </editor-fold desc="Additional parameters.">
 		addOptionalOption(options, SOURCE_VALUE_SET_PARAM, SOURCE_VALUE_SET_PARAM_LONGOPT, SOURCE_VALUE_SET_PARAM_NAME, SOURCE_VALUE_SET_PARAM_DESC);
 		addOptionalOption(options, TARGET_VALUE_SET_PARAM, TARGET_VALUE_SET_PARAM_LONGOPT, TARGET_VALUE_SET_PARAM_NAME, TARGET_VALUE_SET_PARAM_DESC);
@@ -178,6 +179,8 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withTrim())
 		) {
 			retVal.setUrl(conceptMapUrl);
+
+			retVal.setStatus(Enumerations.PublicationStatus.fromCode(status));
 
 			if (isNotBlank(sourceValueSet)) {
 				retVal.setSource(new UriType(sourceValueSet));
