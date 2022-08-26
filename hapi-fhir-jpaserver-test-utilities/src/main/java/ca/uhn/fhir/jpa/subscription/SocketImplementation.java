@@ -1,15 +1,16 @@
 
 package ca.uhn.fhir.jpa.subscription;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.*;
-import org.slf4j.Logger;
-
-import ca.uhn.fhir.rest.api.EncodingEnum;
 
 @WebSocket
 public class SocketImplementation {
