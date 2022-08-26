@@ -179,7 +179,6 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 					.withTrim())
 		) {
 			retVal.setUrl(conceptMapUrl);
-
 			retVal.setStatus(Enumerations.PublicationStatus.fromCode(status));
 
 			if (isNotBlank(sourceValueSet)) {
