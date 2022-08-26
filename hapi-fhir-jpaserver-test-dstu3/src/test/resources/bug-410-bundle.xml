@@ -1,4 +1,4 @@
-<Bundle xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://hl7.org/fhir">
+<Bundle xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns="http://hl7.org/fhir">
 	<id value="af89d63e90e34ec4b123c5fcc74b54e5" />
 	<type value="transaction" />
 	<entry>
