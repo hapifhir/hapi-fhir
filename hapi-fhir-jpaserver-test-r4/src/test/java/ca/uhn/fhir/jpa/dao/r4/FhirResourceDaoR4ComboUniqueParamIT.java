@@ -62,9 +62,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
+public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamTest.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamIT.class);
 
 	@AfterEach
 	public void purgeUniqueIndexes() {

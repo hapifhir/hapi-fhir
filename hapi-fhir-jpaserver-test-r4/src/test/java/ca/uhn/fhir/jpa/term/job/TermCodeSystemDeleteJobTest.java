@@ -39,11 +39,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
@@ -95,9 +94,9 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 	private IJobCoordinator myJobCoordinator;
 
 	private void initMultipleVersionLoad() throws Exception {
-		File file = ResourceUtils.getFile("classpath:loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		InputStream is = new ClassPathResource("loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode()).getInputStream();
 		uploadProperties = new Properties();
-		uploadProperties.load(new FileInputStream(file));
+		uploadProperties.load(is);
 
 		IFhirResourceDao<ValueSet> valueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 	}
