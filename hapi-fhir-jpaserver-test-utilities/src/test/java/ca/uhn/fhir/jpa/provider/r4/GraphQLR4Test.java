@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static ca.uhn.fhir.jpa.provider.GraphQLR4ProviderTest.DATA_PREFIX;
-import static ca.uhn.fhir.jpa.provider.GraphQLR4ProviderTest.DATA_SUFFIX;
+import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_PREFIX;
+import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -33,7 +33,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	public void testLoadLoincMultipleVersions() throws IOException {
 
 		// Load LOINC marked as version 2.67
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -59,7 +59,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		// Update LOINC marked as version 2.67
 		myFiles = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -86,7 +86,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
@@ -118,7 +118,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	public void testLoadLoincVersionNotCurrent() throws IOException {
 
 		// Load LOINC marked as version 2.67
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -153,7 +153,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		// Load LOINC marked as version 2.68 and not making it current (so 2.67 should remain current)
 		myFiles = new ZipCollectionBuilder();
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(
 			myFiles, "v268_curr_false_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -195,7 +195,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myFiles.addFileZip("/loinc/", "loinc.xml");
 
 		// Load LOINC marked as version 2.67
-		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, null);
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, null);
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();

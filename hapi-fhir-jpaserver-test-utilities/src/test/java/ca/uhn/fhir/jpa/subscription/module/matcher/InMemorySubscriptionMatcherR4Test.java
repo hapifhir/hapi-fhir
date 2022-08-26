@@ -17,7 +17,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
+import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -340,15 +340,15 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Test
 	public void testLocationPositionNotSupported() {
 		Location loc = new Location();
-		double latitude = CoordCalculatorTest.LATITUDE_UHN;
-		double longitude = CoordCalculatorTest.LONGITUDE_UHN;
+		double latitude = CoordCalculatorTestUtil.LATITUDE_UHN;
+		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		double bigEnoughDistance = CoordCalculatorTest.DISTANCE_KM_CHIN_TO_UHN * 2;
+		double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 		SearchParameterMap params = myMatchUrlService.translateMatchUrl(
 			"Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTest.LATITUDE_CHIN + "|"
-				+ CoordCalculatorTest.LONGITUDE_CHIN + "|" +
+				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|"
+				+ CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" +
 				bigEnoughDistance, myFhirContext.getResourceDefinition("Location"));
 		assertUnsupported(loc, params);
 	}

@@ -1,16 +1,18 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.util.CoordCalculatorTestUtil;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Location;
+import org.hl7.fhir.dstu3.model.PractitionerRole;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URLEncoder;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
+public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3Test {
 
 	@BeforeEach
 	@Override
@@ -26,15 +28,16 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_UHN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + bigEnoughDistance;
+				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTestUtil.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
-			Bundle actual = myClient
+			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -48,11 +51,12 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
 			String url = "/Location?" +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + tooSmallDistance;
+				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTestUtil.LONGITUDE_CHIN +
+				"&" +
+				Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
+			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -72,16 +76,16 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		double longitude = CoordCalculatorTestUtil.LONGITUDE_CHIN;
 		Location.LocationPositionComponent position = new Location.LocationPositionComponent().setLatitude(latitude).setLongitude(longitude);
 		loc.setPosition(position);
-		IIdType locId = myClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
+		IIdType locId = ourClient.create().resource(loc).execute().getId().toUnqualifiedVersionless();
 
 		PractitionerRole pr = new PractitionerRole();
 		pr.addLocation().setReference(locId.getValue());
-		IIdType prId = myClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
+		IIdType prId = ourClient.create().resource(pr).execute().getId().toUnqualifiedVersionless();
 
 		String url = "PractitionerRole?location." +
-			Location.SP_NEAR + "=" + latitude + "|" + longitude;
+			Location.SP_NEAR + "=" + latitude + URLEncoder.encode(":") + longitude;
 
-		Bundle actual = myClient
+		Bundle actual = ourClient
 			.search()
 			.byUrl(ourServerBase + "/" + url)
 			.encodedJson()
@@ -110,11 +114,12 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		{ // In the box
 			double bigEnoughDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2;
 			String url = "PractitionerRole?location." +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + bigEnoughDistance;
+				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTestUtil.LONGITUDE_CHIN +
+				"&" +
+				"location." + Location.SP_NEAR_DISTANCE + "=" + bigEnoughDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
+			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()
@@ -130,11 +135,12 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
 			String url = "PractitionerRole?location." +
-				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN +
-				"|" + tooSmallDistance;
+				Location.SP_NEAR + "=" + CoordCalculatorTestUtil.LATITUDE_CHIN + URLEncoder.encode(":") + CoordCalculatorTestUtil.LONGITUDE_CHIN +
+				"&" +
+				"location." + Location.SP_NEAR_DISTANCE + "=" + tooSmallDistance + URLEncoder.encode("|http://unitsofmeasure.org|km");
 
 			myCaptureQueriesListener.clear();
-			Bundle actual = myClient
+			Bundle actual = ourClient
 				.search()
 				.byUrl(ourServerBase + "/" + url)
 				.encodedJson()

@@ -4,10 +4,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
@@ -161,7 +161,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testPackageIdHandlingIsNotCaseSensitive() {
 		String packageNameAllLowercase = "hl7.fhir.us.davinci-cdex";
 		String packageNameUppercase = packageNameAllLowercase.toUpperCase(Locale.ROOT);
-		InputStream stream = IgInstallerDstu3Test.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
+		InputStream stream = JpaPackageCacheTest.class.getResourceAsStream("/packages/package-davinci-cdex-0.2.0.tgz");
 
 		// The package has the ID in lower-case, so for the test we input the first parameter in upper-case & check that no error is thrown
 		assertDoesNotThrow(() -> myPackageCacheManager.addPackageToCache(packageNameUppercase, "0.2.0", stream, "hl7.fhir.us.davinci-cdex"));

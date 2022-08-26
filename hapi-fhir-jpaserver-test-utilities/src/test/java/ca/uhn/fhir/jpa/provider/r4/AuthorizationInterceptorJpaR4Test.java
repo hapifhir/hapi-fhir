@@ -2,11 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
-import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -402,14 +402,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testSearchCodeIn() {
 		createLocalCsAndVs();
 
-		createObservation(withId("allowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
-		createObservation(withId("disallowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+		createObservation(withId("allowed"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("disallowed"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "foo"));
 
 		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET).andThen()
+					.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", TermTestUtil.URL_MY_VALUE_SET).andThen()
 					.build();
 			}
 		}.setValidationSupport(myValidationSupport));
@@ -1457,15 +1457,15 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSmartFilterSearchAllowed() {
-		createObservation(withId("allowed"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
-		createObservation(withId("allowed2"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+		createObservation(withId("allowed"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("allowed2"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "foo"));
 
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow("filter rule").read().allResources().withAnyId()
-					.withFilterTester("code=" + FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM + "|")
+					.withFilterTester("code=" + TermTestUtil.URL_MY_CODE_SYSTEM + "|")
 					.andThen().build();
 			}
 		};
@@ -1479,8 +1479,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testSmartFilterSearch_badQuery_abstain() {
-		createObservation(withId("obs1"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "A"));
-		createObservation(withId("obs2"), withObservationCode(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM, "foo"));
+		createObservation(withId("obs1"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "A"));
+		createObservation(withId("obs2"), withObservationCode(TermTestUtil.URL_MY_CODE_SYSTEM, "foo"));
 
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

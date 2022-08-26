@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -35,41 +34,18 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import static ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc.MAKE_LOADING_VERSION_CURRENT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_ANSWERLIST_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_MAKE_CURRENT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONSUMER_NAME_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_DUPLICATE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_GROUP_TERMS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_HIERARCHY_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PARENT_GROUP_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_PRIMARY_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_RSNA_PLAYBOOK_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
-import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -133,19 +109,19 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@Test
 	public void testLoadLoincWithSplitPartLink() throws Exception {
-		addLoincMandatoryFilesToZip(myFiles);
+		TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 		verifyLoadLoinc();
 	}
 
 	@Test
 	public void testLoadLoincWithSinglePartLink() throws Exception {
-		addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
+		TermTestUtil.addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
 		verifyLoadLoinc();
 	}
 
 	@Test
 	public void testLoadLoincWithMandatoryFilesOnly() throws Exception {
-		addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
+		TermTestUtil.addLoincMandatoryFilesWithoutTop2000ToZip(myFiles);
 		verifyLoadLoinc(false, false);
 	}
 
@@ -153,7 +129,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	public void testLoadLoincInvalidPartLinkFiles() throws IOException {
 
 		// Missing all PartLinkFiles
-		addBaseLoincMandatoryFilesToZip(myFiles, true);
+		TermTestUtil.addBaseLoincMandatoryFilesToZip(myFiles, true);
 		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
 
 		try {
@@ -186,7 +162,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@Test
 	public void testLoadLoincWithConsumerNameAndLinguisticVariants() throws Exception {
-		addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
+		TermTestUtil.addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(myFiles);
 		verifyLoadLoinc(false, true);
 	}
 
@@ -483,16 +459,16 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		if (theIncludeConsumerNameAndLinguisticVariants) {
 		    code = concepts.get("61438-8");
 		    assertEquals(8, code.getDesignations().size());
-		    verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
-		    verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
-		    verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
-		    verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 61438-8");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "Entlassungsbrief Ärztlich","Ergebnis","Zeitpunkt","{Setting}","Dokument","Dermatologie","DOC.ONTOLOGY","de shortname","de long common name","de related names 2","de linguistic variant display name");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Cellules de Purkinje cytoplasmique type 2 , IgG","Titre","Temps ponctuel","Sérum","Quantitatif","Immunofluorescence","Sérologie","","","","");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","大脑中动脉","定量型","超声.多普勒","产科学检查与测量指标.超声","","", "Cereb 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 大脑（Cerebral） 时刻;随机;随意;瞬间 术语\"cerebral\"指的是主要由中枢半球（大脑皮质和基底神经节）组成的那部分脑结构 流 流量;流速;流体 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
 		    code = concepts.get("17787-3");
 		    assertEquals(5, code.getDesignations().size());
-		    verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
-		    verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
-		    verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
-		    verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
+		    TermTestUtil.verifyConsumerName(code.getDesignations(), "Consumer Name 17787-3");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "de-AT", "","","","","","","","","","CoV OC43 RNA ql/SM P","Coronavirus OC43 RNA ql. /Sondermaterial PCR");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "fr-CA", "Virus respiratoire syncytial bovin","Présence-Seuil","Temps ponctuel","XXX","Ordinal","Culture spécifique à un microorganisme","Microbiologie","","","","");
+		    TermTestUtil.verifyLinguisticVariant(code.getDesignations(), "zh-CN", "血流速度.收缩期.最大值","速度","时间点","二尖瓣^胎儿","定量型","超声.多普勒","产科学检查与测量指标.超声","","","僧帽瓣 动态 可用数量表示的;定量性;数值型;数量型;连续数值型标尺 时刻;随机;随意;瞬间 流 流量;流速;流体 胎;超系统 - 胎儿 血;全血 血流量;血液流量 速度(距离/时间);速率;速率(距离/时间)","");
 		}
 	}
 
@@ -501,7 +477,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Load LOINC marked as version 2.67
 
-		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_first.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_first.capture(), myConceptMapCaptor_267_first.capture());
@@ -552,7 +528,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Update LOINC marked as version 2.67
 		myFiles = new ZipCollectionBuilder();
-		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_second.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_second.capture(), myConceptMapCaptor_267_second.capture());
@@ -603,7 +579,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
-		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
+		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_268.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_268.capture(), myConceptMapCaptor_268.capture());
@@ -668,76 +644,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 	}
 
-	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
-		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
-	}
-
-	public static void addLoincMandatoryFilesAndConsumerNameAndLinguisticVariants(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
-		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "zhCN5LinguisticVariant.csv");
-		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "deAT24LinguisticVariant.csv");
-		theFiles.addFileZip("/loinc/", LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + "frCA8LinguisticVariant.csv");
-	}
-
-
-	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-	}
-
-	public static void addLoincMandatoryFilesWithoutTop2000ToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addBaseLoincMandatoryFilesToZip(theFiles, false);
-		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-	}
-
-	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
-		if (thePropertiesFile != null) {
-			theFiles.addFileZip("/loinc/", thePropertiesFile);
-		}
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
-		addBaseLoincMandatoryFilesToZip(theFiles, true);
-	}
-
-	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles, Boolean theIncludeTop2000) throws IOException{
-		theFiles.addFileZip("/loinc/", LOINC_XML_FILE.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_HIERARCHY_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
-		if (theIncludeTop2000) {
-			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
-			theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
-		}
-
-	}
 
 	@Test
 	public void testLoadLoincMultiaxialHierarchySupport() throws Exception {
-		addLoincMandatoryFilesToZip(myFiles);
+		TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
@@ -862,7 +772,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		@Test
 		public void testDontMakeCurrentVersion() throws IOException {
-			addLoincMandatoryFilesToZip(myFiles);
+			TermTestUtil.addLoincMandatoryFilesToZip(myFiles);
 			testProps.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), "false");
 			testProps.put(LOINC_CODESYSTEM_VERSION.getCode(), "27.0");
 
@@ -940,54 +850,4 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 
-
-	private static void verifyConsumerName(Collection<TermConceptDesignation> designationList, String theConsumerName) {
-	    
-	    TermConceptDesignation consumerNameDesignation = null;
-	    for (TermConceptDesignation designation : designationList) {
-	    	if ("ConsumerName".equals(designation.getUseDisplay() )) {
-	    		consumerNameDesignation = designation;
-	    	}
-	    }
-	    assertEquals(theConsumerName, consumerNameDesignation.getValue());
-	}
-
-	private static void verifyLinguisticVariant(Collection<TermConceptDesignation> designationList, String theLanguage,
-			String theComponent, String theProperty, String theTimeAspct, String theSystem, String theScaleTyp,
-			String methodType, String theClass, String theShortName, String theLongCommonName, String theRelatedName2,
-			String theLinguisticVariantDisplayName) {
-
-		TermConceptDesignation formalNameDes = null;
-		TermConceptDesignation shortNameDes = null;
-		TermConceptDesignation longCommonNameDes = null;	
-		TermConceptDesignation linguisticVariantDisplayNameDes = null;
-		
-		for (TermConceptDesignation designation : designationList) {
-			if (theLanguage.equals(designation.getLanguage())) {
-				
-				if ("FullySpecifiedName".equals(designation.getUseDisplay())) 
-					formalNameDes = designation;
-				
-				if ("SHORTNAME".equals(designation.getUseDisplay())) 
-					shortNameDes = designation;
-				if ("LONG_COMMON_NAME".equals(designation.getUseDisplay())) 
-					longCommonNameDes = designation;
-				if ("LinguisticVariantDisplayName".equals(designation.getUseDisplay())) 
-					linguisticVariantDisplayNameDes = designation;
-			}
-		}
-		
-		verifyDesignation(formalNameDes, ITermLoaderSvc.LOINC_URI, "FullySpecifiedName", theComponent+":"+theProperty+":"+theTimeAspct+":"+theSystem+":"+theScaleTyp+":"+methodType);
-		verifyDesignation(shortNameDes, ITermLoaderSvc.LOINC_URI, "SHORTNAME", theShortName);
-		verifyDesignation(longCommonNameDes, ITermLoaderSvc.LOINC_URI, "LONG_COMMON_NAME", theLongCommonName);		
-		verifyDesignation(linguisticVariantDisplayNameDes, ITermLoaderSvc.LOINC_URI, "LinguisticVariantDisplayName", theLinguisticVariantDisplayName);
-	}
-	
-	private static void verifyDesignation(TermConceptDesignation theDesignation, String theUseSystem, String theUseCode, String theValue) {
-		if (theDesignation == null)
-		   return;
-		assertEquals(theUseSystem, theDesignation.getUseSystem());
-		assertEquals(theUseCode, theDesignation.getUseCode());
-		assertEquals(theValue, theDesignation.getValue());
-	}
 }

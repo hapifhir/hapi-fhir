@@ -2,9 +2,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.TermTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -75,7 +75,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.onType(CodeSystem.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "code", new CodeType("ParentA"))
-			.andParameter("system", new UriType(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM))
+			.andParameter("system", new UriType(TermTestUtil.URL_MY_CODE_SYSTEM))
 			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -96,7 +96,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.onType(CodeSystem.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "code", new CodeType("ParentA"))
-			.andParameter("system", new UriType(FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM))
+			.andParameter("system", new UriType(TermTestUtil.URL_MY_CODE_SYSTEM))
 			.useHttpGet()
 			.execute();
 
