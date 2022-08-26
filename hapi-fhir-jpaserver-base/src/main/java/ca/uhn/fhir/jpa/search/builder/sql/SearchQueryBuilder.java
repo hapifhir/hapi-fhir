@@ -289,9 +289,19 @@ public class SearchQueryBuilder {
 		return cp;
 	}
 
+	public TokenPredicateBuilder createTokenPredicateBuilder() {
+		TokenPredicateBuilder tp = mySqlBuilderFactory.tokenIndexTable(this);
+		return tp;
+	}
+
 	public DatePredicateBuilder createDatePredicateBuilder() {
 		DatePredicateBuilder dp = mySqlBuilderFactory.dateIndexTable(this);
 		return dp;
+	}
+
+	public UriPredicateBuilder createUriPredicateBuilder() {
+		UriPredicateBuilder up = mySqlBuilderFactory.uriIndexTable(this);
+		return up;
 	}
 
 	/**

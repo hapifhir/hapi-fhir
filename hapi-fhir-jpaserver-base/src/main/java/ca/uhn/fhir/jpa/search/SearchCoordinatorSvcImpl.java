@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -243,7 +244,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 		//private IInterceptorBroadcaster myInterceptorBroadcaster;
 	}
-	private StorageInterceptorHooks myStorageInterceptorHooks = new StorageInterceptorHooks();
+	private final StorageInterceptorHooks myStorageInterceptorHooks = new StorageInterceptorHooks();
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
@@ -331,7 +332,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					parameters.setLoadingThrottleForUnitTests(myLoadingThrottleForUnitTests);
 					SearchContinuationTask task = (SearchContinuationTask) myBeanFactory.getBean("continueTask",
 						parameters);
-//					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails, requestPartitionId);
+
 					myIdToSearchTask.put(search.getUuid(), task);
 					task.call();
 				}
@@ -376,7 +377,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		validateSearch(theParams);
 
-		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(theResourceType).getImplementingClass();
+		RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(theResourceType);
+		Class<? extends IBaseResource> resourceTypeClass = runtimeResourceDefinition.getImplementingClass();
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
@@ -538,7 +540,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		);
 		stp.setLoadingThrottleForUnitTests(myLoadingThrottleForUnitTests);
 		SearchTask task = (SearchTask) myBeanFactory.getBean("searchTask", stp);
-//		SearchTask task = new SearchTask(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails, theRequestPartitionId);
+
 		myIdToSearchTask.put(theSearch.getUuid(), task);
 		task.call();
 
