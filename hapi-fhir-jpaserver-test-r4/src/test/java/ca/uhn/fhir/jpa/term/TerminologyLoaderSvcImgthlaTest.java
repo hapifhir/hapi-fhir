@@ -10,8 +10,8 @@ import org.mockito.Mock;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
