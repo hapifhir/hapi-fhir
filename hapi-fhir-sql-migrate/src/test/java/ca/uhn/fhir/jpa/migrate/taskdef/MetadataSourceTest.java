@@ -29,7 +29,8 @@ class MetadataSourceTest {
 		"MARIADB_10_1,,false",
 		"MYSQL_5_7,,false",
 		"POSTGRES_9_4,,true",
-		"ORACLE_12C,,true",
+		"ORACLE_12C,Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production,true",
+		"ORACLE_12C,Oracle Database 19c Express Edition Release 11.2.0.2.0 - 64bit Production,false",
 		"COCKROACHDB_21_1,,true",
 		// sql server only supports it in Enterprise
 		// https://docs.microsoft.com/en-us/sql/sql-server/editions-and-components-of-sql-server-2019?view=sql-server-ver16#RDBMSHA

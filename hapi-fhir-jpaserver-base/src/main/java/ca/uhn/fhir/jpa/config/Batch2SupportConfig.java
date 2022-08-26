@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.api.svc.IDeleteExpungeSvc;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
@@ -42,8 +43,8 @@ public class Batch2SupportConfig {
 	}
 
 	@Bean
-	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder) {
-		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder);
+	public IDeleteExpungeSvc deleteExpungeSvc(EntityManager theEntityManager, DeleteExpungeSqlBuilder theDeleteExpungeSqlBuilder, IFulltextSearchSvc theFullTextSearchSvc) {
+		return new DeleteExpungeSvcImpl(theEntityManager, theDeleteExpungeSqlBuilder, theFullTextSearchSvc);
 	}
 
 	@Bean

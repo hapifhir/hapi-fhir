@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -69,7 +70,21 @@ public class DeleteExpungeJobTest extends BaseJpaR4Test {
 
 		// validate
 		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
+		assertDocumentCountMatchesResourceCount(myObservationDao);
+
 		assertEquals(1, myDiagnosticReportDao.search(SearchParameterMap.newSynchronous()).size());
+		assertDocumentCountMatchesResourceCount(myDiagnosticReportDao);
+
 		assertEquals(2, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertDocumentCountMatchesResourceCount(myPatientDao);
+	}
+
+	public void assertDocumentCountMatchesResourceCount(IFhirResourceDao dao) {
+		String resourceType = myFhirContext.getResourceType(dao.getResourceType());
+		long resourceCount = dao.search(new SearchParameterMap().setLoadSynchronous(true)).size();
+		runInTransaction(() -> {
+			assertEquals(resourceCount, myFulltestSearchSvc.count(resourceType, new SearchParameterMap()));
+		});
+
 	}
 }

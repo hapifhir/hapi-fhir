@@ -51,7 +51,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 		if (targetPid != null) {
 			Optional<? extends IMdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(targetPid);
 			if (oLink.isPresent()) {
-				ResourcePersistentId goldenResourcePid = new ResourcePersistentId(oLink.get().getGoldenResourcePersistenceId().getIdAsLong());
+				ResourcePersistentId goldenResourcePid = oLink.get().getGoldenResourcePersistenceId();
 				ourLog.debug("Resource previously linked. Using existing link.");
 					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}

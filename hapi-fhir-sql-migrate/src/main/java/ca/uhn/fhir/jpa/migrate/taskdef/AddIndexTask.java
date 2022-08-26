@@ -126,22 +126,24 @@ public class AddIndexTask extends BaseTableTask {
 			mssqlWhereClause = buildMSSqlNotNullWhereClause();
 		}
 		// Should we do this non-transactionally?  Avoids a write-lock, but introduces weird failure modes.
-		String postgresOnline = "";
-		String oracleOnlineDeferred = "";
+		String postgresOnlineClause = "";
+		String msSqlOracleOnlineClause = "";
 		if (myOnline) {
 			switch (getDriverType()) {
 				case POSTGRES_9_4:
 				case COCKROACHDB_21_1:
-					postgresOnline = "CONCURRENTLY ";
+					postgresOnlineClause = "CONCURRENTLY ";
 					// This runs without a lock, and can't be done transactionally.
 					setTransactional(false);
 					break;
 				case ORACLE_12C:
-					oracleOnlineDeferred = " ONLINE DEFERRED INVALIDATION";
+					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
+						msSqlOracleOnlineClause = " ONLINE DEFERRED INVALIDATION";
+					}
 					break;
 				case MSSQL_2012:
 					if (myMetadataSource.isOnlineIndexSupported(getConnectionProperties())) {
-						oracleOnlineDeferred = " WITH (ONLINE = ON)";
+						msSqlOracleOnlineClause = " WITH (ONLINE = ON)";
 					}
 					break;
 				default:
@@ -150,8 +152,8 @@ public class AddIndexTask extends BaseTableTask {
 
 
 		String sql =
-			"create " + unique + "index " + postgresOnline + myIndexName +
-			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + oracleOnlineDeferred;
+			"create " + unique + "index " + postgresOnlineClause + myIndexName +
+			" on " + getTableName() + "(" + columns + ")" + includeClause +  mssqlWhereClause + msSqlOracleOnlineClause;
 		return sql;
 	}
 

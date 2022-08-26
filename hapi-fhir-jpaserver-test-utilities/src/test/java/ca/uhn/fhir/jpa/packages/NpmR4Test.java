@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
@@ -749,7 +750,6 @@ public class NpmR4Test extends BaseJpaR4Test {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(true, versionEntity.isCurrentVersion());
 		});
-
 	}
 
 	@Test
@@ -766,7 +766,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
 
-		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
+		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")), new SystemRequestDetails());
 		assertEquals(1, spSearch.sizeOrThrowNpe());
 		SearchParameter sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
 		assertEquals("network-id", sp.getCode());
@@ -782,7 +782,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 		myPractitionerRoleDao.create(pr);
 
 		SearchParameterMap map = SearchParameterMap.newSynchronous("network-id", new ReferenceParam(orgId.getValue()));
-		spSearch = myPractitionerRoleDao.search(map);
+
+		spSearch = myPractitionerRoleDao.search(map, new SystemRequestDetails());
 		assertEquals(1, spSearch.sizeOrThrowNpe());
 		
 		// Install newer version
