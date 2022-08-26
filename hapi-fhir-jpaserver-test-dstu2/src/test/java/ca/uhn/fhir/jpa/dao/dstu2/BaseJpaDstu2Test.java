@@ -58,6 +58,7 @@ import ca.uhn.fhir.model.dstu2.resource.ValueSet;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,6 +73,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestDstu2Config.class})
@@ -260,5 +263,13 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 
-
+	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
+		List<IIdType> retVal = new ArrayList<>();
+		for (Bundle.Entry next : theFound.getEntry()) {
+			// if (next.getResource()!= null) {
+			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
+			// }
+		}
+		return retVal;
+	}
 }
