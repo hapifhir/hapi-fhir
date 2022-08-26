@@ -38,6 +38,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -89,6 +93,13 @@ public class BulkDataExportProviderTest {
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
 	private RestfulServer servlet;
+
+	static Stream<Arguments> paramsProvider(){
+		return Stream.of(
+			Arguments.arguments(true),
+			Arguments.arguments(false)
+		);
+	}
 
 	@AfterEach
 	public void after() throws Exception {
@@ -140,8 +151,14 @@ public class BulkDataExportProviderTest {
 		return createJobStartResponse(A_JOB_ID);
 	}
 
-	@Test
-	public void testSuccessfulInitiateBulkRequest_Post() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURL(Boolean baseUrlFixed) throws IOException {
+		// setup
+		if (baseUrlFixed) {
+			startWithFixedBaseUrl();
+		}
+
 		String patientResource = "Patient";
 		String practitionerResource = "Practitioner";
 		String filter = "Patient?identifier=foo";
@@ -178,13 +195,6 @@ public class BulkDataExportProviderTest {
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertNotNull(params.getStartDate());
 		assertTrue(params.getFilters().contains(filter));
-	}
-
-	@Test
-	public void testSuccessfulInitiateBulkRequest_Post_FixedBaseURL() throws Exception {
-		// setup
-		startWithFixedBaseUrl();
-		testSuccessfulInitiateBulkRequest_Post();
 	}
 
 	@Test
@@ -304,9 +314,14 @@ public class BulkDataExportProviderTest {
 		}
 	}
 
-	@Test
-	public void testPollForStatus_COMPLETED() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testPollForStatus_COMPLETED_WithFixedBaseURL(boolean baseUrlFixed) throws IOException {
 		// setup
+		if (baseUrlFixed) {
+			startWithFixedBaseUrl();
+		}
+
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
@@ -348,13 +363,6 @@ public class BulkDataExportProviderTest {
 			assertEquals("Patient", responseJson.getOutput().get(2).getType());
 			assertEquals("http://localhost:" + myPort + "/Binary/333", responseJson.getOutput().get(2).getUrl());
 		}
-	}
-
-	@Test
-	public void testPollForStatus_COMPLETED_FixedBaseURL() throws Exception {
-		// setup
-		startWithFixedBaseUrl();
-		testPollForStatus_COMPLETED();
 	}
 
 	@Test
