@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -42,6 +43,7 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHeader;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -149,8 +151,7 @@ public class BulkDataExportProvider {
 	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails.getTenantId() == null || theRequestDetails.getTenantId().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
 			return getServerBase(theRequestDetails);
-		}
-		else {
+		} else {
 			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest().replace(theRequestDetails.getTenantId(), JpaConstants.DEFAULT_PARTITION_NAME), "/");
 		}
 	}
@@ -237,52 +238,55 @@ public class BulkDataExportProvider {
 	/**
 	 * $export-poll-status
 	 */
-	@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
+	@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true, deleteEnabled = true)
 	public void exportPollStatus(
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
 	) throws IOException {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
-
 		Batch2JobInfo info = myJobRunner.getJobInfo(theJobId.getValueAsString());
 
 		switch (info.getStatus()) {
 			case COMPLETE:
-				response.setStatus(Constants.STATUS_HTTP_200_OK);
-				response.setContentType(Constants.CT_JSON);
-
-				// Create a JSON response
-				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
-				bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
-
-				String report = info.getReport();
-				if (isEmpty(report)) {
-					// this should never happen, but just in case...
-					ourLog.error("No report for completed bulk export job.");
-					response.getWriter().close();
+				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
+					handleDeleteRequest(theJobId, response);
 				} else {
-					BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+					response.setStatus(Constants.STATUS_HTTP_200_OK);
+					response.setContentType(Constants.CT_JSON);
 
-					// if there is a message....
-					bulkResponseDocument.setMsg(results.getReportMsg());
+					// Create a JSON response
+					BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
+					bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
 
-					String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+					String report = info.getReport();
+					if (isEmpty(report)) {
+						// this should never happen, but just in case...
+						ourLog.error("No report for completed bulk export job.");
+						response.getWriter().close();
+					} else {
+						BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 
-					for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
-						String resourceType = entrySet.getKey();
-						List<String> binaryIds = entrySet.getValue();
-						for (String binaryId : binaryIds) {
-							IIdType iId = new IdType(binaryId);
-							String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
-							bulkResponseDocument
-								.addOutput()
-								.setType(resourceType)
-								.setUrl(nextUrl);
+						// if there is a message....
+						bulkResponseDocument.setMsg(results.getReportMsg());
+
+						String serverBase = getDefaultPartitionServerBase(theRequestDetails);
+
+						for (Map.Entry<String, List<String>> entrySet : results.getResourceTypeToBinaryIds().entrySet()) {
+							String resourceType = entrySet.getKey();
+							List<String> binaryIds = entrySet.getValue();
+							for (String binaryId : binaryIds) {
+								IIdType iId = new IdType(binaryId);
+								String nextUrl = serverBase + "/" + iId.toUnqualifiedVersionless().getValue();
+								bulkResponseDocument
+									.addOutput()
+									.setType(resourceType)
+									.setUrl(nextUrl);
+							}
 						}
+						JsonUtil.serialize(bulkResponseDocument, response.getWriter());
+						response.getWriter().close();
 					}
-					JsonUtil.serialize(bulkResponseDocument, response.getWriter());
-					response.getWriter().close();
 				}
 				break;
 			case ERROR:
@@ -299,15 +303,33 @@ public class BulkDataExportProvider {
 			case BUILDING:
 			case SUBMITTED:
 			default:
-				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-				String dateString = getTransitionTimeOfJobInfo(info);
-				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to "
-					+ info.getStatus()
-					+ " at "
-					+ dateString);
-				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
+					handleDeleteRequest(theJobId, response);
+				} else {
+					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+					String dateString = getTransitionTimeOfJobInfo(info);
+					response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to "
+						+ info.getStatus()
+						+ " at "
+						+ dateString);
+					response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				}
 				break;
 		}
+	}
+
+	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response) throws IOException {
+		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
+		Batch2JobOperationResult resultMessage = myJobRunner.cancelInstance(theJobId.getValueAsString());
+		if (resultMessage.getSuccess()) {
+			response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "information", resultMessage.getMessage(), null, "informational");
+		} else {
+			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", resultMessage.getMessage(), null, null);
+		}
+		myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(outcome, response.getWriter());
+		response.getWriter().close();
 	}
 
 	private String getTransitionTimeOfJobInfo(Batch2JobInfo theInfo) {
@@ -389,7 +411,7 @@ public class BulkDataExportProvider {
 	}
 
 	private Set<String> splitTypeFilters(List<IPrimitiveType<String>> theTypeFilter) {
-		if (theTypeFilter== null) {
+		if (theTypeFilter == null) {
 			return null;
 		}
 
@@ -400,7 +422,7 @@ public class BulkDataExportProvider {
 			Arrays
 				.stream(typeFilterString.split(FARM_TO_TABLE_TYPE_FILTER_REGEX))
 				.filter(StringUtils::isNotBlank)
-				.forEach(t->retVal.add(t));
+				.forEach(t -> retVal.add(t));
 		}
 
 		return retVal;

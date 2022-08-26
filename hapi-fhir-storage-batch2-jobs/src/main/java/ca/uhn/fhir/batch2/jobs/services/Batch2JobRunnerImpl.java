@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
@@ -77,12 +78,20 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	}
 
 	@Override
-	public String cancelInstance(String theJobId) throws ResourceNotFoundException {
+	public Batch2JobOperationResult cancelInstance(String theJobId) throws ResourceNotFoundException {
 		JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
 		if (cancelResult == null) {
 			throw new ResourceNotFoundException(Msg.code(2131) + " : " + theJobId);
 		}
-		return cancelResult.getMessage();
+		return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
+	}
+
+	private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(@Nonnull JobOperationResultJson theResultJson) {
+		Batch2JobOperationResult result = new Batch2JobOperationResult();
+		result.setOperation(theResultJson.getOperation());
+		result.setMessage(theResultJson.getMessage());
+		result.setSuccess(theResultJson.getSuccess());
+		return result;
 	}
 
 	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -197,7 +199,7 @@ public class BulkDataExportProviderTest {
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
-		BulkExportParameters params = verifyJobStart();;
+		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "Practitioner"));
 		assertThat(params.getStartDate(), notNullValue());
@@ -226,7 +228,7 @@ public class BulkDataExportProviderTest {
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
-		BulkExportParameters params = verifyJobStart();;
+		BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 		assertThat(params.getResourceTypes(), containsInAnyOrder("Patient", "EpisodeOfCare"));
 		assertThat(params.getStartDate(), nullValue());
@@ -456,12 +458,12 @@ public class BulkDataExportProviderTest {
 
 		InstantType now = InstantType.now();
 
-		String url = "http://localhost:" + myPort + "/" + GROUP_ID + "/"  + JpaConstants.OPERATION_EXPORT
+		String url = "http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo|bar")
-			+ "&" + JpaConstants.PARAM_EXPORT_MDM+ "=true";
+			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
 
 		// call
 		HttpGet get = new HttpGet(url);
@@ -524,7 +526,7 @@ public class BulkDataExportProviderTest {
 	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
 		// when
 
-		String url = "http://localhost:" + myPort + "/" + "Group/123/" +JpaConstants.OPERATION_EXPORT
+		String url = "http://localhost:" + myPort + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition,Observation");
 
@@ -548,7 +550,7 @@ public class BulkDataExportProviderTest {
 		String url = "http://localhost:" + myPort + "/" + "Group/123/" + JpaConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);
 
-        HttpGet get = new HttpGet(url);
+		HttpGet get = new HttpGet(url);
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		CloseableHttpResponse execute = myClient.execute(get);
 
@@ -679,16 +681,22 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
-	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJob() throws IOException {
+	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJobSuccessfully() throws IOException {
 		// setup
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
 		info.setEndTime(InstantType.now().getValue());
+		Batch2JobOperationResult result = new Batch2JobOperationResult();
+		result.setOperation("Cancel job instance " + A_JOB_ID);
+		result.setMessage("Job instance <" + A_JOB_ID + "> successfully cancelled.");
+		result.setSuccess(true);
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
 			.thenReturn(info);
+		when(myJobRunner.cancelInstance(eq(A_JOB_ID)))
+			.thenReturn(result);
 
 		// call
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
@@ -698,13 +706,86 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("ACCEPTED", response.getStatusLine().getReasonPhrase());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 
 			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
-			if (response.getEntity() != null && response.getEntity().getContent() != null) {
-				String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info("Response content: {}", responseContent);
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			if (!Objects.equals(responseContent, "")) {
+				assertThat(responseContent, containsString("successfully cancelled."));
+			}
+		}
+	}
 
+	@Test
+	public void testDeleteForOperationPollStatus_SUBMITTEDAndCancelled_ShouldReturnError() throws IOException {
+		// setup
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+		info.setEndTime(InstantType.now().getValue());
+		Batch2JobOperationResult result = new Batch2JobOperationResult();
+		result.setOperation("Cancel job instance " + A_JOB_ID);
+		result.setMessage("Job instance <" + A_JOB_ID + "> was already cancelled.  Nothing to do.");
+		result.setSuccess(false);
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+		when(myJobRunner.cancelInstance(eq(A_JOB_ID)))
+			.thenReturn(result);
+
+		// call
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpDelete delete = new HttpDelete(url);
+		try (CloseableHttpResponse response = myClient.execute(delete)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(404, response.getStatusLine().getStatusCode());
+			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
+
+			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			if (!Objects.equals(responseContent, "")) {
+				assertThat(responseContent, containsString("was already cancelled."));
+			}
+		}
+	}
+
+	@Test
+	public void testDeleteForOperationPollStatus_COMPLETE_ShouldCancelJobSuccessfully() throws IOException {
+		// setup
+		Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
+		info.setEndTime(InstantType.now().getValue());
+		Batch2JobOperationResult result = new Batch2JobOperationResult();
+		result.setOperation("Cancel job instance " + A_JOB_ID);
+		result.setMessage("Job instance <" + A_JOB_ID + "> successfully cancelled.");
+		result.setSuccess(true);
+
+		// when
+		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+			.thenReturn(info);
+		when(myJobRunner.cancelInstance(eq(A_JOB_ID)))
+			.thenReturn(result);
+
+		// call
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpDelete delete = new HttpDelete(url);
+		try (CloseableHttpResponse response = myClient.execute(delete)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+
+			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			if (!Objects.equals(responseContent, "")) {
 				assertThat(responseContent, containsString("successfully cancelled."));
 			}
 		}

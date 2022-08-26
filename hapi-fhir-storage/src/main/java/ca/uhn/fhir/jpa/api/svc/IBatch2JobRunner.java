@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.api.svc;
  */
 
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 
@@ -44,5 +45,5 @@ public interface IBatch2JobRunner {
 	/**
 	 * Cancels the job provided
 	 */
-	String cancelInstance(String theJobId);
+	Batch2JobOperationResult cancelInstance(String theJobId);
 }
