@@ -35,13 +35,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -150,9 +149,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
-		File file = ResourceUtils.getFile("classpath:loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		InputStream is = new ClassPathResource("loinc-ver/" + LOINC_UPLOAD_PROPERTIES_FILE.getCode()).getInputStream();
 		uploadProperties = new Properties();
-		uploadProperties.load(new FileInputStream(file));
+		uploadProperties.load(is);
 
 		myValueSetIFhirResourceDao = myDaoRegistry.getResourceDao(ValueSet.class);
 
