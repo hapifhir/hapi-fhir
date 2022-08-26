@@ -111,7 +111,7 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails,
-								 BulkDataExportOptions theOptions) throws Exception {
+								 BulkDataExportOptions theOptions){
 		// permission check
 		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
 			.add(RequestDetails.class, theRequestDetails)
@@ -377,10 +377,10 @@ public class BulkDataExportProvider {
 		return bulkDataExportOptions;
 	}
 
-	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, JobInfo theOutcome) throws Exception {
+	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
 		if (serverBase == null) {
-			throw new InternalErrorException("Unable to get the server base.");
+			throw new InternalErrorException(Msg.code(2131) + "Unable to get the server base.");
 		}
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
 

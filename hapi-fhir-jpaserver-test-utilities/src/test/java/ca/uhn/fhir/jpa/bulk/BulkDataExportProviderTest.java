@@ -88,6 +88,7 @@ public class BulkDataExportProviderTest {
 
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
+	private RestfulServer servlet;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -100,7 +101,7 @@ public class BulkDataExportProviderTest {
 		myServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
+		servlet = new RestfulServer(myCtx);
 		servlet.registerProvider(myProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -114,18 +115,7 @@ public class BulkDataExportProviderTest {
 		myClient = builder.build();
 	}
 
-	public void startWithFixedBaseUrl() throws Exception {
-		myServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
-		servlet.registerProvider(myProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		myServer.setHandler(proxyHandler);
-		JettyUtil.startServer(myServer);
-		myPort = JettyUtil.getPortForStartedServer(myServer);
-
+	public void startWithFixedBaseUrl() {
 		String baseUrl = "http://localhost:" + myPort + "/fixedvalue";
 		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(baseUrl);
 		servlet.setServerAddressStrategy(hardcodedServerAddressStrategy);
@@ -194,35 +184,7 @@ public class BulkDataExportProviderTest {
 	public void testSuccessfulInitiateBulkRequest_Post_FixedBaseURL() throws Exception {
 		// setup
 		startWithFixedBaseUrl();
-
-		String patientResource = "Patient";
-		String practitionerResource = "Practitioner";
-		String filter = "Patient?identifier=foo";
-		when(myJobRunner.startNewJob(any()))
-			.thenReturn(createJobStartResponse());
-
-		InstantType now = InstantType.now();
-
-		Parameters input = new Parameters();
-		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
-		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(patientResource + ", " + practitionerResource));
-		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
-		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType(filter));
-
-		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
-
-		// test
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response.toString());
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		testSuccessfulInitiateBulkRequest_Post();
 	}
 
 	@Test
@@ -392,37 +354,7 @@ public class BulkDataExportProviderTest {
 	public void testPollForStatus_COMPLETED_FixedBaseURL() throws Exception {
 		// setup
 		startWithFixedBaseUrl();
-
-		Batch2JobInfo info = new Batch2JobInfo();
-		info.setJobId(A_JOB_ID);
-		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
-		info.setEndTime(InstantType.now().getValue());
-		ArrayList<String> ids = new ArrayList<>();
-		ids.add(new IdType("Binary/111").getValueAsString());
-		BulkExportJobResults results = new BulkExportJobResults();
-		HashMap<String, List<String>> map = new HashMap<>();
-		map.put("Patient", ids);
-		results.setResourceTypeToBinaryIds(map);
-		info.setReport(JsonUtil.serialize(results));
-
-		// when
-		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
-			.thenReturn(info);
-
-		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
-			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
-
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals("http://localhost:" + myPort + "/Binary/111", responseJson.getOutput().get(0).getUrl());
-		}
+		testPollForStatus_COMPLETED();
 	}
 
 	@Test
