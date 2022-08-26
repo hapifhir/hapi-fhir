@@ -1,19 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
+import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.UriType;
@@ -24,6 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test {
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
