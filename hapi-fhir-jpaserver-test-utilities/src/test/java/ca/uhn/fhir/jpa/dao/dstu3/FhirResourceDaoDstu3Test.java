@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -107,7 +108,6 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -865,7 +865,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myOrganizationDao.delete(orgId, mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertConflictException(e);
+			DaoTestUtils.assertConflictException(e);
 		}
 
 		myPatientDao.delete(patId, mySrd);
@@ -1007,7 +1007,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myObservationDao.deleteByUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER", mySrd);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertConflictException(e);
+			DaoTestUtils.assertConflictException(e);
 		}
 
 		myObservationDao.read(obs1id);
@@ -3409,11 +3409,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		myConsentDao.create(consent);
 	}
 
-
-	public static void assertConflictException(ResourceVersionConflictException e) {
-		assertThat(e.getMessage(), matchesPattern(
-			Msg.code(550) + Msg.code(515) + "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
-	}
 
 	private static List<String> toStringList(List<UriType> theUriType) {
 		ArrayList<String> retVal = new ArrayList<>();

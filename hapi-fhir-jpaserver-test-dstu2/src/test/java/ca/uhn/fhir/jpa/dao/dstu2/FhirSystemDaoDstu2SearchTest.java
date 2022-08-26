@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-
-import ca.uhn.fhir.util.TestUtil;
 
 public class FhirSystemDaoDstu2SearchTest extends BaseJpaDstu2SystemTest {
 

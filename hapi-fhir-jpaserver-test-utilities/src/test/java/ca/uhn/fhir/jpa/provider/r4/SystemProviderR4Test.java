@@ -6,7 +6,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.DiagnosticReportResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.LocationResourceProvider;
@@ -730,7 +729,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.registerInterceptor(interceptor);
 		try {
 
-			InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
+			InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
 			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 
 			HttpPost req = new HttpPost(ourServerBase);

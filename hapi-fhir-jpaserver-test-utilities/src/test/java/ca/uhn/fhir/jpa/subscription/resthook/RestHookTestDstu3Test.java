@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -56,7 +56,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
@@ -115,11 +114,11 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	@BeforeEach
 	public void beforeRegisterRestHookListener() {
 		ourLog.info("Before re-registering interceptors");
-		logAllInterceptors(myInterceptorRegistry);
+		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 		ourLog.info("After re-registering interceptors");
-		logAllInterceptors(myInterceptorRegistry);
+		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
 	}
 
 	@BeforeEach
@@ -683,16 +682,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			communicationRequestListenerLatch.countDown();
 			return new MethodOutcome(new IdType("CommunicationRequest/1"), false);
 		}
-	}
-
-	public static void logAllInterceptors(IInterceptorService theInterceptorRegistry) {
-		List<Object> allInterceptors = theInterceptorRegistry.getAllRegisteredInterceptors();
-		String interceptorList = allInterceptors
-			.stream()
-			.map(t -> t.getClass().toString())
-			.sorted()
-			.collect(Collectors.joining("\n * "));
-		ourLog.info("Registered interceptors:\n * {}", interceptorList);
 	}
 
 	@BeforeAll
