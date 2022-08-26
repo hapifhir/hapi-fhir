@@ -939,7 +939,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 		String s = currentRelativePath.toAbsolutePath().toString();
 		System.out.println("Current absolute path is: " + s);
 
-		String fileUrl = "file:" + s + "/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz";
+		String fileUrl = "file:" + s + "/src/main/resources/packages/de.basisprofil.r4-1.2.0.tgz";
 
 		myPackageInstallerSvc.install(new PackageInstallationSpec()
 			.setName("de.basisprofil.r4")
