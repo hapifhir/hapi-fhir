@@ -167,27 +167,4 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
-	<build>
-		<plugins>
-
-			<plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <configuration>
-               <dumpOnExit>true</dumpOnExit>
-            </configuration>
-            <executions>
-               <execution>
-                  <id>default-prepare-agent</id>
-                  <goals>
-                     <goal>prepare-agent</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-
-		</plugins>
-	</build>
-
 </project>
