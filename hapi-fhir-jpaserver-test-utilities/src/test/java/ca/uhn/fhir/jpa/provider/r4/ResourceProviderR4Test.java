@@ -7082,6 +7082,28 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void createResource_withMetaSourceHashProvided_providedHashMetaSourceIsNotModified(){
+		String expectedMetaSource = "mySource#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+
+	}
+
 	@Nonnull
 	private IIdType createNewPatientWithHistory() {
 		String TEST_SYSTEM_NAME = "testHistoryRewrite";
