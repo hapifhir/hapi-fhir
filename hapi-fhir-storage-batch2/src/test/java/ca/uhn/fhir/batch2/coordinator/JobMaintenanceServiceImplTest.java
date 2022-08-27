@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunk;
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
@@ -68,6 +69,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
 	@Captor
 	private ArgumentCaptor<JobCompletionDetails<TestJobParameters>> myJobCompletionCaptor;
+
+	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -111,6 +114,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		mySvc.runMaintenancePass();
 
@@ -145,6 +149,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -232,6 +237,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenReturn(chunks.iterator());
 		when(myJobPersistence.updateInstance(any())).thenReturn(true);
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		// Execute
 
@@ -283,6 +289,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenReturn(chunks.iterator());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		mySvc.runMaintenancePass();
 

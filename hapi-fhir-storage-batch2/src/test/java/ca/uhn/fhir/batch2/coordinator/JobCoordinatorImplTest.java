@@ -64,9 +64,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
-	// The code refactored to keep the same functionality,
-	// but in this service (so it's a real service here!)
-	private WorkChunkProcessor myJobStepExecutorSvc;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -77,13 +74,15 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
 	private ArgumentCaptor<JobInstance> myJobInstanceCaptor;
-	@Captor
-	private ArgumentCaptor<String> myErrorMessageCaptor;
+
+	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 
 	@BeforeEach
 	public void beforeEach() {
-		myJobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, myJobStepExecutorSvc);
+		// The code refactored to keep the same functionality,
+		// but in this service (so it's a real service here!)
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc);
 	}
 
 	@Test
@@ -194,6 +193,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		setupMocks(createJobDefinition(), createWorkChunkStep1());
 		when(myStep1Worker.run(any(), any())).thenReturn(new RunOutcome(50));
+		when(myJobInstancePersister.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+
 		mySvc.start();
 
 		// Execute
@@ -545,13 +546,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId) {
-		return createWorkNotification(JOB_DEFINITION_ID, theStepId);
-	}
-
-	@Nonnull
-	private JobWorkNotification createWorkNotification(String theJobId, String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
-		payload.setJobDefinitionId(theJobId);
+		payload.setJobDefinitionId(JOB_DEFINITION_ID);
 		payload.setJobDefinitionVersion(1);
 		payload.setInstanceId(INSTANCE_ID);
 		payload.setChunkId(BaseBatch2Test.CHUNK_ID);
