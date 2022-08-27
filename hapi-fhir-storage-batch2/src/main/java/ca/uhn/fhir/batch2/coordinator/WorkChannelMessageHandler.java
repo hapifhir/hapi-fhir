@@ -52,7 +52,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull BatchJobSender theBatchJobSender,
-									  @Nonnull StepExecutionSvc theExecutorSvc
+									  @Nonnull WorkChunkProcessor theExecutorSvc
 	) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;

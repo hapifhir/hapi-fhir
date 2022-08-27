@@ -57,7 +57,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Mock
 	private IJobPersistence myJobPersistence;
 	@Mock
-	private StepExecutionSvc myJobExecutorSvc;
+	private WorkChunkProcessor myJobExecutorSvc;
 	private JobMaintenanceServiceImpl mySvc;
 	@Captor
 	private ArgumentCaptor<JobInstance> myInstanceCaptor;

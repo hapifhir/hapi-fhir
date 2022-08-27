@@ -66,7 +66,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	// The code refactored to keep the same functionality,
 	// but in this service (so it's a real service here!)
-	private StepExecutionSvc myJobStepExecutorSvc;
+	private WorkChunkProcessor myJobStepExecutorSvc;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -82,7 +82,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@BeforeEach
 	public void beforeEach() {
-		myJobStepExecutorSvc = new StepExecutionSvc(myJobInstancePersister, myBatchJobSender);
+		myJobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
 		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, myJobStepExecutorSvc);
 	}
 

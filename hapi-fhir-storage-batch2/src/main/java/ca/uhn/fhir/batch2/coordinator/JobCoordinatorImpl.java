@@ -27,10 +27,10 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
@@ -46,11 +46,9 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -71,7 +69,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IChannelReceiver theWorkChannelReceiver,
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-									  @Nonnull StepExecutionSvc theExecutorSvc
+									  @Nonnull WorkChunkProcessor theExecutorSvc
 	) {
 		Validate.notNull(theJobPersistence);
 
@@ -97,12 +95,11 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
-			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
-				theStartRequest.getJobDefinitionId(), theStartRequest.getParameters()
+			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(),
+				StatusEnum.QUEUED,
+				StatusEnum.IN_PROGRESS,
+				StatusEnum.COMPLETED
 			);
-			request.addStatus(StatusEnum.QUEUED);
-			request.addStatus(StatusEnum.IN_PROGRESS);
-			request.addStatus(StatusEnum.COMPLETED);
 
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {

@@ -23,7 +23,7 @@ package ca.uhn.fhir.batch2.maintenance;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobStepExecutorOutput;
-import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
+import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -48,14 +48,14 @@ public class JobInstanceProcessor {
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
-	private final StepExecutionSvc myJobExecutorSvc;
+	private final WorkChunkProcessor myJobExecutorSvc;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								JobInstance theInstance,
 								JobChunkProgressAccumulator theProgressAccumulator,
-								StepExecutionSvc theExecutorSvc
+								WorkChunkProcessor theExecutorSvc
 	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
@@ -179,17 +179,7 @@ public class JobInstanceProcessor {
 		if (!result.isSuccessful()) {
 			myInstance.setStatus(StatusEnum.FAILED);
 			myInstance.setEndTime(new Date());
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
-	}
-
-	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
-		if (myInstance.getStatus() != newStatus) {
-			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
-			myInstance.setStatus(newStatus);
-			myInstance.setStartTime(new Date());
-			return true;
-		}
-		return false;
 	}
 }

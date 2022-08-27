@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-	private final StepExecutionSvc myJobExecutorSvc;
+	private final WorkChunkProcessor myJobExecutorSvc;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	private final JobDefinition<PT> myDefinition;
 	private final JobInstance myInstance;
@@ -57,7 +59,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 						 @Nonnull JobInstance theInstance,
 						 @Nonnull WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull StepExecutionSvc theExecutor) {
+						 @Nonnull WorkChunkProcessor theExecutor) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
@@ -67,6 +69,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myWorkChunk = theWorkChunk;
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,7 +88,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed and setting end date", myInstanceId);
 			myInstance.setEndTime(new Date());
 			myInstance.setStatus(StatusEnum.COMPLETED);
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 
 		if (myDefinition.isGatedExecution()) {

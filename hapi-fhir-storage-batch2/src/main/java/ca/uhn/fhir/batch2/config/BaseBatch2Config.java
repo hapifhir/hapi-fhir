@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
+import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -55,8 +55,8 @@ public abstract class BaseBatch2Config {
 	}
 
 	@Bean
-	public StepExecutionSvc jobStepExecutorService(BatchJobSender theBatchJobSender) {
-		return new StepExecutionSvc(myPersistence, theBatchJobSender);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
 	}
 
 	@Bean
@@ -67,7 +67,7 @@ public abstract class BaseBatch2Config {
 	@Bean
 	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
 															  BatchJobSender theBatchJobSender,
-															  StepExecutionSvc theExecutor) {
+															  WorkChunkProcessor theExecutor) {
 		return new JobCoordinatorImpl(
 			theBatchJobSender,
 			batch2ProcessingChannelReceiver(myChannelFactory),
@@ -81,7 +81,7 @@ public abstract class BaseBatch2Config {
 	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
 																				 JobDefinitionRegistry theJobDefinitionRegistry,
 																				 BatchJobSender theBatchJobSender,
-																				 StepExecutionSvc theExecutor
+																				 WorkChunkProcessor theExecutor
 	) {
 		return new JobMaintenanceServiceImpl(theSchedulerService,
 			myPersistence,

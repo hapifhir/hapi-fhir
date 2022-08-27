@@ -20,6 +20,8 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -132,4 +134,33 @@ public enum StatusEnum {
 		ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
 	}
 
+	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
+		if (theOrigStatus == theNewStatus) {
+			return true;
+		}
+
+		switch (theOrigStatus) {
+			case QUEUED:
+				// initial state can transition to anything
+				return true;
+			case IN_PROGRESS:
+				switch (theNewStatus) {
+					case QUEUED:
+						return false;
+					case COMPLETED:
+					case CANCELLED:
+					case ERRORED:
+					case FAILED:
+						return true;
+				}
+			case COMPLETED:
+			case CANCELLED:
+			case ERRORED:
+			case FAILED:
+				// terminal state cannot transition
+				return false;
+		}
+
+		throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+	}
 }

@@ -32,11 +32,11 @@ import javax.annotation.Nonnull;
 public class JobStepExecutorFactory {
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-	private final StepExecutionSvc myJobStepExecutorSvc;
+	private final WorkChunkProcessor myJobStepExecutorSvc;
 
 	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence,
 											@Nonnull BatchJobSender theBatchJobSender,
-											@Nonnull StepExecutionSvc theExecutorSvc) {
+											@Nonnull WorkChunkProcessor theExecutorSvc) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;

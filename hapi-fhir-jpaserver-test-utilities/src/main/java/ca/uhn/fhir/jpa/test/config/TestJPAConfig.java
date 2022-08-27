@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.test.config;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
@@ -104,8 +106,8 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public Batch2JobHelper batch2JobHelper() {
-		return new Batch2JobHelper();
+	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator) {
+		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator);
 	}
 
 	@Bean
