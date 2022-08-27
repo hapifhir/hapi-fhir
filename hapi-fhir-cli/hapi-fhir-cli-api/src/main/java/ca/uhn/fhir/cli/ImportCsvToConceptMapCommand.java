@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -64,10 +65,15 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	protected static final String TARGET_VALUE_SET_PARAM_LONGOPT = "output";
 	protected static final String TARGET_VALUE_SET_PARAM_NAME = "output";
 	protected static final String TARGET_VALUE_SET_PARAM_DESC = "The target value set of the ConceptMap to be imported (i.e. ConceptMap.targetUri).";
+	protected static final String CONCEPTMAP_STATUS_PARAM = "s";
+	protected static final String CONCEPTMAP_STATUS_PARAM_LONGOPT = "status";
+	protected static final String CONCEPTMAP_STATUS_PARAM_NAME = "status";
+	protected static final String CONCEPTMAP_STATUS_PARAM_DESC = "The status of the ConceptMap resource to be imported/exported (i.e. ConceptMap.status).";
 
 	protected String sourceValueSet;
 	protected String targetValueSet;
 
+	private String status;
 	private boolean hasElements;
 	private boolean hasTargets;
 
@@ -97,7 +103,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 	}
 
 	@Override
-	protected void parseAdditionalParameters(CommandLine theCommandLine) {
+	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {
 		sourceValueSet = theCommandLine.getOptionValue(SOURCE_VALUE_SET_PARAM);
 		if (isBlank(sourceValueSet)) {
 			ourLog.info("Source value set is not specified (i.e. ConceptMap.sourceUri).");
@@ -110,6 +116,11 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 			ourLog.info("Target value set is not specified (i.e. ConceptMap.targetUri).");
 		} else {
 			ourLog.info("Specified target value set (i.e. ConceptMap.targetUri): {}", targetValueSet);
+		}
+
+		status = theCommandLine.getOptionValue(CONCEPTMAP_STATUS_PARAM);
+		if (isBlank(status)) {
+			throw new ParseException(Msg.code(2134) + "No status (" + CONCEPTMAP_STATUS_PARAM + ") specified.");
 		}
 	}
 
