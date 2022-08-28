@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,5 +158,17 @@ class InstanceProgress {
 
 	public boolean changed() {
 		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myIncompleteChunkCount", myIncompleteChunkCount)
+			.append("myCompleteChunkCount", myCompleteChunkCount)
+			.append("myErroredChunkCount", myErroredChunkCount)
+			.append("myFailedChunkCount", myFailedChunkCount)
+			.append("myErrormessage", myErrormessage)
+			.append("myRecordsProcessed", myRecordsProcessed)
+			.toString();
 	}
 }
