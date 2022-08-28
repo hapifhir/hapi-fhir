@@ -64,13 +64,12 @@ public class JobInstanceProgressCalculator {
 
 
 		if (instanceProgress.changed() || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			// TODO KHS reduce loglevel once batch state change is working consistently
 			if (myInstance.getCombinedRecordsProcessed() > 0) {
 				ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
-				ourLog.info(instanceProgress.toString());
+				ourLog.debug(instanceProgress.toString());
 			} else {
 				ourLog.info("Job {} of type {} has status {} - {} records processed", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed());
-				ourLog.info(instanceProgress.toString());
+				ourLog.debug(instanceProgress.toString());
 			}
 		}
 
