@@ -16,6 +16,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.cache.Cache;
 import org.hl7.fhir.cache.CacheFactory;
+import org.hl7.fhir.cache.LoadingCache;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -62,7 +63,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
-	private final Cache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 

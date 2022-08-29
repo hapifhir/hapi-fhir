@@ -32,9 +32,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hl7.fhir.cache.Cache;
 import org.hl7.fhir.cache.CacheFactory;
 import org.hl7.fhir.cache.CacheLoader;
+import org.hl7.fhir.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +62,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Autowired
 	private IPartitionDao myPartitionDao;
 
-	private Cache<String, PartitionEntity> myNameToPartitionCache;
-	private Cache<Integer, PartitionEntity> myIdToPartitionCache;
+	private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
+	private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private FhirContext myFhirCtx;
