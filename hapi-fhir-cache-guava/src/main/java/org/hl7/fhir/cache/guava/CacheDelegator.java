@@ -45,6 +45,10 @@ public class CacheDelegator<K, V> implements org.hl7.fhir.cache.Cache<K, V> {
 		cache.invalidateAll();
 	}
 
+	public long estimatedSize() {
+		return cache.size();
+	}
+
 	public void cleanUp(){
 		cache.cleanUp();
 	}

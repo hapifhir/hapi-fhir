@@ -28,5 +28,7 @@ public interface Cache<K, V> {
 
     void invalidateAll();
 
+	 long estimatedSize();
+
     void cleanUp();
 }
