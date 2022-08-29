@@ -4,9 +4,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -202,6 +204,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 	@Autowired
 	MatchUrlService myMatchUrlService;
+	@Autowired
+	IInterceptorService myInterceptorService;
 
 	@AfterEach
 	public void afterResetSearchSize() {
@@ -252,6 +256,20 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCodeSystemDao.search(map, mySrd); // should not fail
 
 	}
+
+	@Test
+	public void testRebuildSearchParamRegistryWithOffsetSearches() {
+		ForceOffsetSearchModeInterceptor forceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		forceOffsetSearchModeInterceptor.setDefaultCount(1);
+		try {
+			myInterceptorService.registerInterceptor(forceOffsetSearchModeInterceptor);
+			createObservationIssueSearchParameter();
+			mySearchParamRegistry.forceRefresh();
+		} finally {
+			myInterceptorService.unregisterInterceptor(forceOffsetSearchModeInterceptor);
+		}
+	}
+
 
 	@Test
 	public void testSearchInExistingTransaction() {
@@ -4380,16 +4398,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// Add a search parameter to Observation.issued, so that between that one
 		// and the existing one on Observation.effective, we have 2 date search parameters
 		// on the same resource
-		{
-			SearchParameter sp = new SearchParameter();
-			sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			sp.addBase("Observation");
-			sp.setType(Enumerations.SearchParamType.DATE);
-			sp.setCode("issued");
-			sp.setExpression("Observation.issued");
-			mySearchParameterDao.create(sp);
-			mySearchParamRegistry.forceRefresh();
-		}
+		createObservationIssueSearchParameter();
+		mySearchParamRegistry.forceRefresh();
 
 		// Dates are reversed on these two observations
 		IIdType obsId1;
@@ -4472,6 +4482,16 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
 
+	}
+
+	private void createObservationIssueSearchParameter() {
+		SearchParameter sp = new SearchParameter();
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Observation");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("issued");
+		sp.setExpression("Observation.issued");
+		mySearchParameterDao.create(sp);
 	}
 
 	@Test

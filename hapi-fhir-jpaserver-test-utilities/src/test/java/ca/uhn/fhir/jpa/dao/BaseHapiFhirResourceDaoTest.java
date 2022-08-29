@@ -1,5 +1,10 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
+import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -17,6 +22,8 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,6 +31,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -31,7 +39,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityManager;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +59,15 @@ class BaseHapiFhirResourceDaoTest {
 
 	@Mock
 	private DaoConfig myConfig;
+
+	@Mock
+	private IJobCoordinator myJobCoordinator;
+
+	@Mock
+	private UrlPartitioner myUrlPartitioner;
+
+	@Mock
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	// we won't inject this
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -164,6 +184,48 @@ class BaseHapiFhirResourceDaoTest {
 		// verify
 		Assertions.assertNotNull(outcome);
 		Assertions.assertEquals(id.getValue(), outcome.getId().getValue());
+	}
+
+	@Test
+	public void requestReindexForRelatedResources_withValidBase_includesUrlsInJobParameters() {
+		List<String> base = Lists.newArrayList("Patient", "Group");
+
+		Mockito.when(myUrlPartitioner.partitionUrl(Mockito.any(), Mockito.any())).thenAnswer(i -> {
+			PartitionedUrl partitionedUrl = new PartitionedUrl();
+			partitionedUrl.setUrl(i.getArgument(0));
+			return partitionedUrl;
+		});
+
+		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
+
+		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
+		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
+
+		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
+		assertNotNull(actualRequest);
+		assertNotNull(actualRequest.getParameters());
+		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
+
+		assertEquals(2, actualParameters.getPartitionedUrls().size());
+		assertEquals("Patient?", actualParameters.getPartitionedUrls().get(0).getUrl());
+		assertEquals("Group?", actualParameters.getPartitionedUrls().get(1).getUrl());
+	}
+
+	@Test
+	public void requestReindexForRelatedResources_withSpecialBaseResource_doesNotIncludeUrlsInJobParameters() {
+		List<String> base = Lists.newArrayList("Resource");
+
+		mySvc.requestReindexForRelatedResources(false, base, new ServletRequestDetails());
+
+		ArgumentCaptor<JobInstanceStartRequest> requestCaptor = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
+		Mockito.verify(myJobCoordinator).startInstance(requestCaptor.capture());
+
+		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
+		assertNotNull(actualRequest);
+		assertNotNull(actualRequest.getParameters());
+		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
+
+		assertEquals(0, actualParameters.getPartitionedUrls().size());
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {

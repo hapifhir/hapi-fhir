@@ -12,27 +12,34 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Patient;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmPackageValidationSupportTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(NpmPackageValidationSupportTest.class);
 	private FhirContext myFhirContext = FhirContext.forR4Cached();
 
+	private Map<String, byte[]> EXPECTED_BINARIES_MAP = Map.of(
+		"dummyBinary1.txt", "myDummyContent1".getBytes(),
+		"dummyBinary2.txt", "myDummyContent2".getBytes()
+	);
 	@Test
 	public void testValidateWithPackage() throws IOException {
 
 		// Create an NPM Package Support module and load one package in from
 		// the classpath
-		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(myFhirContext);
-		npmPackageSupport.loadPackageFromClasspath("classpath:package/UK.Core.r4-1.1.0.tgz");
+		NpmPackageValidationSupport npmPackageSupport = getNpmPackageValidationSupport("classpath:package/UK.Core.r4-1.1.0.tgz");
 
 		// Create a support chain including the NPM Package Support
 		ValidationSupportChain validationSupportChain = new ValidationSupportChain(
@@ -64,4 +71,21 @@ public class NpmPackageValidationSupportTest {
 
 	}
 
+	@NotNull
+	private NpmPackageValidationSupport getNpmPackageValidationSupport(String theClasspath) throws IOException {
+		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(myFhirContext);
+		npmPackageSupport.loadPackageFromClasspath(theClasspath);
+		return npmPackageSupport;
+	}
+
+	@Test
+	public void loadPackageFromClasspath_normally_loadsExpectedBinaries() throws IOException {
+		NpmPackageValidationSupport npmPackageSupport = getNpmPackageValidationSupport("classpath:package/dummy-package-with-binaries.tgz");
+
+		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
+			byte[] expectedBytes = entry.getValue();
+			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
+			assertArrayEquals(expectedBytes, actualBytes);
+		}
+	}
 }

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3899
+title: "Searches using `code:in` and `code:not-in` will now expand the valueset up to the Maximum Expansion Size defined in the DaoConfig."

@@ -568,12 +568,55 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		validateNoErrors(tasks);
 	}
+
+	@Test
+	public void test_DeleteExpunge_withLargeBatchSizeManyResources() {
+		// setup
+		int batchSize = 1000;
+		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
+
+		// create patients
+		for (int i = 0; i < batchSize; i++) {
+			Patient patient = new Patient();
+			patient.setId("tracer" + i);
+			patient.setActive(true);
+			MethodOutcome result = myClient.update().resource(patient).execute();
+		}
+		ourLog.info("Patients created");
+
+		// parameters
+		Parameters input = new Parameters();
+		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Patient?active=true");
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+
+		// execute
+		myCaptureQueriesListener.clear();
+		Parameters response = myClient
+			.operation()
+			.onServer()
+			.named(ProviderConstants.OPERATION_DELETE_EXPUNGE)
+			.withParameters(input)
+			.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
+		myBatch2JobHelper.awaitJobCompletion(jobId, 60);
+		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
+
+		myCaptureQueriesListener.logDeleteQueries();
+		assertThat(deleteCount, is(equalTo(88)));
+	}
+
 	@Test
 	public void testDeleteExpungeOperationOverLargeDataset() {
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setExpungeEnabled(true);
 		myDaoConfig.setDeleteExpungeEnabled(true);
-	// setup
+
+		// setup
 		Patient patient = new Patient();
 		patient.setId("tracer");
 		patient.setActive(true);
@@ -583,7 +626,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		patient.setId(result.getId());
 		patient.getMeta().addTag().setSystem(UUID.randomUUID().toString()).setCode(UUID.randomUUID().toString());
 		result = myClient.update().resource(patient).execute();
-
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Patient?active=true");

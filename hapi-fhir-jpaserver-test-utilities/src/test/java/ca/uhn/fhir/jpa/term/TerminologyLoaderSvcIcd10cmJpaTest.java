@@ -45,7 +45,7 @@ public class TerminologyLoaderSvcIcd10cmJpaTest extends BaseJpaR4Test {
 			assertEquals(0, myTermValueSetDao.count());
 			assertEquals(0, myTermConceptMapDao.count());
 			assertEquals(1, myResourceTableDao.count());
-			assertEquals(17, myTermConceptDao.count());
+			assertEquals(43, myTermConceptDao.count());
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri(ITermLoaderSvc.ICD10CM_URI);
 
 			assertEquals("2021", codeSystem.getCurrentVersion().getCodeSystemVersionId());

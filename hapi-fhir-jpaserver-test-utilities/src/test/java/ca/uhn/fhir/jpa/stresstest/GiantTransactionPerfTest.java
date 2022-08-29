@@ -501,6 +501,11 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public ResourceHistoryTable getReferenceById(Long theLong) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public <S extends ResourceHistoryTable> Optional<S> findOne(Example<S> example) {
 			return Optional.empty();
 		}
@@ -874,6 +879,11 @@ public class GiantTransactionPerfTest {
 		public Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId) {
 			assert theRequestPartitionId.getPartitionIds().size() == 1;
 			return Collections.singleton(theRequestPartitionId.getFirstPartitionIdOrNull());
+		}
+
+		@Override
+		public boolean isResourcePartitionable(String theResourceType) {
+			return true;
 		}
 
 

@@ -46,7 +46,9 @@ import java.util.Set;
 
 public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends ChunkRangeJson> implements IJobStepWorker<PT, IT, ResourceIdListWorkChunkJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceIdListStep.class);
-	public static final Integer DEFAULT_PAGE_SIZE = 20000;
+	public static final int DEFAULT_PAGE_SIZE = 20000;
+
+	private static final int MAX_BATCH_OF_IDS = 500;
 
 	private final IIdChunkProducer<IT> myIdChunkProducer;
 
@@ -98,13 +100,12 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			previousLastTime = nextChunk.getLastDate().getTime();
 			nextStart = nextChunk.getLastDate();
 
-			while (idBuffer.size() >= 1000) {
-
+			while (idBuffer.size() >= MAX_BATCH_OF_IDS) {
 				List<TypedPidJson> submissionIds = new ArrayList<>();
 				for (Iterator<TypedPidJson> iter = idBuffer.iterator(); iter.hasNext(); ) {
 					submissionIds.add(iter.next());
 					iter.remove();
-					if (submissionIds.size() >= 1000) {
+					if (submissionIds.size() >= MAX_BATCH_OF_IDS) {
 						break;
 					}
 				}

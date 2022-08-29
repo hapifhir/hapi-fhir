@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Date;
 import java.util.Optional;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
@@ -80,8 +82,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		}
 
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
-			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed", myInstanceId);
-			myJobPersistence.markInstanceAsCompleted(myInstanceId);
+			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed and setting end date", myInstanceId);
+			myInstance.setEndTime(new Date());
+			myInstance.setStatus(StatusEnum.COMPLETED);
+			myJobPersistence.updateInstance(myInstance);
 		}
 
 		if (myDefinition.isGatedExecution()) {

@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -159,20 +160,30 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int thePage, int theBatchSize) {
 		String definitionId = theRequest.getJobDefinition();
 		String params = theRequest.getParameters();
+		Set<StatusEnum> statuses = theRequest.getStatuses();
 
-		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
+		Pageable pageable = PageRequest.of(thePage, theBatchSize);
 
-		// TODO - consider adding a new index... on the JobDefinitionId (and possibly Status)
-		List<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(
-			definitionId,
-			params,
-			pageable
-		);
+		List<Batch2JobInstanceEntity> instanceEntities;
 
-		return instances == null ? new ArrayList<>() : instances;
+		if (statuses != null && !statuses.isEmpty()) {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+				definitionId,
+				params,
+				statuses,
+				pageable
+			);
+		} else {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(
+				definitionId,
+				params,
+				pageable
+			);
+		}
+		return toInstanceList(instanceEntities);
 	}
 
 	@Override
