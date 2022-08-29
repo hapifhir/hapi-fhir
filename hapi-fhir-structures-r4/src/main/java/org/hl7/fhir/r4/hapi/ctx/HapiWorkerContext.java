@@ -7,11 +7,11 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -66,7 +66,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
       timeoutMillis = Long.parseLong(System.getProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS));
     }
 
-    myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
+    myFetchedResourceCache = CacheFactory.build(timeoutMillis);
 
     // Set a default locale
     setValidationMessageLanguage(getLocale());

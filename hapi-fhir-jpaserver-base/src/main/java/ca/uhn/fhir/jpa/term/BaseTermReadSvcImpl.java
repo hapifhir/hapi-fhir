@@ -85,8 +85,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
@@ -112,6 +110,8 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -226,7 +226,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private boolean myPreExpandingValueSets = false;
 
-	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1));
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired

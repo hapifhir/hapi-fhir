@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -77,7 +77,7 @@ class MemoryCacheServiceTest {
 		}
 
 		void withCacheOfSize(int theMaxSize) {
-			myCache = Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(theMaxSize).build();
+			myCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(60), theMaxSize);
 		}
 
 		void fillCacheWithRange(int theStart, int theEnd) {

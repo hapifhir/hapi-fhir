@@ -23,10 +23,11 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -87,10 +88,7 @@ public class MemoryCacheService {
 					break;
 			}
 
-			Cache<Object, Object> nextCache = Caffeine.newBuilder()
-				.expireAfterWrite(timeoutSeconds, SECONDS)
-				.maximumSize(maximumSize)
-				.build();
+			Cache<Object, Object> nextCache = CacheFactory.build(timeoutSeconds * DateUtils.MILLIS_PER_SECOND, maximumSize);
 
 			myCaches.put(next, nextCache);
 		}

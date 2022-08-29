@@ -9,13 +9,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_10_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -62,7 +62,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private static final FhirContext ourR5Context = FhirContext.forR5();
 	private final ValidationSupportContext myValidationSupportContext;
 	private final IVersionTypeConverter myModelConverter;
-	private final LoadingCache<ResourceKey, IBaseResource> myFetchResourceCache;
+	private final Cache<ResourceKey, IBaseResource> myFetchResourceCache;
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
@@ -75,10 +75,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			timeoutMillis = Long.parseLong(System.getProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS));
 		}
 
-		myFetchResourceCache = Caffeine.newBuilder()
-			.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
-			.maximumSize(10000)
-			.build(key -> {
+		myFetchResourceCache = CacheFactory.build(timeoutMillis, 10000, key -> {
 
 				String fetchResourceName = key.getResourceName();
 				if (myValidationSupportContext.getRootValidationSupport().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
