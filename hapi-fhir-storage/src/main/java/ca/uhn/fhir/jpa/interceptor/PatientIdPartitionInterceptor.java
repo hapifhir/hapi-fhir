@@ -224,7 +224,7 @@ public class PatientIdPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId provideCompartmentMemberInstanceResponse(RequestDetails theRequestDetails, String theResourceIdPart) {
 		int partitionId = providePartitionIdForPatientId(theRequestDetails, theResourceIdPart);
-		return RequestPartitionId.fromPartitionId(partitionId);
+		return RequestPartitionId.fromPartitionIdAndName(partitionId, theResourceIdPart);
 	}
 
 	/**
