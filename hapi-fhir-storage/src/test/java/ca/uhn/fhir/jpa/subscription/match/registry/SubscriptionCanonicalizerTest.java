@@ -48,7 +48,7 @@ class SubscriptionCanonicalizerTest {
 		ca.uhn.fhir.model.dstu2.resource.Subscription dstu2Sub = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		ExtensionDt extensionDt = new ExtensionDt();
 		extensionDt.setUrl(EX_SEND_DELETE_MESSAGES);
-		extensionDt.setValue(new BooleanDt(true));
+		extensionDt.setValue(new org.hl7.fhir.dstu2.model.BooleanType(true));
 		dstu2Sub.getChannel().addUndeclaredExtension(extensionDt);
 		CanonicalSubscription canonicalize = dstu2Canonicalizer.canonicalize(dstu2Sub);
 		assertTrue(canonicalize.getSendDeleteMessages());
