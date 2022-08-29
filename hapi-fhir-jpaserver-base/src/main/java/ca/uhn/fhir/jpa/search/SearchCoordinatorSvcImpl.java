@@ -33,15 +33,12 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
-import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
-import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
-import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -57,7 +54,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.IPagingProvider;
@@ -68,59 +64,38 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import co.elastic.apm.api.ElasticApm;
-import co.elastic.apm.api.Span;
-import co.elastic.apm.api.Transaction;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AbstractPageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantOnlyCount;
-import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -131,57 +106,72 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
-	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private DaoConfig myDaoConfig;
+
+	private final FhirContext myContext;
+	private final DaoConfig myDaoConfig;
+	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	private final PlatformTransactionManager myManagedTxManager;
+	private final ISearchCacheSvc mySearchCacheSvc;
+	private final ISearchResultCacheSvc mySearchResultCacheSvc;
+	private final DaoRegistry myDaoRegistry;
+	private final IPagingProvider myPagingProvider;
+	private final SearchBuilderFactory mySearchBuilderFactory;
+	private final ISynchronousSearchSvc mySynchronousSearchSvc;
+	private final PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	private final ISearchParamRegistry mySearchParamRegistry;
+	private final SearchStrategyFactory mySearchStrategyFactory;
+	private final BeanFactory myBeanFactory;
 
 	private Integer myLoadingThrottleForUnitTests = null;
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
-	private PlatformTransactionManager myManagedTxManager;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
-	@Autowired
-	private ISearchResultCacheSvc mySearchResultCacheSvc;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IPagingProvider myPagingProvider;
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
-
-	@Autowired
-	private ISynchronousSearchSvc mySynchronousSearchSvc;
-
-	@Autowired
-	private BeanFactory myBeanFactory;
 
 	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
-	@Autowired
-	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
-	@Autowired
-	private SearchStrategyFactory mySearchStrategyFactory;
+	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 
-	private Consumer<String> myOnRemoveSearchTask = (theId) -> {
+	private final Consumer<String> myOnRemoveSearchTask = (theId) -> {
 		myIdToSearchTask.remove(theId);
 	};
 
-	/**
-	 * Constructor
-	 */
-	@Autowired
-	public SearchCoordinatorSvcImpl() {
+	private final StorageInterceptorHooksFacade myStorageInterceptorHooks;
+
+	public SearchCoordinatorSvcImpl(
+		FhirContext theContext,
+		DaoConfig theDaoConfig,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		PlatformTransactionManager theManagedTxManager,
+		ISearchCacheSvc theSearchCacheSvc,
+		ISearchResultCacheSvc theSearchResultCacheSvc,
+		DaoRegistry theDaoRegistry,
+		IPagingProvider thePagingProvider,
+		SearchBuilderFactory theSearchBuilderFactory,
+		ISynchronousSearchSvc theSynchronousSearchSvc,
+		PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
+		IRequestPartitionHelperSvc theRequestPartitionHelperService,
+		ISearchParamRegistry theSearchParamRegistry,
+		SearchStrategyFactory theSearchStrategyFactory,
+		BeanFactory theBeanFactory
+	) {
 		super();
+		myContext = theContext;
+		myDaoConfig = theDaoConfig;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myManagedTxManager = theManagedTxManager;
+		mySearchCacheSvc = theSearchCacheSvc;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+		myDaoRegistry = theDaoRegistry;
+		myPagingProvider = thePagingProvider;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		mySynchronousSearchSvc = theSynchronousSearchSvc;
+		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
+		myRequestPartitionHelperService = theRequestPartitionHelperService;
+		mySearchParamRegistry = theSearchParamRegistry;
+		mySearchStrategyFactory = theSearchStrategyFactory;
+		myBeanFactory = theBeanFactory;
+
+		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
 	}
 
 	@VisibleForTesting
@@ -189,24 +179,77 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return myIdToSearchTask.keySet();
 	}
 
+//	@VisibleForTesting
+//	public void setSearchCacheServicesForUnitTest(ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc) {
+//		mySearchCacheSvc = theSearchCacheSvc;
+//		mySearchResultCacheSvc = theSearchResultCacheSvc;
+//	}
+//
+//	@VisibleForTesting
+//	void setContextForUnitTest(FhirContext theCtx) {
+//		myContext = theCtx;
+//	}
+//
+//	@VisibleForTesting
+//	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+//		myDaoConfig = theDaoConfig;
+//	}
+
 	@VisibleForTesting
-	public void setSearchCacheServicesForUnitTest(ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc) {
-		mySearchCacheSvc = theSearchCacheSvc;
-		mySearchResultCacheSvc = theSearchResultCacheSvc;
+	public void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
+		myLoadingThrottleForUnitTests = theLoadingThrottleForUnitTests;
 	}
 
-//	@PostConstruct
-//	public void start() {
-//		if (myManagedTxManager instanceof JpaTransactionManager) {
-//			JpaDialect jpaDialect = ((JpaTransactionManager) myManagedTxManager).getJpaDialect();
-//			if (jpaDialect instanceof HibernateJpaDialect) {
-//				myCustomIsolationSupported = true;
-//			}
-//		}
-//		if (myCustomIsolationSupported == false) {
-//			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
-//		}
+	@VisibleForTesting
+	public void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
+		myNeverUseLocalSearchForUnitTests = theNeverUseLocalSearchForUnitTests;
+	}
+
+	@VisibleForTesting
+	public void setSyncSizeForUnitTests(int theSyncSize) {
+		mySyncSize = theSyncSize;
+	}
+//
+//	@VisibleForTesting
+//	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
+//		myManagedTxManager = theTxManager;
 //	}
+//
+//	@VisibleForTesting
+//	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+//		myDaoRegistry = theDaoRegistry;
+//	}
+//
+//	@VisibleForTesting
+//	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+//		myInterceptorBroadcaster = theInterceptorBroadcaster;
+//	}
+//
+//	@VisibleForTesting
+//	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
+//		mySearchBuilderFactory = theSearchBuilderFactory;
+//	}
+//
+//	@VisibleForTesting
+//	public void setPersistedJpaBundleProviderFactoryForUnitTest(PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory) {
+//		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
+//	}
+//
+//	@VisibleForTesting
+//	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
+//		myRequestPartitionHelperService = theRequestPartitionHelperService;
+//	}
+//
+//	@VisibleForTesting
+//	public void setSynchronousSearchSvc(ISynchronousSearchSvc theSynchronousSearchSvc) {
+//		mySynchronousSearchSvc = theSynchronousSearchSvc;
+//	}
+
+	@SuppressWarnings("SameParameterValue")
+	@VisibleForTesting
+	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
+		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
+	}
 
 	@Override
 	public void cancelAllActiveSearches() {
@@ -216,35 +259,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			AsyncUtil.awaitLatchAndIgnoreInterrupt(next.getCompletionLatch(), 30, TimeUnit.SECONDS);
 		}
 	}
-
-	@SuppressWarnings("SameParameterValue")
-	@VisibleForTesting
-	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
-		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
-	}
-
-	/**
-	 * facade over raw hook intererface
-	 */
-	public class StorageInterceptorHooks {
-		/**
-		 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
-		 *
-		 * @param theRequestDetails
-		 * @param theParams
-		 * @param search
-		 */
-		private void callStoragePresearchRegistered(RequestDetails theRequestDetails, SearchParameterMap theParams, Search search) {
-			HookParams params = new HookParams()
-				.add(ICachedSearchDetails.class, search)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(SearchParameterMap.class, theParams);
-			CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
-		}
-		//private IInterceptorBroadcaster myInterceptorBroadcaster;
-	}
-	private final StorageInterceptorHooks myStorageInterceptorHooks = new StorageInterceptorHooks();
 
 	/**
 	 * This method is called by the HTTP client processing thread in order to
@@ -379,6 +393,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		RuntimeResourceDefinition runtimeResourceDefinition = myContext.getResourceDefinition(theResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = runtimeResourceDefinition.getImplementingClass();
+
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(theCallingDao, theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 
@@ -612,66 +627,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return loadSynchronousUpTo;
 	}
 
-	@VisibleForTesting
-	void setContextForUnitTest(FhirContext theCtx) {
-		myContext = theCtx;
-	}
-
-	@VisibleForTesting
-	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
-	}
-
-	@VisibleForTesting
-	public void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
-		myLoadingThrottleForUnitTests = theLoadingThrottleForUnitTests;
-	}
-
-	@VisibleForTesting
-	public void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
-		myNeverUseLocalSearchForUnitTests = theNeverUseLocalSearchForUnitTests;
-	}
-
-	@VisibleForTesting
-	public void setSyncSizeForUnitTests(int theSyncSize) {
-		mySyncSize = theSyncSize;
-	}
-
-	@VisibleForTesting
-	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
-		myManagedTxManager = theTxManager;
-	}
-
-	@VisibleForTesting
-	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
-
-	@VisibleForTesting
-	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
-		myInterceptorBroadcaster = theInterceptorBroadcaster;
-	}
-
-	@VisibleForTesting
-	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
-		mySearchBuilderFactory = theSearchBuilderFactory;
-	}
-
-	@VisibleForTesting
-	public void setPersistedJpaBundleProviderFactoryForUnitTest(PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory) {
-		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
-	}
-
-	@VisibleForTesting
-	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
-		myRequestPartitionHelperService = theRequestPartitionHelperService;
-	}
-
-	@VisibleForTesting
-	public void setSynchronousSearchSvc(ISynchronousSearchSvc theSynchronousSearchSvc) {
-		mySynchronousSearchSvc = theSynchronousSearchSvc;
-	}
-
 	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
 		theSearch.setDeleted(false);
 		theSearch.setUuid(theSearchUuid);
@@ -756,7 +711,5 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			throw BaseServerResponseException.newInstance(status, message);
 		}
 	}
-
-
 
 }

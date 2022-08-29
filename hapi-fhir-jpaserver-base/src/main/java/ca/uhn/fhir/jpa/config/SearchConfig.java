@@ -23,8 +23,12 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -33,6 +37,8 @@ import ca.uhn.fhir.jpa.search.tasks.SearchContinuationTask;
 import ca.uhn.fhir.jpa.search.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.tasks.SearchTaskParameters;
 import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,9 +70,38 @@ public class SearchConfig {
 	@Autowired
 	private IPagingProvider myPagingProvider;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private ISynchronousSearchSvc mySynchronousSearchSvc;
+	@Autowired
+	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperService;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private BeanFactory myBeanFactory;
+
 	@Bean
 	public ISearchCoordinatorSvc searchCoordinatorSvc() {
-		return new SearchCoordinatorSvcImpl();
+		return new SearchCoordinatorSvcImpl(
+			myContext,
+			myDaoConfig,
+			myInterceptorBroadcaster,
+			myManagedTxManager,
+			mySearchCacheSvc,
+			mySearchResultCacheSvc,
+			myDaoRegistry,
+			myPagingProvider,
+			mySearchBuilderFactory,
+			mySynchronousSearchSvc,
+			myPersistedJpaBundleProviderFactory,
+			myRequestPartitionHelperService,
+			mySearchParamRegistry,
+			mySearchStrategyFactory,
+			myBeanFactory
+		);
 	}
 
 	@Bean(name = SEARCH_TASK)

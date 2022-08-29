@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.search;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +89,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	@Mock
 	private SearchStrategyFactory mySearchStrategyFactory;
-
 	@Mock
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
@@ -103,7 +105,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Mock
 	private ISynchronousSearchSvc mySynchronousSearchSvc;
 
+	@Spy
+	protected FhirContext myContext = FhirContext.forR4();
+
 	@AfterEach
+	@Override
 	public void after() {
 		System.clearProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK);
 		super.after();
@@ -115,18 +121,18 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		myCurrentSearch = null;
 
-		mySvc.setTransactionManagerForUnitTest(myTxManager);
-		mySvc.setContextForUnitTest(ourCtx);
-		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
-		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
-		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
-		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
-		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
-		mySvc.setRequestPartitionHelperService(myPartitionHelperSvc);
-		mySvc.setSynchronousSearchSvc(mySynchronousSearchSvc);
+//		mySvc.setTransactionManagerForUnitTest(myTxManager);
+//		mySvc.setContextForUnitTest(ourCtx);
+//		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
+//		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
+//		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+//		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
+//		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
+//		mySvc.setRequestPartitionHelperService(myPartitionHelperSvc);
+//		mySvc.setSynchronousSearchSvc(mySynchronousSearchSvc);
 
-		DaoConfig daoConfig = new DaoConfig();
-		mySvc.setDaoConfigForUnitTest(daoConfig);
+
+//		mySvc.setDaoConfigForUnitTest(daoConfig);
 	}
 
 	@Test
@@ -277,7 +283,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	private void initSearches() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(
+			any(IFhirResourceDao.class), anyString(), any(Class.class)))
+			.thenReturn(mySearchBuilder);
 
 		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 	}
