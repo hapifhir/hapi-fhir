@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.search.builder.helpers.ChainElement;
 import ca.uhn.fhir.jpa.search.builder.helpers.ReferenceChainExtractor;
 import ca.uhn.fhir.jpa.search.builder.models.LeafNodeDefinition;
 import ca.uhn.fhir.jpa.search.builder.models.MissingParameterQueryParams;
+import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
 import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
@@ -47,6 +48,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredic
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.ICanMakeMissingParamPredicate;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityBasePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
@@ -1029,19 +1031,29 @@ public class QueryStack {
 			}
 		}
 
+		// TODO - Change this when we have HFJ_SPIDX_MISSING table
 		/*
 		 * How we search depends on if the IndexMissingFields property is set or not.
 		 *
 		 * If it is, we will use the SP_MISSING values set into the various
-		 * SP_INDX_X tables and search on those. This is fast for :missing=true, but slow
-		 * for :missing=false.
+		 * SP_INDX_X tables and search on those ("old" search).
 		 *
-		 * If it is not set, however, we will try and construct a new query that
-		 * looks for missing SearchParameters in the SP_INDX_X tables.
-		 * This is fast for :missing=false, and slow for :missing=true.
+		 * If it is not set, however, we will try and construct a query that
+		 * looks for missing SearchParameters in the SP_INDX_* tables ("new" search).
 		 *
-		 * You cannot mix and match, however. So setting (or unsetting) the IndexMissingFields
-		 * property should always be followed up with a /$reindex call
+		 * You cannot mix and match, however (SP_MISSING is not in HASH_IDENTITY information).
+		 * So setting (or unsetting) the IndexMissingFields
+		 * property should always be followed up with a /$reindex call.
+		 *
+		 * ---
+		 *
+		 * Current limitations:
+		 * Checking if a row exists ("new" search) for a given missing field in an SP_INDX_* table
+		 * (ie, :missing=true) is slow when there are many resources in the table. (Defaults to
+		 * a table scan, since HASH_IDENTITY isn't part of the index).
+		 *
+		 * However, the "old" search method was slow for the reverse: when looking for resources
+		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
 		SearchQueryBuilder sqlBuilder = theParams.SqlBuilder;
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
@@ -1084,7 +1096,8 @@ public class QueryStack {
 				break;
 			case REFERENCE:
 			case URI:
-				// we expect these values, but the pattern is slightly different
+				// we expect these values, but the pattern is slightly different;
+				// see below
 				break;
 			case HAS:
 			case SPECIAL:
@@ -1143,7 +1156,7 @@ public class QueryStack {
 	private Condition createMissingPredicateForUnindexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-		BaseJoiningPredicateBuilder innerQuery;
+		ICanMakeMissingParamPredicate innerQuery;
 		switch (theParams.ParamType) {
 			case NUMBER:
 				innerQuery = sqlBuilder.createNumberPredicateBuilder();
@@ -1179,19 +1192,13 @@ public class QueryStack {
 				return null;
 		}
 
-		DbColumn hashIdentityColumn = null;
-
-		// all except ResourceLinkPredicateBuilder have a HashIdentityColumn
-		if (innerQuery instanceof BaseSearchParamPredicateBuilder) {
-			hashIdentityColumn = ((BaseSearchParamPredicateBuilder) innerQuery).getColumnHashIdentity();
-		}
-
 		return innerQuery.createPredicateParamMissingValue(
-			table,
-			theParams.IsMissing,
-			theParams.ParamName,
-			theParams.RequestPartitionId,
-			hashIdentityColumn
+			new MissingQueryParameterPredicateParams(
+				table,
+				theParams.IsMissing,
+				theParams.ParamName,
+				theParams.RequestPartitionId
+			)
 		);
 	}
 

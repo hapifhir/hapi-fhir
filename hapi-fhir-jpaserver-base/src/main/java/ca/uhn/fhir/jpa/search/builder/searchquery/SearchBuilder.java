@@ -289,7 +289,6 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
 
-			// TODO - get the parent table here?
 			Condition predicate = theQueryStack.searchForIdsWithAndOr(null,
 				myResourceName,
 				nextParamName,
@@ -346,11 +345,11 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	@Override // TODO - rename to CreateQueryIterator
-	public IResultIterator createQuery(SearchParameterMap theParams,
-												  SearchRuntimeDetails theSearchRuntimeDetails,
-												  RequestDetails theRequest,
-												  @Nonnull RequestPartitionId theRequestPartitionId) {
+	@Override
+	public IResultIterator createQueryResultsIterator(SearchParameterMap theParams,
+																	  SearchRuntimeDetails theSearchRuntimeDetails,
+																	  RequestDetails theRequest,
+																	  @Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 

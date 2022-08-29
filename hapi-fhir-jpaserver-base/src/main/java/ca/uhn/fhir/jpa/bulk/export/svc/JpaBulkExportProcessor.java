@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -142,7 +141,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 					map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 				}
 
-				IResultIterator resultIterator = searchBuilder.createQuery(map,
+				IResultIterator resultIterator = searchBuilder.createQueryResultsIterator(map,
 					new SearchRuntimeDetails(null, jobId),
 					null,
 					RequestPartitionId.allPartitions());
@@ -176,7 +175,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 			for (SearchParameterMap map : maps) {
 				// requires a transaction
-				IResultIterator resultIterator = searchBuilder.createQuery(map,
+				IResultIterator resultIterator = searchBuilder.createQueryResultsIterator(map,
 					new SearchRuntimeDetails(null, jobId),
 					null,
 					RequestPartitionId.allPartitions());
@@ -357,7 +356,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 
 			//Execute query and all found pids to our local iterator.
-			IResultIterator resultIterator = searchBuilder.createQuery(expandedSpMap,
+			IResultIterator resultIterator = searchBuilder.createQueryResultsIterator(expandedSpMap,
 				new SearchRuntimeDetails(null, theParams.getJobId()),
 				null,
 				RequestPartitionId.allPartitions());

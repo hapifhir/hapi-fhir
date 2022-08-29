@@ -22,14 +22,10 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
-import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
@@ -116,48 +112,5 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 				.collect(Collectors.toList());
 		}
 		return partitionIds;
-	}
-
-	public Condition createPredicateParamMissingValue(
-		ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
-		boolean theMissing,
-		String theParamName,
-		RequestPartitionId theRequestPartitionId,
-		@Nullable DbColumn theHashIdentityColumn
-	) {
-		SelectQuery subquery = new SelectQuery();
-		subquery.addCustomColumns(1);
-		subquery.addFromTable(getTable());
-
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-			getPartitionSettings(),
-			theRequestPartitionId,
-			theResourceTablePredicateBuilder.getResourceType(),
-			theParamName
-		);
-
-		Condition subQueryCondition = null;
-		if (theHashIdentityColumn != null) {
-			subQueryCondition = ComboCondition.and(
-				BinaryCondition.equalTo(getResourceIdColumn(),
-					theResourceTablePredicateBuilder.getResourceIdColumn()
-				),
-				BinaryCondition.equalTo(theHashIdentityColumn,
-					generatePlaceholder(hashIdentity))
-			);
-		} else {
-			subQueryCondition = BinaryCondition.equalTo(getResourceIdColumn(),
-					theResourceTablePredicateBuilder.getResourceIdColumn()
-				);
-		}
-
-		subquery.addCondition(subQueryCondition);
-
-		Condition unaryCondition = UnaryCondition.exists(subquery);
-		if (theMissing) {
-			unaryCondition = new NotCondition(unaryCondition);
-		}
-
-		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, unaryCondition);
 	}
 }

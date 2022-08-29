@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -57,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -203,7 +201,7 @@ public class JpaBulkExportProcessorTest {
 		when(mySearchBuilderFactory.newSearchBuilder(eq(mockDao), eq(parameters.getResourceType()), any()))
 			.thenReturn(searchBuilder);
 		// ret
-		when(searchBuilder.createQuery(
+		when(searchBuilder.createQueryResultsIterator(
 			eq(map),
 			any(SearchRuntimeDetails.class),
 			any(),
@@ -380,7 +378,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(observationDao);
 		when(mySearchBuilderFactory.newSearchBuilder(any(), eq("Observation"), any()))
 			.thenReturn(searchBuilder);
-		when(searchBuilder.createQuery(any(SearchParameterMap.class),
+		when(searchBuilder.createQueryResultsIterator(any(SearchParameterMap.class),
 			any(SearchRuntimeDetails.class),
 			any(),
 			eq(RequestPartitionId.allPartitions())))
@@ -422,7 +420,7 @@ public class JpaBulkExportProcessorTest {
 			anyString(),
 			any()
 		)).thenReturn(searchBuilder);
-		when(searchBuilder.createQuery(
+		when(searchBuilder.createQueryResultsIterator(
 			any(SearchParameterMap.class),
 			any(SearchRuntimeDetails.class),
 			any(),

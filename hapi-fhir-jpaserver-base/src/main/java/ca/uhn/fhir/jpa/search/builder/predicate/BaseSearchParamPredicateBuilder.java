@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -37,7 +38,9 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredicateBuilder {
+public abstract class BaseSearchParamPredicateBuilder
+	extends BaseJoiningPredicateBuilder
+	implements ICanMakeMissingParamPredicate {
 
 	private final DbColumn myColumnMissing;
 	private final DbColumn myColumnResType;
@@ -101,5 +104,35 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		);
 
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, condition);
+	}
+
+	public Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams) {
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(getTable());
+
+		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+			getPartitionSettings(),
+			theParams.RequestPartitionId,
+			theParams.ResourceTablePredicateBuilder.getResourceType(),
+			theParams.ParamName
+		);
+
+		Condition subQueryCondition = ComboCondition.and(
+			BinaryCondition.equalTo(getResourceIdColumn(),
+				theParams.ResourceTablePredicateBuilder.getResourceIdColumn()
+			),
+			BinaryCondition.equalTo(getColumnHashIdentity(),
+				generatePlaceholder(hashIdentity))
+		);
+
+		subquery.addCondition(subQueryCondition);
+
+		Condition unaryCondition = UnaryCondition.exists(subquery);
+		if (theParams.IsMissing) {
+			unaryCondition = new NotCondition(unaryCondition);
+		}
+
+		return combineWithRequestPartitionIdPredicate(theParams.RequestPartitionId, unaryCondition);
 	}
 }

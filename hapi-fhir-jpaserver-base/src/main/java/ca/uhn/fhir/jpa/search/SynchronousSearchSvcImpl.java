@@ -130,7 +130,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 				return bundleProvider;
 			}
 
-			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
+			try (IResultIterator resultIter = theSb.createQueryResultsIterator(theParams, searchRuntimeDetails, theRequestDetails, theRequestPartitionId)) {
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {

@@ -111,7 +111,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	private long submitAllMatchingResourcesToMdmChannel(SearchParameterMap theSpMap, ISearchBuilder theSearchBuilder, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(null, UUID.randomUUID().toString());
 		long total = 0;
-		try (IResultIterator query = theSearchBuilder.createQuery(theSpMap, searchRuntimeDetails, null, theRequestPartitionId)) {
+		try (IResultIterator query = theSearchBuilder.createQueryResultsIterator(theSpMap, searchRuntimeDetails, null, theRequestPartitionId)) {
 			Collection<ResourcePersistentId> pidBatch;
 			do {
 				pidBatch = query.getNextResultBatch(myBufferSize);

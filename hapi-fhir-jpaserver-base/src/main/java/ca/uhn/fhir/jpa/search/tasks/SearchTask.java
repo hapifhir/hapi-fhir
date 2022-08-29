@@ -636,7 +636,7 @@ public class SearchTask implements Callable<Void> {
 		 * This is an odd implementation behaviour, but the change
 		 * for this will require a lot more handling at higher levels
 		 */
-		try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
+		try (IResultIterator resultIterator = sb.createQueryResultsIterator(myParams, mySearchRuntimeDetails, myRequest, myRequestPartitionId)) {
 			assert (resultIterator != null);
 
 			/*

@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -73,6 +74,9 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -95,7 +99,9 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
+public class ResourceLinkPredicateBuilder
+	extends BaseJoiningPredicateBuilder
+	implements ICanMakeMissingParamPredicate {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
 	private final DbColumn myColumnSrcType;
@@ -105,6 +111,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnSrcResourceId;
 	private final DbColumn myColumnTargetResourceType;
 	private final QueryStack myQueryStack;
+	/**
+	 * Whether to treat the SRC_RESOURCE_ID or TARGET_RESOURCE_ID as the RES_ID column
+	 * (ie, when joining to other tables on "RES_ID")
+	 *
+	 * true - Target has RES_ID
+	 * false - Src has RES_ID
+	 */
 	private final boolean myReversed;
 
 	@Autowired
@@ -158,6 +171,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			return myColumnTargetResourceId;
 		} else {
 			return myColumnSrcResourceId;
+		}
+	}
+
+	private DbColumn getResourceTypeColumn() {
+		if (myReversed) {
+			return myColumnTargetResourceType;
+		} else {
+			return myColumnSrcType;
 		}
 	}
 
@@ -706,5 +727,29 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		}
 
 		return condition;
+	}
+
+	@Override
+	public Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams) {
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(getTable());
+
+		Condition subQueryCondition = ComboCondition.and(
+			BinaryCondition.equalTo(getResourceIdColumn(),
+				theParams.ResourceTablePredicateBuilder.getResourceIdColumn()
+			),
+			BinaryCondition.equalTo(getResourceTypeColumn(),
+				generatePlaceholder(theParams.ResourceTablePredicateBuilder.getResourceType()))
+		);
+
+		subquery.addCondition(subQueryCondition);
+
+		Condition unaryCondition = UnaryCondition.exists(subquery);
+		if (theParams.IsMissing) {
+			unaryCondition = new NotCondition(unaryCondition);
+		}
+
+		return combineWithRequestPartitionIdPredicate(theParams.RequestPartitionId, unaryCondition);
 	}
 }
