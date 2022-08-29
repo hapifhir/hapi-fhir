@@ -11,7 +11,7 @@
 	<suppress files="BaseMigrationTasks\.java" checks="AbstractClassName"/>
 	<suppress files="BaseLoincTop2000LabResultsHandler\.java" checks="AbstractClassName"/>
 
-	<!-- Missing "abstract" modifier suppressions -->
+	<!-- Missing "Base" prefix suppressions -->
 	<suppress files="ResourceMetadataKeyEnum\.java" checks="AbstractClassName"/>
 	<suppress files="RequestDetails\.java" checks="AbstractClassName"/>
 	<suppress files="RestfulClientFactory\.java" checks="AbstractClassName"/>
