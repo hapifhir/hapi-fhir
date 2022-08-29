@@ -105,7 +105,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
-		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+		public List<Base> resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
 			return null;
 		}
 
