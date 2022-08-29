@@ -36,7 +36,7 @@ import org.hl7.fhir.r4.model.UnsignedIntType;
  * #L%
  */
 
-public class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<Encounter> {
+public abstract class BaseJpaResourceProviderEncounterR4 extends JpaResourceProviderR4<Encounter> {
 
 	/**
 	 * Encounter/123/$everything

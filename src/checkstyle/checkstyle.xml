@@ -7,6 +7,9 @@
 	<property name="charset" value="UTF-8"/>
 	<property name="cacheFile" value="target/cache_non_main_files"/>
 
+	<module name="SuppressionFilter">
+		<property name="file" value="src/checkstyle/checkstyle_suppressions.xml" />
+	</module>
 	<module name="TreeWalker">
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>
@@ -14,7 +17,6 @@
 		</module>
 		<module name="AbstractClassName">
 			<property name="format" value="^(Base|Abstract).+$"/>
-			<property name="ignoreModifier" value="true"/>
 		</module>
 	</module>
 

@@ -28,7 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
 
-public class BaseTest {
+public abstract class BaseTest {
 
 	static {
 		ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);

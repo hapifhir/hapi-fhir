@@ -20,7 +20,7 @@ package ca.uhn.fhir.parser.json;
  * #L%
  */
 
-public abstract class JsonLikeArray extends JsonLikeValue {
+public abstract class BaseJsonLikeArray extends BaseJsonLikeValue {
 
 	@Override
 	public ValueType getJsonType() {
@@ -38,7 +38,7 @@ public abstract class JsonLikeArray extends JsonLikeValue {
 	}
 
 	@Override
-	public JsonLikeArray getAsArray() {
+	public BaseJsonLikeArray getAsArray() {
 		return this;
 	}
 
@@ -49,5 +49,5 @@ public abstract class JsonLikeArray extends JsonLikeValue {
 
 	public abstract int size ();
 	
-	public abstract JsonLikeValue get (int index);
+	public abstract BaseJsonLikeValue get (int index);
 }

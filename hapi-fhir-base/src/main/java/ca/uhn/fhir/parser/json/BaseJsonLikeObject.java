@@ -22,7 +22,7 @@ import java.util.Iterator;
  * #L%
  */
 
-public abstract class JsonLikeObject extends JsonLikeValue {
+public abstract class BaseJsonLikeObject extends BaseJsonLikeValue {
 
 	@Override
 	public ValueType getJsonType() {
@@ -40,7 +40,7 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 	}
 
 	@Override
-	public JsonLikeObject getAsObject() {
+	public BaseJsonLikeObject getAsObject() {
 		return this;
 	}
 
@@ -51,6 +51,6 @@ public abstract class JsonLikeObject extends JsonLikeValue {
 
 	public abstract Iterator<String> keyIterator();
 
-	public abstract JsonLikeValue get(String key);
+	public abstract BaseJsonLikeValue get(String key);
 
 }
