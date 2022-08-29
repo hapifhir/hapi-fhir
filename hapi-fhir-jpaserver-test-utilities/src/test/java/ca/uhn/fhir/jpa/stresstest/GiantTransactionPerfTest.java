@@ -501,11 +501,6 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable getReferenceById(Long theLong) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public <S extends ResourceHistoryTable> Optional<S> findOne(Example<S> example) {
 			return Optional.empty();
 		}
