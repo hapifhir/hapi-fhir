@@ -250,7 +250,7 @@ public class BulkDataExportProvider {
 		switch (info.getStatus()) {
 			case COMPLETE:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
-					handleDeleteRequest(theJobId, response);
+					handleDeleteRequest(theJobId, response, info.getStatus());
 				} else {
 					response.setStatus(Constants.STATUS_HTTP_200_OK);
 					response.setContentType(Constants.CT_JSON);
@@ -304,7 +304,7 @@ public class BulkDataExportProvider {
 			case SUBMITTED:
 			default:
 				if (theRequestDetails.getRequestType() == RequestTypeEnum.DELETE) {
-					handleDeleteRequest(theJobId, response);
+					handleDeleteRequest(theJobId, response, info.getStatus());
 				} else {
 					response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 					String dateString = getTransitionTimeOfJobInfo(info);
@@ -318,15 +318,15 @@ public class BulkDataExportProvider {
 		}
 	}
 
-	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response) throws IOException {
+	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response, BulkExportJobStatusEnum theStatusEnum) throws IOException {
 		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		Batch2JobOperationResult resultMessage = myJobRunner.cancelInstance(theJobId.getValueAsString());
-		if (resultMessage.getSuccess()) {
+		if (theStatusEnum.equals(BulkExportJobStatusEnum.COMPLETE)) {
+			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", "Job instance <" + theJobId.getValueAsString() + "> was already cancelled.  Nothing to do.", null, null);
+		} else {
 			response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "information", resultMessage.getMessage(), null, "informational");
-		} else {
-			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
-			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", resultMessage.getMessage(), null, null);
 		}
 		myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(outcome, response.getWriter());
 		response.getWriter().close();

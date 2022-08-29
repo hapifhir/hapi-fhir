@@ -718,22 +718,16 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
-	public void testDeleteForOperationPollStatus_SUBMITTEDAndCancelled_ShouldReturnError() throws IOException {
+	public void testDeleteForOperationPollStatus_COMPLETE_ShouldReturnError() throws IOException {
 		// setup
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
-		info.setStatus(BulkExportJobStatusEnum.SUBMITTED);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
 		info.setEndTime(InstantType.now().getValue());
-		Batch2JobOperationResult result = new Batch2JobOperationResult();
-		result.setOperation("Cancel job instance " + A_JOB_ID);
-		result.setMessage("Job instance <" + A_JOB_ID + "> was already cancelled.  Nothing to do.");
-		result.setSuccess(false);
 
 		// when
 		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
 			.thenReturn(info);
-		when(myJobRunner.cancelInstance(eq(A_JOB_ID)))
-			.thenReturn(result);
 
 		// call
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
@@ -750,43 +744,6 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response content: {}", responseContent);
 			if (!Objects.equals(responseContent, "")) {
 				assertThat(responseContent, containsString("was already cancelled."));
-			}
-		}
-	}
-
-	@Test
-	public void testDeleteForOperationPollStatus_COMPLETE_ShouldCancelJobSuccessfully() throws IOException {
-		// setup
-		Batch2JobInfo info = new Batch2JobInfo();
-		info.setJobId(A_JOB_ID);
-		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
-		info.setEndTime(InstantType.now().getValue());
-		Batch2JobOperationResult result = new Batch2JobOperationResult();
-		result.setOperation("Cancel job instance " + A_JOB_ID);
-		result.setMessage("Job instance <" + A_JOB_ID + "> successfully cancelled.");
-		result.setSuccess(true);
-
-		// when
-		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
-			.thenReturn(info);
-		when(myJobRunner.cancelInstance(eq(A_JOB_ID)))
-			.thenReturn(result);
-
-		// call
-		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
-			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpDelete delete = new HttpDelete(url);
-		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response.toString());
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-
-			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			if (!Objects.equals(responseContent, "")) {
-				assertThat(responseContent, containsString("successfully cancelled."));
 			}
 		}
 	}
