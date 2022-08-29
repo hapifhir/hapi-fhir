@@ -66,6 +66,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
+			// FIXME: 2022-08-25 PEPE return all resource type within the Patient compartment if resourceType is null
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 

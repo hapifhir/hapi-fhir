@@ -74,6 +74,11 @@ public class SearchParameterUtil {
 		return Optional.ofNullable(myPatientSearchParam);
 	}
 
+	public static Optional<RuntimeSearchParam> getIdSearchParamForResourceType(FhirContext theFhirContext, String theResourceType){
+		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
+		return Optional.ofNullable(runtimeResourceDefinition.getSearchParam("_id"));
+	}
+
 
 	/**
 	 * Search the resource definition for a compartment named 'patient' and return its related Search Parameter.
