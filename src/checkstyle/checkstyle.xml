@@ -12,6 +12,10 @@
 			<property name="format" value="System\.out\.println"/>
 			<property name="ignoreComments" value="true"/>
 		</module>
+		<module name="AbstractClassName">
+			<property name="format" value="^(Base|Abstract).+$"/>
+			<property name="ignoreModifier" value="true"/>
+		</module>
 	</module>
 
 	<!--
