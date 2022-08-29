@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
+import ca.uhn.fhir.jpa.search.tasks.SearchContinuationTask;
 import ca.uhn.fhir.jpa.search.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.tasks.SearchTaskParameters;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -69,6 +71,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -304,7 +307,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQueryResultsIterator(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
-		when(myInterceptorBroadcaster.hasHooks(any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(any(), any()))
 			.thenReturn(true);
 
@@ -592,7 +594,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		}  catch (ResourceGoneException e) {
 			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
-
 	}
 
 	public static class FailAfterNIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
@@ -727,22 +728,42 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	private void mockSearchTask() {
 		IPagingProvider pagingProvider = mock(IPagingProvider.class);
-		when(pagingProvider.getMaximumPageSize())
+		lenient().when(pagingProvider.getMaximumPageSize())
 			.thenReturn(500);
 		when(myBeanFactory.getBean(anyString(), any(SearchTaskParameters.class)))
 			.thenAnswer(invocation -> {
-				return new SearchTask(
-					invocation.getArgument(1),
-					myTxManager,
-					ourCtx,
-					mySearchStrategyFactory,
-					myInterceptorBroadcaster,
-					mySearchBuilderFactory,
-					mySearchResultCacheSvc,
-					myDaoConfig,
-					mySearchCacheSvc,
-					pagingProvider
-				);
+				String type = invocation.getArgument(0);
+				switch (type) {
+					case SearchConfig.SEARCH_TASK:
+						return new SearchTask(
+							invocation.getArgument(1),
+							myTxManager,
+							ourCtx,
+							mySearchStrategyFactory,
+							myInterceptorBroadcaster,
+							mySearchBuilderFactory,
+							mySearchResultCacheSvc,
+							myDaoConfig,
+							mySearchCacheSvc,
+							pagingProvider
+						);
+					case SearchConfig.CONTINUE_TASK:
+						return new SearchContinuationTask(
+							invocation.getArgument(1),
+							myTxManager,
+							ourCtx,
+							mySearchStrategyFactory,
+							myInterceptorBroadcaster,
+							mySearchBuilderFactory,
+							mySearchResultCacheSvc,
+							myDaoConfig,
+							mySearchCacheSvc,
+							pagingProvider
+						);
+					default:
+						fail("Invalid bean type: " + type);
+						return null;
+				}
 			});
 	}
 }

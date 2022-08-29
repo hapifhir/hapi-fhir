@@ -42,6 +42,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class SearchConfig {
 
+	public static final String SEARCH_TASK = "searchTask";
+	public static final String CONTINUE_TASK = "continueTask";
+
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
 	@Autowired
@@ -66,7 +69,7 @@ public class SearchConfig {
 		return new SearchCoordinatorSvcImpl();
 	}
 
-	@Bean(name = "searchTask")
+	@Bean(name = SEARCH_TASK)
 	@Scope("prototype")
 	public SearchTask createSearchTask(SearchTaskParameters theParams) {
 		return new SearchTask(theParams,
@@ -82,7 +85,7 @@ public class SearchConfig {
 		);
 	}
 
-	@Bean(name = "continueTask")
+	@Bean(name = CONTINUE_TASK)
 	@Scope("prototype")
 	public SearchContinuationTask createSearchContinuationTask(SearchTaskParameters theParams) {
 		return new SearchContinuationTask(theParams,
