@@ -76,7 +76,6 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
@@ -177,7 +176,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -7249,13 +7247,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		 */
 		private static Stream<Arguments> provideParameters() {
 			return Stream.of(
+				// 1
 				Arguments.of(new MissingSearchTestParameters(true, true, true)),
+				// 2
 				Arguments.of(new MissingSearchTestParameters(true, false, false)),
+				// 3
 				Arguments.of(new MissingSearchTestParameters(true, false, true)),
+				// 4
 				Arguments.of(new MissingSearchTestParameters(true, true, false)),
+				// 5
 				Arguments.of(new MissingSearchTestParameters(false, true, true)),
+				// 6
 				Arguments.of(new MissingSearchTestParameters(false, false, true)),
+				// 7
 				Arguments.of(new MissingSearchTestParameters(false, true, false)),
+				// 8
 				Arguments.of(new MissingSearchTestParameters(false, false, false))
 			);
 		}
@@ -7270,11 +7276,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		) {
 			String testMethod = new Exception().getStackTrace()[1].getMethodName();
 			ourLog.info(
-				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\n{}",
+				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
 				testMethod,
 				theParams.EnableMissingFields,
 				theParams.HasField,
-				theParams.IsMissing ? "Returning resources that do not have field" : "Returning resources that do have field"
+				theParams.IsMissing,
+				theParams.HasField == theParams.IsMissing ? "0" : "1"
 			);
 
 			// setup
@@ -7337,19 +7344,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				hasField -> {
 					Patient patient = new Patient();
 					if (hasField) {
-						patient.setDeceased(new BooleanType(true));
+						patient.setGender(AdministrativeGender.FEMALE);
 					}
 					return patient;
 				}, isMissing -> {
-					return doSearch(Patient.class, Patient.DECEASED.isMissing(isMissing));
+					return doSearch(Patient.class, Patient.GENDER.isMissing(isMissing));
 				});
 		}
 
 		@ParameterizedTest
 		@MethodSource("provideParameters")
 		public void testMissingReferenceClientParameter(MissingSearchTestParameters theParams) {
-			//TODO - old query is pretty simple
-			// SELECT t0.RES_ID FROM HFJ_RES_PARAM_PRESENT t0 WHERE (t0.HASH_PRESENCE = ?) limit ?
 			runTest(theParams,
 				hasField -> {
 					Patient patient = new Patient();

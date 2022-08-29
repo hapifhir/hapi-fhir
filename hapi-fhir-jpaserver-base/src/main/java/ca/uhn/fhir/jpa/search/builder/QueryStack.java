@@ -1053,6 +1053,10 @@ public class QueryStack {
 		}
 	}
 
+	/**
+	 * Old way of searching.
+	 * Missing values must be indexed!
+	 */
 	@org.jetbrains.annotations.Nullable
 	private Condition createMissingPredicateForIndexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		PredicateBuilderTypeEnum predicateType = null;
@@ -1132,13 +1136,14 @@ public class QueryStack {
 	}
 
 	/**
-	 * Creates the MissingField predicate when IndexedMissingFields is Disabled
-	 */
+	 * New way of searching for missing fields.
+	 * Missing values must not indexed!
+ 	 */
 	@org.jetbrains.annotations.Nullable
 	private Condition createMissingPredicateForUnindexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-		BaseSearchParamPredicateBuilder innerQuery;
+		BaseJoiningPredicateBuilder innerQuery;
 		switch (theParams.ParamType) {
 			case NUMBER:
 				innerQuery = sqlBuilder.createNumberPredicateBuilder();
@@ -1159,6 +1164,10 @@ public class QueryStack {
 				innerQuery = sqlBuilder.createUriPredicateBuilder();
 				break;
 			case REFERENCE:
+				// this is the only predicatebuilder that does not extend
+				// BaseSearchParamPredicateBuilder
+				innerQuery = sqlBuilder.createReferencePredicateBuilder(this);
+				break;
 			case HAS:
 			case SPECIAL:
 				innerQuery = sqlBuilder.createCoordsPredicateBuilder();
@@ -1170,11 +1179,19 @@ public class QueryStack {
 				return null;
 		}
 
+		DbColumn hashIdentityColumn = null;
+
+		// all except ResourceLinkPredicateBuilder have a HashIdentityColumn
+		if (innerQuery instanceof BaseSearchParamPredicateBuilder) {
+			hashIdentityColumn = ((BaseSearchParamPredicateBuilder) innerQuery).getColumnHashIdentity();
+		}
+
 		return innerQuery.createPredicateParamMissingValue(
 			table,
 			theParams.IsMissing,
 			theParams.ParamName,
-			theParams.RequestPartitionId
+			theParams.RequestPartitionId,
+			hashIdentityColumn
 		);
 	}
 

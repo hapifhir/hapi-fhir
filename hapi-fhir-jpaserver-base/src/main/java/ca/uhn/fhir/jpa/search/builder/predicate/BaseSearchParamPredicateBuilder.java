@@ -93,40 +93,6 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
 	}
 
-	public Condition createPredicateParamMissingValue(
-		ResourceTablePredicateBuilder theResourceTablePredicateBuilder,
-		boolean theMissing,
-		String theParamName,
-		RequestPartitionId theRequestPartitionId
-	) {
-		SelectQuery subquery = new SelectQuery();
-		subquery.addCustomColumns(1);
-		subquery.addFromTable(getTable());
-
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-			getPartitionSettings(),
-			theRequestPartitionId,
-			theResourceTablePredicateBuilder.getResourceType(),
-			theParamName
-		);
-		subquery.addCondition(
-			ComboCondition.and(
-				BinaryCondition.equalTo(getResourceIdColumn(),
-					theResourceTablePredicateBuilder.getResourceIdColumn()
-				),
-				BinaryCondition.equalTo(getColumnHashIdentity(),
-					generatePlaceholder(hashIdentity))
-			)
-		);
-
-		Condition unaryCondition = UnaryCondition.exists(subquery);
-		if (theMissing) {
-			unaryCondition = new NotCondition(unaryCondition);
-		}
-
-		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, unaryCondition);
-	}
-
 	public Condition createPredicateParamMissingForNonReference(String theResourceName, String theParamName, Boolean theMissing, RequestPartitionId theRequestPartitionId) {
 		ComboCondition condition = ComboCondition.and(
 			BinaryCondition.equalTo(getResourceTypeColumn(), generatePlaceholder(theResourceName)),

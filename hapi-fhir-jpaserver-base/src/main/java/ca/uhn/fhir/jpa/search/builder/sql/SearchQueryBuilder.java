@@ -304,6 +304,11 @@ public class SearchQueryBuilder {
 		return up;
 	}
 
+	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
+		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return retVal;
+	}
+
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_tag</code> search parameter
 	 */
