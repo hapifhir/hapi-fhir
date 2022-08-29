@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3960
+jira: SMILE-4679
+title: "Previously, when the source in meta was specified with id, the id was replaced. This has been corrected."

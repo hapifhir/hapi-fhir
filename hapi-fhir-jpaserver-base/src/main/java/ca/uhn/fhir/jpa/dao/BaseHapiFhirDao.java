@@ -1200,13 +1200,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 6. Handle source (provenance)
-		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
+		if (isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
+			MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
+		} else if (isNotBlank(provenanceRequestId)) {
 			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);
-
 			MetaUtil.setSource(myContext, retVal, sourceString);
-
 		}
 
 		// 7. Add partition information
