@@ -1,0 +1,5 @@
+type: fix
+issue: 3881
+jira: SMILE-4083
+title: "Previously, if an error was thrown after the outgoing response stream had started being written to, an OperationOutcome was not being returned. Instead, an HTML 
+servlet error was being thrown. This has been corrected."

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3887
+title: "Previously, if Fulltext Search was enabled, and a `$delete-expunge` job was run, it could leave orphaned documents in the Fulltext index. This has been corrected."

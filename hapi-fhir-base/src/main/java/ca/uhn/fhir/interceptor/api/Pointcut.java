@@ -1346,7 +1346,8 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
 	),
 
 	/**

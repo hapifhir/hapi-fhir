@@ -4528,4 +4528,68 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals("3", id.getVersionIdPart());
 	}
 
+	@Test
+	public void testTransactionWithDuplicateConditionalCreateAndDelete() {
+		Bundle request = new Bundle();
+		request.setType(Bundle.BundleType.TRANSACTION);
+
+		String duplicateUrl = "/Patient";
+		String duplicateIfNoneExist = "identifier=http://acme.org/mrns|12345";
+		String firstPatientFullUrl = "urn:uuid:3ac4fde3-089d-4a2d-829b-f3ef68cae371";
+		String secondPatientFullUrl = "urn:uuid:2ab44de3-019d-432d-829b-f3ee08cae395";
+
+		Patient firstPatient = new Patient();
+		Identifier firstPatientIdentifier = new Identifier();
+		firstPatientIdentifier.setSystem("http://acme.org/mrns");
+		firstPatientIdentifier.setValue("12345");
+		firstPatient.setIdentifier(List.of(firstPatientIdentifier));
+
+		request
+			.addEntry()
+			.setResource(firstPatient)
+			.setFullUrl(firstPatientFullUrl)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl(duplicateUrl)
+			.setIfNoneExist(duplicateIfNoneExist);
+
+		Patient secondPatient = new Patient();
+		Identifier secondPatientIdentifier = new Identifier();
+		secondPatientIdentifier.setSystem("http://acme.org/mrns");
+		secondPatientIdentifier.setValue("12346");
+		secondPatient.setIdentifier(List.of(secondPatientIdentifier));
+
+		request
+			.addEntry()
+			.setResource(secondPatient)
+			.setFullUrl(secondPatientFullUrl)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.POST)
+			.setUrl(duplicateUrl)
+			.setIfNoneExist(duplicateIfNoneExist);
+
+		String deleteUrl = "Observation?patient=urn:uuid:2ac34de3-069d-442d-829b-f3ef68cae371";
+
+		request
+			.addEntry()
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.DELETE)
+			.setUrl(deleteUrl);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		ourLog.info(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
+
+		int expectedEntries = 2;
+		assertEquals(BundleType.TRANSACTIONRESPONSE, resp.getTypeElement().getValue());
+		assertEquals(expectedEntries, resp.getEntry().size());
+
+		String status201 = "201 Created";
+		String status204 = "204 No Content";
+
+		assertEquals(expectedEntries, resp.getEntry().size());
+		assertEquals(status201, resp.getEntry().get(0).getResponse().getStatus());
+		assertEquals(status204, resp.getEntry().get(1).getResponse().getStatus());
+	}
+
 }
