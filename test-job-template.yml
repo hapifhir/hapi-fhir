@@ -13,7 +13,7 @@ jobs:
       steps:
          -  task: Cache@2
             inputs:
-               key: 'maven | "$(Agent.OS)" | ./pom.xml'
+               key: 'maven | "$(Agent.OS)" | "$(SourceBranchName)" | ./pom.xml'
                path: $(MAVEN_CACHE_FOLDER)
          -  task: Bash@3
             inputs:
@@ -39,6 +39,7 @@ jobs:
             vmImage: ubuntu-latest
          steps:
             -  script: echo testing module ${{ p.module }}
+            -  script: echo $(SourceBranchName)
             -  task: DockerInstaller@0
                displayName: Docker Installer
                inputs:
