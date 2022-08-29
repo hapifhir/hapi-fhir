@@ -323,7 +323,7 @@ public class BulkDataExportProvider {
 		Batch2JobOperationResult resultMessage = myJobRunner.cancelInstance(theJobId.getValueAsString());
 		if (theStatusEnum.equals(BulkExportJobStatusEnum.COMPLETE)) {
 			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
-			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", "Job instance <" + theJobId.getValueAsString() + "> was already cancelled.  Nothing to do.", null, null);
+			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", "Job instance <" + theJobId.getValueAsString() + "> was already cancelled or has completed.  Nothing to do.", null, null);
 		} else {
 			response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
 			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "information", resultMessage.getMessage(), null, "informational");

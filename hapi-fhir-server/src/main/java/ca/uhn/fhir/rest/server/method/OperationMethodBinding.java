@@ -323,20 +323,18 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			allowedRequestTypes.add(RequestTypeEnum.DELETE);
 		}
 		String messageParameter = allowedRequestTypes.stream().map(RequestTypeEnum::name).collect(Collectors.joining(", "));
+		String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), messageParameter);
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
 			// all good
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), messageParameter);
 				throw new MethodNotAllowedException(Msg.code(426) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 			}
 		} else if (theRequest.getRequestType() == RequestTypeEnum.DELETE) {
 			if (!myDeleteEnabled) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), messageParameter);
 				throw new MethodNotAllowedException(Msg.code(427) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 			}
 		} else {
-			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), messageParameter);
 			throw new MethodNotAllowedException(Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 

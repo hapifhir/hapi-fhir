@@ -52,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -711,9 +710,7 @@ public class BulkDataExportProviderTest {
 			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
-			if (!Objects.equals(responseContent, "")) {
-				assertThat(responseContent, containsString("successfully cancelled."));
-			}
+			assertThat(responseContent, containsString("successfully cancelled."));
 		}
 	}
 
@@ -741,10 +738,9 @@ public class BulkDataExportProviderTest {
 
 			verify(myJobRunner, times(1)).cancelInstance(A_JOB_ID);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			// content would be blank, since the job is cancelled, so no
 			ourLog.info("Response content: {}", responseContent);
-			if (!Objects.equals(responseContent, "")) {
-				assertThat(responseContent, containsString("was already cancelled."));
-			}
+			assertThat(responseContent, containsString("was already cancelled or has completed."));
 		}
 	}
 
