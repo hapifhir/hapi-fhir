@@ -28,7 +28,7 @@ public class StringParamTest {
 
 	@Test
 	public void doSetValueAsQueryToken_withCustomSearchParameterAndNicknameQualifier_enablesNicknameExpansion(){
-		String customSearchParamName = "firstName";
+		String customSearchParamName = "someCustomSearchParameter";
 		StringParam stringParam = new StringParam();
 		stringParam.doSetValueAsQueryToken(myContext, customSearchParamName, ":nickname", "John");
 		assertNicknameQualifierSearchParameterIsValid(stringParam, "John");
