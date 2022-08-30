@@ -881,6 +881,11 @@ public class GiantTransactionPerfTest {
 			return Collections.singleton(theRequestPartitionId.getFirstPartitionIdOrNull());
 		}
 
+		@Override
+		public boolean isResourcePartitionable(String theResourceType) {
+			return true;
+		}
+
 
 	}
 
