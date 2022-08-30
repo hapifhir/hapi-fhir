@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.hl7.fhir.cache.LoadingCache;
 
 public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K,V> {
@@ -17,6 +18,12 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 	public V get(K key) {
 		try {
 			return getCache().get(key);
+		} catch (UncheckedExecutionException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				// Unwrap exception to match Caffeine
+				throw (RuntimeException)e.getCause();
+			}
+			throw e;
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		} catch (CacheLoader.InvalidCacheLoadException e) {
@@ -29,6 +36,12 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 	public Map<K, V> getAll(Iterable<? extends K> keys) {
 		try {
 			return getCache().getAll(keys);
+		} catch (UncheckedExecutionException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				// Unwrap exception to match Caffeine
+				throw (RuntimeException)e.getCause();
+			}
+			throw e;
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		} catch (CacheLoader.InvalidCacheLoadException e) {
