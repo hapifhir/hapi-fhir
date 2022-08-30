@@ -348,7 +348,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
 				ourLog.info("Search {} is using direct load strategy", searchUuid);
-				SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+				SearchStrategyFactory.ISearchStrategy direct = mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
 
 				try {
 					return direct.get();
@@ -652,5 +652,4 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			throw BaseServerResponseException.newInstance(status, message);
 		}
 	}
-
 }
