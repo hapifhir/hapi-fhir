@@ -11,9 +11,9 @@ import java.util.concurrent.CompletableFuture;
  * Please check their documentation for information in the methods below.
  */
 public interface LoadingCache<K extends Object, V extends Object> extends Cache<K, V> {
-	V get(K key);
+    V get(K key);
 
-	Map<K, V> getAll(Iterable<? extends K> keys);
+    Map<K, V> getAll(Iterable<? extends K> keys);
 
-	void refresh(K key);
+    void refresh(K key);
 }
