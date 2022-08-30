@@ -3,6 +3,7 @@ package org.hl7.fhir.cache.guava;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import com.google.common.cache.CacheLoader;
 import org.hl7.fhir.cache.LoadingCache;
 
 public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements LoadingCache<K,V> {
@@ -17,8 +18,11 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		try {
 			return getCache().get(key);
 		} catch (ExecutionException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
+		} catch (CacheLoader.InvalidCacheLoadException e) {
+			// If the entry is not found or load as null, returns null instead of an exception.
+			// This matches the behaviour of Caffeine
+			return null;
 		}
 	}
 
@@ -26,8 +30,11 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		try {
 			return getCache().getAll(keys);
 		} catch (ExecutionException e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
+		} catch (CacheLoader.InvalidCacheLoadException e) {
+			// If the entry is not found or load as null, returns null instead of an exception
+			// This matches the behaviour of Caffeine
+			return null;
 		}
 	}
 
