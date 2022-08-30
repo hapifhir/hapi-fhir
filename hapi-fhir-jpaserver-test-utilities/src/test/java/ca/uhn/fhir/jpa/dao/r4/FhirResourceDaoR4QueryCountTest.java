@@ -18,6 +18,8 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
@@ -171,6 +173,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchByBirthdateDoesNotCauseDuplicateClauses() {
+		String expectedSQL = "SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = '5247847184787287691') AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= '20220101') AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= '20220101'))) limit '500'";
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			myClient.search().forResource("Patient").where(Patient.BIRTHDATE.exactly().day("2022-01-01")).returnBundle(Bundle.class).execute();
+		});
+		SqlQuery doubleClauseSql = myCaptureQueriesListener.getSelectQueries().get(1);
+		String generatedSQL = doubleClauseSql.getSql(true, false);
+		ourLog.info(generatedSQL);
+		assertEquals(expectedSQL, generatedSQL);
 	}
 
 
