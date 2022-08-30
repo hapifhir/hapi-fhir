@@ -36,6 +36,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -88,7 +89,7 @@ public class MemoryCacheService {
 					break;
 			}
 
-			Cache<Object, Object> nextCache = CacheFactory.build(timeoutSeconds * DateUtils.MILLIS_PER_SECOND, maximumSize);
+			Cache<Object, Object> nextCache = CacheFactory.build(SECONDS.toMillis(timeoutSeconds), maximumSize);
 
 			myCaches.put(next, nextCache);
 		}
