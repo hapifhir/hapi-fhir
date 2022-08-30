@@ -18,27 +18,27 @@ public class CacheFactory {
         if (providers(false).hasNext()) {
             return providers(false).next().create(timeoutMillis);
         }
-        throw new RuntimeException("No CacheProviders found");
+        throw new RuntimeException("No Cache Service Providers found. Choose between hapi-fhir-cache-caffeine (Default) and hapi-fhir-cache-guava (Android)");
     }
 
     public static <K,V> LoadingCache<K,V> build(long timeoutMillis, CacheLoader<K,V> cacheLoader) {
 		 if (providers(false).hasNext()) {
 			return providers(false).next().create(timeoutMillis, cacheLoader);
 		 }
-		 throw new RuntimeException("No CacheProviders found");
+		 throw new RuntimeException("No Cache Service Providers found. Choose between hapi-fhir-cache-caffeine (Default) and hapi-fhir-cache-guava (Android)");
     }
 
     public static <K,V> Cache<K,V> build(long timeoutMillis, long maximumSize) {
         if (providers(false).hasNext()) {
             return providers(false).next().create(timeoutMillis, maximumSize);
         }
-        throw new RuntimeException("No CacheProviders found");
+        throw new RuntimeException("No Cache Service Providers found. Choose between hapi-fhir-cache-caffeine (Default) and hapi-fhir-cache-guava (Android)");
     }
 
     public static <K,V> LoadingCache<K,V> build(long timeoutMillis, long maximumSize, CacheLoader<K,V> cacheLoader) {
         if (providers(false).hasNext()) {
             return providers(false).next().create(timeoutMillis, maximumSize, cacheLoader);
         }
-        throw new RuntimeException("No CacheProviders found");
+        throw new RuntimeException("No Cache Service Providers found. Choose between hapi-fhir-cache-caffeine (Default) and hapi-fhir-cache-guava (Android)");
     }
 }
