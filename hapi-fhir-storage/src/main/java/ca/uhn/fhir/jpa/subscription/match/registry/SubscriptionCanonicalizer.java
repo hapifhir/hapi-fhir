@@ -27,8 +27,10 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -44,7 +46,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,8 +113,8 @@ public class SubscriptionCanonicalizer {
 		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES)
 			.stream()
 			.map(ExtensionDt::getValue)
-			.map(value -> (org.hl7.fhir.dstu2.model.BooleanType) value)
-			.map(org.hl7.fhir.dstu2.model.BooleanType::booleanValue)
+			.map(value -> (BooleanDt) value)
+			.map(BasePrimitive::getValue)
 			.findFirst()
 			.orElse(false);
 	}
@@ -189,7 +190,6 @@ public class SubscriptionCanonicalizer {
 		return retVal;
 	}
 
-	@NotNull
 	private Boolean extractSendDeletesDstu3(org.hl7.fhir.dstu3.model.Subscription subscription) {
 		return subscription.getChannel().getExtensionsByUrl(EX_SEND_DELETE_MESSAGES).stream()
 			.map(org.hl7.fhir.dstu3.model.Extension::getValue)
