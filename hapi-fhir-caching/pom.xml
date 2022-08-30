@@ -18,6 +18,7 @@
 		<module>hapi-fhir-cache</module>
 		<module>hapi-fhir-cache-guava</module>
 		<module>hapi-fhir-cache-caffeine</module>
-	</modules>
+		<module>hapi-fhir-cache-testing</module>
+    </modules>
 	
 </project>

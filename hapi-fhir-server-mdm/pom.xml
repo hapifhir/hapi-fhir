@@ -117,7 +117,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cache-caffeine</artifactId>
+			<artifactId>hapi-fhir-cache-testing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
