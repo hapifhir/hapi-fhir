@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;

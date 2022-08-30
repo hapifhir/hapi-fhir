@@ -43,7 +43,7 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;

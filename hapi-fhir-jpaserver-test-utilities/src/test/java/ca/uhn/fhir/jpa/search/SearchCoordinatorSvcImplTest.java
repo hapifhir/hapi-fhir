@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -84,9 +83,6 @@ import static org.mockito.Mockito.when;
 public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
 
-	@InjectMocks
-	private SearchCoordinatorSvcImpl mySvc;
-
 	@Mock
 	private SearchStrategyFactory mySearchStrategyFactory;
 	@Mock
@@ -108,6 +104,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	@Spy
 	protected FhirContext myContext = FhirContext.forR4();
 
+	// small service, so we'll use the real one
+	@Spy
+	private ExceptionSvc myExceptionSvc = new ExceptionSvc(myContext);
+
+//	@InjectMocks
+	private SearchCoordinatorSvcImpl mySvc;
+
 	@AfterEach
 	@Override
 	public void after() {
@@ -121,18 +124,26 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		myCurrentSearch = null;
 
-//		mySvc.setTransactionManagerForUnitTest(myTxManager);
-//		mySvc.setContextForUnitTest(ourCtx);
-//		mySvc.setSearchCacheServicesForUnitTest(mySearchCacheSvc, mySearchResultCacheSvc);
-//		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
-//		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
-//		mySvc.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
-//		mySvc.setPersistedJpaBundleProviderFactoryForUnitTest(myPersistedJpaBundleProviderFactory);
-//		mySvc.setRequestPartitionHelperService(myPartitionHelperSvc);
-//		mySvc.setSynchronousSearchSvc(mySynchronousSearchSvc);
-
-
-//		mySvc.setDaoConfigForUnitTest(daoConfig);
+		// Mockito has problems wiring up all
+		// the dependencies; particularly those in extended
+		// classes. This forces them in
+		mySvc = new SearchCoordinatorSvcImpl(
+			myContext,
+			myDaoConfig,
+			myInterceptorBroadcaster,
+			myTxManager,
+			mySearchCacheSvc,
+			mySearchResultCacheSvc,
+			myDaoRegistry,
+			mySearchBuilderFactory,
+			mySynchronousSearchSvc,
+			myPersistedJpaBundleProviderFactory,
+			myPartitionHelperSvc,
+			null, // search param registry
+			mySearchStrategyFactory,
+			myExceptionSvc,
+			myBeanFactory
+		);
 	}
 
 	@Test
@@ -255,7 +266,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	@Test
-	public void testAsyncSearchLargeResultSetSameCoordinator() {
+	public void testAsyncSearchLargeResultSetSameCoordinator() throws InterruptedException {
 		initSearches();
 		initAsyncSearches();
 
@@ -279,7 +290,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertEquals(30, resources.size());
 		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
-
 	}
 
 	private void initSearches() {
@@ -766,7 +776,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 							mySearchResultCacheSvc,
 							myDaoConfig,
 							mySearchCacheSvc,
-							pagingProvider
+							pagingProvider,
+							myExceptionSvc
 						);
 					default:
 						fail("Invalid bean type: " + type);

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamBaseQuantity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;

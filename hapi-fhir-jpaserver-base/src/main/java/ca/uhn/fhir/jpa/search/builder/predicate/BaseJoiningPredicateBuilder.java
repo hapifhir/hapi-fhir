@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;

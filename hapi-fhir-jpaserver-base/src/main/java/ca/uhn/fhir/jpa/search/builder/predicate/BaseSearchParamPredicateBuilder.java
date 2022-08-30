@@ -24,7 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;

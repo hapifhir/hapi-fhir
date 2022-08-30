@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.search.builder.utils;
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;

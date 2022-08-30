@@ -61,11 +61,11 @@ import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -123,7 +123,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.split;
 
 public class QueryStack {
 

@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.search.ExceptionSvc;
 import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -93,15 +94,20 @@ public class SearchConfig {
 			mySearchCacheSvc,
 			mySearchResultCacheSvc,
 			myDaoRegistry,
-			myPagingProvider,
 			mySearchBuilderFactory,
 			mySynchronousSearchSvc,
 			myPersistedJpaBundleProviderFactory,
 			myRequestPartitionHelperService,
 			mySearchParamRegistry,
 			mySearchStrategyFactory,
+			exceptionService(),
 			myBeanFactory
 		);
+	}
+
+	@Bean
+	public ExceptionSvc exceptionService() {
+		return new ExceptionSvc(myContext);
 	}
 
 	@Bean(name = SEARCH_TASK)
@@ -132,7 +138,8 @@ public class SearchConfig {
 			mySearchResultCacheSvc,
 			myDaoConfig,
 			mySearchCacheSvc,
-			myPagingProvider
+			myPagingProvider,
+			exceptionService()
 		);
 	}
 }

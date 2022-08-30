@@ -5,7 +5,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.search.builder.models.LeafNodeDefinition;
-import ca.uhn.fhir.jpa.search.builder.utils.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;

@@ -114,13 +114,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private final ISearchCacheSvc mySearchCacheSvc;
 	private final ISearchResultCacheSvc mySearchResultCacheSvc;
 	private final DaoRegistry myDaoRegistry;
-	private final IPagingProvider myPagingProvider;
 	private final SearchBuilderFactory mySearchBuilderFactory;
 	private final ISynchronousSearchSvc mySynchronousSearchSvc;
 	private final PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	private final IRequestPartitionHelperSvc myRequestPartitionHelperService;
 	private final ISearchParamRegistry mySearchParamRegistry;
 	private final SearchStrategyFactory mySearchStrategyFactory;
+	private final ExceptionSvc myExceptionSvc;
 	private final BeanFactory myBeanFactory;
 
 	private Integer myLoadingThrottleForUnitTests = null;
@@ -145,13 +145,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		ISearchCacheSvc theSearchCacheSvc,
 		ISearchResultCacheSvc theSearchResultCacheSvc,
 		DaoRegistry theDaoRegistry,
-		IPagingProvider thePagingProvider,
 		SearchBuilderFactory theSearchBuilderFactory,
 		ISynchronousSearchSvc theSynchronousSearchSvc,
 		PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory,
 		IRequestPartitionHelperSvc theRequestPartitionHelperService,
 		ISearchParamRegistry theSearchParamRegistry,
 		SearchStrategyFactory theSearchStrategyFactory,
+		ExceptionSvc theExceptionSvc,
 		BeanFactory theBeanFactory
 	) {
 		super();
@@ -162,13 +162,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		mySearchCacheSvc = theSearchCacheSvc;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
 		myDaoRegistry = theDaoRegistry;
-		myPagingProvider = thePagingProvider;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySynchronousSearchSvc = theSynchronousSearchSvc;
 		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
 		mySearchParamRegistry = theSearchParamRegistry;
 		mySearchStrategyFactory = theSearchStrategyFactory;
+		myExceptionSvc = theExceptionSvc;
 		myBeanFactory = theBeanFactory;
 
 		myStorageInterceptorHooks = new StorageInterceptorHooksFacade(myInterceptorBroadcaster);
@@ -178,22 +178,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	Set<String> getActiveSearchIds() {
 		return myIdToSearchTask.keySet();
 	}
-
-//	@VisibleForTesting
-//	public void setSearchCacheServicesForUnitTest(ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc) {
-//		mySearchCacheSvc = theSearchCacheSvc;
-//		mySearchResultCacheSvc = theSearchResultCacheSvc;
-//	}
-//
-//	@VisibleForTesting
-//	void setContextForUnitTest(FhirContext theCtx) {
-//		myContext = theCtx;
-//	}
-//
-//	@VisibleForTesting
-//	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-//		myDaoConfig = theDaoConfig;
-//	}
 
 	@VisibleForTesting
 	public void setLoadingThrottleForUnitTests(Integer theLoadingThrottleForUnitTests) {
@@ -209,41 +193,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public void setSyncSizeForUnitTests(int theSyncSize) {
 		mySyncSize = theSyncSize;
 	}
-//
-//	@VisibleForTesting
-//	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
-//		myManagedTxManager = theTxManager;
-//	}
-//
-//	@VisibleForTesting
-//	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
-//		myDaoRegistry = theDaoRegistry;
-//	}
-//
-//	@VisibleForTesting
-//	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
-//		myInterceptorBroadcaster = theInterceptorBroadcaster;
-//	}
-//
-//	@VisibleForTesting
-//	public void setSearchBuilderFactoryForUnitTest(SearchBuilderFactory theSearchBuilderFactory) {
-//		mySearchBuilderFactory = theSearchBuilderFactory;
-//	}
-//
-//	@VisibleForTesting
-//	public void setPersistedJpaBundleProviderFactoryForUnitTest(PersistedJpaBundleProviderFactory thePersistedJpaBundleProviderFactory) {
-//		myPersistedJpaBundleProviderFactory = thePersistedJpaBundleProviderFactory;
-//	}
-//
-//	@VisibleForTesting
-//	public void setRequestPartitionHelperService(IRequestPartitionHelperSvc theRequestPartitionHelperService) {
-//		myRequestPartitionHelperService = theRequestPartitionHelperService;
-//	}
-//
-//	@VisibleForTesting
-//	public void setSynchronousSearchSvc(ISynchronousSearchSvc theSynchronousSearchSvc) {
-//		mySynchronousSearchSvc = theSynchronousSearchSvc;
-//	}
 
 	@SuppressWarnings("SameParameterValue")
 	@VisibleForTesting
@@ -303,7 +252,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
-				.orElseThrow(() -> newResourceGoneException(theUuid));
+				.orElseThrow(() -> myExceptionSvc.newResourceGoneException(theUuid));
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -359,20 +308,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		List<ResourcePersistentId> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 		if (pids == null) {
-			throw newResourceGoneException(theUuid);
+			throw myExceptionSvc.newResourceGoneException(theUuid);
 		}
 
 		ourLog.trace("Fetched {} results", pids.size());
 
 		return pids;
-	}
-
-	// copy pasta (see SearchContinuationTask)
-	@Nonnull
-	private ResourceGoneException newResourceGoneException(String theUuid) {
-		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
-		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
-		return new ResourceGoneException(msg);
 	}
 
 	@Override
