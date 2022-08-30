@@ -18,3 +18,4 @@ import org.springframework.context.annotation.Import;
 })
 public class TestR4ConfigWithElasticHSearch {
 }
+
