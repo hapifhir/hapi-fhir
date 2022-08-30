@@ -1663,6 +1663,27 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testSearchBySourceTransactionId() {
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource("http://example.com/fhir/thing/end#my-fragment");
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=http://example.com/fhir/thing/end#my-fragment")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+	}
+
 	/**
 	 * Based on email from Rene Spronk
 	 */
