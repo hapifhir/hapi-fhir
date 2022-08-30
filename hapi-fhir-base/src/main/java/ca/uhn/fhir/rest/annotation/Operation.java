@@ -139,4 +139,9 @@ public @interface Operation {
 	 */
 	boolean global() default false;
 
+	/**
+	 * Used to manually define canonical URI for operation. If not supplied, will fall back to normal
+	 * generation of name & operation definition.
+	 */
+	String definition() default "";
 }

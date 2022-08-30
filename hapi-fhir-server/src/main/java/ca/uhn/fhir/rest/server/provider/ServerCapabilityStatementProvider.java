@@ -554,7 +554,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
-		theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		theTerser.addElement(theOperation, "definition", theMethodBinding.getDefinition().orElse(createOperationUrl(theRequestDetails, theOpName)));
 		if (isNotBlank(theMethodBinding.getDescription())) {
 			theTerser.addElement(theOperation, "documentation", theMethodBinding.getDescription());
 		}

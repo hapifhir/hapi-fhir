@@ -53,6 +53,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -67,6 +68,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private final ReturnTypeEnum myReturnType;
 	private final String myShortDescription;
 	private boolean myGlobal;
+
+	private String myDefinition;
 	private BundleTypeEnum myBundleType;
 	private boolean myCanOperateAtInstanceLevel;
 	private boolean myCanOperateAtServerLevel;
@@ -87,8 +90,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 		myManualRequestMode = theAnnotation.manualRequest();
 		myManualResponseMode = theAnnotation.manualResponse();
+		myDefinition = theAnnotation.definition() == null || theAnnotation.definition().trim().isEmpty() ? null: theAnnotation.definition();
 	}
-
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
 												OperationParam[] theReturnParams, BundleTypeEnum theBundleType, boolean theGlobal) {
@@ -194,6 +197,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public boolean isGlobalMethod() {
 		return myGlobal;
+	}
+
+	public Optional<String> getDefinition() {
+		return Optional.ofNullable(myDefinition);
 	}
 
 	public String getDescription() {
