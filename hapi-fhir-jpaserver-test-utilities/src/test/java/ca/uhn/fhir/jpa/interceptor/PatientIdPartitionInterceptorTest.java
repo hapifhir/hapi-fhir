@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -430,6 +432,30 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(selectQueries.get(0).getSql(true, false).toUpperCase(Locale.US), matchesPattern("SELECT.*FROM HFJ_RES_LINK.*WHERE.*PARTITION_ID = '4267'.*"));
 
 	}
+
+	@Test
+	public void testTransaction_ConditionallyCreatedPatientAndConditionallyCreatedObservation() {
+
+		BundleBuilder tx = new BundleBuilder(myFhirContext);
+
+		Patient p = new Patient();
+		p.setId(IdType.newRandomUuid());
+		p.addIdentifier().setSystem("http://ids").setValue("A");
+		tx.addTransactionCreateEntry(p).conditional("Patient?identifier=http://ids|A");
+
+		Observation o = new Observation();
+		o.addIdentifier().setSystem("http://ids").setValue("B");
+		o.setSubject(new Reference(p.getId()));
+		tx.addTransactionCreateEntry(o).conditional("Observation?identifier=http://ids|B");
+
+		try {
+			mySystemDao.transaction(mySrd, (Bundle) tx.getBundle());
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode", e.getMessage());
+		}
+	}
+
 
 
 	@Test

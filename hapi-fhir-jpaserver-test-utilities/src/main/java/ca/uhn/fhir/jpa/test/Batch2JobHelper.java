@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -30,6 +31,7 @@ import org.awaitility.core.ConditionTimeoutException;
 import org.hamcrest.Matchers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.util.ArrayUtils;
 
 import java.time.Duration;
@@ -38,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
@@ -51,10 +54,12 @@ public class Batch2JobHelper {
 
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final IJobCoordinator myJobCoordinator;
+	private final IJobPersistence myJobPersistence;
 
-	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator) {
+	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobCoordinator = theJobCoordinator;
+		myJobPersistence = theJobPersistence;
 	}
 
 	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
@@ -66,9 +71,20 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(String theId, int theSecondsToWait) {
-		await()
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+
+		try {
+			await()
 			.atMost(theSecondsToWait, TimeUnit.SECONDS)
 			.until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.COMPLETED));
+		} catch (ConditionTimeoutException e) {
+			String statuses = myJobPersistence.fetchInstances(100, 0)
+				.stream()
+				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
+				.collect(Collectors.joining("\n"));
+			String currentStatus = myJobCoordinator.getInstance(theId).getStatus().name();
+			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+		}
 		return myJobCoordinator.getInstance(theId);
 	}
 
