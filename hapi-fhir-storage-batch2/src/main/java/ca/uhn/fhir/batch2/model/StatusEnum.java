@@ -63,7 +63,7 @@ public enum StatusEnum {
 
 	private final boolean myIncomplete;
 	private final boolean myEnded;
-	private static Set<StatusEnum> ourIncompleteStatuses;
+	private static StatusEnum[] ourIncompleteStatuses;
 	private static Set<StatusEnum> ourEndedStatuses;
 	private static Set<StatusEnum> ourNotEndedStatuses;
 
@@ -76,8 +76,8 @@ public enum StatusEnum {
 	 * Statuses that represent a job that has not yet completed. I.e.
 	 * all statuses except {@link #COMPLETED}
 	 */
-	public static Set<StatusEnum> getIncompleteStatuses() {
-		Set<StatusEnum> retVal = ourIncompleteStatuses;
+	public static StatusEnum[] getIncompleteStatuses() {
+		StatusEnum[] retVal = ourIncompleteStatuses;
 		if (retVal == null) {
 			EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
 			for (StatusEnum next : values()) {
@@ -85,7 +85,7 @@ public enum StatusEnum {
 					incompleteSet.add(next);
 				}
 			}
-			ourIncompleteStatuses = Collections.unmodifiableSet(incompleteSet);
+			ourIncompleteStatuses = incompleteSet.toArray(new StatusEnum[0]);
 			retVal = ourIncompleteStatuses;
 		}
 		return retVal;
@@ -154,5 +154,9 @@ public enum StatusEnum {
 		}
 
 		throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+	}
+
+	public boolean isIncomplete() {
+		return myIncomplete;
 	}
 }

@@ -116,9 +116,7 @@ public class WorkChunkProcessor {
 			StepExecutionDetails<PT, IT> stepExecutionDetails = getExecutionDetailsForNonReductionStep(theWorkChunk, theInstance, inputType, parameters);
 
 			// execute the step
-			boolean success = myStepExecutor.executeStep(stepExecutionDetails,
-				worker,
-				dataSink);
+			boolean success = myStepExecutor.executeStep(stepExecutionDetails, worker, dataSink);
 
 			// return results with data sink
 			return new JobStepExecutorOutput<>(success, dataSink);

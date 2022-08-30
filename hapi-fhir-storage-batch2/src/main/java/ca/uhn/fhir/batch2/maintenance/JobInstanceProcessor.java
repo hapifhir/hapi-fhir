@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 
 public class JobInstanceProcessor {
@@ -155,11 +154,14 @@ public class JobInstanceProcessor {
 				// otherwise, continue processing as expected
 				processChunksForNextSteps(instanceId, nextStepId);
 			}
+		} else {
+			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {} because there are {} incomplete work chunks",
+				instanceId, currentStepId, jobWorkCursor.nextStep.getStepId(), incompleteChunks);
 		}
 	}
 
 	private void processChunksForNextSteps(String instanceId, String nextStepId) {
-		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
+		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
 		for (String nextChunkId : chunksForNextStep) {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
