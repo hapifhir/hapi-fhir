@@ -19,7 +19,7 @@
 	<name>HAPI FHIR - Active Cache Library in Testing</name>
 
 	<dependencies>
-		<!-- Change here to run test cases with different cache library -->
+		<!-- Change here (and run mvn install, mvn test -U) to run test cases with different cache library -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-cache-caffeine</artifactId>
