@@ -36,6 +36,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
 	private static final String FILENAME = "import-csv-to-conceptmap-command-test-input.csv";
+	private static final String STATUS = "Active";
 
 	static {
 		System.setProperty("test", "true");
@@ -44,7 +45,8 @@ public class ImportCsvToConceptMapCommandR4Test {
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	private final String myVersion = "r4";
 	private String myFilePath;
-	private String myStatus = Enumerations.PublicationStatus.ACTIVE.toCode();
+	private final String myStatus = Enumerations.PublicationStatus.ACTIVE.toCode();
+
 
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
@@ -157,6 +159,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
 		assertEquals(CM_URL, conceptMap.getUrl());
+		assertEquals(STATUS, conceptMap.getStatus().getDisplay());
 		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
 		assertEquals(VS_URL_2, conceptMap.getTargetUriType().getValueAsString());
 
@@ -391,6 +394,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(myRestServerR4Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
 		assertEquals("http://loinc.org/cm/loinc-to-phenx", conceptMap.getUrl());
+		assertEquals(STATUS, conceptMap.getStatus().getDisplay());
 		assertEquals("http://loinc.org", conceptMap.getSourceUriType().getValueAsString());
 		assertEquals("http://phenxtoolkit.org", conceptMap.getTargetUriType().getValueAsString());
 
