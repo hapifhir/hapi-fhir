@@ -144,15 +144,7 @@ public enum StatusEnum {
 				// initial state can transition to anything
 				return true;
 			case IN_PROGRESS:
-				switch (theNewStatus) {
-					case QUEUED:
-						return false;
-					case COMPLETED:
-					case CANCELLED:
-					case ERRORED:
-					case FAILED:
-						return true;
-				}
+				return theNewStatus != QUEUED;
 			case COMPLETED:
 			case CANCELLED:
 			case ERRORED:
