@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
+import com.google.common.cache.CacheLoader;
+
 public class CacheDelegator<K, V> implements org.hl7.fhir.cache.Cache<K, V> {
 
 	com.google.common.cache.Cache<K, V> cache;
@@ -22,6 +24,10 @@ public class CacheDelegator<K, V> implements org.hl7.fhir.cache.Cache<K, V> {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		} catch (CacheLoader.InvalidCacheLoadException e) {
+			// If the entry is not found or load as null, returns null instead of an exception
+			// This matches the behaviour of Caffeine
+			return null;
 		}
 	}
 
