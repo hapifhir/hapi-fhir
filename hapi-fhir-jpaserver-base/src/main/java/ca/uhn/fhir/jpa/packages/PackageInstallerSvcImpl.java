@@ -113,6 +113,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	@Autowired
+	private Optional<IIGBlacklistInterceptor> blacklistInterceptor;
 	/**
 	 * Constructor
 	 */
@@ -417,6 +420,14 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 		}
 
+		if(blacklistInterceptor.isPresent())
+		{
+			if (!blacklistInterceptor.get().isValidForUpload(theResource)) {
+				return false;
+			}
+		}
+
+
 		if (!isValidResourceStatusForPackageUpload(theResource)) {
 			ourLog.warn("Failed to validate resource of type {} with ID {} - Error: Resource status not accepted value.",
 				theResource.fhirType(), theResource.getIdElement().getValue());
@@ -542,6 +553,11 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@VisibleForTesting
 	void setFhirContextForUnitTest(FhirContext theCtx) {
 		myFhirContext = theCtx;
+	}
+
+	@VisibleForTesting
+	void setBlacklistInterceptorForUnitTest(Optional<IIGBlacklistInterceptor> theBlacklistInterceptor) {
+		blacklistInterceptor = theBlacklistInterceptor;
 	}
 
 }

@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -8,6 +11,8 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -128,5 +133,29 @@ class PackageInstallerSvcImplTest {
 		assertFalse(mySvc.validForUpload(communication));
 		communication.setStatus(null);
 		assertFalse(mySvc.validForUpload(communication));
+	}
+
+	@Test
+	public void testValidForUpload_EmptyCodeSystem() {
+		//Arrange
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL);
+		mySvc.setBlacklistInterceptorForUnitTest(Optional.of(new IIGBlacklistInterceptor() {
+			@Override
+			public boolean isValidForUpload(IBaseResource theResource) {
+				if(theResource instanceof CodeSystem)
+				{
+					CodeSystem cs = (CodeSystem) theResource;
+					return !CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL.equalsIgnoreCase(cs.getUrl());
+				}
+				return true;
+			}
+		}));
+
+		//Act
+		boolean result = mySvc.validForUpload(codeSystem);
+		
+		//Assert
+		assertFalse(result);
 	}
 }
