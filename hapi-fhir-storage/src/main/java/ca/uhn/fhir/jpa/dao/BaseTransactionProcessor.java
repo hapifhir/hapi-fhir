@@ -389,8 +389,8 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
+				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -1867,14 +1867,14 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		private void populateResponseMapWithLastSeenException() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			ServerResponseExceptionHolder caughtEx = new ServerResponseExceptionHolder();
 			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
 	}
 
-	private static class BaseServerResponseExceptionHolder {
+	private static class ServerResponseExceptionHolder {
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {
