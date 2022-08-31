@@ -120,7 +120,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 
 		status = theCommandLine.getOptionValue(CONCEPTMAP_STATUS_PARAM);
 		if (isBlank(status)) {
-			throw new ParseException(Msg.code(2134) + "No status (" + CONCEPTMAP_STATUS_PARAM + ") specified.");
+			throw new ParseException(Msg.code(2132) + "No status (" + CONCEPTMAP_STATUS_PARAM + ") specified.");
 		}
 	}
 
