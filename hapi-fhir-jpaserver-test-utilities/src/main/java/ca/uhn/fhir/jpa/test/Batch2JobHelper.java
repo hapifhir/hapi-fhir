@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
@@ -104,14 +104,6 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstance(theId).getStatus();
 	}
 
-	public void awaitSingleChunkJobCompletion(Batch2JobStartResponse theStartResponse) {
-		awaitSingleChunkJobCompletion(theStartResponse.getJobId());
-	}
-
-	public void awaitSingleChunkJobCompletion(String theId) {
-		await().until(() -> getStatus(theId) == StatusEnum.COMPLETED);
-	}
-
 	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
 		return awaitJobFailure(theStartResponse.getJobId());
 	}
@@ -138,8 +130,8 @@ public class Batch2JobHelper {
 		await().until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.IN_PROGRESS));
 	}
 
-	public void assertNoGatedStep(String theInstanceId) {
-		assertNull(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId());
+	public void assertFastTracking(String theInstanceId) {
+		assertFalse(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {

@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
-import java.util.Optional;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
@@ -89,45 +88,19 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			myJobInstanceStatusUpdater.updateInstance(myInstance);
 		}
 
-		if (myDefinition.isGatedExecution()) {
-			handleGatedExecution(stepExecutorOutput.getDataSink());
+		if (myInstance.isFastTracking()) {
+			handleFastTracking(stepExecutorOutput.getDataSink());
 		}
 	}
 
-	private void handleGatedExecution(BaseDataSink<PT, IT, OT> theDataSink) {
-		JobInstance jobInstance = initializeGatedExecutionIfRequired(theDataSink);
-
-		if (eligibleForFastTracking(theDataSink, jobInstance)) {
+	private void handleFastTracking(BaseDataSink<PT, IT, OT> theDataSink) {
+		if (theDataSink.getWorkChunkCount() <= 1) {
 			ourLog.info("Gated job {} step {} produced at most one chunk:  Triggering a maintenance pass.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
 			myJobMaintenanceService.triggerMaintenancePass();
+		} else {
+			ourLog.info("Gated job {} step {} produced {} chunks:  Disabling fast tracking.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId(), theDataSink.getWorkChunkCount());
+			myInstance.setFastTracking(false);
+			myJobPersistence.updateInstance(myInstance);
 		}
-	}
-
-	private boolean eligibleForFastTracking(BaseDataSink<PT, IT, OT> theDataSink, JobInstance theJobInstance) {
-		return theJobInstance != null &&
-			!theJobInstance.hasGatedStep() &&
-			theDataSink.getWorkChunkCount() <= 1;
-	}
-
-	private JobInstance initializeGatedExecutionIfRequired(BaseDataSink<PT, IT, OT> theDataSink) {
-		Optional<JobInstance> oJobInstance = myJobPersistence.fetchInstance(myInstanceId);
-		if (oJobInstance.isEmpty()) {
-			return null;
-		}
-
-		JobInstance jobInstance = oJobInstance.get();
-		if (jobInstance.hasGatedStep()) {
-			// Gated execution is already initialized
-			return jobInstance;
-		}
-
-		if (theDataSink.getWorkChunkCount() <= 1) {
-			// Do not initialize gated execution for steps that produced only one chunk
-			return jobInstance;
-		}
-
-		jobInstance.setCurrentGatedStepId(myCursor.getCurrentStepId());
-		myJobPersistence.updateInstance(jobInstance);
-		return jobInstance;
 	}
 }

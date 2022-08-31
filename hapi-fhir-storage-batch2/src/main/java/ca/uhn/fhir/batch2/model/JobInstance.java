@@ -32,7 +32,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
-import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -49,6 +48,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 
 	@JsonProperty(value = "cancelled")
 	private boolean myCancelled;
+
+	@JsonProperty(value = "fastTracking")
+	private boolean myFastTracking;
 
 	// time when the job instance was actually first created/stored
 	@JsonProperty(value = "createTime")
@@ -109,6 +111,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	public JobInstance(JobInstance theJobInstance) {
 		super(theJobInstance);
 		setCancelled(theJobInstance.isCancelled());
+		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
 		setCreateTime(theJobInstance.getCreateTime());
@@ -131,6 +134,10 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
 		JobInstance instance = new JobInstance();
 		instance.setJobDefinition(theJobDefinition);
+		if (theJobDefinition.isGatedExecution()) {
+			instance.setFastTracking(true);
+			instance.setCurrentGatedStepId(theJobDefinition.getFirstStepId());
+		}
 		return instance;
 	}
 
@@ -351,5 +358,15 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 
 	public boolean isPendingCancellation() {
 		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+	}
+
+	@Override
+	public boolean isFastTracking() {
+		return myFastTracking;
+	}
+
+	@Override
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
 	}
 }

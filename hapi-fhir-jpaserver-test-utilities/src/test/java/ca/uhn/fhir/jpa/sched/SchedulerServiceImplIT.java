@@ -130,6 +130,24 @@ public class SchedulerServiceImplIT {
 	}
 
 	@Test
+	public void testScheduleTaskLongRunningDoesntRunConcurrentlyWithTrigger() {
+		ScheduledJobDefinition def = buildJobDefinition();
+		ourTaskDelay = 500;
+
+		StopWatch sw = new StopWatch();
+		mySvc.scheduleLocalJob(100, def);
+		mySvc.triggerLocalJobImmediately(def);
+		mySvc.triggerLocalJobImmediately(def);
+
+		await().until(CountingJob.ourCount::get, greaterThan(5));
+
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(3000L));
+		assertThat(sw.getMillis(), lessThan(3500L));
+	}
+
+
+	@Test
 	public void testIntervalJob() {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
@@ -158,6 +176,7 @@ public class SchedulerServiceImplIT {
 	public static class CountingJob implements Job, ApplicationContextAware {
 
 		private static AtomicInteger ourCount = new AtomicInteger();
+		private static boolean ourRunning = false;
 
 		@Autowired
 		@Qualifier("stringBean")
@@ -170,6 +189,10 @@ public class SchedulerServiceImplIT {
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
+			if (ourRunning) {
+				fail();
+			}
+			ourRunning = true;
 			if (!"String beans are good.".equals(myStringBean)) {
 				fail("Did not autowire stringBean correctly, found: " + myStringBean);
 			}
@@ -184,6 +207,7 @@ public class SchedulerServiceImplIT {
 				ourLog.info("Job has fired...");
 			}
 			ourCount.incrementAndGet();
+			ourRunning = false;
 		}
 
 		@Override

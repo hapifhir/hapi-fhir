@@ -61,4 +61,8 @@ public interface IJobInstance {
 	boolean isCancelled();
 
 	String getReport();
+
+	boolean isFastTracking();
+
+	void setFastTracking(boolean theFastTracking);
 }
