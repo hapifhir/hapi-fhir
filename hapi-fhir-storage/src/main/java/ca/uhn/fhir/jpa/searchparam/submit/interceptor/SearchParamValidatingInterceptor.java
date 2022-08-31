@@ -39,10 +39,10 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashSet;
@@ -139,33 +139,31 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp) {
-		return getUpliftCode(theRuntimeSearchParam) == getUpliftCode(theSp)
-			&& getUpliftElementName(theRuntimeSearchParam) == getUpliftCode(theSp);
+		String firstCode = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "code");
+		String secondCode = getUpliftChildExtensionValueByUrl(theSp, "code");
+		String firstElementName = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "element-name");
+		String secondElementName = getUpliftChildExtensionValueByUrl(theSp, "element-name");
+		return firstCode.equals(secondCode) && firstElementName.equals(secondElementName);
 	}
 
-	private IBaseDatatype getUpliftCode(RuntimeSearchParam theRuntimeSearchParam) {
-		List<IBaseExtension<?, ?>> extensions = theRuntimeSearchParam.getExtensions(UPLIFT_EXTENSION_URL);
+
+	private String getUpliftChildExtensionValueByUrl(RuntimeSearchParam theSp, String theUrl) {
+		List<IBaseExtension<?, ?>> extensions = theSp.getExtensions(UPLIFT_EXTENSION_URL);
 		Validate.isTrue(extensions.size() == 1);
 		IBaseExtension<?, ?> topLevelExtension = extensions.get(0);
 		List<IBaseExtension> extension = (List<IBaseExtension>) topLevelExtension.getExtension();
-		IBaseDatatype code = extension.stream().filter(ext -> ext.getUrl().equals("code")).map(IBaseExtension::getValue).findFirst().orElse(null);
-		return code;
-	}
-
-	private IBaseDatatype getUpliftElementName(RuntimeSearchParam theRuntimeSearchParam) {
-		List<IBaseExtension<?, ?>> extensions = theRuntimeSearchParam.getExtensions(UPLIFT_EXTENSION_URL);
-		Validate.isTrue(extensions.size() == 1);
-		IBaseExtension<?, ?> topLevelExtension = extensions.get(0);
-		List<IBaseExtension> extension = (List<IBaseExtension>) topLevelExtension.getExtension();
-		IBaseDatatype elementName = extension.stream().filter(ext -> ext.getUrl().equals("element-name")).map(IBaseExtension::getValue).findFirst().orElse(null);
-		return elementName;
+		String subExtensionValue = extension.stream().filter(ext -> ext.getUrl().equals(theUrl)).map(IBaseExtension::getValue)
+			.map(IPrimitiveType.class::cast)
+			.map(IPrimitiveType::getValueAsString)
+			.findFirst()
+			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2132), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
+		return subExtensionValue;
 	}
 
 	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
 		return theExistingIds
 			.stream()
 			.noneMatch(resId -> resId.equals(theSearchParam.getId().getIdPart()));
-
 	}
 
 	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
