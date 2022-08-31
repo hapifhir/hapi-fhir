@@ -41,9 +41,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.BaseParseAction;
 import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
-import ca.uhn.fhir.rest.api.server.ParseAction;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
@@ -1813,7 +1813,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 	}
 
-	public Object returnResponse(ServletRequestDetails theRequest, ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
+	public Object returnResponse(ServletRequestDetails theRequest, BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
 		HttpServletResponse servletResponse = theRequest.getServletResponse();
 		servletResponse.setStatus(operationStatus);
 		servletResponse.setCharacterEncoding(Constants.CHARSET_NAME_UTF8);

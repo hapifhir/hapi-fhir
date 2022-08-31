@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
-public class QuantityNormalizedPredicateBuilder extends QuantityBasePredicateBuilder {
+public class QuantityNormalizedPredicateBuilder extends BaseQuantityPredicateBuilder {
 
 	/**
 	 * Constructor

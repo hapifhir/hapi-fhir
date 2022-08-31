@@ -24,11 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamBaseQuantity;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -45,7 +43,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
-public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredicateBuilder {
+public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	protected DbColumn myColumnHashIdentitySystemUnits;
 	protected DbColumn myColumnHashIdentityUnits;
@@ -57,11 +55,11 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 	/**
 	 * Constructor
 	 */
-	public QuantityBasePredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
+	public BaseQuantityPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder, DbTable theTable) {
 		super(theSearchSqlBuilder, theTable);
 	}
 
-	public Condition createPredicateQuantity(QuantityParam theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityBasePredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
+	public Condition createPredicateQuantity(QuantityParam theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, BaseQuantityPredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
 		String systemValue = theParam.getSystem();
 		String unitsValue = theParam.getUnits();
@@ -70,10 +68,10 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 
 		Condition hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamBaseQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
+			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentitySystemUnits, generatePlaceholder(hash));
 		} else if (!isBlank(unitsValue)) {
-			long hash = ResourceIndexedSearchParamBaseQuantity.calculateHashUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
+			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
 			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);

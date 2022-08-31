@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-public class BaseValidationSupportWrapper extends BaseValidationSupport {
+public abstract class BaseValidationSupportWrapper extends BaseValidationSupport {
 	private final IValidationSupport myWrap;
 
 	/**
