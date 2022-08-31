@@ -4,7 +4,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -57,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
+public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
 
 	@Autowired
 	private MemberMatcherR4Helper myMemberMatcherR4Helper;

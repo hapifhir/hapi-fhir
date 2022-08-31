@@ -20,23 +20,29 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import java.io.IOException;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
-
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-public abstract class RestfulResponse<T extends RequestDetails> implements IRestfulResponse {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public abstract class BaseRestfulResponse<T extends RequestDetails> implements IRestfulResponse {
 
 	private IIdType myOperationResourceId;
 	private IPrimitiveType<Date> myOperationResourceLastUpdated;
 	private final Map<String, List<String>> myHeaders = new HashMap<>();
 	private T theRequestDetails;
 
-	public RestfulResponse(T requestDetails) {
+	public BaseRestfulResponse(T requestDetails) {
 		this.theRequestDetails = requestDetails;
 	}
 

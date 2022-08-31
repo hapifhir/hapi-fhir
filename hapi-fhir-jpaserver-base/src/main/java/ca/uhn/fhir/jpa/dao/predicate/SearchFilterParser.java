@@ -193,9 +193,9 @@ public class SearchFilterParser {
 		return str.toString();
 	}
 
-	private Filter parse() throws FilterSyntaxException {
+	private BaseFilter parse() throws FilterSyntaxException {
 
-		Filter result = parseOpen();
+		BaseFilter result = parseOpen();
 		if (cursor < original.length()) {
 			throw new FilterSyntaxException(Msg.code(1056) + String.format("Expression did not terminate at %d",
 				cursor));
@@ -203,9 +203,9 @@ public class SearchFilterParser {
 		return result;
 	}
 
-	private Filter parseOpen() throws FilterSyntaxException {
+	private BaseFilter parseOpen() throws FilterSyntaxException {
 
-		Filter result;
+		BaseFilter result;
 		String s;
 		FilterParameterGroup grp;
 		if (peek() == FilterLexType.fsltOpen) {
@@ -239,9 +239,9 @@ public class SearchFilterParser {
 		return result;
 	}
 
-	private Filter parseLogical(Filter filter) throws FilterSyntaxException {
+	private BaseFilter parseLogical(BaseFilter filter) throws FilterSyntaxException {
 
-		Filter result = null;
+		BaseFilter result = null;
 		String s;
 		FilterLogical logical;
 		if (filter == null) {
@@ -302,9 +302,9 @@ public class SearchFilterParser {
 		return result;
 	}
 
-	private Filter parseParameter(String name) throws FilterSyntaxException {
+	private BaseFilter parseParameter(String name) throws FilterSyntaxException {
 
-		Filter result;
+		BaseFilter result;
 		String s;
 		FilterParameter filter = new FilterParameter();
 
@@ -423,7 +423,7 @@ public class SearchFilterParser {
 		fsltCloseSq
 	}
 
-	abstract public static class Filter {
+	abstract public static class BaseFilter {
 
 		private FilterItemType itemType;
 
@@ -435,7 +435,7 @@ public class SearchFilterParser {
 	public static class FilterParameterPath {
 
 		private String FName;
-		private Filter FFilter;
+		private BaseFilter FFilter;
 		private FilterParameterPath FNext;
 
 		public String getName() {
@@ -448,12 +448,12 @@ public class SearchFilterParser {
 			FName = value;
 		}
 
-		public Filter getFilter() {
+		public BaseFilter getFilter() {
 
 			return FFilter;
 		}
 
-		public void setFilter(Filter value) {
+		public void setFilter(BaseFilter value) {
 
 			FFilter = value;
 		}
@@ -483,16 +483,16 @@ public class SearchFilterParser {
 		}
 	}
 
-	public static class FilterParameterGroup extends Filter {
+	public static class FilterParameterGroup extends BaseFilter {
 
-		private Filter FContained;
+		private BaseFilter FContained;
 
-		public Filter getContained() {
+		public BaseFilter getContained() {
 
 			return FContained;
 		}
 
-		public void setContained(Filter value) {
+		public void setContained(BaseFilter value) {
 
 			FContained = value;
 		}
@@ -505,7 +505,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	public static class FilterParameter extends Filter {
+	public static class FilterParameter extends BaseFilter {
 
 		private FilterParameterPath FParamPath;
 		private CompareOperation FOperation;
@@ -563,19 +563,19 @@ public class SearchFilterParser {
 		}
 	}
 
-	public static class FilterLogical extends Filter {
+	public static class FilterLogical extends BaseFilter {
 
-		private Filter FFilter1;
+		private BaseFilter FFilter1;
 		private FilterLogicalOperation FOperation;
-		private Filter FFilter2;
+		private BaseFilter FFilter2;
 
 
-		public Filter getFilter1() {
+		public BaseFilter getFilter1() {
 
 			return FFilter1;
 		}
 
-		void setFilter1(Filter FFilter1) {
+		void setFilter1(BaseFilter FFilter1) {
 
 			this.FFilter1 = FFilter1;
 		}
@@ -590,12 +590,12 @@ public class SearchFilterParser {
 			this.FOperation = FOperation;
 		}
 
-		public Filter getFilter2() {
+		public BaseFilter getFilter2() {
 
 			return FFilter2;
 		}
 
-		void setFilter2(Filter FFilter2) {
+		void setFilter2(BaseFilter FFilter2) {
 
 			this.FFilter2 = FFilter2;
 		}
@@ -612,7 +612,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	static public Filter parse(String expression) throws FilterSyntaxException {
+	static public BaseFilter parse(String expression) throws FilterSyntaxException {
 		SearchFilterParser parser = new SearchFilterParser();
 		parser.original = expression;
 		parser.cursor = 0;

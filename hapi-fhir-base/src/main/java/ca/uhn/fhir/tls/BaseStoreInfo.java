@@ -25,7 +25,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public abstract class StoreInfo {
+public abstract class BaseStoreInfo {
 
 	private final String myFilePath;
 	private final PathType myPathType;
@@ -33,7 +33,7 @@ public abstract class StoreInfo {
 	private final String myAlias;
 	private final KeyStoreType myType;
 
-	public StoreInfo(String theFilePath, String theStorePass, String theAlias) {
+	public BaseStoreInfo(String theFilePath, String theStorePass, String theAlias) {
 		if(theFilePath.startsWith(PathType.RESOURCE.getPrefix())){
 			myFilePath = theFilePath.substring(PathType.RESOURCE.getPrefix().length());
 			myPathType = PathType.RESOURCE;
