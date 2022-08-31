@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 
-public class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDstu2<Encounter> {
+public abstract class BaseJpaResourceProviderEncounterDstu2 extends JpaResourceProviderDstu2<Encounter> {
 
 	/**
 	 * Encounter/123/$everything

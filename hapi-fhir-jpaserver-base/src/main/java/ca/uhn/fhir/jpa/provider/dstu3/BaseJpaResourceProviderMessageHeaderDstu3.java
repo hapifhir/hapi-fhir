@@ -22,6 +22,6 @@ import org.hl7.fhir.dstu3.model.MessageHeader;
  * #L%
  */
 
-public class BaseJpaResourceProviderMessageHeaderDstu3 extends JpaResourceProviderDstu3<MessageHeader> {
+public abstract class BaseJpaResourceProviderMessageHeaderDstu3 extends JpaResourceProviderDstu3<MessageHeader> {
 	// nothing now
 }
