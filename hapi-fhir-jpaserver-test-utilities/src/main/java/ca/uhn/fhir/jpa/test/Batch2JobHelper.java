@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
@@ -130,8 +131,12 @@ public class Batch2JobHelper {
 		await().until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.IN_PROGRESS));
 	}
 
-	public void assertFastTracking(String theInstanceId) {
+	public void assertNotFastTracking(String theInstanceId) {
 		assertFalse(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
+	}
+
+	public void assertFastTracking(String theInstanceId) {
+		assertTrue(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
