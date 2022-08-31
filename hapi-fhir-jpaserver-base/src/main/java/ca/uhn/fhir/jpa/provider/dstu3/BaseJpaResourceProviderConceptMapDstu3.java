@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderDstu3<ConceptMap> {
+public abstract class BaseJpaResourceProviderConceptMapDstu3 extends JpaResourceProviderDstu3<ConceptMap> {
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
 		@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),

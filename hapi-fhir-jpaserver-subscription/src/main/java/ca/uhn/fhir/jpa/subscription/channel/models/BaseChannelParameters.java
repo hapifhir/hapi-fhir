@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.subscription.channel.models;
 
 import ca.uhn.fhir.jpa.subscription.model.ChannelRetryConfiguration;
 
-public class BaseChannelParameters {
+public abstract class BaseChannelParameters {
 
 	private final String myChannelName;
 

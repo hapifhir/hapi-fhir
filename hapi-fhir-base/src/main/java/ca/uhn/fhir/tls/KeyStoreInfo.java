@@ -20,7 +20,7 @@ package ca.uhn.fhir.tls;
  * #L%
  */
 
-public class KeyStoreInfo extends StoreInfo {
+public class KeyStoreInfo extends BaseStoreInfo {
 
 	private final char[] myKeyPass;
 
