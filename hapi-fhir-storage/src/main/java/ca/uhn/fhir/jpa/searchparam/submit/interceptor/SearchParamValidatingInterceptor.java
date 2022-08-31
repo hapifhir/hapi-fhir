@@ -45,6 +45,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamValidatingInterceptor {
 
 	public static final String SEARCH_PARAM = "SearchParameter";
-	public static final String UPLIFT_EXTENSION_URL = "https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain";
+	public List<String> myUpliftExtensions;
 
 	private FhirContext myFhirContext;
 
@@ -121,34 +122,38 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	private void validateUpliftSp(RequestDetails theRequestDetails, RuntimeSearchParam theRuntimeSearchParam, SearchParameterMap theSearchParameterMap) {
+		Validate.notEmpty(getUpliftExtensions(), "You are attempting to validate an Uplift Search Parameter, but have not defined which URLs correspond to uplifted search parameter extensions.");
+
 		IBundleProvider bundleProvider = getDao().search(theSearchParameterMap, theRequestDetails);
 		List<IBaseResource> allResources = bundleProvider.getAllResources();
 		if(isNotEmpty(allResources)) {
 			Set<String> existingIds = allResources.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toSet());
 			if (isNewSearchParam(theRuntimeSearchParam, existingIds)) {
-				boolean matchesExistingUplift = allResources.stream()
-					.map(sp -> mySearchParameterCanonicalizer.canonicalizeSearchParameter(sp))
-					.filter(sp -> !sp.getExtensions(UPLIFT_EXTENSION_URL).isEmpty())
-					.anyMatch( sp -> isDuplicateUpliftParameter(theRuntimeSearchParam, sp));
-				
-				if (matchesExistingUplift) {
-					throwDuplicateError();
+				for (String upliftExtensionUrl: getUpliftExtensions()) {
+					boolean matchesExistingUplift = allResources.stream()
+						.map(sp -> mySearchParameterCanonicalizer.canonicalizeSearchParameter(sp))
+						.filter(sp -> !sp.getExtensions(upliftExtensionUrl).isEmpty())
+						.anyMatch(sp -> isDuplicateUpliftParameter(theRuntimeSearchParam, sp, upliftExtensionUrl));
+
+					if (matchesExistingUplift) {
+						throwDuplicateError();
+					}
 				}
 			}
 		}
 	}
 
-	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp) {
-		String firstCode = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "code");
-		String secondCode = getUpliftChildExtensionValueByUrl(theSp, "code");
-		String firstElementName = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "element-name");
-		String secondElementName = getUpliftChildExtensionValueByUrl(theSp, "element-name");
+	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp, String theUpliftUrl) {
+		String firstCode = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "code", theUpliftUrl);
+		String secondCode = getUpliftChildExtensionValueByUrl(theSp, "code", theUpliftUrl);
+		String firstElementName = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "element-name", theUpliftUrl);
+		String secondElementName = getUpliftChildExtensionValueByUrl(theSp, "element-name", theUpliftUrl);
 		return firstCode.equals(secondCode) && firstElementName.equals(secondElementName);
 	}
 
 
-	private String getUpliftChildExtensionValueByUrl(RuntimeSearchParam theSp, String theUrl) {
-		List<IBaseExtension<?, ?>> extensions = theSp.getExtensions(UPLIFT_EXTENSION_URL);
+	private String getUpliftChildExtensionValueByUrl(RuntimeSearchParam theSp, String theUrl, String theUpliftUrl) {
+		List<IBaseExtension<?, ?>> extensions = theSp.getExtensions(theUpliftUrl);
 		Validate.isTrue(extensions.size() == 1);
 		IBaseExtension<?, ?> topLevelExtension = extensions.get(0);
 		List<IBaseExtension> extension = (List<IBaseExtension>) topLevelExtension.getExtension();
@@ -185,7 +190,7 @@ public class SearchParamValidatingInterceptor {
 			IBaseHasExtensions resource = (IBaseHasExtensions) theResource;
 			return resource.getExtension()
 				.stream()
-				.anyMatch(ext -> UPLIFT_EXTENSION_URL.equals(ext.getUrl()));
+				.anyMatch(ext -> getUpliftExtensions().contains(ext.getUrl()));
 		} else {
 			return false;
 		}
@@ -254,5 +259,15 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		return retVal;
+	}
+
+	public List<String> getUpliftExtensions() {
+		if (myUpliftExtensions == null) {
+			myUpliftExtensions = new ArrayList<>();
+		}
+		return myUpliftExtensions;
+	}
+	public void addUpliftExtension(String theUrl) {
+		getUpliftExtensions().add(theUrl);
 	}
 }

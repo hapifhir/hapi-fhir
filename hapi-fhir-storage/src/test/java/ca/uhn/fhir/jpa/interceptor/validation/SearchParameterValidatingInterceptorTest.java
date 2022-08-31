@@ -65,6 +65,7 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
+		mySearchParamValidatingInterceptor.addUpliftExtension("https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain");
 
 		myExistingSearchParameter = buildSearchParameterWithId(ID1);
 
