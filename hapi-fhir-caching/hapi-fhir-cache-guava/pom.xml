@@ -8,7 +8,7 @@
 		<artifactId>hapi-fhir</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<version>6.2.0-PRE2-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-cache-guava</artifactId>
