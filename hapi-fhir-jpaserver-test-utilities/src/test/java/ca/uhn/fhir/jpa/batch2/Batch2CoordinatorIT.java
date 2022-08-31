@@ -343,11 +343,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
 
+		// After the first step, we've only ever produced 1 chunk so we're still fast tracking
 		myBatch2JobHelper.assertFastTracking(instanceId);
 
 		myLastStepLatch.setExpectedCount(2);
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
+
+		// Now we've processed 2 chunks so we are no longer fast tracking
+		myBatch2JobHelper.assertNotFastTracking(instanceId);
 	}
 
 
