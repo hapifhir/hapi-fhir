@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 public class SearchParameterValidatingInterceptorTest {
 
 	static final FhirContext ourFhirContext = FhirContext.forR4();
+	public static final String UPLIFT_URL = "https://some-url";
 
 	@Mock
 	RequestDetails myRequestDetails;
@@ -65,7 +66,7 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
-		mySearchParamValidatingInterceptor.addUpliftExtension("https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain");
+		mySearchParamValidatingInterceptor.addUpliftExtension(UPLIFT_URL);
 
 		myExistingSearchParameter = buildSearchParameterWithId(ID1);
 
@@ -181,7 +182,7 @@ public class SearchParameterValidatingInterceptorTest {
 		SearchParameter newSearchParam = buildSearchParameterWithId(theID);
 
 		Extension topLevelExtension = new Extension();
-		topLevelExtension.setUrl("https://smilecdr.com/fhir/ns/StructureDefinition/searchparameter-uplift-refchain");
+		topLevelExtension.setUrl(UPLIFT_URL);
 
 		Extension codeExtension = new Extension();
 		codeExtension.setUrl("code");
