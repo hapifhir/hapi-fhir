@@ -1067,7 +1067,6 @@ public class QueryStack {
 	 * Old way of searching.
 	 * Missing values must be indexed!
 	 */
-	@org.jetbrains.annotations.Nullable
 	private Condition createMissingPredicateForIndexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		PredicateBuilderTypeEnum predicateType = null;
 		Supplier<? extends BaseJoiningPredicateBuilder> supplier = null;
@@ -1150,7 +1149,6 @@ public class QueryStack {
 	 * New way of searching for missing fields.
 	 * Missing values must not indexed!
 	 */
-	@org.jetbrains.annotations.Nullable
 	private Condition createMissingPredicateForUnindexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
