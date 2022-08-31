@@ -83,10 +83,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
-
-	// FIXME KHS data migration
-	@Column(name = "FAST_TRACKING", nullable = false)
-	private boolean myFastTracking;
+	@Column(name = "FAST_TRACKING", nullable = true)
+	private Boolean myFastTracking;
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 	@Lob
@@ -305,6 +303,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public boolean isFastTracking() {
+		if (myFastTracking == null) {
+			return false;
+		}
 		return myFastTracking;
 	}
 
