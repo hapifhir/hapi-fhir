@@ -29,7 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourceIndexedSearchParam {
+public abstract class BaseResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
 
 	private static final int MAX_LENGTH = 200;
 
@@ -62,7 +62,7 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamBaseQuantity() {
+	public BaseResourceIndexedSearchParamQuantity() {
 		super();
 	}
 
