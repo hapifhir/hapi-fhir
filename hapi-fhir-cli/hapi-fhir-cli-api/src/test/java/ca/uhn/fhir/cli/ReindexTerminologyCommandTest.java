@@ -31,7 +31,7 @@ class ReindexTerminologyCommandTest {
 	private final FhirContext myContext = FhirContext.forR4();
 
 	@Spy
-	private BaseJpaSystemProvider<?, ?> myProvider = spy(new BaseJpaSystemProvider<>());
+	private BaseJpaSystemProvider<?, ?> myProvider = spy(new BaseJpaSystemProvider<>() {});
 
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);

@@ -26,7 +26,7 @@ package ca.uhn.fhir.parser.json;
  * or a null.
  * 
  */
-public abstract class JsonLikeValue {
+public abstract class BaseJsonLikeValue {
 	
 	public enum ValueType {
 		ARRAY, OBJECT, SCALAR, NULL
@@ -66,10 +66,10 @@ public abstract class JsonLikeValue {
 		return this.getJsonType() == ValueType.NULL;
 	}
 	
-	public JsonLikeArray getAsArray () {
+	public BaseJsonLikeArray getAsArray () {
 		return null;
 	}
-	public JsonLikeObject getAsObject () {
+	public BaseJsonLikeObject getAsObject () {
 		return null;
 	}
 	public String getAsString () {
@@ -82,25 +82,25 @@ public abstract class JsonLikeValue {
 		return !isNull();
 	}
 	
-	public static JsonLikeArray asArray (JsonLikeValue element) {
+	public static BaseJsonLikeArray asArray (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsArray();
 		}
 		return null;
 	}
-	public static JsonLikeObject asObject (JsonLikeValue element) {
+	public static BaseJsonLikeObject asObject (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsObject();
 		}
 		return null;
 	}
-	public static String asString (JsonLikeValue element) {
+	public static String asString (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsString();
 		}
 		return null;
 	}
-	public static boolean asBoolean (JsonLikeValue element) {
+	public static boolean asBoolean (BaseJsonLikeValue element) {
 		if (element != null) {
 			return element.getAsBoolean();
 		}
@@ -108,7 +108,7 @@ public abstract class JsonLikeValue {
 	}
 	
 
-    public static final JsonLikeValue NULL = new JsonLikeValue() {
+    public static final BaseJsonLikeValue NULL = new BaseJsonLikeValue() {
         @Override
         public ValueType getJsonType() {
             return ValueType.NULL;
@@ -129,8 +129,8 @@ public abstract class JsonLikeValue {
             if (this == obj){
                 return true;
             }
-            if (obj instanceof JsonLikeValue) {
-                return getJsonType().equals(((JsonLikeValue)obj).getJsonType());
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType());
             }
             return false;
         }
@@ -146,7 +146,7 @@ public abstract class JsonLikeValue {
         }
     };
 
-    public static final JsonLikeValue TRUE = new JsonLikeValue() {
+    public static final BaseJsonLikeValue TRUE = new BaseJsonLikeValue() {
         @Override
         public ValueType getJsonType() {
         	return ValueType.SCALAR;
@@ -167,10 +167,10 @@ public abstract class JsonLikeValue {
             if (this == obj){
                 return true;
             }
-            if (obj instanceof JsonLikeValue) {
-                return getJsonType().equals(((JsonLikeValue)obj).getJsonType())
-                	&& getDataType().equals(((JsonLikeValue)obj).getDataType())
-                	&& toString().equals(((JsonLikeValue)obj).toString());
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType())
+                	&& getDataType().equals(((BaseJsonLikeValue)obj).getDataType())
+                	&& toString().equals(((BaseJsonLikeValue)obj).toString());
             }
             return false;
         }
@@ -186,7 +186,7 @@ public abstract class JsonLikeValue {
         }
     };
 
-    public static final JsonLikeValue FALSE = new JsonLikeValue() {
+    public static final BaseJsonLikeValue FALSE = new BaseJsonLikeValue() {
         @Override
         public ValueType getJsonType() {
         	return ValueType.SCALAR;
@@ -207,10 +207,10 @@ public abstract class JsonLikeValue {
             if (this == obj){
                 return true;
             }
-            if (obj instanceof JsonLikeValue) {
-                return getJsonType().equals(((JsonLikeValue)obj).getJsonType())
-                    	&& getDataType().equals(((JsonLikeValue)obj).getDataType())
-                    	&& toString().equals(((JsonLikeValue)obj).toString());
+            if (obj instanceof BaseJsonLikeValue) {
+                return getJsonType().equals(((BaseJsonLikeValue)obj).getJsonType())
+                    	&& getDataType().equals(((BaseJsonLikeValue)obj).getDataType())
+                    	&& toString().equals(((BaseJsonLikeValue)obj).toString());
             }
             return false;
         }

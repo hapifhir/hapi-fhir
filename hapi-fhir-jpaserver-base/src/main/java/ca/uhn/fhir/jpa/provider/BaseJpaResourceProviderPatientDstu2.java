@@ -21,8 +21,6 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.StringType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
+public abstract class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
 	/**
 	 * Patient/123/$everything

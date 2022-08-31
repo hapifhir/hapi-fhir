@@ -40,7 +40,7 @@ import java.util.Map;
  * #L%
  */
 
-public class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProviderDstu3<Observation> {
+public abstract class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProviderDstu3<Observation> {
 
 	/**
 	 * Observation/$lastn

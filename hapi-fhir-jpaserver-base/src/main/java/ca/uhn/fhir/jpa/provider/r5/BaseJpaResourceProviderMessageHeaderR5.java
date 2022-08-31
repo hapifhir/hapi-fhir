@@ -22,6 +22,6 @@ import org.hl7.fhir.r5.model.MessageHeader;
  * #L%
  */
 
-public class BaseJpaResourceProviderMessageHeaderR5 extends JpaResourceProviderR5<MessageHeader> {
+public abstract class BaseJpaResourceProviderMessageHeaderR5 extends JpaResourceProviderR5<MessageHeader> {
 	// nothing right now
 }

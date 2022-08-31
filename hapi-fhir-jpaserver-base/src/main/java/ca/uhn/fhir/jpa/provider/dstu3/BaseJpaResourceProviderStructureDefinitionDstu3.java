@@ -36,7 +36,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
  * #L%
  */
 
-public class BaseJpaResourceProviderStructureDefinitionDstu3 extends JpaResourceProviderDstu3<StructureDefinition> {
+public abstract class BaseJpaResourceProviderStructureDefinitionDstu3 extends JpaResourceProviderDstu3<StructureDefinition> {
 
 	/**
 	 * <code>$snapshot</code> operation
