@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -63,6 +65,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IJobPersistence myJobInstancePersister;
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
+	@Mock
+	private IJobMaintenanceService myJobMaintenanceService;
 
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
@@ -77,12 +81,21 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 
+
 	@BeforeEach
 	public void beforeEach() {
 		// The code refactored to keep the same functionality,
 		// but in this service (so it's a real service here!)
 		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		verifyNoMoreInteractions(myBatchJobSender,
+			myJobInstancePersister,
+			myJobDefinitionRegistry,
+			myJobMaintenanceService);
 	}
 
 	@Test

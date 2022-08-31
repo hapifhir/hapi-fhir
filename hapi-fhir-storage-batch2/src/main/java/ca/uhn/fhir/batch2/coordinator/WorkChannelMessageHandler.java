@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -52,11 +53,11 @@ class WorkChannelMessageHandler implements MessageHandler {
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull BatchJobSender theBatchJobSender,
-									  @Nonnull WorkChunkProcessor theExecutorSvc
-	) {
+									  @Nonnull WorkChunkProcessor theExecutorSvc,
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc);
+		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
 	}
 
 	@Override

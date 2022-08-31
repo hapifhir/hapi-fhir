@@ -20,16 +20,14 @@ package ca.uhn.fhir.batch2.coordinator;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
@@ -45,6 +43,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
+	private final IJobMaintenanceService myJobMaintenanceService;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	private final JobDefinition<PT> myDefinition;
@@ -52,23 +51,22 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 	private final String myInstanceId;
 	private final WorkChunk myWorkChunk;
 	private final JobWorkCursor<PT, IT, OT> myCursor;
-	private final PT myParameters;
 
 	JobStepExecutor(@Nonnull IJobPersistence theJobPersistence,
 						 @Nonnull BatchJobSender theBatchJobSender,
 						 @Nonnull JobInstance theInstance,
 						 @Nonnull WorkChunk theWorkChunk,
 						 @Nonnull JobWorkCursor<PT, IT, OT> theCursor,
-						 @Nonnull WorkChunkProcessor theExecutor) {
+						 @Nonnull WorkChunkProcessor theExecutor, IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myDefinition = theCursor.jobDefinition;
 		myInstance = theInstance;
 		myInstanceId = theInstance.getInstanceId();
-		myParameters = theInstance.getParameters(myDefinition.getParametersType());
 		myWorkChunk = theWorkChunk;
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
+		myJobMaintenanceService = theJobMaintenanceService;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(myJobPersistence);
 	}
 
@@ -100,18 +98,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		JobInstance jobInstance = initializeGatedExecutionIfRequired(theDataSink);
 
 		if (eligibleForFastTracking(theDataSink, jobInstance)) {
-			ourLog.info("Gated job {} step {} produced at most one chunk:  Fast tracking execution.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
-			// This job is defined to be gated, but so far every step has produced at most 1 work chunk, so it is
-			// eligible for fast tracking.
-			if (myCursor.isFinalStep()) {
-				// TODO KHS instance factory should set definition instead of setting it explicitly here and there
-				jobInstance.setJobDefinition(myDefinition);
-				JobInstanceProgressCalculator calculator = new JobInstanceProgressCalculator(myJobPersistence, jobInstance, new JobChunkProgressAccumulator());
-				calculator.calculateAndStoreInstanceProgress();
-			} else if (theDataSink.hasExactlyOneChunk()) {
-				JobWorkNotification workNotification = new JobWorkNotification(jobInstance, myCursor.nextStep.getStepId(), ((JobDataSink<PT,IT,OT>) theDataSink).getOnlyChunkId());
-				myBatchJobSender.sendWorkChannelMessage(workNotification);
-			}
+			ourLog.info("Gated job {} step {} produced at most one chunk:  Triggering a maintenance pass.", myDefinition.getJobDefinitionId(), myCursor.currentStep.getStepId());
+			myJobMaintenanceService.triggerMaintenancePass();
 		}
 	}
 

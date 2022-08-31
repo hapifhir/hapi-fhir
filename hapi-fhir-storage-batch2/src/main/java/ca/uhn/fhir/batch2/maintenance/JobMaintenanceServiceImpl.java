@@ -67,6 +67,7 @@ import java.util.Set;
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
+	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
@@ -97,10 +98,20 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	@PostConstruct
 	public void start() {
+		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
+	}
+
+	@Nonnull
+	private ScheduledJobDefinition buildJobDefinition() {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(JobMaintenanceScheduledJob.class.getName());
+		jobDefinition.setId(SCHEDULED_JOB_ID);
 		jobDefinition.setJobClass(JobMaintenanceScheduledJob.class);
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
+		return jobDefinition;
+	}
+
+	@Override
+	public void triggerMaintenancePass() {
+		mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 	}
 
 	@Override

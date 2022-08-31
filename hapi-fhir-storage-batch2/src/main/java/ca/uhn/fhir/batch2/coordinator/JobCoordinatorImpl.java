@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -69,8 +70,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IChannelReceiver theWorkChannelReceiver,
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-									  @Nonnull WorkChunkProcessor theExecutorSvc
-	) {
+									  @Nonnull WorkChunkProcessor theExecutorSvc,
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -78,7 +79,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc);
+		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 	}

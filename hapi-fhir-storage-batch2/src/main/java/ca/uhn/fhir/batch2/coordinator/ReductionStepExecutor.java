@@ -47,7 +47,7 @@ public class ReductionStepExecutor {
 			WorkChunk chunk = chunkIterator.next();
 			if (chunk.getStatus().isIncomplete()) {
 				// This should never happen since jobs with reduction are required to be gated
-				ourLog.error("Unexpected incomplete chunk {} found while reducing {}.  Gated jobs should never be reduced when there are still incomplete chunks.", chunk.getId(), theInstance);
+				ourLog.error("Unexpected chunk {} with status {} found while reducing {}.  Gated jobs should never be reduced when there are still incomplete chunks.", chunk.getId(), chunk.getStatus(), theInstance);
 				continue;
 			}
 

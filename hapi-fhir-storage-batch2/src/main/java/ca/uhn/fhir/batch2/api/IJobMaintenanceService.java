@@ -21,7 +21,11 @@ package ca.uhn.fhir.batch2.api;
  */
 
 public interface IJobMaintenanceService {
+	/**
+	 * Do not wait for the next scheduled time for maintenance. Trigger it immediately.
+	 */
+    void triggerMaintenancePass();
 
-	void runMaintenancePass();
+    void runMaintenancePass();
 
 }

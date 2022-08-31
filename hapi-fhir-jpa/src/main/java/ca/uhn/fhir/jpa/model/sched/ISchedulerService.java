@@ -54,4 +54,7 @@ public interface ISchedulerService {
 	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
 	boolean isStopping();
+
+	default void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+	default void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 }
