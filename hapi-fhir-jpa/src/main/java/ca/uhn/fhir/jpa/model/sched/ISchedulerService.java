@@ -28,8 +28,6 @@ import java.util.Set;
 
 public interface ISchedulerService {
 
-	boolean isClusteredSchedulingEnabled();
-
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 
@@ -59,4 +57,6 @@ public interface ISchedulerService {
 
 	default void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 	default void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+
+	default boolean isClusteredSchedulingEnabled() { return false; }
 }
