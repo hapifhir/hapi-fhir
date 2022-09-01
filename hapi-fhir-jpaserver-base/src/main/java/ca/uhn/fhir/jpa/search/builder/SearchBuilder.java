@@ -154,29 +154,7 @@ public class SearchBuilder implements ISearchBuilder {
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final IDao myCallingDao;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
-	protected IResourceTagDao myResourceTagDao;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IResourceSearchViewDao myResourceSearchViewDao;
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private IIdHelperService myIdHelperService;
-	@Autowired(required = false)
-	private IFulltextSearchSvc myFulltextSearchSvc;
-	@Autowired(required = false)
-	private IElasticsearchSvc myIElasticsearchSvc;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
@@ -186,25 +164,69 @@ public class SearchBuilder implements ISearchBuilder {
 	private Set<ResourcePersistentId> myPidSet;
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-	@Autowired
-	private SqlObjectFactory mySqlBuilderFactory;
-	@Autowired
-	private HibernatePropertiesProvider myDialectProvider;
-	@Autowired
-	private ModelConfig myModelConfig;
 
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+	@Autowired(required = false)
+	private IElasticsearchSvc myIElasticsearchSvc;
+
+	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	private final SqlObjectFactory mySqlBuilderFactory;
+	private final HibernatePropertiesProvider myDialectProvider;
+	private final ModelConfig myModelConfig;
+	private final ISearchParamRegistry mySearchParamRegistry;
+	private final PartitionSettings myPartitionSettings;
+	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected final IResourceTagDao myResourceTagDao;
+	private final DaoRegistry myDaoRegistry;
+	private final IResourceSearchViewDao myResourceSearchViewDao;
+	private final FhirContext myContext;
+	private final IIdHelperService myIdHelperService;
+
+	private final DaoConfig myDaoConfig;
+
+	private final IDao myCallingDao;
 
 	/**
 	 * Constructor
 	 */
-	public SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public SearchBuilder(
+		IDao theDao,
+		String theResourceName,
+		DaoConfig theDaoConfig,
+		HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
+		SqlObjectFactory theSqlBuilderFactory,
+		HibernatePropertiesProvider theDialectProvider,
+		ModelConfig theModelConfig,
+		ISearchParamRegistry theSearchParamRegistry,
+		PartitionSettings thePartitionSettings,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		IResourceTagDao theResourceTagDao,
+		DaoRegistry theDaoRegistry,
+		IResourceSearchViewDao theResourceSearchViewDao,
+		FhirContext theContext,
+		IIdHelperService theIdHelperService,
+		Class<? extends IBaseResource> theResourceType
+	) {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
+		myDaoConfig = theDaoConfig;
+
+		myEntityManagerFactory = theEntityManagerFactory;
+		mySqlBuilderFactory = theSqlBuilderFactory;
+		myDialectProvider = theDialectProvider;
+		myModelConfig = theModelConfig;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myPartitionSettings = thePartitionSettings;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myResourceTagDao = theResourceTagDao;
+		myDaoRegistry = theDaoRegistry;
+		myResourceSearchViewDao = theResourceSearchViewDao;
+		myContext = theContext;
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Override
@@ -1437,11 +1459,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public String getResourceName() {
 		return myResourceName;
-	}
-
-	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {

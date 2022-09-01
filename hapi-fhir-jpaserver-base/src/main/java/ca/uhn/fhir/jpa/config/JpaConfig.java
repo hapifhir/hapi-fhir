@@ -184,7 +184,8 @@ import java.util.Date;
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
-	JpaBulkExportConfig.class
+	JpaBulkExportConfig.class,
+	SearchConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -616,12 +617,6 @@ public class JpaConfig {
 	@Scope("prototype")
 	public SearchQueryExecutor newSearchQueryExecutor(GeneratedSql theGeneratedSql, Integer theMaxResultsToFetch) {
 		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
-	}
-
-	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
-	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
-		return new SearchBuilder(theDao, theResourceName, theResourceType);
 	}
 
 	@Bean(name = HISTORY_BUILDER)
