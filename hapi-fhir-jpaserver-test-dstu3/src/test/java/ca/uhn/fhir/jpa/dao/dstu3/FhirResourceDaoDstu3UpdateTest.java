@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -61,7 +60,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testCreateAndUpdateWithoutRequest() {
-		String methodName = getTestName();
+		String methodName = "testUpdateByUrl";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
@@ -314,7 +313,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testUpdateByUrl() {
-		String methodName = getTestName();
+		String methodName = "testUpdateByUrl";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -338,7 +337,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testUpdateConditionalByLastUpdated() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateByUrl";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
@@ -377,7 +376,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		TimeZone def = TimeZone.getDefault();
 		try {
 			TimeZone.setDefault(TimeZone.getTimeZone("GMT-0:00"));
-			String methodName = getTestName();
+			String methodName = "testUpdateByUrl";
 
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
@@ -413,7 +412,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	@Test
 	public void testUpdateCreatesTextualIdIfItDoesntAlreadyExist() {
 		Patient p = new Patient();
-		String methodName = getTestName();
+		String methodName = "testUpdateCreatesTextualIdIfItDoesntAlreadyExist";
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
 		p.setId("Patient/" + methodName);
@@ -427,7 +426,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testUpdateDoesntFailForUnknownIdWithNumberThenText() {
-		String methodName = getTestName();
+		String methodName = "testUpdateFailsForUnknownIdWithNumberThenText";
 		Patient p = new Patient();
 		p.setId("0" + methodName);
 		p.addName().setFamily(methodName);
@@ -438,7 +437,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	@Test
 	@Disabled
 	public void testUpdateIgnoresIdenticalVersions() {
-		String methodName = getTestName();
+		String methodName = "testUpdateIgnoresIdenticalVersions";
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -495,7 +494,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	 */
 	@Test
 	public void testUpdateMaintainsTagsAndSecurityLabels() {
-		String methodName = getTestName();
+		String methodName = "testUpdateMaintainsTagsAndSecurityLabels";
 
 		IIdType p1id;
 		{

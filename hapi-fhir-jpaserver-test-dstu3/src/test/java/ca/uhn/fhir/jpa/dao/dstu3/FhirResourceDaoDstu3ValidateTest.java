@@ -47,7 +47,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -248,7 +247,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@Test
 	@Disabled
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -261,7 +260,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@Test
 	@Disabled
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -325,7 +324,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationInvalid() {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
@@ -353,7 +352,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateForCreate() {
-		String methodName = getTestName();
+		String methodName = "testValidateForCreate";
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -373,7 +372,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateForUpdate() {
-		String methodName = getTestName();
+		String methodName = "testValidateForUpdate";
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -393,7 +392,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateForUpdateWithContained() {
-		String methodName = getTestName();
+		String methodName = "testValidateForUpdate";
 
 		Organization org = new Organization();
 		org.setId("#123");
@@ -416,7 +415,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testValidateForDelete() {
-		String methodName = getTestName();
+		String methodName = "testValidateForDelete";
 
 		Organization org = new Organization();
 		org.setName(methodName);

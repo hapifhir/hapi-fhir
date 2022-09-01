@@ -61,7 +61,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
@@ -742,7 +741,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteResourceConditional() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testDeleteResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);

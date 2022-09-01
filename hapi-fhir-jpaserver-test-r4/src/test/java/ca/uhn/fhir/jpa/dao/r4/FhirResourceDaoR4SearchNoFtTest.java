@@ -7,7 +7,6 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.interceptor.ForceOffsetSearchModeInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -173,7 +172,6 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.is;
@@ -838,7 +836,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testEverythingTimings() {
-		String methodName = getTestName();
+		String methodName = "testEverythingTimings";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -872,7 +870,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters(), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, null, mySrd, null);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -880,12 +878,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters(), patId);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 
 		// Specific patient ID with no linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters(), patId2);
+		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(patId2, orgId));
 
 	}
@@ -914,7 +912,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, new PatientEverythingParameters(), new IdType("Patient/A161443"));
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, null, null, mySrd);
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
@@ -2608,7 +2606,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParam";
 
 		DateTimeType beforeAny = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
 		TestUtil.sleepOneClick();
@@ -3084,7 +3082,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchPractitionerPhoneAndEmailParam";
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
@@ -3257,7 +3255,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchResourceLinkWithChainDouble() {
-		String methodName = getTestName();
+		String methodName = "testSearchResourceLinkWithChainDouble";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -3600,7 +3598,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = getTestName();
+		String methodName = "testSearchStringParamReallyLong";
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		IIdType longId;
@@ -4134,7 +4132,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = getTestName();
+		String methodName = "testSearchValueQuantity";
 
 		String id1;
 		{
@@ -4519,7 +4517,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludes() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
@@ -4626,7 +4624,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -4668,7 +4666,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -4710,7 +4708,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -4751,7 +4749,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -4858,7 +4856,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithRevIncludes() {
-		final String methodName = getTestName();
+		final String methodName = "testSearchWithRevIncludes";
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
@@ -4888,7 +4886,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithSecurityAndProfileParams";
 
 		IIdType tag1id;
 		{
@@ -4920,7 +4918,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameter() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameter";
 
 		IIdType tag1id;
 		{
@@ -5007,7 +5005,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameterMissing() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameterMissing";
 
 		IIdType tag1id;
 		{

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -87,7 +86,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -129,7 +127,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testEverythingTimings() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testEverythingIncludesBackReferences";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -155,11 +153,11 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType moId = myMedicationOrderDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters(), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null,null, mySrd, null);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters(), patId);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -802,7 +800,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchLastUpdatedParam() throws InterruptedException {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParam";
 
 		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
 		TestUtil.sleepOneClick();
@@ -1095,7 +1093,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchPractitionerPhoneAndEmailParam";
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
@@ -1201,7 +1199,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchResourceLinkWithChainDouble() {
-		String methodName = getTestName();
+		String methodName = "testSearchResourceLinkWithChainDouble";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -1415,7 +1413,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = getTestName();
+		String methodName = "testSearchStringParamReallyLong";
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		IIdType longId;
@@ -1586,7 +1584,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = getTestName();
+		String methodName = "testSearchValueQuantity";
 
 		QuantityParam param;
 		List<ResourcePersistentId> found;
@@ -1633,7 +1631,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludes() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
@@ -1765,7 +1763,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1807,7 +1805,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1849,7 +1847,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludesStarNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -1890,7 +1888,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithIncludesStarRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2159,7 +2157,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithSecurityAndProfileParams";
 
 		IIdType tag1id;
 		{
@@ -2199,7 +2197,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSearchWithTagParameter() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameter";
 
 		IIdType tag1id;
 		{

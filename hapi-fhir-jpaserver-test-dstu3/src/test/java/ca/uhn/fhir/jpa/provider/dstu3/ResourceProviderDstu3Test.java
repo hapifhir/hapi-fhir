@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.BaseValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -151,7 +150,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -836,7 +834,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCreateResourceConditional() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -979,7 +977,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testCreateWithForcedId() {
-		String methodName = getTestName();
+		String methodName = "testCreateWithForcedId";
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
@@ -1027,7 +1025,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteConditionalMultiple() {
-		String methodName = getTestName();
+		String methodName = "testDeleteConditionalMultiple";
 
 		myDaoConfig.setAllowMultipleDelete(false);
 
@@ -1087,7 +1085,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteConditionalNoMatches() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testDeleteConditionalNoMatches";
 
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?identifier=" + methodName);
 		CloseableHttpResponse resp = ourHttpClient.execute(delete);
@@ -1141,7 +1139,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1206,7 +1204,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testDeleteResourceConditional2() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testDeleteResourceConditional2";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1334,7 +1332,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingEncounterInstance() {
-		String methodName = getTestName();
+		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1398,7 +1396,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingEncounterType() {
-		String methodName = getTestName();
+		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1581,7 +1579,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void testEverythingPatientIncludesBackReferences() {
-		String methodName = getTestName();
+		String methodName = "testEverythingIncludesBackReferences";
 
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
@@ -1596,7 +1594,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patId);
+		Parameters output = ourClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		ourLog.info(ids.toString());
 		assertThat(ids, containsInAnyOrder(patId, medId, moId));
 	}
@@ -1638,7 +1638,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientOperation() {
-		String methodName = getTestName();
+		String methodName = "testEverythingOperation";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1673,7 +1673,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		enc.getSubject().setReferenceElement(patientId);
 		IIdType encId = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patientId);
+		Parameters output = ourClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
 
 		ourLog.info(ids.toString());
@@ -1681,7 +1683,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientType() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientType";
 
 		Organization o1 = new Organization();
 		o1.setName(methodName + "1");
@@ -1710,7 +1712,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		c3.addIdentifier().setValue(methodName + "3");
 		IIdType c3Id = ourClient.create().resource(c3).execute().getId().toUnqualifiedVersionless();
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(null);
+		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
@@ -1718,7 +1724,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientInstanceWithTypeParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1727,29 +1733,29 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
-		//Patient 2 stuff.
-		IIdType o2Id = createOrganization(methodName, "2");
-		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
-		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
-		IIdType obs2Id = createObservationForPatient(p2Id, "2");
-		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
-
 		//Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(parameters, p1Id);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
-		assertThat(ids, not(hasItem(p2Id)));
-		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1762,7 +1768,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
@@ -1771,7 +1786,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -1792,40 +1807,22 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("Condition, Observation"));
 		parameters.addParameter().setName(Constants.PARAM_ID).setValue(new IdType(p1Id.getIdPart()));
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
 		assertThat(ids, not(hasItem(p2Id)));
 		assertThat(ids, not(hasItem(o2Id)));
-	}
-
-	private List<IIdType> doPatientEverythingTypeOperation(Parameters theParameters) {
-		Parameters output;
-		if (theParameters == null) {
-			output = ourClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
-		} else {
-			output = ourClient.operation().onType(Patient.class).named("everything").withParameters(theParameters).execute();
-		}
-		return getListOfIds(output);
-	}
-
-	private List<IIdType> doPatientEverythingInstanceOperation(Parameters theParameters, IIdType theId) {
-		Parameters output;
-		if (theParameters == null) {
-			output = ourClient.operation().onInstance(theId).named("everything").withNoParameters(Parameters.class).execute();
-		} else {
-			output = ourClient.operation().onInstance(theId).named("everything").withParameters(theParameters).execute();
-		}
-		return getListOfIds(output);
-	}
-
-	private List<IIdType> getListOfIds(Parameters output) {
-		Bundle b = (Bundle) output.getParameter().get(0).getResource();
-
-		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
-		return toUnqualifiedVersionlessIds(b);
 	}
 
 	private IIdType createOrganization(String methodName, String s) {
@@ -1873,21 +1870,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testEverythingWithTypeParamAndUnknownTypeThrowsError() {
-		Parameters parameters = new Parameters();
-		parameters.addParameter().setName(Constants.PARAM_TYPE).setValue(new StringType("NotAResource"));
-
-		try {
-			ourClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
-		}
-	}
-
-	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testEverythingWithLastUpdatedAndSort";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2180,7 +2164,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -2256,7 +2240,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testHistoryWithAtParameter() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -2299,7 +2283,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() {
-		String methodName = getTestName();
+		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -2330,7 +2314,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIdAndVersionInBodyForCreate() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testIdAndVersionInBodyForCreate";
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -2372,7 +2356,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testIdAndVersionInBodyForUpdate() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testIdAndVersionInBodyForUpdate";
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -2482,7 +2466,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testMetaOperations() {
-		String methodName = getTestName();
+		String methodName = "testMetaOperations";
 		ourClient.registerInterceptor(new LoggingInterceptor(true));
 		ourClient.setPrettyPrint(true);
 		IValidatorModule module = new FhirInstanceValidator(myFhirContext);
@@ -2983,7 +2967,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSearchByLastUpdated() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testSearchByLastUpdated";
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName + "1");
@@ -3121,7 +3105,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParamRp";
 
 		int sleep = 100;
 		Thread.sleep(sleep);
@@ -3247,7 +3231,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchPagingKeepsOldSearches() {
-		String methodName = getTestName();
+		String methodName = "testSearchPagingKeepsOldSearches";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3804,7 +3788,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testSearchWithMissing() {
 		ourLog.info("Starting testSearchWithMissing");
 
-		String methodName = getTestName();
+		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
 		IIdType deletedIdMissingTrue = ourClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
@@ -3956,7 +3940,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSortFromResourceProvider() {
 		Patient p;
-		String methodName = getTestName();
+		String methodName = "testSortFromResourceProvider";
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -4135,7 +4119,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateInvalidReference() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4158,7 +4142,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateInvalidReference2() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateInvalidReference2";
 
 		Patient pt = new Patient();
 		pt.setId("2");
@@ -4185,7 +4169,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateNoIdInBody";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4295,7 +4279,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testUpdateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4374,7 +4358,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateResourceWithPrefer() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateResourceWithPrefer";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4475,7 +4459,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateWithETag() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateWithETag";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -4516,7 +4500,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateWrongIdInBody";
 
 		Patient pt = new Patient();
 		pt.setId("333");
@@ -4790,4 +4774,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();
 	}
+
+
 }

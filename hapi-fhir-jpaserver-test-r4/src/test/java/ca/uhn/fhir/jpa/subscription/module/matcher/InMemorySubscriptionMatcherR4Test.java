@@ -77,7 +77,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -356,7 +355,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParamUnsupported() {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParam";
 		DateTimeType today = new DateTimeType(new Date(), TemporalPrecisionEnum.DAY);
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
@@ -429,7 +428,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchPractitionerPhoneAndEmailParam";
 		Practitioner patient = new Practitioner();
 		patient.addName().setFamily(methodName);
 		patient.addTelecom().setSystem(ContactPoint.ContactPointSystem.PHONE).setValue("123");
@@ -620,7 +619,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = getTestName();
+		String methodName = "testSearchStringParamReallyLong";
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		Patient patient = new Patient();
@@ -786,7 +785,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = getTestName();
+		String methodName = "testSearchValueQuantity";
 
 		Observation o1 = new Observation();
 		o1.getCode().addCoding().setSystem("urn:foo").setCode(methodName + "code");
@@ -874,7 +873,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchWithIncludesIgnored() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("001");
 		patient.addName().setFamily("Tester_" + methodName + "_P1").addGiven("Joe");
@@ -933,7 +932,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParamsUnsupported() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithSecurityAndProfileParams";
 
 		Organization org = new Organization();
 		org.getNameElement().setValue("FOO");
@@ -952,7 +951,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	@Test
 	public void testSearchWithTagParameterUnsupported() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameter";
 
 		Organization org = new Organization();
 		org.getNameElement().setValue("FOO");

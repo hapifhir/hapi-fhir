@@ -90,7 +90,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -224,7 +223,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testCantSearchForDeletedResourceByTag() {
-		String methodName = getTestName();
+		String methodName = "testCantSearchForDeletedResourceByLanguageOrTag";
 		Organization org = new Organization();
 		org.setLanguage(new CodeDt("EN_ca"));
 		org.setName(methodName);
@@ -369,7 +368,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testCreateBundleAllowsDocumentAndCollection() {
-		String methodName = getTestName();
+		String methodName = "testCreateBundleAllowsDocumentAndCollection";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -582,7 +581,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteFailsIfIncomingLinks() {
-		String methodName = getTestName();
+		String methodName = "testDeleteFailsIfIncomingLinks";
 		SearchParameterMap map;
 		List<IIdType> found;
 
@@ -767,7 +766,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrl() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrl";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -804,7 +803,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrlChainedIdentifier() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrlChainedIdentifer";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -830,7 +829,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrlChainedProfile() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		List<IdDt> profileList = new ArrayList<IdDt>();
 		profileList.add(new IdDt("http://foo"));
@@ -877,7 +876,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrlChainedString() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrlChainedString";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -897,7 +896,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrlChainedTag() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrlChainedString";
 
 		TagList tl = new TagList();
 		tl.addTag("http://foo", "term");
@@ -944,7 +943,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testDeleteWithMatchUrlQualifierMissing() {
-		String methodName = getTestName();
+		String methodName = "testDeleteWithMatchUrlChainedProfile";
 
 		/*
 		 * Org 2 has no name
@@ -1034,7 +1033,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testHistoryOverMultiplePages() throws Exception {
 		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
-		String methodName = getTestName();
+		String methodName = "testHistoryOverMultiplePages";
 
 		/*
 		 * for (int i = 0; i < 1000; i++) {
@@ -1193,7 +1192,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
@@ -1298,7 +1297,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testInstanceMetaOperations() {
-		String methodName = getTestName();
+		String methodName = "testMetaRead";
 		IIdType id;
 		{
 			Patient patient = new Patient();
@@ -1725,7 +1724,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testReadInvalidVersion() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testReadInvalidVersion";
 
 		Patient pat = new Patient();
 		pat.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -1765,7 +1764,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testReadWithDeletedResource() {
-		String methodName = getTestName();
+		String methodName = "testReadWithDeletedResource";
 
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
@@ -1800,7 +1799,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testResourceInstanceMetaOperation() {
 
-		String methodName = getTestName();
+		String methodName = "testResourceInstanceMetaOperation";
 		IIdType id1, id2;
 		{
 			Patient patient = new Patient();
@@ -1917,7 +1916,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testResourceMetaOperation() {
 
-		String methodName = getTestName();
+		String methodName = "testResourceMetaOperation";
 		IIdType id1, id2;
 		{
 			Patient patient = new Patient();
@@ -2035,7 +2034,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testReverseIncludes() {
-		String methodName = getTestName();
+		String methodName = "testReverseIncludes";
 		Organization org = new Organization();
 		org.setName("X" + methodName + "X");
 		IIdType orgId = myOrganizationDao.create(org, mySrd).getId();
@@ -2189,7 +2188,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortById() {
-		String methodName = getTestName();
+		String methodName = "testSortBTyId";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -2240,7 +2239,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortByLastUpdated() throws InterruptedException {
-		String methodName = getTestName();
+		String methodName = "testSortByLastUpdated";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system1").setValue(methodName);
@@ -2297,7 +2296,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortByNumber() {
-		String methodName = getTestName();
+		String methodName = "testSortByNumber";
 
 		Encounter e1 = new Encounter();
 		e1.addIdentifier().setSystem("foo").setValue(methodName);
@@ -2371,7 +2370,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortByReference() {
-		String methodName = getTestName();
+		String methodName = "testSortByReference";
 
 		Organization o1 = new Organization();
 		IIdType oid1 = myOrganizationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
@@ -2544,7 +2543,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortByToken() {
-		String methodName = getTestName();
+		String methodName = "testSortByToken";
 
 		Patient p;
 
@@ -2628,7 +2627,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	@Test
 	public void testSortNoMatches() {
-		String methodName = getTestName();
+		String methodName = "testSortNoMatches";
 
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);

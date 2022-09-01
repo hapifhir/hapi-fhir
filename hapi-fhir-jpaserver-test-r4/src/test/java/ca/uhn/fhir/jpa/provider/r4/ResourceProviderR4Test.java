@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -174,7 +173,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1253,7 +1251,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateResourceConditional() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1396,7 +1394,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateWithForcedId() {
-		String methodName = getTestName();
+		String methodName = "testCreateWithForcedId";
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName);
@@ -1483,7 +1481,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteConditionalMultiple() {
-		String methodName = getTestName();
+		String methodName = "testDeleteConditionalMultiple";
 
 		myDaoConfig.setAllowMultipleDelete(false);
 
@@ -1541,10 +1539,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-
 	@Test
 	public void testDeleteConditionalNoMatches() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testDeleteConditionalNoMatches";
 
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Patient?identifier=" + methodName);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(delete)) {
@@ -1605,7 +1602,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteResourceConditional1() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1670,7 +1667,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testDeleteResourceConditional2() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testDeleteResourceConditional2";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -1860,7 +1857,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingEncounterInstance() {
-		String methodName = getTestName();
+		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -1922,7 +1919,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingEncounterType() {
-		String methodName = getTestName();
+		String methodName = "testEverythingEncounterInstance";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -2103,7 +2100,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testEverythingPatientIncludesBackReferences() {
-		String methodName = getTestName();
+		String methodName = "testEverythingIncludesBackReferences";
 
 		Medication med = new Medication();
 		med.getCode().setText(methodName);
@@ -2118,7 +2115,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mo.setMedication(new Reference(medId));
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patId);
+		Parameters output = myClient.operation().onInstance(patId).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		ourLog.info(ids.toString());
 		assertThat(ids, containsInAnyOrder(patId, medId, moId));
 	}
@@ -2160,7 +2159,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientOperation() {
-		String methodName = getTestName();
+		String methodName = "testEverythingOperation";
 
 		Organization org1parent = new Organization();
 		org1parent.setId("org1parent");
@@ -2193,7 +2192,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		enc.getSubject().setReferenceElement(patientId);
 		IIdType encId = myClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(null, patientId);
+		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		assertThat(ids, containsInAnyOrder(patientId, devId, obsId, encId, orgId1, orgId2, orgId1parent));
 
 		ourLog.info(ids.toString());
@@ -2201,7 +2202,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientType() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientType";
 
 		IIdType o1Id = createOrganization(methodName, "1");
 		IIdType o2Id = createOrganization(methodName, "2");
@@ -2214,7 +2215,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		IIdType c3Id = createConditionForPatient(methodName, "3", null);
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(null);
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id));
 		assertThat(ids, not(containsInRelativeOrder(c3Id)));
@@ -2223,7 +2228,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientTypeWithIdParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientTypeWithIdParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2254,7 +2259,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Parameters parameters = new Parameters();
 			parameters.addParameter("_id", p1Id.getIdPart());
 
-			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
 			assertThat(ids, not((o2Id)));
@@ -2269,7 +2278,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", p1Id.getIdPart());
 			parameters.addParameter("_id", p2Id.getIdPart());
 
-			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
 		}
@@ -2280,7 +2293,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Parameters parameters = new Parameters();
 			parameters.addParameter("_id", p1Id.getIdPart() + "," + p2Id.getIdPart());
 
-			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
 			assertThat(ids, not(contains(c5Id)));
@@ -2294,7 +2311,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", p3Id.getIdPart() + "," + p4Id.getIdPart());
 			parameters.addParameter(new Parameters.ParametersParameterComponent().setName("_count").setValue(new UnsignedIntType(20)));
 
-			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
 			assertThat(ids, not(contains(c5Id)));
@@ -2331,7 +2352,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientInstanceWithTypeParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientInstanceWithTypeParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2340,29 +2361,29 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType obs1Id = createObservationForPatient(p1Id, "1");
 		IIdType m1Id = createMedicationRequestForPatient(p1Id, "1");
 
-		//Patient 2 stuff.
-		IIdType o2Id = createOrganization(methodName, "2");
-		IIdType p2Id = createPatientWithIndexAtOrganization(methodName, "2", o2Id);
-		IIdType c2Id = createConditionForPatient(methodName, "2", p2Id);
-		IIdType obs2Id = createObservationForPatient(p2Id, "2");
-		IIdType m2Id = createMedicationRequestForPatient(p2Id, "2");
-
 		//Test for only one patient
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		List<IIdType> ids = doPatientEverythingInstanceOperation(parameters, p1Id);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onInstance(p1Id).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
 		assertThat(ids, not(hasItem(m1Id)));
-		assertThat(ids, not(hasItem(p2Id)));
-		assertThat(ids, not(hasItem(o2Id)));
 	}
 
 	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientTypeWithTypeParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2375,7 +2396,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Parameters parameters = new Parameters();
 		parameters.addParameter("_type", "Condition, Observation");
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
@@ -2384,7 +2414,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientTypeWithTypeAndIdParameter";
 
 		//Patient 1 stuff.
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2405,7 +2435,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		parameters.addParameter("_type", "Condition, Observation");
 		parameters.addParameter("_id", p1Id.getIdPart());
 
-		List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+		myCaptureQueriesListener.clear();
+
+		Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+		Bundle b = (Bundle) output.getParameter().get(0).getResource();
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		assertEquals(BundleType.SEARCHSET, b.getType());
+		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids, containsInAnyOrder(p1Id, c1Id, obs1Id));
 		assertThat(ids, not(hasItem(o1Id)));
@@ -2414,49 +2453,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(ids, not(hasItem(o2Id)));
 	}
 
-	private List<IIdType> doPatientEverythingTypeOperation(Parameters theParameters) {
-		Parameters output;
-		if (theParameters == null) {
-			output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
-		} else {
-			output = myClient.operation().onType(Patient.class).named("everything").withParameters(theParameters).execute();
-		}
-		return getListOfIds(output);
-	}
-
-	private List<IIdType> doPatientEverythingInstanceOperation(Parameters theParameters, IIdType theId) {
-		Parameters output;
-		if (theParameters == null) {
-			output = myClient.operation().onInstance(theId).named("everything").withNoParameters(Parameters.class).execute();
-		} else {
-			output = myClient.operation().onInstance(theId).named("everything").withParameters(theParameters).execute();
-		}
-		return getListOfIds(output);
-	}
-
-	private List<IIdType> getListOfIds(Parameters theResult) {
-		Bundle b = (Bundle) theResult.getParameter().get(0).getResource();
-
-		assertEquals(BundleType.SEARCHSET, b.getType());
-		return toUnqualifiedVersionlessIds(b);
-	}
-
-	@Test
-	public void testEverythingWithTypeParamAndUnknownTypeThrowsError() {
-		Parameters parameters = new Parameters();
-		parameters.addParameter("_type", "NotAResource");
-
-		try {
-			myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertTrue(e.getMessage().contains("Unknown resource type 'NotAResource' in _type parameter."));
-		}
-	}
-
 	@Test
 	public void testEverythingPatientWorksWithForcedId() {
-		String methodName = getTestName();
+		String methodName = "testEverythingPatientType";
 
 		//Given
 		IIdType o1Id = createOrganization(methodName, "1");
@@ -2482,9 +2481,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			parameters.addParameter("_id", "Patient/abc,Patient/def");
 
 			//When
-			List<IIdType> ids = doPatientEverythingTypeOperation(parameters);
+			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
+			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 			//Then
+			assertEquals(BundleType.SEARCHSET, b.getType());
+			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
 			assertThat(ids, not(contains(c3Id)));
 		}
@@ -2501,7 +2503,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	// retest
 	@Test
 	public void testEverythingPatientWithLastUpdatedAndSort() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testEverythingWithLastUpdatedAndSort";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2924,7 +2926,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testGetResourceCountsOperation() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -2994,7 +2996,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testHistoryWithAtParameter() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testHistoryWithFromAndTo";
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -3038,7 +3040,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testHistoryWithDeletedResource() {
-		String methodName = getTestName();
+		String methodName = "testHistoryWithDeletedResource";
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
@@ -3198,7 +3200,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIdAndVersionInBodyForCreate() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testIdAndVersionInBodyForCreate";
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -3240,7 +3242,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testIdAndVersionInBodyForUpdate() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testIdAndVersionInBodyForUpdate";
 
 		Patient pt = new Patient();
 		pt.setId("Patient/AAA/_history/4");
@@ -3394,7 +3396,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testMetaOperations() {
-		String methodName = getTestName();
+		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -3583,7 +3585,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatch() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testPatchUsingJsonPatch";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3611,7 +3613,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckBad() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testPatchUsingJsonPatchWithContentionCheckBad";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3639,7 +3641,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingJsonPatchWithContentionCheckGood() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testPatchUsingJsonPatchWithContentionCheckGood";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -3668,7 +3670,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testPatchUsingXmlPatch() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testPatchUsingXmlPatch";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -4300,7 +4302,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByLastUpdated() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testSearchByLastUpdated";
 
 		Patient p = new Patient();
 		p.addName().setFamily(methodName + "1");
@@ -4495,7 +4497,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParamRp() throws InterruptedException {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParamRp";
 
 		int sleep = 100;
 		Thread.sleep(sleep);
@@ -4640,7 +4642,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchPagingKeepsOldSearches() {
-		String methodName = getTestName();
+		String methodName = "testSearchPagingKeepsOldSearches";
 		IIdType pid1;
 		{
 			Patient patient = new Patient();
@@ -5641,7 +5643,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		ourLog.info("Starting testSearchWithMissing");
 
-		String methodName = getTestName();
+		String methodName = "testSearchWithMissing";
 
 		Organization org = new Organization();
 		IIdType deletedIdMissingTrue = myClient.create().resource(org).execute().getId().toUnqualifiedVersionless();
@@ -5900,7 +5902,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSortFromResourceProvider() {
 		Patient p;
-		String methodName = getTestName();
+		String methodName = "testSortFromResourceProvider";
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -6076,7 +6078,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateInvalidReference() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6096,7 +6098,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateInvalidReference2() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateInvalidReference2";
 
 		Patient pt = new Patient();
 		pt.setId("2");
@@ -6120,7 +6122,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	@Disabled
 	public void testUpdateNoIdInBody() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateNoIdInBody";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6227,7 +6229,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateResourceConditional() throws IOException {
-		String methodName = getTestName();
+		String methodName = "testUpdateResourceConditional";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6306,7 +6308,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateResourceWithPrefer() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateResourceWithPrefer";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6476,7 +6478,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWithETag() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateWithETag";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -6517,7 +6519,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWrongIdInBody() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testUpdateWrongIdInBody";
 
 		Patient pt = new Patient();
 		pt.setId("333");
@@ -7141,4 +7143,5 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
 	}
+
 }

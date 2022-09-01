@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -120,7 +119,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -359,7 +357,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testEverythingTimings() {
-		String methodName = getTestName();
+		String methodName = "testEverythingTimings";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -385,11 +383,11 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, mySrd, new PatientEverythingParameters(), null);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, null, mySrd, null);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, mySrd, new PatientEverythingParameters(), patId);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -417,9 +415,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		PatientEverythingParameters everythingParams = new PatientEverythingParameters();
-		everythingParams.setCount(count);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), mySrd, everythingParams, new IdType("Patient/A161443"));
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, null, null, mySrd);
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
@@ -1438,7 +1434,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchLastUpdatedParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchLastUpdatedParam";
 
 		TestUtil.sleepOneClick();
 
@@ -1765,7 +1761,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchPractitionerPhoneAndEmailParam() {
-		String methodName = getTestName();
+		String methodName = "testSearchPractitionerPhoneAndEmailParam";
 		IIdType id1;
 		{
 			Practitioner patient = new Practitioner();
@@ -1894,7 +1890,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchResourceLinkWithChainDouble() {
-		String methodName = getTestName();
+		String methodName = "testSearchResourceLinkWithChainDouble";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -2159,7 +2155,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchStringParamReallyLong() {
-		String methodName = getTestName();
+		String methodName = "testSearchStringParamReallyLong";
 		String value = StringUtils.rightPad(methodName, 200, 'a');
 
 		IIdType longId;
@@ -2448,7 +2444,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchValueQuantity() {
-		String methodName = getTestName();
+		String methodName = "testSearchValueQuantity";
 
 		String id1;
 		{
@@ -2638,7 +2634,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludes() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentOrgId;
 		{
 			Organization org = new Organization();
@@ -2745,7 +2741,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2787,7 +2783,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchWithIncludesParameterRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2829,7 +2825,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarNoRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2870,7 +2866,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithIncludesStarRecurse() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithIncludes";
 		IIdType parentParentOrgId;
 		{
 			Organization org = new Organization();
@@ -2977,7 +2973,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithRevIncludes() {
-		final String methodName = getTestName();
+		final String methodName = "testSearchWithRevIncludes";
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		IIdType pid = txTemplate.execute(new TransactionCallback<IIdType>() {
@@ -3007,7 +3003,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithSecurityAndProfileParams() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithSecurityAndProfileParams";
 
 		IIdType tag1id;
 		{
@@ -3039,7 +3035,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameter() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameter";
 
 		IIdType tag1id;
 		{
@@ -3125,7 +3121,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithTagParameterMissing() {
-		String methodName = getTestName();
+		String methodName = "testSearchWithTagParameterMissing";
 
 		IIdType tag1id;
 		{

@@ -83,7 +83,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
-import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -1345,7 +1344,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	@Disabled
 	public void testValidateResourceContainingProfileDeclarationJson() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationJson";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.JSON);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -1358,7 +1357,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	@Disabled
 	public void testValidateResourceContainingProfileDeclarationXml() throws Exception {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationXml";
 		OperationOutcome outcome = doTestValidateResourceContainingProfileDeclaration(methodName, EncodingEnum.XML);
 
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
@@ -1454,7 +1453,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateResourceContainingProfileDeclarationInvalid() {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
@@ -1481,7 +1480,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateBundleContainingResourceContainingProfileDeclarationInvalid() {
-		String methodName = getTestName();
+		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation observation = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
@@ -1511,7 +1510,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			org.hl7.fhir.r4.model.OperationOutcome oo = (org.hl7.fhir.r4.model.OperationOutcome) e.getOperationOutcome();
 			String outputString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 			ourLog.info(outputString);
-			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateBundleContainingResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
+			assertThat(outputString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
 		}
 	}
 
@@ -1596,7 +1595,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateForCreate() {
-		String methodName = getTestName();
+		String methodName = "testValidateForCreate";
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -1616,7 +1615,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateForUpdate() {
-		String methodName = getTestName();
+		String methodName = "testValidateForUpdate";
 
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -1636,7 +1635,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateForUpdateWithContained() {
-		String methodName = getTestName();
+		String methodName = "testValidateForUpdate";
 
 		Organization org = new Organization();
 		org.setId("#123");
@@ -1659,7 +1658,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateForDelete() {
-		String methodName = getTestName();
+		String methodName = "testValidateForDelete";
 
 		Organization org = new Organization();
 		org.setName(methodName);
@@ -1696,7 +1695,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	public void testValidateForDeleteWithReferentialIntegrityDisabled() {
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(false);
-		String methodName = getTestName();
+		String methodName = "testValidateForDelete";
 
 		Organization org = new Organization();
 		org.setName(methodName);
