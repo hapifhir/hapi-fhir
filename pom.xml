@@ -3041,12 +3041,5 @@
 				</plugins>
 			</build>
 		</profile>
-
-		<profile>
-			<id>MEM7G</id>
-			<properties>
-				<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx7g</surefire_jvm_args>
-			</properties>
-		</profile>
 	</profiles>
 </project>
