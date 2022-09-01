@@ -110,7 +110,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			theQualifier = "";
 
 			if (!("name".equals(theParamName) || "given".equals(theParamName))){
-				ourLog.warn(":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"");
+				ourLog.debug(":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"");
 			}
 		}
 

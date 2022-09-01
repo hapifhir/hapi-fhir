@@ -78,7 +78,7 @@ public class StringParamTest {
 
 	private void assertNicknameWarningLogged(boolean theWasLogged){
 		String expectedMessage = ":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"";
-		Level expectedLevel = Level.WARN;
+		Level expectedLevel = Level.DEBUG;
 		List<ILoggingEvent> warningLogs = myListAppender
 			.list
 			.stream()
