@@ -266,9 +266,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<>();
 		for (Bundle.Entry next : theFound.getEntry()) {
-			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-			// }
 		}
 		return retVal;
 	}
