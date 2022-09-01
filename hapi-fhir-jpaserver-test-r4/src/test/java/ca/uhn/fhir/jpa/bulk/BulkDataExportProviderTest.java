@@ -176,6 +176,28 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
+	public void testOmittingOutputFormatDefaultsToNdjson() throws IOException {
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		InstantType now = InstantType.now();
+
+		Parameters input = new Parameters();
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.setEntity(new ResourceEntity(myCtx, input));
+
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		BulkExportParameters params = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+
+
+	}
+
+	@Test
 	public void testSuccessfulInitiateBulkRequest_Get() throws IOException {
 		when(myJobRunner.startNewJob(any())).thenReturn(createJobStartResponse());
 
