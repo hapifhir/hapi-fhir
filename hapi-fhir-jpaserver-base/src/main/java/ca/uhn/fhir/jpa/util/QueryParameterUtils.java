@@ -1,11 +1,19 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchInclude;
+import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -32,11 +40,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 public class QueryParameterUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryParameterUtils.class);
+	public static final int DEFAULT_SYNC_SIZE = 250;
+	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
 
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
 
@@ -178,5 +191,39 @@ public class QueryParameterUtils {
 		TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
 		return ResourcePersistentId.fromLongList(query.getResultList());
+	}
+
+	public static void verifySearchHasntFailedOrThrowInternalErrorException(Search theSearch) {
+		if (theSearch.getStatus() == SearchStatusEnum.FAILED) {
+			Integer status = theSearch.getFailureCode();
+			status = defaultIfNull(status, 500);
+
+			String message = theSearch.getFailureMessage();
+			throw BaseServerResponseException.newInstance(status, message);
+		}
+	}
+
+	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch, RequestPartitionId theRequestPartitionId) {
+		theSearch.setDeleted(false);
+		theSearch.setUuid(theSearchUuid);
+		theSearch.setCreated(new Date());
+		theSearch.setTotalCount(null);
+		theSearch.setNumFound(0);
+		theSearch.setPreferredPageSize(theParams.getCount());
+		theSearch.setSearchType(theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
+		theSearch.setLastUpdated(theParams.getLastUpdated());
+		theSearch.setResourceType(theResourceType);
+		theSearch.setStatus(SearchStatusEnum.LOADING);
+		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
+
+		if (theParams.hasIncludes()) {
+			for (Include next : theParams.getIncludes()) {
+				theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+			}
+		}
+
+		for (Include next : theParams.getRevIncludes()) {
+			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
+		}
 	}
 }
