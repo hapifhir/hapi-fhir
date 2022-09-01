@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithLuceneHSearch;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -61,12 +62,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Test is executed from child classes with Lucene or Elastic configuration
  * Requires 6Gb memory (set in pom file, 'surefire_jvm_args' property) and takes 3 Hs to run successfully
  */
-@Disabled("Only intended to be run 'manually' on the performance build")
+@Disabled("The LOINC upload process this test runs consumes over 4G memory, and needs to be fixed before enabling this test.")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	LoincFullLoadR4IT.NoopMandatoryTransactionListener.class
 	// pick up elastic or lucene engine:
-//	,TestR4ConfigWithElasticHSearch.class
+//	, TestR4ConfigWithElasticHSearch.class
 	, TestR4ConfigWithLuceneHSearch.class
 })
 public class LoincFullLoadR4IT extends BaseJpaTest {
@@ -125,7 +126,7 @@ public class LoincFullLoadR4IT extends BaseJpaTest {
 
 
 	@Test()
-	public void uploadLoincCodeSystem() throws FileNotFoundException, InterruptedException {
+	public void uploadLoincCodeSystem() throws FileNotFoundException {
 		List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
 
 		// upload terminology
@@ -144,22 +145,22 @@ public class LoincFullLoadR4IT extends BaseJpaTest {
 		ourLog.info("=================> Pre-expanding ValueSets took {}", sw);
 		saveValueSetPreexpansionCounts();
 
-		// run reindexing operation
-		sw.restart();
-		reFreetextIndexTerminology();
-		ourLog.info("=================> Deleting and recreating freetext indexes took {}", sw);
-		validateFreetextCounts();
-
-		// remove ValueSet pre-expansions
-		sw.restart();
-		removeValueSetPreExpansions();
-		ourLog.info("=================> Removing all ValueSet pre-expansions took {}", sw);
-
-		// pre-expand  ValueSets again, after freetext reindexing
-		sw.restart();
-		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
-		ourLog.info("=================> Pre-expanding ValueSets (again, after reindexing) took {}", sw);
-		validateValueSetPreexpansion();
+//		// run reindexing operation
+//		sw.restart();
+//		reFreetextIndexTerminology();
+//		ourLog.info("=================> Deleting and recreating freetext indexes took {}", sw);
+//		validateFreetextCounts();
+//
+//		// remove ValueSet pre-expansions
+//		sw.restart();
+//		removeValueSetPreExpansions();
+//		ourLog.info("=================> Removing all ValueSet pre-expansions took {}", sw);
+//
+//		// pre-expand  ValueSets again, after freetext reindexing
+//		sw.restart();
+//		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+//		ourLog.info("=================> Pre-expanding ValueSets (again, after reindexing) took {}", sw);
+//		validateValueSetPreexpansion();
 	}
 
 
