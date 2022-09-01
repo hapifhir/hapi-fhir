@@ -39,6 +39,7 @@ jobs:
             vmImage: ubuntu-latest
          steps:
             -  script: echo testing module ${{ p.module }}
+            -  script: echo $(SourceBranchName)
             -  task: DockerInstaller@0
                displayName: Docker Installer
                inputs:
