@@ -1,6 +1,10 @@
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -12,14 +16,28 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class QueryParameterUtils {
+	private static final Logger ourLog = LoggerFactory.getLogger(QueryParameterUtils.class);
+
 	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
 
 	static {
@@ -123,4 +141,42 @@ public class QueryParameterUtils {
 
         return theSpnamePrefix + "." + theParamName;
     }
+
+    public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
+        return thePredicates.toArray(new Predicate[0]);
+    }
+
+	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
+		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
+		if (theLastUpdated != null) {
+			if (theLastUpdated.getLowerBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
+				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
+				lastUpdatedPredicates.add(predicateLower);
+			}
+			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
+				lastUpdatedPredicates.add(predicateUpper);
+			}
+		}
+		return lastUpdatedPredicates;
+	}
+
+	public static List<ResourcePersistentId> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<ResourcePersistentId> thePids) {
+		if (thePids.isEmpty()) {
+			return Collections.emptyList();
+		}
+		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
+		Root<ResourceTable> from = cq.from(ResourceTable.class);
+		cq.select(from.get("myId").as(Long.class));
+
+		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
+		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(thePids)));
+
+		cq.where(toPredicateArray(lastUpdatedPredicates));
+		TypedQuery<Long> query = theEntityManager.createQuery(cq);
+
+		return ResourcePersistentId.fromLongList(query.getResultList());
+	}
 }
