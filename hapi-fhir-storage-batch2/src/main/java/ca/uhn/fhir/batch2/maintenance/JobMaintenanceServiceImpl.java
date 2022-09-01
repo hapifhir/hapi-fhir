@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -74,6 +75,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
+
+	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
 	/**
 	 * Constructor
@@ -111,12 +114,26 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	@Override
 	public void triggerMaintenancePass() {
-		mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+		if (mySchedulerService.isClusteredSchedulingEnabled()) {
+			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+		} else {
+			runMaintenancePass();
+		}
 	}
 
 	@Override
 	public void runMaintenancePass() {
+		if (!myRunMaintenanceSemaphore.tryAcquire()) {
+			return;
+		}
+		try {
+			doMaintenancePass();
+		} finally {
+			myRunMaintenanceSemaphore.release();
+		}
+	}
 
+	private void doMaintenancePass() {
 		// NB: If you add any new logic, update the class javadoc
 
 		Set<String> processedInstanceIds = new HashSet<>();

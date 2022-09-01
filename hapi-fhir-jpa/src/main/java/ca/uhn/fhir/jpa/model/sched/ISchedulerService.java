@@ -28,6 +28,8 @@ import java.util.Set;
 
 public interface ISchedulerService {
 
+	boolean isClusteredSchedulingEnabled();
+
 	@VisibleForTesting
 	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
 

@@ -156,7 +156,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+		return myJobInstanceRepository.findById(theInstanceId).map(this::toInstance);
 	}
 
 	@Override

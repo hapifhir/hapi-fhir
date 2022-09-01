@@ -95,6 +95,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		myLocalSchedulingEnabled = theLocalSchedulingEnabled;
 	}
 
+	@Override
 	public boolean isClusteredSchedulingEnabled() {
 		return myClusteredSchedulingEnabled;
 	}
@@ -107,6 +108,10 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 	public void create() throws SchedulerException {
 		myLocalScheduler = createScheduler(false);
 		myClusteredScheduler = createScheduler(true);
+		if (isSchedulingDisabled()) {
+			setLocalSchedulingEnabled(false);
+			setClusteredSchedulingEnabled(false);
+		}
 		myStopping.set(false);
 	}
 
