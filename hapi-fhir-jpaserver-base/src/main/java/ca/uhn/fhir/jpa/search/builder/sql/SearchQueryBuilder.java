@@ -306,6 +306,47 @@ public class SearchQueryBuilder {
 	}
 
 
+
+	public StringPredicateBuilder createStringPredicateBuilder() {
+		StringPredicateBuilder sp = mySqlBuilderFactory.stringIndexTable(this);
+		return sp;
+	}
+
+	public NumberPredicateBuilder createNumberPredicateBuilder() {
+		NumberPredicateBuilder np = mySqlBuilderFactory.numberIndexTable(this);
+		return np;
+	}
+
+	public QuantityPredicateBuilder createQuantityPredicateBuilder() {
+		QuantityPredicateBuilder qp = mySqlBuilderFactory.quantityIndexTable(this);
+		return qp;
+	}
+
+	public CoordsPredicateBuilder createCoordsPredicateBuilder() {
+		CoordsPredicateBuilder cp = mySqlBuilderFactory.coordsPredicateBuilder(this);
+		return cp;
+	}
+
+	public TokenPredicateBuilder createTokenPredicateBuilder() {
+		TokenPredicateBuilder tp = mySqlBuilderFactory.tokenIndexTable(this);
+		return tp;
+	}
+
+	public DatePredicateBuilder createDatePredicateBuilder() {
+		DatePredicateBuilder dp = mySqlBuilderFactory.dateIndexTable(this);
+		return dp;
+	}
+
+	public UriPredicateBuilder createUriPredicateBuilder() {
+		UriPredicateBuilder up = mySqlBuilderFactory.uriIndexTable(this);
+		return up;
+	}
+
+	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
+		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return retVal;
+	}
+
 	public ResourceIdPredicateBuilder newResourceIdBuilder() {
 		return mySqlBuilderFactory.resourceId(this);
 	}
