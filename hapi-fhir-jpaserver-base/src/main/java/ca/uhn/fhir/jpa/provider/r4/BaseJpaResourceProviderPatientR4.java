@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
+public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
 
 	@Autowired
 	private MemberMatcherR4Helper myMemberMatcherR4Helper;

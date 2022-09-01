@@ -48,7 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
+public abstract class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu2<Patient> {
 
 	/**
 	 * Patient/123/$everything
