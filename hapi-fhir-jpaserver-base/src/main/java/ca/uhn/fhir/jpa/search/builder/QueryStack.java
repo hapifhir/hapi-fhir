@@ -35,6 +35,9 @@ import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.builder.models.MissingParameterQueryParams;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheKey;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderCacheLookupResult;
+import ca.uhn.fhir.jpa.search.builder.models.PredicateBuilderTypeEnum;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseQuantityPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseSearchParamPredicateBuilder;
@@ -59,6 +62,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -72,7 +76,6 @@ import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -98,12 +101,7 @@ import com.healthmarketscience.sqlbuilder.SetOperationQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnionQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import org.apache.commons.collections4.BidiMap;
-import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Triple;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -1878,66 +1876,6 @@ public class QueryStack {
 				throw new InvalidRequestException(Msg.code(1225) + "The search type: " + theParam.getParamType() + " is not supported.");
 		}
 		return qp;
-	}
-
-	private enum PredicateBuilderTypeEnum {
-		DATE, COORDS, NUMBER, QUANTITY, REFERENCE, SOURCE, STRING, TOKEN, TAG
-	}
-
-	private static class PredicateBuilderCacheLookupResult<T extends BaseJoiningPredicateBuilder> {
-		private final boolean myCacheHit;
-		private final T myResult;
-
-		private PredicateBuilderCacheLookupResult(boolean theCacheHit, T theResult) {
-			myCacheHit = theCacheHit;
-			myResult = theResult;
-		}
-
-		public boolean isCacheHit() {
-			return myCacheHit;
-		}
-
-		public T getResult() {
-			return myResult;
-		}
-	}
-
-	private static class PredicateBuilderCacheKey {
-		private final DbColumn myDbColumn;
-		private final PredicateBuilderTypeEnum myType;
-		private final String myParamName;
-		private final int myHashCode;
-
-		private PredicateBuilderCacheKey(DbColumn theDbColumn, PredicateBuilderTypeEnum theType, String theParamName) {
-			myDbColumn = theDbColumn;
-			myType = theType;
-			myParamName = theParamName;
-			myHashCode = new HashCodeBuilder().append(myDbColumn).append(myType).append(myParamName).toHashCode();
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-
-			PredicateBuilderCacheKey that = (PredicateBuilderCacheKey) theO;
-
-			return new EqualsBuilder()
-				.append(myDbColumn, that.myDbColumn)
-				.append(myType, that.myType)
-				.append(myParamName, that.myParamName)
-				.isEquals();
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
-		}
 	}
 
 }

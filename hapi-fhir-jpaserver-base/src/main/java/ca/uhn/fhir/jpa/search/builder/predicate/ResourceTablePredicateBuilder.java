@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.search.builder.QueryParameterUtils;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -30,8 +30,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryParameterUtils.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 
 public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnResId;

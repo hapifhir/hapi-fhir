@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.search.builder;
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
