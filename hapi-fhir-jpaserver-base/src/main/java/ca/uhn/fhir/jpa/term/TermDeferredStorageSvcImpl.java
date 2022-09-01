@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -42,7 +41,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-import ca.uhn.fhir.rest.server.mail.MailSvc;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -74,7 +72,6 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSI
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
-	private static final int MAX_SAVE_DEFERRED_CALLS = 1000;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -270,18 +267,10 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public synchronized void saveAllDeferred() {
-		int counter = 0;
+	public void saveAllDeferred() {
+		// TODO it is risky to have an infinite loop in a foreground thread like this.  Can we move this to a scheduled job or batch job?
 		while (!isStorageQueueEmpty()) {
 			saveDeferred();
-			if (++counter > MAX_SAVE_DEFERRED_CALLS) {
-				throw new IllegalStateException(Msg.code(2133) + "Exceeded " + MAX_SAVE_DEFERRED_CALLS + " calls to saveDeferred.  Aborting");
-			}
-			try {
-				this.wait(10);
-			} catch (InterruptedException e) {
-				ourLog.error("Interrupted.");
-			}
 		}
 	}
 

@@ -25,7 +25,7 @@ public final class Msg {
 
 	/**
 	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last used code value: 2133
+	 * Last used code value: 2132
 	 */
 
 	private Msg() {}
