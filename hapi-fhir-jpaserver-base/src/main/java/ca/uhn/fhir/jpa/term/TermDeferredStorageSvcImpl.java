@@ -74,7 +74,7 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSI
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
-	private static final int MAX_SAVE_DEFERRED_CALLS = 100000;
+	private static final int MAX_SAVE_DEFERRED_CALLS = 1000;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -270,12 +270,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public void saveAllDeferred() {
+	public synchronized void saveAllDeferred() {
 		int counter = 0;
 		while (!isStorageQueueEmpty()) {
 			saveDeferred();
 			if (++counter > MAX_SAVE_DEFERRED_CALLS) {
 				throw new IllegalStateException(Msg.code(2133) + "Exceeded " + MAX_SAVE_DEFERRED_CALLS + " calls to saveDeferred.  Aborting");
+			}
+			try {
+				this.wait(10);
+			} catch (InterruptedException e) {
+				ourLog.error("Interrupted.");
 			}
 		}
 	}
