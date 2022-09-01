@@ -1,0 +1,19 @@
+---
+type: fix
+issue: 3951
+title: "Changing the way missing field searches work.
+      Currently, a user must enable IndexMissingFields flag
+      in order to be able to search on missing fields at all.
+      However, this search takes a lot of extra space and is
+      slower if searching for fields that are not missing
+      amongst many similarly typed resources.
+      This change begins a migration process that will allow searching
+      on missing fields without enabling IndexMissingFields flag.
+      This first step will be faster in looking for fields that are not
+      missing. However, it will be slower for looking for fields that are
+      missing if there are many (similarly typed) resources to search over.
+      The type of search used will be determined by the IndexMissingFields flag:
+      if it is Enabled, the old method is used. If disabled, the new method is used.
+      The 2 searches are not compatible. And changes from one to the other
+      require a call to /$reindex in order to gather correct results.
+      "
