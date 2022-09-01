@@ -34,4 +34,18 @@ public class ValidateCommandTest {
 			"-p",
 			"-n", resourcePath});
 	}
+
+	@Test
+	public void testValidateLocalProfileAndResourceR4() {
+		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
+		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profil.json").getFile();
+		ourLog.info(patientJson);
+
+		App.main(new String[] {
+			"validate",
+			"--fhir-version", "r4",
+			"--profile",
+			"--file", patientJson,
+			"-l", patientProfile});
+	}
 }

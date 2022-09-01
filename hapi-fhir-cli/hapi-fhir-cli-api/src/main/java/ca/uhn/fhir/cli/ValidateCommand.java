@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import com.helger.commons.io.file.FileHelper;
@@ -37,10 +38,11 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -136,13 +138,10 @@ public class ValidateCommand extends BaseCommand {
 		FhirContext ctx = getFhirContext();
 		FhirValidator val = ctx.newValidator();
 
-		IBaseResource localProfileResource = null;
+		ValidationOptions options = new ValidationOptions();
 		if (theCommandLine.hasOption("l")) {
 			String localProfile = theCommandLine.getOptionValue("l");
-			ourLog.info("Loading profile: {}", localProfile);
-			String input = loadFile(localProfile);
-
-			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
+			options.addProfile(localProfile);
 		}
 
 		if (theCommandLine.hasOption("p")) {
@@ -164,7 +163,11 @@ public class ValidateCommand extends BaseCommand {
 				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
+					ValidationSupportChain validationSupport = new ValidationSupportChain(
+						new DefaultProfileValidationSupport(ctx),
+						new InMemoryTerminologyServerValidationSupport(ctx),
+						new LocalFileValidationSupport(ctx),
+						new SnapshotGeneratingValidationSupport(ctx));
 
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
@@ -182,7 +185,7 @@ public class ValidateCommand extends BaseCommand {
 
 		ValidationResult results;
 		try {
-			results = val.validateWithResult(contents);
+			results = val.validateWithResult(contents, options);
 		} catch (DataFormatException e) {
 			throw new CommandFailureException(Msg.code(1621) + e.getMessage());
 		}
