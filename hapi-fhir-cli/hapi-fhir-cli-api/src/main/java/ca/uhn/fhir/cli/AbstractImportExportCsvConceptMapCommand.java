@@ -138,7 +138,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		process();
 	}
 
-	protected void parseAdditionalParameters(CommandLine theCommandLine) {}
+	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {}
 
 	protected abstract void process() throws ParseException, ExecutionException;
 
