@@ -211,9 +211,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 		assert theJobDefinition.getJobClass() != null;
 
 		ourLog.info("Scheduling {} job {} with interval {}", theInstanceName, theJobDefinition.getId(), StopWatch.formatMillis(theIntervalMillis));
-		if (theJobDefinition.getGroup() == null) {
-			theJobDefinition.setGroup(myDefaultGroup);
-		}
+		defaultGroup(theJobDefinition);
 		theScheduler.scheduleJob(theIntervalMillis, theJobDefinition);
 	}
 
@@ -241,11 +239,19 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService, Sma
 
 	@Override
 	public void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {
+		defaultGroup(theJobDefinition);
 		myClusteredScheduler.triggerJobImmediately(theJobDefinition);
 	}
 
 	@Override
 	public void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {
+		defaultGroup(theJobDefinition);
 		myLocalScheduler.triggerJobImmediately(theJobDefinition);
+	}
+
+	private void defaultGroup(ScheduledJobDefinition theJobDefinition) {
+		if (theJobDefinition.getGroup() == null) {
+			theJobDefinition.setGroup(myDefaultGroup);
+		}
 	}
 }

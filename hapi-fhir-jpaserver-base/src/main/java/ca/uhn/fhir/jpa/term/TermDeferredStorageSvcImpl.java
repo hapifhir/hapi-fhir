@@ -268,9 +268,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
-		// TODO it is risky to have an infinite loop in a foreground thread like this.  Can we move this to a scheduled job or batch job?
 		while (!isStorageQueueEmpty()) {
 			saveDeferred();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				ourLog.error("Interrupted.");
+			}
 		}
 	}
 
