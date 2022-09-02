@@ -36,9 +36,23 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	public void testValidateLocalProfileAndResourceR4() {
+	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality() {
+		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient-no-identifier.json").getFile();
+		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
+		ourLog.info(patientJson);
+
+		App.main(new String[] {
+			"validate",
+			"--fhir-version", "r4",
+			"--profile",
+			"--file", patientJson,
+			"-l", patientProfile});
+	}
+
+	@Test
+	public void validate_withLocalProfileR4_shouldPass() {
 		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
-		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profil.json").getFile();
+		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 		ourLog.info(patientJson);
 
 		App.main(new String[] {
