@@ -36,7 +36,7 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality() {
+	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality_whenResourceDoesNotComplyWithProfile() {
 		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient-no-identifier.json").getFile();
 		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 		ourLog.info(patientJson);
@@ -50,7 +50,7 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	public void validate_withLocalProfileR4_shouldPass() {
+	public void validate_withLocalProfileR4_shouldPass_whenResourceCompliesWithProfile() {
 		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
 		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 		ourLog.info(patientJson);
