@@ -83,6 +83,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
+		myJobDefinitionRegistry.setJobDefinition(instance);
 		String instanceId = instance.getInstanceId();
 
 		if (instance.isCancelled()) {

@@ -185,13 +185,27 @@ public class Batch2JobHelper {
 		return myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, null, 100, 0);
 	}
 
+
+	public void awaitNoJobsRunning() {
+		awaitNoJobsRunning(false);
+	}
+
 	public void awaitAllJobsComplete() {
+		awaitNoJobsRunning(true);
+	}
+
+	public void awaitNoJobsRunning(boolean theExpectAtLeastOneJobToExist) {
 		HashMap<String, String> map = new HashMap<>();
 		Awaitility.await().atMost(10, TimeUnit.SECONDS)
 			.until(() -> {
 				myJobMaintenanceService.runMaintenancePass();
 
 				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+				// "All Jobs" assumes at least one job exists
+				if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
+					ourLog.warn("No jobs found yet...");
+					return false;
+				}
 
 				for (JobInstance job : jobs) {
 					if (job.getStatus() != StatusEnum.COMPLETED) {
@@ -219,13 +233,13 @@ public class Batch2JobHelper {
 		return awaitJobCompletion(theId, theSeconds);
 	}
 
-	public JobInstance awaitMultipleChunkJobCompletion(String theId) {
-		return awaitMultipleChunkJobCompletion(theId, 10);
+	public JobInstance awaitMultipleChunkJobCompletion(String theJobId) {
+		return awaitMultipleChunkJobCompletion(theJobId, 10);
 	}
 
 
-	public JobInstance awaitJobFailure(String theId) {
-		await().until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.ERRORED, StatusEnum.FAILED));
-		return myJobCoordinator.getInstance(theId);
+	public JobInstance awaitJobFailure(String theJobId) {
+		await().until(() -> checkStatusWithMaintenancePass(theJobId, StatusEnum.ERRORED, StatusEnum.FAILED));
+		return myJobCoordinator.getInstance(theJobId);
 	}
 }
