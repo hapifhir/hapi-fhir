@@ -68,8 +68,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -550,16 +548,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
-		}
-		return retVal;
-	}
-
-	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<>();
-		for (Entry next : theFound.getEntry()) {
-			// if (next.getResource()!= null) {
-			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-			// }
 		}
 		return retVal;
 	}

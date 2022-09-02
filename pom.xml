@@ -2743,6 +2743,10 @@
 				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-fhir-jpaserver-test-utilities</module>
+				<module>hapi-fhir-jpaserver-test-dstu2</module>
+				<module>hapi-fhir-jpaserver-test-dstu3</module>
+				<module>hapi-fhir-jpaserver-test-r4</module>
+				<module>hapi-fhir-jpaserver-test-r5</module>
 				<module>hapi-fhir-jpaserver-elastic-test-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
