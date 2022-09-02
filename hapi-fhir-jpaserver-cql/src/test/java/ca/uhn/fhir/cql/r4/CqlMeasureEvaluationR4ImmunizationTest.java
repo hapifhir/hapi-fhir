@@ -4,7 +4,6 @@ import ca.uhn.fhir.cql.BaseCqlR4Test;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.collections.map.HashedMap;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base64BinaryType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -12,6 +11,8 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,22 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 
 	 private static final String MY_TESTBUNDLE_MMR_SIMPLE = "r4/immunization/testdata-bundles/Testbundle_3Patients_1MMRVaccinated_1PVaccinated_1NoVaccination.json";
 	 private static final String MY_TESTBUNDLE_MMR_INCL_PRACTITIONER = "r4/immunization/testdata-bundles/Testbundle_Patients_By_Practitioner.json";
+	 private static final String MY_TESTBUNDLE_ONTARIO_SCHEDULE = "r4/immunization/testdata-bundles/Patients_Encounters_Immunizations_ValueSets_Practitioners.json";
+	 private static final String MY_FHIR_HELPERS = "r4/immunization/testdata-bundles/Fhir_Helper.json";
+	 private static final String MY_TEST_DATA = "r4/immunization/testdata-bundles/Patients_Encounters_Immunizations_ValueSets_Practitioners.json";
+	 private static final String MY_IMMUNIZATION_CQL_RESOURCES = "r4/immunization/testdata-bundles/Measure_Library_Ontario_ImmunizationStatus.json";
 
+
+	@BeforeEach
+	public void init() throws IOException {
+		loadBundle(MY_FHIR_HELPERS);
+		loadBundle(MY_TEST_DATA);
+	}
+
+	@AfterEach
+	public void clearServerFromInput() {
+		//TODO see if wiping database is needed
+	}
 
     //overall testing function including bundle manipulation and evaluation and assertion
     protected void testMeasureScoresByBundleAndCQLLocation(String theBundleLocation, String theCQLMeasureLocation, String thePractitionerRef, Map<String, Double> theExpectedScores) throws IOException {
@@ -107,6 +123,17 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 
                 null, thePractitionerRef, null, null, null, null, myRequestDetails);
     }
+
+	//evaluates a Measure to produce one certain MeasureReport
+	protected MeasureReport evaluateMeasureByMeasure(String theMeasureId, String thePractitionerRef, String theMeasurePeriodStart, String theMeasurePeriodEnd) {
+
+		return this.myMeasureOperationsProvider.evaluateMeasure(new IdType("Measure", theMeasureId),
+			theMeasurePeriodStart, theMeasurePeriodEnd, null,
+
+			"subject", null,
+
+			null, thePractitionerRef, null, null, null, null, myRequestDetails);
+	}
 
     //helper function to manipulate a test bundle
     //loads a bundle from theBundleLocation: requirement: containing 1 exact FHIR Measure
@@ -195,7 +222,6 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
         return new DateTimeType(date).getValueAsString();
     }
 
-
 	@Test
 	public void test_Immunization_MMR_Individual_Vaccinated() throws IOException {
 		Map<String, Double> expectedScoresByIdentifier = new HashedMap();
@@ -232,4 +258,20 @@ public class CqlMeasureEvaluationR4ImmunizationTest extends BaseCqlR4Test {
 		//of dreric' s patients, all are vaccinated, because the second patient who is not vaccinated yet doesn't meet the age criteria (denominator), so 1/1 is vaccinated.
 		this.testMeasureScoresByBundleAndCQLLocation(MY_TESTBUNDLE_MMR_INCL_PRACTITIONER, "r4/immunization/cqls/4-Patients-ByAge.cql", "Practitioner/dreric", 1.0/1.0);
 	 }
+
+	@Test
+	public void test_Immunization_Ontario_Schedule() throws IOException {
+		//given
+		//FHIR Helpers as well as test patients / immunizations / encounters / practitioners are already loaded by init function
+		loadBundle(MY_IMMUNIZATION_CQL_RESOURCES);
+
+		//when
+		MeasureReport report = evaluateMeasureByMeasure("immunizationMeasure", null, null, null);
+		MeasureReport reportByPractitioner = evaluateMeasureByMeasure("immunizationMeasure", "Practitioner/ImmunizationStatus-practitioner-3", null, null);
+
+		//then
+		assertMeasureScore(report, 0.269841269);
+		assertMeasureScore(reportByPractitioner, 0.285714);
+	}
+
 }
