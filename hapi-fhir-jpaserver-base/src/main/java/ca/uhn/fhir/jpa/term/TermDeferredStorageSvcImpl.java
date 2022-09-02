@@ -270,11 +270,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	public void saveAllDeferred() {
 		while (!isStorageQueueEmpty()) {
 			saveDeferred();
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				ourLog.error("Interrupted.");
-			}
 		}
 	}
 
