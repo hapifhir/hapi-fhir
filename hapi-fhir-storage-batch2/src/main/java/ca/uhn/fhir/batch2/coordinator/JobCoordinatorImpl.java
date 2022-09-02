@@ -38,6 +38,8 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
 
@@ -54,6 +56,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
+	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImpl.class);
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -112,6 +115,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
 				response.setJobId(first.getInstanceId());
 				response.setUsesCachedResult(true);
+
+				ourLog.info("Reusing cached {} job with status {} and id {}", first.getJobDefinitionId(), first.getStatus(), first.getInstanceId());
 
 				return response;
 			}

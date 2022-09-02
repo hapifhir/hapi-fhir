@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -68,16 +67,26 @@ public class Batch2JobHelper {
 	}
 
 	public JobInstance awaitJobCompletion(String theId) {
-		return awaitJobCompletion(theId, 10);
+		return awaitJobHasStatus(theId, StatusEnum.COMPLETED);
+	}
+
+	public JobInstance awaitJobCancelled(String theId) {
+		return awaitJobHasStatus(theId, StatusEnum.CANCELLED);
 	}
 
 	public JobInstance awaitJobCompletion(String theId, int theSecondsToWait) {
+		return awaitJobHasStatus(theId, theSecondsToWait, StatusEnum.COMPLETED);
+	}
+	public JobInstance awaitJobHasStatus(String theId, StatusEnum... theExpectedStatus) {
+		return awaitJobHasStatus(theId, 10, theExpectedStatus);
+	}
+	public JobInstance awaitJobHasStatus(String theId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		try {
 			await()
 			.atMost(theSecondsToWait, TimeUnit.SECONDS)
-			.until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.COMPLETED));
+			.until(() -> checkStatusWithMaintenancePass(theId, theExpectedStatus));
 		} catch (ConditionTimeoutException e) {
 			String statuses = myJobPersistence.fetchInstances(100, 0)
 				.stream()
@@ -109,11 +118,8 @@ public class Batch2JobHelper {
 		return awaitJobFailure(theStartResponse.getJobId());
 	}
 
-	public void awaitJobCancelled(String theId) {
-		await().until(() -> {
-			myJobMaintenanceService.runMaintenancePass();
-			return getStatus(theId);
-		}, equalTo(StatusEnum.CANCELLED));
+	public JobInstance awaitJobFailure(String theJobId) {
+		return awaitJobHasStatus(theJobId, StatusEnum.ERRORED, StatusEnum.FAILED);
 	}
 
 	public JobInstance awaitJobHitsStatusInTime(String theId, int theSeconds, StatusEnum... theStatuses) {
@@ -229,17 +235,4 @@ public class Batch2JobHelper {
 		}
 	}
 
-	public JobInstance awaitMultipleChunkJobCompletion(String theId, int theSeconds) {
-		return awaitJobCompletion(theId, theSeconds);
-	}
-
-	public JobInstance awaitMultipleChunkJobCompletion(String theJobId) {
-		return awaitMultipleChunkJobCompletion(theJobId, 10);
-	}
-
-
-	public JobInstance awaitJobFailure(String theJobId) {
-		await().until(() -> checkStatusWithMaintenancePass(theJobId, StatusEnum.ERRORED, StatusEnum.FAILED));
-		return myJobCoordinator.getInstance(theJobId);
-	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
@@ -603,7 +604,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
-		myBatch2JobHelper.awaitJobCompletion(jobId, 60);
+		myBatch2JobHelper.awaitJobCompletion(jobId, 60, StatusEnum.COMPLETED);
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
