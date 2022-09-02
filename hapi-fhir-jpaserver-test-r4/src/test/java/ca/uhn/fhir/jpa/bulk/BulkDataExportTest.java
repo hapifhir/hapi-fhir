@@ -108,9 +108,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		group.addMember().getEntity().setReference("Patient/PING1");
 		myClient.update().resource(group).execute();
 
-		for (int i = 0; i < 2; i++) {
-			verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
-		}
+		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+
+		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+
 
 	}
 
