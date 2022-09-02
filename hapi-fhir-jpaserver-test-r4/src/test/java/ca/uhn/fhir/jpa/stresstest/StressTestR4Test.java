@@ -604,7 +604,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		String jobId = BatchHelperR4.jobIdFromBatch2Parameters(response);
-		myBatch2JobHelper.awaitJobCompletion(jobId, 60, StatusEnum.COMPLETED);
+		myBatch2JobHelper.awaitJobHasStatus(jobId, 60, StatusEnum.COMPLETED);
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();

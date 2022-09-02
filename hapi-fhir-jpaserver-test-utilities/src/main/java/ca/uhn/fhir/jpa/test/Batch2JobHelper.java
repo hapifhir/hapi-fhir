@@ -235,4 +235,7 @@ public class Batch2JobHelper {
 		}
 	}
 
+	public void runMaintenancePass() {
+		myJobMaintenanceService.runMaintenancePass();
+	}
 }
