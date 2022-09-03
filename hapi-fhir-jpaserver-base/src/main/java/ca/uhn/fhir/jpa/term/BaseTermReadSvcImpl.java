@@ -171,7 +171,6 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -189,7 +188,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -200,7 +198,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.ObjectUtils.max;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -763,17 +760,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// Handle includes
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			 executeInNewTransactionIfNeeded(() ->
+			 executeInNewTransactionIfNeeded(() -> {
 				 expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
-					include, true, theExpansionFilter) );
+					 include, true, theExpansionFilter);
+				 return null;
+			 });
 		}
 
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
-				executeInNewTransactionIfNeeded(() ->
+				executeInNewTransactionIfNeeded(() -> {
 					expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
-						exclude, false, ExpansionFilter.NO_FILTER) );
+						exclude, false, ExpansionFilter.NO_FILTER);
+					return null;
+				});
 		}
 
 		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
@@ -790,9 +791,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 */
 	private <T> T executeInNewTransactionIfNeeded(Supplier<T> theAction) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			return theAction.get();
+			return null;
 		}
-		return myTxTemplate.execute(t->theAction.get());
+		myTxTemplate.execute(t->theAction.get());
+		return null;
 	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
@@ -822,7 +824,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * @return Returns true if there are potentially more results to process.
 	 */
-	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions,
+	private void expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions,
 																								  IValueSetConceptAccumulator theValueSetCodeAccumulator,
 																								  Set<String> theAddedCodes,
 																								  ValueSet.ConceptSetComponent theIncludeOrExclude,
@@ -836,7 +838,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (hasSystem) {
 
 			if (theExpansionFilter.hasCode() && theExpansionFilter.getSystem() != null && !system.equals(theExpansionFilter.getSystem())) {
-				return false;
+				return;
 			}
 
 			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
@@ -846,14 +848,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
 					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
-				return false;
 
 			} else {
 
 				if (theIncludeOrExclude.getConcept().size() > 0 && theExpansionFilter.hasCode()) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theExpansionFilter.getSystem())) {
 						if (theIncludeOrExclude.getConcept().stream().noneMatch(t -> t.getCode().equals(theExpansionFilter.getCode()))) {
-							return false;
+							return;
 						}
 					}
 				}
@@ -868,14 +869,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					new InMemoryTerminologyServerValidationSupport(myContext).expandValueSetIncludeOrExclude(new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (!theExpansionOptions.isFailOnMissingCodeSystem() && e.getFailureType() == InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
-						return false;
+						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
-
-				return false;
 			}
 
 		} else if (hasValueSet) {
@@ -896,8 +895,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				expandValueSetIntoAccumulator(valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, theAdd);
 
 			}
-
-			return false;
 
 		} else {
 			throw new InvalidRequestException(Msg.code(890) + "ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
