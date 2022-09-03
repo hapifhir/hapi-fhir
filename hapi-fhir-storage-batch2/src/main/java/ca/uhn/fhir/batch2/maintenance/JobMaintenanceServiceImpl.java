@@ -120,7 +120,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 		} else {
-			ourLog.debug("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
+			ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
 			runMaintenancePass();
 		}
 	}
@@ -128,7 +128,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	@Override
 	public void runMaintenancePass() {
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
-			ourLog.debug("Another maintenance pass is currently in progress.  Ignoring request.");
+			ourLog.info("Another maintenance pass is currently in progress.  Ignoring request.");
 			return;
 		}
 		try {
