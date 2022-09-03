@@ -32,6 +32,8 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -66,6 +68,7 @@ import java.util.concurrent.Semaphore;
  * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
+	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
@@ -117,6 +120,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 		} else {
+			ourLog.debug("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
 			runMaintenancePass();
 		}
 	}
@@ -124,6 +128,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	@Override
 	public void runMaintenancePass() {
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
+			ourLog.debug("Another maintenance pass is currently in progress.  Ignoring request.");
 			return;
 		}
 		try {

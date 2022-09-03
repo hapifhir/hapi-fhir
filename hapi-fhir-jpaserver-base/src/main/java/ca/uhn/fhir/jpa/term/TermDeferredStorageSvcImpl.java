@@ -272,10 +272,21 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		return new TransactionTemplate(myTransactionMgr).execute(tx -> theRunnable.get());
 	}
 
+	// Failed on 2022-09-03 22:23:01.097 [main] ERROR c.u.f.j.t.TermDeferredStorageSvcImpl [TermDeferredStorageSvcImpl.java:287]
+	// TermDeferredStorageSvcImpl[myDeferredCodeSystemsDeletions=0,
+	// myDeferredCodeSystemVersionsDeletions=0,
+	// myDeferredConcepts=0,
+	// myDeferredValueSets=0,
+	// myDeferredConceptMaps=0,
+	// myConceptLinksToSaveLater=0,
+	// myJobExecutions=1,
+	// myProcessDeferred=true]
+
 	@Override
 	public void saveAllDeferred() {
 		StopWatch sw = new StopWatch();
 		boolean warned = false;
+		boolean errored = false;
 
 		while (!isStorageQueueEmpty()) {
 			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES).toMillis() && !warned) {
@@ -283,9 +294,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				ourLog.warn(toString());
 				warned = true;
 			}
-			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis()) {
-				ourLog.error(toString());
-				throw new SaveAllDeferredTimeoutException(Msg.code(2133) + TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
+			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis() && !errored) {
+				if ("true".equalsIgnoreCase(System.getProperty("unit_test_mode"))) {
+					ourLog.error(toString());
+					throw new SaveAllDeferredTimeoutException(Msg.code(2133) + TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
+				} else {
+					ourLog.error(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() has run for more than {} minutes", SAVE_ALL_DEFERRED_ERROR_MINUTES);
+					ourLog.error(toString());
+					errored = true;
+				}
 			}
 
 			saveDeferred();
