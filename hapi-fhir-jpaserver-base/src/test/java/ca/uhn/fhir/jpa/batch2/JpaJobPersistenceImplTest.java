@@ -158,7 +158,7 @@ class JpaJobPersistenceImplTest {
 		assertEquals(toSave.getStatus(), saved.getStatus());
 		assertEquals(toSave.getStartTime(), entity.getStartTime());
 		assertEquals(toSave.getEndTime(), entity.getEndTime());
-		assertEquals(toSave.isCancelled(), entity.isCancelled());
+		assertEquals(toSave.isCancellationRequested(), entity.isCancelled());
 		assertEquals(toSave.getCombinedRecordsProcessed(), entity.getCombinedRecordsProcessed());
 		assertEquals(toSave.getCombinedRecordsProcessedPerSecond(), entity.getCombinedRecordsProcessedPerSecond());
 		assertEquals(toSave.getTotalElapsedMillis(), entity.getTotalElapsedMillis());

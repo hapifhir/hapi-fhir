@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -84,8 +83,7 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
 			ourLog.info("First step of job myInstance {} produced no work chunks, marking as completed and setting end date", myInstanceId);
 			myInstance.setEndTime(new Date());
-			myInstance.setStatus(StatusEnum.COMPLETED);
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.setCompleted(myInstance);
 		}
 
 		if (myInstance.isFastTracking()) {

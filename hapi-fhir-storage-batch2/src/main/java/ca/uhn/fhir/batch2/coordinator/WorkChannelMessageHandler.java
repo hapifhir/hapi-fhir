@@ -29,7 +29,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -49,6 +51,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
@@ -58,6 +61,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
 
 	@Override
@@ -81,12 +85,13 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
 
-		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(workNotification.getInstanceId());
+		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
+		markInProgressIfQueued(instance);
 		myJobDefinitionRegistry.setJobDefinition(instance);
 		String instanceId = instance.getInstanceId();
 
-		if (instance.isCancelled()) {
+		if (instance.isCancellationRequested()) {
 			ourLog.info("Skipping chunk {} because job instance is cancelled", chunkId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 			return;
@@ -94,6 +99,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
 		stepExecutor.executeStep();
+	}
+
+	private void markInProgressIfQueued(JobInstance theInstance) {
+		if (theInstance.getStatus() == StatusEnum.QUEUED) {
+			myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.QUEUED);
+		}
 	}
 
 	private JobWorkCursor<?, ?, ?> buildCursorFromNotification(JobWorkNotification workNotification) {

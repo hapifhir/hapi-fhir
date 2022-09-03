@@ -47,7 +47,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	private StatusEnum myStatus;
 
 	@JsonProperty(value = "cancelled")
-	private boolean myCancelled;
+	private boolean myCancellationRequested;
 
 	@JsonProperty(value = "fastTracking")
 	private boolean myFastTracking;
@@ -110,7 +110,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 */
 	public JobInstance(JobInstance theJobInstance) {
 		super(theJobInstance);
-		setCancelled(theJobInstance.isCancelled());
+		setCancellationRequested(theJobInstance.isCancellationRequested());
 		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
@@ -301,12 +301,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	@Override
-	public boolean isCancelled() {
-		return myCancelled;
+	public boolean isCancellationRequested() {
+		return myCancellationRequested;
 	}
 
-	public void setCancelled(boolean theCancelled) {
-		myCancelled = theCancelled;
+	public void setCancellationRequested(boolean theCancellationRequested) {
+		myCancellationRequested = theCancellationRequested;
 	}
 
 	@Override
@@ -343,7 +343,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
 	 */
 	public boolean isRunning() {
-		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+		return getStatus() == StatusEnum.IN_PROGRESS && !isCancellationRequested();
 	}
 
 	public boolean isFinished() {
@@ -356,8 +356,8 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return !isBlank(myCurrentGatedStepId);
 	}
 
-	public boolean isPendingCancellation() {
-		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+	public boolean isPendingCancellationRequest() {
+		return myCancellationRequested && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
 	}
 
 	@Override

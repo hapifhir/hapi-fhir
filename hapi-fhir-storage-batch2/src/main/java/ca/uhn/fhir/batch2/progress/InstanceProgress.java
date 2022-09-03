@@ -43,6 +43,7 @@ class InstanceProgress {
 	private Long myEarliestStartTime = null;
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
+	private StatusEnum myNewStatus = null;
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -130,9 +131,9 @@ class InstanceProgress {
 			theInstance.setProgress(percentComplete);
 
 			if (jobSuccessfullyCompleted()) {
-				theInstance.setStatus(StatusEnum.COMPLETED);
+				myNewStatus = StatusEnum.COMPLETED;
 			} else if (myErroredChunkCount > 0) {
-				theInstance.setStatus(StatusEnum.ERRORED);
+				myNewStatus = StatusEnum.ERRORED;
 			}
 
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
@@ -170,5 +171,13 @@ class InstanceProgress {
 			.append("myErrormessage", myErrormessage)
 			.append("myRecordsProcessed", myRecordsProcessed)
 			.toString();
+	}
+
+	public StatusEnum getNewStatus() {
+		return myNewStatus;
+	}
+
+	public boolean hasNewStatus() {
+		return myNewStatus != null;
 	}
 }

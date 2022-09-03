@@ -119,12 +119,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return entity.getId();
 	}
 
-	@Override
-	public Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.IN_PROGRESS);
-		return fetchInstance(theInstanceId);
-	}
-
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
 		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));
@@ -299,7 +293,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instanceEntity.setStartTime(theInstance.getStartTime());
 		instanceEntity.setEndTime(theInstance.getEndTime());
 		instanceEntity.setStatus(theInstance.getStatus());
-		instanceEntity.setCancelled(theInstance.isCancelled());
+		instanceEntity.setCancelled(theInstance.isCancellationRequested());
 		instanceEntity.setFastTracking(theInstance.isFastTracking());
 		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
 		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());

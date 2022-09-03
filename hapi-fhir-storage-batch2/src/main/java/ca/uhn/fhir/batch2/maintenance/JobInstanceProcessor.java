@@ -72,10 +72,9 @@ public class JobInstanceProcessor {
 	}
 
 	private void handleCancellation() {
-		if (myInstance.isPendingCancellation()) {
+		if (myInstance.isPendingCancellationRequest()) {
 			myInstance.setErrorMessage(buildCancelledMessage());
-			myInstance.setStatus(StatusEnum.CANCELLED);
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.setCancelled(myInstance);
 		}
 	}
 
@@ -179,9 +178,8 @@ public class JobInstanceProcessor {
 			myInstance,
 			null);
 		if (!result.isSuccessful()) {
-			myInstance.setStatus(StatusEnum.FAILED);
 			myInstance.setEndTime(new Date());
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.setFailed(myInstance);
 		}
 	}
 }

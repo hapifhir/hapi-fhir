@@ -58,7 +58,7 @@ public class JobInstanceProgressCalculator {
 		instanceProgress.updateInstance(myInstance);
 
 		if (instanceProgress.failed()) {
-			myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, StatusEnum.FAILED);
+			myJobInstanceStatusUpdater.setFailed(myInstance);
 			return;
 		}
 
@@ -74,7 +74,11 @@ public class JobInstanceProgressCalculator {
 		}
 
 		if (instanceProgress.changed()) {
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			if (instanceProgress.hasNewStatus()) {
+				myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, instanceProgress.getNewStatus());
+			} else {
+				myJobPersistence.updateInstance(myInstance);
+			}
 		}
 	}
 }

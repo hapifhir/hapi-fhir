@@ -114,7 +114,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(createInstance()));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		mySvc.runMaintenancePass();
 
@@ -149,7 +148,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 
 		// Execute
 		mySvc.runMaintenancePass();
@@ -332,7 +330,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Execute
-			instance1.setCancelled(true);
+			instance1.setCancellationRequested(true);
 
 			mySvc.runMaintenancePass();
 
@@ -362,7 +360,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Execute
-			instance1.setCancelled(true);
+			instance1.setCancellationRequested(true);
 
 			mySvc.runMaintenancePass();
 

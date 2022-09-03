@@ -41,11 +41,19 @@ public class JobInstanceStatusUpdater {
 	}
 
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+		StatusEnum origStatus = theJobInstance.getStatus();
+		if (origStatus == theNewStatus) {
+			return false;
+		}
+		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
+			return false;
+		}
 		theJobInstance.setStatus(theNewStatus);
 		return updateInstance(theJobInstance);
 	}
 
-	public boolean updateInstance(JobInstance theJobInstance) {
+	private boolean updateInstance(JobInstance theJobInstance) {
 		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(theJobInstance.getInstanceId());
 		if (oInstance.isEmpty()) {
 			ourLog.error("Trying to update instance of non-existent Instance {}", theJobInstance);
@@ -97,5 +105,21 @@ public class JobInstanceStatusUpdater {
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
 		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
 		theJobCompletionHandler.jobComplete(completionDetails);
+	}
+
+	public boolean setCompleted(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
+	}
+
+	public boolean setInProgress(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
+	}
+
+	public boolean setCancelled(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.CANCELLED);
+	}
+
+	public boolean setFailed(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.FAILED);
 	}
 }

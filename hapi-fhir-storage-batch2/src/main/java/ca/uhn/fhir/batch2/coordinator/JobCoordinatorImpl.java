@@ -129,6 +129,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
+		ourLog.info("Stored new {} job {} with status {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus());
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
