@@ -219,7 +219,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).updateInstance(any());
+		// QUEUED -> IN_PROGRESS and IN_PROGRESS -> COMPLETED
+		verify(myJobInstancePersister, times(2)).updateInstance(any());
 	}
 
 	@Test
