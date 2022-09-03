@@ -57,6 +57,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +74,8 @@ import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSI
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
+	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
+	private static final long SAVE_ALL_DEFERRED_ERROR_MINUTES = 5;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -268,7 +272,18 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
+		StopWatch sw = new StopWatch();
+		boolean warned = false;
+
 		while (!isStorageQueueEmpty()) {
+			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES).toMillis() && !warned) {
+				ourLog.warn(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() has run for more than {} minutes", SAVE_ALL_DEFERRED_WARN_MINUTES);
+				warned = true;
+			}
+			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis()) {
+				throw new SaveAllDeferredTimeoutException(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
+			}
+
 			saveDeferred();
 		}
 	}
@@ -353,7 +368,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		TermCodeSystemDeleteVersionJobParameters parameters = new TermCodeSystemDeleteVersionJobParameters();
 		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
 		request.setParameters(parameters);
-		
+
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		myJobExecutions.add(response.getJobId());
 	}
