@@ -46,7 +46,7 @@ public class JobInstanceStatusUpdater {
 			return false;
 		}
 		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
-			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
 			return false;
 		}
 		theJobInstance.setStatus(theNewStatus);
@@ -63,7 +63,7 @@ public class JobInstanceStatusUpdater {
 		StatusEnum origStatus = oInstance.get().getStatus();
 		StatusEnum newStatus = theJobInstance.getStatus();
 		if (!StatusEnum.isLegalStateTransition(origStatus, newStatus)) {
-			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, newStatus);
 			return false;
 		}
 

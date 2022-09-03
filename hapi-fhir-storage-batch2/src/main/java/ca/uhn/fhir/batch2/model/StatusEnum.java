@@ -145,9 +145,10 @@ public enum StatusEnum {
 				return true;
 			case IN_PROGRESS:
 				return theNewStatus != QUEUED;
+			case ERRORED:
+				return theNewStatus == FAILED;
 			case COMPLETED:
 			case CANCELLED:
-			case ERRORED:
 			case FAILED:
 				// terminal state cannot transition
 				return false;

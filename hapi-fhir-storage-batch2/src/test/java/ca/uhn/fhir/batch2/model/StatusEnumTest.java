@@ -53,7 +53,7 @@ class StatusEnumTest {
 		"ERRORED, COMPLETED, false",
 		"ERRORED, CANCELLED, false",
 		"ERRORED, ERRORED, true",
-		"ERRORED, FAILED, false",
+		"ERRORED, FAILED, true",
 
 		"FAILED, QUEUED, false",
 		"FAILED, IN_PROGRESS, false",

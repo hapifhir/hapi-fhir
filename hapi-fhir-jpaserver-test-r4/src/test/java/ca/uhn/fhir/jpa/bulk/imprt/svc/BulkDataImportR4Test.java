@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -16,8 +15,6 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
-import ca.uhn.fhir.jpa.dao.data.IBulkImportJobDao;
-import ca.uhn.fhir.jpa.dao.data.IBulkImportJobFileDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
@@ -72,13 +69,6 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 	@Autowired
 	private IBulkDataImportSvc mySvc;
-	@Autowired
-	private IBulkImportJobDao myBulkImportJobDao;
-	@Autowired
-	private IBulkImportJobFileDao myBulkImportJobFileDao;
-
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
 	private Batch2JobHelper myBatch2JobHelper;
