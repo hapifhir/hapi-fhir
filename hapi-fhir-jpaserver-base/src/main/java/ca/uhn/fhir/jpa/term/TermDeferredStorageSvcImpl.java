@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.quartz.JobExecutionContext;
@@ -278,9 +279,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		while (!isStorageQueueEmpty()) {
 			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES).toMillis() && !warned) {
 				ourLog.warn(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() has run for more than {} minutes", SAVE_ALL_DEFERRED_WARN_MINUTES);
+				ourLog.warn(toString());
 				warned = true;
 			}
 			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis()) {
+				ourLog.error(toString());
 				throw new SaveAllDeferredTimeoutException(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
 			}
 
@@ -515,5 +518,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 	}
 
-
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myDeferredCodeSystemsDeletions", myDeferredCodeSystemsDeletions.size())
+			.append("myDeferredCodeSystemVersionsDeletions", myDeferredCodeSystemVersionsDeletions.size())
+			.append("myDeferredConcepts", myDeferredConcepts.size())
+			.append("myDeferredValueSets", myDeferredValueSets.size())
+			.append("myDeferredConceptMaps", myDeferredConceptMaps.size())
+			.append("myConceptLinksToSaveLater", myConceptLinksToSaveLater.size())
+			.append("myJobExecutions", myJobExecutions.size())
+			.append("myProcessDeferred", myProcessDeferred)
+			.toString();
+	}
 }
