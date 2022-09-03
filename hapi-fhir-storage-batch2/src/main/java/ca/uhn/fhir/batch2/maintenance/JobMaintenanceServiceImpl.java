@@ -42,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -120,15 +121,25 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 		} else {
-			ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
-			runMaintenancePass();
+			try {
+				ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
+				try {
+					myRunMaintenanceSemaphore.tryAcquire(5, TimeUnit.MINUTES);
+				} catch (InterruptedException e) {
+					throw new RuntimeException("Timed out waiting to trigger a maintenance pass", e);
+				}
+				ourLog.info("Semaphore acquired.  Starting maintenance pass.");
+				doMaintenancePass();
+			} finally {
+				myRunMaintenanceSemaphore.release();
+			}
 		}
 	}
 
 	@Override
 	public void runMaintenancePass() {
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
-			ourLog.info("Another maintenance pass is currently in progress.  Ignoring request.");
+			ourLog.debug("Another maintenance pass is already in progress.  Ignoring request.");
 			return;
 		}
 		try {
