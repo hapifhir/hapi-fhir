@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -284,7 +285,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			}
 			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis()) {
 				ourLog.error(toString());
-				throw new SaveAllDeferredTimeoutException(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
+				throw new SaveAllDeferredTimeoutException(Msg.code(2133) + TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
 			}
 
 			saveDeferred();
