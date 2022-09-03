@@ -47,7 +47,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	private StatusEnum myStatus;
 
 	@JsonProperty(value = "cancelled")
-	private boolean myCancellationRequested;
+	private boolean myCancelled;
 
 	@JsonProperty(value = "fastTracking")
 	private boolean myFastTracking;
@@ -110,7 +110,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 */
 	public JobInstance(JobInstance theJobInstance) {
 		super(theJobInstance);
-		setCancellationRequested(theJobInstance.isCancellationRequested());
+		setCancelled(theJobInstance.isCancelled());
 		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
@@ -301,12 +301,12 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	@Override
-	public boolean isCancellationRequested() {
-		return myCancellationRequested;
+	public boolean isCancelled() {
+		return myCancelled;
 	}
 
-	public void setCancellationRequested(boolean theCancellationRequested) {
-		myCancellationRequested = theCancellationRequested;
+	public void setCancelled(boolean theCancelled) {
+		myCancelled = theCancelled;
 	}
 
 	@Override
@@ -343,7 +343,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
 	 */
 	public boolean isRunning() {
-		return getStatus() == StatusEnum.IN_PROGRESS && !isCancellationRequested();
+		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
 	}
 
 	public boolean isFinished() {
@@ -357,7 +357,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	}
 
 	public boolean isPendingCancellationRequest() {
-		return myCancellationRequested && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
 	}
 
 	@Override

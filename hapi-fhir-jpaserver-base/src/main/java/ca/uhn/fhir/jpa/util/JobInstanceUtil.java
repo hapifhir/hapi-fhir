@@ -43,7 +43,7 @@ public class JobInstanceUtil {
 		retVal.setJobDefinitionId(theEntity.getDefinitionId());
 		retVal.setJobDefinitionVersion(theEntity.getDefinitionVersion());
 		retVal.setStatus(theEntity.getStatus());
-		retVal.setCancellationRequested(theEntity.isCancelled());
+		retVal.setCancelled(theEntity.isCancelled());
 		retVal.setFastTracking(theEntity.isFastTracking());
 		retVal.setStartTime(theEntity.getStartTime());
 		retVal.setCreateTime(theEntity.getCreateTime());

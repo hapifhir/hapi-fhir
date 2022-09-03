@@ -91,7 +91,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 		myJobDefinitionRegistry.setJobDefinition(instance);
 		String instanceId = instance.getInstanceId();
 
-		if (instance.isCancellationRequested()) {
+		if (instance.isCancelled()) {
 			ourLog.info("Skipping chunk {} because job instance is cancelled", chunkId);
 			myJobPersistence.markInstanceAsCompleted(instanceId);
 			return;
@@ -103,7 +103,7 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 	private void markInProgressIfQueued(JobInstance theInstance) {
 		if (theInstance.getStatus() == StatusEnum.QUEUED) {
-			myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.QUEUED);
+			myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
 		}
 	}
 

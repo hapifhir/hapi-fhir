@@ -330,7 +330,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Execute
-			instance1.setCancellationRequested(true);
+			instance1.setCancelled(true);
 
 			mySvc.runMaintenancePass();
 
@@ -360,7 +360,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			mySvc.runMaintenancePass();
 
 			// Execute
-			instance1.setCancellationRequested(true);
+			instance1.setCancelled(true);
 
 			mySvc.runMaintenancePass();
 

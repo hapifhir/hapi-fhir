@@ -293,7 +293,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		instanceEntity.setStartTime(theInstance.getStartTime());
 		instanceEntity.setEndTime(theInstance.getEndTime());
 		instanceEntity.setStatus(theInstance.getStatus());
-		instanceEntity.setCancelled(theInstance.isCancellationRequested());
+		instanceEntity.setCancelled(theInstance.isCancelled());
 		instanceEntity.setFastTracking(theInstance.isFastTracking());
 		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
 		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());

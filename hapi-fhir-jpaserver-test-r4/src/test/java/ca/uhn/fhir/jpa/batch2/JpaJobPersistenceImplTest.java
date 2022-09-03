@@ -150,7 +150,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(JOB_DEFINITION_ID, foundInstance.getJobDefinitionId());
 		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
 		assertEquals(StatusEnum.QUEUED, foundInstance.getStatus());
-		assertTrue(foundInstance.isCancellationRequested());
+		assertTrue(foundInstance.isCancelled());
 		assertEquals(CHUNK_DATA, foundInstance.getParameters());
 
 	}

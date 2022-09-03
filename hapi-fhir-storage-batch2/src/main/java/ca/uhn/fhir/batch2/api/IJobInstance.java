@@ -58,7 +58,7 @@ public interface IJobInstance {
 
 	JobDefinition<?> getJobDefinition();
 
-	boolean isCancellationRequested();
+	boolean isCancelled();
 
 	String getReport();
 

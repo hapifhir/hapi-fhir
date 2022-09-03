@@ -98,7 +98,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(theInstance.getInstanceId());
 		info.setStatus(fromBatchStatus(theInstance.getStatus()));
-		info.setCancelled(theInstance.isCancellationRequested());
+		info.setCancelled(theInstance.isCancelled());
 		info.setStartTime(theInstance.getStartTime());
 		info.setEndTime(theInstance.getEndTime());
 		info.setReport(theInstance.getReport());
