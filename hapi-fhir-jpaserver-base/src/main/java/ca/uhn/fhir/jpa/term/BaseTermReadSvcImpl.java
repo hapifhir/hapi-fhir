@@ -108,6 +108,8 @@ import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesS
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
+import org.hibernate.search.engine.search.query.SearchScroll;
+import org.hibernate.search.engine.search.query.SearchScrollResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -169,6 +171,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -197,6 +200,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.ObjectUtils.max;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -759,32 +763,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// Handle includes
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			for (int i = 0; ; i++) {
-				int queryIndex = i;
-				Boolean shouldContinue = executeInNewTransactionIfNeeded(() -> {
-					boolean add = true;
-					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, add, queryIndex, theExpansionFilter);
-				});
-				if (!shouldContinue) {
-					break;
-				}
-			}
+			 executeInNewTransactionIfNeeded(() ->
+				 expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
+					include, true, theExpansionFilter) );
 		}
 
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
-			for (int i = 0; ; i++) {
-				int queryIndex = i;
-				Boolean shouldContinue = executeInNewTransactionIfNeeded(() -> {
-					boolean add = false;
-					ExpansionFilter expansionFilter = ExpansionFilter.NO_FILTER;
-					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, exclude, add, queryIndex, expansionFilter);
-				});
-				if (!shouldContinue) {
-					break;
-				}
-			}
+				executeInNewTransactionIfNeeded(() ->
+					expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
+						exclude, false, ExpansionFilter.NO_FILTER) );
 		}
 
 		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
@@ -803,7 +792,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			return theAction.get();
 		}
-		return myTxTemplate.execute(t -> theAction.get());
+		return myTxTemplate.execute(t->theAction.get());
 	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
@@ -833,7 +822,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * @return Returns true if there are potentially more results to process.
 	 */
-	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, int theQueryIndex, @Nonnull ExpansionFilter theExpansionFilter) {
+	private Boolean expandValueSetHandleIncludeOrExclude(@Nullable ValueSetExpansionOptions theExpansionOptions,
+																								  IValueSetConceptAccumulator theValueSetCodeAccumulator,
+																								  Set<String> theAddedCodes,
+																								  ValueSet.ConceptSetComponent theIncludeOrExclude,
+																								  boolean theAdd,
+																								  @Nonnull ExpansionFilter theExpansionFilter) {
 
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
@@ -850,7 +844,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
 
-				return expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, theAdd, theQueryIndex, theExpansionFilter, system, cs);
+				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
+					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
+				return false;
 
 			} else {
 
@@ -915,73 +911,110 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nonnull
-	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, int theQueryIndex, @Nonnull ExpansionFilter theExpansionFilter, String theSystem, TermCodeSystem theCs) {
-		String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
-		TermCodeSystemVersion csv;
-		if (isEmpty(includeOrExcludeVersion)) {
-			csv = theCs.getCurrentVersion();
-		} else {
-			csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
-		}
+	private void expandValueSetHandleIncludeOrExcludeUsingDatabase(
+						ValueSetExpansionOptions theExpansionOptions,
+						IValueSetConceptAccumulator theValueSetCodeAccumulator,
+						Set<String> theAddedCodes,
+						ValueSet.ConceptSetComponent theIncludeOrExclude,
+						boolean theAdd,
+						@Nonnull ExpansionFilter theExpansionFilter,
+						String theSystem,
+						TermCodeSystem theCs) {
 
-		SearchSession searchSession = Search.session(myEntityManager);
+		StopWatch fullOperationSw = new StopWatch();
+
+		String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
+		TermCodeSystemVersion termCodeSystemVersion = isEmpty(includeOrExcludeVersion)
+			? theCs.getCurrentVersion()
+			: myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
+
 		/*
 		 * If FullText searching is not enabled, we can handle only basic expansions
 		 * since we're going to do it without the database.
 		 */
 		if (!isHibernateSearchEnabled()) {
-			expandWithoutHibernateSearch(theValueSetCodeAccumulator, csv, theAddedCodes, theIncludeOrExclude, theSystem, theAdd);
-			return false;
+			expandWithoutHibernateSearch(theValueSetCodeAccumulator, termCodeSystemVersion, theAddedCodes, theIncludeOrExclude, theSystem, theAdd);
+			return;
 		}
 
 		/*
 		 * Ok, let's use hibernate search to build the expansion
 		 */
-		//Manually building a predicate since we need to throw it around.
-		SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 
-		//Build the top-level expansion on filters.
-		PredicateFinalStep step = predicate.bool(b -> {
-			b.must(predicate.match().field("myCodeSystemVersionPid").matching(csv.getPid()));
+		int count = 0;
 
-			if (theExpansionFilter.hasCode()) {
-				b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
+		Optional<Integer> chunkSizeOpt = getScrollChunkSize(theAdd, theValueSetCodeAccumulator);
+		if (chunkSizeOpt.isEmpty()) { return; }
+		int chunkSize = chunkSizeOpt.get();
+
+		SearchProperties searchProps = buildSearchScroll(termCodeSystemVersion, theExpansionFilter, theSystem,
+			theIncludeOrExclude, chunkSize, includeOrExcludeVersion);
+
+		int accumulatedBatchesSoFar = 0;
+		try ( SearchScroll<EntityReference> scroll = searchProps.getSearchScroll() ) {
+
+			ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), chunkSize);
+			for ( SearchScrollResult<EntityReference> chunk = scroll.next(); chunk.hasHits(); chunk = scroll.next() ) {
+				int countForBatch = 0;
+
+				List<Long> pids = chunk.hits()
+					.stream()
+					.map(t -> (Long) t.id())
+					.collect(Collectors.toList());
+
+				List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
+
+				// If the include section had multiple codes, return the codes in the same order
+				List<String> codes = searchProps.getIncludeOrExcludeCodes();
+				if (codes.size() > 1) {
+					termConcepts = new ArrayList<>(termConcepts);
+					Map<String, Integer> codeToIndex = new HashMap<>(codes.size());
+					for (int i = 0; i < codes.size(); i++) {
+						codeToIndex.put(codes.get(i), i);
+					}
+					termConcepts.sort(((o1, o2) -> {
+						Integer idx1 = codeToIndex.get(o1.getCode());
+						Integer idx2 = codeToIndex.get(o2.getCode());
+						return Comparators.nullsHigh().compare(idx1, idx2);
+					}));
+				}
+
+				//	 int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
+				Optional<PredicateFinalStep> expansionStepOpt = searchProps.getExpansionStepOpt();
+				int delta = 0;
+				for (TermConcept concept : termConcepts) {
+					count++;
+					countForBatch++;
+					if (theAdd && expansionStepOpt.isPresent()) {
+						ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+						if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+							concept.setDisplay(theIncludeConcept.getDisplay());
+						}
+					}
+					boolean added = addCodeIfNotAlreadyAdded(theExpansionOptions, theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
+					if (added) {
+						delta++;
+					}
+				}
+
+				ourLog.debug("Batch expansion scroll for {} with offset {} produced {} results in {}ms",
+					(theAdd ? "inclusion" : "exclusion"), accumulatedBatchesSoFar, chunk.hits().size(), chunk.took().toMillis());
+
+				theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
+				accumulatedBatchesSoFar += countForBatch;
+
+				// keep session bounded
+				myEntityManager.flush();
+				myEntityManager.clear();
 			}
 
-			String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, includeOrExcludeVersion);
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
-				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
-			}
-		});
+			ourLog.debug("Expansion for {} produced {} results in {}ms",
+				(theAdd ? "inclusion" : "exclusion"), count, fullOperationSw.getMillis());
+		}
+	}
 
-		List<String> codes = theIncludeOrExclude
-			.getConcept()
-			.stream()
-			.filter(Objects::nonNull)
-			.map(ValueSet.ConceptReferenceComponent::getCode)
-			.filter(StringUtils::isNotBlank)
-			.collect(Collectors.toList());
 
-		Optional<PredicateFinalStep> expansionStepOpt = buildExpansionPredicate(codes, predicate);
-		final PredicateFinalStep finishedQuery = expansionStepOpt.isPresent()
-			? predicate.bool().must(step).must(expansionStepOpt.get()) : step;
-
-		/*
-		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
-		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
-		 */
-
-		//BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
-		//TODO GGG HS looks like we can't set max clause count, but it can be set server side.
-		//BooleanQuery.setMaxClauseCount(10000);
-		// JM 2-22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
-
-		StopWatch sw = new StopWatch();
-		AtomicInteger count = new AtomicInteger(0);
-
+	private Optional<Integer> getScrollChunkSize(boolean theAdd, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		int maxResultsPerBatch = SearchBuilder.getMaximumPageSize();
 
 		/*
@@ -993,15 +1026,65 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (accumulatorCapacityRemaining != null) {
 				maxResultsPerBatch = Math.min(maxResultsPerBatch, accumulatorCapacityRemaining + 1);
 			}
-			if (maxResultsPerBatch <= 0) {
-				return false;
-			}
 		}
+		return maxResultsPerBatch > 0 ? Optional.of(maxResultsPerBatch): Optional.empty();
+	}
 
-		ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
 
-		StopWatch swForBatch = new StopWatch();
-		AtomicInteger countForBatch = new AtomicInteger(0);
+
+
+
+	private SearchProperties buildSearchScroll(TermCodeSystemVersion theTermCodeSystemVersion,
+																							ExpansionFilter theExpansionFilter,
+																							String theSystem,
+																							ValueSet.ConceptSetComponent theIncludeOrExclude,
+																							Integer theScrollChunkSize, String theIncludeOrExcludeVersion) {
+		SearchSession searchSession = Search.session(myEntityManager);
+		//Manually building a predicate since we need to throw it around.
+		SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
+
+		//Build the top-level expansion on filters.
+		PredicateFinalStep step = predicate.bool(b -> {
+			b.must(predicate.match().field("myCodeSystemVersionPid").matching(theTermCodeSystemVersion.getPid()));
+
+			if (theExpansionFilter.hasCode()) {
+				b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
+			}
+
+			String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, theIncludeOrExcludeVersion);
+			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
+				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+			}
+			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
+				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+			}
+		});
+
+		SearchProperties returnProps = new SearchProperties();
+
+		List<String> codes = theIncludeOrExclude
+			.getConcept()
+			.stream()
+			.filter(Objects::nonNull)
+			.map(ValueSet.ConceptReferenceComponent::getCode)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toList());
+		returnProps.setIncludeOrExcludeCodes(codes);
+
+		Optional<PredicateFinalStep> expansionStepOpt = buildExpansionPredicate(codes, predicate);
+		final PredicateFinalStep finishedQuery = expansionStepOpt.isPresent()
+			? predicate.bool().must(step).must(expansionStepOpt.get()) : step;
+		returnProps.setExpansionStepOpt(expansionStepOpt);
+
+		/*
+		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
+		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
+		 */
+
+		//BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
+		//TODO GGG HS looks like we can't set max clause count, but it can be set server side.
+		//BooleanQuery.setMaxClauseCount(10000);
+		// JM 22-02-15 - Hopefully increasing maxClauseCount should be not needed anymore
 
 		SearchQuery<EntityReference> termConceptsQuery = searchSession
 			.search(TermConcept.class)
@@ -1009,57 +1092,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			.where(f -> finishedQuery)
 			.toQuery();
 
-		ourLog.trace("About to query: {}", termConceptsQuery.queryString());
-		List<EntityReference> termConceptRefs = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
-		List<Long> pids = termConceptRefs
-			.stream()
-			.map(t -> (Long) t.id())
-			.collect(Collectors.toList());
-
-		List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
-
-		// If the include section had multiple codes, return the codes in the same order
-		if (codes.size() > 1) {
-			termConcepts = new ArrayList<>(termConcepts);
-			Map<String, Integer> codeToIndex = new HashMap<>(codes.size());
-			for (int i = 0; i < codes.size(); i++) {
-				codeToIndex.put(codes.get(i), i);
-			}
-			termConcepts.sort(((o1, o2) -> {
-				Integer idx1 = codeToIndex.get(o1.getCode());
-				Integer idx2 = codeToIndex.get(o2.getCode());
-				return Comparators.nullsHigh().compare(idx1, idx2);
-			}));
-		}
-
-		int resultsInBatch = termConcepts.size();
-		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
-		int delta = 0;
-		for (TermConcept concept : termConcepts) {
-			count.incrementAndGet();
-			countForBatch.incrementAndGet();
-			if (theAdd && expansionStepOpt.isPresent()) {
-				ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
-				if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
-					concept.setDisplay(theIncludeConcept.getDisplay());
-				}
-			}
-			boolean added = addCodeIfNotAlreadyAdded(theExpansionOptions, theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
-			if (added) {
-				delta++;
-			}
-		}
-
-		ourLog.debug("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
-		theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
-
-		if (resultsInBatch < maxResultsPerBatch) {
-			ourLog.debug("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
-			return false;
-		} else {
-			return true;
-		}
+		returnProps.setSearchScroll( termConceptsQuery.scroll(theScrollChunkSize) );
+		return returnProps;
 	}
+
 
 	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
 		return theIncludeOrExclude
@@ -2866,4 +2902,36 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
+	/**
+	 * Properties returned from method buildSearchScroll
+	 */
+	private final class SearchProperties {
+		private SearchScroll<EntityReference> mySearchScroll;
+		private Optional<PredicateFinalStep> myExpansionStepOpt;
+		private List<String> myIncludeOrExcludeCodes;
+
+		public SearchScroll<EntityReference> getSearchScroll() {
+			return mySearchScroll;
+		}
+
+		public void setSearchScroll(SearchScroll<EntityReference> theSearchScroll) {
+			mySearchScroll = theSearchScroll;
+		}
+
+		public Optional<PredicateFinalStep> getExpansionStepOpt() {
+			return myExpansionStepOpt;
+		}
+
+		public void setExpansionStepOpt(Optional<PredicateFinalStep> theExpansionStepOpt) {
+			myExpansionStepOpt = theExpansionStepOpt;
+		}
+
+		public List<String> getIncludeOrExcludeCodes() {
+			return myIncludeOrExcludeCodes;
+		}
+
+		public void setIncludeOrExcludeCodes(List<String> theIncludeOrExcludeCodes) {
+			myIncludeOrExcludeCodes = theIncludeOrExcludeCodes;
+		}
+	}
 }
