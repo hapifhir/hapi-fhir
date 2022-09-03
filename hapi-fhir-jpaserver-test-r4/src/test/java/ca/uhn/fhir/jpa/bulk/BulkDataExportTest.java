@@ -33,11 +33,37 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
+
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
-	
+
 	@Test
-	public void testTwoBulkExportsInArow() {
+	public void testGroupBulkExportWithTypeFilter() {
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		varifyBulkExportResults("G", Sets.newHashSet("Patient?gender=female"), Collections.singletonList("\"PF\""), Collections.singletonList("\"PM\""));
+	}
+
+	@Test
+	public void testGroupBulkExportNotInGroup_DoeNotShowUp() {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -45,18 +71,30 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 
+		patient = new Patient();
+		patient.setId("PING2");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PNING3");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
 		Group group = new Group();
 		group.setId("Group/G2");
 		group.setActive(true);
 		group.addMember().getEntity().setReference("Patient/PING1");
+		group.addMember().getEntity().setReference("Patient/PING2");
 		myClient.update().resource(group).execute();
 
-		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
-
-		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+		varifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\"", "\"PING2\""), Collections.singletonList("\"PNING3\""));
 	}
 
-	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
+
+	private void varifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setGroupId(new IdType("Group", theGroupId));
@@ -94,4 +132,5 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			}
 		}
 	}
+
 }
