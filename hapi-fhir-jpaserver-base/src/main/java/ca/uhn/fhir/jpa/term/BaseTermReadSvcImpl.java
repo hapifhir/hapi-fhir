@@ -791,6 +791,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	 */
 	private <T> T executeInNewTransactionIfNeeded(Supplier<T> theAction) {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			theAction.get();
 			return null;
 		}
 		myTxTemplate.execute(t->theAction.get());
