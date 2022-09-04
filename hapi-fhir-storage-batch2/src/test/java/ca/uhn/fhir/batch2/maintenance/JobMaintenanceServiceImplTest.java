@@ -392,6 +392,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	void triggerMaintenancePass_twoSimultaneousRequests_onlyCallOnce() throws InterruptedException, ExecutionException {
 		CountDownLatch simulatedMaintenancePasslatch = new CountDownLatch(1);
 		CountDownLatch maintenancePassCalled = new CountDownLatch(1);
+		CountDownLatch secondCall = new CountDownLatch(1);
 
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0)))
 			.thenAnswer(t -> {
@@ -399,7 +400,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 				simulatedMaintenancePasslatch.await();
 				return Collections.emptyList();
 			})
-			.thenReturn(Collections.emptyList());
+			.thenAnswer(t -> {
+				secondCall.countDown();
+				return Collections.emptyList();
+			});
 
 		// Trigger a thread blocking on our latch maintenance pass in the background
 		Future<Boolean> result1 = Executors.newSingleThreadExecutor().submit(() -> mySvc.triggerMaintenancePass());
@@ -416,6 +420,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Now release the background task
 		simulatedMaintenancePasslatch.countDown();
+
+		// Now wait for the second maintenance pass to be called
+		secondCall.await();
 
 		// Verify maintenance was only called once
 		verify(myJobPersistence, times(2)).fetchInstances(anyInt(), eq(0));
