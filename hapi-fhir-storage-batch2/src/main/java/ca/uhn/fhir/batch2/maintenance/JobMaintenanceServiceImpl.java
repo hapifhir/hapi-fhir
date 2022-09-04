@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -73,6 +74,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
+	public static final int MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT = 5;
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
@@ -121,18 +123,20 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 		} else {
-			try {
-				ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
-				try {
-					myRunMaintenanceSemaphore.tryAcquire(5, TimeUnit.MINUTES);
-				} catch (InterruptedException e) {
-					throw new RuntimeException("Timed out waiting to trigger a maintenance pass", e);
-				}
-				ourLog.info("Semaphore acquired.  Starting maintenance pass.");
-				doMaintenancePass();
-			} finally {
-				myRunMaintenanceSemaphore.release();
-			}
+			runMaintenanceDirectlyWithTimeout();
+		}
+	}
+
+	private void runMaintenanceDirectlyWithTimeout() {
+		try {
+			ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
+			myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES);
+			ourLog.info("Semaphore acquired.  Starting maintenance pass.");
+			doMaintenancePass();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
+		} finally {
+			myRunMaintenanceSemaphore.release();
 		}
 	}
 
