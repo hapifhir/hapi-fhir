@@ -44,7 +44,7 @@ public abstract class BaseBatch2Test {
 	protected IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestJobReductionOutputType> myReductionStepWorker;
 
 	@Nonnull
-	static JobInstance createInstance() {
+	protected static JobInstance createInstance() {
 		return createInstance(JOB_DEFINITION_ID, StatusEnum.IN_PROGRESS);
 	}
 

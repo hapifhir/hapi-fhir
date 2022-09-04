@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -88,7 +89,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private final WorkChunkProcessor myJobExecutorSvc;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
-	private final Semaphore myRequestImmediateMaintenancePassSemaphore = new Semaphore(1);
 
 	/**
 	 * Constructor
@@ -124,20 +124,24 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		return jobDefinition;
 	}
 
+	/**
+	 * @return true if a request to run a maintance pass was submitted
+	 */
 	@Override
-	public void triggerMaintenancePass() {
+	public boolean triggerMaintenancePass() {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+			return true;
 		} else {
 			// We are probably running a unit test
-			runMaintenanceDirectlyWithTimeout();
+			return runMaintenanceDirectlyWithTimeout();
 		}
 	}
 
-	private void runMaintenanceDirectlyWithTimeout() {
-		if (!myRequestImmediateMaintenancePassSemaphore.tryAcquire()) {
-			ourLog.debug("Another request for an immediate maintenance pass is progress.  Ignoring request.");
-			return;
+	private boolean runMaintenanceDirectlyWithTimeout() {
+		if (getQueueLength() > 0) {
+			ourLog.debug("There are already {} threads waiting to run a maintenance pass.  Ignoring request.", getQueueLength());
+			return false;
 		}
 
 		try {
@@ -146,13 +150,18 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 			myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES);
 			ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
 			doMaintenancePass();
+			return true;
 		} catch (InterruptedException e) {
 			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
 		} finally {
 			ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
 			myRunMaintenanceSemaphore.release();
-			myRequestImmediateMaintenancePassSemaphore.release();
 		}
+	}
+
+	@VisibleForTesting
+	int getQueueLength() {
+		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
 	@Override

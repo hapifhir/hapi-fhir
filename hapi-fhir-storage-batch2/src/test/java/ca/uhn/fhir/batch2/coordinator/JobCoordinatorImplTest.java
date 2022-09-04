@@ -567,7 +567,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
+	public static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
 		return createWorkChunk(JOB_DEFINITION_ID, theTargetStepId, theData);
 	}
 
@@ -583,11 +583,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep1() {
+	public static WorkChunk createWorkChunkStep1() {
 		return createWorkChunk(STEP_1, null);
 	}
 
-	static WorkChunk createWorkChunkStep2() {
+	public static WorkChunk createWorkChunkStep2() {
 		return createWorkChunkStep2(JOB_DEFINITION_ID);
 	}
 
@@ -597,7 +597,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep3() {
+	public static WorkChunk createWorkChunkStep3() {
 		return createWorkChunkStep3(JOB_DEFINITION_ID);
 	}
 
