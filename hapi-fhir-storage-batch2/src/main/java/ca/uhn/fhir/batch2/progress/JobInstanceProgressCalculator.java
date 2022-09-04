@@ -25,13 +25,13 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
 public class JobInstanceProgressCalculator {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;

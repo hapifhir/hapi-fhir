@@ -32,15 +32,15 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
 public class WorkChunkProcessor {
-	private static final Logger ourLog = LoggerFactory.getLogger(WorkChunkProcessor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	// TODO
 	/**

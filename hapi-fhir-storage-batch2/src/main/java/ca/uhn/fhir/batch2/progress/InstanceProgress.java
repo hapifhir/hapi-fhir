@@ -23,16 +23,16 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 class InstanceProgress {
-	private static final Logger ourLog = LoggerFactory.getLogger(InstanceProgress.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private int myRecordsProcessed = 0;
 	private int myIncompleteChunkCount = 0;

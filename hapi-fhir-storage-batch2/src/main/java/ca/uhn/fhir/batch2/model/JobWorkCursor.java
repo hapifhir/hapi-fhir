@@ -22,11 +22,11 @@ package ca.uhn.fhir.batch2.model;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ import java.util.List;
  * @param <OT> Current step output data type and next step input data type
  */
 public class JobWorkCursor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobWorkCursor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public final JobDefinition<PT> jobDefinition;
 	public final boolean isFirstStep;
 	public final JobDefinitionStep<PT, IT, OT> currentStep;

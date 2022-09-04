@@ -28,15 +28,15 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.Date;
 
 public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobStepExecutor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;

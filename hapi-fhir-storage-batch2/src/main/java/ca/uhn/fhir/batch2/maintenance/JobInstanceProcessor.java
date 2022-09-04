@@ -30,15 +30,15 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.List;
 
 public class JobInstanceProcessor {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProcessor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
 	private final IJobPersistence myJobPersistence;

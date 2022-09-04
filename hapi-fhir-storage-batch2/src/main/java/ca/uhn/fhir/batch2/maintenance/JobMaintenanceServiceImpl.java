@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -34,7 +35,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -70,7 +70,7 @@ import java.util.concurrent.TimeUnit;
  * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceServiceImpl.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	public static final int INSTANCES_PER_PASS = 100;
 	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();

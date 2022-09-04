@@ -33,13 +33,13 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
 
@@ -56,7 +56,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobCoordinatorImpl.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
