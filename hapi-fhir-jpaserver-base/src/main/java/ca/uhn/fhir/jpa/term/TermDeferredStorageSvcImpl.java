@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -43,6 +42,7 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TimeoutManager;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -284,27 +284,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
-		StopWatch sw = new StopWatch();
-		boolean warned = false;
-		boolean errored = false;
+		TimeoutManager timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
+			Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+			Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
 
 		while (!isStorageQueueEmpty()) {
-			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES).toMillis() && !warned) {
-				ourLog.warn(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() has run for more than {} minutes", SAVE_ALL_DEFERRED_WARN_MINUTES);
-				ourLog.warn(toString());
-				warned = true;
+			if (timeoutManager.checkTimeout()) {
+				ourLog.info(toString());
 			}
-			if (sw.getMillis() > Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES).toMillis() && !errored) {
-				if ("true".equalsIgnoreCase(System.getProperty("unit_test_mode"))) {
-					ourLog.error(toString());
-					throw new SaveAllDeferredTimeoutException(Msg.code(2133) + TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() timed out after running for " + SAVE_ALL_DEFERRED_ERROR_MINUTES + " minutes");
-				} else {
-					ourLog.error(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred() has run for more than {} minutes", SAVE_ALL_DEFERRED_ERROR_MINUTES);
-					ourLog.error(toString());
-					errored = true;
-				}
-			}
-
 			saveDeferred();
 		}
 	}
