@@ -26,9 +26,12 @@ import org.springframework.messaging.Message;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunk;
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
@@ -212,7 +215,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		List<WorkChunk> chunks = new ArrayList<>();
 
 		chunks.add(
-		createWorkChunkStep1().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25)
+			createWorkChunkStep1().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:00-04:00")).setEndTime(parseTime("2022-02-12T14:01:00-04:00")).setRecordsProcessed(25)
 		);
 		chunks.add(
 			createWorkChunkStep2().setStatus(StatusEnum.COMPLETED).setStartTime(parseTime("2022-02-12T14:00:01-04:00")).setEndTime(parseTime("2022-02-12T14:06:00-04:00")).setRecordsProcessed(25)
@@ -370,6 +373,45 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		}
 
 	}
+
+	@Test
+	void triggerMaintenancePass_noneInProgress_runsMaintenace() {
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Collections.emptyList());
+		mySvc.triggerMaintenancePass();
+
+		// Verify maintenance was only called once
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
+	}
+
+	@Test
+	void triggerMaintenancePass_twoSimultaneousRequests_onlyCallOnce() throws InterruptedException {
+		CountDownLatch simulatedMaintenancePasslatch = new CountDownLatch(1);
+		CountDownLatch maintenancePassCalled = new CountDownLatch(1);
+
+		when(myJobPersistence.fetchInstances(anyInt(), eq(0)))
+			.thenAnswer(t -> {
+				maintenancePassCalled.countDown();
+				simulatedMaintenancePasslatch.await();
+				return Collections.emptyList();
+			})
+			.thenReturn(Collections.emptyList());
+
+		// Trigger a hanging maintenance pass in the background
+		Executors.newSingleThreadExecutor().submit(() -> mySvc.triggerMaintenancePass());
+
+		// Wait for the background maintenance pass to run
+		maintenancePassCalled.await();
+
+		// Now trigger a maintenance pass in the foreground
+		mySvc.triggerMaintenancePass();
+
+		// Now release the background task
+		simulatedMaintenancePasslatch.countDown();
+
+		// Verify maintenance was only called once
+		verify(myJobPersistence, times(1)).fetchInstances(anyInt(), eq(0));
+	}
+
 
 	private static Date parseTime(String theDate) {
 		return new DateTimeType(theDate).getValue();

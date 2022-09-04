@@ -68,6 +68,11 @@ import java.util.concurrent.TimeUnit;
  * have gated execution. For these instances, we check if the current step
  * is complete (all chunks are in COMPLETE status) and trigger the next step.
  * </p>
+ *
+ * <p>
+ *    The maintenance pass is run once per minute.  However if a gated job is fast-tracking (i.e. every step produced
+ *    exactly one chunk, then the maintenance task will be triggered earlier than scheduled by the step executor.
+ * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -83,6 +88,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	private final WorkChunkProcessor myJobExecutorSvc;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
+	private final Semaphore myRequestImmediateMaintenancePassSemaphore = new Semaphore(1);
 
 	/**
 	 * Constructor
@@ -123,20 +129,29 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 		if (mySchedulerService.isClusteredSchedulingEnabled()) {
 			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
 		} else {
+			// We are probably running a unit test
 			runMaintenanceDirectlyWithTimeout();
 		}
 	}
 
 	private void runMaintenanceDirectlyWithTimeout() {
+		if (!myRequestImmediateMaintenancePassSemaphore.tryAcquire()) {
+			ourLog.debug("Another request for an immediate maintenance pass is progress.  Ignoring request.");
+			return;
+		}
+
 		try {
-			ourLog.info("There is no clustered scheduling service.  Attempting to run maintenance pass directly.");
+			ourLog.debug("There is no clustered scheduling service.  Requesting semaphore to run maintenance pass directly.");
+			// Some unit test, esp. the Loinc terminology tests, depend on this maintenance pass being run shortly after it is requested
 			myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES);
-			ourLog.info("Semaphore acquired.  Starting maintenance pass.");
+			ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
 			doMaintenancePass();
 		} catch (InterruptedException e) {
 			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
 		} finally {
+			ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
 			myRunMaintenanceSemaphore.release();
+			myRequestImmediateMaintenancePassSemaphore.release();
 		}
 	}
 
@@ -154,8 +169,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 	}
 
 	private void doMaintenancePass() {
-		// NB: If you add any new logic, update the class javadoc
-
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {
