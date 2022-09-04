@@ -49,14 +49,14 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
 		Date end = new Date();
 
 		if (params.getPartitionedUrls().isEmpty()) {
-			ourLog.info("Initiating reindex of All Resources from {} to {}", start, end);
+			ourLog.info("Searching for All Resources from {} to {}", start, end);
 			PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
 			nextRange.setStart(start);
 			nextRange.setEnd(end);
 			theDataSink.accept(nextRange);
 		} else {
 			for (PartitionedUrl nextPartitionedUrl : params.getPartitionedUrls()) {
-				ourLog.info("Initiating reindex of [{}]] from {} to {}", nextPartitionedUrl, start, end);
+				ourLog.info("Searching for [{}]] from {} to {}", nextPartitionedUrl, start, end);
 				PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();
 				nextRange.setPartitionedUrl(nextPartitionedUrl);
 				nextRange.setStart(start);

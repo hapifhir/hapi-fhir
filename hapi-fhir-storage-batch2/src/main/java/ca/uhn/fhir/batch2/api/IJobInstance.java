@@ -62,6 +62,9 @@ public interface IJobInstance {
 
 	String getReport();
 
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
 	boolean isFastTracking();
 
 	void setFastTracking(boolean theFastTracking);

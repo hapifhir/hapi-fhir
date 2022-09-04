@@ -302,9 +302,12 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.toString();
 	}
 
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
 	public boolean isFastTracking() {
 		if (myFastTracking == null) {
-			return false;
+			myFastTracking = false;
 		}
 		return myFastTracking;
 	}

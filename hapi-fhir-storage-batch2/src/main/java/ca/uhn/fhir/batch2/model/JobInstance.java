@@ -49,6 +49,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 	@JsonProperty(value = "cancelled")
 	private boolean myCancelled;
 
+	/**
+	 * True if every step of the job has produced exactly 1 chunk.
+	 */
 	@JsonProperty(value = "fastTracking")
 	private boolean myFastTracking;
 
@@ -360,6 +363,9 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson, 
 		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
 	}
 
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
 	@Override
 	public boolean isFastTracking() {
 		return myFastTracking;
