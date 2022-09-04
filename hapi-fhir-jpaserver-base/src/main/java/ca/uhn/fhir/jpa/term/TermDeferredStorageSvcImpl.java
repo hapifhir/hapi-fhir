@@ -272,16 +272,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		return new TransactionTemplate(myTransactionMgr).execute(tx -> theRunnable.get());
 	}
 
-	// Failed on 2022-09-03 22:23:01.097 [main] ERROR c.u.f.j.t.TermDeferredStorageSvcImpl [TermDeferredStorageSvcImpl.java:287]
-	// TermDeferredStorageSvcImpl[myDeferredCodeSystemsDeletions=0,
-	// myDeferredCodeSystemVersionsDeletions=0,
-	// myDeferredConcepts=0,
-	// myDeferredValueSets=0,
-	// myDeferredConceptMaps=0,
-	// myConceptLinksToSaveLater=0,
-	// myJobExecutions=1,
-	// myProcessDeferred=true]
-
 	@Override
 	public void saveAllDeferred() {
 		TimeoutManager timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
