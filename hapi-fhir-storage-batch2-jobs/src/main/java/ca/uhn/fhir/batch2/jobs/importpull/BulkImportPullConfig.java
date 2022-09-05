@@ -55,7 +55,7 @@ public class BulkImportPullConfig {
 			.setParametersType(Batch2BulkImportPullJobParameters.class)
 			.setParametersValidator(importParameterValidator())
 			.addFirstStep(
-				"ReadInResourcesStep",
+				"FetchPartitionedFilesStep",
 				"Reads an import file and extracts the resources",
 				BulkImportFilePartitionResult.class,
 				fetchPartitionedFilesStep()
@@ -67,7 +67,7 @@ public class BulkImportPullConfig {
 				readInResourcesFromFileStep()
 			)
 			.addLastStep(
-				"WriteBundleStep",
+				"WriteBundleForImportStep",
 				"Parses the bundle from previous step and writes it to the dv",
 				writeBundleForImportStep()
 			)

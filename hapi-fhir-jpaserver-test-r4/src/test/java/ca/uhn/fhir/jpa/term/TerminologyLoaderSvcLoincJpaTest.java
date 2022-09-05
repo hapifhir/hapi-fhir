@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
-	@Autowired private BatchJobHelper myBatchJobHelper;
+	@Autowired
+	private BatchJobHelper myBatchJobHelper;
 	private TermLoaderSvcImpl mySvc;
 	private ZipCollectionBuilder myFiles;
 
@@ -63,7 +64,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -89,7 +90,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME );
+		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -116,6 +117,14 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testLoadLoincVersionNotCurrent() throws IOException {
+		runInTransaction(() -> {
+			assertEquals(0, myTermCodeSystemDao.count());
+			assertEquals(0, myTermCodeSystemVersionDao.count());
+			assertEquals(0, myTermValueSetDao.count());
+			assertEquals(0, myTermConceptDao.count());
+			assertEquals(0, myTermConceptMapDao.count());
+			assertEquals(0, myResourceTableDao.count());
+		});
 
 		// Load LOINC marked as version 2.67
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
@@ -202,7 +211,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		IBundleProvider codeSystems = myCodeSystemDao.search(SearchParameterMap.newSynchronous());
 		assertEquals(1, codeSystems.size());
-		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0,1).get(0);
+		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0, 1).get(0);
 		assertEquals("LOINC Code System (Testing Copy)", codeSystem.getTitle());
 	}
 

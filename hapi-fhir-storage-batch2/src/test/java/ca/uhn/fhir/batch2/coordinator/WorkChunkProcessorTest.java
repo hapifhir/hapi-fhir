@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
-public class StepExecutionSvcTest {
+public class WorkChunkProcessorTest {
 	private static final String INSTANCE_ID = "instanceId";
 	private static final String JOB_DEFINITION_ID = "jobDefId";
 	public static final String REDUCTION_STEP_ID = "step last";
@@ -102,9 +102,9 @@ public class StepExecutionSvcTest {
 	}
 
 	// our test class
-	private class TestStepExecutionSvc extends StepExecutionSvc {
+	private class TestWorkChunkProcessor extends WorkChunkProcessor {
 
-		public TestStepExecutionSvc(IJobPersistence thePersistence, BatchJobSender theSender) {
+		public TestWorkChunkProcessor(IJobPersistence thePersistence, BatchJobSender theSender) {
 			super(thePersistence, theSender);
 		}
 
@@ -138,11 +138,11 @@ public class StepExecutionSvcTest {
 	@Mock
 	private BatchJobSender myJobSender;
 
-	private TestStepExecutionSvc myExecutorSvc;
+	private TestWorkChunkProcessor myExecutorSvc;
 
 	@BeforeEach
 	public void init() {
-		myExecutorSvc = new TestStepExecutionSvc(myJobPersistence, myJobSender);
+		myExecutorSvc = new TestWorkChunkProcessor(myJobPersistence, myJobSender);
 	}
 
 	private <OT extends IModelJson> JobDefinitionStep<TestJobParameters, StepInputData, OT> mockOutWorkCursor(
@@ -301,7 +301,7 @@ public class StepExecutionSvcTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
 
 		// when
 		when(workCursor.isReductionStep())
@@ -346,7 +346,7 @@ public class StepExecutionSvcTest {
 		}
 		JobInstance jobInstance = getTestJobInstance();
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, true, false);
+		JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData> step = mockOutWorkCursor(StepType.REDUCTION, workCursor, false, false);
 
 		// when
 		when(workCursor.isReductionStep())
@@ -551,12 +551,12 @@ public class StepExecutionSvcTest {
 			 * we check for > MAX_CHUNK_ERROR_COUNT (+1)
 			 * we want it to run one extra time here (+1)
 			 */
-		} while (processedOutcomeSuccessfully == null && counter < StepExecutionSvc.MAX_CHUNK_ERROR_COUNT + 2);
+		} while (processedOutcomeSuccessfully == null && counter < WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 2);
 
 		// verify
 		assertNotNull(processedOutcomeSuccessfully);
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
-		assertEquals(StepExecutionSvc.MAX_CHUNK_ERROR_COUNT  + 1, counter);
+		assertEquals(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT  + 1, counter);
 		assertFalse(processedOutcomeSuccessfully);
 	}
 
