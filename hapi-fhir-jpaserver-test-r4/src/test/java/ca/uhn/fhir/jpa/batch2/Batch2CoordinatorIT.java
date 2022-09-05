@@ -326,8 +326,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
 			sink.accept(new FirstStepOutput());
-			callLatch(myFirstStepLatch, step);
-			return RunOutcome.SUCCESS;
+			return callLatch(myFirstStepLatch, step);
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
@@ -342,9 +341,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
-
-		// After the first step, we've only ever produced 1 chunk so we're still fast tracking
-		myBatch2JobHelper.assertFastTracking(instanceId);
 
 		myLastStepLatch.setExpectedCount(2);
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
@@ -461,7 +457,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(response.getJobId(),
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED, StatusEnum.ERRORED // error states
 		);
