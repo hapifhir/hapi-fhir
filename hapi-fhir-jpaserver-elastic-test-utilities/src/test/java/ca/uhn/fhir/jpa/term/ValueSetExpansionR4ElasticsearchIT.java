@@ -227,9 +227,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	}
 
 	/**
-	 * Reproduces: https://github.com/hapifhir/hapi-fhir/issues/3419
+	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/3419
 	 */
-	@Disabled("Until referenced bug gets fixed")
 	@Test
 	public void testExpandValueSetLargerThanElasticDefaultScrollSize() {
 		CodeSystem codeSystem = new CodeSystem();
