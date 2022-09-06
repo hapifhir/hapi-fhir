@@ -67,7 +67,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
 		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(res);
+		myBatch2JobHelper.awaitJobCompletion(res);
 
 		// validate
 		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
@@ -102,7 +102,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(new ReindexJobParameters());
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
 		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous()).size());

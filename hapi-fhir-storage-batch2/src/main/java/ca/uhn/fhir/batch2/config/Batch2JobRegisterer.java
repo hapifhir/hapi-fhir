@@ -22,8 +22,8 @@ package ca.uhn.fhir.batch2.config;
 
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -31,7 +31,7 @@ import javax.annotation.PostConstruct;
 import java.util.Map;
 
 public class Batch2JobRegisterer {
-	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobRegisterer.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
