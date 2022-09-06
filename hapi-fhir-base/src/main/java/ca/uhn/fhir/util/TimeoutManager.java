@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,8 @@ public class TimeoutManager {
 		return retval;
 	}
 
-	public void addTimeForUnitTest(Duration theDuration) {
+	@VisibleForTesting
+	void addTimeForUnitTest(Duration theDuration) {
 		myStopWatch.setNowForUnitTest(myStopWatch.getStartedDate().getTime() + theDuration.toMillis());
 	}
 }
