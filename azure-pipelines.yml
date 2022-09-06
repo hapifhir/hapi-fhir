@@ -81,9 +81,9 @@ stages:
                   -  name: hapi_fhir_server_openapi
                      module: hapi-fhir-server-openapi
                   -  name: hapi_fhir_spring_boot_autoconfigure
-                     module: hapi-fhir-spring-boot-autoconfigure
+                     module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-autoconfigure
                   -  name: hapi_fhir_spring_boot_sample_server_jersey
-                     module: hapi-fhir-spring-boot-sample-server-jersey
+                     module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples/hapi-fhir-spring-boot-sample-server-jersey
                   -  name: hapi_fhir_sql_migrate
                      module: hapi-fhir-sql-migrate
                   -  name: hapi_fhir_storage
