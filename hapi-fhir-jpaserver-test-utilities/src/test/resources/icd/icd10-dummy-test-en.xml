@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ClaML SYSTEM "ClaML.dtd">
 <ClaML version="2.0.0">
 	<!-- All dummy data -->
 	<Title date="2022-06-23" name="ICD-10-EN" version="2022-tree-expanded">International Statistical Classification of Diseases and Related Health Problems 10th Revision</Title>
