@@ -1200,8 +1200,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 6. Handle source (provenance)
-		if (isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
-			MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
+		if (!myConfig.getOverwriteSourceEnabled()) {
+			if (isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
+				MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
+		}
 		} else if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
 			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")

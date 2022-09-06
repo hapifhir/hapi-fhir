@@ -320,6 +320,11 @@ public class DaoConfig {
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
 	/**
+	 * Since 6.1.0
+	 */
+	private boolean myOverwriteSourceEnabled = true;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2909,6 +2914,24 @@ public class DaoConfig {
 	 */
 	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
+	}
+
+	/**
+	 * This setting indicate whether overwriting source is allowed.
+	 *
+	 * @since 6.1.0
+	 */
+	public boolean getOverwriteSourceEnabled() {
+		return myOverwriteSourceEnabled;
+	}
+
+	/**
+	 * This setting indicate whether overwriting source is allowed.
+	 *
+	 * @since 6.1.0
+	 */
+	public void setOverwriteSourceEnabled(boolean theOverwriteSourceEnabled) {
+		myOverwriteSourceEnabled = theOverwriteSourceEnabled;
 	}
 
 
