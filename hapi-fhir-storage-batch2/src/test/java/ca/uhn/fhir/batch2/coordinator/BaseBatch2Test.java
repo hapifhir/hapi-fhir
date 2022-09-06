@@ -44,13 +44,13 @@ public abstract class BaseBatch2Test {
 	protected IReductionStepWorker<TestJobParameters, TestJobStep3InputType, TestJobReductionOutputType> myReductionStepWorker;
 
 	@Nonnull
-	static JobInstance createInstance() {
-		return createInstance(JOB_DEFINITION_ID);
+	protected static JobInstance createInstance() {
+		return createInstance(JOB_DEFINITION_ID, StatusEnum.IN_PROGRESS);
 	}
 
-	static JobInstance createInstance(String theJobId) {
+	static JobInstance createInstance(String theJobId, StatusEnum theStatus) {
 		JobInstance instance = JobInstance.fromInstanceId(INSTANCE_ID);
-		instance.setStatus(StatusEnum.IN_PROGRESS);
+		instance.setStatus(theStatus);
 		instance.setJobDefinitionId(theJobId);
 		instance.setJobDefinitionVersion(1);
 		instance.setParameters(new TestJobParameters()

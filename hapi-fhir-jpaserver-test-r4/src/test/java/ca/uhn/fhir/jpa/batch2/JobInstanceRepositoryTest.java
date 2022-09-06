@@ -61,9 +61,7 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	@Test
 	public void testServiceLogicIsCorrectWithStatuses() {
 		//Given
-		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams);
-		request.addStatus(StatusEnum.IN_PROGRESS);
-		request.addStatus(StatusEnum.COMPLETED);
+		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 
 		//When
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);

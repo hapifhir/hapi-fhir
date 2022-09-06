@@ -54,7 +54,6 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -270,7 +269,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				}
 
 				String name = createNamedQueryName(methodBinding);
-				ourLog.debug("Detected named query: {}", name);
+				ourLog.trace("Detected named query: {}", name);
 
 				namedSearchMethodBindingToName.put(methodBinding, name);
 				if (!searchNameToBindings.containsKey(name)) {

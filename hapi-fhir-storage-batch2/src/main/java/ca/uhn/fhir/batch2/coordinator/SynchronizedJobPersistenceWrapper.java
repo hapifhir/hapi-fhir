@@ -24,10 +24,10 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
@@ -79,11 +79,6 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		return myWrap.fetchRecentInstances(thePageSize, thePageIndex);
-	}
-
-	@Override
-	public synchronized Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
-		return myWrap.fetchInstanceAndMarkInProgress(theInstanceId);
 	}
 
 	@Override

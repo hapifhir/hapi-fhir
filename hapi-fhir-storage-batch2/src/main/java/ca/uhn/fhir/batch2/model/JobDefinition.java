@@ -27,10 +27,10 @@ import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class JobDefinition<PT extends IModelJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinition.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final int ID_MAX_LENGTH = 100;
 
 	private final String myJobDefinitionId;

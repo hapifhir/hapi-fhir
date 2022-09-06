@@ -487,7 +487,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			if (Modifier.isStatic(m.getModifiers())) {
 				throw new ConfigurationException(Msg.code(291) + "Method '" + m.getName() + "' is static, FHIR RESTful methods must not be static");
 			}
-			ourLog.debug("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
+			ourLog.trace("Scanning public method: {}#{}", theProvider.getClass(), m.getName());
 
 			String resourceName = foundMethodBinding.getResourceName();
 			ResourceBinding resourceBinding;
@@ -523,7 +523,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			resourceBinding.addMethod(foundMethodBinding);
-			ourLog.debug(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
+			ourLog.trace(" * Method: {}#{} is a handler", theProvider.getClass(), m.getName());
 
 		}
 
