@@ -46,7 +46,9 @@ public interface ITermLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+	default UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		return null;
+	}
 
 	UploadStatistics loadIcd10cm(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
