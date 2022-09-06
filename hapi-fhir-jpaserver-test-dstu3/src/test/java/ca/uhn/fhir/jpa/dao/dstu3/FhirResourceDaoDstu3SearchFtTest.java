@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
@@ -195,7 +196,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		Device dev1 = new Device();
 		dev1.setManufacturer("Some Manufacturer");
 		IIdType devId1 = myDeviceDao.create(dev1, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
 		myDeviceDao.create(dev2, mockSrd()).getId().toUnqualifiedVersionless();
@@ -219,32 +220,37 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		obs3.getCode().addCoding().setCode("CODE3");
 		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		HttpServletRequest request;
 		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
-		
+		PatientEverythingParameters everythingParams;
+
 		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
-		
+
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, param, null, null, null, mockSrd()));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), everythingParams, ptId1));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obstext1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, null, param, null, null, mockSrd()));
+		everythingParams.setNarrative(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), everythingParams, ptId1));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		request = mock(HttpServletRequest.class);
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, null, null, null, null, mockSrd()));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), new PatientEverythingParameters(), ptId1));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId2, devId1)));
 
 		/*
 		 * Add another match
 		 */
-		
+
 		Observation obs4 = new Observation();
 		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
@@ -253,14 +259,16 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
 
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, param, null, null, null, mockSrd()));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), everythingParams, ptId1));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId4, devId1)));
 
 		/*
 		 * Make one previous match no longer match
 		 */
-		
+
 		obs1 = new Observation();
 		obs1.setId(obsId1);
 		obs1.getSubject().setReferenceElement(ptId1);
@@ -269,12 +277,14 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		myObservationDao.update(obs1, mockSrd());
 
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, null, param, null, null, null, mockSrd()));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, mockSrd(), everythingParams, ptId1));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId4)));
 
 	}
-	
+
 	@Test
 	public void testEverythingTypeWithContentFilter() {
 		Patient pt1 = new Patient();
@@ -288,7 +298,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		Device dev1 = new Device();
 		dev1.setManufacturer("Some Manufacturer");
 		IIdType devId1 = myDeviceDao.create(dev1, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
 		myDeviceDao.create(dev2, mockSrd()).getId().toUnqualifiedVersionless();
@@ -311,27 +321,30 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		obs3.getCode().addCoding().setCode("CODE3");
 		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		HttpServletRequest request;
 		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
-		
+		PatientEverythingParameters everythingParams;
+
 		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", new Object[] {ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart()});
-		
+
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, param, null, null, null, mockSrd(), null));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, mockSrd(), everythingParams, null));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, devId1)));
 
 		request = mock(HttpServletRequest.class);
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, null, mockSrd(), null));
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, mockSrd(), new PatientEverythingParameters(), null));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId2, devId1, ptId2, obsId3)));
 
 		/*
 		 * Add another match
 		 */
-		
+
 		Observation obs4 = new Observation();
 		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
@@ -340,14 +353,16 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
 
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, param, null, null, null, mockSrd(), null));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, mockSrd(), everythingParams, null));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, ptId2, obsId1, obsId4, devId1)));
 
 		/*
 		 * Make one previous match no longer match
 		 */
-		
+
 		obs1 = new Observation();
 		obs1.setId(obsId1);
 		obs1.getSubject().setReferenceElement(ptId1);
@@ -356,12 +371,13 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		myObservationDao.update(obs1, mockSrd());
 
 		param = new StringAndListParam();
+		everythingParams = new PatientEverythingParameters();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
-		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, param, null, null, null, mockSrd(), null));
+		everythingParams.setContent(param);
+		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, mockSrd(), everythingParams, null));
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId4)));
 
 	}
-
 	
 	/**
 	 * When processing transactions, we do two passes. Make sure we don't update the lucene index twice since that would
