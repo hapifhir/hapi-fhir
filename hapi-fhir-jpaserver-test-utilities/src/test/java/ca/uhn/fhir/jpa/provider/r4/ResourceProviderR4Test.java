@@ -7083,7 +7083,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withMetaSourceHashProvided_providedHashMetaSourceIsNotModified(){
+	public void createResource_withMetaSourceHashProvided_HashMetaSourceOverwriteIsDisabled(){
+		myDaoConfig.setOverwriteSourceEnabled(false);
+
 		String expectedMetaSource = "mySource#345676";
 		String patientId = "1234a";
 		Patient patient = new Patient();
@@ -7101,6 +7103,116 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
 		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+
+	}
+
+	@Test
+	public void createResource_withMetaSourceHashProvided_HashMetaSourceOverwriteIsEnabled(){
+		myDaoConfig.setOverwriteSourceEnabled(true);
+
+		String expectedMetaSource = "mySource";
+		String requestId = "#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource + requestId);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertTrue(returnedPatientMetaSource.startsWith(expectedMetaSource));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+
+	}
+
+	@Test
+	public void testSearchBySourceAndRequestId() {
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource("urn:source:0#my-fragment");
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=urn:source:0#my-fragment")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+	}
+
+	@Test
+	public void testSearchBySource() {
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource("urn:source:0#my-fragment");
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=urn:source:0")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+	}
+
+	@Test
+	public void testSearchByRequestId() {
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource("urn:source:0#my-fragment123");
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=#my-fragment123")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+	}
+
+	@Test
+	public void testSearchByRequestIdFail() {
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource("urn:source:0#my-fragment123");
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=#my-fragment000")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
 
 	}
 
