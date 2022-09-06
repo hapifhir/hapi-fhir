@@ -414,7 +414,7 @@ public class StopWatch {
 	}
 
 	@VisibleForTesting
-	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
+	static public void setNowForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
 	}
 

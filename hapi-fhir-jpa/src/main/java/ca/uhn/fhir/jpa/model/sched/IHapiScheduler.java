@@ -41,4 +41,6 @@ public interface IHapiScheduler {
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;
+
+	default void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {}
 }

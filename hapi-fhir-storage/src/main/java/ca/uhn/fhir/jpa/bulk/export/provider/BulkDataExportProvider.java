@@ -329,10 +329,10 @@ public class BulkDataExportProvider {
 		}
 	}
 
-	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response, BulkExportJobStatusEnum theStatusEnum) throws IOException {
+	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response, BulkExportJobStatusEnum theOrigStatus) throws IOException {
 		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		Batch2JobOperationResult resultMessage = myJobRunner.cancelInstance(theJobId.getValueAsString());
-		if (theStatusEnum.equals(BulkExportJobStatusEnum.COMPLETE)) {
+		if (theOrigStatus.equals(BulkExportJobStatusEnum.COMPLETE)) {
 			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
 			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", "Job instance <" + theJobId.getValueAsString() + "> was already cancelled or has completed.  Nothing to do.", null, null);
 		} else {
