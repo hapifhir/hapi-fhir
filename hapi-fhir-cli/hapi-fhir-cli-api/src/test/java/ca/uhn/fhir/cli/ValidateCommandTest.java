@@ -2,7 +2,10 @@ package ca.uhn.fhir.cli;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.read.ListAppender;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -27,6 +30,7 @@ public class ValidateCommandTest {
 
 	@BeforeEach
 	public void beforeEach() {
+		ourLog.setLevel(Level.ALL);
 		myListAppender = new ListAppender<>();
 		myListAppender.start();
 		ourLog.addAppender(myListAppender);

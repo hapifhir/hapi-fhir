@@ -227,7 +227,7 @@ public class ValidateCommand extends BaseCommand {
 		b.append(App.LINESEP);
 
 		if (count > 0) {
-			ourLog.error(b.toString());
+			ourLog.info(b.toString());
 		}
 
 		if (results.isSuccessful()) {
