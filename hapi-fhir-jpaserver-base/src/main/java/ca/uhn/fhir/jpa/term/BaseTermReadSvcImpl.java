@@ -189,7 +189,6 @@ import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
@@ -760,21 +759,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// Handle includes
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			 executeInNewTransactionIfNeeded(() -> {
+			myTxTemplate.executeWithoutResult(tx ->
 				 expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
-					 include, true, theExpansionFilter);
-				 return null;
-			 });
+					 include, true, theExpansionFilter) );
 		}
 
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
-				executeInNewTransactionIfNeeded(() -> {
+			myTxTemplate.executeWithoutResult(tx ->
 					expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes,
-						exclude, false, ExpansionFilter.NO_FILTER);
-					return null;
-				});
+						exclude, false, ExpansionFilter.NO_FILTER) );
 		}
 
 		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
@@ -784,19 +779,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		ourLog.debug("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
 	}
 
-	/**
-	 * Execute in a new transaction only if we aren't already in one. We do this because in some cases
-	 * when performing a VS expansion we throw an {@link ExpansionTooCostlyException} and we don't want
-	 * this to cause the TX to be marked a rollback prematurely.
-	 */
-	private <T> T executeInNewTransactionIfNeeded(Supplier<T> theAction) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			theAction.get();
-			return null;
-		}
-		myTxTemplate.execute(t->theAction.get());
-		return null;
-	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
 		StringBuilder sb = new StringBuilder();
@@ -849,6 +831,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
 					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
+				return;
 
 			} else {
 
@@ -963,19 +946,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				List<TermConcept> termConcepts = myTermConceptDao.fetchConceptsAndDesignationsByPid(pids);
 
 				// If the include section had multiple codes, return the codes in the same order
-				List<String> codes = searchProps.getIncludeOrExcludeCodes();
-				if (codes.size() > 1) {
-					termConcepts = new ArrayList<>(termConcepts);
-					Map<String, Integer> codeToIndex = new HashMap<>(codes.size());
-					for (int i = 0; i < codes.size(); i++) {
-						codeToIndex.put(codes.get(i), i);
-					}
-					termConcepts.sort(((o1, o2) -> {
-						Integer idx1 = codeToIndex.get(o1.getCode());
-						Integer idx2 = codeToIndex.get(o2.getCode());
-						return Comparators.nullsHigh().compare(idx1, idx2);
-					}));
-				}
+				termConcepts = sortTermConcepts(searchProps, termConcepts);
 
 				//	 int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 				Optional<PredicateFinalStep> expansionStepOpt = searchProps.getExpansionStepOpt();
@@ -1009,6 +980,24 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			ourLog.debug("Expansion for {} produced {} results in {}ms",
 				(theAdd ? "inclusion" : "exclusion"), count, fullOperationSw.getMillis());
 		}
+	}
+
+
+	private List<TermConcept> sortTermConcepts(SearchProperties searchProps, List<TermConcept> termConcepts) {
+		List<String> codes = searchProps.getIncludeOrExcludeCodes();
+		if (codes.size() > 1) {
+			termConcepts = new ArrayList<>(termConcepts);
+			Map<String, Integer> codeToIndex = new HashMap<>(codes.size());
+			for (int i = 0; i < codes.size(); i++) {
+				codeToIndex.put(codes.get(i), i);
+			}
+			termConcepts.sort(((o1, o2) -> {
+				Integer idx1 = codeToIndex.get(o1.getCode());
+				Integer idx2 = codeToIndex.get(o2.getCode());
+				return Comparators.nullsHigh().compare(idx1, idx2);
+			}));
+		}
+		return termConcepts;
 	}
 
 

@@ -247,7 +247,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts( codeSystemVersion.getCodeSystemVersionId() );
 
-//		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
@@ -258,8 +257,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
 		Slice<TermValueSet> page = runInTransaction(() ->
-			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND));
-		assertThat(page.getContent(), empty());
+			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertEquals(1, page.getContent().size());
 	}
 
 
