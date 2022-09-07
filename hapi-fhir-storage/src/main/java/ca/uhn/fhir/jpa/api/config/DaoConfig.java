@@ -320,9 +320,9 @@ public class DaoConfig {
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
 	/**
-	 * Since 6.1.0
+	 * Since 6.2.0
 	 */
-	private boolean myOverwriteSourceEnabled = true;
+	private boolean myOverwriteRequestIdEnabled = true;
 
 	/**
 	 * Constructor
@@ -2917,21 +2917,24 @@ public class DaoConfig {
 	}
 
 	/**
-	 * This setting indicate whether overwriting source is allowed.
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
 	 *
-	 * @since 6.1.0
+	 * @since 6.2.0
 	 */
-	public boolean getOverwriteSourceEnabled() {
-		return myOverwriteSourceEnabled;
+	public boolean isOverwriteRequestIDEnabled() {
+		return myOverwriteRequestIdEnabled;
 	}
 
 	/**
-	 * This setting indicate whether overwriting source is allowed.
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 * Default is true.
 	 *
-	 * @since 6.1.0
+	 * @since 6.2.0
 	 */
-	public void setOverwriteSourceEnabled(boolean theOverwriteSourceEnabled) {
-		myOverwriteSourceEnabled = theOverwriteSourceEnabled;
+	public void setOverwriteRequestIdEnabled(boolean theOverwriteRequestIdEnabled) {
+		myOverwriteRequestIdEnabled = theOverwriteRequestIdEnabled;
 	}
 
 

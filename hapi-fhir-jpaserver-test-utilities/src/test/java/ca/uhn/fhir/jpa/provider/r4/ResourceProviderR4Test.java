@@ -152,7 +152,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -235,6 +234,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		myDaoConfig.setOverwriteRequestIdEnabled(true);
 	}
 
 	@BeforeEach
@@ -7083,8 +7083,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withMetaSourceHashProvided_HashMetaSourceOverwriteIsDisabled(){
-		myDaoConfig.setOverwriteSourceEnabled(false);
+	public void createResource_withRequestIdProvidedAndOverwriteDisabled_RequestIdIsPreserved(){
+
+		myDaoConfig.setOverwriteRequestIdEnabled(false);
 
 		String expectedMetaSource = "mySource#345676";
 		String patientId = "1234a";
@@ -7107,8 +7108,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withMetaSourceHashProvided_HashMetaSourceOverwriteIsEnabled(){
-		myDaoConfig.setOverwriteSourceEnabled(true);
+	public void createResource_withRequestIdProvidedAndOverwriteEnabled_RequestIdIsOverwritten(){
 
 		String expectedMetaSource = "mySource";
 		String requestId = "#345676";
@@ -7133,10 +7133,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchBySourceAndRequestId() {
+	public void searchResource_bySourceAndRequestIdWithOverwriteDisabled_isSuccess(){
+
+		myDaoConfig.setOverwriteRequestIdEnabled(false);
+
+		String expectedMetaSource = "mySource";
+		String requestId = "345676";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource + requestId);
 
 		Patient p1 = new Patient();
-		p1.getMeta().setSource("urn:source:0#my-fragment");
+		p1.getMeta().setSource(expectedMetaSource + "#" + requestId);
 
 		myClient
 			.create()
@@ -7145,19 +7152,48 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=urn:source:0#my-fragment")
+			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(1, results.getEntry().size());
+		// FIXME: 2022-09-07 add more assertion on the source and requestId to make sure we have the right patient
+	}
+
+	@Test
+	public void searchResource_bySourceAndRequestIdWithOverwriteEnabled_fails(){
+
+		String expectedMetaSource = "mySource";
+		String requestId = "345676";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource + requestId);
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(expectedMetaSource + "#" + requestId);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
 
 	}
 
 	@Test
 	public void testSearchBySource() {
 
+		String expectedSourceUrl = "http://acme.org";
+		String requestId = "my-fragment";
+
 		Patient p1 = new Patient();
-		p1.getMeta().setSource("urn:source:0#my-fragment");
+		p1.getMeta().setSource(expectedSourceUrl + "#" + requestId);
 
 		myClient
 			.create()
@@ -7166,7 +7202,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=urn:source:0")
+			.byUrl(ourServerBase + "/Patient?_source=" + expectedSourceUrl)
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -7176,6 +7212,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByRequestId() {
+
+		myDaoConfig.setOverwriteRequestIdEnabled(true);
 
 		Patient p1 = new Patient();
 		p1.getMeta().setSource("urn:source:0#my-fragment123");
@@ -7187,7 +7225,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=#my-fragment123")
+			.byUrl(ourServerBase + "/Patient?_source=%23my-fragment123")
 			.returnBundle(Bundle.class)
 			.execute();
 
