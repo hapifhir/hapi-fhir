@@ -1,24 +1,37 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+/*-
+ * #%L
+ * HAPI FHIR - Command Line Client - API
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
-public class LocalFileValidationSupport implements IValidationSupport {
-
-	final private FhirContext myCtx;
+public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 
 	public LocalFileValidationSupport(FhirContext ctx) {
-		this.myCtx = ctx;
+		super(ctx);
 	}
 
 	@Override
@@ -26,14 +39,10 @@ public class LocalFileValidationSupport implements IValidationSupport {
 		return myCtx;
 	}
 
-	@Nullable
-	@Override
-	public IBaseResource fetchStructureDefinition(String theUrl) {
-		try {
-			String contents = IOUtils.toString(new InputStreamReader(new FileInputStream(theUrl), "UTF-8"));
-			return myCtx.newJsonParser().parseResource(contents);
-		} catch (IOException e) {
-			return null;
-		}
+	public void loadFile(String theFileName) throws IOException {
+		String contents = IOUtils.toString(new InputStreamReader(new FileInputStream(theFileName), "UTF-8"));
+		IBaseResource resource  = myCtx.newJsonParser().parseResource(contents);
+		this.addStructureDefinition(resource);
 	}
+
 }

@@ -163,12 +163,24 @@ public class ValidateCommand extends BaseCommand {
 				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
+
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
 						new DefaultProfileValidationSupport(ctx),
-						new InMemoryTerminologyServerValidationSupport(ctx),
-						new LocalFileValidationSupport(ctx),
-						new SnapshotGeneratingValidationSupport(ctx));
+						new InMemoryTerminologyServerValidationSupport(ctx));
 
+					if (theCommandLine.hasOption("l")) {
+						try {
+							String localProfile = theCommandLine.getOptionValue("l");
+							LocalFileValidationSupport localFileValidationSupport = new LocalFileValidationSupport(ctx);
+
+							localFileValidationSupport.loadFile(localProfile);
+
+							validationSupport.addValidationSupport(localFileValidationSupport);
+							validationSupport.addValidationSupport(new SnapshotGeneratingValidationSupport(ctx));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
 					}
@@ -221,7 +233,7 @@ public class ValidateCommand extends BaseCommand {
 		if (results.isSuccessful()) {
 			ourLog.info("Validation successful!");
 		} else {
-			throw new CommandFailureException(Msg.code(1622) + "Validation failed");
+			//throw new CommandFailureException(Msg.code(1622) + "Validation failed");
 		}
 	}
 }
