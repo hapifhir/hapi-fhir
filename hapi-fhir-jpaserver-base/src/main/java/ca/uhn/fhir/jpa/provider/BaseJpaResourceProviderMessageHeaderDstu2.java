@@ -22,6 +22,6 @@ import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
  * #L%
  */
 
-public class BaseJpaResourceProviderMessageHeaderDstu2 extends JpaResourceProviderDstu2<MessageHeader> {
+public abstract class BaseJpaResourceProviderMessageHeaderDstu2 extends JpaResourceProviderDstu2<MessageHeader> {
 	// nothing now
 }

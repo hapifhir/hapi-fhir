@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -41,7 +41,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
+public abstract class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
 
 	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {
 		@OperationParam(name = "name", type = StringType.class, min = 1),

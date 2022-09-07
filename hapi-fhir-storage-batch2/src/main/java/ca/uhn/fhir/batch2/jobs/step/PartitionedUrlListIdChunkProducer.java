@@ -25,15 +25,15 @@ import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Date;
 
 public class PartitionedUrlListIdChunkProducer implements IIdChunkProducer<PartitionedUrlChunkRangeJson> {
-	private static final Logger ourLog = LoggerFactory.getLogger(PartitionedUrlListIdChunkProducer.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IBatch2DaoSvc myBatch2DaoSvc;
 
 	public PartitionedUrlListIdChunkProducer(IBatch2DaoSvc theBatch2DaoSvc) {

@@ -38,9 +38,14 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamValidatingInterceptor {
 
 	public static final String SEARCH_PARAM = "SearchParameter";
+	public List<String> myUpliftExtensions;
 
 	private FhirContext myFhirContext;
 
@@ -73,10 +79,9 @@ public class SearchParamValidatingInterceptor {
 	}
 
 	public void validateSearchParamOnCreate(IBaseResource theResource, RequestDetails theRequestDetails){
-		if( isNotSearchParameterResource(theResource) ){
+		if(isNotSearchParameterResource(theResource)){
 			return;
 		}
-
 		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
 		if (runtimeSearchParam == null) {
 			return;
@@ -84,35 +89,110 @@ public class SearchParamValidatingInterceptor {
 
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
-		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		if (isUpliftSearchParam(theResource)) {
+			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		} else {
+			validateStandardSpOnCreate(theRequestDetails, searchParameterMap);
+		}
+	}
 
+	private void validateStandardSpOnCreate(RequestDetails theRequestDetails, SearchParameterMap searchParameterMap) {
+		List<ResourcePersistentId> persistedIdList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if( isNotEmpty(persistedIdList) ) {
-			throw new UnprocessableEntityException(Msg.code(2124) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			throw new UnprocessableEntityException(Msg.code(2131) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
 		}
 	}
 
 	public void validateSearchParamOnUpdate(IBaseResource theResource, RequestDetails theRequestDetails){
-		if( isNotSearchParameterResource(theResource) ){
+		if(isNotSearchParameterResource(theResource)){
+			return;
+		}
+		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
+		if (runtimeSearchParam == null) {
 			return;
 		}
 
-		RuntimeSearchParam runtimeSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theResource);
-
 		SearchParameterMap searchParameterMap = extractSearchParameterMap(runtimeSearchParam);
 
-		List<ResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
+		if (isUpliftSearchParam(theResource)) {
+			validateUpliftSp(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		} else {
+			validateStandardSpOnUpdate(theRequestDetails, runtimeSearchParam, searchParameterMap);
+		}
+	}
 
+	private void validateUpliftSp(RequestDetails theRequestDetails, RuntimeSearchParam theRuntimeSearchParam, SearchParameterMap theSearchParameterMap) {
+		Validate.notEmpty(getUpliftExtensions(), "You are attempting to validate an Uplift Search Parameter, but have not defined which URLs correspond to uplifted search parameter extensions.");
+
+		IBundleProvider bundleProvider = getDao().search(theSearchParameterMap, theRequestDetails);
+		List<IBaseResource> allResources = bundleProvider.getAllResources();
+		if(isNotEmpty(allResources)) {
+			Set<String> existingIds = allResources.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toSet());
+			if (isNewSearchParam(theRuntimeSearchParam, existingIds)) {
+				for (String upliftExtensionUrl: getUpliftExtensions()) {
+					boolean matchesExistingUplift = allResources.stream()
+						.map(sp -> mySearchParameterCanonicalizer.canonicalizeSearchParameter(sp))
+						.filter(sp -> !sp.getExtensions(upliftExtensionUrl).isEmpty())
+						.anyMatch(sp -> isDuplicateUpliftParameter(theRuntimeSearchParam, sp, upliftExtensionUrl));
+
+					if (matchesExistingUplift) {
+						throwDuplicateError();
+					}
+				}
+			}
+		}
+	}
+
+	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp, String theUpliftUrl) {
+		String firstCode = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "code", theUpliftUrl);
+		String secondCode = getUpliftChildExtensionValueByUrl(theSp, "code", theUpliftUrl);
+		String firstElementName = getUpliftChildExtensionValueByUrl(theRuntimeSearchParam, "element-name", theUpliftUrl);
+		String secondElementName = getUpliftChildExtensionValueByUrl(theSp, "element-name", theUpliftUrl);
+		return firstCode.equals(secondCode) && firstElementName.equals(secondElementName);
+	}
+
+
+	private String getUpliftChildExtensionValueByUrl(RuntimeSearchParam theSp, String theUrl, String theUpliftUrl) {
+		List<IBaseExtension<?, ?>> extensions = theSp.getExtensions(theUpliftUrl);
+		Validate.isTrue(extensions.size() == 1);
+		IBaseExtension<?, ?> topLevelExtension = extensions.get(0);
+		List<IBaseExtension> extension = (List<IBaseExtension>) topLevelExtension.getExtension();
+		String subExtensionValue = extension.stream().filter(ext -> ext.getUrl().equals(theUrl)).map(IBaseExtension::getValue)
+			.map(IPrimitiveType.class::cast)
+			.map(IPrimitiveType::getValueAsString)
+			.findFirst()
+			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2132), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
+		return subExtensionValue;
+	}
+
+	private boolean isNewSearchParam(RuntimeSearchParam theSearchParam, Set<String> theExistingIds) {
+		return theExistingIds
+			.stream()
+			.noneMatch(resId -> resId.equals(theSearchParam.getId().getIdPart()));
+	}
+
+	private void validateStandardSpOnUpdate(RequestDetails theRequestDetails, RuntimeSearchParam runtimeSearchParam, SearchParameterMap searchParameterMap) {
+		List<ResourcePersistentId> pidList = getDao().searchForIds(searchParameterMap, theRequestDetails);
 		if(isNotEmpty(pidList)){
 			Set<String> resolvedResourceIds = myIdHelperService.translatePidsToFhirResourceIds(new HashSet<>(pidList));
-			String incomingResourceId = runtimeSearchParam.getId().getIdPart();
-
-			boolean isNewSearchParam = resolvedResourceIds
-				.stream()
-				.noneMatch(resId -> resId.equals(incomingResourceId));
-
-			if(isNewSearchParam){
-				throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+			if(isNewSearchParam(runtimeSearchParam, resolvedResourceIds)) {
+				throwDuplicateError();
 			}
+		}
+	}
+
+	private void throwDuplicateError() {
+		throw new UnprocessableEntityException(Msg.code(2125) + "Can't process submitted SearchParameter as it is overlapping an existing one.");
+	}
+
+	private boolean isUpliftSearchParam(IBaseResource theResource) {
+		if (theResource instanceof IBaseHasExtensions) {
+			IBaseHasExtensions resource = (IBaseHasExtensions) theResource;
+			return resource.getExtension()
+				.stream()
+				.anyMatch(ext -> getUpliftExtensions().contains(ext.getUrl()));
+		} else {
+			return false;
 		}
 	}
 
@@ -179,5 +259,15 @@ public class SearchParamValidatingInterceptor {
 		}
 
 		return retVal;
+	}
+
+	public List<String> getUpliftExtensions() {
+		if (myUpliftExtensions == null) {
+			myUpliftExtensions = new ArrayList<>();
+		}
+		return myUpliftExtensions;
+	}
+	public void addUpliftExtension(String theUrl) {
+		getUpliftExtensions().add(theUrl);
 	}
 }

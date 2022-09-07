@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,11 +48,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.RangePredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -81,7 +84,6 @@ public class ExtendedHSearchClauseBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExtendedHSearchClauseBuilder.class);
 
 	private static final double QTY_APPROX_TOLERANCE_PERCENT = .10;
-	private static final double QTY_TOLERANCE_PERCENT = .05;
 
 	final FhirContext myFhirContext;
 	public final SearchPredicateFactory myPredicateFactory;
@@ -533,7 +535,7 @@ public class ExtendedHSearchClauseBuilder {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
 				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-				setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, canonicalQty, valueFieldPath);
+				setPrefixedNumericPredicate(theQuantityTerms, activePrefix, canonicalQty.getValue(), valueFieldPath, true);
 				theQuantityTerms.must(myPredicateFactory.match()
 					.field(fieldPath + "." + QTY_CODE_NORM)
 					.matching(canonicalQty.getUnits()));
@@ -543,7 +545,7 @@ public class ExtendedHSearchClauseBuilder {
 
 		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
 		String valueFieldPath = fieldPath + "." + QTY_VALUE;
-		setPrefixedQuantityPredicate(theQuantityTerms, activePrefix, qtyParam, valueFieldPath);
+		setPrefixedNumericPredicate(theQuantityTerms, activePrefix, qtyParam.getValue(), valueFieldPath, true);
 
 		if ( isNotBlank(qtyParam.getSystem()) ) {
 			theQuantityTerms.must(
@@ -559,71 +561,72 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 
-	private void setPrefixedQuantityPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
-			ParamPrefixEnum thePrefix, QuantityParam theQuantity, String valueFieldPath) {
+	private void setPrefixedNumericPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
+				ParamPrefixEnum thePrefix, BigDecimal theNumberValue, String valueFieldPath, boolean theIsMust) {
 
-		double value = theQuantity.getValue().doubleValue();
+		double value = theNumberValue.doubleValue();
+		Pair<BigDecimal, BigDecimal> range = NumericParamRangeUtil.getRange(theNumberValue);
 		double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
-		double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
 
-		switch (thePrefix) {
+		ParamPrefixEnum activePrefix = thePrefix == null ? ParamPrefixEnum.EQUAL : thePrefix;
+		switch (activePrefix) {
 			//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE:
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.between(value-approxTolerance, value+approxTolerance));
+				var predApp = myPredicateFactory.range().field(valueFieldPath)
+					.between(value-approxTolerance, value+approxTolerance);
+				addMustOrShouldPredicate(theQuantityTerms, predApp, theIsMust);
 				break;
 
 			// searches for resource quantity between passed param value +/- 5%
 			case EQUAL:
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.between(value-defaultTolerance, value+defaultTolerance));
+				var predEq = myPredicateFactory.range().field(valueFieldPath)
+					.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
+				addMustOrShouldPredicate(theQuantityTerms, predEq, theIsMust);
 				break;
 
 			// searches for resource quantity > param value
 			case GREATERTHAN:
 			case STARTS_AFTER:  // treated as GREATERTHAN because search doesn't handle ranges
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.greaterThan(value));
+				var predGt = myPredicateFactory.range().field(valueFieldPath).greaterThan(value);
+				addMustOrShouldPredicate(theQuantityTerms, predGt, theIsMust);
 				break;
 
 			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.atLeast(value));
+				theQuantityTerms.must(myPredicateFactory.range().field(valueFieldPath).atLeast(value));
+
+				var predGe = myPredicateFactory.range().field(valueFieldPath).atLeast(value);
+				addMustOrShouldPredicate(theQuantityTerms, predGe, theIsMust);
 				break;
 
 			// searches for resource quantity < param value
 			case LESSTHAN:
 			case ENDS_BEFORE:  // treated as LESSTHAN because search doesn't handle ranges
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.lessThan(value));
+				var predLt = myPredicateFactory.range().field(valueFieldPath).lessThan(value);
+				addMustOrShouldPredicate(theQuantityTerms, predLt, theIsMust);
 				break;
 
-				// searches for resource quantity not > param value
+			// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
-				theQuantityTerms.must(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.atMost(value));
+				var predLe = myPredicateFactory.range().field(valueFieldPath).atMost(value);
+				addMustOrShouldPredicate(theQuantityTerms, predLe, theIsMust);
 				break;
 
-				// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
+			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL:
-				theQuantityTerms.mustNot(
-					myPredicateFactory.range()
-						.field(valueFieldPath)
-						.between(value-defaultTolerance, value+defaultTolerance));
+				theQuantityTerms.mustNot(myPredicateFactory.range()
+					.field(valueFieldPath).between(range.getLeft().doubleValue(), range.getRight().doubleValue()));
 				break;
+		}
+	}
+
+	private void addMustOrShouldPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
+			 RangePredicateOptionsStep<?> thePredicateToAdd, boolean theIsMust) {
+
+		if (theIsMust) {
+			theQuantityTerms.must(thePredicateToAdd);
+		} else {
+			theQuantityTerms.should(thePredicateToAdd);
 		}
 	}
 
@@ -651,49 +654,11 @@ public class ExtendedHSearchClauseBuilder {
 			numberPredicateStep.minimumShouldMatchNumber(1);
 
 			for (NumberParam orTerm : orTerms) {
-				double value = orTerm.getValue().doubleValue();
-				double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
-				double defaultTolerance = value * QTY_TOLERANCE_PERCENT;
-
-				ParamPrefixEnum activePrefix = orTerm.getPrefix() == null ? ParamPrefixEnum.EQUAL : orTerm.getPrefix();
-				switch (activePrefix) {
-					case APPROXIMATE:
-						numberPredicateStep.should(myPredicateFactory.range()
-							.field(fieldPath).between(value - approxTolerance, value + approxTolerance));
-						break;
-
-					case EQUAL:
-						numberPredicateStep.should(myPredicateFactory.range()
-							.field(fieldPath).between(value - defaultTolerance, value + defaultTolerance));
-						break;
-
-					case STARTS_AFTER:
-					case GREATERTHAN:
-						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).greaterThan(value));
-						break;
-
-					case GREATERTHAN_OR_EQUALS:
-						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).atLeast(value));
-						break;
-
-					case ENDS_BEFORE:
-					case LESSTHAN:
-						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).lessThan(value));
-						break;
-
-					case LESSTHAN_OR_EQUALS:
-						numberPredicateStep.should(myPredicateFactory.range().field(fieldPath).atMost(value));
-						break;
-
-					case NOT_EQUAL:
-						numberPredicateStep.mustNot(myPredicateFactory.match().field(fieldPath).matching(value));
-						break;
-				}
+				setPrefixedNumericPredicate(numberPredicateStep, orTerm.getPrefix(), orTerm.getValue(), fieldPath, false);
 			}
 
 			myRootClause.must(numberPredicateStep);
 		}
 	}
-
 
 }

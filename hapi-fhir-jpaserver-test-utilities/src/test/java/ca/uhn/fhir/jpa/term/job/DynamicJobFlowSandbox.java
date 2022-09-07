@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
  * Not intended to ever run. Used as a sandbox for "interesting" jobs
  */
 public class DynamicJobFlowSandbox {
-	protected static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemDeleteJobTest.class);
+	protected static final Logger ourLog = LoggerFactory.getLogger(DynamicJobFlowSandbox.class);
 
 
 	@Autowired

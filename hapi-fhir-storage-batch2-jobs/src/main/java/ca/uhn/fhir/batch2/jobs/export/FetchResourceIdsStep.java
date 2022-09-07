@@ -72,6 +72,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				// filters are the filters for searching
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
+
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
@@ -90,11 +91,10 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				if (!idsToSubmit.isEmpty()) {
 					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 					submissionCount++;
-					idsToSubmit = new ArrayList<>();
 				}
 			}
 		} catch (Exception ex) {
-			ourLog.error(ex.getMessage());
+			ourLog.error(ex.getMessage(), ex);
 
 			theDataSink.recoveredError(ex.getMessage());
 

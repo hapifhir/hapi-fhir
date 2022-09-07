@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
+public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
 
 	@Autowired
 	private MemberMatcherR4Helper myMemberMatcherR4Helper;
@@ -110,7 +110,17 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails);
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -164,7 +174,17 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), toStringAndList(theTypes), theRequestDetails, toFlattenedPatientIdTokenParamList(theId));
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, everythingParams, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}

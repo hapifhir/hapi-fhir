@@ -8,10 +8,12 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.when;
 public class SearchParameterValidatingInterceptorTest {
 
 	static final FhirContext ourFhirContext = FhirContext.forR4();
+	public static final String UPLIFT_URL = "https://some-url";
 
 	@Mock
 	RequestDetails myRequestDetails;
@@ -48,7 +51,7 @@ public class SearchParameterValidatingInterceptorTest {
 
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
 
-	SearchParameter mySearchParameterId1;
+	SearchParameter myExistingSearchParameter;
 
 	static String ID1 = "ID1";
 	static String ID2 = "ID2";
@@ -61,8 +64,9 @@ public class SearchParameterValidatingInterceptorTest {
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
+		mySearchParamValidatingInterceptor.addUpliftExtension(UPLIFT_URL);
 
-		mySearchParameterId1 = aSearchParameter(ID1);
+		myExistingSearchParameter = buildSearchParameterWithId(ID1);
 
 	}
 
@@ -78,9 +82,9 @@ public class SearchParameterValidatingInterceptorTest {
 	public void whenCreatingNonOverlappingSearchParam_thenIsAllowed(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(emptyList());
+		setPersistedSearchParameterIds(emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 
@@ -90,15 +94,15 @@ public class SearchParameterValidatingInterceptorTest {
 	public void whenCreatingOverlappingSearchParam_thenExceptionIsThrown(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
-		SearchParameter newSearchParam = aSearchParameter(ID2);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 			fail();
 		}catch (UnprocessableEntityException e){
-			assertTrue(e.getMessage().contains("2124"));
+			assertTrue(e.getMessage().contains("2131"));
 		}
 
 	}
@@ -107,9 +111,9 @@ public class SearchParameterValidatingInterceptorTest {
 	public void whenUsingPutOperationToCreateNonOverlappingSearchParam_thenIsAllowed(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(emptyList());
+		setPersistedSearchParameterIds(emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 	}
@@ -118,9 +122,9 @@ public class SearchParameterValidatingInterceptorTest {
 	public void whenUsingPutOperationToCreateOverlappingSearchParam_thenExceptionIsThrown(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
-		SearchParameter newSearchParam = aSearchParameter(ID2);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
@@ -134,28 +138,77 @@ public class SearchParameterValidatingInterceptorTest {
 	public void whenUpdateSearchParam_thenIsAllowed(){
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
-		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(mySearchParameterId1.getId()));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(myExistingSearchParameter.getId()));
 
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 
 	}
 
-	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams){
+	@Test
+	public void whenUpliftSearchParameter_thenMoreGranularComparisonSucceeds() {
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+
+		setPersistedSearchParameters(asList(myExistingSearchParameter));
+
+		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
+
+		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+	}
+
+	@Test
+	public void whenUpliftSearchParameter_thenMoreGranularComparisonFails() {
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+		SearchParameter existingUpliftSp = buildSearchParameterWithUpliftExtension(ID1);
+		setPersistedSearchParameters(asList(existingUpliftSp));
+
+		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
+
+		try {
+			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+			fail();
+		}catch (UnprocessableEntityException e){
+			assertTrue(e.getMessage().contains("2125"));
+		}
+	}
+
+	@NotNull
+	private SearchParameter buildSearchParameterWithUpliftExtension(String theID) {
+		SearchParameter newSearchParam = buildSearchParameterWithId(theID);
+
+		Extension topLevelExtension = new Extension();
+		topLevelExtension.setUrl(UPLIFT_URL);
+
+		Extension codeExtension = new Extension();
+		codeExtension.setUrl("code");
+		codeExtension.setValue(new CodeType("identifier"));
+
+		Extension elementExtension = new Extension();
+		elementExtension.setUrl("element-name");
+		elementExtension.setValue(new CodeType("patient-identifier"));
+
+		topLevelExtension.addExtension(codeExtension);
+		topLevelExtension.addExtension(elementExtension);
+		newSearchParam.addExtension(topLevelExtension);
+		return newSearchParam;
+	}
+
+	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams){
 		List<ResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
 			.map(theS -> new ResourcePersistentId(theS))
 			.collect(Collectors.toList());
-		Set<String> ids = theSearchParams.stream().map(sp -> sp.getId()).collect(Collectors.toSet());
-
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
+	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams) {
+		when(myIFhirResourceDao.search(any(), any())).thenReturn(new SimpleBundleProvider(theSearchParams));
+	}
 
-	private SearchParameter aSearchParameter(String id) {
+	private SearchParameter buildSearchParameterWithId(String id) {
 		SearchParameter retVal = new SearchParameter();
 		retVal.setId(id);
 		retVal.setCode("patient");

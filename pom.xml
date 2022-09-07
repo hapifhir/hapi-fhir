@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.1.1</version>
+	<version>6.2.0-PRE5-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -756,6 +756,9 @@
 			<id>gjergjsheldija</id>
 			<name>Gjergj Sheldija</name>
 		</developer>
+		<developer>
+			<id>dyoung-work</id>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -767,7 +770,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.36</fhir_core_version>
+        <fhir_core_version>5.6.55</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -2012,7 +2015,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.1.1</version>
+                            <version>6.2.0-PRE5-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
@@ -2020,17 +2023,6 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring_boot_version}</version>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.8</version>
-					<extensions>true</extensions>
-					<configuration>
-						<serverId>ossrh</serverId>
-						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-						<autoReleaseAfterClose>true</autoReleaseAfterClose>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.basepom.maven</groupId>
@@ -2741,41 +2733,6 @@
 			</build>
 		</profile>
 		<profile>
-			<id>SIGN_ARTIFACTS</id>
-			<activation>
-				<property>
-					<name>gpg.passphrase</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-									<!--
-									These arguments are needed for GPG 2.1+ per
-									https://stackoverflow.com/questions/53992950/maven-gpg-plugin-failing-with-inappropriate-ioctl-for-device-when-running-unde
-									-->
-									<gpgArguments>
-										<arg>--pinentry-mode</arg>
-										<arg>loopback</arg>
-									</gpgArguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>ALLMODULES</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -2788,9 +2745,11 @@
 				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-fhir-jpaserver-test-utilities</module>
-				<!-- TODO KHS temporarily disable these tests because they are blocking ci
+				<module>hapi-fhir-jpaserver-test-dstu2</module>
+				<module>hapi-fhir-jpaserver-test-dstu3</module>
+				<module>hapi-fhir-jpaserver-test-r4</module>
+				<module>hapi-fhir-jpaserver-test-r5</module>
 				<module>hapi-fhir-jpaserver-elastic-test-utilities</module>
-				-->
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>

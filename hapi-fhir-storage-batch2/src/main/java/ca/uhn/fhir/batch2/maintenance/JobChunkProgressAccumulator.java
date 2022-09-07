@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -45,19 +46,23 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class JobChunkProgressAccumulator {
 
 	private final Set<String> myConsumedInstanceAndChunkIds = new HashSet<>();
-	private final Multimap<String, ChunkStatusCountKey> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
+	private final Multimap<String, ChunkStatusCountValue> myInstanceIdToChunkStatuses = ArrayListMultimap.create();
 
-	int countChunksWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
+	int countChunksWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
 		return getChunkIdsWithStatus(theInstanceId, theStepId, theStatuses).size();
 	}
 
-	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, Set<StatusEnum> theStatuses) {
-		return getChunkStatuses(theInstanceId).stream().filter(t -> t.myStepId.equals(theStepId)).filter(t -> theStatuses.contains(t.myStatus)).map(t -> t.myChunkId).collect(Collectors.toList());
+	public List<String> getChunkIdsWithStatus(String theInstanceId, String theStepId, StatusEnum... theStatuses) {
+		return getChunkStatuses(theInstanceId).stream()
+			.filter(t -> t.myStepId.equals(theStepId))
+			.filter(t -> ArrayUtils.contains(theStatuses, t.myStatus))
+			.map(t -> t.myChunkId)
+			.collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private Collection<ChunkStatusCountKey> getChunkStatuses(String theInstanceId) {
-		Collection<ChunkStatusCountKey> chunkStatuses = myInstanceIdToChunkStatuses.get(theInstanceId);
+	private Collection<ChunkStatusCountValue> getChunkStatuses(String theInstanceId) {
+		Collection<ChunkStatusCountValue> chunkStatuses = myInstanceIdToChunkStatuses.get(theInstanceId);
 		chunkStatuses = defaultIfNull(chunkStatuses, emptyList());
 		return chunkStatuses;
 	}
@@ -68,16 +73,16 @@ public class JobChunkProgressAccumulator {
 		// Note: If chunks are being written while we're executing, we may see the same chunk twice. This
 		// check avoids adding it twice.
 		if (myConsumedInstanceAndChunkIds.add(instanceId + " " + chunkId)) {
-			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountKey(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
+			myInstanceIdToChunkStatuses.put(instanceId, new ChunkStatusCountValue(chunkId, theChunk.getTargetStepId(), theChunk.getStatus()));
 		}
 	}
 
-	private static class ChunkStatusCountKey {
+	private static class ChunkStatusCountValue {
 		public final String myChunkId;
 		public final String myStepId;
 		public final StatusEnum myStatus;
 
-		private ChunkStatusCountKey(String theChunkId, String theStepId, StatusEnum theStatus) {
+		private ChunkStatusCountValue(String theChunkId, String theStepId, StatusEnum theStatus) {
 			myChunkId = theChunkId;
 			myStepId = theStepId;
 			myStatus = theStatus;

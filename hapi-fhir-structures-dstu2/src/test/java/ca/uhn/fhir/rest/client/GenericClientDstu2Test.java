@@ -83,6 +83,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.getMethodNameUtil.getTestName;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -191,7 +192,7 @@ public class GenericClientDstu2Test {
 
 	@Test
 	public void testAcceptHeaderPreflightConformance() throws Exception {
-		String methodName = "testAcceptHeaderPreflightConformance";
+		String methodName = getTestName();
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();
@@ -234,7 +235,7 @@ public class GenericClientDstu2Test {
 
 	@Test
 	public void testAcceptHeaderPreflightConformancePreferJson() throws Exception {
-		String methodName = "testAcceptHeaderPreflightConformancePreferJson";
+		String methodName = getTestName();
 		final IParser p = ourCtx.newXmlParser();
 
 		final Conformance conf = new Conformance();

@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -85,6 +86,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -118,7 +120,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -657,11 +658,18 @@ public class SearchBuilder implements ISearchBuilder {
 			.map(csvString -> List.of(csvString.split(",")))
 			.flatMap(List::stream).collect(Collectors.toList());
 
+		Set<String> knownResourceTypes = myContext.getResourceTypes();
+
 		// remove leading/trailing whitespaces if any and remove duplicates
-		Set<String> retVal = resourceTypes
-			.stream()
-			.map(String::trim)
-			.collect(Collectors.toSet());
+		Set<String> retVal = new HashSet<>();
+
+		for (String type : resourceTypes) {
+			String trimmed = type.trim();
+			if (!knownResourceTypes.contains(trimmed)) {
+				throw new ResourceNotFoundException(Msg.code(2132) + "Unknown resource type '" + trimmed + "' in _type parameter.");
+			}
+			retVal.add(trimmed);
+		}
 
 		return retVal;
 	}
@@ -953,11 +961,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Can we fast track this loading by checking elastic search?
 		if (isLoadingFromElasticSearchSupported(thePids)) {
-			theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
-		} else {
-			// We only chunk because some jdbc drivers can't handle long param lists.
-			new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
+			try {
+				theResourceListToPopulate.addAll(loadResourcesFromElasticSearch(thePids));
+				return;
+
+			} catch (ResourceNotFoundInIndexException theE) {
+				// some resources were not found in index, so we will inform this and resort to JPA search
+				ourLog.warn("Some resources were not found in index. Make sure all resources were indexed. Resorting to database search.");
+			}
 		}
+
+		// We only chunk because some jdbc drivers can't handle long param lists.
+		new QueryChunker<ResourcePersistentId>().chunk(thePids, t -> doLoadPids(t, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position));
 	}
 
 	/**
@@ -969,9 +984,9 @@ public class SearchBuilder implements ISearchBuilder {
 	 * @return can we fetch from Hibernate Search?
 	 */
 	private boolean isLoadingFromElasticSearchSupported(Collection<ResourcePersistentId> thePids) {
-
 		// is storage enabled?
 		return myDaoConfig.isStoreResourceInHSearchIndex() &&
+			myDaoConfig.isAdvancedHSearchIndexing() &&
 			// we don't support history
 			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
 			// skip the complexity for metadata in dstu2
@@ -1164,17 +1179,24 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 						}
 						//@formatter:off
-						String resourceUrlBasedQuery = "SELECT " + fieldsToLoadFromSpidxUriTable +
+						StringBuilder resourceUrlBasedQuery = new StringBuilder("SELECT " + fieldsToLoadFromSpidxUriTable +
 							" FROM hfj_res_link r " +
 							" JOIN hfj_spidx_uri rUri ON ( " +
 							"   r.target_resource_url = rUri.sp_uri AND " +
-							"   rUri.sp_name = 'url' " +
-							    (targetResourceType != null ? " AND rUri.res_type = :target_resource_type " : "") +
-							    (haveTargetTypesDefinedByParam ? " AND rUri.res_type IN (:target_resource_types) " : "") +
-							" ) " +
+							"   rUri.sp_name = 'url' ");
+
+						if(targetResourceType != null) {
+							resourceUrlBasedQuery.append(" AND rUri.res_type = :target_resource_type ");
+
+						} else if(haveTargetTypesDefinedByParam) {
+							resourceUrlBasedQuery.append(" AND rUri.res_type IN (:target_resource_types) ");
+						}
+
+						resourceUrlBasedQuery.append(" ) ");
+						resourceUrlBasedQuery.append(
 							" WHERE r.src_path = :src_path AND " +
-							" r.target_resource_id IS NULL AND " +
-							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ";
+								" r.target_resource_id IS NULL AND " +
+								" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
 						//@formatter:on
 
 						String sql = resourceIdBasedQuery + " UNION " + resourceUrlBasedQuery;
@@ -1189,6 +1211,7 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
+
 							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);

@@ -36,7 +36,7 @@ import org.hl7.fhir.dstu3.model.UnsignedIntType;
  * #L%
  */
 
-public class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDstu3<Encounter> {
+public abstract class BaseJpaResourceProviderEncounterDstu3 extends JpaResourceProviderDstu3<Encounter> {
 
 	/**
 	 * Encounter/123/$everything
