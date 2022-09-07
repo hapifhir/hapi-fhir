@@ -91,12 +91,17 @@ public class ValidateCommandTest {
 			assertEquals("HAPI-1622: Validation failed", e.getMessage());
 		}
 
-		String expectedMessage = "expected message";
+		String expectedMessage = "Validation results:\u001B[22m\n" +
+			"\u001B[32mIssue 1: ERROR\u001B[37m - \u001B[37mPatient\n" +
+			"\u001B[37m         Patient.identifier: minimum required = 1, but only found 0 (from\n" +
+			"\u001B[37m         https://www.medizininformatik-initiative.de/fhir/core/modul-person/Stru\n" +
+			"\u001B[37m         ctureDefinition/Patient)\n";
+
 		Level expectedLevel = Level.INFO;
 		List<ILoggingEvent> errorLogs = myListAppender
 			.list
 			.stream()
-//			.filter(event -> expectedMessage.equals(event.getFormattedMessage()))
+			.filter(event -> expectedMessage.equals(event.getFormattedMessage()))
 			.filter(event -> expectedLevel.equals(event.getLevel()))
 			.collect(Collectors.toList());
 
