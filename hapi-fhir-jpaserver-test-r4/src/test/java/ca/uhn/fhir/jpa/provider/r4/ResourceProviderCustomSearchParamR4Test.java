@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
@@ -43,6 +44,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -589,5 +591,53 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		}
 	}
 
+	@Test
+	public void testNicknameExpansionWithCustomSearchParameter() {
+
+		SearchParameter firstNameSp = new SearchParameter();
+		firstNameSp.setId("patient-firstName");
+		firstNameSp.setTitle("Patient First Name");
+		firstNameSp.setUrl("http://some.url.com");
+		firstNameSp.setName("firstName");
+		firstNameSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		firstNameSp.setCode("firstName");
+		firstNameSp.addBase("Patient");
+		firstNameSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.STRING);
+		firstNameSp.setDescription("First given name of first patient name");
+		firstNameSp.setExpression("Patient.name[0].where(use='official' or use='usual' or use.exists().not()).given[0]");
+		firstNameSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+
+		mySearchParameterDao.create(firstNameSp, mySrd);
+
+		myCaptureQueriesListener.clear();
+		mySearchParamRegistry.forceRefresh();
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		Patient pat = new Patient();
+		pat.getNameFirstRep()
+			.setUse(HumanName.NameUse.OFFICIAL)
+			.setFamily("Chalmders")
+			.setGiven(List.of(new StringType("Kenneth"), new StringType("James")));
+
+		IIdType patId = myPatientDao.create(pat, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient pat2 = new Patient();
+		pat2.getNameFirstRep()
+			.setUse(HumanName.NameUse.OFFICIAL)
+			.setFamily("Smith")
+			.setGiven(List.of(new StringType("Tom"), new StringType("Fred")));
+		IIdType patId2 = myPatientDao.create(pat2, mySrd).getId().toUnqualifiedVersionless();
+
+
+		Bundle result = myClient
+			.search()
+			.byUrl("Patient?firstName:nickname=Ken")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
+		assertEquals(1, foundResources.size());
+		assertThat(foundResources, contains(patId.getValue()));
+	}
 
 }
