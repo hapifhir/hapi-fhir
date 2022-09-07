@@ -756,6 +756,9 @@
 			<id>gjergjsheldija</id>
 			<name>Gjergj Sheldija</name>
 		</developer>
+		<developer>
+			<id>dyoung-work</id>
+		</developer>
 	</developers>
 
 	<licenses>
