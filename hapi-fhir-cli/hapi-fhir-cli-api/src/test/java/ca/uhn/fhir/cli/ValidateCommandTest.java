@@ -1,24 +1,28 @@
 package ca.uhn.fhir.cli;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ch.qos.logback.classic.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ValidateCommandTest {
 
-	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(ValidateCommand.class);
-		private ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
+	private final Logger ourLog = (Logger) LoggerFactory.getLogger(ValidateCommand.class);
+	private ValidateCommand myValidateCommand = new ValidateCommand();
+	private ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
 
 
 	@BeforeEach
@@ -63,17 +67,25 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality_whenResourceDoesNotComplyWithProfile() {
+	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality_whenResourceDoesNotComplyWithProfile() throws ParseException {
 		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient-no-identifier.json").getFile();
 		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
 
-		assertThrows(CommandFailureException.class, () ->
-			App.main(new String[]{
-				"validate",
-				"--fhir-version", "r4",
-				"--profile",
-				"--file", patientJson,
-				"-l", patientProfile}));
+		String[] args = new String[]{
+			"validate",
+			"--fhir-version", "r4",
+			"--profile",
+			"--file", patientJson,
+			"-l", patientProfile
+		};
+
+		try {
+			CommandLine commandLine = new DefaultParser().parse(myValidateCommand.getOptions(), args);
+			myValidateCommand.run(commandLine);
+			fail();
+		} catch(CommandFailureException e) {
+			assertEquals("HAPI-1622: Validation failed", e.getMessage());
+		}
 
 		String expectedMessage = "expected message";
 		Level expectedLevel = Level.INFO;
