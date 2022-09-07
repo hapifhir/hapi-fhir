@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -204,7 +203,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
-	protected IResourceProvenanceDao myResourceProvenanceDao;
+	protected IResourceHistoryTableDao myResourceProvenanceDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
@@ -1200,9 +1199,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 6. Handle source (provenance)
-		if (!myConfig.isOverwriteRequestIDEnabled() && isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
-				MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
-		} else if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
+//		if (!myConfig.isPreserveRequestIdInResourceBody() && isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
+//				MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
+//		} else if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
+		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
 			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);

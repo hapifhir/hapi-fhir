@@ -7169,6 +7169,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		});
 
 		myCaptureQueriesListener.clear();
+
 		Bundle results = myClient
 			.search()
 			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
@@ -7179,6 +7180,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, results.getEntry().size());
 		// FIXME: 2022-09-07 add more assertion on the source and requestId to make sure we have the right patient
+	}
+
+
+	public void myTest(){
+		String mySource = "mySource#345676";
+
+		String sourceToSearch = "";
+		String requestToSearch = "";
+
+		boolean hasSearchSource = mySource.contains(sourceToSearch);
+
 	}
 
 	@Test
