@@ -26,12 +26,14 @@ import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 public class JobInstanceStatusUpdater {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceStatusUpdater.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 
 	public JobInstanceStatusUpdater(IJobPersistence theJobPersistence) {
@@ -39,11 +41,32 @@ public class JobInstanceStatusUpdater {
 	}
 
 	public boolean updateInstanceStatus(JobInstance theJobInstance, StatusEnum theNewStatus) {
+		StatusEnum origStatus = theJobInstance.getStatus();
+		if (origStatus == theNewStatus) {
+			return false;
+		}
+		if (!StatusEnum.isLegalStateTransition(origStatus, theNewStatus)) {
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theNewStatus);
+			return false;
+		}
 		theJobInstance.setStatus(theNewStatus);
 		return updateInstance(theJobInstance);
 	}
 
-	public boolean updateInstance(JobInstance theJobInstance) {
+	private boolean updateInstance(JobInstance theJobInstance) {
+		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(theJobInstance.getInstanceId());
+		if (oInstance.isEmpty()) {
+			ourLog.error("Trying to update instance of non-existent Instance {}", theJobInstance);
+			return false;
+		}
+
+		StatusEnum origStatus = oInstance.get().getStatus();
+		StatusEnum newStatus = theJobInstance.getStatus();
+		if (!StatusEnum.isLegalStateTransition(origStatus, newStatus)) {
+			ourLog.error("Ignoring illegal state transition for job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, newStatus);
+			return false;
+		}
+
 		boolean statusChanged = myJobPersistence.updateInstance(theJobInstance);
 
 		// This code can be called by both the maintenance service and the fast track work step executor.
@@ -51,13 +74,13 @@ public class JobInstanceStatusUpdater {
 		// record changed count from of a sql update change status to rely on the database to tell us which thread
 		// the status change happened in.
 		if (statusChanged) {
-			ourLog.info("Marking job instance {} of type {} as {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), theJobInstance.getStatus());
-			handleStatusChange(theJobInstance);
+			ourLog.info("Changing job instance {} of type {} from {} to {}", theJobInstance.getInstanceId(), theJobInstance.getJobDefinitionId(), origStatus, theJobInstance.getStatus());
+			handleStatusChange(origStatus, theJobInstance);
 		}
 		return statusChanged;
 	}
 
-	private <PT extends IModelJson> void handleStatusChange(JobInstance theJobInstance) {
+	private <PT extends IModelJson> void handleStatusChange(StatusEnum theOrigStatus, JobInstance theJobInstance) {
 		JobDefinition<PT> definition = (JobDefinition<PT>) theJobInstance.getJobDefinition();
 		switch (theJobInstance.getStatus()) {
 			case COMPLETED:
@@ -75,7 +98,6 @@ public class JobInstanceStatusUpdater {
 		}
 	}
 
-
 	private <PT extends IModelJson> void invokeCompletionHandler(JobInstance theJobInstance, JobDefinition<PT> theJobDefinition, IJobCompletionHandler<PT> theJobCompletionHandler) {
 		if (theJobCompletionHandler == null) {
 			return;
@@ -83,5 +105,21 @@ public class JobInstanceStatusUpdater {
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
 		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
 		theJobCompletionHandler.jobComplete(completionDetails);
+	}
+
+	public boolean setCompleted(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.COMPLETED);
+	}
+
+	public boolean setInProgress(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
+	}
+
+	public boolean setCancelled(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.CANCELLED);
+	}
+
+	public boolean setFailed(JobInstance theInstance) {
+		return updateInstanceStatus(theInstance, StatusEnum.FAILED);
 	}
 }

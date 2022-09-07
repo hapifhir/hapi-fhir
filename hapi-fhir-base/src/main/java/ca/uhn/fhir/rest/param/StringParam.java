@@ -31,10 +31,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class StringParam extends BaseParam implements IQueryParameterType {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(StringParam.class);
 
 	private boolean myContains;
 	private boolean myExact;
@@ -102,11 +106,11 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	@Override
 	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
 		if (Constants.PARAMQUALIFIER_NICKNAME.equals(theQualifier)) {
-			if ("name".equals(theParamName) || "given".equals(theParamName)) {
-				myNicknameExpand = true;
-				theQualifier = "";
-			} else {
-				throw new InvalidRequestException(Msg.code(2077) + "Modifier " + Constants.PARAMQUALIFIER_NICKNAME + " may only be used with 'name' and 'given' search parameters");
+			myNicknameExpand = true;
+			theQualifier = "";
+
+			if (!("name".equals(theParamName) || "given".equals(theParamName))){
+				ourLog.debug(":nickname qualifier was assigned to a search parameter other than one of the intended parameters \"name\" and \"given\"");
 			}
 		}
 

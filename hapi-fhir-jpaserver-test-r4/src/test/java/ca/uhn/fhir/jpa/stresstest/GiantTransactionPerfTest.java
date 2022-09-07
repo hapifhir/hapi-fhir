@@ -816,6 +816,7 @@ public class GiantTransactionPerfTest {
 	}
 
 	private static class MockSchedulerSvc implements ISchedulerService {
+
 		@Override
 		public void purgeAllScheduledJobsForUnitTest() {
 			throw new UnsupportedOperationException();
@@ -849,6 +850,16 @@ public class GiantTransactionPerfTest {
 		@Override
 		public boolean isStopping() {
 			return false;
+		}
+
+		@Override
+		public void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {
+			ISchedulerService.super.triggerLocalJobImmediately(theJobDefinition);
+		}
+
+		@Override
+		public void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {
+			ISchedulerService.super.triggerClusteredJobImmediately(theJobDefinition);
 		}
 	}
 

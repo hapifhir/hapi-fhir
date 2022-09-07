@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
-import ca.uhn.test.concurrency.LatchTimedOutError;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.junit.jupiter.api.AfterEach;
@@ -50,13 +49,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
-import static ca.uhn.fhir.batch2.coordinator.StepExecutionSvc.MAX_CHUNK_ERROR_COUNT;
+import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -193,7 +189,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
 	}
 
 	@Test
@@ -205,88 +201,22 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
-		String jobId = "test-job-2";
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		String jobDefId = "test-job-2";
+		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
 
-		JobInstanceStartRequest request = buildRequest(jobId);
+		JobInstanceStartRequest request = buildRequest(jobDefId);
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String batchJobId = myJobCoordinator.startInstance(request).getJobId();
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.assertNoGatedStep(startResponse.getJobId());
+		myBatch2JobHelper.assertFastTracking(batchJobId);
 
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(startResponse.getJobId());
-		myLastStepLatch.awaitExpected();
-	}
-
-	@Test
-	public void testFastTrack_Maintenance_do_not_both_call_CompletionHandler() throws InterruptedException {
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
-			sink.accept(new FirstStepOutput());
-			callLatch(myFirstStepLatch, step);
-			return RunOutcome.SUCCESS;
-		};
-
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
-
-		String jobId = "test-job-2a";
-		String completionHandlerLatchName = "Completion Handler";
-		PointcutLatch calledLatch = new PointcutLatch(completionHandlerLatchName);
-		CountDownLatch waitLatch = new CountDownLatch(2);
-
-		myCompletionHandler = details -> {
-			try {
-				calledLatch.call(details);
-				waitLatch.await();
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		};
-
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
-
-		myJobDefinitionRegistry.addJobDefinition(definition);
-
-		JobInstanceStartRequest request = buildRequest(jobId);
-
-		myFirstStepLatch.setExpectedCount(1);
-		myLastStepLatch.setExpectedCount(1);
-		calledLatch.setExpectedCount(1);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
-		String instanceId = startResponse.getJobId();
-		myFirstStepLatch.awaitExpected();
-		calledLatch.awaitExpected();
-
-		myBatch2JobHelper.assertNoGatedStep(instanceId);
-
-		// Start a maintenance run in the background
-		ExecutorService executor = Executors.newSingleThreadExecutor();
-
-		// Now queue up the maintenance call
-		calledLatch.setExpectedCount(1);
-		executor.submit(() -> myJobMaintenanceService.runMaintenancePass());
-
-		// We should have only called the completion handler once
-		try {
-			// This test will pause for 5 seconds here.  This should be more than enough time on most servers to hit the
-			// spot where the maintenance services calls the completion handler
-			calledLatch.awaitExpectedWithTimeout(5);
-			fail();
-		} catch (LatchTimedOutError e) {
-			assertEquals("HAPI-1483: " + completionHandlerLatchName + " PointcutLatch timed out waiting 5 seconds for latch to countdown from 1 to 0.  Is 1.", e.getMessage());
-		}
-
-		// Now release the latches
-		waitLatch.countDown();
-		waitLatch.countDown(); // This shouldn't be necessary, but just in case
-
-		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
-		myBatch2JobHelper.awaitSingleChunkJobCompletion(instanceId);
+		myBatch2JobHelper.awaitJobCompletion(batchJobId);
 		myLastStepLatch.awaitExpected();
 	}
 
@@ -396,8 +326,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
 			sink.accept(new FirstStepOutput());
-			callLatch(myFirstStepLatch, step);
-			return RunOutcome.SUCCESS;
+			return callLatch(myFirstStepLatch, step);
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
@@ -413,11 +342,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		String instanceId = startResponse.getJobId();
 		myFirstStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
-
 		myLastStepLatch.setExpectedCount(2);
 		myBatch2JobHelper.awaitJobCompletion(instanceId);
 		myLastStepLatch.awaitExpected();
+
+		// Now we've processed 2 chunks so we are no longer fast tracking
+		myBatch2JobHelper.assertNotFastTracking(instanceId);
 	}
 
 
@@ -527,7 +457,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
-		JobInstance instance = myBatch2JobHelper.awaitJobHitsStatusInTime(response.getJobId(),
+		JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(response.getJobId(),
 			12, // we want to wait a long time (2 min here) cause backoff is incremental
 			StatusEnum.FAILED, StatusEnum.ERRORED // error states
 		);

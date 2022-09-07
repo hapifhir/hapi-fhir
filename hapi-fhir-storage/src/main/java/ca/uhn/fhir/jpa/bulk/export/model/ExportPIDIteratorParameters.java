@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  */
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
 import java.util.List;
@@ -122,4 +123,16 @@ public class ExportPIDIteratorParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myResourceType", myResourceType)
+			.append("myStartDate", myStartDate)
+			.append("myFilters", myFilters)
+			.append("myJobId", myJobId)
+			.append("myExportStyle", myExportStyle)
+			.append("myGroupId", myGroupId)
+			.append("myExpandMdm", myExpandMdm)
+			.toString();
+	}
 }
