@@ -57,7 +57,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -249,7 +248,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
-				.orElseThrow(() -> myExceptionSvc.newResourceGoneException(theUuid));
+				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
 
 			QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -304,7 +303,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		List<ResourcePersistentId> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 		if (pids == null) {
-			throw myExceptionSvc.newResourceGoneException(theUuid);
+			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
 
 		ourLog.trace("Fetched {} results", pids.size());

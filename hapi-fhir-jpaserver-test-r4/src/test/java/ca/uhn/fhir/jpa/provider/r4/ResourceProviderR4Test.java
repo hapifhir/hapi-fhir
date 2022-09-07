@@ -7381,7 +7381,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		@ParameterizedTest
 		@MethodSource("provideParameters")
-		public void testMissingReferenceClientParameter2(MissingSearchTestParameters theParams) {
+		public void testMissingReferenceClientParameterOnIndexedContainedResources(MissingSearchTestParameters theParams) {
+			myModelConfig.setIndexOnContainedResources(true);
 			runTest(theParams,
 				hasField -> {
 					Observation obs = new Observation();
@@ -7393,8 +7394,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					}
 					return obs;
 				}, isMissing -> {
-					return doSearch(Observation.class, Observation.ENCOUNTER.isMissing(isMissing));
+					ICriterion<?> criterion = Observation.ENCOUNTER.isMissing(isMissing);
+					return doSearch(Observation.class, criterion);
 				});
+
+			myModelConfig.setIndexOnContainedResources(false);
 		}
 
 		@ParameterizedTest

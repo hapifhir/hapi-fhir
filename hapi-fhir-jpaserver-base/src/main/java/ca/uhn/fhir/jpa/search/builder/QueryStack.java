@@ -57,6 +57,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
@@ -353,14 +354,16 @@ public class QueryStack {
 		}
 
 		// TODO - Change this when we have HFJ_SPIDX_MISSING table
-		/*
-		 * How we search depends on if the IndexMissingFields property is set or not.
+		/**
+		 * How we search depends on if the
+		 * {@link ca.uhn.fhir.jpa.api.config.DaoConfig#myIndexMissingFieldsEnabled property}
+		 * is Enabled or Disabled.
 		 *
 		 * If it is, we will use the SP_MISSING values set into the various
 		 * SP_INDX_X tables and search on those ("old" search).
 		 *
 		 * If it is not set, however, we will try and construct a query that
-		 * looks for missing SearchParameters in the SP_INDX_* tables ("new" search).
+		 * looks for missing SearchParameters in the SP_IDX_* tables ("new" search).
 		 *
 		 * You cannot mix and match, however (SP_MISSING is not in HASH_IDENTITY information).
 		 * So setting (or unsetting) the IndexMissingFields
@@ -475,41 +478,11 @@ public class QueryStack {
 	private Condition createMissingPredicateForUnindexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
-		ICanMakeMissingParamPredicate innerQuery;
-		switch (theParams.ParamType) {
-			case NUMBER:
-				innerQuery = sqlBuilder.createNumberPredicateBuilder();
-				break;
-			case DATE:
-				innerQuery = sqlBuilder.createDatePredicateBuilder();
-				break;
-			case STRING:
-				innerQuery = sqlBuilder.createStringPredicateBuilder();
-				break;
-			case TOKEN:
-				innerQuery = sqlBuilder.createTokenPredicateBuilder();
-				break;
-			case QUANTITY:
-				innerQuery = sqlBuilder.createQuantityPredicateBuilder();
-				break;
-			case URI:
-				innerQuery = sqlBuilder.createUriPredicateBuilder();
-				break;
-			case REFERENCE:
-				// this is the only predicatebuilder that does not extend
-				// BaseSearchParamPredicateBuilder
-				innerQuery = sqlBuilder.createReferencePredicateBuilder(this);
-				break;
-			case HAS:
-			case SPECIAL:
-				innerQuery = sqlBuilder.createCoordsPredicateBuilder();
-				break;
-			case COMPOSITE:
-			default:
-				// we don't expect to see this
-				ourLog.error("Invalid param type " + theParams.ParamType.name());
-				return null;
-		}
+		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
+			theParams.ParamType,
+			theParams.SqlBuilder,
+			this
+		);
 
 		return innerQuery.createPredicateParamMissingValue(
 			new MissingQueryParameterPredicateParams(

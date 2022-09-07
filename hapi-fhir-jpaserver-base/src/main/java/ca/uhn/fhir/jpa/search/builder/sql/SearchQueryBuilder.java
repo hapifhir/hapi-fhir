@@ -217,21 +217,21 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
 	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
-		
+
 		QuantityPredicateBuilder retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
-		
+
 		return retVal;
 	}
 
 	public QuantityNormalizedPredicateBuilder addQuantityNormalizedPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
-		
+
 		QuantityNormalizedPredicateBuilder retVal = mySqlBuilderFactory.quantityNormalizedIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
-		
+
 		return retVal;
 	}
-	
+
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
@@ -305,46 +305,8 @@ public class SearchQueryBuilder {
 		return retVal;
 	}
 
-
-
-	public StringPredicateBuilder createStringPredicateBuilder() {
-		StringPredicateBuilder sp = mySqlBuilderFactory.stringIndexTable(this);
-		return sp;
-	}
-
-	public NumberPredicateBuilder createNumberPredicateBuilder() {
-		NumberPredicateBuilder np = mySqlBuilderFactory.numberIndexTable(this);
-		return np;
-	}
-
-	public QuantityPredicateBuilder createQuantityPredicateBuilder() {
-		QuantityPredicateBuilder qp = mySqlBuilderFactory.quantityIndexTable(this);
-		return qp;
-	}
-
-	public CoordsPredicateBuilder createCoordsPredicateBuilder() {
-		CoordsPredicateBuilder cp = mySqlBuilderFactory.coordsPredicateBuilder(this);
-		return cp;
-	}
-
-	public TokenPredicateBuilder createTokenPredicateBuilder() {
-		TokenPredicateBuilder tp = mySqlBuilderFactory.tokenIndexTable(this);
-		return tp;
-	}
-
-	public DatePredicateBuilder createDatePredicateBuilder() {
-		DatePredicateBuilder dp = mySqlBuilderFactory.dateIndexTable(this);
-		return dp;
-	}
-
-	public UriPredicateBuilder createUriPredicateBuilder() {
-		UriPredicateBuilder up = mySqlBuilderFactory.uriIndexTable(this);
-		return up;
-	}
-
-	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
-		ResourceLinkPredicateBuilder retVal = mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
-		return retVal;
+	public SqlObjectFactory getSqlBuilderFactory() {
+		return mySqlBuilderFactory;
 	}
 
 	public ResourceIdPredicateBuilder newResourceIdBuilder() {
@@ -436,7 +398,7 @@ public class SearchQueryBuilder {
 		if (maxResultsToFetch != null || offset != null) {
 
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
-			
+
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
 			RowSelection selection = new RowSelection();
 			selection.setFirstRow(offset);
@@ -639,15 +601,15 @@ public class SearchQueryBuilder {
 	}
 
 	public void excludeResourceIdsPredicate(Set<ResourcePersistentId> theExsitinghPidSetToExclude) {
-		
+
 		// Do  nothing if it's empty
 		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
 			return;
-		
+
 		List<Long> excludePids = ResourcePersistentId.toLongList(theExsitinghPidSetToExclude);
-		
+
 		ourLog.trace("excludePids = " + excludePids);
-		
+
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
 		predicate.setNegate(true);

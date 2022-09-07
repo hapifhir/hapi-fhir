@@ -1537,13 +1537,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
 			throw new MethodNotAllowedException(Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
-
-		/*
-		 * NB:
-		 * We do not need to check if Missing Fields are indexed anymore.
-		 * See the comment in QueryStack.createMissingParameterQuery
-		 */
-
+		
 		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);
