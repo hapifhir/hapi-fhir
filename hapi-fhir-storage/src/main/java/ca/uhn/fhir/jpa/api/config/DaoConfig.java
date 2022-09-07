@@ -322,7 +322,7 @@ public class DaoConfig {
 	/**
 	 * Since 6.2.0
 	 */
-	private boolean myOverwriteRequestIdEnabled = true;
+	private boolean myPreserveRequestIdInResourceBody = false;
 
 	/**
 	 * Constructor
@@ -2922,8 +2922,8 @@ public class DaoConfig {
 	 *
 	 * @since 6.2.0
 	 */
-	public boolean isOverwriteRequestIDEnabled() {
-		return myOverwriteRequestIdEnabled;
+	public boolean isPreserveRequestIdInResourceBody() {
+		return myPreserveRequestIdInResourceBody;
 	}
 
 	/**
@@ -2933,8 +2933,8 @@ public class DaoConfig {
 	 *
 	 * @since 6.2.0
 	 */
-	public void setOverwriteRequestIdEnabled(boolean theOverwriteRequestIdEnabled) {
-		myOverwriteRequestIdEnabled = theOverwriteRequestIdEnabled;
+	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
+		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
 

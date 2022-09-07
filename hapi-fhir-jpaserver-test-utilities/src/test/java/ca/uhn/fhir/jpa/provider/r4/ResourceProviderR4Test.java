@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -213,6 +215,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
+	@Autowired
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
+
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -234,7 +239,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
-		myDaoConfig.setOverwriteRequestIdEnabled(true);
+		myDaoConfig.setPreserveRequestIdInResourceBody(false);
+
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+
 	}
 
 	@BeforeEach
@@ -7083,9 +7091,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withRequestIdProvidedAndOverwriteDisabled_RequestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabled_RequestIdIsPreserved(){
 
-		myDaoConfig.setOverwriteRequestIdEnabled(false);
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
 		String patientId = "1234a";
@@ -7108,7 +7116,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withRequestIdProvidedAndOverwriteEnabled_RequestIdIsOverwritten(){
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
 
 		String expectedMetaSource = "mySource";
 		String requestId = "#345676";
@@ -7134,8 +7142,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void searchResource_bySourceAndRequestIdWithOverwriteDisabled_isSuccess(){
-
-		myDaoConfig.setOverwriteRequestIdEnabled(false);
+//		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
+		// FIXME: 2022-09-07
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource";
 		String requestId = "345676";
@@ -7150,11 +7159,23 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.resource(p1)
 			.execute();
 
+		runInTransaction(() -> {
+			List<ResourceHistoryProvenanceEntity> resourceHistoryProvenanceDaoAll = myResourceHistoryProvenanceDao.findAll();
+
+			for (ResourceHistoryProvenanceEntity current: resourceHistoryProvenanceDaoAll) {
+				ourLog.info(current.toString());
+
+			}
+		});
+
+		myCaptureQueriesListener.clear();
 		Bundle results = myClient
 			.search()
 			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
 			.returnBundle(Bundle.class)
 			.execute();
+
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(1, results.getEntry().size());
 		// FIXME: 2022-09-07 add more assertion on the source and requestId to make sure we have the right patient
@@ -7212,8 +7233,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchByRequestId() {
-
-		myDaoConfig.setOverwriteRequestIdEnabled(true);
+// FIXME: 2022-09-07
+		myDaoConfig.setPreserveRequestIdInResourceBody(false);
 
 		Patient p1 = new Patient();
 		p1.getMeta().setSource("urn:source:0#my-fragment123");
