@@ -59,10 +59,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Volume test which loads a full LOINC CodeSystem
- * Test is executed from child classes with Lucene or Elastic configuration
- * Requires 6Gb memory (set in pom file, 'surefire_jvm_args' property) and takes 3 Hs to run successfully
+ * Can be executed with Lucene or Elastic configuration
+ * Requires 7Gb memory and takes 3 Hs to run successfully
+ *
+ * Run this test from the maven command line using the command:
+ * mvn test -pl :hapi-fhir-jpaserver-elastic-test-utilities -Dtest=LoincFullLoadR4IT#uploadLoincCodeSystem -Dsurefire_jvm_args="-Xmx7g"
  */
-@Disabled("The LOINC upload process this test runs consumes over 4G memory, and needs to be fixed before enabling this test.")
+//@Disabled("The LOINC upload process this test runs consumes over 4G memory, and needs to be fixed before enabling this test.")
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	LoincFullLoadR4IT.NoopMandatoryTransactionListener.class
