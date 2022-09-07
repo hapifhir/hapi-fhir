@@ -227,13 +227,13 @@ public class ValidateCommand extends BaseCommand {
 		b.append(App.LINESEP);
 
 		if (count > 0) {
-			ourLog.info(b.toString());
+			ourLog.error(b.toString());
 		}
 
 		if (results.isSuccessful()) {
 			ourLog.info("Validation successful!");
 		} else {
-			//throw new CommandFailureException(Msg.code(1622) + "Validation failed");
+			throw new CommandFailureException(Msg.code(1622) + "Validation failed");
 		}
 	}
 }
