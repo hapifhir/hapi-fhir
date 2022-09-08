@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
@@ -289,7 +290,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						mySyncSize
 					);
 					parameters.setLoadingThrottleForUnitTests(myLoadingThrottleForUnitTests);
-					SearchContinuationTask task = (SearchContinuationTask) myBeanFactory.getBean("continueTask",
+					SearchContinuationTask task = (SearchContinuationTask) myBeanFactory.getBean(SearchConfig.CONTINUE_TASK,
 						parameters);
 					myIdToSearchTask.put(search.getUuid(), task);
 					task.call();
@@ -477,7 +478,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySyncSize
 		);
 		stp.setLoadingThrottleForUnitTests(myLoadingThrottleForUnitTests);
-		SearchTask task = (SearchTask) myBeanFactory.getBean("searchTask", stp);
+		SearchTask task = (SearchTask) myBeanFactory.getBean(SearchConfig.SEARCH_TASK, stp);
 		myIdToSearchTask.put(theSearch.getUuid(), task);
 		task.call();
 
