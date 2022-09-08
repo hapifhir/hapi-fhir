@@ -168,6 +168,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
@@ -7079,6 +7080,48 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
 		}
+	}
+
+	@Test
+	public void testSearchHistoryWithAtAndGtParameters() throws Exception {
+
+		// Create Patient
+		Patient patient = new Patient();
+		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		Long patientId = patient.getIdElement().getIdPartAsLong();
+
+		// Update Patient after delay
+		int delayInMs = 1000;
+		TimeUnit.MILLISECONDS.sleep(delayInMs);
+		patient.getNameFirstRep().addGiven("Bob");
+		myClient.update().resource(patient).execute();
+
+		// ensure the patient has the expected overall history
+		Bundle result = myClient.history()
+			.onInstance("Patient/"+patientId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, result.getEntry().size());
+
+		Patient patientV1 = (Patient) result.getEntry().get(1).getResource();
+		assertEquals(patientId, patientV1.getIdElement().getIdPartAsLong());
+
+		Patient patientV2 = (Patient) result.getEntry().get(0).getResource();
+		assertEquals(patientId, patientV2.getIdElement().getIdPartAsLong());
+
+		Date dateV1 = patientV1.getMeta().getLastUpdated();
+		Date dateV2 = patientV2.getMeta().getLastUpdated();
+		assertTrue(dateV1.before((dateV2)));
+
+		// Issue 3138 test case
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+patientId+"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+patientId+"/_history/2"));
 	}
 
 	@Nonnull
