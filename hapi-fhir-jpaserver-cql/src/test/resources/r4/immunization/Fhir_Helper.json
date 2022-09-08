@@ -1,6 +1,6 @@
 {
 	"resourceType": "Bundle",
-	"id": "bundle-mmr-single",
+	"id": "bundle-fhir-helpers",
 	"type": "transaction",
 	"entry": [
 		{
