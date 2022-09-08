@@ -1,11 +1,13 @@
 package ca.uhn.fhir.jpa.search.builder.models;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 public class MissingParameterQueryParams {
@@ -62,7 +64,9 @@ public class MissingParameterQueryParams {
 		myParamType = theParamType;
 		myQueryParameterTypes = theList;
 		if (theList.isEmpty()) {
-
+			// this will never happen
+			throw new InvalidParameterException(Msg.code(2137)
+				+ " Invalid search parameter list. Cannot be empty!");
 		}
 		myIsMissing = theList.get(0).getMissing();
 		myParamName = theParamName;

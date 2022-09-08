@@ -356,7 +356,7 @@ public class QueryStack {
 		// TODO - Change this when we have HFJ_SPIDX_MISSING table
 		/**
 		 * How we search depends on if the
-		 * {@link ca.uhn.fhir.jpa.api.config.DaoConfig#myIndexMissingFieldsEnabled property}
+		 * {@link DaoConfig#getIndexMissingFields()} property
 		 * is Enabled or Disabled.
 		 *
 		 * If it is, we will use the SP_MISSING values set into the various
