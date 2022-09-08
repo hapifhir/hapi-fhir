@@ -7163,10 +7163,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		private static class MissingSearchTestParameters {
 			/**
-			 * Whether or not to use the old missing search parameter
-			 * system. If true, ENABLE the IndexMissingFields.
+			 * The setting for IndexMissingFields
 			 */
-			public final boolean myEnableMissingFields;
+			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
 
 			/**
 			 * Whether to use :missing=true/false
@@ -7180,8 +7179,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			 */
 			public final boolean myIsValuePresentOnResource;
 
-			public MissingSearchTestParameters(boolean theEnableMissingFields, boolean theIsMissing, boolean theHasField) {
-				myEnableMissingFields = theEnableMissingFields;
+			public MissingSearchTestParameters(
+				DaoConfig.IndexEnabledEnum theEnableMissingFields,
+				boolean theIsMissing,
+				boolean theHasField
+			) {
+				myEnableMissingFieldsValue = theEnableMissingFields;
 				myIsMissing = theIsMissing;
 				myIsValuePresentOnResource = theHasField;
 			}
@@ -7257,21 +7260,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		private static Stream<Arguments> provideParameters() {
 			return Stream.of(
 				// 1
-				Arguments.of(new MissingSearchTestParameters(true, true, true)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
 				// 2
-				Arguments.of(new MissingSearchTestParameters(true, false, false)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
 				// 3
-				Arguments.of(new MissingSearchTestParameters(true, false, true)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
 				// 4
-				Arguments.of(new MissingSearchTestParameters(true, true, false)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
 				// 5
-				Arguments.of(new MissingSearchTestParameters(false, true, true)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
 				// 6
-				Arguments.of(new MissingSearchTestParameters(false, false, true)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
 				// 7
-				Arguments.of(new MissingSearchTestParameters(false, true, false)),
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
 				// 8
-				Arguments.of(new MissingSearchTestParameters(false, false, false))
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
 			);
 		}
 
