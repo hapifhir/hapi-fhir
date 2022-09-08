@@ -116,14 +116,14 @@ public abstract class BaseSearchParamPredicateBuilder
 
 		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
 			getPartitionSettings(),
-			theParams.RequestPartitionId,
-			theParams.ResourceTablePredicateBuilder.getResourceType(),
-			theParams.ParamName
+			theParams.getRequestPartitionId(),
+			theParams.getResourceTablePredicateBuilder().getResourceType(),
+			theParams.getParamName()
 		);
 
 		Condition subQueryCondition = ComboCondition.and(
 			BinaryCondition.equalTo(getResourceIdColumn(),
-				theParams.ResourceTablePredicateBuilder.getResourceIdColumn()
+				theParams.getResourceTablePredicateBuilder().getResourceIdColumn()
 			),
 			BinaryCondition.equalTo(getColumnHashIdentity(),
 				generatePlaceholder(hashIdentity))
@@ -132,10 +132,10 @@ public abstract class BaseSearchParamPredicateBuilder
 		subquery.addCondition(subQueryCondition);
 
 		Condition unaryCondition = UnaryCondition.exists(subquery);
-		if (theParams.IsMissing) {
+		if (theParams.isMissing()) {
 			unaryCondition = new NotCondition(unaryCondition);
 		}
 
-		return combineWithRequestPartitionIdPredicate(theParams.RequestPartitionId, unaryCondition);
+		return combineWithRequestPartitionIdPredicate(theParams.getRequestPartitionId(), unaryCondition);
 	}
 }

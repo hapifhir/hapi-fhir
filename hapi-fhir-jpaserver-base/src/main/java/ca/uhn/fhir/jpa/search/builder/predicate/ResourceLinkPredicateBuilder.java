@@ -734,19 +734,19 @@ public class ResourceLinkPredicateBuilder
 
 		Condition subQueryCondition = ComboCondition.and(
 			BinaryCondition.equalTo(getResourceIdColumn(),
-				theParams.ResourceTablePredicateBuilder.getResourceIdColumn()
+				theParams.getResourceTablePredicateBuilder().getResourceIdColumn()
 			),
 			BinaryCondition.equalTo(getResourceTypeColumn(),
-				generatePlaceholder(theParams.ResourceTablePredicateBuilder.getResourceType()))
+				generatePlaceholder(theParams.getResourceTablePredicateBuilder().getResourceType()))
 		);
 
 		subquery.addCondition(subQueryCondition);
 
 		Condition unaryCondition = UnaryCondition.exists(subquery);
-		if (theParams.IsMissing) {
+		if (theParams.isMissing()) {
 			unaryCondition = new NotCondition(unaryCondition);
 		}
 
-		return combineWithRequestPartitionIdPredicate(theParams.RequestPartitionId, unaryCondition);
+		return combineWithRequestPartitionIdPredicate(theParams.getRequestPartitionId(), unaryCondition);
 	}
 }
