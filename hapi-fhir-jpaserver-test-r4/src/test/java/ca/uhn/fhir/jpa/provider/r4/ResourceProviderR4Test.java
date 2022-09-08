@@ -7178,12 +7178,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			 * True -> populate field.
 			 * False -> not populated
 			 */
-			public boolean HasField;
+			public boolean IsValuePresentOnResource;
 
 			public MissingSearchTestParameters(boolean theEnableMissingFields, boolean theIsMissing, boolean theHasField) {
 				EnableMissingFields = theEnableMissingFields;
 				IsMissing = theIsMissing;
-				HasField = theHasField;
+				IsValuePresentOnResource = theHasField;
 			}
 		}
 
@@ -7213,7 +7213,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(theType.toString(), type.toString());
 		}
 
-		private void verifyBundleNotFound(Bundle theBundle) {
+		private void verifyBundleIsEmpty(Bundle theBundle) {
 			ourLog.info(myParser.encodeResourceToString(theBundle));
 			assertEquals(0, theBundle.getTotal());
 		}
@@ -7288,9 +7288,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
 				testMethod,
 				theParams.EnableMissingFields,
-				theParams.HasField,
+				theParams.IsValuePresentOnResource,
 				theParams.IsMissing,
-				theParams.HasField == theParams.IsMissing ? "0" : "1"
+				theParams.IsValuePresentOnResource == theParams.IsMissing ? "0" : "1"
 			);
 
 			// setup
@@ -7299,7 +7299,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 
 			// create our resource
-			Resource resource = theResourceProvider.doTask(theParams.HasField);
+			Resource resource = theResourceProvider.doTask(theParams.IsValuePresentOnResource);
 
 			// save the resource
 			IIdType resourceId = createResource(resource);
@@ -7307,11 +7307,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			// run test
 			Bundle found = theRunner.doTask(theParams.IsMissing);
 
-			if ((theParams.IsMissing && !theParams.HasField)
-				|| (theParams.HasField && !theParams.IsMissing)) {
+			if ((theParams.IsMissing && !theParams.IsValuePresentOnResource)
+				|| (theParams.IsValuePresentOnResource && !theParams.IsMissing)) {
 				verifyFoundBundle(found, resourceId);
 			} else {
-				verifyBundleNotFound(found);
+				verifyBundleIsEmpty(found);
 			}
 		}
 
@@ -7416,7 +7416,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 					sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 					if (hasField) {
-						sp.setUrl("http://localhost:8080");
+						sp.setUrl("http://example.com");
 					}
 					return sp;
 				}, isMissing -> {

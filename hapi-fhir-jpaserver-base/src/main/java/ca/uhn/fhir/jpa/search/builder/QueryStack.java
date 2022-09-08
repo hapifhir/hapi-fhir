@@ -122,6 +122,13 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
@@ -300,12 +307,12 @@ public class QueryStack {
 			IQueryParameterType rightValue = cp.getRightValue();
 			Condition rightPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, theSpnamePrefix, right, rightValue, theRequestPartitionId, theSqlBuilder);
 
-			Condition andCondition = QueryParameterUtils.toAndPredicate(leftPredicate, rightPredicate);
+			Condition andCondition = toAndPredicate(leftPredicate, rightPredicate);
 
 			if (orCondidtion == null) {
-				orCondidtion = QueryParameterUtils.toOrPredicate(andCondition);
+				orCondidtion = toOrPredicate(andCondition);
 			} else {
-				orCondidtion = QueryParameterUtils.toOrPredicate(orCondidtion, andCondition);
+				orCondidtion = toOrPredicate(orCondidtion, andCondition);
 			}
 		}
 
@@ -322,7 +329,7 @@ public class QueryStack {
 				return createPredicateToken(theSourceJoinColumn, theResourceName, theSpnamePrefix, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId, theSqlBuilder);
 			}
 			case DATE: {
-				return createPredicateDate(theSourceJoinColumn, theResourceName, theSpnamePrefix, theParam, Collections.singletonList(theParamValue), QueryParameterUtils.toOperation(((DateParam) theParamValue).getPrefix()), theRequestPartitionId, theSqlBuilder);
+				return createPredicateDate(theSourceJoinColumn, theResourceName, theSpnamePrefix, theParam, Collections.singletonList(theParamValue), toOperation(((DateParam) theParamValue).getPrefix()), theRequestPartitionId, theSqlBuilder);
 			}
 			case QUANTITY: {
 				return createPredicateQuantity(theSourceJoinColumn, theResourceName, theSpnamePrefix, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId, theSqlBuilder);
@@ -503,7 +510,7 @@ public class QueryStack {
 														SearchQueryBuilder theSqlBuilder) {
 		Boolean isMissing = theList.get(0).getMissing();
 		if (isMissing != null) {
-			String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+			String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 			return createMissingParameterQuery(
 				new MissingParameterQueryParams(
@@ -537,7 +544,7 @@ public class QueryStack {
 	public Condition createPredicateDate(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
 													 String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 													 SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		Boolean isMissing = theList.get(0).getMissing();
 		if (isMissing != null) {
@@ -564,7 +571,7 @@ public class QueryStack {
 				codePredicates.add(p);
 			}
 
-			Condition predicate = QueryParameterUtils.toOrPredicate(codePredicates);
+			Condition predicate = toOrPredicate(codePredicates);
 
 			if (!cacheHit) {
 				predicate = predicateBuilder.combineWithHashIdentityPredicate(theResourceName, paramName, predicate);
@@ -627,7 +634,7 @@ public class QueryStack {
 				} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
 					return theQueryStack3.createPredicateString(null, theResourceName, null, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-					return theQueryStack3.createPredicateDate(null, theResourceName, null, searchParam, Collections.singletonList(new DateParam(QueryParameterUtils.fromOperation(theFilter.getOperation()), theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+					return theQueryStack3.createPredicateDate(null, theResourceName, null, searchParam, Collections.singletonList(new DateParam(fromOperation(theFilter.getOperation()), theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
 					return theQueryStack3.createPredicateNumber(null, theResourceName, null, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
@@ -719,11 +726,11 @@ public class QueryStack {
 
 			//Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				String chainedPartOfParameter = QueryParameterUtils.getChainedPart(parameterName);
+				String chainedPartOfParameter = getChainedPart(parameterName);
 				orValues.stream()
 					.filter(qp -> qp instanceof ReferenceParam)
 					.map(qp -> (ReferenceParam) qp)
-					.forEach(rp -> rp.setChain(QueryParameterUtils.getChainedPart(chainedPartOfParameter)));
+					.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
@@ -738,12 +745,12 @@ public class QueryStack {
 
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference, new ArrayList<>());
 			Condition typePredicate = BinaryCondition.equalTo(join.getColumnTargetResourceType(), mySqlBuilder.generatePlaceholder(theResourceType));
-			Condition pathPredicate = QueryParameterUtils.toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
+			Condition pathPredicate = toEqualToOrInPredicate(join.getColumnSourcePath(), mySqlBuilder.generatePlaceholders(paths));
 			Condition linkedPredicate = searchForIdsWithAndOr(join.getColumnSrcResourceId(), targetResourceType, parameterName, Collections.singletonList(orValues), theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE);
-			andPredicates.add(QueryParameterUtils.toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
+			andPredicates.add(toAndPredicate(partitionPredicate, pathPredicate, typePredicate, linkedPredicate));
 		}
 
-		return QueryParameterUtils.toAndPredicate(andPredicates);
+		return toAndPredicate(andPredicates);
 	}
 
 	public Condition createPredicateNumber(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
@@ -756,7 +763,7 @@ public class QueryStack {
 														String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 														SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
 
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		Boolean isMissing = theList.get(0).getMissing();
 		if (isMissing != null) {
@@ -787,7 +794,7 @@ public class QueryStack {
 
 					SearchFilterParser.CompareOperation operation = theOperation;
 					if (operation == null) {
-						operation = QueryParameterUtils.toOperation(param.getPrefix());
+						operation = toOperation(param.getPrefix());
 					}
 
 
@@ -814,7 +821,7 @@ public class QueryStack {
 														  String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 														  SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
 
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		Boolean isMissing = theList.get(0).getMissing();
 		if (isMissing != null) {
@@ -1334,7 +1341,7 @@ public class QueryStack {
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 			andPredicates.add(createPredicateSource(theSourceJoinColumn, nextAnd));
 		}
-		return QueryParameterUtils.toAndPredicate(andPredicates);
+		return toAndPredicate(andPredicates);
 	}
 
 	private Condition createPredicateSource(@Nullable DbColumn theSourceJoinColumn, List<? extends IQueryParameterType> theList) {
@@ -1351,7 +1358,7 @@ public class QueryStack {
 			String sourceUri = sourceParameter.getSourceUri();
 			String requestId = sourceParameter.getRequestId();
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
-				orPredicates.add(QueryParameterUtils.toAndPredicate(
+				orPredicates.add(toAndPredicate(
 					join.createPredicateSourceUri(sourceUri),
 					join.createPredicateRequestId(requestId)
 				));
@@ -1362,7 +1369,7 @@ public class QueryStack {
 			}
 		}
 
-		return QueryParameterUtils.toOrPredicate(orPredicates);
+		return toOrPredicate(orPredicates);
 	}
 
 	public Condition createPredicateString(@Nullable DbColumn theSourceJoinColumn, String theResourceName,
@@ -1376,7 +1383,7 @@ public class QueryStack {
 														SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId,
 														SearchQueryBuilder theSqlBuilder) {
 		Boolean isMissing = theList.get(0).getMissing();
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		if (isMissing != null) {
 			return createMissingParameterQuery(
@@ -1400,7 +1407,7 @@ public class QueryStack {
 			codePredicates.add(singleCode);
 		}
 
-		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, QueryParameterUtils.toOrPredicate(codePredicates));
+		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, toOrPredicate(codePredicates));
 	}
 
 	public Condition createPredicateTag(@Nullable DbColumn theSourceJoinColumn, List<List<IQueryParameterType>> theList, String theParamName, RequestPartitionId theRequestPartitionId) {
@@ -1448,7 +1455,7 @@ public class QueryStack {
 			andPredicates.add(join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, tagPredicate));
 		}
 
-		return QueryParameterUtils.toAndPredicate(andPredicates);
+		return toAndPredicate(andPredicates);
 	}
 
 	private boolean populateTokens(List<Triple<String, String, String>> theTokens, List<? extends IQueryParameterType> theAndParams) {
@@ -1547,7 +1554,7 @@ public class QueryStack {
 			return null;
 		}
 
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		Condition predicate;
 		BaseJoiningPredicateBuilder join;
 		
@@ -1604,7 +1611,7 @@ public class QueryStack {
 													SearchFilterParser.CompareOperation theOperation, RequestDetails theRequestDetails,
 													RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
 
-		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		Boolean isMissing = theList.get(0).getMissing();
 		if (isMissing != null) {
@@ -1659,9 +1666,7 @@ public class QueryStack {
 
 			default:
 				return createPredicateSearchParameter(theSourceJoinColumn, theResourceName, theParamName, theAndOrParams, theRequest, theRequestPartitionId);
-
 		}
-
 	}
 
 	@Nullable
@@ -1684,7 +1689,7 @@ public class QueryStack {
 						SearchFilterParser.CompareOperation operation = null;
 						if (nextAnd.size() > 0) {
 							DateParam param = (DateParam) nextAnd.get(0);
-							operation = QueryParameterUtils.toOperation(param.getPrefix());
+							operation = toOperation(param.getPrefix());
 						}
 						andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
 					}
@@ -1694,7 +1699,7 @@ public class QueryStack {
 						SearchFilterParser.CompareOperation operation = null;
 						if (nextAnd.size() > 0) {
 							QuantityParam param = (QuantityParam) nextAnd.get(0);
-							operation = QueryParameterUtils.toOperation(param.getPrefix());
+							operation = toOperation(param.getPrefix());
 						}
 						andPredicates.add(createPredicateQuantity(theSourceJoinColumn, theResourceName, null, nextParamDef, nextAnd, operation, theRequestPartitionId));
 					}
@@ -1780,7 +1785,7 @@ public class QueryStack {
 			}
 		}
 
-		return QueryParameterUtils.toAndPredicate(andPredicates);
+		return toAndPredicate(andPredicates);
 	}
 
 	private boolean isEligibleForContainedResourceSearch(List<? extends IQueryParameterType> nextAnd) {
