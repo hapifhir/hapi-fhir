@@ -277,10 +277,10 @@ public class RuntimeSearchParam {
 	}
 
 	private boolean pathMatchesResourceType(String theResourceName, String thePath) {
-		if (thePath.startsWith(theResourceName + ".")) {
+		if (thePath.startsWith(theResourceName) && thePath.charAt(theResourceName.length()) == '.') {
 			return true;
 		}
-		if (thePath.startsWith("Resouce.") || thePath.startsWith("DomainResource.")) {
+		if (thePath.startsWith("Resource.") || thePath.startsWith("DomainResource.")) {
 			return true;
 		}
 		if (Character.isLowerCase(thePath.charAt(0))) {

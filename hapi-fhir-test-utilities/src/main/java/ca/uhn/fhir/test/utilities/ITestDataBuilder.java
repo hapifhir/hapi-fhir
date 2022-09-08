@@ -223,7 +223,7 @@ public interface ITestDataBuilder {
 	}
 
 	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
-		return withReference("subject", new IdType(theEncounter));
+		return withReference("encounter", new IdType(theEncounter));
 	}
 
 	@NotNull

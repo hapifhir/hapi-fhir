@@ -944,13 +944,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		map.addInclude(Observation.INCLUDE_ENCOUNTER);
 		map.addInclude(Observation.INCLUDE_PATIENT);
 		map.addInclude(Observation.INCLUDE_SUBJECT);
-		ids = toUnqualifiedIdValues(myObservationDao.search(map, mySrd));
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
 		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		// TODO: 10 seems high for this, this could probably be optimized
+		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
@@ -970,12 +971,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		map.addInclude(Observation.INCLUDE_ENCOUNTER);
 		map.addInclude(Observation.INCLUDE_PATIENT);
 		map.addInclude(Observation.INCLUDE_SUBJECT);
-		ids = toUnqualifiedIdValues(myObservationDao.search(map, mySrd));
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
 		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());

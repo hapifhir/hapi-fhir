@@ -1144,7 +1144,7 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = theReverseMode ? param.getPathsSplitForResourceType(resType) : param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
 					// end replace
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
@@ -1215,10 +1215,10 @@ public class SearchBuilder implements ISearchBuilder {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
 
-							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
+							List<Tuple> results = q.getResultList();
 							for (Tuple result : results) {
 								if (result != null) {
 									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));

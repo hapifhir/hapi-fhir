@@ -40,6 +40,7 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r4</artifactId>
 			<version>${fhir_core_version}</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<!-- General -->
