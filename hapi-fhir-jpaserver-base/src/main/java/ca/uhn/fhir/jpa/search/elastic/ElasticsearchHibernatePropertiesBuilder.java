@@ -30,6 +30,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.PutIndexTemplateRequest;
 import org.elasticsearch.common.settings.Settings;
+import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsBackendSettings;
+import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsCredentialsTypeNames;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
@@ -62,6 +64,16 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	private String myHosts;
 	private String myUsername;
 	private String myPassword;
+
+	public String getAwsRegion() {
+		return myAwsRegion;
+	}
+
+	public void setAwsRegion(String theAwsRegion) {
+		myAwsRegion = theAwsRegion;
+	}
+
+	private String myAwsRegion;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
 	private long myScrollTimeoutSecs = SCROLL_TIMEOUT;
 	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;
@@ -105,6 +117,19 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 		//This tells elasticsearch to use our custom index naming strategy.
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
+
+		if (!StringUtils.isBlank(myAwsRegion)) {
+			theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.REGION), myAwsRegion);
+			theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.SIGNING_ENABLED), true);
+			if (!StringUtils.isBlank(myUsername) && !StringUtils.isBlank(myPassword)) {
+				theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.CREDENTIALS_TYPE), ElasticsearchAwsCredentialsTypeNames.STATIC);
+				theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.CREDENTIALS_ACCESS_KEY_ID), myUsername);
+				theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.CREDENTIALS_SECRET_ACCESS_KEY), myPassword);
+			} else {
+				//Default to Standard IAM Auth provider if username or password is absent.
+				theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.CREDENTIALS_TYPE), ElasticsearchAwsCredentialsTypeNames.DEFAULT);
+			}
+		}
 
 		injectStartupTemplate(myProtocol, myHosts, myUsername, myPassword);
 	}
