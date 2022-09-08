@@ -182,8 +182,7 @@ public class BulkImportCommand extends BaseCommand {
 				continue;
 			}
 			else {
-				ourLog.error("Unexpected response status code.");
-				break;
+				throw new InternalErrorException(Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
 			}
 		}
 	}
