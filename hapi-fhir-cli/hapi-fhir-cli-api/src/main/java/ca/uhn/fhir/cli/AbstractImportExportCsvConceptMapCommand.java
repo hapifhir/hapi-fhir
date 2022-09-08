@@ -20,9 +20,9 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import com.google.common.collect.Sets;
@@ -138,7 +138,7 @@ public abstract class AbstractImportExportCsvConceptMapCommand extends BaseReque
 		process();
 	}
 
-	protected void parseAdditionalParameters(CommandLine theCommandLine) {}
+	protected void parseAdditionalParameters(CommandLine theCommandLine) throws ParseException {}
 
 	protected abstract void process() throws ParseException, ExecutionException;
 
