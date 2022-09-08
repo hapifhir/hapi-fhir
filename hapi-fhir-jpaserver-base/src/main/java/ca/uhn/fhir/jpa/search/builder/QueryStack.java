@@ -343,11 +343,11 @@ public class QueryStack {
 	private Condition createMissingParameterQuery(
 		MissingParameterQueryParams theParams
 	) {
-		if (theParams.ParamType == RestSearchParameterTypeEnum.COMPOSITE) {
+		if (theParams.getParamType() == RestSearchParameterTypeEnum.COMPOSITE) {
 			ourLog.error("Cannot create missing parameter query for a composite parameter.");
 			return null;
-		} else if (theParams.ParamType == RestSearchParameterTypeEnum.REFERENCE) {
-			if (isEligibleForContainedResourceSearch(theParams.QueryParameterTypes)) {
+		} else if (theParams.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+			if (isEligibleForContainedResourceSearch(theParams.getQueryParameterTypes())) {
 				ourLog.error("Cannot construct missing query parameter search for ContainedResource REFERENCE search.");
 				return null;
 			}
@@ -379,7 +379,7 @@ public class QueryStack {
 		 * However, the "old" search method was slow for the reverse: when looking for resources
 		 * that do not have a missing field (:missing=false) for much the same reason.
 		 */
-		SearchQueryBuilder sqlBuilder = theParams.SqlBuilder;
+		SearchQueryBuilder sqlBuilder = theParams.getSqlBuilder();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			// new search
 			return createMissingPredicateForUnindexedMissingFields(theParams, sqlBuilder);
@@ -396,26 +396,26 @@ public class QueryStack {
 	private Condition createMissingPredicateForIndexedMissingFields(MissingParameterQueryParams theParams, SearchQueryBuilder sqlBuilder) {
 		PredicateBuilderTypeEnum predicateType = null;
 		Supplier<? extends BaseJoiningPredicateBuilder> supplier = null;
-		switch (theParams.ParamType) {
+		switch (theParams.getParamType()) {
 			case STRING:
 				predicateType = PredicateBuilderTypeEnum.STRING;
-				supplier = () -> sqlBuilder.addStringPredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addStringPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case NUMBER:
 				predicateType = PredicateBuilderTypeEnum.NUMBER;
-				supplier = () -> sqlBuilder.addNumberPredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addNumberPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case DATE:
 				predicateType = PredicateBuilderTypeEnum.DATE;
-				supplier = () -> sqlBuilder.addDatePredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addDatePredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case TOKEN:
 				predicateType = PredicateBuilderTypeEnum.TOKEN;
-				supplier = () -> sqlBuilder.addTokenPredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addTokenPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case QUANTITY:
 				predicateType = PredicateBuilderTypeEnum.QUANTITY;
-				supplier = () -> sqlBuilder.addQuantityPredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addQuantityPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case REFERENCE:
 			case URI:
@@ -425,7 +425,7 @@ public class QueryStack {
 			case HAS:
 			case SPECIAL:
 				predicateType = PredicateBuilderTypeEnum.COORDS;
-				supplier = () -> sqlBuilder.addCoordsPredicateBuilder(theParams.SourceJoinColumn);
+				supplier = () -> sqlBuilder.addCoordsPredicateBuilder(theParams.getSourceJoinColumn());
 				break;
 			case COMPOSITE:
 			default:
@@ -435,37 +435,37 @@ public class QueryStack {
 		if (supplier != null) {
 			BaseSearchParamPredicateBuilder join = (BaseSearchParamPredicateBuilder) createOrReusePredicateBuilder(
 				predicateType,
-				theParams.SourceJoinColumn,
-				theParams.ParamName,
+				theParams.getSourceJoinColumn(),
+				theParams.getParamName(),
 				supplier
 			).getResult();
 
 			return join.createPredicateParamMissingForNonReference(
-				theParams.ResourceType,
-				theParams.ParamName,
-				theParams.IsMissing,
-				theParams.RequestPartitionId
+				theParams.getResourceType(),
+				theParams.getParamName(),
+				theParams.isMissing(),
+				theParams.getRequestPartitionId()
 			);
 		} else {
-			if (theParams.ParamType == RestSearchParameterTypeEnum.REFERENCE) {
-				SearchParamPresentPredicateBuilder join = sqlBuilder.addSearchParamPresentPredicateBuilder(theParams.SourceJoinColumn);
+			if (theParams.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+				SearchParamPresentPredicateBuilder join = sqlBuilder.addSearchParamPresentPredicateBuilder(theParams.getSourceJoinColumn());
 				return join.createPredicateParamMissingForReference(
-					theParams.ResourceType,
-					theParams.ParamName,
-					theParams.IsMissing,
-					theParams.RequestPartitionId
+					theParams.getResourceType(),
+					theParams.getParamName(),
+					theParams.isMissing(),
+					theParams.getRequestPartitionId()
 				);
-			} else if (theParams.ParamType == RestSearchParameterTypeEnum.URI) {
-				UriPredicateBuilder join = sqlBuilder.addUriPredicateBuilder(theParams.SourceJoinColumn);
+			} else if (theParams.getParamType() == RestSearchParameterTypeEnum.URI) {
+				UriPredicateBuilder join = sqlBuilder.addUriPredicateBuilder(theParams.getSourceJoinColumn());
 				return join.createPredicateParamMissingForNonReference(
-					theParams.ResourceType,
-					theParams.ParamName,
-					theParams.IsMissing,
-					theParams.RequestPartitionId
+					theParams.getResourceType(),
+					theParams.getParamName(),
+					theParams.isMissing(),
+					theParams.getRequestPartitionId()
 				);
 			} else {
 				// we don't expect to see this
-				ourLog.error("Invalid param type " + theParams.ParamType.name());
+				ourLog.error("Invalid param type " + theParams.getParamType().name());
 				return null;
 			}
 		}
@@ -479,17 +479,17 @@ public class QueryStack {
 		ResourceTablePredicateBuilder table = sqlBuilder.getOrCreateResourceTablePredicateBuilder();
 
 		ICanMakeMissingParamPredicate innerQuery = PredicateBuilderFactory.createPredicateBuilderForParamType(
-			theParams.ParamType,
-			theParams.SqlBuilder,
+			theParams.getParamType(),
+			theParams.getSqlBuilder(),
 			this
 		);
 
 		return innerQuery.createPredicateParamMissingValue(
 			new MissingQueryParameterPredicateParams(
 				table,
-				theParams.IsMissing,
-				theParams.ParamName,
-				theParams.RequestPartitionId
+				theParams.isMissing(),
+				theParams.getParamName(),
+				theParams.getRequestPartitionId()
 			)
 		);
 	}

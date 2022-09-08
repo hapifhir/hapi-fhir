@@ -12,42 +12,42 @@ public class MissingParameterQueryParams {
 	/**
 	 * The sql builder
 	 */
-	public SearchQueryBuilder SqlBuilder;
+	private final SearchQueryBuilder mySqlBuilder;
 
 	/**
 	 * The parameter type
 	 */
-	public RestSearchParameterTypeEnum ParamType;
+	private final RestSearchParameterTypeEnum myParamType;
 
 	/**
 	 * The list of query parameter types (only needed for validation)
 	 */
-	public List<? extends IQueryParameterType> QueryParameterTypes;
+	private final List<? extends IQueryParameterType> myQueryParameterTypes;
 
 	/**
 	 * The missing boolean value from :missing=true/false
 	 */
-	public boolean IsMissing;
+	private final boolean myIsMissing;
 
 	/**
 	 * The name of the parameter.
 	 */
-	public String ParamName;
+	private final String myParamName;
 
 	/**
 	 * The resource type
 	 */
-	public String ResourceType;
+	private final String myResourceType;
 
 	/**
 	 * The column on which to join.
 	 */
-	public DbColumn SourceJoinColumn;
+	private final DbColumn mySourceJoinColumn;
 
 	/**
 	 * The partition id
 	 */
-	public RequestPartitionId RequestPartitionId;
+	private final RequestPartitionId myRequestPartitionId;
 
 	public MissingParameterQueryParams(
 		SearchQueryBuilder theSqlBuilder,
@@ -58,13 +58,48 @@ public class MissingParameterQueryParams {
 		DbColumn theSourceJoinColumn,
 		RequestPartitionId theRequestPartitionId
 	) {
-		SqlBuilder = theSqlBuilder;
-		ParamType = theParamType;
-		QueryParameterTypes = theList;
-		IsMissing = theList.get(0).getMissing();
-		ParamName = theParamName;
-		ResourceType = theResourceType;
-		SourceJoinColumn = theSourceJoinColumn;
-		RequestPartitionId = theRequestPartitionId;
+		mySqlBuilder = theSqlBuilder;
+		myParamType = theParamType;
+		myQueryParameterTypes = theList;
+		if (theList.isEmpty()) {
+
+		}
+		myIsMissing = theList.get(0).getMissing();
+		myParamName = theParamName;
+		myResourceType = theResourceType;
+		mySourceJoinColumn = theSourceJoinColumn;
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	public SearchQueryBuilder getSqlBuilder() {
+		return mySqlBuilder;
+	}
+
+	public RestSearchParameterTypeEnum getParamType() {
+		return myParamType;
+	}
+
+	public List<? extends IQueryParameterType> getQueryParameterTypes() {
+		return myQueryParameterTypes;
+	}
+
+	public boolean isMissing() {
+		return myIsMissing;
+	}
+
+	public String getParamName() {
+		return myParamName;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public DbColumn getSourceJoinColumn() {
+		return mySourceJoinColumn;
+	}
+
+	public ca.uhn.fhir.interceptor.model.RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 }
