@@ -929,6 +929,58 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+
+	@Test
+	public void testSearchWithMultipleIncludes_Async() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_ENCOUNTER);
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		map.addInclude(Observation.INCLUDE_SUBJECT);
+		ids = toUnqualifiedIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludes_Sync() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.addInclude(Observation.INCLUDE_ENCOUNTER);
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		map.addInclude(Observation.INCLUDE_SUBJECT);
+		ids = toUnqualifiedIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
 	@Test
 	public void testTransactionWithMultipleCreates() {
 		myDaoConfig.setMassIngestionMode(true);

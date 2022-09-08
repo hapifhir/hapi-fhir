@@ -1112,6 +1112,8 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 
 					List<String> paths;
+
+					// Start replace
 					RuntimeSearchParam param;
 					String resType = nextInclude.getParamType();
 					if (isBlank(resType)) {
@@ -1135,6 +1137,7 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 
 					paths = theReverseMode ? param.getPathsSplitForResourceType(resType) : param.getPathsSplit();
+					// end replace
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {

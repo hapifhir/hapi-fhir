@@ -33,7 +33,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -169,6 +171,10 @@ public interface ITestDataBuilder {
 		return t -> t.getMeta().setLastUpdated(new InstantType(theIsoDate).getValue());
 	}
 
+	default IIdType createEncounter(Consumer<IBaseResource>... theModifiers) {
+		return createResource("Encounter", theModifiers);
+	}
+
 	default IIdType createObservation(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Observation", theModifiers);
 	}
@@ -209,13 +215,26 @@ public interface ITestDataBuilder {
 
 
 	default Consumer<IBaseResource> withSubject(@Nullable IIdType theSubject) {
+		return withReference("subject", theSubject);
+	}
+
+	default Consumer<IBaseResource> withSubject(@Nullable String theSubject) {
+		return withSubject(new IdType(theSubject));
+	}
+
+	default Consumer<IBaseResource> withEncounter(@Nullable String theEncounter) {
+		return withReference("subject", new IdType(theEncounter));
+	}
+
+	@NotNull
+	private Consumer<IBaseResource> withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
-			if (theSubject != null) {
+			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
 				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
-				reference.setReference(theSubject.getValue());
+				reference.setReference(theReferenceValue.getValue());
 
 				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-				resourceDef.getChildByName("subject").getMutator().addValue(t, reference);
+				resourceDef.getChildByName(theReferenceName).getMutator().addValue(t, reference);
 			}
 		};
 	}
@@ -279,27 +298,11 @@ public interface ITestDataBuilder {
 	}
 
 	default Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
-		return t -> {
-			if (theHasMember != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
-				reference.setReference(theHasMember.getValue());
-
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-				resourceDef.getChildByName("hasMember").getMutator().addValue(t, reference);
-			}
-		};
+		return withReference("hasMember", theHasMember);
 	}
 
 	default Consumer<IBaseResource> withOrganization(@Nullable IIdType theHasMember) {
-		return t -> {
-			if (theHasMember != null) {
-				IBaseReference reference = (IBaseReference) getFhirContext().getElementDefinition("Reference").newInstance();
-				reference.setReference(theHasMember.getValue());
-
-				RuntimeResourceDefinition resourceDef = getFhirContext().getResourceDefinition(t.getClass());
-				resourceDef.getChildByName("managingOrganization").getMutator().addValue(t, reference);
-			}
-		};
+		return withReference("managingOrganization", theHasMember);
 	}
 
 	/**
