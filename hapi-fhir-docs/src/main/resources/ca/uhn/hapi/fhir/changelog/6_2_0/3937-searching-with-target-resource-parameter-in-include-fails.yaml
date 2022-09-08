@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3937
+backport: 6.0.5
+jira: SMILE-4959
+title: "Fixing bug where searching with a target resource parameter (Coverage:payor:Patient) as value to an _include parameter would fail with a 500 response."

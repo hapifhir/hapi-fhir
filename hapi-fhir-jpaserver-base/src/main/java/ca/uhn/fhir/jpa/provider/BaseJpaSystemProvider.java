@@ -21,10 +21,6 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ReindexTerminologyResult;
@@ -32,7 +28,6 @@ import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.History;
 import ca.uhn.fhir.rest.annotation.Offset;
 import ca.uhn.fhir.rest.annotation.Operation;
-import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -43,16 +38,14 @@ import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-public class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT> implements IJpaSystemProvider {
+public abstract class BaseJpaSystemProvider<T, MT> extends BaseStorageSystemProvider<T, MT> implements IJpaSystemProvider {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaSystemProvider.class);
 
 	public static final String RESP_PARAM_SUCCESS = "success";

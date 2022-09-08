@@ -241,6 +241,13 @@ public class BulkDataImportProvider {
 				String msg = "Job is in " + status.getStatus() + " state with " +
 					status.getErrorCount() + " error count. Last error: " + status.getErrorMessage();
 				streamOperationOutcomeResponse(response, msg, "error");
+				break;
+			}
+			case CANCELLED: {
+				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+				String msg = "Job was cancelled.";
+				streamOperationOutcomeResponse(response, msg, "information");
+				break;
 			}
 		}
 	}
