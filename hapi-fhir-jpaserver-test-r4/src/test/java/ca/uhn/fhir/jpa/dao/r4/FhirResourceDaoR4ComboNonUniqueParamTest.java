@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -14,7 +17,12 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.List;
@@ -24,8 +32,28 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
+
+	@Autowired
+	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
+	@Autowired
+	IInterceptorService myInterceptorService;
+	private boolean myInterceptorFound = false;
+
+	@BeforeEach
+	public void removeInterceptor() {
+		myInterceptorFound = myInterceptorService.unregisterInterceptor(mySearchParamValidatingInterceptor);
+	}
+
+	@AfterEach
+	public void restoreInterceptor() {
+		if (myInterceptorFound) {
+			myInterceptorService.unregisterInterceptor(mySearchParamValidatingInterceptor);
+		}
+	}
 
 	private void createNamesAndGenderSp() {
 		SearchParameter sp = new SearchParameter();
@@ -108,8 +136,14 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
-		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')", sql);
+		boolean found = false;
+		for (SqlQuery query : myCaptureQueriesListener.getSelectQueries()) {
+			String sql = query.getSql(true, false);
+			if ("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')".equals(sql)) {
+				found = true;
+			}
+		}
+		assertTrue(found, "Found expected sql");
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));

@@ -85,6 +85,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -674,11 +675,18 @@ public class SearchBuilder implements ISearchBuilder {
 			.map(csvString -> List.of(csvString.split(",")))
 			.flatMap(List::stream).collect(Collectors.toList());
 
+		Set<String> knownResourceTypes = myContext.getResourceTypes();
+
 		// remove leading/trailing whitespaces if any and remove duplicates
-		Set<String> retVal = resourceTypes
-			.stream()
-			.map(String::trim)
-			.collect(Collectors.toSet());
+		Set<String> retVal = new HashSet<>();
+
+		for (String type : resourceTypes) {
+			String trimmed = type.trim();
+			if (!knownResourceTypes.contains(trimmed)) {
+				throw new ResourceNotFoundException(Msg.code(2132) + "Unknown resource type '" + trimmed + "' in _type parameter.");
+			}
+			retVal.add(trimmed);
+		}
 
 		return retVal;
 	}

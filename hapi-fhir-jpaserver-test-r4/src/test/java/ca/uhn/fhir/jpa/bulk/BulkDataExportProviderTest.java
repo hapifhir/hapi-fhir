@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -39,6 +40,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -90,6 +95,14 @@ public class BulkDataExportProviderTest {
 
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
+	private RestfulServer servlet;
+
+	static Stream<Arguments> paramsProvider(){
+		return Stream.of(
+			Arguments.arguments(true),
+			Arguments.arguments(false)
+		);
+	}
 
 	@AfterEach
 	public void after() throws Exception {
@@ -102,7 +115,7 @@ public class BulkDataExportProviderTest {
 		myServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(myCtx);
+		servlet = new RestfulServer(myCtx);
 		servlet.registerProvider(myProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
@@ -114,6 +127,12 @@ public class BulkDataExportProviderTest {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(connectionManager);
 		myClient = builder.build();
+	}
+
+	public void startWithFixedBaseUrl() {
+		String baseUrl = "http://localhost:" + myPort + "/fixedvalue";
+		HardcodedServerAddressStrategy hardcodedServerAddressStrategy = new HardcodedServerAddressStrategy(baseUrl);
+		servlet.setServerAddressStrategy(hardcodedServerAddressStrategy);
 	}
 
 	private BulkExportParameters verifyJobStart() {
@@ -135,8 +154,14 @@ public class BulkDataExportProviderTest {
 		return createJobStartResponse(A_JOB_ID);
 	}
 
-	@Test
-	public void testSuccessfulInitiateBulkRequest_Post() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURL(Boolean baseUrlFixed) throws IOException {
+		// setup
+		if (baseUrlFixed) {
+			startWithFixedBaseUrl();
+		}
+
 		String patientResource = "Patient";
 		String practitionerResource = "Practitioner";
 		String filter = "Patient?identifier=foo";
@@ -314,9 +339,14 @@ public class BulkDataExportProviderTest {
 		}
 	}
 
-	@Test
-	public void testPollForStatus_COMPLETED() throws IOException {
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testPollForStatus_COMPLETED_WithFixedBaseURL(boolean baseUrlFixed) throws IOException {
 		// setup
+		if (baseUrlFixed) {
+			startWithFixedBaseUrl();
+		}
+
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(A_JOB_ID);
 		info.setStatus(BulkExportJobStatusEnum.COMPLETE);

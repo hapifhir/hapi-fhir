@@ -25,14 +25,14 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
 class FinalStepDataSink<PT extends IModelJson, IT extends IModelJson> extends BaseDataSink<PT,IT,VoidModel> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FinalStepDataSink.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	/**
 	 * Constructor

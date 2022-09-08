@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.sched;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.util.StopWatch;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,12 +36,14 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@ContextConfiguration(classes = SchedulerServiceImplTest.TestConfiguration.class)
+@ContextConfiguration(classes = SchedulerServiceImplIT.TestConfiguration.class)
 @ExtendWith(SpringExtension.class)
 @DirtiesContext
-public class SchedulerServiceImplTest {
+public class SchedulerServiceImplIT {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImplIT.class);
+	public static final String SCHEDULED_JOB_ID = CountingJob.class.getName();
+	private static final AtomicInteger ourNameCounter = new AtomicInteger();
 	private static long ourTaskDelay;
 	@Autowired
 	private ISchedulerService mySvc;
@@ -51,59 +56,96 @@ public class SchedulerServiceImplTest {
 	@Test
 	public void testScheduleTask() {
 
-		ScheduledJobDefinition def = new ScheduledJobDefinition()
-			.setId(CountingJob.class.getName())
-			.setJobClass(CountingJob.class);
+		ScheduledJobDefinition def = buildJobDefinition();
 
+		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
 
-		sleepAtLeast(1000);
+		await().until(CountingJob.ourCount::get, greaterThan(5));
 
-		ourLog.info("Fired {} times", CountingJob.ourCount);
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(500L));
+		assertThat(sw.getMillis(), lessThan(1000L));
+	}
 
-		assertThat(CountingJob.ourCount, greaterThan(3));
-		assertThat(CountingJob.ourCount, lessThan(20));
+	@Test
+	public void triggerImmediately_runsJob() {
+
+		ScheduledJobDefinition def = buildJobDefinition();
+
+		StopWatch sw = new StopWatch();
+		mySvc.scheduleLocalJob(100, def);
+		for (int i = 0; i < 20; ++i) {
+			mySvc.triggerLocalJobImmediately(def);
+		}
+
+		await().until(CountingJob.ourCount::get, greaterThan(25));
+
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(500L));
+		assertThat(sw.getMillis(), lessThan(1000L));
+
+	}
+
+	private static ScheduledJobDefinition buildJobDefinition() {
+		return new ScheduledJobDefinition()
+			.setId(SCHEDULED_JOB_ID + ourNameCounter.incrementAndGet())
+			.setJobClass(CountingJob.class);
 	}
 
 	@Test
 	public void testStopAndStartService() throws SchedulerException {
 
-		ScheduledJobDefinition def = new ScheduledJobDefinition()
-			.setId(CountingJob.class.getName())
-			.setJobClass(CountingJob.class);
+		ScheduledJobDefinition def = buildJobDefinition();
 
 		BaseSchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
+
 		svc.stop();
 		svc.create();
 		svc.start();
 
+		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
 
-		sleepAtLeast(1000);
+		await().until(CountingJob.ourCount::get, greaterThan(5));
 
-		ourLog.info("Fired {} times", CountingJob.ourCount);
-
-		await().until(() -> CountingJob.ourCount, greaterThan(3));
-		assertThat(CountingJob.ourCount, lessThan(50));
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(0L));
+		assertThat(sw.getMillis(), lessThan(1000L));
 	}
 
 	@Test
 	public void testScheduleTaskLongRunningDoesntRunConcurrently() {
-
-		ScheduledJobDefinition def = new ScheduledJobDefinition()
-			.setId(CountingJob.class.getName())
-			.setJobClass(CountingJob.class);
+		ScheduledJobDefinition def = buildJobDefinition();
 		ourTaskDelay = 500;
 
+		StopWatch sw = new StopWatch();
 		mySvc.scheduleLocalJob(100, def);
 
-		sleepAtLeast(1000);
+		await().until(CountingJob.ourCount::get, greaterThan(5));
 
-		ourLog.info("Fired {} times", CountingJob.ourCount);
-
-		await().until(() -> CountingJob.ourCount, greaterThanOrEqualTo(1));
-		assertThat(CountingJob.ourCount, lessThan(5));
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(3000L));
+		assertThat(sw.getMillis(), lessThan(3500L));
 	}
+
+	@Test
+	public void testScheduleTaskLongRunningDoesntRunConcurrentlyWithTrigger() {
+		ScheduledJobDefinition def = buildJobDefinition();
+		ourTaskDelay = 500;
+
+		StopWatch sw = new StopWatch();
+		mySvc.scheduleLocalJob(100, def);
+		mySvc.triggerLocalJobImmediately(def);
+		mySvc.triggerLocalJobImmediately(def);
+
+		await().until(CountingJob.ourCount::get, greaterThan(5));
+
+		ourLog.info("Fired {} times in {}", CountingJob.ourCount, sw);
+		assertThat(sw.getMillis(), greaterThan(3000L));
+		assertThat(sw.getMillis(), lessThan(3500L));
+	}
+
 
 	@Test
 	public void testIntervalJob() {
@@ -125,7 +167,7 @@ public class SchedulerServiceImplTest {
 
 	@AfterEach
 	public void after() throws SchedulerException {
-		CountingJob.ourCount = 0;
+		CountingJob.resetCount();
 		CountingIntervalJob.ourCount = 0;
 		mySvc.purgeAllScheduledJobsForUnitTest();
 	}
@@ -133,15 +175,24 @@ public class SchedulerServiceImplTest {
 	@DisallowConcurrentExecution
 	public static class CountingJob implements Job, ApplicationContextAware {
 
-		private static int ourCount;
+		private static AtomicInteger ourCount = new AtomicInteger();
+		private static boolean ourRunning = false;
 
 		@Autowired
 		@Qualifier("stringBean")
 		private String myStringBean;
 		private ApplicationContext myAppCtx;
 
+		public static void resetCount() {
+			ourCount = new AtomicInteger();
+		}
+
 		@Override
 		public void execute(JobExecutionContext theContext) {
+			if (ourRunning) {
+				fail();
+			}
+			ourRunning = true;
 			if (!"String beans are good.".equals(myStringBean)) {
 				fail("Did not autowire stringBean correctly, found: " + myStringBean);
 			}
@@ -155,7 +206,8 @@ public class SchedulerServiceImplTest {
 			} else {
 				ourLog.info("Job has fired...");
 			}
-			ourCount++;
+			ourCount.incrementAndGet();
+			ourRunning = false;
 		}
 
 		@Override

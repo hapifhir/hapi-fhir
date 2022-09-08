@@ -32,34 +32,28 @@ stages:
                      module: hapi-fhir-structures-r4
                   -  name: hapi_fhir_jpaserver_base
                      module: hapi-fhir-jpaserver-base
-                  -  name: hapi_deployable_pom
-                     module: hapi-deployable-pom
                   -  name: hapi_fhir_android
                      module: hapi-fhir-android
                   -  name: hapi_fhir_base
                      module: hapi-fhir-base
                   -  name: hapi_fhir_batch
                      module: hapi-fhir-batch
-                  -  name: hapi_fhir_bom
-                     module: hapi-fhir-bom
                   -  name: hapi_fhir_checkstyle
                      module: hapi-fhir-checkstyle
-                  -  name: hapi_fhir_cli
-                     module: hapi-fhir-cli
+                  -  name: hapi_fhir_cli_api
+                     module: hapi-fhir-cli/hapi-fhir-cli-api
+                  -  name: hapi_fhir_cli_jpaserver
+                     module: hapi-fhir-cli/hapi-fhir-cli-jpaserver
                   -  name: hapi_fhir_client
                      module: hapi-fhir-client
                   -  name: hapi_fhir_client_okhttp
                      module: hapi-fhir-client-okhttp
                   -  name: hapi_fhir_converter
                      module: hapi-fhir-converter
-                  -  name: hapi_fhir_dist
-                     module: hapi-fhir-dist
                   -  name: hapi_fhir_docs
                      module: hapi-fhir-docs
                   -  name: hapi_fhir_jaxrsserver_base
                      module: hapi-fhir-jaxrsserver-base
-                  -  name: hapi_fhir_jpa
-                     module: hapi-fhir-jpa
                   #                  Put to top, but kept in order here
                   #                  -  name: hapi_fhir_jpaserver_base
                   #                     module: hapi-fhir-jpaserver-base
@@ -86,8 +80,10 @@ stages:
                      module: hapi-fhir-server-mdm
                   -  name: hapi_fhir_server_openapi
                      module: hapi-fhir-server-openapi
-                  -  name: hapi_fhir_spring_boot
-                     module: hapi-fhir-spring-boot
+                  -  name: hapi_fhir_spring_boot_autoconfigure
+                     module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-autoconfigure
+                  -  name: hapi_fhir_spring_boot_sample_server_jersey
+                     module: hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples/hapi-fhir-spring-boot-sample-server-jersey
                   -  name: hapi_fhir_sql_migrate
                      module: hapi-fhir-sql-migrate
                   -  name: hapi_fhir_storage
@@ -119,16 +115,10 @@ stages:
                      module: hapi-fhir-testpage-overlay
                   -  name: hapi_fhir_validation
                      module: hapi-fhir-validation
-                  -  name: hapi_fhir_validation_resources_dstu2
-                     module: hapi-fhir-validation-resources-dstu2
-                  -  name: hapi_fhir_validation_resources_dstu2_1
-                     module: hapi-fhir-validation-resources-dstu2.1
                   -  name: hapi_fhir_validation_resources_dstu3
                      module: hapi-fhir-validation-resources-dstu3
                   -  name: hapi_fhir_validation_resources_r4
                      module: hapi-fhir-validation-resources-r4
-                  -  name: hapi_fhir_validation_resources_r5
-                     module: hapi-fhir-validation-resources-r5
                   -  name: hapi_tinder_plugin
                      module: hapi-tinder-plugin
                   -  name: hapi_tinder_test
