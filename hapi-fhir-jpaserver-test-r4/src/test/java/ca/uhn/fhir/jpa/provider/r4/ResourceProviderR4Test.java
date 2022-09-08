@@ -7290,16 +7290,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(
 				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
 				testMethod,
-				theParams.myEnableMissingFields,
+				theParams.myEnableMissingFieldsValue.name(),
 				theParams.myIsValuePresentOnResource,
 				theParams.myIsMissing,
 				theParams.myIsValuePresentOnResource == theParams.myIsMissing ? "0" : "1"
 			);
 
 			// setup
-			if (theParams.myEnableMissingFields) {
-				myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-			}
+			myDaoConfig.setIndexMissingFields(theParams.myEnableMissingFieldsValue);
 
 			// create our resource
 			Resource resource = theResourceProvider.doTask(theParams.myIsValuePresentOnResource);
