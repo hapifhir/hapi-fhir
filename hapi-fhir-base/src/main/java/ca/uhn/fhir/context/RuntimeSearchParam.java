@@ -276,15 +276,24 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
-	private boolean pathMatchesResourceType(String theResourceName, String thePath) {
-		if (thePath.startsWith(theResourceName) && thePath.charAt(theResourceName.length()) == '.') {
-			return true;
-		}
-		if (thePath.startsWith("Resource.") || thePath.startsWith("DomainResource.")) {
-			return true;
-		}
-		if (Character.isLowerCase(thePath.charAt(0))) {
-			return true;
+	static boolean pathMatchesResourceType(String theResourceName, String thePath) {
+		for (int i = 0; i < thePath.length() - 1; i++) {
+			char nextChar = thePath.charAt(i);
+			if (Character.isLowerCase(nextChar)) {
+				return true;
+			}
+			if (Character.isLetter(nextChar)) {
+				if (thePath.startsWith(theResourceName, i) && thePath.length() > theResourceName.length() && thePath.charAt(theResourceName.length() + i) == '.') {
+					return true;
+				}
+				if (thePath.startsWith("Resource", i) && "Resource".length() > theResourceName.length() && thePath.charAt("Resource".length() + i) == '.') {
+					return true;
+				}
+				if (thePath.startsWith("DomainResource", i) && "DomainResource".length() > theResourceName.length() && thePath.charAt("DomainResource".length() + i) == '.') {
+					return true;
+				}
+				return false;
+			}
 		}
 
 		return false;

@@ -952,7 +952,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// TODO: 10 seems high for this, this could probably be optimized
 		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
