@@ -7166,24 +7166,24 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			 * Whether or not to use the old missing search parameter
 			 * system. If true, ENABLE the IndexMissingFields.
 			 */
-			public boolean EnableMissingFields;
+			public final boolean myEnableMissingFields;
 
 			/**
 			 * Whether to use :missing=true/false
 			 */
-			public boolean IsMissing;
+			public final boolean myIsMissing;
 
 			/**
 			 * Whether or not the field is populated or not.
 			 * True -> populate field.
 			 * False -> not populated
 			 */
-			public boolean IsValuePresentOnResource;
+			public final boolean myIsValuePresentOnResource;
 
 			public MissingSearchTestParameters(boolean theEnableMissingFields, boolean theIsMissing, boolean theHasField) {
-				EnableMissingFields = theEnableMissingFields;
-				IsMissing = theIsMissing;
-				IsValuePresentOnResource = theHasField;
+				myEnableMissingFields = theEnableMissingFields;
+				myIsMissing = theIsMissing;
+				myIsValuePresentOnResource = theHasField;
 			}
 		}
 
@@ -7287,28 +7287,28 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(
 				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
 				testMethod,
-				theParams.EnableMissingFields,
-				theParams.IsValuePresentOnResource,
-				theParams.IsMissing,
-				theParams.IsValuePresentOnResource == theParams.IsMissing ? "0" : "1"
+				theParams.myEnableMissingFields,
+				theParams.myIsValuePresentOnResource,
+				theParams.myIsMissing,
+				theParams.myIsValuePresentOnResource == theParams.myIsMissing ? "0" : "1"
 			);
 
 			// setup
-			if (theParams.EnableMissingFields) {
+			if (theParams.myEnableMissingFields) {
 				myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 			}
 
 			// create our resource
-			Resource resource = theResourceProvider.doTask(theParams.IsValuePresentOnResource);
+			Resource resource = theResourceProvider.doTask(theParams.myIsValuePresentOnResource);
 
 			// save the resource
 			IIdType resourceId = createResource(resource);
 
 			// run test
-			Bundle found = theRunner.doTask(theParams.IsMissing);
+			Bundle found = theRunner.doTask(theParams.myIsMissing);
 
-			if ((theParams.IsMissing && !theParams.IsValuePresentOnResource)
-				|| (theParams.IsValuePresentOnResource && !theParams.IsMissing)) {
+			if ((theParams.myIsMissing && !theParams.myIsValuePresentOnResource)
+				|| (theParams.myIsValuePresentOnResource && !theParams.myIsMissing)) {
 				verifyFoundBundle(found, resourceId);
 			} else {
 				verifyBundleIsEmpty(found);
