@@ -43,7 +43,6 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 			assertThat(e.getMessage(), is(equalTo(Msg.code(1173) + failureMessage)));
 		}
 
-		doNothing().when(myPropertiesBuilder).injectStartupTemplate(any(), any(), any(), any());
 		Properties properties = new Properties();
 		myPropertiesBuilder
 			.setHosts(host)

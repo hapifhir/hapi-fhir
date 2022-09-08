@@ -115,6 +115,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		//This tells elasticsearch to use our custom index naming strategy.
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LAYOUT_STRATEGY), IndexNamePrefixLayoutStrategy.class.getName());
 
+		//This tells hibernate search to use this custom file for creating index settings. We use this to add a custom max_ngram_diff
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_SETTINGS_FILE), "ca/uhn/fhir/jpa/elastic/index-settings.json");
+
 		if (!StringUtils.isBlank(myAwsRegion)) {
 			theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.REGION), myAwsRegion);
 			theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.SIGNING_ENABLED), true);
@@ -127,8 +130,6 @@ public class ElasticsearchHibernatePropertiesBuilder {
 				theProperties.put(BackendSettings.backendKey(ElasticsearchAwsBackendSettings.CREDENTIALS_TYPE), ElasticsearchAwsCredentialsTypeNames.DEFAULT);
 			}
 		}
-
-		injectStartupTemplate(myProtocol, myHosts, myUsername, myPassword);
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(IndexStatus theRequiredIndexStatus) {
@@ -177,24 +178,4 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	/**
-	 * At startup time, injects a template into the elasticsearch cluster, which is needed for handling large ngram diffs.
-	 * TODO GGG HS: In HS6.1, we should have a native way of performing index settings manipulation at bootstrap time, so this should
-	 * eventually be removed in favour of whatever solution they come up with.
-	 */
-	void injectStartupTemplate(String theProtocol, String theHosts, @Nullable String theUsername, @Nullable String thePassword) {
-		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
-			.patterns(Arrays.asList("*resourcetable-*", "*termconcept-*"))
-			.settings(Settings.builder().put("index.max_ngram_diff", 50));
-
-		try {
-			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theProtocol, theHosts, theUsername, thePassword);
-			ourLog.info("Adding starter template for large ngram diffs");
-			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
-			assert acknowledgedResponse.isAcknowledged();
-		} catch (IOException theE) {
-			theE.printStackTrace();
-			throw new ConfigurationException(Msg.code(1169) + "Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
-		}
-	}
 }
