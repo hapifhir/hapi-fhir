@@ -1625,7 +1625,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Save resource source
 		String source = null;
-		String requestId = theRequest != null ? theRequest.getRequestId() : null;
+
 		if (theResource != null) {
 			if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 				IBaseMetaType meta = theResource.getMeta();
@@ -1643,6 +1643,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
+		String requestId = getRequestId(theRequest, source);
+		source = cleanProvenanceSourceUri(source);
+
 		boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
 		boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 		if (haveSource || haveRequestId) {
@@ -1658,6 +1661,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			myEntityManager.persist(provenance);
 		}
+	}
+
+	private String getRequestId(RequestDetails theRequest, String source) {
+		if (myConfig.isPreserveRequestIdInResourceBody()) {
+			String[] splitSource = source.split("#", 2);
+			if (splitSource.length == 2) {
+				return splitSource[1].equals("") ? null : splitSource[1] ;
+			}
+		}
+		return theRequest != null ? theRequest.getRequestId() : null;
 	}
 
 	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, BaseHasResource entity) {

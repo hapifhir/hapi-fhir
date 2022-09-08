@@ -7092,7 +7092,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void createResource_withPreserveRequestIdEnabled_RequestIdIsPreserved(){
-
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
@@ -7112,17 +7111,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
 		assertEquals(expectedMetaSource, returnedPatientMetaSource);
-
 	}
 
 	@Test
 	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
-
-		String expectedMetaSource = "mySource";
+		String sourceURL = "mySource";
 		String requestId = "#345676";
 		String patientId = "1234a";
 		Patient patient = new Patient();
-		patient.getMeta().setSource(expectedMetaSource + requestId);
+		patient.getMeta().setSource(sourceURL + requestId);
 
 		patient.setId(patientId);
 		patient.addName().addGiven("Phil").setFamily("Sick");
@@ -7135,98 +7132,68 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
-		assertTrue(returnedPatientMetaSource.startsWith(expectedMetaSource));
+		assertTrue(returnedPatientMetaSource.startsWith(sourceURL));
 		assertFalse(returnedPatientMetaSource.endsWith(requestId));
-
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithOverwriteDisabled_isSuccess(){
-//		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
-		// FIXME: 2022-09-07
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
-		String expectedMetaSource = "mySource";
+		String sourceUri = "mySource";
 		String requestId = "345676";
-		Patient patient = new Patient();
-		patient.getMeta().setSource(expectedMetaSource + requestId);
+		String expectedSourceUrl = sourceUri + "#" + requestId;
 
-		Patient p1 = new Patient();
-		p1.getMeta().setSource(expectedMetaSource + "#" + requestId);
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
 
 		myClient
 			.create()
-			.resource(p1)
+			.resource(patient)
 			.execute();
-
-		runInTransaction(() -> {
-			List<ResourceHistoryProvenanceEntity> resourceHistoryProvenanceDaoAll = myResourceHistoryProvenanceDao.findAll();
-
-			for (ResourceHistoryProvenanceEntity current: resourceHistoryProvenanceDaoAll) {
-				ourLog.info(current.toString());
-
-			}
-		});
-
-		myCaptureQueriesListener.clear();
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri + "%23" + requestId)
 			.returnBundle(Bundle.class)
 			.execute();
 
-		myCaptureQueriesListener.logSelectQueries();
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
 		assertEquals(1, results.getEntry().size());
-		// FIXME: 2022-09-07 add more assertion on the source and requestId to make sure we have the right patient
-	}
-
-
-	public void myTest(){
-		String mySource = "mySource#345676";
-
-		String sourceToSearch = "";
-		String requestToSearch = "";
-
-		boolean hasSearchSource = mySource.contains(sourceToSearch);
-
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithOverwriteEnabled_fails(){
-
-		String expectedMetaSource = "mySource";
+	public void searchResource_bySourceAndCustomRequestIdWithPreserveRequestIdDisabled_fails(){
+		String sourceURI = "mySource";
 		String requestId = "345676";
-		Patient patient = new Patient();
-		patient.getMeta().setSource(expectedMetaSource + requestId);
 
-		Patient p1 = new Patient();
-		p1.getMeta().setSource(expectedMetaSource + "#" + requestId);
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceURI + "#" + requestId);
 
 		myClient
 			.create()
-			.resource(p1)
+			.resource(patient)
 			.execute();
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=" + expectedMetaSource + "%23" + requestId)
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceURI + "%23" + requestId)
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(0, results.getEntry().size());
-
 	}
 
 	@Test
-	public void testSearchBySource() {
-
-		String expectedSourceUrl = "http://acme.org";
+	public void searchResource_bySourceWithPreserveRequestIdDisabled_isSuccess() {
+		String sourceUri = "http://acme.org";
 		String requestId = "my-fragment";
 
 		Patient p1 = new Patient();
-		p1.getMeta().setSource(expectedSourceUrl + "#" + requestId);
+		p1.getMeta().setSource(sourceUri + "#" + requestId);
 
 		myClient
 			.create()
@@ -7235,56 +7202,117 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=" + expectedSourceUrl)
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertTrue(returnedPatientMetaSource.startsWith(sourceUri));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+	}
+
+	@Test
+	public void searchResource_bySourceWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_byRequestIdWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23" + requestId)
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(1, results.getEntry().size());
 
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
 	}
 
 	@Test
-	public void testSearchByRequestId() {
-// FIXME: 2022-09-07
-		myDaoConfig.setPreserveRequestIdInResourceBody(false);
+	public void searchResource_bySourceAndWrongCustomRequestIdLongerThan16CharsWithPreserveRequestIdEnabled_fails() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
-		Patient p1 = new Patient();
-		p1.getMeta().setSource("urn:source:0#my-fragment123");
+		String sourceUri = "http://acme.org";
+		String requestId = "12345678901234567890123456789";
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceUri + "#" + requestId);
 
 		myClient
 			.create()
-			.resource(p1)
+			.resource(patient)
 			.execute();
 
 		Bundle results = myClient
 			.search()
-			.byUrl(ourServerBase + "/Patient?_source=%23my-fragment123")
-			.returnBundle(Bundle.class)
-			.execute();
-
-		assertEquals(1, results.getEntry().size());
-
-	}
-
-	@Test
-	public void testSearchByRequestIdFail() {
-
-		Patient p1 = new Patient();
-		p1.getMeta().setSource("urn:source:0#my-fragment123");
-
-		myClient
-			.create()
-			.resource(p1)
-			.execute();
-
-		Bundle results = myClient
-			.search()
-			.byUrl(ourServerBase + "/Patient?_source=#my-fragment000")
+			.byUrl(ourServerBase + "/Patient?_source=%231234567890123456:)")
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals(0, results.getEntry().size());
+	}
 
+	@Test
+	public void searchResource_bySourceAndWrongCustomRequestIdWithPreserveRequestIdEnabled_fails() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		Patient patient = new Patient();
+		patient.getMeta().setSource("urn:source:0#my-fragment123");
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23my-fragment000")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
 	}
 
 	@Nonnull
