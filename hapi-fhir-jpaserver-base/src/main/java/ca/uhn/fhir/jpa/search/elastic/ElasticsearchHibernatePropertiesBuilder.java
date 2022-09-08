@@ -69,9 +69,6 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return myAwsRegion;
 	}
 
-	public void setAwsRegion(String theAwsRegion) {
-		myAwsRegion = theAwsRegion;
-	}
 
 	private String myAwsRegion;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
@@ -172,6 +169,11 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	public ElasticsearchHibernatePropertiesBuilder setDebugPrettyPrintJsonLog(boolean theDebugPrettyPrintJsonLog) {
 		myDebugPrettyPrintJsonLog = theDebugPrettyPrintJsonLog;
+		return this;
+	}
+
+	public ElasticsearchHibernatePropertiesBuilder setAwsRegion(String theAwsRegion) {
+		myAwsRegion = theAwsRegion;
 		return this;
 	}
 
