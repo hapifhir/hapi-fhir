@@ -1663,8 +1663,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 	private String getRequestId(RequestDetails theRequest, String theSource) {
 		if (myConfig.isPreserveRequestIdInResourceBody()) {
-			String requestId = StringUtils.substringAfter(theSource, "#");
-			return requestId.equals("") ? null : requestId;
+			return StringUtils.substringAfter(theSource, "#");
 		}
 		return theRequest != null ? theRequest.getRequestId() : null;
 	}

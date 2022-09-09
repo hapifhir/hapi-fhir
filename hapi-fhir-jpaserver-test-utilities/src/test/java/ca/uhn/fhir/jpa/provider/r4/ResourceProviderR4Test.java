@@ -7109,6 +7109,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String metaSource = "mySource#123456789012345678901234567890";
+		String expectedMetaSource = "mySource#1234567890123456";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(metaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+	}
+
+	@Test
 	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
 		String sourceURL = "mySource";
 		String requestId = "#345676";
