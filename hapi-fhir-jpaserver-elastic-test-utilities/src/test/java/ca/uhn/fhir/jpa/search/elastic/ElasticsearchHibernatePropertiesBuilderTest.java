@@ -40,7 +40,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 				.apply(new Properties());
 			fail();
 		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(1173) + failureMessage)));
+			assertThat(e.getMessage(), is(equalTo(Msg.code(2139) + failureMessage)));
 		}
 
 		Properties properties = new Properties();

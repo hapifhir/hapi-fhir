@@ -130,7 +130,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	public ElasticsearchHibernatePropertiesBuilder setHosts(String hosts) {
 		if (hosts.contains("://")) {
-			throw new ConfigurationException(Msg.code(1173) + "Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
+			throw new ConfigurationException(Msg.code(2139) + "Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
 		}
 		myHosts = hosts;
 		return this;
