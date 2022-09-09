@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
+import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
@@ -410,4 +411,16 @@ public class FhirResourceDaoR4StandardQueriesNoFTTest extends BaseJpaTest {
 
 	}
 
+	@Nested
+	class CompositeSearch extends CompositeSearchParameterTestCases {
+		CompositeSearch() {
+			super(myDataBuilder, myTestDaoSearch);
+		}
+
+		/** JPA doesn't know which sub-element matches */
+		@Override
+		protected boolean isCorrelatedSupported() {
+			return false;
+		}
+	}
 }

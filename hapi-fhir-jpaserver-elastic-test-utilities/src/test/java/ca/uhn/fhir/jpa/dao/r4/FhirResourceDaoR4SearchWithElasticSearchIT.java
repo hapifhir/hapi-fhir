@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
@@ -2641,8 +2642,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 
+	@Nested
+	class CompositeSearch extends CompositeSearchParameterTestCases {
+		CompositeSearch() {
+			super(myTestDataBuilder, myTestDaoSearch);
+		}
 
-
+		/** HSearch supports it! */
+		@Override
+		protected boolean isCorrelatedSupported() {
+			return true;
+		}
+	}
 
 	/**
 	 * Strategy is to test many common combined parameters use cases on the code-value-quantity
@@ -2689,9 +2700,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			@Disabled
 			@Test
 			public void searchForSameComponent() {
-				IIdType id1 = createObservationWithComponentsWithCodeAndQty(List.of(
-					Pair.of(myCodingA, new Quantity().setValue(60.0)),
-					Pair.of(myCodingB, new Quantity().setValue(100.0)) ));
+				IIdType id1 = createObservation(
+					withObservationComponent(
+						withObservationCode(myCodeSystemA, myCode1),
+						withQuantityAtPath("valueQuantity", 60, null, "mmHg")),
+					withObservationComponent(
+						withObservationCode(myCodeSystemA, myCode2),
+						withQuantityAtPath("valueQuantity", 100, null, "mmHg"))
+				);
 
 				runInTransaction(() -> {
 					SearchSession searchSession = Search.session(myEntityManager);
@@ -2763,6 +2779,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 
 
+		// fixme mb enable or delete
+		@Disabled
 		@Nested
 		public class ForComponentCorrelation {
 

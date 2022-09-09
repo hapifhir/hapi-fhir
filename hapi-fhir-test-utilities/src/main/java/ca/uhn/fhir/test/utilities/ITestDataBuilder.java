@@ -234,10 +234,10 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default <T extends IBase> Consumer<T> withElementAt(String thePath, Consumer<IBase>... theModifiers) {
+	default <T extends IBase, E extends IBase> Consumer<T> withElementAt(String thePath, Consumer<E>... theModifiers) {
 		return t->{
 			FhirTerser terser = getFhirContext().newTerser();
-			IBase element = terser.addElement(t, thePath);
+			E element = terser.addElement(t, thePath);
 			applyElementModifiers(element, theModifiers);
 		};
 	}
@@ -263,33 +263,33 @@ public interface ITestDataBuilder {
 		return element;
 	}
 
-	default void applyElementModifiers(IBase element, Consumer<IBase>[] theModifiers) {
-		for (Consumer<IBase> nextModifier : theModifiers) {
+	default <E extends IBase> void applyElementModifiers(E element, Consumer<E>[] theModifiers) {
+		for (Consumer<E> nextModifier : theModifiers) {
 			nextModifier.accept(element);
 		}
 	}
 
-	default <T extends IBase> Consumer<T> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode) {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default <T extends IBase> Consumer<T> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
-		return withElementAt("code", withCoding(theSystem, theCode, theDisplay));
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
 	}
 
-	default <T extends IBase> Consumer<T> withCoding(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
-		return t -> {
-			FhirTerser terser = getFhirContext().newTerser();
-			IBase coding = terser.addElement(t, "coding");
-			terser.addElement(coding, "system", theSystem);
-			terser.addElement(coding, "code", theCode);
-			if (StringUtils.isNotEmpty(theDisplay)) {
-				terser.addElement(coding, "display", theDisplay);
-			}
-		};
+	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
+		return withCodingAt(thePath, theSystem, theValue, null);
 	}
 
-	default Consumer<IBaseResource> withObservationComponent(Consumer<IBase>... theModifiers) {
+	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("system", theSystem),
+			withPrimitiveAttribute("code", theValue),
+			withPrimitiveAttribute("display", theDisplay)
+		);
+	}
+
+	default <T extends IBaseResource, E extends IBase> Consumer<T> withObservationComponent(Consumer<E>... theModifiers) {
 		return withElementAt("component", theModifiers);
 	}
 
@@ -317,6 +317,7 @@ public interface ITestDataBuilder {
 		};
 	}
 
+	// wipmb extract these to something like TestDataBuilderBacking.  Maybe split out create* into child interface since people skip it.
 	/**
 	 * Users of this API must implement this method
 	 */
