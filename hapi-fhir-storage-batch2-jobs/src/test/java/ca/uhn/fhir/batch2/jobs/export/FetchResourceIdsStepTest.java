@@ -149,7 +149,8 @@ public class FetchResourceIdsStepTest {
 		verify(myAppender, atLeastOnce()).doAppend(logCaptor.capture());
 		List<ILoggingEvent> events = logCaptor.getAllValues();
 		assertTrue(events.get(0).getMessage().contains("Starting BatchExport job"));
-		assertTrue(events.get(1).getFormattedMessage().contains("Submitted "
+		assertTrue(events.get(1).getMessage().contains("Running FetchResource"));
+		assertTrue(events.get(2).getFormattedMessage().contains("Submitted "
 			+ parameters.getResourceTypes().size()
 			+ " groups of ids for processing"
 		));
