@@ -13,11 +13,16 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -37,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,15 +51,23 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SearchParamExtractorR4Test {
+public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private FhirContextSearchParamRegistry mySearchParamRegistry;
 	private PartitionSettings myPartitionSettings;
+	ModelConfig myModelConfig = new ModelConfig();
 
 	@BeforeEach
 	public void before() {
@@ -377,4 +391,38 @@ public class SearchParamExtractorR4Test {
 
 	}
 
+	@Test
+	void testComposite_componentCodeCode_producesEntry() {
+		// fixme mb
+		IBaseResource resource = buildResource("Observation",
+			withObservationComponent(
+				withCodingAt("code.coding", "http://example.com", "code_token", null),
+				withCodingAt("valueCodeableConcept.coding", null, "value_token", null))
+		);
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		Collection<ResourceIndexedSearchParamComposite> c = extractor
+			.extractSearchParamComposites(resource);
+
+		assertThat(c, not(empty()));
+		assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("paramName", equalTo("component-code-value-concept"))));
+		ResourceIndexedSearchParamComposite composite = c.stream().filter(idx -> idx.getParamName().equals("component-code-value-concept"))
+			.findFirst().orElseThrow();
+		
+	}
+
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		return null;
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		return null;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return ourCtx;
+	}
 }

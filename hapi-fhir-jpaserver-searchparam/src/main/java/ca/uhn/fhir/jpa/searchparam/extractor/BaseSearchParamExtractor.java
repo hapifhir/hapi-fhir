@@ -227,6 +227,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case COMPOSITE:
 			default:
+				// fixme mb test?
 				throw new UnsupportedOperationException(Msg.code(503) + "Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 
@@ -257,6 +258,56 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.map(param -> param.toQueryParameterType().getValueAsQueryToken(myContext))
 			.collect(Collectors.toList());
 	}
+
+	public SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamComposite> extractor = createCompositeExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.COMPOSITE, false);
+
+	}
+
+	private IExtractor<ResourceIndexedSearchParamComposite> createCompositeExtractor(IBaseResource theResource) {
+		// fixme mb do we need to ape token and have a default system from CodeSet or ValueSet
+		return new CompositeExtractor2(toRootTypeName(theResource));
+
+	}
+
+	private class CompositeExtractor2 implements IExtractor<ResourceIndexedSearchParamComposite> {
+		final String myResourceType;
+
+		public CompositeExtractor2(String theToRootTypeName) {
+			myResourceType = theToRootTypeName;
+		}
+
+		@Override
+		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
+			String spName = theSearchParam.getName();
+			ourLog.debug("CompositeExtractor - extracting {}", spName);
+			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(spName, toRootTypeName(theValue), thePath);
+			for (RuntimeSearchParam.Component component : theSearchParam.getComponents()) {
+				String componentSpRef = component.getReference();
+				ourLog.trace("loading component for {} - {}", spName, componentSpRef);
+				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
+				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", spName, componentSpRef);
+				// fixme mb extract this.
+				extractComponent(theValue, e, componentSp);
+			}
+
+			theParams.add(e);
+
+			//mySearchParamRegistry
+		}
+
+		private void extractComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam) {
+			RestSearchParameterTypeEnum paramType = theRuntimeSearchParam.getParamType();
+			switch (paramType) {
+				case TOKEN:
+					//extractSearchParamTokens(theParentElement, theRuntimeSearchParam);
+					break;
+			}
+
+		}
+	}
+
 
 	@Override
 	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
@@ -1131,7 +1182,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	/**
 	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
-	 *
+	 * <p>
 	 * "Patient.select(a or b)" -->  ["Patient.select(a or b)"]
 	 * "Patient.select(a or b) or Patient.select(c or d )" --> ["Patient.select(a or b)", "Patient.select(c or d)"]
 	 * "Patient.select(a|b) or Patient.select(c or d )" --> ["Patient.select(a|b)", "Patient.select(c or d)"]
@@ -1139,7 +1190,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 *
 	 * @param thePaths The string to split
 	 * @return The split string
-
 	 */
 	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
@@ -1154,7 +1204,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		int index = thePath.indexOf(theToken);
 		int rightIndex = 0;
 		List<String> retVal = new ArrayList<>();
-		while (index > -1 ) {
+		while (index > -1) {
 			String left = thePath.substring(rightIndex, index);
 			if (allParensHaveBeenClosed(left)) {
 				retVal.add(left);
@@ -1682,6 +1732,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
+	// fixme mb rename this - MultiExtractor?
 	private static class CompositeExtractor<T> implements IExtractor<T> {
 
 		private final IExtractor<T> myExtractor0;
