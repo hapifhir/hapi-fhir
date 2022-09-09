@@ -173,6 +173,14 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
+	/**
+	 * If this is set to `true`, the AWS region will be used to configure the AWS client. Additionally, this will trigger
+	 * HibernateSearch to attempt to use IAM Authentication. If the username and password are set in addition to the region,
+	 * then the username and password will be used as the AWS_ACCESS_KEY_ID and AWS_SECRET_KEY_ID for a static credentials file for IAM.
+	 *
+	 * @param theAwsRegion The String version of the region, e.g. `us-east-2`.
+	 * @return This builder.
+	 */
 	public ElasticsearchHibernatePropertiesBuilder setAwsRegion(String theAwsRegion) {
 		myAwsRegion = theAwsRegion;
 		return this;
