@@ -1199,13 +1199,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 6. Handle source (provenance)
-//		if (!myConfig.isPreserveRequestIdInResourceBody() && isNotBlank(provenanceSourceUri) && provenanceSourceUri.contains("#") && !provenanceSourceUri.endsWith("#")) {
-//				MetaUtil.setSource(myContext, retVal, provenanceSourceUri);
-//		} else if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
 			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);
+
 			MetaUtil.setSource(myContext, retVal, sourceString);
 		}
 
@@ -1663,12 +1661,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	private String getRequestId(RequestDetails theRequest, String source) {
+	private String getRequestId(RequestDetails theRequest, String theSource) {
 		if (myConfig.isPreserveRequestIdInResourceBody()) {
-			String[] splitSource = source.split("#", 2);
-			if (splitSource.length == 2) {
-				return splitSource[1].equals("") ? null : splitSource[1] ;
-			}
+			String requestId = StringUtils.substringAfter(theSource, "#");
+			return requestId.equals("") ? null : requestId;
 		}
 		return theRequest != null ? theRequest.getRequestId() : null;
 	}

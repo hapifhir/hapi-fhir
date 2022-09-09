@@ -215,9 +215,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchDao mySearchEntityDao;
 
-	@Autowired
-	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
-
 	@Override
 	@AfterEach
 	public void after() throws Exception {
@@ -240,8 +237,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
 		myDaoConfig.setPreserveRequestIdInResourceBody(false);
-
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 
 	}
 
@@ -7091,7 +7086,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabled_RequestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
@@ -7166,7 +7161,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndCustomRequestIdWithPreserveRequestIdDisabled_fails(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
 		String sourceURI = "mySource";
 		String requestId = "345676";
 
@@ -7272,31 +7267,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndWrongCustomRequestIdLongerThan16CharsWithPreserveRequestIdEnabled_fails() {
-		myDaoConfig.setPreserveRequestIdInResourceBody(true);
-
-		String sourceUri = "http://acme.org";
-		String requestId = "12345678901234567890123456789";
-
-		Patient patient = new Patient();
-		patient.getMeta().setSource(sourceUri + "#" + requestId);
-
-		myClient
-			.create()
-			.resource(patient)
-			.execute();
-
-		Bundle results = myClient
-			.search()
-			.byUrl(ourServerBase + "/Patient?_source=%231234567890123456:)")
-			.returnBundle(Bundle.class)
-			.execute();
-
-		assertEquals(0, results.getEntry().size());
-	}
-
-	@Test
-	public void searchResource_bySourceAndWrongCustomRequestIdWithPreserveRequestIdEnabled_fails() {
+	public void searchResource_bySourceAndWrongRequestIdWithPreserveRequestIdEnabled_fails() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 		Patient patient = new Patient();
 		patient.getMeta().setSource("urn:source:0#my-fragment123");

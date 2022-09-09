@@ -2929,7 +2929,7 @@ public class DaoConfig {
 	/**
 	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
 	 * should be preserved or overwritten.
-	 * Default is false.
+	 * Default is false. This means that a client provided requestId will be overwritten.
 	 *
 	 * @since 6.2.0
 	 */
