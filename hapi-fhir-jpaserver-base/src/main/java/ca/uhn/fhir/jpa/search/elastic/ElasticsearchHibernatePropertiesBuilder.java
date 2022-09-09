@@ -23,13 +23,7 @@ package ca.uhn.fhir.jpa.search.elastic;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
-import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.PutIndexTemplateRequest;
-import org.elasticsearch.common.settings.Settings;
 import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsBackendSettings;
 import org.hibernate.search.backend.elasticsearch.aws.cfg.ElasticsearchAwsCredentialsTypeNames;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
@@ -41,9 +35,6 @@ import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Properties;
 
 import static org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings.Defaults.SCROLL_TIMEOUT;
@@ -138,6 +129,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setHosts(String hosts) {
+		if (hosts.contains("://")) {
+			throw new ConfigurationException(Msg.code(1173) + "Elasticsearch URLs cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
+		}
 		myHosts = hosts;
 		return this;
 	}
