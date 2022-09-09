@@ -302,6 +302,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			switch (paramType) {
 				case TOKEN:
 					//extractSearchParamTokens(theParentElement, theRuntimeSearchParam);
+					theIndexBean.addComponent(new ResourceIndexedSearchParamToken());
 					break;
 			}
 

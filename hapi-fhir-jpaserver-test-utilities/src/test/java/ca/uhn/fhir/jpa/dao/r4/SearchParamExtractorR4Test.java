@@ -37,6 +37,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,17 +66,10 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private FhirContextSearchParamRegistry mySearchParamRegistry;
-	private PartitionSettings myPartitionSettings;
+	private FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 	ModelConfig myModelConfig = new ModelConfig();
 
-	@BeforeEach
-	public void before() {
-
-		mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
-		myPartitionSettings = new PartitionSettings();
-
-	}
 
 	@Test
 	public void testParamWithOrInPath() {
@@ -391,24 +385,51 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	}
 
-	@Test
-	void testComposite_componentCodeCode_producesEntry() {
-		// fixme mb
-		IBaseResource resource = buildResource("Observation",
-			withObservationComponent(
-				withCodingAt("code.coding", "http://example.com", "code_token", null),
-				withCodingAt("valueCodeableConcept.coding", null, "value_token", null))
-		);
-
+	@Nested
+	public class CompositeSearchParameter {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		Collection<ResourceIndexedSearchParamComposite> c = extractor
-			.extractSearchParamComposites(resource);
 
-		assertThat(c, not(empty()));
-		assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("paramName", equalTo("component-code-value-concept"))));
-		ResourceIndexedSearchParamComposite composite = c.stream().filter(idx -> idx.getParamName().equals("component-code-value-concept"))
-			.findFirst().orElseThrow();
-		
+		@Test
+		void testExtractSearchParamComposites_componentCodeCode_producesEntries() {
+			IBaseResource resource = buildResource("Observation",
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_token", null)),
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token2", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_toke2", null))
+			);
+
+			Collection<ResourceIndexedSearchParamComposite> c = extractor.extractSearchParamComposites(resource);
+
+			assertThat(c, not(empty()));
+			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("paramName", equalTo("component-code-value-concept"))));
+
+		}
+
+		@Test
+		void testExtractSearchParamComposites_componentCodeCode_yieldsTwoSubValues() {
+			IBaseResource resource = buildResource("Observation",
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_token", null)),
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token2", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_toke2", null))
+			);
+
+			Collection<ResourceIndexedSearchParamComposite> c = extractor.extractSearchParamComposites(resource);
+
+			List<ResourceIndexedSearchParamComposite> components = c.stream()
+				.filter(idx -> idx.getParamName().equals("component-code-value-concept"))
+				.collect(Collectors.toList());
+			assertThat("both components match", components, hasSize(2));
+			ResourceIndexedSearchParamComposite componentCodeValueConcept = components.get(0);
+			List<BaseResourceIndexedSearchParam> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
+			assertThat("component-code-value-concept has two sub-params", indexedComponentsOfElement, hasSize(2));
+
+
+		}
 	}
 
 	@Override
