@@ -42,7 +42,7 @@ public class LocalFileValidationSupport extends PrePopulatedValidationSupport {
 	public void loadFile(String theFileName) throws IOException {
 		String contents = IOUtils.toString(new InputStreamReader(new FileInputStream(theFileName), "UTF-8"));
 		IBaseResource resource  = myCtx.newJsonParser().parseResource(contents);
-		this.addStructureDefinition(resource);
+		this.addResource(resource);
 	}
 
 }
