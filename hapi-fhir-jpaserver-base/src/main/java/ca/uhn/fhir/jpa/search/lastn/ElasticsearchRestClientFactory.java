@@ -71,6 +71,7 @@ public class ElasticsearchRestClientFactory {
 			clientBuilder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
 				.setDefaultCredentialsProvider(credentialsProvider));
 		}
+
 		Header[] defaultHeaders = new Header[]{new BasicHeader("Content-Type", "application/json")};
 		clientBuilder.setDefaultHeaders(defaultHeaders);
 
