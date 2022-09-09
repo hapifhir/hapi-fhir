@@ -147,10 +147,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				}
 			}
 		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
-			ourLog.info("We are about to expand a Group Export");
+			ourLog.trace("About to expand a Group Bulk Export");
 			// Group
 			if (resourceType.equalsIgnoreCase("Patient")) {
-				ourLog.info("Yup about to get patients.");
+				ourLog.info("Expanding Patients of a Group Bulk Export.");
 				return getExpandedPatientIterator(theParams);
 			}
 
@@ -249,7 +249,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator(ExportPIDIteratorParameters theParameters) {
 		List<String> members = getMembersFromGroupWithFilter(theParameters);
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
-		ourLog.info("While extracting patients from a group, we found {} patients.", ids.size());
+		ourLog.debug("While extracting patients from a group, we found {} patients.", ids.size());
 
 		// Are bulk exports partition aware or care about partition at all? This does
 		List<ResourcePersistentId> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), ids);
@@ -290,8 +290,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			HasOrListParam hasOrListParam = new HasOrListParam();
 			hasOrListParam.addOr(new HasParam("Group", "member", "_id", theParameters.getGroupId()));
 			map.add(PARAM_HAS, hasOrListParam);
-			map.setLoadSynchronous(true);
-			ourLog.info("Searching for members of group {} with job id {} with map {}", theParameters.getGroupId(), theParameters.getJobId(), map);
+			ourLog.debug("Searching for members of group {} with job id {} with map {}", theParameters.getGroupId(), theParameters.getJobId(), map);
 
 			IResultIterator resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theParameters.getJobId()),
