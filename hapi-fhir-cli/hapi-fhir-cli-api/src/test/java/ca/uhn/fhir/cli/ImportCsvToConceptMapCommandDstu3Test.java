@@ -2,8 +2,8 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.ConceptMap;
@@ -12,6 +12,7 @@ import org.hl7.fhir.dstu3.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.dstu3.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -128,6 +129,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 				"-i", VS_URL_1,
 				"-o", VS_URL_2,
 				"-f", myFile,
+				"-s", Enumerations.PublicationStatus.ACTIVE.toCode(),
 				"-l"
 			},
 			"-t", theIncludeTls, myRestServerDstu3Helper
@@ -328,6 +330,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 				"-i", VS_URL_1,
 				"-o", VS_URL_2,
 				"-f", myFile,
+				"-s", Enumerations.PublicationStatus.ACTIVE.toCode(),
 				"-l"
 			},
 			"-t", theIncludeTls, myRestServerDstu3Helper

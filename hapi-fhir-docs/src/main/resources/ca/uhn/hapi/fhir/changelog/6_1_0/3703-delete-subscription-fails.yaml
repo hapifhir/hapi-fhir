@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3703
+backport: 6.0.3
+title: "Previously, using the `http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages` extension on a subscription, 
+along with a subscription that used a Search Expression criteria (e.g. `Patient?gender=male`) would cause a failure during an attempt to send the delete.
+ This has been corrected."

@@ -52,4 +52,8 @@ public class SearchParamSubmitInterceptorLoader {
 	public void setInterceptorRegistry(IInterceptorService theInterceptorRegistry) {
 		myInterceptorRegistry = theInterceptorRegistry;
 	}
+
+	protected SearchParamValidatingInterceptor getSearchParamValidatingInterceptor() {
+		return mySearchParamValidatingInterceptor;
+	}
 }

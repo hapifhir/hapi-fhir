@@ -50,7 +50,7 @@ import java.util.List;
  * #L%
  */
 
-public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
+public abstract class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
 
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)

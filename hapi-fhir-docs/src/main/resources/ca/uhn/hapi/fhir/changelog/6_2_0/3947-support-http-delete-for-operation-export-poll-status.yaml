@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3947
+title: "Previously, DELETE request type is not supported for any operations. DELETE is now supported, and is enabled for operation $export-poll-status to allow cancellation of jobs"

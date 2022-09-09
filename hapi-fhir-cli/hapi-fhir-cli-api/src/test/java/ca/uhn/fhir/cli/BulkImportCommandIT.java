@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -172,6 +173,52 @@ public class BulkImportCommandIT {
 		assertEquals(2, jobParameters.getNdJsonUrls().size());
 		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
 		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+	}
+
+	@Test
+	public void testBulkImport_FAILED() throws IOException {
+
+		JobInstance jobInfo = new JobInstance()
+			.setStatus(StatusEnum.FAILED)
+			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
+			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
+
+		when(myJobCoordinator.getInstance(eq("THE-JOB-ID"))).thenReturn(jobInfo);
+
+		String fileContents1 = "{\"resourceType\":\"Observation\"}\n{\"resourceType\":\"Observation\"}";
+		String fileContents2 = "{\"resourceType\":\"Patient\"}\n{\"resourceType\":\"Patient\"}";
+		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
+		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
+
+		when(myJobCoordinator.startInstance(any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
+
+		// Start the command in a separate thread
+		new Thread(() -> App.main(new String[]{
+			BulkImportCommand.BULK_IMPORT,
+			"--" + BaseCommand.FHIR_VERSION_PARAM_LONGOPT, "r4",
+			"--" + BulkImportCommand.PORT, "0",
+			"--" + BulkImportCommand.SOURCE_DIRECTORY, myTempDir.toAbsolutePath().toString(),
+			"--" + BulkImportCommand.TARGET_BASE, myRestfulServerExtension.getBaseUrl()
+		})).start();
+
+		ourLog.info("Waiting for initiation requests");
+		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		ourLog.info("Initiation requests complete");
+
+		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(myStartCaptor.capture());
+
+		try{
+			JobInstanceStartRequest startRequest = myStartCaptor.getValue();
+			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
+
+			// Reverse order because Patient should be first
+			assertEquals(2, jobParameters.getNdJsonUrls().size());
+			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+		}
+		catch(InternalErrorException e) {
+			ourLog.error(e.getMessage());
+		}
 	}
 
 	private String fetchFile(String url) throws IOException {

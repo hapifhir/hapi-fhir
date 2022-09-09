@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3980
+jira: SMILE-5053
+backport: 6.1.1
+title: "A regression was introduced in 6.1.0 which caused bulk export jobs to not default to the correct output format when the `_outputFormat` parameter was omitted. 
+This behaviour has been fixed, and if omitted, will now default to the only legal value `application/fhir+ndjson`."
