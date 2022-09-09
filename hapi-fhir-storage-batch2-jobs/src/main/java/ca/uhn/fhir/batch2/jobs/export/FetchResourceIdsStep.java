@@ -75,7 +75,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				List<Id> idsToSubmit = new ArrayList<>();
 
 				if (!pidIterator.hasNext()) {
-					ourLog.warn("Bulk Export generator an iterator with no results.");
+					ourLog.warn("Bulk Export generated an iterator with no results!");
 				}
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
