@@ -29,7 +29,6 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 	}
 
 	@Override
-	public IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
+	public IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath) {
 		return () -> {
 			String path = theSinglePath;
 

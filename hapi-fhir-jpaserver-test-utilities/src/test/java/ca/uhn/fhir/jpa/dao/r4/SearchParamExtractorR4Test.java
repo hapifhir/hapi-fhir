@@ -425,8 +425,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 				.collect(Collectors.toList());
 			assertThat("both components match", components, hasSize(2));
 			ResourceIndexedSearchParamComposite componentCodeValueConcept = components.get(0);
-			List<BaseResourceIndexedSearchParam> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
+			List<ResourceIndexedSearchParamComposite.Component> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
 			assertThat("component-code-value-concept has two sub-params", indexedComponentsOfElement, hasSize(2));
+
 
 
 		}

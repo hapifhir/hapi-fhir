@@ -282,14 +282,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 			String spName = theSearchParam.getName();
 			ourLog.debug("CompositeExtractor - extracting {}", spName);
-			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(spName, toRootTypeName(theValue), thePath);
+			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(spName, myResourceType, thePath);
 			for (RuntimeSearchParam.Component component : theSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
 				ourLog.trace("loading component for {} - {}", spName, componentSpRef);
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", spName, componentSpRef);
 				// fixme mb extract this.
-				extractComponent(theValue, e, componentSp);
+				extractComponent(theValue, e, componentSp, theWantLocalReferences);
 			}
 
 			theParams.add(e);
@@ -297,15 +297,23 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			//mySearchParamRegistry
 		}
 
-		private void extractComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam) {
+		private <T extends BaseResourceIndexedSearchParam> void extractComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam, boolean theWantLocalReferences) {
 			RestSearchParameterTypeEnum paramType = theRuntimeSearchParam.getParamType();
+			IExtractor extractor = null;
+			SearchParamSet set = new SearchParamSet<>();
 			switch (paramType) {
 				case TOKEN:
-					//extractSearchParamTokens(theParentElement, theRuntimeSearchParam);
-					theIndexBean.addComponent(new ResourceIndexedSearchParamToken());
+					// fixme we can't propogate the default system down - is that a problem?
+					extractor = new TokenExtractor(myResourceType, null);
 					break;
 			}
+			if (extractor == null) {
+				return;
+			}
+			Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
 
+			extractSearchParam(theRuntimeSearchParam, theParentElement, extractor, set, theWantLocalReferences);
+			theIndexBean.addComponent(theRuntimeSearchParam, set);
 		}
 	}
 
@@ -547,7 +555,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * Override parent because we're using FHIRPath here
 	 */
 	@Override
-	public List<IBase> extractValues(String thePaths, IBaseResource theResource) {
+	public List<IBase> extractValues(String thePaths, IBase theResource) {
 		List<IBase> values = new ArrayList<>();
 		if (isNotBlank(thePaths)) {
 			String[] nextPathsSplit = split(thePaths);
@@ -1063,7 +1071,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBaseResource theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
+	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBase theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
 		String nextPathUnsplit = theSearchParameterDef.getPath();
 		if (isBlank(nextPathUnsplit)) {
 			return;

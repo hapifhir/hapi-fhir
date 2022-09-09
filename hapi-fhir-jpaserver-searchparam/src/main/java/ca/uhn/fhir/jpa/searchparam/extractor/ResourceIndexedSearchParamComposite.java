@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.model.dstu2.resource.BaseResource;
-import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
-import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +23,19 @@ public class ResourceIndexedSearchParamComposite {
 	 * The path of the parent element
 	 */
 	private final String myPath;
-	private List<BaseResourceIndexedSearchParam> myComponents = new ArrayList<>();
+	private List<Component> myComponents = new ArrayList<>();
+
+	public static class Component {
+		final String mySearchParamName;
+		final RestSearchParameterTypeEnum mySearchParameterType;
+		final ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> myParamIndexValues;
+
+		public Component(String theSearchParamName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
+			mySearchParamName = theSearchParamName;
+			mySearchParameterType = theSearchParameterType;
+			myParamIndexValues = theParamIndexValues;
+		}
+	}
 
 	public ResourceIndexedSearchParamComposite(String theParamName, String theResourceType, String thePath) {
 		myParamName = theParamName;
@@ -56,11 +66,14 @@ public class ResourceIndexedSearchParamComposite {
 			.toString();
 	}
 
-	public List<BaseResourceIndexedSearchParam> getComponents() {
+	public List<Component> getComponents() {
 		return myComponents;
 	}
 
-	public void addComponent(BaseResourceIndexedSearchParam theComponent) {
-		myComponents.add(theComponent);
+
+	public void addComponent(RuntimeSearchParam theRuntimeSearchParam, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+		myComponents.add(new Component(theRuntimeSearchParam.getName(), theRuntimeSearchParam.getParamType(), theExtractedParams));
 	}
+
+
 }
