@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4008
+jira: SMILE-4296
+title: "Previously, when user search for the date between the records' updated date, only latest record is returned.
+After updating search criteria, the results returned will include the records updated after search date and the latest one before it."

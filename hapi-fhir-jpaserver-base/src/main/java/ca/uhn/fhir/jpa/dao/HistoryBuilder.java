@@ -43,9 +43,12 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -121,6 +124,10 @@ public class HistoryBuilder {
 
 		query.setMaxResults(theToIndex - theFromIndex);
 
+		// TODO ////
+		String sql = query.unwrap(org.hibernate.Query.class).getQueryString();
+		ourLog.info("\n\n ------ SQL:\n{} \n\n", sql);
+
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
@@ -175,7 +182,7 @@ public class HistoryBuilder {
 		}
 
 		if (myRangeStartInclusive != null) {
-			predicates.add(theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeStartInclusive));
+			addPredicateWhenStartInclusive(theCriteriaBuilder, theQuery, theFrom, predicates);
 		}
 		if (myRangeEndInclusive != null) {
 			predicates.add(theCriteriaBuilder.lessThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeEndInclusive));
@@ -184,6 +191,20 @@ public class HistoryBuilder {
 		if (predicates.size() > 0) {
 			theQuery.where(toPredicateArray(predicates));
 		}
+	}
+
+	private void addPredicateWhenStartInclusive(CriteriaBuilder theCriteriaBuilder, CriteriaQuery<?> theQuery,
+															  Root<ResourceHistoryTable> theFrom, List<Predicate> predicates) {
+		Subquery<Date> pastDateSubQuery = theQuery.subquery(Date.class);
+		Root<ResourceHistoryTable> subQueryResourceHistory = pastDateSubQuery.from(ResourceHistoryTable.class);
+		Expression<Date> myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated")).as(Date.class);
+		Expression<Date> myUpdatedMostRecentOrDefault = theCriteriaBuilder.coalesce(myUpdatedMostRecent,
+			theCriteriaBuilder.literal(myRangeStartInclusive));
+		pastDateSubQuery.select(myUpdatedMostRecentOrDefault)
+			.where(theCriteriaBuilder.lessThanOrEqualTo(subQueryResourceHistory.get("myUpdated").as(Date.class), myRangeStartInclusive));
+		Predicate updatedDatePredicate = theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class),
+			pastDateSubQuery);
+		predicates.add(updatedDatePredicate);
 	}
 
 	private void validateNotSearchingAllPartitions(RequestPartitionId thePartitionId) {

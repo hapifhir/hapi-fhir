@@ -7115,13 +7115,38 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(dateV1.before((dateV2)));
 
 		// Issue 3138 test case
+		verifyWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+	}
+
+	private void verifyWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertEquals(2, resultIds.size());
-		assertTrue(resultIds.contains("Patient/"+patientId+"/_history/1"));
-		assertTrue(resultIds.contains("Patient/"+patientId+"/_history/2"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifyWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(1, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifyWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
 	}
 
 	@Nonnull
