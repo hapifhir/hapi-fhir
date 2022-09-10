@@ -949,9 +949,33 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// TODO: 10 seems high for this, this could probably be optimized
+		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludesRecurse_Async() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_ENCOUNTER.asRecursive());
+		map.addInclude(Observation.INCLUDE_PATIENT.asRecursive());
+		map.addInclude(Observation.INCLUDE_SUBJECT.asRecursive());
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
@@ -977,6 +1001,32 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Verify
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludesRecurse_Sync() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.addInclude(Observation.INCLUDE_ENCOUNTER.asRecursive());
+		map.addInclude(Observation.INCLUDE_PATIENT.asRecursive());
+		map.addInclude(Observation.INCLUDE_SUBJECT.asRecursive());
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());

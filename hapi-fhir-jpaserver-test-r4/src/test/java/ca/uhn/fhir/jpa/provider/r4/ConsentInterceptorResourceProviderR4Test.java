@@ -570,7 +570,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		StopWatch sw = new StopWatch();
 		while (true) {
 			SearchStatusEnum status = runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+				Search search = mySearchEntityDao.findByUuid(searchId).orElseThrow(() -> new IllegalStateException());
 				return search.getStatus();
 			});
 			if (status == SearchStatusEnum.FINISHED) {
@@ -587,7 +587,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertNull(response.getTotalElement().getValue());
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+			Search search = mySearchEntityDao.findByUuid(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
@@ -631,12 +631,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		await()
 			.until(
-				() -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()),
+				() -> runInTransaction(() -> mySearchEntityDao.findByUuid(searchId).orElseThrow(() -> new IllegalStateException()).getStatus()),
 				equalTo(SearchStatusEnum.FINISHED)
 			);
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
+			Search search = mySearchEntityDao.findByUuid(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(0, search.getNumBlocked());
 			assertEquals(3, search.getTotalCount());

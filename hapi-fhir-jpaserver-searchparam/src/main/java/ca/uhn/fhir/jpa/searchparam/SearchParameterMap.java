@@ -587,6 +587,13 @@ public class SearchParameterMap implements Serializable {
 		return myIncludes != null && !myIncludes.isEmpty();
 	}
 
+	/**
+	 * @since 6.2.0
+	 */
+	public boolean hasRevIncludes() {
+		return myRevIncludes != null && !myRevIncludes.isEmpty();
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);

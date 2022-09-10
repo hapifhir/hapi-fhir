@@ -1015,7 +1015,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Collection<Include> theIncludes,
 																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();

@@ -33,10 +33,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-//@formatter:off
+/**
+ * As of HAPI FHIR 6.2.0 this entity is no longer used for anything.
+ * It should be removed at least two releases later.
+ *
+ * @deprecated
+ */
 @Entity
 @Table(name = "HFJ_SEARCH_INCLUDE")
-//@formatter:on
+@Deprecated
 public class SearchInclude implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -72,40 +77,6 @@ public class SearchInclude implements Serializable {
 	 */
 	public SearchInclude() {
 		// nothing
-	}
-
-	/**
-	 * Constructor
-	 */
-	public SearchInclude(Search theSearch, String theInclude, boolean theReverse, boolean theRecurse) {
-		mySearch = theSearch;
-		myInclude = theInclude;
-		myReverse = theReverse;
-		myRecurse = theRecurse;
-	}
-
-	@Override
-	public boolean equals(Object theObj) {
-		if (!(theObj instanceof SearchInclude)) {
-			return false;
-		}
-		if (myId == null) {
-			return false;
-		}
-		return myId.equals(((SearchInclude) theObj).myId);
-	}
-
-	public String getInclude() {
-		return myInclude;
-	}
-
-	@Override
-	public int hashCode() {
-		return myId == null ? 0 : myId.hashCode();
-	}
-
-	public boolean isRecurse() {
-		return myRecurse;
 	}
 
 }

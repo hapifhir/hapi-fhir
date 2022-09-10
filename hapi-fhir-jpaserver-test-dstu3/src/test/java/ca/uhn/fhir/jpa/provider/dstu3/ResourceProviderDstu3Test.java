@@ -3404,7 +3404,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
 			@Override
 			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException(""));
+				return mySearchEntityDao.findByUuid(uuid1).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
 		Date created1 = search1.getCreated();
@@ -3421,7 +3421,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
 			@Override
 			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException(""));
+				return mySearchEntityDao.findByUuid(uuid2).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
 		Date created2 = search2.getCreated();
@@ -3463,7 +3463,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date created1 = search1.getCreated();
 
 		Bundle result2 = ourClient
@@ -3473,7 +3473,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date created2 = search2.getCreated();
 
 		assertEquals(created2.getTime(), created1.getTime());

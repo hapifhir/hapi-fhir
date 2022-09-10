@@ -186,7 +186,6 @@ public interface ITestDataBuilder {
 	default IBaseResource buildPatient(Consumer<IBaseResource>... theModifiers) {
 		return buildResource("Patient", theModifiers);
 	}
-
 	default IIdType createPatient(Consumer<IBaseResource>... theModifiers) {
 		return createResource("Patient", theModifiers);
 	}

@@ -5,8 +5,10 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
@@ -25,7 +27,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -36,9 +37,9 @@ import javax.persistence.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -99,8 +100,10 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	@OneToMany(mappedBy = "mySearch")
-	private Collection<SearchInclude> myIncludes;
+	@Transient
+	private transient Collection<Include> myIncludes;
+	@Transient
+	private transient Collection<Include> myRevIncludes;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
@@ -237,11 +240,47 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myId;
 	}
 
-	public Collection<SearchInclude> getIncludes() {
-		if (myIncludes == null) {
-			myIncludes = new ArrayList<>();
-		}
+	public Collection<Include> getIncludes() {
+		parseIncludesAndRevIncludesIfNecessary();
 		return myIncludes;
+	}
+
+	public void setIncludes(Set<Include> theIncludes) {
+		myIncludes = theIncludes;
+	}
+
+	public Collection<Include> getRevIncludes() {
+		parseIncludesAndRevIncludesIfNecessary();
+		return myRevIncludes;
+	}
+
+	public void setRevIncludes(Set<Include> theRevIncludes) {
+		myRevIncludes = theRevIncludes;
+	}
+
+	private void parseIncludesAndRevIncludesIfNecessary() {
+		if (myIncludes == null) {
+			List<Include> includes = new ArrayList<>();
+			List<Include> revIncludes = new ArrayList<>();
+
+			Map<String, String[]> parts = UrlUtil.parseQueryString(getSearchQueryString());
+			parseIncludes(Constants.PARAM_INCLUDE, parts, includes, false);
+			parseIncludes(Constants.PARAM_INCLUDE + Constants.PARAM_INCLUDE_QUALIFIER_RECURSE, parts, includes, true);
+			parseIncludes(Constants.PARAM_REVINCLUDE, parts, revIncludes, false);
+			parseIncludes(Constants.PARAM_REVINCLUDE + Constants.PARAM_INCLUDE_QUALIFIER_RECURSE, parts, revIncludes, true);
+
+			myIncludes = includes;
+			myRevIncludes = revIncludes;
+		}
+	}
+
+	private void parseIncludes(String theParamName, Map<String, String[]> theParts, List<Include> theIncludes, boolean theRecurse) {
+		String[] strings = theParts.get(theParamName);
+		if (strings != null) {
+			for (String next : strings) {
+				theIncludes.add(new Include(next, theRecurse));
+			}
+		}
 	}
 
 	public DateRangeParam getLastUpdated() {
@@ -365,28 +404,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	public void setLastUpdated(Date theLowerBound, Date theUpperBound) {
 		myLastUpdatedLow = theLowerBound;
 		myLastUpdatedHigh = theUpperBound;
-	}
-
-	private Set<Include> toIncList(boolean theWantReverse) {
-		HashSet<Include> retVal = new HashSet<>();
-		for (SearchInclude next : getIncludes()) {
-			if (theWantReverse == next.isReverse()) {
-				retVal.add(new Include(next.getInclude(), next.isRecurse()));
-			}
-		}
-		return Collections.unmodifiableSet(retVal);
-	}
-
-	public Set<Include> toIncludesList() {
-		return toIncList(false);
-	}
-
-	public Set<Include> toRevIncludesList() {
-		return toIncList(true);
-	}
-
-	public void addInclude(SearchInclude theInclude) {
-		getIncludes().add(theInclude);
 	}
 
 	public Integer getVersion() {

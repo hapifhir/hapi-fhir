@@ -40,7 +40,6 @@ public class ProcessedIncludeSet {
 				continue;
 			}
 			if (Constants.INCLUDE_STAR.equals(nextInclude.getParamName())) {
-//				if (isNotBlank(nextInclude.get))
 				includeStar = true;
 				continue;
 			}
@@ -67,8 +66,6 @@ public class ProcessedIncludeSet {
 				continue;
 			}
 
-			// FIXME: why?
-//			List<String> nextPaths = theReverseMode ? param.getPathsSplitForResourceType(resType) : param.getPathsSplit();
 			List<String> nextPaths = param.getPathsSplitForResourceType(resType);
 			if (paths == null) {
 				paths = new HashSet<>();

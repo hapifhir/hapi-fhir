@@ -2523,7 +2523,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 					int finalI = i;
 					int finalI1 = i;
 					runInTransaction(() -> {
-						Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
+						Search search = mySearchEntityDao.findByUuid(searchId).get();
 						fail("Failed to load range " + finalI + " - " + (finalI1 + 1) + " - " + mySearchResultDao.countForSearch(search.getId()) + " results in " + search);
 					});
 				}
