@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +27,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		super.before();
 
 		mySvc = new ForceOffsetSearchModeInterceptor();
-		ourRestServer.registerInterceptor(mySvc);
+		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInitialDefaultPageSize = ourRestServer.getDefaultPageSize();
 	}
 
@@ -34,12 +36,12 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 	public void after() throws Exception {
 		super.after();
 
-		ourRestServer.unregisterInterceptor(mySvc);
+		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		ourRestServer.setDefaultPageSize(myInitialDefaultPageSize);
 	}
 
 	@Test
-	public void testSearch_NoExplcitCount() {
+	public void testSearch_NoExplicitCount() {
 		ourRestServer.setDefaultPageSize(5);
 
 		for (int i = 0; i < 10; i++) {
@@ -155,4 +157,47 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 	}
 
 
+	@Test
+	public void testSearch_LoadSynchronousUpToOverridesConfig() {
+		ourRestServer.setDefaultPageSize(5);
+		mySvc.setDefaultCount(5);
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("A" + i), withActiveTrue());
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(9);
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+
+		assertThat(toUnqualifiedVersionlessIdValues(outcome).toString(), toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
+			"Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4", "Patient/A5", "Patient/A6", "Patient/A7", "Patient/A8"
+		));
+		assertEquals(9, outcome.size());
+		assertEquals(null, outcome.getCurrentPageOffset());
+		assertEquals(null, outcome.getCurrentPageSize());
+
+	}
+
+
+	@Test
+	public void testSearch_NoLoadSynchronous() {
+		ourRestServer.setDefaultPageSize(5);
+		mySvc.setDefaultCount(5);
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withId("A" + i), withActiveTrue());
+		}
+
+		SearchParameterMap params = new SearchParameterMap();
+		IBundleProvider outcome = myPatientDao.search(params, mySrd);
+
+		assertThat(toUnqualifiedVersionlessIdValues(outcome).toString(), toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
+			"Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4"
+		));
+		assertNull(outcome.size());
+		assertEquals(0, outcome.getCurrentPageOffset());
+		assertEquals(5, outcome.getCurrentPageSize());
+
+	}
 }
