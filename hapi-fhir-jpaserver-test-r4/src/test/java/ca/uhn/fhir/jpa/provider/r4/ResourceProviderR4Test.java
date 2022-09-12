@@ -7096,6 +7096,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.getNameFirstRep().addGiven("Bob");
 		myClient.update().resource(patient).execute();
 
+		// FIXME - unrelated patients should not impact the history of our original patient
+		// Currently the subquery is getting the max for all Patient resources and not the specific patient being queried
+		Patient unrelatedPatient = (Patient) myClient.create().resource(new Patient()).execute().getResource();
+		assertNotEquals(unrelatedPatient.getIdElement().getIdPartAsLong(), patientId);
+
 		// ensure the patient has the expected overall history
 		Bundle result = myClient.history()
 			.onInstance("Patient/"+patientId)
