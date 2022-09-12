@@ -24,8 +24,10 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -74,6 +76,8 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
+	private ISearchIncludeDao mySearchIncludeDao;
+	@Autowired
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -86,14 +90,15 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Transactional(Transactional.TxType.REQUIRED)
 	@Override
 	public Search save(Search theSearch) {
-		return mySearchDao.save(theSearch);
+		Search newSearch = mySearchDao.save(theSearch);
+		return newSearch;
 	}
 
 	@Override
 	@Transactional(Transactional.TxType.REQUIRED)
 	public Optional<Search> fetchByUuid(String theUuid) {
 		Validate.notBlank(theUuid);
-		return mySearchDao.findByUuid(theUuid);
+		return mySearchDao.findByUuidAndFetchIncludes(theUuid);
 	}
 
 	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
@@ -205,6 +210,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
+			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
 
 			/*
 			 * Note, we're only deleting up to 500 results in an individual search here. This

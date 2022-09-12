@@ -413,7 +413,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			Integer maxIncludes = myDaoConfig.getMaximumIncludesToLoadPerPage();
 
 			// Load _revincludes
-			Set<ResourcePersistentId> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.getRevIncludes(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
+			Set<ResourcePersistentId> includedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
 			if (maxIncludes != null) {
 				maxIncludes -= includedPids.size();
 			}
@@ -421,7 +421,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			includedPidList.addAll(includedPids);
 
 			// Load _includes
-			Set<ResourcePersistentId> revIncludedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.getIncludes(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
+			Set<ResourcePersistentId> revIncludedPids = theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest, maxIncludes);
 			thePids.addAll(revIncludedPids);
 			includedPidList.addAll(revIncludedPids);
 

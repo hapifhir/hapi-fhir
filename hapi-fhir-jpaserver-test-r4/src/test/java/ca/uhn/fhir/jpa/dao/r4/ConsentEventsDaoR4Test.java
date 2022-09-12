@@ -135,7 +135,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		if (!myObservationIdsEvenOnly.subList(10, 25).equals(returnedIdValues)) {
 			if (resources.size() != 1) {
 				runInTransaction(() -> {
-					Search search = mySearchEntityDao.findByUuid(searchId).get();
+					Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
 					fail("Failed to load - " + mySearchResultDao.countForSearch(search.getId()) + " results in " + search);
 				});
 			}

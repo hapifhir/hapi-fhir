@@ -100,7 +100,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -637,14 +636,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
 
 		if (theParams.hasIncludes()) {
-			theSearch.setIncludes(theParams.getIncludes());
-		} else {
-			theSearch.setIncludes(Collections.emptySet());
+			for (Include next : theParams.getIncludes()) {
+				theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
+			}
 		}
-		if (theParams.hasRevIncludes()) {
-			theSearch.setRevIncludes(theParams.getRevIncludes());
-		} else {
-			theSearch.setRevIncludes(Collections.emptySet());
+
+		for (Include next : theParams.getRevIncludes()) {
+			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), true, next.isRecurse()));
 		}
 	}
 

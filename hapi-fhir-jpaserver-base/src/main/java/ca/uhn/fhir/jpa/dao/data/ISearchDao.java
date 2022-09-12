@@ -34,8 +34,8 @@ import java.util.Optional;
 
 public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT s FROM Search s WHERE s.myUuid = :uuid")
-	Optional<Search> findByUuid(@Param("uuid") String theUuid);
+	@Query("SELECT s FROM Search s LEFT OUTER JOIN FETCH s.myIncludes WHERE s.myUuid = :uuid")
+	Optional<Search> findByUuidAndFetchIncludes(@Param("uuid") String theUuid);
 
 	@Query("SELECT s.myId FROM Search s WHERE (s.myCreated < :cutoff) AND (s.myExpiryOrNull IS NULL OR s.myExpiryOrNull < :now) AND (s.myDeleted IS NULL OR s.myDeleted = FALSE)")
 	Slice<Long> findWhereCreatedBefore(@Param("cutoff") Date theCutoff, @Param("now") Date theNow, Pageable thePage);
@@ -43,7 +43,7 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
 	Slice<Long> findDeleted(Pageable thePage);
 
-	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")
+	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
 
 	@Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")

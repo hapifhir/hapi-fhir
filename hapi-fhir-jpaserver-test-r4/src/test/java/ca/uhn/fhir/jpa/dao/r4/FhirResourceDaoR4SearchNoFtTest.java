@@ -875,7 +875,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
-		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Specific patient ID with linked stuff
 		request = mock(HttpServletRequest.class);
@@ -2523,7 +2523,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 					int finalI = i;
 					int finalI1 = i;
 					runInTransaction(() -> {
-						Search search = mySearchEntityDao.findByUuid(searchId).get();
+						Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).get();
 						fail("Failed to load range " + finalI + " - " + (finalI1 + 1) + " - " + mySearchResultDao.countForSearch(search.getId()) + " results in " + search);
 					});
 				}

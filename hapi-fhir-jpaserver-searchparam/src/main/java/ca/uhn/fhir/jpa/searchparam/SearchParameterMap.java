@@ -239,12 +239,16 @@ public class SearchParameterMap implements Serializable {
 				b.append(Constants.PARAM_INCLUDE_QUALIFIER_RECURSE);
 			}
 			b.append('=');
-			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
-			b.append(':');
-			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamName()));
-			if (isNotBlank(nextInclude.getParamTargetType())) {
+			if ("*".equals(nextInclude.getValue())) {
+				b.append("*");
+			} else {
+				b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 				b.append(':');
-				b.append(nextInclude.getParamTargetType());
+				b.append(UrlUtil.escapeUrlParam(nextInclude.getParamName()));
+				if (isNotBlank(nextInclude.getParamTargetType())) {
+					b.append(':');
+					b.append(nextInclude.getParamTargetType());
+				}
 			}
 		}
 	}
