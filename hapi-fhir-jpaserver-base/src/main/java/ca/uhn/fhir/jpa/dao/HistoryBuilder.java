@@ -123,10 +123,6 @@ public class HistoryBuilder {
 
 		query.setMaxResults(theToIndex - theFromIndex);
 
-		// TODO ////
-		String sql = query.unwrap(org.hibernate.Query.class).getQueryString();
-		ourLog.info("\n\n ------ SQL:\n{} \n\n", sql);
-
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
