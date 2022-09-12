@@ -2244,10 +2244,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
+
+		IIdType idCreated = myPatientDao.create(patient, mySrd).getId();
+		ids.add(idCreated.toUnqualified().getValue());
+		IIdType id = idCreated.toUnqualifiedVersionless();
+
 		for (int i = 0; i < 10; i++) {
 			Thread.sleep(100);
 			preDates.add(new Date());
@@ -2260,13 +2264,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<String> idValues;
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1), ids.get(0)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt2060");
 		assertThat(idValues.toString(), idValues, empty());
