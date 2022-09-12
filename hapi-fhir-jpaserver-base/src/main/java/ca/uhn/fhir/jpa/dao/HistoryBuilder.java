@@ -176,8 +176,12 @@ public class HistoryBuilder {
 			validateNotSearchingAllPartitions(thePartitionId);
 		}
 
-		if (myRangeStartInclusive != null) {
-			addPredicateWhenStartInclusive(theCriteriaBuilder, theQuery, theFrom, predicates);
+		if (null != myRangeStartInclusive) {
+			if(null != myResourceId) {
+				addPredicateWhenStartInclusive(theCriteriaBuilder, theQuery, theFrom, predicates);
+			} else {
+				predicates.add(theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeStartInclusive));
+			}
 		}
 		if (myRangeEndInclusive != null) {
 			predicates.add(theCriteriaBuilder.lessThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeEndInclusive));
@@ -195,8 +199,11 @@ public class HistoryBuilder {
 		Expression<Date> myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated")).as(Date.class);
 		Expression<Date> myUpdatedMostRecentOrDefault = theCriteriaBuilder.coalesce(myUpdatedMostRecent,
 			theCriteriaBuilder.literal(myRangeStartInclusive));
+
 		pastDateSubQuery.select(myUpdatedMostRecentOrDefault)
-			.where(theCriteriaBuilder.lessThanOrEqualTo(subQueryResourceHistory.get("myUpdated").as(Date.class), myRangeStartInclusive));
+			.where(theCriteriaBuilder.lessThanOrEqualTo(subQueryResourceHistory.get("myUpdated").as(Date.class), myRangeStartInclusive)
+			, theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourceId"), myResourceId));
+
 		Predicate updatedDatePredicate = theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class),
 			pastDateSubQuery);
 		predicates.add(updatedDatePredicate);
