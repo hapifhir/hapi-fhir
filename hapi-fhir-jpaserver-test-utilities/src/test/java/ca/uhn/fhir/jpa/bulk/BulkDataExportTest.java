@@ -59,7 +59,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		group.addMember().getEntity().setReference("Patient/PM");
 		myClient.update().resource(group).execute();
 
-		varifyBulkExportResults("G", Sets.newHashSet("Patient?gender=female"), Collections.singletonList("\"PF\""), Collections.singletonList("\"PM\""));
+		verifyBulkExportResults("G", Sets.newHashSet("Patient?gender=female"), Collections.singletonList("\"PF\""), Collections.singletonList("\"PM\""));
 	}
 
 	@Test
@@ -90,11 +90,38 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		group.addMember().getEntity().setReference("Patient/PING2");
 		myClient.update().resource(group).execute();
 
-		varifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\"", "\"PING2\""), Collections.singletonList("\"PNING3\""));
+		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\"", "\"PING2\""), Collections.singletonList("\"PNING3\""));
+	}
+
+	@Test
+	public void testTwoBulkExportsInArow() {
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+		myCaptureQueriesListener.clear();
+		verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+		myCaptureQueriesListener.logSelectQueries();
+		ourLog.error("************");
+		myCaptureQueriesListener.clear();
+		try {
+			verifyBulkExportResults("G2", new HashSet<>(), List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+		} finally {
+			myCaptureQueriesListener.logSelectQueries();
+
+		}
 	}
 
 
-	private void varifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
+	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient"));
 		options.setGroupId(new IdType("Group", theGroupId));
