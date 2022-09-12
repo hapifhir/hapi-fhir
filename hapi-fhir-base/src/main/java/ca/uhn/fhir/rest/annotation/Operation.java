@@ -92,6 +92,17 @@ public @interface Operation {
 	boolean idempotent() default false;
 
 	/**
+	 * To support cancelling of a job,
+	 * this flag should be set to <code>true</code> (default is <code>false</code>).
+	 * <p>
+	 * The server, when setting this to <code>true</code>,
+	 * will allow the operation to be invoked using an <code>HTTP DELETE</code>
+	 * (on top of the standard <code>HTTP POST</code>)
+	 * </p>
+	 */
+	boolean deleteEnabled() default false;
+
+	/**
 	 * This parameter may be used to specify the parts which will be found in the
 	 * response to this operation.
 	 */

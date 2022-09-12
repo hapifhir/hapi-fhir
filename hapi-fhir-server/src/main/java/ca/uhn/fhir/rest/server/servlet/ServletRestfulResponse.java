@@ -22,8 +22,8 @@ package ca.uhn.fhir.rest.server.servlet;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.ParseAction;
-import ca.uhn.fhir.rest.server.RestfulResponse;
+import ca.uhn.fhir.rest.api.server.BaseParseAction;
+import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 
@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
-public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetails> {
+public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDetails> {
 
 	/**
 	 * Constructor
@@ -110,7 +110,7 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	}
 
 	@Override
-	public Object returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
+	public Object returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException {
 		addHeaders();
 		return getRequestDetails().getServer().returnResponse(getRequestDetails(), outcome, operationStatus, allowPrefer, response, resourceName);
 	}

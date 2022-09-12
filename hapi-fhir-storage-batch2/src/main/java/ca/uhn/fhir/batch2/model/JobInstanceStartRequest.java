@@ -79,6 +79,9 @@ public class JobInstanceStartRequest implements IModelJson {
 	}
 
 	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		if (myParameters == null) {
+			return null;
+		}
 		return JsonUtil.deserialize(myParameters, theType);
 	}
 
@@ -86,7 +89,17 @@ public class JobInstanceStartRequest implements IModelJson {
 		return myUseCache;
 	}
 
+
 	public void setUseCache(boolean theUseCache) {
 		myUseCache = theUseCache;
+	}
+
+	@Override
+	public String toString() {
+		return "JobInstanceStartRequest{" +
+			"myJobDefinitionId='" + myJobDefinitionId + '\'' +
+			", myParameters='" + myParameters + '\'' +
+			", myUseCache=" + myUseCache +
+			'}';
 	}
 }

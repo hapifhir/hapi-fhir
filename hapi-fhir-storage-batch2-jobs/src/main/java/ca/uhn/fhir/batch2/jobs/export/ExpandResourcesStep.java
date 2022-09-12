@@ -109,7 +109,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	private IBundleProvider fetchAllResources(BulkExportIdList theIds) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIds.getResourceType());
 
-		SearchParameterMap map = new SearchParameterMap();
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
 		TokenOrListParam ids = new TokenOrListParam();
 		for (Id id : theIds.getIds()) {
 			ids.addOr(new TokenParam(id.toPID().getAssociatedResourceId().getValue()));
