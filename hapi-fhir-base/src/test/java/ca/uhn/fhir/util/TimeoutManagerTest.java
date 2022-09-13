@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,11 @@ class TimeoutManagerTest {
 	ArgumentCaptor<ILoggingEvent> myLoggingEvent;
 
 	TimeoutManager mySvc = new TimeoutManager(TEST_SERVICE_NAME, myWarningTimeout, myErrorTimeout);
+
+	@AfterAll
+	public static void resetStopwatch() {
+		StopWatch.setNowForUnitTest(null);
+	}
 
 	@BeforeEach
 	void before() {
