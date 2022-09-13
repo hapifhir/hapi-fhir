@@ -111,6 +111,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -257,6 +258,25 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Assert
 		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
+	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("resource-security");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Security");
+		searchParameter.setCode("_security");
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		IIdType id = ourClient.create().resource(searchParameter).execute().getId();
+
+		assertNotNull(id);
+		assertEquals("resource-security", id.getValueAsString());
+
+
 	}
 
 	@Test
