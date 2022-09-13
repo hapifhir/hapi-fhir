@@ -71,38 +71,6 @@ public class ValidateCommandTest {
 	}
 
 	@Test
-	public void validate_withLocalProfileR4_shouldLogErrorAboutCardinality_whenResourceDoesNotComplyWithProfile() throws ParseException {
-		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient-no-identifier.json").getFile();
-		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();
-
-		String[] args = new String[]{
-			"validate",
-			"--fhir-version", "r4",
-			"--profile",
-			"--file", patientJson,
-			"-l", patientProfile
-		};
-
-		try {
-			CommandLine commandLine = new DefaultParser().parse(myValidateCommand.getOptions(), args);
-			myValidateCommand.run(commandLine);
-			fail();
-		} catch(CommandFailureException e) {
-			assertEquals("HAPI-1622: Validation failed", e.getMessage());
-		}
-
-		String expectedMessage = "Patient.identifier: minimum required = 1, but only found 0";
-
-		List<ILoggingEvent> errorLogs = myListAppender
-			.list
-			.stream()
-			.filter(event -> event.getFormattedMessage().contains(expectedMessage))
-			.collect(Collectors.toList());
-
-		assertEquals(1, errorLogs.size());
-	}
-
-	@Test
 	public void validate_withLocalProfileR4_shouldPass_whenResourceCompliesWithProfile() {
 		String patientJson = ValidateCommandTest.class.getResource("/validate/Patient.json").getFile();
 		String patientProfile = ValidateCommandTest.class.getResource("/validate/PatientIn-Profile.json").getFile();

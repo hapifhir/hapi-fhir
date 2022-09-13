@@ -38,8 +38,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
-import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -147,44 +145,18 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
-					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
-
-					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu2());
-					}
 					FhirInstanceValidator instanceValidator;
-					instanceValidator = new FhirInstanceValidator(validationSupport);
+					ValidationSupportChain validationSupportChain = ValidationSupportChainCreator.getValidationSupportChainDstu2(ctx, theCommandLine);
+					instanceValidator = new FhirInstanceValidator(validationSupportChain);
 					val.registerValidatorModule(instanceValidator);
-
 					break;
 				}
 				case DSTU3:
 				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-
-					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ctx),
-						new InMemoryTerminologyServerValidationSupport(ctx));
-
-					if (theCommandLine.hasOption("l")) {
-						try {
-							String localProfile = theCommandLine.getOptionValue("l");
-							LocalFileValidationSupport localFileValidationSupport = new LocalFileValidationSupport(ctx);
-
-							localFileValidationSupport.loadFile(localProfile);
-
-							validationSupport.addValidationSupport(localFileValidationSupport);
-							validationSupport.addValidationSupport(new SnapshotGeneratingValidationSupport(ctx));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
-					}
-					instanceValidator.setValidationSupport(validationSupport);
+					ValidationSupportChain validationSupportChain = ValidationSupportChainCreator.getValidationSupportChainR4(ctx, theCommandLine);
+					instanceValidator.setValidationSupport(validationSupportChain);
 					break;
 				}
 				default:
