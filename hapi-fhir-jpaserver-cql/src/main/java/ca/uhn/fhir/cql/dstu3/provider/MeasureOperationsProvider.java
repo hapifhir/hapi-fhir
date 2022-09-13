@@ -77,7 +77,7 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "periodEnd") String periodEnd,
 													 @OperationParam(name = "measure") String measureRef,
 													 @OperationParam(name = "reportType") String reportType,
-													 @OperationParam(name = "patient") String patientRef,
+													 @OperationParam(name = "subject") String subjectRef,
 													 @OperationParam(name = "productLine") String productLine,
 													 @OperationParam(name = "practitioner") String practitionerRef,
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
@@ -102,7 +102,7 @@ public class MeasureOperationsProvider {
 		if (reportType != null) {
 			switch (reportType) {
 				case "patient":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), subjectRef, theRequestDetails);
 				case "patient-list":
 					return evaluator.evaluatePatientListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
@@ -113,7 +113,7 @@ public class MeasureOperationsProvider {
 		}
 
 		// default report type is patient
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, theRequestDetails);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), subjectRef, theRequestDetails);
 		if (productLine != null) {
 			Extension ext = new Extension();
 			ext.setUrl("http://hl7.org/fhir/us/cqframework/cqfmeasures/StructureDefinition/cqfm-productLine");
