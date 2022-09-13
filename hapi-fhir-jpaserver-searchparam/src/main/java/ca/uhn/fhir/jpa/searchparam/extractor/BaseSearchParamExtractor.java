@@ -211,7 +211,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
 				if (myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
-					extractor = new CompositeExtractor(
+					extractor = new MultiplexExtractor(
 						createQuantityExtractor(theResource),
 						createQuantityNormalizedExtractor(theResource)
 					);
@@ -267,14 +267,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private IExtractor<ResourceIndexedSearchParamComposite> createCompositeExtractor(IBaseResource theResource) {
 		// fixme mb do we need to ape token and have a default system from CodeSet or ValueSet
-		return new CompositeExtractor2(toRootTypeName(theResource));
+		return new CompositeExtractor(toRootTypeName(theResource));
 
 	}
 
-	private class CompositeExtractor2 implements IExtractor<ResourceIndexedSearchParamComposite> {
+	public class CompositeExtractor implements IExtractor<ResourceIndexedSearchParamComposite> {
 		final String myResourceType;
 
-		public CompositeExtractor2(String theToRootTypeName) {
+		public CompositeExtractor(String theToRootTypeName) {
 			myResourceType = theToRootTypeName;
 		}
 
@@ -282,14 +282,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 			String spName = theSearchParam.getName();
 			ourLog.debug("CompositeExtractor - extracting {}", spName);
+			ourLog.trace("CompositeExtractor - extracting {} {}", spName, theValue);
 			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(spName, myResourceType, thePath);
 			for (RuntimeSearchParam.Component component : theSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
+				String expression = component.getExpression();
 				ourLog.trace("loading component for {} - {}", spName, componentSpRef);
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", spName, componentSpRef);
-				// fixme mb extract this.
-				extractComponent(theValue, e, componentSp, theWantLocalReferences);
+				extractCompositeComponent(theValue, e, componentSp, expression, theWantLocalReferences);
 			}
 
 			theParams.add(e);
@@ -297,23 +298,38 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			//mySearchParamRegistry
 		}
 
-		private <T extends BaseResourceIndexedSearchParam> void extractComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam, boolean theWantLocalReferences) {
-			RestSearchParameterTypeEnum paramType = theRuntimeSearchParam.getParamType();
-			IExtractor extractor = null;
-			SearchParamSet set = new SearchParamSet<>();
-			switch (paramType) {
-				case TOKEN:
-					// fixme we can't propogate the default system down - is that a problem?
-					extractor = new TokenExtractor(myResourceType, null);
-					break;
-			}
-			if (extractor == null) {
+		private <T extends BaseResourceIndexedSearchParam> void extractCompositeComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam, String theSubPathExpression, boolean theWantLocalReferences) {
+
+			IExtractor extractor = buildExtractor(theRuntimeSearchParam.getParamType());
+			// fixme skip unsupported types for now
+			if (extractor==null) {
+				ourLog.warn("CompositeExtractor - no extractor for {} of type {}", theRuntimeSearchParam.getName(), theRuntimeSearchParam. getParamType());
 				return;
 			}
-			Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
 
-			extractSearchParam(theRuntimeSearchParam, theParentElement, extractor, set, theWantLocalReferences);
+			SearchParamSet set = new SearchParamSet<>();
+			extractSearchParam(theRuntimeSearchParam, theSubPathExpression, theParentElement, extractor, set, theWantLocalReferences);
 			theIndexBean.addComponent(theRuntimeSearchParam, set);
+			ourLog.debug("CompositeExtractor - extracted {} index values for {}", set.size(), theRuntimeSearchParam.getName());
+		}
+
+		@Nonnull
+		private IExtractor buildExtractor(RestSearchParameterTypeEnum paramType) {
+			IExtractor extractor = null;
+			switch (paramType) {
+//				case DATE:
+//					extractor = new DateExtractor(myResourceType);
+//					break;
+				case TOKEN:
+					// fixme we can't propagate the default system down - is that a problem?
+					extractor = new TokenExtractor(myResourceType, null);
+					break;
+
+				default:
+					// fixme go back
+					//Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
+			}
+			return extractor;
 		}
 	}
 
@@ -1071,13 +1087,26 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBase theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
+
+	/**
+	 * extract for normal SP
+	 */
+	@VisibleForTesting
+	public <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, IBase theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
 		String nextPathUnsplit = theSearchParameterDef.getPath();
-		if (isBlank(nextPathUnsplit)) {
+		extractSearchParam(theSearchParameterDef, nextPathUnsplit, theResource, theExtractor, theSetToPopulate, theWantLocalReferences);
+	}
+
+	/**
+	 * extract for SP, but with possibly different expression.
+	 * Allows composite SPs to use sub-paths.
+	 */
+	private <T> void extractSearchParam(RuntimeSearchParam theSearchParameterDef, String thePathExpression, IBase theResource, IExtractor<T> theExtractor, SearchParamSet<T> theSetToPopulate, boolean theWantLocalReferences) {
+		if (isBlank(thePathExpression)) {
 			return;
 		}
 
-		String[] splitPaths = split(nextPathUnsplit);
+		String[] splitPaths = split(thePathExpression);
 		for (String nextPath : splitPaths) {
 			nextPath = trim(nextPath);
 			for (IBase nextObject : extractValues(nextPath, theResource)) {
@@ -1533,11 +1562,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private class DateExtractor implements IExtractor<ResourceIndexedSearchParamDate> {
 
-		String myResourceType;
+		final String myResourceType;
 		ResourceIndexedSearchParamDate myIndexedSearchParamDate = null;
 
 		public DateExtractor(IBaseResource theResource) {
-			myResourceType = toRootTypeName(theResource);
+			this(toRootTypeName(theResource));
 		}
 
 		public DateExtractor(String theResourceType) {
@@ -1741,13 +1770,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	// fixme mb rename this - MultiExtractor?
-	private static class CompositeExtractor<T> implements IExtractor<T> {
+
+	/**
+	 * Extractor that delegates to two other extractors.
+	 * @param <T> the type (currently only used for Numberic)
+	 */
+	private static class MultiplexExtractor<T> implements IExtractor<T> {
 
 		private final IExtractor<T> myExtractor0;
 		private final IExtractor<T> myExtractor1;
 
-		private CompositeExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
+		private MultiplexExtractor(IExtractor<T> theExtractor0, IExtractor<T> theExtractor1) {
 			myExtractor0 = theExtractor0;
 			myExtractor1 = theExtractor1;
 		}

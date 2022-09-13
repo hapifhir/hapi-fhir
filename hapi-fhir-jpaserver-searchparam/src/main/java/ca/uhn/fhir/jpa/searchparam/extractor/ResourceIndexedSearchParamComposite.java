@@ -16,7 +16,7 @@ public class ResourceIndexedSearchParamComposite {
 	/**
 	 * the SP name
 	 */
-	private final String myParamName;
+	private final String mySearchParamName;
 
 	private final String myResourceType;
 	/**
@@ -35,17 +35,29 @@ public class ResourceIndexedSearchParamComposite {
 			mySearchParameterType = theSearchParameterType;
 			myParamIndexValues = theParamIndexValues;
 		}
+
+		public String getSearchParamName() {
+			return mySearchParamName;
+		}
+
+		public RestSearchParameterTypeEnum getSearchParameterType() {
+			return mySearchParameterType;
+		}
+
+		public ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> getParamIndexValues() {
+			return myParamIndexValues;
+		}
 	}
 
-	public ResourceIndexedSearchParamComposite(String theParamName, String theResourceType, String thePath) {
-		myParamName = theParamName;
+	public ResourceIndexedSearchParamComposite(String theSearchParamName, String theResourceType, String thePath) {
+		mySearchParamName = theSearchParamName;
 		myResourceType = theResourceType;
 		myPath = thePath;
 	}
 
 
-	public String getParamName() {
-		return myParamName;
+	public String getSearchParamName() {
+		return mySearchParamName;
 	}
 
 	public String getResourceType() {
@@ -59,11 +71,7 @@ public class ResourceIndexedSearchParamComposite {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myParamName", myParamName)
-			.append("myResourceType", myResourceType)
-			.append("myPath", myPath)
-			.toString();
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
 	public List<Component> getComponents() {
