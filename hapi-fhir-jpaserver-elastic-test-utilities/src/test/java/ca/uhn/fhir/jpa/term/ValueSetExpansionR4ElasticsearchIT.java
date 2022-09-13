@@ -57,8 +57,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -283,6 +283,51 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			theCs.getConcepts().add(tc);
 		}
 	}
+
+	/**
+	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/3992
+	 */
+	@Test
+	@Disabled("until bug gets fixed")
+	public void testExpandValueSetWithMoreThanElasticDefaultNestedObjectCount() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("SYSTEM NAME");
+		codeSystem.setVersion("SYSTEM VERSION");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+		ResourceTable csResource = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		codeSystemVersion.setResource(csResource);
+
+		TermConcept tc = new TermConcept(codeSystemVersion, "test-code-1");
+		// need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
+		addTerConceptProperties(tc, 10_100);
+		codeSystemVersion.getConcepts().add(tc);
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(LOINC_ALL_VALUESET_ID);
+		valueSet.setUrl(CS_URL + "/vs");
+		valueSet.setVersion(codeSystemVersion.getCodeSystemVersionId());
+		valueSet.setName("All LOINC codes");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.setDate(new Date());
+		valueSet.setDescription("A value set that includes all LOINC codes");
+		valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(codeSystemVersion.getCodeSystemVersionId());
+
+		assertDoesNotThrow( () -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
+				new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList() ));
+
+	}
+
+	private void addTerConceptProperties(TermConcept theTermConcept, int theCount) {
+		for (int i = 0; i < theCount; i++) {
+			String suff = String.format("%05d", i);
+			theTermConcept.addPropertyString("prop-" + suff, "value-" + suff);
+		}
+	}
+
 
 	@Override
 	protected FhirContext getFhirContext() {
