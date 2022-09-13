@@ -106,10 +106,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
 
-	private final HashMap<String, ISearchBuilder> myResourceTypeToSearchBuilder = new HashMap<>();
-
-	private final HashMap<String, String> myResourceTypeToFhirPath = new HashMap<>();
-
 	private IFhirPath myFhirPath;
 
 	@Transactional
@@ -151,8 +147,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				}
 			}
 		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
+			ourLog.trace("About to expand a Group Bulk Export");
 			// Group
 			if (resourceType.equalsIgnoreCase("Patient")) {
+				ourLog.info("Expanding Patients of a Group Bulk Export.");
 				return getExpandedPatientIterator(theParams);
 			}
 
@@ -194,14 +192,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	 */
 	protected ISearchBuilder getSearchBuilderForLocalResourceType(ExportPIDIteratorParameters theParams) {
 		String resourceType = theParams.getResourceType();
-		if (!myResourceTypeToSearchBuilder.containsKey(resourceType)) {
-			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
-			Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
-			ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceType, nextTypeClass);
-			myResourceTypeToSearchBuilder.put(resourceType, sb);
-		}
-		return myResourceTypeToSearchBuilder.get(resourceType);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+		Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
+		return mySearchBuilderFactory.newSearchBuilder(dao, resourceType, nextTypeClass);
 	}
 
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType(String theResourceType) {
@@ -220,9 +214,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				annotateBackwardsReferences(resource);
 			}
 		}
-
-		// is this necessary?
-		myResourceTypeToFhirPath.clear();
 	}
 
 	/**
@@ -258,6 +249,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private Iterator<ResourcePersistentId> getExpandedPatientIterator(ExportPIDIteratorParameters theParameters) {
 		List<String> members = getMembersFromGroupWithFilter(theParameters);
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
+		ourLog.debug("While extracting patients from a group, we found {} patients.", ids.size());
 
 		// Are bulk exports partition aware or care about partition at all? This does
 		List<ResourcePersistentId> pidsOrThrowException = myIdHelperService.getPidsOrThrowException(RequestPartitionId.allPartitions(), ids);
@@ -298,6 +290,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			HasOrListParam hasOrListParam = new HasOrListParam();
 			hasOrListParam.addOr(new HasParam("Group", "member", "_id", theParameters.getGroupId()));
 			map.add(PARAM_HAS, hasOrListParam);
+			ourLog.debug("Searching for members of group {} with job id {} with map {}", theParameters.getGroupId(), theParameters.getJobId(), map);
 
 			IResultIterator resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theParameters.getJobId()),
@@ -486,14 +479,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private Optional<String> getPatientReference(IBaseResource iBaseResource) {
 		String fhirPath;
 
-		String resourceType = iBaseResource.fhirType();
-		if (myResourceTypeToFhirPath.containsKey(resourceType)) {
-			fhirPath = myResourceTypeToFhirPath.get(resourceType);
-		} else {
-			RuntimeSearchParam runtimeSearchParam = getRuntimeSearchParam(iBaseResource);
-			fhirPath = getPatientFhirPath(runtimeSearchParam);
-			myResourceTypeToFhirPath.put(resourceType, fhirPath);
-		}
+		RuntimeSearchParam runtimeSearchParam = getRuntimeSearchParam(iBaseResource);
+		fhirPath = getPatientFhirPath(runtimeSearchParam);
 
 		if (iBaseResource.fhirType().equalsIgnoreCase("Patient")) {
 			return Optional.of(iBaseResource.getIdElement().getIdPart());

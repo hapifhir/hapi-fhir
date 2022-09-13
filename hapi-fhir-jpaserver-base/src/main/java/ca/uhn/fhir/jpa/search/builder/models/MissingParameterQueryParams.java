@@ -65,7 +65,7 @@ public class MissingParameterQueryParams {
 		myQueryParameterTypes = theList;
 		if (theList.isEmpty()) {
 			// this will never happen
-			throw new InvalidParameterException(Msg.code(2137)
+			throw new InvalidParameterException(Msg.code(2140)
 				+ " Invalid search parameter list. Cannot be empty!");
 		}
 		myIsMissing = theList.get(0).getMissing();
