@@ -344,4 +344,29 @@ public interface ITestDataBuilder {
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
 	}
+
+	interface Support {
+		FhirContext getFhirContext();
+		IIdType createResource(IBaseResource theResource);
+		IIdType updateResource(IBaseResource theResource);
+	}
+
+	interface WithSupport extends ITestDataBuilder {
+		Support getSupport();
+
+		@Override
+		default FhirContext getFhirContext() {
+			return getSupport().getFhirContext();
+		}
+
+		@Override
+		default IIdType doCreateResource(IBaseResource theResource) {
+			return getSupport().createResource(theResource);
+		}
+
+		@Override
+		default IIdType doUpdateResource(IBaseResource theResource) {
+			return getSupport().updateResource(theResource);
+		}
+	}
 }

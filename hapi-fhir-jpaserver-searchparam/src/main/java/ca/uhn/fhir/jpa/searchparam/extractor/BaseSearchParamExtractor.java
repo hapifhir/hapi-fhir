@@ -259,6 +259,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			.collect(Collectors.toList());
 	}
 
+	@Override
 	public SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamComposite> extractor = createCompositeExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.COMPOSITE, false);

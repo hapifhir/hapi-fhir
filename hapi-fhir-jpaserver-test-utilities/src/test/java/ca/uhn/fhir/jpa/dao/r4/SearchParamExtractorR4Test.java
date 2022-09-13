@@ -388,9 +388,15 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	class CompositeSearchParameter {
 		SearchParamExtractorR4 myExtractor = new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 
+		/**
+		 * Install a full definition of component-code-value-concept in the SP registry.
+		 *
+		 * We can't use the base FhirContext SP definitions since @SearchParamDefinition
+		 * only includes the sub-SP ids, and lacks the composite sub-paths.
+		 * @see ca.uhn.fhir.model.api.annotation.SearchParamDefinition#compositeOf
+		 */
 		@BeforeEach
 		public void setUp() {
-			// fixme mb we can't use the FhirContext SP definitions yet since they are missing composite sub-paths.
 			String spJson = """
 				{
 				  "resourceType": "SearchParameter",

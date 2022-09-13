@@ -204,7 +204,7 @@ public class SearchParamExtractorService {
 		theTargetParams.myCoordsParams.addAll(theSrcParams.myCoordsParams);
 	}
 
-	private void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
+	void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
 
 		// Strings
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
@@ -249,6 +249,12 @@ public class SearchParamExtractorService {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
+
+		// Composites
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
+		handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
+		theParams.myCompositeParams.addAll(composites);
+
 
 		// Specials
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> specials = extractSearchParamSpecial(theResource);
@@ -559,6 +565,11 @@ public class SearchParamExtractorService {
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamUri(theResource);
 	}
+
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamComposites(theResource);
+	}
+
 
 	@VisibleForTesting
 	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
