@@ -276,6 +276,14 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
+	/**
+	 * This method tests whether a given FHIRPath expression <i>could</i>
+	 * possibly apply to the given resource type.
+	 *
+	 * @param theResourceName
+	 * @param thePath
+	 * @return
+	 */
 	static boolean pathMatchesResourceType(String theResourceName, String thePath) {
 		for (int i = 0; i < thePath.length() - 1; i++) {
 			char nextChar = thePath.charAt(i);
