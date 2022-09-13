@@ -86,8 +86,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 
 					String contentType = response.getEntity().getContentType().getValue();
-					Validate.isTrue(ourValidContentTypes.contains(contentType), "Received content type \"%s\" from URL: %s. This format is not one of the supported content type: %s", contentType, nextUrl, getContentTypesString());
-					if (ourValidNonNdJsonContentTypes.contains(contentType)) {
+					Validate.isTrue(hasMatchingSubstring(contentType, ourValidContentTypes), "Received content type \"%s\" from URL: %s. This format is not one of the supported content type: %s", contentType, nextUrl, getContentTypesString());
+					if (hasMatchingSubstring(contentType, ourValidNonNdJsonContentTypes)) {
 						ourLog.info("Received non-NDJSON content type \"{}\" from URL: {}. It will be processed but it may not complete correctly if the actual data is not NDJSON.", contentType, nextUrl);
 					}
 
@@ -154,6 +154,10 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		}
 
 		return builder.build();
+	}
+
+	private static boolean hasMatchingSubstring(String str, List<String> substrings) {
+		return substrings.stream().anyMatch(str::contains);
 	}
 
 	private static String getContentTypesString() {
