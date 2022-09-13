@@ -204,8 +204,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
-	protected IResourceHistoryTableDao myResourceProvenanceDao;
-	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	protected ITermReadSvc myTerminologySvc;
