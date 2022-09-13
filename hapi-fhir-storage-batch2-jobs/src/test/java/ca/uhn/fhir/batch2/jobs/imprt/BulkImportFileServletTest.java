@@ -8,15 +8,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
-import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
-import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkImportFileServletTest {
@@ -44,12 +39,12 @@ public class BulkImportFileServletTest {
 
 		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
 
-		executeAndAssert(url, BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE);
+		executeBulkImportAndCheckReturnedContentType(url);
 
 	}
 
 
-	private void executeAndAssert(String theUrl, String theExpectedHeaderContentType)  throws IOException{
+	private void executeBulkImportAndCheckReturnedContentType(String theUrl)  throws IOException{
 		CloseableHttpClient client = myServletExtension.getHttpClient();
 
 		try (CloseableHttpResponse response = client.execute(new HttpGet(theUrl))) {
@@ -57,7 +52,7 @@ public class BulkImportFileServletTest {
 			String responseHeaderContentType = response.getFirstHeader("content-type").getValue();
 
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(theExpectedHeaderContentType, responseHeaderContentType);
+			assertEquals(BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE, responseHeaderContentType);
 			assertEquals(ourInput, responseBody);
 		}
 	}

@@ -48,12 +48,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
+	private static final List<String> ourValidContentTypes = Arrays.asList(Constants.CT_APP_NDJSON,  Constants.CT_FHIR_NDJSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.CT_JSON, Constants.CT_TEXT);
+	private static final List<String> ourValidNonNdJsonContentTypes = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.CT_JSON, Constants.CT_TEXT);
 
 	@Nonnull
 	@Override
@@ -83,7 +86,10 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 
 					String contentType = response.getEntity().getContentType().getValue();
-					Validate.isTrue(isValidContentType(contentType), "Received non-NDJSON content type \"%s\" from URL: %s", contentType, nextUrl);
+					Validate.isTrue(ourValidContentTypes.contains(contentType), "Received content type \"%s\" from URL: %s. This format is not one of the supported content type: %s", contentType, nextUrl, getContentTypesString());
+					if (ourValidNonNdJsonContentTypes.contains(contentType)) {
+						ourLog.info("Received non-NDJSON content type \"{}\" from URL: {}. It will be processed but it may not complete correctly if the actual data is not NDJSON.", contentType, nextUrl);
+					}
 
 					try (InputStream inputStream = response.getEntity().getContent()) {
 						try (LineIterator lineIterator = new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -150,13 +156,8 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		return builder.build();
 	}
 
-	private boolean isValidContentType(String theContentType) {
-		EncodingEnum encoding = EncodingEnum.forContentType(theContentType);
-		return encoding == EncodingEnum.NDJSON
-			|| Constants.CT_FHIR_JSON.equals(theContentType)
-			|| Constants.CT_FHIR_JSON_NEW.equals(theContentType)
-			|| Constants.CT_JSON.equals(theContentType)
-			|| Constants.CT_TEXT.equals(theContentType);
+	private static String getContentTypesString() {
+		return String.join(", ", ourValidContentTypes);
 	}
 
 }
