@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.sched;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -178,13 +178,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
 
-		JobKey jobKey = new JobKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-		TriggerKey triggerKey = new TriggerKey(theJobDefinition.getId(), theJobDefinition.getGroup());
-		
-		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
-		jobDetail.setJobClass(theJobDefinition.getJobClass());
-		jobDetail.setKey(jobKey);
-		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
+		TriggerKey triggerKey = theJobDefinition.toTriggerKey();
+		JobDetailImpl jobDetail = buildJobDetail(theJobDefinition);
 
 		ScheduleBuilder<? extends Trigger> schedule = SimpleScheduleBuilder
 			.simpleSchedule()
@@ -208,6 +203,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	}
 
+	@Nonnull
+	private JobDetailImpl buildJobDetail(ScheduledJobDefinition theJobDefinition) {
+		JobDetailImpl jobDetail = new NonConcurrentJobDetailImpl();
+		jobDetail.setJobClass(theJobDefinition.getJobClass());
+		jobDetail.setKey(theJobDefinition.toJobKey());
+		jobDetail.setJobDataMap(new JobDataMap(theJobDefinition.getJobData()));
+		return jobDetail;
+	}
+
 	@VisibleForTesting
 	@Override
 	public Set<JobKey> getJobKeysForUnitTest() throws SchedulerException {
@@ -221,6 +225,15 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		@Override
 		public boolean isConcurrentExectionDisallowed() {
 			return true;
+		}
+	}
+
+	@Override
+	public void triggerJobImmediately(ScheduledJobDefinition theJobDefinition) {
+		try {
+			myScheduler.triggerJob(theJobDefinition.toJobKey());
+		} catch (SchedulerException e) {
+			ourLog.error("Error triggering scheduled job with key {}", theJobDefinition);
 		}
 	}
 }

@@ -105,7 +105,7 @@ public class ResourceReindexer {
 		Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
 		final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
 		dao.reindex(theResource, theResourceTable);
-		if (myFulltextSearchSvc != null) {
+		if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
 			// update the full-text index, if active.
 			myFulltextSearchSvc.reindex(theResourceTable);
 		}

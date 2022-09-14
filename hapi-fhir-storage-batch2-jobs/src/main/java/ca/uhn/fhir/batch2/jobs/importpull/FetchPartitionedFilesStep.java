@@ -68,7 +68,7 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 			theDataSink.accept(result);
 		}
 
-		ourLog.info("FetchPartitionedFilesStep complete for jobID {}", jobId);
+		ourLog.info("FetchPartitionedFilesStep complete for jobID {}.  Submitted {} files to next step.", jobId, job.getFileCount());
 
 		return RunOutcome.SUCCESS;
 	}
