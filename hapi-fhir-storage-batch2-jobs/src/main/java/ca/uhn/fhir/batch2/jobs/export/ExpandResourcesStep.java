@@ -93,7 +93,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		output.setResourceType(idList.getResourceType());
 		theDataSink.accept(output);
 
-		ourLog.warn("Expanding of {} resources of type {} completed",
+		ourLog.info("Expanding of {} resources of type {} completed",
 			idList.getIds().size(),
 			idList.getResourceType());
 
@@ -103,18 +103,13 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	private List<IBaseResource> fetchAllResources(BulkExportIdList theIds) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIds.getResourceType());
-
-//		SearchParameterMap map = new SearchParameterMap();
-//		TokenOrListParam ids = new TokenOrListParam();
 		List<IBaseResource> resources = new ArrayList<>();
+
 		for (Id id : theIds.getIds()) {
 			String value = id.getId();
-//			TokenParam parameter = new TokenParam(value);
-//			ids.addOr(parameter);
 			resources.add(dao.readByPid(new ResourcePersistentId(value)));
 		}
-//		map.add(Constants.PARAM_ID, ids);
-//		return dao.search(map, SystemRequestDetails.forAllPartitions());
+		
 		return resources;
 	}
 
