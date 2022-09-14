@@ -63,6 +63,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setExpandMdm(params.isExpandMdm());
+		ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
 
 		int submissionCount = 0;
 		try {
@@ -73,6 +74,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
 
+				if (!pidIterator.hasNext()) {
+					ourLog.warn("Bulk Export generated an iterator with no results!");
+				}
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 

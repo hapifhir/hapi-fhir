@@ -222,6 +222,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
+		assert myOtherOperationType != null;
 		return myOtherOperationType;
 	}
 

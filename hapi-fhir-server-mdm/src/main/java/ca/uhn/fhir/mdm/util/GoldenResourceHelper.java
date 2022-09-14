@@ -130,6 +130,7 @@ public class GoldenResourceHelper {
 																  IAnyResource theIncomingResource, IBase theNewGoldenResource) {
 		String incomingResourceType = myFhirContext.getResourceType(theIncomingResource);
 		String mdmEIDSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType(incomingResourceType);
+
 		if (mdmEIDSystem == null) {
 			return;
 		}
