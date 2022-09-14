@@ -93,7 +93,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
 			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
-			
+
 		}
 	}
 
