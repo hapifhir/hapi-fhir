@@ -63,7 +63,7 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<logger name="ca.uhn.fhir.jpa.bulk" additivity="false" level="trace">
+	<logger name="ca.uhn.fhir.jpa.bulk" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
 

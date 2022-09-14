@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.bulk.export.model;
  */
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 import java.util.List;
@@ -124,14 +126,7 @@ public class ExportPIDIteratorParameters {
 
 	@Override
 	public String toString() {
-		return "ExportPIDIteratorParameters{" +
-			"myResourceType='" + myResourceType + '\'' +
-			", myStartDate=" + myStartDate +
-			", myFilters=" + myFilters +
-			", myJobId='" + myJobId + '\'' +
-			", myExportStyle=" + myExportStyle +
-			", myGroupId='" + myGroupId + '\'' +
-			", myExpandMdm=" + myExpandMdm +
-			'}';
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
+
 }

@@ -156,9 +156,7 @@ public class JobInstanceProcessor {
 				processChunksForNextSteps(instanceId, nextStepId);
 			}
 		}  else {
-			if (ourLog.isDebugEnabled()) {
 				ourLog.debug("All chunks are not complete yet, there are {} remaining chunks for instance {} step {}", incompleteChunks, instanceId, currentStepId);
-			}
 		}
 	}
 

@@ -107,6 +107,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 		for (Id id : theIds.getIds()) {
 			String value = id.getId();
+			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
 			resources.add(dao.readByPid(new ResourcePersistentId(value)));
 		}
 
