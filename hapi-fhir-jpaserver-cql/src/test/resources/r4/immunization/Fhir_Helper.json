@@ -6,69 +6,6 @@
 		{
 			"resource": {
 				"resourceType": "Library",
-				"id": "immunizationCQLLibrary",
-				"name": "immunizationCQLLibrary",
-				"status": "active",
-				"relatedArtifact": [
-					{
-						"type": "depends-on",
-						"resource": "http://hl7.org/fhir/Library/FHIRHelpers|4.0.1"
-					}
-				],
-				"type": {
-					"coding": [
-						{
-							"system": "http://terminology.hl7.org/CodeSystem/library-type",
-							"code": "logic-library"
-						}
-					]
-				},
-				"parameter": [
-					{
-						"name": "InitialPopulation",
-						"use": "out",
-						"min": 0,
-						"max": "*",
-						"type": "Patient"
-					},
-					{
-						"name": "Denominator",
-						"use": "out",
-						"min": 0,
-						"max": "*",
-						"type": "Patient"
-					},
-					{
-						"name": "Numerator",
-						"use": "out",
-						"min": 0,
-						"max": "*",
-						"type": "Patient"
-					}
-				],
-				"dataRequirement": [
-					{
-						"type": "Patient",
-						"profile": [
-							"http://hl7.org/fhir/StructureDefinition/Patient"
-						]
-					}
-				],
-				"content": [
-					{
-						"contentType": "text/cql",
-						"data": "This will be automatically replaced with a specified CQL content as part of the testing helper functions. If it is not being replaced with proper CQL content, there is something wrong with the bundle manipulating function 'loadBundleFromFileLocationAndManipulate'. "
-					}
-				]
-			},
-			"request": {
-				"method": "PUT",
-				"url": "Library/immunizationCQLLibrary"
-			}
-		},
-		{
-			"resource": {
-				"resourceType": "Library",
 				"id": "library-FHIRHelpers-4.0.1",
 				"extension": [
 					{
