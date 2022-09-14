@@ -132,7 +132,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				//Ensure users did not monkey with the patient compartment search parameter.
 				validateSearchParametersForPatient(map, theParams);
 
-				ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
+				ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 				if (!resourceType.equalsIgnoreCase("Patient")) {
 					map.add(patientSearchParam, new ReferenceParam().setMissing(false));
@@ -169,7 +169,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		} else {
 			// System
 			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
-			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
+			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 			for (SearchParameterMap map : maps) {
 				// requires a transaction
@@ -183,20 +183,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 		}
 
-		ourLog.warn("Finished expanding resource pids to export, size is {}", pids.size());
+		ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
 		return pids.iterator();
 	}
 
 	/**
 	 * Get a ISearchBuilder for the given resource type this partition is responsible for.
 	 */
-	protected ISearchBuilder getSearchBuilderForLocalResourceType(ExportPIDIteratorParameters theParams) {
-		String resourceType = theParams.getResourceType();
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
-		Class<? extends IBaseResource> typeClass = def.getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(dao, resourceType, typeClass);
-	}
 	protected ISearchBuilder getSearchBuilderForResourceType(String theResourceType) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
@@ -373,7 +366,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			validateSearchParametersForGroup(expandedSpMap, theParams.getResourceType());
 
 			// Fetch and cache a search builder for this resource type
-			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
+			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 			// Now, further filter the query with patient references defined by the chunk of IDs we have.
 			if (PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES.contains(theParams.getResourceType())) {
@@ -463,7 +456,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
 		//so would be otherwise skipped
 		List<String> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams);
-		ourLog.warn("Group {} has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
+		ourLog.debug("Group {} has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
 		expandedIds.addAll(membersFromGroupWithFilter);
 
 		return expandedIds;
