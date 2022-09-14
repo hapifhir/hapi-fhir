@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -118,73 +119,106 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		Set<ResourcePersistentId> pids = new HashSet<>();
 
 		if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
-			// Patient
-			if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-				String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
-				ourLog.error(errorMessage);
-				throw new IllegalStateException(Msg.code(797) + errorMessage);
-			}
-
-			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
-			String patientSearchParam = getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName();
-
-			for (SearchParameterMap map : maps) {
-				//Ensure users did not monkey with the patient compartment search parameter.
-				validateSearchParametersForPatient(map, theParams);
-
-				ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
-
-				if (!resourceType.equalsIgnoreCase("Patient")) {
-					map.add(patientSearchParam, new ReferenceParam().setMissing(false));
-				}
-
-				IResultIterator resultIterator = searchBuilder.createQuery(map,
-					new SearchRuntimeDetails(null, jobId),
-					null,
-					RequestPartitionId.allPartitions());
-				while (resultIterator.hasNext()) {
-					pids.add(resultIterator.next());
-				}
-			}
+			pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, def);
 		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
-			ourLog.trace("About to expand a Group Bulk Export");
-			// Group
-			if (resourceType.equalsIgnoreCase("Patient")) {
-				ourLog.info("Expanding Patients of a Group Bulk Export.");
-				return getExpandedPatientIterator(theParams);
-			}
-
-			Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
-			assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
-			if (ourLog.isDebugEnabled()) {
-				ourLog.debug("Group/{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
-			}
-
-			//Next, let's search for the target resources, with their correct patient references, chunked.
-			//The results will be jammed into myReadPids
-			QueryChunker<String> queryChunker = new QueryChunker<>();
-			queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
-				queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, def);
-			});
+			pids = getPidsForGroupStyleExport(theParams, resourceType, def);
 		} else {
-			// System
-			List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
-			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
-
-			for (SearchParameterMap map : maps) {
-				// requires a transaction
-				IResultIterator resultIterator = searchBuilder.createQuery(map,
-					new SearchRuntimeDetails(null, jobId),
-					null,
-					RequestPartitionId.allPartitions());
-				while (resultIterator.hasNext()) {
-					pids.add(resultIterator.next());
-				}
-			}
+			pids = getPidsForSystemStyleExport(theParams, jobId, def);
 		}
 
 		ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
 		return pids.iterator();
+	}
+
+	private Set<ResourcePersistentId> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String jobId, RuntimeResourceDefinition def) {
+		Set<ResourcePersistentId> pids = new HashSet<>();
+		// Patient
+		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
+			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
+			ourLog.error(errorMessage);
+			throw new IllegalStateException(Msg.code(797) + errorMessage);
+		}
+
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+		String patientSearchParam = getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName();
+
+		for (SearchParameterMap map : maps) {
+			//Ensure users did not monkey with the patient compartment search parameter.
+			validateSearchParametersForPatient(map, theParams);
+
+			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
+
+			if (!resourceType.equalsIgnoreCase("Patient")) {
+				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+			}
+
+			IResultIterator resultIterator = searchBuilder.createQuery(map,
+				new SearchRuntimeDetails(null, jobId),
+				null,
+				RequestPartitionId.allPartitions());
+			while (resultIterator.hasNext()) {
+				pids.add(resultIterator.next());
+			}
+		}
+		return pids;
+	}
+
+	private Set<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String jobId, RuntimeResourceDefinition def) {
+		Set<ResourcePersistentId> pids = new HashSet<>();
+		// System
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+		ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
+
+		for (SearchParameterMap map : maps) {
+			// requires a transaction
+			IResultIterator resultIterator = searchBuilder.createQuery(map,
+				new SearchRuntimeDetails(null, jobId),
+				null,
+				RequestPartitionId.allPartitions());
+			while (resultIterator.hasNext()) {
+				pids.add(resultIterator.next());
+			}
+		}
+		return pids;
+	}
+
+	private Set<ResourcePersistentId> getPidsForGroupStyleExport(ExportPIDIteratorParameters theParams, String resourceType, RuntimeResourceDefinition def) {
+		Set<ResourcePersistentId> pids = new HashSet<>();
+
+		if (resourceType.equalsIgnoreCase("Patient")) {
+			ourLog.info("Expanding Patients of a Group Bulk Export.");
+			pids = getExpandedPatientList(theParams);
+		} else if (resourceType.equalsIgnoreCase("Group")) {
+			pids = getSingletonGroupList(theParams);
+		} else {
+			pids = getPatientCompartmentPids(theParams, def);
+		}
+		return pids;
+	}
+
+	private Set<ResourcePersistentId> getPatientCompartmentPids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition def) {
+		Set<ResourcePersistentId> pids = new HashSet<>();
+		Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
+		assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
+		}
+
+		//Next, let's search for the target resources, with their correct patient references, chunked.
+		//The results will be jammed into myReadPids
+		QueryChunker<String> queryChunker = new QueryChunker<>();
+		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
+			queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, def);
+		});
+		return pids;
+	}
+
+	private Set<ResourcePersistentId> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
+		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), SystemRequestDetails.newSystemRequestAllPartitions());
+		ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
+		Set<ResourcePersistentId> pids =  new HashSet<>();
+		pids.add(pidOrNull);
+		return pids;
 	}
 
 	/**
@@ -245,7 +279,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	 * In case we are doing a Group Bulk Export and resourceType `Patient` is requested, we can just return the group members,
 	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
 	 */
-	private Iterator<ResourcePersistentId> getExpandedPatientIterator(ExportPIDIteratorParameters theParameters) {
+	private Set<ResourcePersistentId> getExpandedPatientList(ExportPIDIteratorParameters theParameters) {
 		List<String> members = getMembersFromGroupWithFilter(theParameters);
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		ourLog.debug("While extracting patients from a group, we found {} patients.", ids.size());
@@ -265,7 +299,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			});
 			populateMdmResourceCache(goldenPidSourcePidTuple);
 		}
-		return patientPidsToExport.iterator();
+		return patientPidsToExport;
 	}
 
 	/**
@@ -456,7 +490,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
 		//so would be otherwise skipped
 		List<String> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams);
-		ourLog.debug("Group {} has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
+		ourLog.debug("Group with ID [{}] has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
 		expandedIds.addAll(membersFromGroupWithFilter);
 
 		return expandedIds;

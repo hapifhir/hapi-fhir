@@ -109,7 +109,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			String value = id.getId();
 			resources.add(dao.readByPid(new ResourcePersistentId(value)));
 		}
-		
+
 		return resources;
 	}
 

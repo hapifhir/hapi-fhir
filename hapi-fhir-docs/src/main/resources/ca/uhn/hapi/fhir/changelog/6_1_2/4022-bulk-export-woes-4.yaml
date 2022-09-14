@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4022
+title: "Fixed a bug in Group Bulk Export, in which members which were part of multiple groups were causing other groups to be included during Group Bulk Export, if the Group resource type was specified. Now, when
+doing an export on a specific group, and you elect to return Group resources, only the called Group will be returned, regardless of cross-membership."
+

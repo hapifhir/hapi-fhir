@@ -47,6 +47,81 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private IBatch2JobRunner myJobRunner;
 
 	@Test
+	public void testVeryLargeGroup() {
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+
+		for (int i = 0; i < 600; i++) {
+			Patient patient = new Patient();
+			patient.setId("PING-" + i);
+			patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+			patient.setActive(true);
+			myClient.update().resource(patient).execute();
+			group.addMember().getEntity().setReference("Patient/PING-" + i);
+
+			Observation obs = new Observation();
+			obs.setId("obs-" + i);
+			obs.setSubject(new Reference("Patient/PING-" + i));
+			myClient.update().resource(obs).execute();
+		}
+
+		myClient.update().resource(group).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Group","Patient", "Observation");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G");
+		Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(firstMap.keySet(), hasSize(3));
+		assertThat(firstMap.get("Group"), hasSize(1));
+		assertThat(firstMap.get("Patient"), hasSize(600));
+		assertThat(firstMap.get("Observation"), hasSize(600));
+
+
+
+
+	}
+
+	@Test
+	public void testGroupBulkExportMembershipShouldNotExpandIntoOtherGroups() {
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G1");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+
+		patient = new Patient();
+		patient.setId("PING2");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		group.addMember().getEntity().setReference("Patient/PING2");
+		myClient.update().resource(group).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Group","Patient");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G1");
+		Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(firstMap.get("Patient"), hasSize(1));
+		assertThat(firstMap.get("Group"), hasSize(1));
+
+
+
+
+
+	}
+
+	@Test
 	public void testDifferentTypesDoNotUseCachedResults() {
 
 		Patient patient = new Patient();

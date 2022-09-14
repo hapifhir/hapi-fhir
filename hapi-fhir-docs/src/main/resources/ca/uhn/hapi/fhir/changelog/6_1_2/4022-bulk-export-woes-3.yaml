@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4022
+title: "Fixed a Group Bulk Export bug in which the group members would not be expanded correctly."
+

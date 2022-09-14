@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4022
+title: "Fixed a bug in Group Bulk Export where the server would crash in oracle due to too many clauses."
+
