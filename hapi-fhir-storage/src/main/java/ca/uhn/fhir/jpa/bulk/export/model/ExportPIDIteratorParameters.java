@@ -122,4 +122,16 @@ public class ExportPIDIteratorParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
+	@Override
+	public String toString() {
+		return "ExportPIDIteratorParameters{" +
+			"myResourceType='" + myResourceType + '\'' +
+			", myStartDate=" + myStartDate +
+			", myFilters=" + myFilters +
+			", myJobId='" + myJobId + '\'' +
+			", myExportStyle=" + myExportStyle +
+			", myGroupId='" + myGroupId + '\'' +
+			", myExpandMdm=" + myExpandMdm +
+			'}';
+	}
 }

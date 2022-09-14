@@ -5,28 +5,37 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,29 +47,43 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private IBatch2JobRunner myJobRunner;
 
 	@Test
-	public void testGroupBulkExportWithTypeFilter() {
-		// Create some resources
+	public void testDifferentTypesDoNotUseCachedResults() {
+
 		Patient patient = new Patient();
-		patient.setId("PF");
+		patient.setId("PING1");
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		patient.setActive(true);
 		myClient.update().resource(patient).execute();
 
-		patient = new Patient();
-		patient.setId("PM");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-		patient.setActive(true);
-		myClient.update().resource(patient).execute();
-
 		Group group = new Group();
-		group.setId("Group/G");
+		group.setId("Group/G2");
 		group.setActive(true);
-		group.addMember().getEntity().setReference("Patient/PF");
-		group.addMember().getEntity().setReference("Patient/PM");
+		group.addMember().getEntity().setReference("Patient/PING1");
 		myClient.update().resource(group).execute();
 
-		verifyBulkExportResults("G", Sets.newHashSet("Patient?gender=female"), Collections.singletonList("\"PF\""), Collections.singletonList("\"PM\""));
+		Observation o = new Observation();
+		o.setSubject(new Reference("Patient/PING1"));
+		o.setId("obs-included");
+		myClient.update().resource(o).execute();
+
+		Coverage c = new Coverage();
+		c.setBeneficiary(new Reference("Patient/PING1"));
+		c.setId("cov-included");
+		myClient.update().resource(c).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Observation","Patient");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+		Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(firstMap.get("Patient"), hasSize(1));
+		assertThat(firstMap.get("Observation"), hasSize(1));
+
+		HashSet<String> otherResourceTypes = Sets.newHashSet("Coverage","Patient");
+		BulkExportJobResults altBulkExportResults = startGroupBulkExportJobAndAwaitCompletion(otherResourceTypes, new HashSet<>(), "G2");
+		Map<String, List<IBaseResource>> secondMap = convertJobResultsToResources(altBulkExportResults);
+		assertThat(secondMap.get("Patient"), hasSize(1));
+		assertThat(secondMap.get("Coverage"), hasSize(1));
 	}
+
 
 	@Test
 	public void testGroupBulkExportNotInGroup_DoeNotShowUp() {
@@ -94,7 +117,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testTwoBulkExportsInArow() {
+	public void testTwoConsecutiveBulkExports() {
+
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -120,6 +144,339 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+
+	@Test
+	public void testGroupExportPatientAndOtherResources() {
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		//Other patient not in group
+		Patient patient2 = new Patient();
+		patient2.setId("POG2");
+		patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
+
+		Group group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+
+		Observation o = new Observation();
+		o.setSubject(new Reference("Patient/PING1"));
+		o.setId("obs-included");
+		myClient.update().resource(o).execute();
+
+		Observation o2 = new Observation();
+		o2.setSubject(new Reference("Patient/POG2"));
+		o2.setId("obs-excluded");
+		myClient.update().resource(o2).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Observation","Patient");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+		Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(typeToResources.get("Patient"), hasSize(1));
+		assertThat(typeToResources.get("Observation"), hasSize(1));
+
+		Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+		assertThat(typeToContents.get("Patient"), containsString("PING1"));
+		assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+
+		assertThat(typeToContents.get("Observation"), containsString("obs-included"));
+		assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
+
+	}
+
+	@Test
+	public void testGroupBulkExportWithTypeFilter() {
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		//Create an observation for each patient
+		Observation femaleObs = new Observation();
+		femaleObs.setSubject(new Reference("Patient/PF"));
+		femaleObs.setId("obs-female");
+		myClient.update().resource(femaleObs).execute();
+
+		Observation maleObs = new Observation();
+		maleObs.setSubject(new Reference("Patient/PM"));
+		maleObs.setId("obs-male");
+		myClient.update().resource(maleObs).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Observation","Patient");
+		HashSet<String> filters = Sets.newHashSet("Patient?gender=female");
+		BulkExportJobResults results  = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, "G");
+		Map<String, List<IBaseResource>> stringListMap = convertJobResultsToResources(results);
+		assertThat(stringListMap.get("Observation"), hasSize(1));
+		assertThat(stringListMap.get("Patient"), hasSize(1));
+
+		Map<String, String> typeToContents = convertJobResultsToStringContents(results);
+		assertThat(typeToContents.get("Observation"), not(containsString("obs-male")));
+		assertThat(typeToContents.get("Observation"), containsString("obs-female"));
+	}
+	@Test
+	public void testGroupExportOmitResourceTypesFetchesAll() {
+		// Create some resources
+		Patient patient = new Patient();
+		patient.setId("PF");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("PM");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Group group = new Group();
+		group.setId("Group/G");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PF");
+		group.addMember().getEntity().setReference("Patient/PM");
+		myClient.update().resource(group).execute();
+
+		//Create an observation for each patient
+		Observation femaleObs = new Observation();
+		femaleObs.setSubject(new Reference("Patient/PF"));
+		femaleObs.setId("obs-female");
+		myClient.update().resource(femaleObs).execute();
+
+		Observation maleObs = new Observation();
+		maleObs.setSubject(new Reference("Patient/PM"));
+		maleObs.setId("obs-male");
+		myClient.update().resource(maleObs).execute();
+
+		Coverage coverage = new Coverage();
+		coverage.setBeneficiary(new Reference("Patient/PM"));
+		coverage.setId("coverage-male");
+		myClient.update().resource(coverage).execute();
+
+		coverage = new Coverage();
+		coverage.setBeneficiary(new Reference("Patient/PF"));
+		coverage.setId("coverage-female");
+		myClient.update().resource(coverage).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
+
+		HashSet<String> filters = Sets.newHashSet();
+		BulkExportJobResults results  = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, filters, "G");
+		Map<String, List<IBaseResource>> typeToResource = convertJobResultsToResources(results);
+		assertThat(typeToResource.keySet(), hasSize(4));
+		assertThat(typeToResource.get("Group"), hasSize(1));
+		assertThat(typeToResource.get("Observation"), hasSize(2));
+		assertThat(typeToResource.get("Coverage"), hasSize(2));
+		assertThat(typeToResource.get("Patient"), hasSize(2));
+	}
+	@Test
+	public void testGroupExportPatientOnly() {
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		//Other patient not in group
+		Patient patient2 = new Patient();
+		patient2.setId("POG2");
+		patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
+
+		Group group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Patient");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+		Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(typeToResources.get("Patient"), hasSize(1));
+
+		Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+		assertThat(typeToContents.get("Patient"), containsString("PING1"));
+		assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+	}
+
+	@Test
+	public void testGroupBulkExportMultipleResourceTypes() {
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		//Other patient not in group
+		Patient patient2 = new Patient();
+		patient2.setId("POG2");
+		patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
+
+		Group group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+
+		Observation o = new Observation();
+		o.setSubject(new Reference("Patient/PING1"));
+		o.setId("obs-included");
+		myClient.update().resource(o).execute();
+
+		Coverage coverage = new Coverage();
+		coverage.setBeneficiary(new Reference("Patient/PING1"));
+		coverage.setId("coverage-included");
+		myClient.update().resource(coverage).execute();
+
+
+		HashSet<String> resourceTypes = Sets.newHashSet("Observation", "Coverage");
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+		Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(typeToResources.get("Observation"), hasSize(1));
+		assertThat(typeToResources.get("Coverage"), hasSize(1));
+
+		Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+		assertThat(typeToContents.get("Observation"), containsString("obs-included"));
+		assertThat(typeToContents.get("Coverage"), containsString("coverage-included"));
+	}
+
+	@Test
+	public void testBulkExportOverLargeDataset() {
+		Patient patient = new Patient();
+		patient.setId("PING1");
+		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		//Other patient not in group
+		Patient patient2 = new Patient();
+		patient2.setId("POG2");
+		patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+		patient2.setActive(true);
+		myClient.update().resource(patient2).execute();
+
+		Group group = new Group();
+		group.setId("Group/G2");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/PING1");
+		myClient.update().resource(group).execute();
+
+		for (int i = 0; i < 1000; i++) {
+			Observation o = new Observation();
+			o.setSubject(new Reference("Patient/PING1"));
+			o.setId("obs-included-"+ i);
+			myClient.update().resource(o).execute();
+		}
+		for (int i = 0; i < 100; i++) {
+			Observation o = new Observation();
+			o.setSubject(new Reference("Patient/POG2"));
+			o.setId("obs-not-included-"+ i);
+			myClient.update().resource(o).execute();
+		}
+
+		BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(Sets.newHashSet("Observation"), new HashSet<>(), "G2");
+
+		Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+		assertThat(typeToResources.get("Observation"), hasSize(1000));
+
+		Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+		assertThat(typeToContents.get("Observation"), not(containsString("not-included")));
+		assertThat(typeToContents.get("Observation"), containsString("obs-included-0"));
+		assertThat(typeToContents.get("Observation"), containsString("obs-included-999"));
+	}
+
+	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {
+		Map<String, String> typeToResources = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : theResults.getResourceTypeToBinaryIds().entrySet()) {
+			typeToResources.put(entry.getKey(), "");
+			StringBuilder sb = new StringBuilder();
+			List<String> binaryIds = entry.getValue();
+			for (String binaryId : binaryIds) {
+				String contents = getBinaryContentsAsString(binaryId);
+				if (!contents.endsWith("\n")) {
+					contents = contents + "\n";
+				}
+				sb.append(contents);
+			}
+			typeToResources.put(entry.getKey(), sb.toString());
+		}
+		return typeToResources;
+	}
+
+	Map<String, List<IBaseResource>> convertJobResultsToResources(BulkExportJobResults theResults) {
+		Map<String, String> stringStringMap = convertJobResultsToStringContents(theResults);
+		Map<String, List<IBaseResource>> typeToResources = new HashMap<>();
+		stringStringMap.entrySet().forEach(entry -> typeToResources.put(entry.getKey(), convertNDJSONToResources(entry.getValue())));
+		return typeToResources;
+	}
+
+	private List<IBaseResource> convertNDJSONToResources(String theValue) {
+		IParser iParser = myFhirContext.newJsonParser();
+		return theValue.lines()
+			.map(iParser::parseResource)
+			.toList();
+	}
+
+	private String getBinaryContentsAsString(String theBinaryId) {
+		Binary binary = myBinaryDao.read(new IdType(theBinaryId));
+		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+		String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
+		return contents;
+	}
+	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
+		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+
+	}
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
+
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(theResourceTypes);
+		options.setFilters(theFilters);
+		options.setExportStyle(theExportStyle);
+		if (theExportStyle == BulkDataExportOptions.ExportStyle.GROUP) {
+			options.setGroupId(new IdType("Group", theGroupId));
+		}
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+
+		assertNotNull(startResponse);
+
+		myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+
+		await().until(() -> myJobRunner.getJobInfo(startResponse.getJobId()).getReport() != null);
+
+		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
+		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		return results;
+
+	}
 
 	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
 		BulkDataExportOptions options = new BulkDataExportOptions();

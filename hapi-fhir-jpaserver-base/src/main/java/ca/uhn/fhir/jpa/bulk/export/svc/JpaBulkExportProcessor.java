@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.dao.index.IJpaIdHelperService;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
@@ -60,8 +59,6 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,8 +155,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 
 			Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
+			assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
 			if (ourLog.isDebugEnabled()) {
-				ourLog.debug("Group/{} has been expanded to members:[{}]", theParams, String.join(",", expandedMemberResourceIds));
+				ourLog.debug("Group/{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 			}
 
 			//Next, let's search for the target resources, with their correct patient references, chunked.
@@ -185,18 +183,25 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 		}
 
+		ourLog.warn("Finished expanding resource pids to export, size is {}", pids.size());
 		return pids.iterator();
 	}
 
 	/**
-	 * Get and cache an ISearchBuilder for the given resource type this partition is responsible for.
+	 * Get a ISearchBuilder for the given resource type this partition is responsible for.
 	 */
 	protected ISearchBuilder getSearchBuilderForLocalResourceType(ExportPIDIteratorParameters theParams) {
 		String resourceType = theParams.getResourceType();
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
-		Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
-		return mySearchBuilderFactory.newSearchBuilder(dao, resourceType, nextTypeClass);
+		Class<? extends IBaseResource> typeClass = def.getImplementingClass();
+		return mySearchBuilderFactory.newSearchBuilder(dao, resourceType, typeClass);
+	}
+	protected ISearchBuilder getSearchBuilderForResourceType(String theResourceType) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
+		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResourceType);
+		Class<? extends IBaseResource> typeClass = def.getImplementingClass();
+		return mySearchBuilderFactory.newSearchBuilder(dao, theResourceType, typeClass);
 	}
 
 	protected RuntimeSearchParam getPatientSearchParamForCurrentResourceType(String theResourceType) {
@@ -276,23 +281,16 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	 * @return A list of strings representing the Patient IDs of the members (e.g. ["P1", "P2", "P3"]
 	 */
 	private List<String> getMembersFromGroupWithFilter(ExportPIDIteratorParameters theParameters) {
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(theParameters.getResourceType());
+		RuntimeResourceDefinition def = myContext.getResourceDefinition("Patient");
 		List<String> pids = new ArrayList<>();
 
 		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParameters);
 
+		maps.forEach(map -> addMembershipToGroupClause(map, theParameters.getGroupId()));
+
 		for (SearchParameterMap map : maps) {
-			//Ensure users did not monkey with the patient compartment search parameter.
-			validateSearchParametersForPatient(map, theParameters);
-
-			ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParameters);
-
-			// Now, further filter the query with the group id.
-			HasOrListParam hasOrListParam = new HasOrListParam();
-			hasOrListParam.addOr(new HasParam("Group", "member", "_id", theParameters.getGroupId()));
-			map.add(PARAM_HAS, hasOrListParam);
+			ISearchBuilder searchBuilder = getSearchBuilderForResourceType("Patient");
 			ourLog.debug("Searching for members of group {} with job id {} with map {}", theParameters.getGroupId(), theParameters.getJobId(), map);
-
 			IResultIterator resultIterator = searchBuilder.createQuery(map,
 				new SearchRuntimeDetails(null, theParameters.getJobId()),
 				null,
@@ -302,6 +300,19 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 		}
 		return pids;
+	}
+
+	/**
+	 * This method takes an {@link SearchParameterMap} and adds a clause to it that will filter the search results to only
+	 * return members of the defined group.
+	 *
+	 * @param theMap the map to add the clause to.
+	 * @param theGroupId the group ID to filter by.
+	 */
+	private void addMembershipToGroupClause(SearchParameterMap theMap, String theGroupId) {
+		HasOrListParam hasOrListParam = new HasOrListParam();
+		hasOrListParam.addOr(new HasParam("Group", "member", "_id", theGroupId));
+		theMap.add(PARAM_HAS, hasOrListParam);
 	}
 
 	/**
@@ -392,7 +403,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private void filterSearchByResourceIds(List<String> idChunk, SearchParameterMap expandedSpMap, ExportPIDIteratorParameters theParams) {
 		ReferenceOrListParam orList = new ReferenceOrListParam();
 		idChunk.forEach(id -> orList.add(new ReferenceParam(id)));
-		expandedSpMap.add(getPatientSearchParamForCurrentResourceType(theParams.getResourceType()).getName(), orList);
+		RuntimeSearchParam patientSearchParamForCurrentResourceType = getPatientSearchParamForCurrentResourceType(theParams.getResourceType());
+		expandedSpMap.add(patientSearchParamForCurrentResourceType.getName(), orList);
 	}
 
 	/**
@@ -450,7 +462,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 		//Now manually add the members of the group (its possible even with mdm expansion that some members dont have MDM matches,
 		//so would be otherwise skipped
-		expandedIds.addAll(getMembersFromGroupWithFilter(theParams));
+		List<String> membersFromGroupWithFilter = getMembersFromGroupWithFilter(theParams);
+		ourLog.warn("Group {} has been expanded to: {}", theParams.getGroupId(), membersFromGroupWithFilter);
+		expandedIds.addAll(membersFromGroupWithFilter);
 
 		return expandedIds;
 	}
