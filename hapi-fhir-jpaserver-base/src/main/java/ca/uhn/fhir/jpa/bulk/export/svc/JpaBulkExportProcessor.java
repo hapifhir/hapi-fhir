@@ -65,7 +65,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -116,8 +115,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		String jobId = theParams.getJobId();
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-		Set<ResourcePersistentId> pids = new HashSet<>();
-
+		Set<ResourcePersistentId> pids;
 		if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
 			pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, def);
 		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
@@ -152,10 +150,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 			}
 
-			IResultIterator resultIterator = searchBuilder.createQuery(map,
-				new SearchRuntimeDetails(null, jobId),
-				null,
-				RequestPartitionId.allPartitions());
+			SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
+			IResultIterator resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
 			while (resultIterator.hasNext()) {
 				pids.add(resultIterator.next());
 			}
@@ -163,16 +159,16 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String jobId, RuntimeResourceDefinition def) {
+	private Set<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
 		Set<ResourcePersistentId> pids = new HashSet<>();
 		// System
-		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams);
+		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
 		ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
 		for (SearchParameterMap map : maps) {
 			// requires a transaction
 			IResultIterator resultIterator = searchBuilder.createQuery(map,
-				new SearchRuntimeDetails(null, jobId),
+				new SearchRuntimeDetails(null, theJobId),
 				null,
 				RequestPartitionId.allPartitions());
 			while (resultIterator.hasNext()) {
@@ -182,21 +178,21 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getPidsForGroupStyleExport(ExportPIDIteratorParameters theParams, String resourceType, RuntimeResourceDefinition def) {
-		Set<ResourcePersistentId> pids = new HashSet<>();
+	private Set<ResourcePersistentId> getPidsForGroupStyleExport(ExportPIDIteratorParameters theParams, String theResourceType, RuntimeResourceDefinition theDef) {
+		Set<ResourcePersistentId> pids;
 
-		if (resourceType.equalsIgnoreCase("Patient")) {
+		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
 			pids = getExpandedPatientList(theParams);
-		} else if (resourceType.equalsIgnoreCase("Group")) {
+		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
 		} else {
-			pids = getPatientCompartmentPids(theParams, def);
+			pids = getRelatedResourceTypePids(theParams, theDef);
 		}
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getPatientCompartmentPids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition def) {
+	private Set<ResourcePersistentId> getRelatedResourceTypePids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) {
 		Set<ResourcePersistentId> pids = new HashSet<>();
 		Set<String> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
 		assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
@@ -208,7 +204,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		//The results will be jammed into myReadPids
 		QueryChunker<String> queryChunker = new QueryChunker<>();
 		queryChunker.chunk(new ArrayList<>(expandedMemberResourceIds), QUERY_CHUNK_SIZE, (idChunk) -> {
-			queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, def);
+			queryResourceTypeWithReferencesToPatients(pids, idChunk, theParams, theDef);
 		});
 		return pids;
 	}
