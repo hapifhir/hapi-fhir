@@ -43,6 +43,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class StopWatch {
 
+	// TODO KHS it is risky for this to be a static field.  Safer to make it non-static, but that will require
+	// TODO KHS significant rework of StopWatchTest
 	private static Long ourNowForUnitTest;
 	private long myStarted = now();
 	private TaskTiming myCurrentTask;
@@ -414,7 +416,7 @@ public class StopWatch {
 	}
 
 	@VisibleForTesting
-	static void setNowForUnitTestForUnitTest(Long theNowForUnitTest) {
+	static public void setNowForUnitTest(Long theNowForUnitTest) {
 		ourNowForUnitTest = theNowForUnitTest;
 	}
 

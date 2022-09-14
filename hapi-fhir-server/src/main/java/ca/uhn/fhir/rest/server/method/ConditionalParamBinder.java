@@ -20,27 +20,21 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
-import java.lang.reflect.Method;
-import java.util.Collection;
-
-import org.apache.commons.lang3.Validate;
-
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 class ConditionalParamBinder implements IParameter {
 
-	private RestOperationTypeEnum myOperationType;
 	private boolean mySupportsMultiple;
 
-	ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
-		Validate.notNull(theOperationType, "theOperationType can not be null");
-		myOperationType = theOperationType;
+	ConditionalParamBinder(boolean theSupportsMultiple) {
 		mySupportsMultiple = theSupportsMultiple;
 	}
 
@@ -57,7 +51,7 @@ class ConditionalParamBinder implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getConditionalUrl(myOperationType);
+		return theRequest.getConditionalUrl(theMethodBinding.getRestOperationType());
 	}
 
 }

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;

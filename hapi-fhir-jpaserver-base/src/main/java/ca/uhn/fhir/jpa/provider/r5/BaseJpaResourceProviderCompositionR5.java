@@ -13,15 +13,9 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Composition;
 import org.hl7.fhir.r5.model.IdType;
-import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.UnsignedIntType;
-
-import java.util.List;
 
 
 /*
@@ -44,7 +38,7 @@ import java.util.List;
  * #L%
  */
 
-public class BaseJpaResourceProviderCompositionR5 extends JpaResourceProviderR5<Composition> {
+public abstract class BaseJpaResourceProviderCompositionR5 extends JpaResourceProviderR5<Composition> {
 
 	/**
 	 * Composition/123/$document

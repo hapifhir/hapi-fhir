@@ -23,12 +23,12 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 abstract class BaseDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> implements IJobDataSink<OT> {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseDataSink.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final String myInstanceId;
 	private final JobWorkCursor<PT,IT,OT> myJobWorkCursor;

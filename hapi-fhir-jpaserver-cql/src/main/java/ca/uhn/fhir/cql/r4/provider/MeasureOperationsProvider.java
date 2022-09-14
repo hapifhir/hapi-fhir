@@ -20,12 +20,12 @@ package ca.uhn.fhir.cql.r4.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluation;
 import ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluationSeed;
 import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -78,7 +78,7 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "periodEnd") String periodEnd,
 													 @OperationParam(name = "measure") String measureRef,
 													 @OperationParam(name = "reportType") String reportType,
-													 @OperationParam(name = "patient") String patientRef,
+													 @OperationParam(name = "subject") String subjectRef,
 													 @OperationParam(name = "productLine") String productLine,
 													 @OperationParam(name = "practitioner") String practitionerRef,
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
@@ -104,7 +104,7 @@ public class MeasureOperationsProvider {
 		if (reportType != null) {
 			switch (reportType) {
 				case "subject":
-					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+					return evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), subjectRef, practitionerRef, theRequestDetails);
 				case "subject-list":
 					return evaluator.evaluateSubjectListMeasure(seed.getMeasure(), seed.getContext(), practitionerRef, theRequestDetails);
 				case "population":
@@ -115,7 +115,7 @@ public class MeasureOperationsProvider {
 		}
 
 		// default report type is subject
-		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), patientRef, practitionerRef, theRequestDetails);
+		MeasureReport report = evaluator.evaluatePatientMeasure(seed.getMeasure(), seed.getContext(), subjectRef, practitionerRef, theRequestDetails);
 
 		if (productLine != null) {
 			Extension ext = new Extension();

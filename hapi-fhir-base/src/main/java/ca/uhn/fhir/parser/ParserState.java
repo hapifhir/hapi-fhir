@@ -46,8 +46,8 @@ import ca.uhn.fhir.model.base.resource.ResourceMetadataMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.XhtmlDt;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
@@ -69,7 +69,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IBaseXhtml;
 import org.hl7.fhir.instance.model.api.ICompositeType;
-import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -194,7 +193,7 @@ class ParserState<T> {
 		return theDefinition.newInstance();
 	}
 
-	public ICompositeType newCompositeInstance(PreResourceState thePreResourceState, BaseRuntimeChildDefinition theChild, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+	public ICompositeType newCompositeInstance(BasePreResourceState thePreResourceState, BaseRuntimeChildDefinition theChild, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance(theChild.getInstanceConstructorArguments());
 		if (retVal instanceof IBaseReference) {
 			IBaseReference ref = (IBaseReference) retVal;
@@ -204,7 +203,7 @@ class ParserState<T> {
 		return retVal;
 	}
 
-	public ICompositeType newCompositeTypeInstance(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
+	public ICompositeType newCompositeTypeInstance(BasePreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theCompositeTarget) {
 		ICompositeType retVal = (ICompositeType) theCompositeTarget.newInstance();
 		if (retVal instanceof IBaseReference) {
 			IBaseReference ref = (IBaseReference) retVal;
@@ -246,10 +245,10 @@ class ParserState<T> {
 
 	private abstract class BaseState {
 
-		private PreResourceState myPreResourceState;
+		private BasePreResourceState myPreResourceState;
 		private BaseState myStack;
 
-		BaseState(PreResourceState thePreResourceState) {
+		BaseState(BasePreResourceState thePreResourceState) {
 			super();
 			myPreResourceState = thePreResourceState;
 		}
@@ -315,7 +314,7 @@ class ParserState<T> {
 			return null;
 		}
 
-		PreResourceState getPreResourceState() {
+		BasePreResourceState getPreResourceState() {
 			return myPreResourceState;
 		}
 
@@ -352,9 +351,9 @@ class ParserState<T> {
 
 	}
 
-	private class ContainedResourcesStateHapi extends PreResourceState {
+	private class ContainedResourcesStateHapi extends BasePreResourceState {
 
-		public ContainedResourcesStateHapi(PreResourceState thePreResourcesState) {
+		public ContainedResourcesStateHapi(BasePreResourceState thePreResourcesState) {
 			super(thePreResourcesState, thePreResourcesState.myInstance.getStructureFhirVersionEnum());
 		}
 
@@ -393,9 +392,9 @@ class ParserState<T> {
 
 	}
 
-	private class ContainedResourcesStateHl7Org extends PreResourceState {
+	private class ContainedResourcesStateHl7Org extends BasePreResourceState {
 
-		public ContainedResourcesStateHl7Org(PreResourceState thePreResourcesState) {
+		public ContainedResourcesStateHl7Org(BasePreResourceState thePreResourcesState) {
 			super(thePreResourcesState, thePreResourcesState.myParentVersion);
 		}
 
@@ -437,9 +436,9 @@ class ParserState<T> {
 		private IBase myChildInstance;
 		private RuntimeChildDeclaredExtensionDefinition myDefinition;
 		private IBase myParentInstance;
-		private PreResourceState myPreResourceState;
+		private BasePreResourceState myPreResourceState;
 
-		public DeclaredExtensionState(PreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IBase theParentInstance) {
+		public DeclaredExtensionState(BasePreResourceState thePreResourceState, RuntimeChildDeclaredExtensionDefinition theDefinition, IBase theParentInstance) {
 			super(thePreResourceState);
 			myPreResourceState = thePreResourceState;
 			myDefinition = theDefinition;
@@ -527,7 +526,7 @@ class ParserState<T> {
 		private final Set<String> myParsedNonRepeatableNames = new HashSet<>();
 		private final String myElementName;
 
-		ElementCompositeState(PreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
+		ElementCompositeState(BasePreResourceState thePreResourceState, String theElementName, BaseRuntimeElementCompositeDefinition<?> theDef, IBase theInstance) {
 			super(thePreResourceState);
 			myDefinition = theDef;
 			myInstance = theInstance;
@@ -697,7 +696,7 @@ class ParserState<T> {
 
 		private final IBaseElement myElement;
 
-		ElementIdState(ParserState<T>.PreResourceState thePreResourceState, IBaseElement theElement) {
+		ElementIdState(BasePreResourceState thePreResourceState, IBaseElement theElement) {
 			super(thePreResourceState);
 			myElement = theElement;
 		}
@@ -718,7 +717,7 @@ class ParserState<T> {
 
 		private final IBaseExtension<?, ?> myExtension;
 
-		ExtensionState(PreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
+		ExtensionState(BasePreResourceState thePreResourceState, IBaseExtension<?, ?> theExtension) {
 			super(thePreResourceState);
 			myExtension = theExtension;
 		}
@@ -811,7 +810,7 @@ class ParserState<T> {
 
 		private final IIdentifiableElement myElement;
 
-		public IdentifiableElementIdState(ParserState<T>.PreResourceState thePreResourceState, IIdentifiableElement theElement) {
+		public IdentifiableElementIdState(BasePreResourceState thePreResourceState, IIdentifiableElement theElement) {
 			super(thePreResourceState);
 			myElement = theElement;
 		}
@@ -831,7 +830,7 @@ class ParserState<T> {
 	private class MetaElementState extends BaseState {
 		private final ResourceMetadataMap myMap;
 
-		public MetaElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
+		public MetaElementState(BasePreResourceState thePreResourceState, ResourceMetadataMap theMap) {
 			super(thePreResourceState);
 			myMap = theMap;
 		}
@@ -920,7 +919,7 @@ class ParserState<T> {
 
 		private final ResourceMetadataMap myMap;
 
-		MetaVersionElementState(ParserState<T>.PreResourceState thePreResourceState, ResourceMetadataMap theMap) {
+		MetaVersionElementState(BasePreResourceState thePreResourceState, ResourceMetadataMap theMap) {
 			super(thePreResourceState);
 			myMap = theMap;
 		}
@@ -943,14 +942,14 @@ class ParserState<T> {
 
 	}
 
-	private abstract class PreResourceState extends BaseState {
+	private abstract class BasePreResourceState extends BaseState {
 
 		private Map<String, IBaseResource> myContainedResources;
 		private List<IBaseReference> myLocalReferences = new ArrayList<>();
 		private IBaseResource myInstance;
 		private FhirVersionEnum myParentVersion;
 		private Class<? extends IBaseResource> myResourceType;
-		PreResourceState(Class<? extends IBaseResource> theResourceType) {
+		BasePreResourceState(Class<? extends IBaseResource> theResourceType) {
 			super(null);
 			myResourceType = theResourceType;
 			myContainedResources = new HashMap<>();
@@ -961,7 +960,7 @@ class ParserState<T> {
 			}
 		}
 
-		PreResourceState(PreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
+		BasePreResourceState(BasePreResourceState thePreResourcesState, FhirVersionEnum theParentVersion) {
 			super(thePreResourcesState);
 			Validate.notNull(theParentVersion);
 			myParentVersion = theParentVersion;
@@ -1026,7 +1025,7 @@ class ParserState<T> {
 			return myInstance;
 		}
 
-		private PreResourceState getRootPreResourceState() {
+		private BasePreResourceState getRootPreResourceState() {
 			if (getPreResourceState() != null) {
 				return getPreResourceState();
 			}
@@ -1171,7 +1170,7 @@ class ParserState<T> {
 
 	}
 
-	private class PreResourceStateHapi extends PreResourceState {
+	private class PreResourceStateHapi extends BasePreResourceState {
 		private IMutator myMutator;
 		private IBase myTarget;
 
@@ -1222,7 +1221,7 @@ class ParserState<T> {
 
 	}
 
-	private class PreResourceStateHl7Org extends PreResourceState {
+	private class PreResourceStateHl7Org extends BasePreResourceState {
 
 		private IMutator myMutator;
 		private IBase myTarget;
@@ -1307,7 +1306,7 @@ class ParserState<T> {
 		private final String myTypeName;
 		private IPrimitiveType<?> myInstance;
 
-		PrimitiveState(PreResourceState thePreResourceState, IPrimitiveType<?> theInstance, String theChildName, String theTypeName) {
+		PrimitiveState(BasePreResourceState thePreResourceState, IPrimitiveType<?> theInstance, String theChildName, String theTypeName) {
 			super(thePreResourceState);
 			myInstance = theInstance;
 			myChildName = theChildName;
@@ -1385,7 +1384,7 @@ class ParserState<T> {
 
 		private IResource myInstance;
 
-		public ResourceStateHapi(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance, Map<String, IBaseResource> theContainedResources) {
+		public ResourceStateHapi(BasePreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IResource theInstance, Map<String, IBaseResource> theContainedResources) {
 			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 			myInstance = theInstance;
 		}
@@ -1404,7 +1403,7 @@ class ParserState<T> {
 
 	private class ResourceStateHl7Org extends ElementCompositeState {
 
-		ResourceStateHl7Org(PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
+		ResourceStateHl7Org(BasePreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBaseResource theInstance) {
 			super(thePreResourceState, theDef.getName(), theDef, theInstance);
 		}
 
@@ -1412,7 +1411,7 @@ class ParserState<T> {
 
 	private class SecurityLabelElementStateHapi extends ElementCompositeState {
 
-		SecurityLabelElementStateHapi(ParserState<T>.PreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
+		SecurityLabelElementStateHapi(BasePreResourceState thePreResourceState, BaseRuntimeElementCompositeDefinition<?> theDef, IBase codingDt) {
 			super(thePreResourceState, theDef.getName(), theDef, codingDt);
 		}
 
@@ -1427,7 +1426,7 @@ class ParserState<T> {
 
 		private int myDepth;
 
-		SwallowChildrenWholeState(PreResourceState thePreResourceState) {
+		SwallowChildrenWholeState(BasePreResourceState thePreResourceState) {
 			super(thePreResourceState);
 		}
 
@@ -1563,7 +1562,7 @@ class ParserState<T> {
 		private List<XMLEvent> myEvents = new ArrayList<XMLEvent>();
 		private boolean myIncludeOuterEvent;
 
-		private XhtmlState(PreResourceState thePreResourceState, XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent) throws DataFormatException {
+		private XhtmlState(BasePreResourceState thePreResourceState, XhtmlDt theXhtmlDt, boolean theIncludeOuterEvent) throws DataFormatException {
 			super(thePreResourceState);
 			myDepth = 0;
 			myDt = theXhtmlDt;
@@ -1634,7 +1633,7 @@ class ParserState<T> {
 	private class XhtmlStateHl7Org extends XhtmlState {
 		private IBaseXhtml myHl7OrgDatatype;
 
-		private XhtmlStateHl7Org(PreResourceState thePreResourceState, IBaseXhtml theHl7OrgDatatype) {
+		private XhtmlStateHl7Org(BasePreResourceState thePreResourceState, IBaseXhtml theHl7OrgDatatype) {
 			super(thePreResourceState, new XhtmlDt(), true);
 			myHl7OrgDatatype = theHl7OrgDatatype;
 		}

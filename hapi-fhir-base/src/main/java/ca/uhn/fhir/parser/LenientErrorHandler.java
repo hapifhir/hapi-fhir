@@ -1,10 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
  * #%L
@@ -38,7 +38,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
-public class LenientErrorHandler extends BaseErrorHandler implements IParserErrorHandler {
+public class LenientErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LenientErrorHandler.class);
 	private static final StrictErrorHandler STRICT_ERROR_HANDLER = new StrictErrorHandler();

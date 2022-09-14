@@ -20,7 +20,7 @@ package ca.uhn.fhir.tls;
  * #L%
  */
 
-public class TrustStoreInfo extends StoreInfo{
+public class TrustStoreInfo extends BaseStoreInfo {
 
 	public TrustStoreInfo(String theFilePath, String theStorePass, String theAlias) {
 		super(theFilePath, theStorePass, theAlias);

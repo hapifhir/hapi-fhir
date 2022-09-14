@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -23,6 +24,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -63,10 +65,9 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private IJobPersistence myJobInstancePersister;
 	@Mock
 	private JobDefinitionRegistry myJobDefinitionRegistry;
+	@Mock
+	private IJobMaintenanceService myJobMaintenanceService;
 
-	// The code refactored to keep the same functionality,
-	// but in this service (so it's a real service here!)
-	private StepExecutionSvc myJobStepExecutorSvc;
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -77,13 +78,21 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
 	private ArgumentCaptor<JobInstance> myJobInstanceCaptor;
-	@Captor
-	private ArgumentCaptor<String> myErrorMessageCaptor;
+
+	private final JobInstance ourQueuedInstance = createInstance(JOB_DEFINITION_ID, StatusEnum.QUEUED);
 
 	@BeforeEach
 	public void beforeEach() {
-		myJobStepExecutorSvc = new StepExecutionSvc(myJobInstancePersister, myBatchJobSender);
-		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, myJobStepExecutorSvc);
+		// The code refactored to keep the same functionality,
+		// but in this service (so it's a real service here!)
+		WorkChunkProcessor jobStepExecutorSvc = new WorkChunkProcessor(myJobInstancePersister, myBatchJobSender);
+		mySvc = new JobCoordinatorImpl(myBatchJobSender, myWorkChannelReceiver, myJobInstancePersister, myJobDefinitionRegistry, jobStepExecutorSvc, myJobMaintenanceService);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		// TODO KHS add verify for the other mocks
+		verifyNoMoreInteractions(myJobMaintenanceService);
 	}
 
 	@Test
@@ -132,7 +141,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	private void setupMocks(JobDefinition<TestJobParameters> theJobDefinition, WorkChunk theWorkChunk) {
 		mockJobRegistry(theJobDefinition);
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(theWorkChunk));
 	}
 
@@ -194,6 +203,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		setupMocks(createJobDefinition(), createWorkChunkStep1());
 		when(myStep1Worker.run(any(), any())).thenReturn(new RunOutcome(50));
+		when(myJobInstancePersister.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+
 		mySvc.start();
 
 		// Execute
@@ -208,7 +219,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PARAM_2_VALUE, params.getParam2());
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
-		verify(myJobInstancePersister, times(1)).updateInstance(any());
+		// QUEUED -> IN_PROGRESS and IN_PROGRESS -> COMPLETED
+		verify(myJobInstancePersister, times(2)).updateInstance(any());
 	}
 
 	@Test
@@ -250,7 +262,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
 
@@ -276,7 +288,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenThrow(new NullPointerException("This is an error message"));
 		mySvc.start();
 
@@ -311,7 +323,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_2, new TestJobStep2InputType(DATA_1_VALUE, DATA_2_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep2Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<?> sink = t.getArgument(1, IJobDataSink.class);
 			sink.recoveredError("Error message 1");
@@ -343,7 +355,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunkStep3()));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenReturn(new RunOutcome(50));
 		mySvc.start();
 
@@ -370,7 +382,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		when(myJobInstancePersister.fetchWorkChunkSetStartTimeAndMarkInProgress(eq(CHUNK_ID))).thenReturn(Optional.of(createWorkChunk(STEP_3, new TestJobStep3InputType().setData3(DATA_3_VALUE).setData4(DATA_4_VALUE))));
 		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
-		when(myJobInstancePersister.fetchInstanceAndMarkInProgress(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
 		when(myStep3Worker.run(any(), any())).thenAnswer(t -> {
 			IJobDataSink<VoidModel> sink = t.getArgument(1, IJobDataSink.class);
 			sink.accept(new VoidModel());
@@ -545,13 +557,8 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId) {
-		return createWorkNotification(JOB_DEFINITION_ID, theStepId);
-	}
-
-	@Nonnull
-	private JobWorkNotification createWorkNotification(String theJobId, String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
-		payload.setJobDefinitionId(theJobId);
+		payload.setJobDefinitionId(JOB_DEFINITION_ID);
 		payload.setJobDefinitionVersion(1);
 		payload.setInstanceId(INSTANCE_ID);
 		payload.setChunkId(BaseBatch2Test.CHUNK_ID);
@@ -560,7 +567,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
+	public static WorkChunk createWorkChunk(String theTargetStepId, IModelJson theData) {
 		return createWorkChunk(JOB_DEFINITION_ID, theTargetStepId, theData);
 	}
 
@@ -576,11 +583,11 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep1() {
+	public static WorkChunk createWorkChunkStep1() {
 		return createWorkChunk(STEP_1, null);
 	}
 
-	static WorkChunk createWorkChunkStep2() {
+	public static WorkChunk createWorkChunkStep2() {
 		return createWorkChunkStep2(JOB_DEFINITION_ID);
 	}
 
@@ -590,7 +597,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Nonnull
-	static WorkChunk createWorkChunkStep3() {
+	public static WorkChunk createWorkChunkStep3() {
 		return createWorkChunkStep3(JOB_DEFINITION_ID);
 	}
 

@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -105,7 +105,7 @@ public class ResourceReindexer {
 		Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
 		final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
 		dao.reindex(theResource, theResourceTable);
-		if (myFulltextSearchSvc != null) {
+		if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
 			// update the full-text index, if active.
 			myFulltextSearchSvc.reindex(theResourceTable);
 		}

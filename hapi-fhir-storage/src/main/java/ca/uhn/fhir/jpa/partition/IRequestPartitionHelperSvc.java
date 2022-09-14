@@ -66,4 +66,6 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);
+
+	boolean isResourcePartitionable(String theResourceType);
 }

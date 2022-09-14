@@ -321,6 +321,7 @@ class JpaJobPersistenceImplTest {
 		entity.setEndTime(new Date(2000, 2, 3));
 		entity.setStatus(StatusEnum.COMPLETED);
 		entity.setCancelled(true);
+		entity.setFastTracking(true);
 		entity.setCombinedRecordsProcessed(12);
 		entity.setCombinedRecordsProcessedPerSecond(2d);
 		entity.setTotalElapsedMillis(1000);

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -179,17 +179,8 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		IBundleProvider outcome = runInTransaction(() -> {
 			IBundleProvider res =  dao.patientInstanceEverything(
 				req,
-				new IdDt(id),
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				theDetails
-			);
+                    theDetails, new PatientEverythingParameters(), new IdDt(id)
+            );
 			return res;
 		});
 

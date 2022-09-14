@@ -222,21 +222,21 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
 	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
-		
+
 		QuantityPredicateBuilder retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
-		
+
 		return retVal;
 	}
 
 	public QuantityNormalizedPredicateBuilder addQuantityNormalizedPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
-		
+
 		QuantityNormalizedPredicateBuilder retVal = mySqlBuilderFactory.quantityNormalizedIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
-		
+
 		return retVal;
 	}
-	
+
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */
@@ -310,6 +310,9 @@ public class SearchQueryBuilder {
 		return retVal;
 	}
 
+	public SqlObjectFactory getSqlBuilderFactory() {
+		return mySqlBuilderFactory;
+	}
 
 	public ResourceIdPredicateBuilder newResourceIdBuilder() {
 		return mySqlBuilderFactory.resourceId(this);
@@ -400,7 +403,7 @@ public class SearchQueryBuilder {
 		if (maxResultsToFetch != null || offset != null) {
 
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
-			
+
 			AbstractLimitHandler limitHandler = (AbstractLimitHandler) myDialect.getLimitHandler();
 			RowSelection selection = new RowSelection();
 			selection.setFirstRow(offset);
@@ -603,7 +606,7 @@ public class SearchQueryBuilder {
 	}
 
 	public void excludeResourceIdsPredicate(Set<ResourcePersistentId> theExsitinghPidSetToExclude) {
-		
+
 		// Do  nothing if it's empty
 		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
 			return;
@@ -611,7 +614,7 @@ public class SearchQueryBuilder {
 		List<Long> excludePids = JpaPid.toLongList(theExsitinghPidSetToExclude);
 		
 		ourLog.trace("excludePids = " + excludePids);
-		
+
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
 		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
 		predicate.setNegate(true);
