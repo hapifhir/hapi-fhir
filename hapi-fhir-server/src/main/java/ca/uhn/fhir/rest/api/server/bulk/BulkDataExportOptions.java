@@ -43,6 +43,7 @@ public class BulkDataExportOptions {
 	private ExportStyle myExportStyle;
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
+	private IIdType myPatientId;
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
@@ -98,5 +99,13 @@ public class BulkDataExportOptions {
 
 	public void setGroupId(IIdType theGroupId) {
 		myGroupId = theGroupId;
+	}
+
+	public IIdType getPatientId() {
+		return myPatientId;
+	}
+
+	public void setPatientId(IIdType thePatientId) {
+		myPatientId = thePatientId;
 	}
 }
