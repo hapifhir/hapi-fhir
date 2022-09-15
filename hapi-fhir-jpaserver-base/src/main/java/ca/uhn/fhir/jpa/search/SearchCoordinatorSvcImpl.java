@@ -706,7 +706,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 	}
 
-		/**
+	/**
 	 * A search task is a Callable task that runs in
 	 * a thread pool to handle an individual search. One instance
 	 * is created for any requested search and runs from the
@@ -1145,10 +1145,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 */
 			int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
 			int minWanted = 0;
+			boolean useMinWanted = false;
 			if (myParams.getCount() != null) {
-				minWanted = myParams.getCount();
-				minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
-				minWanted += currentlyLoaded;
+				if (currentlyLoaded == 0) {
+					minWanted = myParams.getCount();
+					useMinWanted = true;
+				} else {
+					minWanted = myParams.getCount();
+					minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
+					minWanted += currentlyLoaded;
+				}
 			}
 
 			for (Iterator<Integer> iter = myDaoConfig.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
@@ -1160,7 +1166,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (next == -1) {
 					sb.setMaxResultsToFetch(null);
 				} else {
-					myMaxResultsToFetch = Math.max(next, minWanted);
+					myMaxResultsToFetch = useMinWanted ? minWanted : Math.max(next, minWanted);
 					sb.setMaxResultsToFetch(myMaxResultsToFetch);
 				}
 
@@ -1221,7 +1227,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						shouldSync = false;
 					}
 
-					if (myUnsyncedPids.size() > 50000) {
+					if (myUnsyncedPids.size() > 50_000) {
 						shouldSync = true;
 					}
 
