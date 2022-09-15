@@ -7131,13 +7131,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date dateV2 = patientV2.getMeta().getLastUpdated();
 		assertTrue(dateV1.before((dateV2)));
 
-		// Issue 3138 test case
-		verifyWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
-		verifyWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
-		verifyWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		// Issue 3138 test case, verify behavior of _at
+		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		// verify behavior of _since
+		verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+
 	}
 
-	private void verifyWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+	private void verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
@@ -7147,7 +7152,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
 	}
 
-	private void verifyWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+	private void verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
 		assertTrue(timeBetweenUpdates.after(dateV1));
 		assertTrue(timeBetweenUpdates.after(dateV2));
@@ -7156,7 +7161,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
 	}
 
-	private void verifyWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+	private void verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
 		assertTrue(timeBetweenUpdates.before(dateV1));
 		assertTrue(timeBetweenUpdates.before(dateV2));
@@ -7165,6 +7170,34 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
 		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
 	}
+
+	private void verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(1, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(0, resultIds.size());
+	}
+
+	private void verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
 
 	@Nonnull
 	private IIdType createNewPatientWithHistory() {
