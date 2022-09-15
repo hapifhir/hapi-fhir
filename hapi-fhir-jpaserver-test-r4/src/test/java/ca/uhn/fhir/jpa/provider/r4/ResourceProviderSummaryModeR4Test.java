@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -28,7 +29,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		super.after();
 		myDaoConfig.setCountSearchResultsUpTo(null);
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setDefaultTotalMode(null);
 	}
@@ -71,7 +72,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
+		assertEquals(Integer.valueOf(104), outcome.getTotalElement().getValue());
 		assertEquals(0, outcome.getEntry().size());
 	}
 
@@ -88,7 +89,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
+		assertEquals(Integer.valueOf(104), outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
 	}
 
@@ -106,7 +107,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
+		assertEquals(Integer.valueOf(104), outcome.getTotalElement().getValue());
 		assertEquals(10, outcome.getEntry().size());
 	}
 
@@ -124,7 +125,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(0), outcome.getTotalElement().getValue());
+		assertEquals(Integer.valueOf(0), outcome.getTotalElement().getValue());
 		assertEquals(0, outcome.getEntry().size());
 	}
 
