@@ -148,7 +148,10 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 			}
 
-			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+//			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			if (theContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
+
+				//for james: what should we do with dst2 cause we do not hvae an expression
 
 				// DSTU3 and below
 				String[] expressionSplit = theSearchParamExtractor.split(expression);
@@ -157,17 +160,23 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 					int dotIdx = nextPath.indexOf('.');
 					if (dotIdx == -1) {
+						// this message is invalid
+						// james: what type of message should we put here
 						throw new UnprocessableEntityException(Msg.code(1117) + "Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name.");
 					}
 
 					String resourceName = nextPath.substring(0, dotIdx);
-					try {
-						theContext.getResourceDefinition(resourceName);
-					} catch (DataFormatException e) {
-						throw new UnprocessableEntityException(Msg.code(1118) + "Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
+					// james: what was the intent here?
+					if (dstu2) {
+						try {
+							theContext.getResourceDefinition(resourceName);
+						} catch (DataFormatException e) {
+							throw new UnprocessableEntityException(Msg.code(1118) + "Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
+						}
 					}
 
-					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+					if (dstu3) {
+//					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 						if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
 							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
 							try {
