@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -35,7 +36,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class BulkExportHelperService {
+	private static final Logger ourLog = getLogger(BulkExportHelperService.class);
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -45,12 +49,16 @@ public class BulkExportHelperService {
 
 	public List<SearchParameterMap> createSearchParameterMapsForResourceType(RuntimeResourceDefinition theDef, ExportPIDIteratorParameters theParams) {
 		String resourceType = theDef.getName();
-		String[] typeFilters = theParams.getFilters().toArray(new String[0]); // lame...
+		List<String> typeFilters = theParams.getFilters();
 		List<SearchParameterMap> spMaps = null;
-		spMaps = Arrays.stream(typeFilters)
+		spMaps = typeFilters.stream()
 			.filter(typeFilter -> typeFilter.startsWith(resourceType + "?"))
 			.map(filter -> buildSearchParameterMapForTypeFilter(filter, theDef, theParams.getStartDate()))
 			.collect(Collectors.toList());
+
+		typeFilters.stream().filter(filter -> !filter.contains("?")).forEach(filter -> {
+			ourLog.warn("Found a strange _typeFilter that we could not process: {}. _typeFilters should follow the format ResourceType?searchparameter=value .", filter);
+		});
 
 		//None of the _typeFilters applied to the current resource type, so just make a simple one.
 		if (spMaps.isEmpty()) {
