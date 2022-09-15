@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Note that this interface is not considered a stable interface. While it is possible to build applications
@@ -214,6 +215,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	default List<ResourcePersistentId> searchForIds(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest, null);
+	}
+
+	/**
+	 * Search for IDs, return as a stream
+	 */
+
+	default Stream<IBaseResource> searchForIdsAsStream(SearchParameterMap theParams, RequestDetails theRequest) {
+		return searchForIds(theParams, theRequest).stream().map(this::readByPid);
 	}
 
 	/**
