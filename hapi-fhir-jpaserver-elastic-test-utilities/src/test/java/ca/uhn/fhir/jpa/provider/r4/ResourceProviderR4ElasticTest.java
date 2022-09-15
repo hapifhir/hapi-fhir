@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.apache.commons.io.IOUtils;
@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = TestHSearchAddInConfig.Elasticsearch.class)
+@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4ElasticTest.class);
 

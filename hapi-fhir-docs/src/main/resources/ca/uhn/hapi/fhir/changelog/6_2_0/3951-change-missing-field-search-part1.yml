@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 3951
+title: "There are now 2 different methods of Missing Fields search.
+      One that works if Enable Missing Fields Search is enabled,
+      and one that works if it is not.
+      These 2 are not compatible together.
+      "

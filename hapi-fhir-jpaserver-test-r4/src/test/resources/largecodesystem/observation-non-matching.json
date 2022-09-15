@@ -1,0 +1,36 @@
+{
+	"resourceType": "Observation",
+	"id": "observationtestnomatch",
+	"code": {
+		"coding": [
+			{
+				"system": "http://loinc.org",
+				"code": "718-7",
+				"display": "Hemoglobin [Mass/volume] in Blood"
+			}
+		],
+		"text": "Haemoglobin"
+	},
+	"valueQuantity": {
+		"value": 176,
+		"unit": "g/L",
+		"system": "http://unitsofmeasure.org",
+		"code": "g/L"
+	},
+	"referenceRange": [
+		{
+			"low": {
+				"value": 135,
+				"unit": "g/L",
+				"system": "http://unitsofmeasure.org",
+				"code": "g/L"
+			},
+			"high": {
+				"value": 180,
+				"unit": "g/L",
+				"system": "http://unitsofmeasure.org",
+				"code": "g/L"
+			}
+		}
+	]
+}

@@ -23,23 +23,22 @@ package ca.uhn.fhir.batch2.maintenance;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobStepExecutorOutput;
-import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
+import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 
 public class JobInstanceProcessor {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProcessor.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
 	private final IJobPersistence myJobPersistence;
@@ -48,14 +47,14 @@ public class JobInstanceProcessor {
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceProgressCalculator myJobInstanceProgressCalculator;
-	private final StepExecutionSvc myJobExecutorSvc;
+	private final WorkChunkProcessor myJobExecutorSvc;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	JobInstanceProcessor(IJobPersistence theJobPersistence,
 								BatchJobSender theBatchJobSender,
 								JobInstance theInstance,
 								JobChunkProgressAccumulator theProgressAccumulator,
-								StepExecutionSvc theExecutorSvc
+								WorkChunkProcessor theExecutorSvc
 	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
@@ -73,10 +72,9 @@ public class JobInstanceProcessor {
 	}
 
 	private void handleCancellation() {
-		if (myInstance.isPendingCancellation()) {
+		if (myInstance.isPendingCancellationRequest()) {
 			myInstance.setErrorMessage(buildCancelledMessage());
-			myInstance.setStatus(StatusEnum.CANCELLED);
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.setCancelled(myInstance);
 		}
 	}
 
@@ -155,13 +153,14 @@ public class JobInstanceProcessor {
 				// otherwise, continue processing as expected
 				processChunksForNextSteps(instanceId, nextStepId);
 			}
-		}  else {
-				ourLog.debug("All chunks are not complete yet, there are {} remaining chunks for instance {} step {}", incompleteChunks, instanceId, currentStepId);
+		} else {
+			ourLog.debug("Not ready to advance gated execution of instance {} from step {} to {} because there are {} incomplete work chunks",
+				instanceId, currentStepId, jobWorkCursor.nextStep.getStepId(), incompleteChunks);
 		}
 	}
 
 	private void processChunksForNextSteps(String instanceId, String nextStepId) {
-		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, EnumSet.of(StatusEnum.QUEUED));
+		List<String> chunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, StatusEnum.QUEUED);
 		for (String nextChunkId : chunksForNextStep) {
 			JobWorkNotification workNotification = new JobWorkNotification(myInstance, nextStepId, nextChunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
@@ -179,19 +178,8 @@ public class JobInstanceProcessor {
 			myInstance,
 			null);
 		if (!result.isSuccessful()) {
-			myInstance.setStatus(StatusEnum.FAILED);
 			myInstance.setEndTime(new Date());
-			myJobPersistence.updateInstance(myInstance);
+			myJobInstanceStatusUpdater.setFailed(myInstance);
 		}
-	}
-
-	public static boolean updateInstanceStatus(JobInstance myInstance, StatusEnum newStatus) {
-		if (myInstance.getStatus() != newStatus) {
-			ourLog.info("Marking job instance {} of type {} as {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), newStatus);
-			myInstance.setStatus(newStatus);
-			myInstance.setStartTime(new Date());
-			return true;
-		}
-		return false;
 	}
 }

@@ -37,8 +37,10 @@ import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
@@ -177,7 +179,11 @@ public class TestHSearchAddInConfig {
 	 * Make sure you add {@link RequiresDocker} annotation to any uses.
 	 */
 	@Configuration
+	@Import(PooledElasticsearchContainerConfig.class)
 	public static class Elasticsearch {
+		@Autowired
+		ElasticsearchContainer myElasticsearchContainer;
+
 		@Bean
 		@Primary // override the default
 		IHSearchConfigurer hibernateSearchConfigurer(ElasticsearchContainer theContainer) {
@@ -208,32 +214,30 @@ public class TestHSearchAddInConfig {
 		}
 
 		@Bean
-		public ElasticsearchContainer elasticContainer() {
-			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
-			embeddedElasticSearch.start();
-			return embeddedElasticSearch;
-		}
-
-		@PreDestroy
-		public void stop() {
-			elasticContainer().stop();
-		}
-
-		@Bean
 		public PartitionSettings partitionSettings() {
 			return new PartitionSettings();
 		}
 
 		@Bean()
 		public ElasticsearchSvcImpl myElasticsearchSvc() {
-			int elasticsearchPort = elasticContainer().getMappedPort(9200);
-			String host = elasticContainer().getHost();
+			int elasticsearchPort = myElasticsearchContainer.getMappedPort(9200);
+			String host = myElasticsearchContainer.getHost();
 			return new ElasticsearchSvcImpl("http", host + ":" + elasticsearchPort, null, null);
 		}
 
 		@PreDestroy
 		public void stopEsClient() throws IOException {
 			myElasticsearchSvc().close();
+		}
+	}
+
+	@Configuration
+	public static class PooledElasticsearchContainerConfig {
+		@Bean
+		public ElasticsearchContainer elasticContainer() {
+			ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+			embeddedElasticSearch.start();
+			return embeddedElasticSearch;
 		}
 
 	}

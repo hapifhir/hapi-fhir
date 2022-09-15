@@ -54,7 +54,7 @@ public class GraphQLMethodBinding extends OperationMethodBinding {
 	private final RequestTypeEnum myMethodRequestType;
 
 	public GraphQLMethodBinding(Method theMethod, RequestTypeEnum theMethodRequestType, FhirContext theContext, Object theProvider) {
-		super(null, null, theMethod, theContext, theProvider, true, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null, true);
+		super(null, null, theMethod, theContext, theProvider, true, false, Constants.OPERATION_NAME_GRAPHQL, null, null, null, null, true);
 
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, theContext);
 		myQueryUrlParamIndex = ParameterUtil.findParamAnnotationIndex(theMethod, GraphQLQueryUrl.class);
