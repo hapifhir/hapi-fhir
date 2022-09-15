@@ -47,6 +47,9 @@ public class BulkExportUtils {
 		if (theOptions.getResourceTypes() != null) {
 			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
 		}
+		if (theOptions.getPatientId() != null) {
+			parameters.setPatientId(theOptions.getPatientId().getValue());
+		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 
 		return parameters;

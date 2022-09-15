@@ -75,6 +75,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 
 public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaBulkExportProcessor.class);
@@ -135,7 +136,15 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 				ISearchBuilder searchBuilder = getSearchBuilderForLocalResourceType(theParams);
 
 				if (!resourceType.equalsIgnoreCase("Patient")) {
-					map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+					if (theParams.getPatientId() != null) {
+						map.add(patientSearchParam, new ReferenceParam(theParams.getPatientId()));
+					} else {
+						map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+					}
+				} else {
+					if (theParams.getPatientId() != null) {
+						map.add(PARAM_ID, new ReferenceParam(theParams.getPatientId()));
+					}
 				}
 
 				IResultIterator resultIterator = searchBuilder.createQuery(map,

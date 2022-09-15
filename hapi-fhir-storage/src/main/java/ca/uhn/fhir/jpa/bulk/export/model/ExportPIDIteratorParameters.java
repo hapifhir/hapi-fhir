@@ -67,6 +67,11 @@ public class ExportPIDIteratorParameters {
 	 */
 	private boolean myExpandMdm;
 
+	/**
+	 * The patient id
+	 */
+	private String myPatientId;
+
 	public String getResourceType() {
 		return myResourceType;
 	}
@@ -121,6 +126,14 @@ public class ExportPIDIteratorParameters {
 
 	public void setExpandMdm(boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
+	}
+
+	public String getPatientId() {
+		return myPatientId;
+	}
+
+	public void setPatientId(String thePatientId) {
+		myPatientId = thePatientId;
 	}
 
 	@Override

@@ -62,6 +62,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setStartDate(params.getStartDate());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
+		providerParams.setPatientId(params.getPatientId());
 		providerParams.setExpandMdm(params.isExpandMdm());
 		ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
 

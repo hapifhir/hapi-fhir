@@ -70,6 +70,11 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 */
 	private boolean myExpandMdm;
 
+	/**
+	 * Patient id
+	 */
+	private String myPatientId;
+
 	public boolean isExpandMdm() {
 		return myExpandMdm;
 	}
@@ -131,5 +136,13 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
+	}
+
+	public String getPatientId() {
+		return myPatientId;
+	}
+
+	public void setPatientId(String thePatientId) {
+		myPatientId = thePatientId;
 	}
 }
