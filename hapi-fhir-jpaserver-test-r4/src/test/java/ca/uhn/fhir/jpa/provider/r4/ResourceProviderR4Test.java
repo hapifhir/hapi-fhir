@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -28,6 +29,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -71,6 +74,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -128,6 +132,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
@@ -142,8 +147,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
@@ -152,6 +160,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -162,6 +171,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -169,6 +179,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
@@ -227,7 +238,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
@@ -7142,6 +7153,317 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
+	}
+
+	@Nested
+	public class MissingSearchParameterTests {
+
+		private interface XtoY<X, Y> {
+			Y doTask(X theInput);
+		}
+
+		private static class MissingSearchTestParameters {
+			/**
+			 * The setting for IndexMissingFields
+			 */
+			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
+
+			/**
+			 * Whether to use :missing=true/false
+			 */
+			public final boolean myIsMissing;
+
+			/**
+			 * Whether or not the field is populated or not.
+			 * True -> populate field.
+			 * False -> not populated
+			 */
+			public final boolean myIsValuePresentOnResource;
+
+			public MissingSearchTestParameters(
+				DaoConfig.IndexEnabledEnum theEnableMissingFields,
+				boolean theIsMissing,
+				boolean theHasField
+			) {
+				myEnableMissingFieldsValue = theEnableMissingFields;
+				myIsMissing = theIsMissing;
+				myIsValuePresentOnResource = theHasField;
+			}
+		}
+
+		private IParser myParser;
+
+		@BeforeEach
+		public void init() {
+			myParser = myFhirContext.newJsonParser();
+			myParser.setPrettyPrint(true);
+
+			myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		}
+
+		/**
+		 * Verifies that the returned Bundle contains the resource
+		 * with the id provided.
+		 * @param theBundle - returned bundle
+		 * @param theType - provided resource id
+		 */
+		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
+			ourLog.info(myParser.encodeResourceToString(theBundle));
+
+			assertEquals(1, theBundle.getTotal());
+			List<IIdType> list = toUnqualifiedVersionlessIds(theBundle);
+			ourLog.info(list.size() + " resources found");
+			IIdType type = list.get(0);
+			assertEquals(theType.toString(), type.toString());
+		}
+
+		private void verifyBundleIsEmpty(Bundle theBundle) {
+			ourLog.info(myParser.encodeResourceToString(theBundle));
+			assertEquals(0, theBundle.getTotal());
+		}
+
+		private IIdType createResource(Resource theResource) {
+			IIdType id = myClient.create()
+				.resource(theResource)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+			theResource.setId(id);
+			ourLog.info("Created:\n{}",
+				myParser.encodeResourceToString(theResource));
+			return id;
+		}
+
+		/**
+		 * Runs the search on the given resource type with the given (missing) criteria
+		 * @param theResourceClass - the resource type class
+		 * @param theCriteria - the missing critia to use
+		 * @return - the found bundle
+		 */
+		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
+			//@formatter:off
+			return myClient
+				.search()
+				.forResource(theResourceClass)
+				.where(theCriteria)
+				.count(100)
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			//@formatter:on
+		}
+
+		/**
+		 * The method that generates parameters for tests
+		 */
+		private static Stream<Arguments> provideParameters() {
+			return Stream.of(
+				// 1
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
+				// 2
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
+				// 3
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
+				// 4
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
+				// 5
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
+				// 6
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
+				// 7
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
+				// 8
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
+			);
+		}
+
+		/**
+		 * Runs the actual test for whichever search parameter and given inputs we want.
+		 */
+		private void runTest(
+			MissingSearchTestParameters theParams,
+			XtoY<Boolean, Resource> theResourceProvider,
+			XtoY<Boolean, Bundle> theRunner
+		) {
+			String testMethod = new Exception().getStackTrace()[1].getMethodName();
+			ourLog.info(
+				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
+				testMethod,
+				theParams.myEnableMissingFieldsValue.name(),
+				theParams.myIsValuePresentOnResource,
+				theParams.myIsMissing,
+				theParams.myIsValuePresentOnResource == theParams.myIsMissing ? "0" : "1"
+			);
+
+			// setup
+			myDaoConfig.setIndexMissingFields(theParams.myEnableMissingFieldsValue);
+
+			// create our resource
+			Resource resource = theResourceProvider.doTask(theParams.myIsValuePresentOnResource);
+
+			// save the resource
+			IIdType resourceId = createResource(resource);
+
+			// run test
+			Bundle found = theRunner.doTask(theParams.myIsMissing);
+
+			if ((theParams.myIsMissing && !theParams.myIsValuePresentOnResource)
+				|| (theParams.myIsValuePresentOnResource && !theParams.myIsMissing)) {
+				verifyFoundBundle(found, resourceId);
+			} else {
+				verifyBundleIsEmpty(found);
+			}
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingStringParameter(MissingSearchTestParameters theParams) {
+			runTest(
+				theParams, (hasField) -> {
+					Organization org = new Organization();
+					if (hasField) {
+						org.setName("anything");
+					}
+					return org;
+				}, (isMissing) -> {
+					return doSearch(Organization.class, Organization.NAME.isMissing(isMissing));
+				}
+			);
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingDateParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				(hasField) -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						patient.setBirthDate(new Date(2000, Calendar.DECEMBER, 25));
+					}
+					return patient;
+				}, (isMissing) -> {
+					return doSearch(Patient.class, Patient.BIRTHDATE.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingTokenClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						patient.setGender(AdministrativeGender.FEMALE);
+					}
+					return patient;
+				}, isMissing -> {
+					return doSearch(Patient.class, Patient.GENDER.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingReferenceClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						Practitioner practitioner = new Practitioner();
+						IIdType practitionerId = createResource(practitioner);
+
+						patient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerId)));
+					}
+					return patient;
+				}, isMissing -> {
+					return doSearch(Patient.class, Patient.GENERAL_PRACTITIONER.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingReferenceClientParameterOnIndexedContainedResources(MissingSearchTestParameters theParams) {
+			myModelConfig.setIndexOnContainedResources(true);
+			runTest(theParams,
+				hasField -> {
+					Observation obs = new Observation();
+					if (hasField) {
+						Encounter enc = new Encounter();
+						IIdType id = createResource(enc);
+
+						obs.setEncounter(new Reference(id));
+					}
+					return obs;
+				}, isMissing -> {
+					ICriterion<?> criterion = Observation.ENCOUNTER.isMissing(isMissing);
+					return doSearch(Observation.class, criterion);
+				});
+
+			myModelConfig.setIndexOnContainedResources(false);
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingURLParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					String methodName = new Exception().getStackTrace()[0].getMethodName();
+
+					SearchParameter sp = new SearchParameter();
+					sp.addBase("MolecularSequence");
+					sp.setCode(methodName);
+					sp.setType(Enumerations.SearchParamType.NUMBER);
+					sp.setExpression("MolecularSequence.variant-end");
+					sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+					sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+					if (hasField) {
+						sp.setUrl("http://example.com");
+					}
+					return sp;
+				}, isMissing -> {
+					return doSearch(SearchParameter.class, SearchParameter.URL.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingQuantityClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Observation obs = new Observation();
+					if (hasField) {
+						obs.setValue(new Quantity(3));
+					}
+					return obs;
+				}, isMissing -> {
+					return doSearch(Observation.class, Observation.VALUE_QUANTITY.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingNumberClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					String methodName = new Exception().getStackTrace()[0].getMethodName();
+
+					MolecularSequence molecularSequence = new MolecularSequence();
+					if (hasField) {
+						molecularSequence.setVariant(Collections.singletonList(
+							new MolecularSequence.MolecularSequenceVariantComponent().setEnd(1)
+						));
+					}
+
+					return molecularSequence;
+				}, isMissing -> {
+					NumberClientParam numberClientParam = new NumberClientParam("variant-end");
+					return doSearch(
+						MolecularSequence.class,
+						numberClientParam.isMissing(isMissing)
+					);
+				});
+		}
 	}
 
 }

@@ -1537,19 +1537,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
 			throw new MethodNotAllowedException(Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
-
-		if (getConfig().getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
-				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
-					for (IQueryParameterType next : nextOrs) {
-						if (next.getMissing() != null) {
-							throw new MethodNotAllowedException(Msg.code(985) + ":missing modifier is disabled on this server");
-						}
-					}
-				}
-			}
-		}
-
+		
 		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);

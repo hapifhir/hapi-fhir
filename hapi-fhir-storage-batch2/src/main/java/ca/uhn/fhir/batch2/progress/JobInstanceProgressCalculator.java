@@ -25,13 +25,13 @@ import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 
 public class JobInstanceProgressCalculator {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobInstanceProgressCalculator.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobInstance myInstance;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
@@ -58,17 +58,27 @@ public class JobInstanceProgressCalculator {
 		instanceProgress.updateInstance(myInstance);
 
 		if (instanceProgress.failed()) {
-			myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, StatusEnum.FAILED);
+			myJobInstanceStatusUpdater.setFailed(myInstance);
 			return;
 		}
 
 
 		if (instanceProgress.changed() || myInstance.getStatus() == StatusEnum.IN_PROGRESS) {
-			ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
+			if (myInstance.getCombinedRecordsProcessed() > 0) {
+				ourLog.info("Job {} of type {} has status {} - {} records processed ({}/sec) - ETA: {}", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed(), myInstance.getCombinedRecordsProcessedPerSecond(), myInstance.getEstimatedTimeRemaining());
+				ourLog.debug(instanceProgress.toString());
+			} else {
+				ourLog.info("Job {} of type {} has status {} - {} records processed", myInstance.getInstanceId(), myInstance.getJobDefinitionId(), myInstance.getStatus(), myInstance.getCombinedRecordsProcessed());
+				ourLog.debug(instanceProgress.toString());
+			}
 		}
 
 		if (instanceProgress.changed()) {
-			myJobInstanceStatusUpdater.updateInstance(myInstance);
+			if (instanceProgress.hasNewStatus()) {
+				myJobInstanceStatusUpdater.updateInstanceStatus(myInstance, instanceProgress.getNewStatus());
+			} else {
+				myJobPersistence.updateInstance(myInstance);
+			}
 		}
 	}
 }

@@ -45,7 +45,7 @@ import java.util.List;
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	public static final int MAX_IDS_TO_BATCH = 1000;
+	public static final int MAX_IDS_TO_BATCH = 900;
 
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
@@ -70,8 +70,13 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
+				ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
+
+				if (!pidIterator.hasNext()) {
+					ourLog.debug("Bulk Export generated an iterator with no results!");
+				}
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
@@ -90,11 +95,10 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				if (!idsToSubmit.isEmpty()) {
 					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 					submissionCount++;
-					idsToSubmit = new ArrayList<>();
 				}
 			}
 		} catch (Exception ex) {
-			ourLog.error(ex.getMessage());
+			ourLog.error(ex.getMessage(), ex);
 
 			theDataSink.recoveredError(ex.getMessage());
 

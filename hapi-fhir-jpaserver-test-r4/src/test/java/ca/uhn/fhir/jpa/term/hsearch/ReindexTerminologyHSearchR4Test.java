@@ -22,6 +22,7 @@ import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -96,13 +97,11 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	@Autowired
 	private TermLoaderSvcImpl myTermLoaderSvc;
 	@Autowired
-	private ITermReadSvc myITermReadSvc;
-	@Autowired
 	private ITermConceptDao myTermConceptDao;
 	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
-	@Test()
+	@Test
 	public void uploadLoincCodeSystem() throws FileNotFoundException, InterruptedException {
 		List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
 
@@ -270,6 +269,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void afterCleanupDao() {
 		if (CLEANUP_DATA) {
 			super.afterCleanupDao();
@@ -277,6 +277,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void afterResetInterceptors() {
 		if (CLEANUP_DATA) {
 			super.afterResetInterceptors();
@@ -284,6 +285,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void afterClearTerminologyCaches() {
 		if (CLEANUP_DATA) {
 			super.afterClearTerminologyCaches();
@@ -291,6 +293,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void afterPurgeDatabase() {
 		if (CLEANUP_DATA) {
 			super.afterPurgeDatabase();
@@ -298,6 +301,7 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	}
 
 	@Override
+	@AfterEach
 	public void afterEachClearCaches() {
 		if (CLEANUP_DATA) {
 			super.afterEachClearCaches();

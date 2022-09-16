@@ -125,7 +125,6 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
 		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
-
 		return myJobCoordinator.startInstance(request);
 	}
 

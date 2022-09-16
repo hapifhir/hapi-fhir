@@ -48,6 +48,7 @@ public class BulkExportUtils {
 			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
+		parameters.setUseExistingJobsFirst(true);
 
 		return parameters;
 	}

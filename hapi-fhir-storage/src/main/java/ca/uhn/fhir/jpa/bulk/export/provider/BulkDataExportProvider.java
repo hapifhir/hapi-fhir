@@ -47,12 +47,14 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -102,7 +104,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
-	) {
+	) throws Exception {
 		// JPA export provider
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 
@@ -112,7 +114,7 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails,
-								 BulkDataExportOptions theOptions) {
+								 BulkDataExportOptions theOptions){
 		// permission check
 		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
 			.add(RequestDetails.class, theRequestDetails)
@@ -145,7 +147,17 @@ public class BulkDataExportProvider {
 	}
 
 	private String getServerBase(ServletRequestDetails theRequestDetails) {
-		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+		if (theRequestDetails.getCompleteUrl().contains(theRequestDetails.getServerBaseForRequest())) {
+			// Base URL not Fixed
+			return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+		} else {
+			// Base URL Fixed
+			int index = StringUtils.indexOf(theRequestDetails.getCompleteUrl(), theRequestDetails.getOperation());
+			if (index == -1) {
+				return null;
+			}
+			return theRequestDetails.getCompleteUrl().substring(0, index - 1);
+		}
 	}
 
 	private String getDefaultPartitionServerBase(ServletRequestDetails theRequestDetails) {
@@ -168,7 +180,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_MDM, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theMdm,
 		ServletRequestDetails theRequestDetails
-	) {
+	) throws Exception {
 		ourLog.debug("Received Group Bulk Export Request for Group {}", theIdParam);
 		ourLog.debug("_type={}", theIdParam);
 		ourLog.debug("_since={}", theSince);
@@ -204,17 +216,9 @@ public class BulkDataExportProvider {
 
 	private Set<String> getPatientCompartmentResources() {
 		if (myCompartmentResources == null) {
-			myCompartmentResources = myFhirContext.getResourceTypes().stream()
-				.filter(this::resourceTypeIsInPatientCompartment)
-				.collect(Collectors.toSet());
+			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext);
 		}
 		return myCompartmentResources;
-	}
-
-	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
-		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		return searchParams != null && searchParams.size() >= 1;
 	}
 
 	/**
@@ -227,7 +231,7 @@ public class BulkDataExportProvider {
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
 		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theTypeFilter,
 		ServletRequestDetails theRequestDetails
-	) {
+	) throws Exception {
 		validatePreferAsyncHeader(theRequestDetails, JpaConstants.OPERATION_EXPORT);
 		BulkDataExportOptions bulkDataExportOptions = buildPatientBulkExportOptions(theOutputFormat, theType, theSince, theTypeFilter);
 		validateResourceTypesAllContainPatientSearchParams(bulkDataExportOptions.getResourceTypes());
@@ -318,10 +322,10 @@ public class BulkDataExportProvider {
 		}
 	}
 
-	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response, BulkExportJobStatusEnum theStatusEnum) throws IOException {
+	private void handleDeleteRequest(IPrimitiveType<String> theJobId, HttpServletResponse response, BulkExportJobStatusEnum theOrigStatus) throws IOException {
 		IBaseOperationOutcome outcome = OperationOutcomeUtil.newInstance(myFhirContext);
 		Batch2JobOperationResult resultMessage = myJobRunner.cancelInstance(theJobId.getValueAsString());
-		if (theStatusEnum.equals(BulkExportJobStatusEnum.COMPLETE)) {
+		if (theOrigStatus.equals(BulkExportJobStatusEnum.COMPLETE)) {
 			response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
 			OperationOutcomeUtil.addIssue(myFhirContext, outcome, "error", "Job instance <" + theJobId.getValueAsString() + "> was already cancelled or has completed.  Nothing to do.", null, null);
 		} else {
@@ -390,6 +394,9 @@ public class BulkDataExportProvider {
 
 	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, JobInfo theOutcome) {
 		String serverBase = getServerBase(theRequestDetails);
+		if (serverBase == null) {
+			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
+		}
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
