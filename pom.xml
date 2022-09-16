@@ -756,6 +756,10 @@
 			<id>gjergjsheldija</id>
 			<name>Gjergj Sheldija</name>
 		</developer>
+		<developer>
+			<id>XcrigX</id>
+			<name>Craig McClendon</name>
+		</developer>
 	</developers>
 
 	<licenses>
