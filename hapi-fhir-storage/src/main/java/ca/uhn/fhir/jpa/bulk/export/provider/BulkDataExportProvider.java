@@ -54,6 +54,7 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -216,17 +217,9 @@ public class BulkDataExportProvider {
 
 	private Set<String> getPatientCompartmentResources() {
 		if (myCompartmentResources == null) {
-			myCompartmentResources = myFhirContext.getResourceTypes().stream()
-				.filter(this::resourceTypeIsInPatientCompartment)
-				.collect(Collectors.toSet());
+			myCompartmentResources = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext);
 		}
 		return myCompartmentResources;
-	}
-
-	private boolean resourceTypeIsInPatientCompartment(String theResourceType) {
-		RuntimeResourceDefinition runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
-		List<RuntimeSearchParam> searchParams = runtimeResourceDefinition.getSearchParamsForCompartmentName("Patient");
-		return searchParams != null && searchParams.size() >= 1;
 	}
 
 	/**

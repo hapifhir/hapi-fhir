@@ -53,6 +53,7 @@ public class BulkExportUtils {
 			parameters.setPatientId(theOptions.getPatientId().stream().map(IIdType::getValue).collect(Collectors.toList()));
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
+		parameters.setUseExistingJobsFirst(true);
 
 		return parameters;
 	}
