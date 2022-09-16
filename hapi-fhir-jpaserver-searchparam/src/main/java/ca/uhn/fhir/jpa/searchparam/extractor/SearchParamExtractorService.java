@@ -251,10 +251,10 @@ public class SearchParamExtractorService {
 		}
 
 		// Composites
+		// fixme should we have config to skip this?
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
 		theParams.myCompositeParams.addAll(composites);
-
 
 		// Specials
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> specials = extractSearchParamSpecial(theResource);

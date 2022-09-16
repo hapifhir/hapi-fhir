@@ -26,8 +26,10 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
@@ -83,6 +85,7 @@ public class ExtendedHSearchIndexExtractor {
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
 
+		// fixme mb add a flag ot DaoConfig
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.forEach(nextParam ->
@@ -116,6 +119,9 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		// fixme mb extraction
+		theNewParams.myCompositeParams.forEach(nextParam ->
+			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
+
 		if (theResource.fhirType().equals("Observation")) {
 			((Observation) theResource).getComponent().stream()
 				.filter(this::isComponentFreetextSearchable).forEach(
@@ -166,6 +172,14 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		return retVal;
+	}
+
+	@Nonnull
+	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
+		// fixme mb head
+		return new CompositeSearchIndexData() {
+
+		};
 	}
 
 

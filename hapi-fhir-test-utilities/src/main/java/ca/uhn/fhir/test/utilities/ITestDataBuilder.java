@@ -26,7 +26,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -367,6 +366,33 @@ public interface ITestDataBuilder {
 		@Override
 		default IIdType doUpdateResource(IBaseResource theResource) {
 			return getSupport().updateResource(theResource);
+		}
+	}
+
+	/**
+	 * Dummy support to use ITestDataBuilder as just a builder, not a DAO
+	 * fixme mb Maybe we should split out the builder into a super-interface and drop this?
+	 */
+	class SupportNoDao implements Support {
+		final FhirContext myFhirContext;
+
+		public SupportNoDao(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return myFhirContext;
+		}
+
+		@Override
+		public IIdType createResource(IBaseResource theResource) {
+			throw new UnsupportedOperationException("Create not supported");
+		}
+
+		@Override
+		public IIdType updateResource(IBaseResource theResource) {
+			throw new UnsupportedOperationException("Update not supported");
 		}
 	}
 }

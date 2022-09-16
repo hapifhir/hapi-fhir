@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Set;
 
 public class HSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);
@@ -66,11 +66,9 @@ public class HSearchIndexWriter {
 
 
 	final HSearchElementCache myNodeCache;
-	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
 
-	HSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
-		myFhirContext = theFhirContext;
+	HSearchIndexWriter(ModelConfig theModelConfig, DocumentElement theRoot) {
 		myModelConfig = theModelConfig;
 		myNodeCache = new HSearchElementCache(theRoot);
 	}
@@ -79,9 +77,8 @@ public class HSearchIndexWriter {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HSearchIndexWriter forRoot(
-			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
+	public static HSearchIndexWriter forRoot(ModelConfig theModelConfig, DocumentElement theDocument) {
+		return new HSearchIndexWriter(theModelConfig, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
@@ -237,4 +234,14 @@ public class HSearchIndexWriter {
 		}
 	}
 
+	public void writeCompositeIndex(String theParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
+		// must be nested.
+		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
+			// fixme need a way to ask for a new sub-object for nested.
+			DocumentElement nspRoot = myNodeCache.getObjectElement("nsp");
+			DocumentElement nestedComposite = nspRoot.addObject(theParamName);
+			//compositeSearchIndexDatum.writeIndex(this, nestedComposite);
+		}
+
+	}
 }

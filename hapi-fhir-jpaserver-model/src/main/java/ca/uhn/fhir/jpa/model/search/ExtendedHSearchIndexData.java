@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
@@ -48,6 +49,7 @@ public class ExtendedHSearchIndexData {
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
 
+	// wipmb replace with Multiset and HashMultiset
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, BigDecimal> mySearchParamNumbers = HashMultimap.create();
@@ -55,8 +57,9 @@ public class ExtendedHSearchIndexData {
 	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
-	// fixme need a new value holder.
 	final SetMultimap<String, ObservationComponentSearchIndexData> mySearchParamObservationComponents = HashMultimap.create();
+
+	final SetMultimap<String, CompositeSearchIndexData> mySearchParamComposites = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
 	private IBaseResource myResource;
@@ -85,7 +88,7 @@ public class ExtendedHSearchIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
+		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
@@ -105,6 +108,7 @@ public class ExtendedHSearchIndexData {
 		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
+		Multimaps.asMap(mySearchParamComposites).forEach(indexWriter::writeCompositeIndex);
 		Multimaps.asMap(mySearchParamObservationComponents).forEach(ifNotContained(indexWriter::writeObservationComponentCompositeIndex));
 	}
 
@@ -116,6 +120,7 @@ public class ExtendedHSearchIndexData {
 	 * Add if not already present.
 	 */
 	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
+		// wipmb create a BaseCodingDt that respects equals
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
 			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {
@@ -159,7 +164,15 @@ public class ExtendedHSearchIndexData {
 		return myForcedId;
 	}
 
-    public void setRawResourceData(String theResourceJSON) {
+	public void setRawResourceData(String theResourceJSON) {
 		 myResourceJSON = theResourceJSON;
     }
+
+	public SetMultimap<String, CompositeSearchIndexData> getSearchParamComposites() {
+		return mySearchParamComposites;
+	}
+
+	public void addCompositeIndexData(String theSearchParamName, CompositeSearchIndexData theBuildCompositeIndexData) {
+		mySearchParamComposites.put(theSearchParamName, theBuildCompositeIndexData);
+	}
 }

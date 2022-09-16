@@ -28,9 +28,9 @@ public class ResourceIndexedSearchParamComposite {
 	public static class Component {
 		final String mySearchParamName;
 		final RestSearchParameterTypeEnum mySearchParameterType;
-		final ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> myParamIndexValues;
+		final ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> myParamIndexValues;
 
-		public Component(String theSearchParamName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
+		public Component(String theSearchParamName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theParamIndexValues) {
 			mySearchParamName = theSearchParamName;
 			mySearchParameterType = theSearchParameterType;
 			myParamIndexValues = theParamIndexValues;
@@ -44,7 +44,7 @@ public class ResourceIndexedSearchParamComposite {
 			return mySearchParameterType;
 		}
 
-		public ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> getParamIndexValues() {
+		public ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> getParamIndexValues() {
 			return myParamIndexValues;
 		}
 	}
@@ -79,8 +79,13 @@ public class ResourceIndexedSearchParamComposite {
 	}
 
 
-	public void addComponent(RuntimeSearchParam theRuntimeSearchParam, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
-		myComponents.add(new Component(theRuntimeSearchParam.getName(), theRuntimeSearchParam.getParamType(), theExtractedParams));
+	public void addComponent(RuntimeSearchParam theRuntimeSearchParam, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theExtractedParams) {
+		addComponent(theRuntimeSearchParam.getName(), theRuntimeSearchParam.getParamType(), theExtractedParams);
+	}
+
+	public void addComponent(String theSearchParameterName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theExtractedParams) {
+		// wipmb theSearchParameterName is likely redundant since it will be in the params
+		myComponents.add(new Component(theSearchParameterName, theSearchParameterType, theExtractedParams));
 	}
 
 
