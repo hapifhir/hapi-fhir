@@ -160,7 +160,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testPatientBulkExportWithId() {
+	public void testPatientBulkExportWithSingleId() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		// create some resources
 		Patient patient = new Patient();
@@ -201,12 +201,74 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Encounter"));
-		options.setPatientId(new IdType("Patient", "P1"));
+		options.setPatientId(Sets.newHashSet(new IdType("Patient", "P1")));
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + encId + "\""), List.of("\"P2\"", "\"" + obsId2 + "\"", "\"" + encId2 + "\"", "\"" + obsId3 + "\""));
+	}
+
+	@Test
+	public void testPatientBulkExportWithMultiIds() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		// create some resources
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Observation observation = new Observation();
+		observation.setSubject(new Reference().setReference("Patient/P1"));
+		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
+		String obsId = myClient.create().resource(observation).execute().getId().getIdPart();
+
+		Encounter encounter = new Encounter();
+		encounter.setSubject(new Reference().setReference("Patient/P1"));
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		String encId = myClient.create().resource(encounter).execute().getId().getIdPart();
+
+		// diff patient
+		patient = new Patient();
+		patient.setId("P2");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		observation = new Observation();
+		observation.setSubject(new Reference().setReference("Patient/P2"));
+		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
+		String obsId2 = myClient.create().resource(observation).execute().getId().getIdPart();
+
+		encounter = new Encounter();
+		encounter.setSubject(new Reference().setReference("Patient/P2"));
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		String encId2 = myClient.create().resource(encounter).execute().getId().getIdPart();
+
+		// yet another diff patient
+		patient = new Patient();
+		patient.setId("P3");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		observation = new Observation();
+		observation.setSubject(new Reference().setReference("Patient/P3"));
+		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
+		String obsId3 = myClient.create().resource(observation).execute().getId().getIdPart();
+
+		encounter = new Encounter();
+		encounter.setSubject(new Reference().setReference("Patient/P3"));
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		String encId3 = myClient.create().resource(encounter).execute().getId().getIdPart();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Encounter"));
+		options.setPatientId(Sets.newHashSet(new IdType("Patient", "P1"), new IdType("Patient", "P2")));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + encId + "\"", "\"P2\"", "\"" + obsId2 + "\"", "\"" + encId2 + "\""), List.of("\"P3\"", "\"" + obsId3 + "\"", "\"" + encId3 + "\""));
 	}
 
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {

@@ -137,13 +137,21 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 				if (!resourceType.equalsIgnoreCase("Patient")) {
 					if (theParams.getPatientId() != null) {
-						map.add(patientSearchParam, new ReferenceParam(theParams.getPatientId()));
+						ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+						for (String patientId : theParams.getPatientId()) {
+							referenceOrListParam.addOr(new ReferenceParam(patientId));
+						}
+						map.add(patientSearchParam, referenceOrListParam);
 					} else {
 						map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 					}
 				} else {
 					if (theParams.getPatientId() != null) {
-						map.add(PARAM_ID, new ReferenceParam(theParams.getPatientId()));
+						ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+						for (String patientId : theParams.getPatientId()) {
+							referenceOrListParam.addOr(new ReferenceParam(patientId));
+						}
+						map.add(PARAM_ID, referenceOrListParam);
 					}
 				}
 

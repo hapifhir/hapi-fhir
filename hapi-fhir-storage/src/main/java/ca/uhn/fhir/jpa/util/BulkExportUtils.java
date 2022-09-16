@@ -23,8 +23,10 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class BulkExportUtils {
 	private BulkExportUtils() {}
@@ -48,7 +50,7 @@ public class BulkExportUtils {
 			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
 		}
 		if (theOptions.getPatientId() != null) {
-			parameters.setPatientId(theOptions.getPatientId().getValue());
+			parameters.setPatientId(theOptions.getPatientId().stream().map(IIdType::getValue).collect(Collectors.toList()));
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 

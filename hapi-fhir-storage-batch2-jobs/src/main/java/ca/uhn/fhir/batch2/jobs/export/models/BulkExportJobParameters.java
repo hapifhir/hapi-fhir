@@ -57,7 +57,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	private BulkDataExportOptions.ExportStyle myExportStyle;
 
 	@JsonProperty("patientId")
-	private String myPatientId;
+	private List<String> myPatientId;
 
 	// Stuff for group export only
 
@@ -110,11 +110,11 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myExportStyle = theExportStyle;
 	}
 
-	public String getPatientId() {
+	public List<String> getPatientId() {
 		return myPatientId;
 	}
 
-	public void setPatientId(String thePatientId) {
+	public void setPatientId(List<String> thePatientId) {
 		myPatientId = thePatientId;
 	}
 
