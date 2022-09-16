@@ -148,12 +148,11 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 			}
 
-//			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-			if (theContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.R4)) {
+			if (theContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
 
 				//for james: what should we do with dst2 cause we do not hvae an expression
 
-				// DSTU3 and below
+				// DSTU2 and below
 				String[] expressionSplit = theSearchParamExtractor.split(expression);
 				for (String nextPath : expressionSplit) {
 					nextPath = nextPath.trim();
@@ -167,7 +166,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 
 					String resourceName = nextPath.substring(0, dotIdx);
 					// james: what was the intent here?
-					if (dstu2) {
+					if (theContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
 						try {
 							theContext.getResourceDefinition(resourceName);
 						} catch (DataFormatException e) {
@@ -175,18 +174,6 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 						}
 					}
 
-					if (dstu3) {
-//					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-						if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
-							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
-							try {
-								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
-							} catch (Exception e) {
-								String msg = theContext.getLocalizer().getMessageSanitized(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-								throw new UnprocessableEntityException(Msg.code(1119) + msg, e);
-							}
-						}
-					}
 				}
 			} else {
 				if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {

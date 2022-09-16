@@ -271,11 +271,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
 
-		IIdType id = ourClient.create().resource(searchParameter).execute().getId();
+		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
 
-		assertNotNull(id);
-		assertEquals("resource-security", id.getValueAsString());
-
+		assertNotNull(result);
+		assertEquals("resource-security", result.getId().toUnqualifiedVersionless().getIdPart());
 
 	}
 
