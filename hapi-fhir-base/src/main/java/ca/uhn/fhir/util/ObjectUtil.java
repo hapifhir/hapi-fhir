@@ -3,6 +3,8 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -44,6 +46,14 @@ public class ObjectUtil {
 	public static void requireNotEmpty(String str, String message) {
 		if (StringUtils.isBlank(str)) {
 			throw new IllegalArgumentException(Msg.code(1777) + message);
+		}
+	}
+
+	public static <T> Optional<T> castAs(Object theObject, Class<T> theClass) {
+		if (theClass.isInstance(theObject)) {
+			return Optional.of((T) theObject);
+		} else {
+			return Optional.empty();
 		}
 	}
 	
