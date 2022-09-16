@@ -2,5 +2,6 @@
 type: add
 issue: 4030
 title: "Previously, bulk export only supports endpoint [fhir base]/Patient/$export, where all patient records are export. 
-Now, it also supports [fhir base]/Patient/[id]/$export, where only one patient's records are exported."
+Now, it also supports [fhir base]/Patient/[id]/$export, where only one patient's records are exported.
+Additionally, added support for the patient parameter in Patient bulk export"
 
