@@ -163,7 +163,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					return existing.isPresent();
 				});
 				if (exists) {
-					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+						ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
