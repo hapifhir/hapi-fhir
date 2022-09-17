@@ -97,27 +97,6 @@ public class SchemaMigratorTest extends BaseTest {
 		assertThat(tableNames, Matchers.containsInAnyOrder("SOMETABLE_A", "SOMETABLE_C"));
 	}
 
-	@ParameterizedTest(name = "{index}: {0}")
-	@MethodSource("data")
-	public void testMigrationRequiredNoFlyway(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
-		before(theTestDatabaseDetails);
-
-		SchemaMigrator schemaMigrator = createTableMigrator();
-		schemaMigrator.setDriverType(getDriverType());
-
-		// Validate shouldn't fail if we aren't using Flyway
-		schemaMigrator.validate();
-
-		schemaMigrator.migrate();
-
-		schemaMigrator.validate();
-
-		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource().getUrl(), getDataSource().getUsername(), getDataSource().getPassword());
-		Set<String> tableNames = JdbcUtils.getTableNames(connectionProperties);
-		assertThat(tableNames, Matchers.contains("SOMETABLE"));
-
-	}
-
 	@Nonnull
 	private SchemaMigrator createTableMigrator() {
 		return createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
