@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.callback.Callback;
@@ -120,6 +121,7 @@ public class HapiMigrator {
 			next.setNoColumnShrink(isNoColumnShrink());
 			next.setConnectionProperties(connectionProperties);
 
+			StopWatch sw = new StopWatch();
 			try {
 				if (isDryRun()) {
 					ourLog.info("Dry run {} {}", next.getMigrationVersion(), next.getDescription());
@@ -129,11 +131,11 @@ public class HapiMigrator {
 				// FIXME KHS replace with different callback probably a BaseTask consumer
 				myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
 				// FIXME KHS break up
-//				preExecute(next);
 				next.execute();
-//				postExecute(next);
+				postExecute(next, sw, true);
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
+				postExecute(next, sw, false);
 				throw new InternalErrorException(Msg.code(48) + e);
 			}
 		}
@@ -141,6 +143,10 @@ public class HapiMigrator {
 			StringBuilder statementBuilder = buildExecutedStatementsString();
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
+	}
+
+	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
+		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
 	}
 
 	public void addTasks(List<BaseTask> theMigrationTasks) {

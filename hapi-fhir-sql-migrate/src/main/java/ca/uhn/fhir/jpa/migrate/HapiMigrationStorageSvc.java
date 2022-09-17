@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
 
@@ -34,5 +35,12 @@ public class HapiMigrationStorageSvc {
 			.map(MigrationVersion::toString)
 			.reduce((first, second) -> second)
 			.orElse("unknown");
+	}
+
+	public void saveTask(BaseTask theBaseTask, Integer theMillis, boolean theSuccess) {
+		HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(theBaseTask);
+		entity.setExecutionTime(theMillis);
+		entity.setSuccess(theSuccess);
+		myHapiMigrationDao.save(entity);
 	}
 }

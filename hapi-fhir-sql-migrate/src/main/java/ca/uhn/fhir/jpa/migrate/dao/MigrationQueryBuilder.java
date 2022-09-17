@@ -44,18 +44,26 @@ public class MigrationQueryBuilder {
 
 		myInstalledRankCol = myTable.addColumn("INSTALLED_RANK", Types.INTEGER, null);
 		myInstalledRankCol.notNull();
+
 		myVersionCol = myTable.addColumn("VERSION", Types.VARCHAR, HapiMigrationEntity.VERSION_MAX_SIZE);
+
 		myDescriptionCol = myTable.addColumn("DESCRIPTION", Types.VARCHAR, HapiMigrationEntity.DESCRIPTION_MAX_SIZE);
 		myDescriptionCol.notNull();
+
 		myTypeCol = myTable.addColumn("TYPE", Types.VARCHAR, HapiMigrationEntity.TYPE_MAX_SIZE);
 		myTypeCol.notNull();
+
 		myScriptCol = myTable.addColumn("SCRIPT", Types.VARCHAR, HapiMigrationEntity.SCRIPT_MAX_SIZE);
 		myScriptCol.notNull();
+
 		myChecksumCol = myTable.addColumn("CHECKSUM", Types.INTEGER, null);
+
 		myInstalledByCol = myTable.addColumn("INSTALLED_BY", Types.VARCHAR, HapiMigrationEntity.INSTALLED_BY_MAX_SIZE);
 		myInstalledByCol.notNull();
-		myInstalledOnCol = myTable.addColumn("INSTALLED_ON", Types.TIME, null);
+
+		myInstalledOnCol = myTable.addColumn("INSTALLED_ON", Types.TIMESTAMP, null);
 		myInstalledOnCol.notNull();
+
 		myExecutionTimeCol = myTable.addColumn("EXECUTION_TIME", Types.INTEGER, null);
 		myExecutionTimeCol.notNull();
 		mySuccessCol = myTable.addColumn("SUCCESS", Types.BOOLEAN, null);

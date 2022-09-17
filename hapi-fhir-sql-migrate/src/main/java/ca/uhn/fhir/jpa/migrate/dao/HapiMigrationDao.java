@@ -6,9 +6,7 @@ import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.util.Date;
@@ -65,19 +63,19 @@ public class HapiMigrationDao {
 
 	private Integer getHighestKey() {
 		String highestKeyQuery = myMigrationQueryBuilder.getHighestKeyQuery();
-		// FIXME KHS
-		RowMapper<HapiMigrationEntity> mapper = HapiMigrationEntity.newRowMapper();
-		List<HapiMigrationEntity> list = myJdbcTemplate.query("SELECT * FROM TEST_MIGRATION_TABLE", mapper);
 		return myJdbcTemplate.queryForObject(highestKeyQuery, Integer.class);
 	}
 
 	// FIXME KHS use this in migration
 	public void createMigrationTableIfRequired() {
 		try {
+			// FIXME KHS find a better way to detect
 			fetchMigrationVersions();
-		} catch (BadSqlGrammarException e) {
+		} catch (Exception e) {
 			ourLog.info("Creating table {}", myMigrationTablename);
-			myJdbcTemplate.execute(myMigrationQueryBuilder.createTableStatement());
+			String createTableStatement = myMigrationQueryBuilder.createTableStatement();
+			ourLog.info(createTableStatement);
+			myJdbcTemplate.execute(createTableStatement);
 		}
 	}
 }

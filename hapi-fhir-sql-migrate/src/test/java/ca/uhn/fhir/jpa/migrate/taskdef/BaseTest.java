@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -21,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-public abstract class BaseTest extends BaseMigrationTest {
+public abstract class BaseTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
@@ -30,9 +31,15 @@ public abstract class BaseTest extends BaseMigrationTest {
 	private String myUrl;
 	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
+	private HapiMigrationDao myHapiMigrationDao;
+	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
+
+	static {
+		// required by Derby
+		System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
+	}
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
-		ourLog.info("H2: {}", org.h2.Driver.class.toString());
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();
 
@@ -40,6 +47,7 @@ public abstract class BaseTest extends BaseMigrationTest {
 		retVal.add(new Supplier<TestDatabaseDetails>() {
 			@Override
 			public TestDatabaseDetails get() {
+				ourLog.info("H2: {}", org.h2.Driver.class.toString());
 				String url = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
 				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
@@ -61,6 +69,8 @@ public abstract class BaseTest extends BaseMigrationTest {
 		retVal.add(new Supplier<TestDatabaseDetails>() {
 			@Override
 			public TestDatabaseDetails get() {
+				ourLog.info("Derby: {}", DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
+
 				String url = "jdbc:derby:memory:" + DATABASE_NAME + ourDatabaseUrl++ + ";create=true";
 				DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "SA", "SA");
 				BasicDataSource dataSource = new BasicDataSource();
@@ -87,6 +97,10 @@ public abstract class BaseTest extends BaseMigrationTest {
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
+		myHapiMigrationDao = new HapiMigrationDao(testDatabaseDetails.myDataSource, SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+
+		myHapiMigrationDao.createMigrationTableIfRequired();
+		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(myHapiMigrationDao);
 	}
 
 	public String getUrl() {

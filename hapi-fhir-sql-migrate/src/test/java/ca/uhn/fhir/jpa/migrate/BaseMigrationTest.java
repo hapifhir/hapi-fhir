@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 
 public abstract class BaseMigrationTest {
 	private static final String TABLE_NAME = "TEST_MIGRATION_TABLE";
-	private static final String TEST_DBUSER = "TEST_DBUSER";
 	protected static HapiMigrationDao ourHapiMigrationDao;
 	protected static HapiMigrationStorageSvc ourHapiMigrationStorageSvc;
 

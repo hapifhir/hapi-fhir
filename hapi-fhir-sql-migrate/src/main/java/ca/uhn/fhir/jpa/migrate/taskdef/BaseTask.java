@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -176,7 +177,7 @@ public abstract class BaseTask {
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new DataAccessException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e) {
+				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e) {
 					private static final long serialVersionUID = 8211678931579252166L;
 				};
 			}
