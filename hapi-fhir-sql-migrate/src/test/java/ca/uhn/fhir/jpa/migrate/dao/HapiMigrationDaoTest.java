@@ -1,13 +1,8 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
-import ca.uhn.fhir.jpa.migrate.config.TestMigrationConfig;
+import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
@@ -15,16 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestMigrationConfig.class})
-class HapiMigrationDaoTest {
-	@Autowired
-	HapiMigrationDao myHapiMigrationDao;
-
-	@AfterEach
-	void after() {
-		myHapiMigrationDao.deleteAll();
-	}
+class HapiMigrationDaoTest extends BaseMigrationTest {
 
 	@Test
 	public void findAll_empty_returnsNothing() {

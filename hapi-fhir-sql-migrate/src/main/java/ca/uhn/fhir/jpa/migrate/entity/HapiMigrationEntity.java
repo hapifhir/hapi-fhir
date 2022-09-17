@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.entity;
 
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.springframework.data.domain.Persistable;
 
 import javax.persistence.Column;
@@ -140,5 +141,14 @@ public class HapiMigrationEntity implements Persistable<Integer> {
 
 	public void setSuccess(Boolean theSuccess) {
 		mySuccess = theSuccess;
+	}
+
+	public static HapiMigrationEntity fromBaseTask(BaseTask theTask) {
+		HapiMigrationEntity retval = new HapiMigrationEntity();
+		retval.setVersion(theTask.getMigrationVersion());
+		retval.setDescription(theTask.getDescription());
+		retval.setChecksum(theTask.hashCode());
+		retval.setType("JDBC");
+		return retval;
 	}
 }

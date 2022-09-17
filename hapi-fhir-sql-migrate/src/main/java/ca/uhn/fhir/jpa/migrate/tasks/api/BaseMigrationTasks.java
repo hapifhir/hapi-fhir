@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.MigrationVersion;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;

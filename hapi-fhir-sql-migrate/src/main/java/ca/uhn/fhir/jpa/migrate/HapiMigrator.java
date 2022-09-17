@@ -24,12 +24,17 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.callback.Callback;
+import org.flywaydb.core.api.callback.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +42,7 @@ import java.util.Objects;
  * This class is an alternative to {@link HapiMigrator ). It doesn't use Flyway, but instead just
  * executes all tasks.
  */
-public class HapiMigrator implements IMigrator {
+public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
 	private List<BaseTask> myTasks = new ArrayList<>();
@@ -47,6 +52,7 @@ public class HapiMigrator implements IMigrator {
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
 	private final String myMigrationTableName;
+	private List<Callback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
 		myDriverType = theDriverType;
@@ -102,7 +108,6 @@ public class HapiMigrator implements IMigrator {
 		return statementBuilder;
 	}
 
-	@Override
 	public void migrate() {
 		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource());
 
@@ -118,6 +123,8 @@ public class HapiMigrator implements IMigrator {
 				} else {
 					ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
 				}
+				// FIXME KHS replace with different callback
+				myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
 				next.execute();
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
@@ -130,14 +137,22 @@ public class HapiMigrator implements IMigrator {
 		}
 	}
 
-	@Override
 	public void addTasks(List<BaseTask> theMigrationTasks) {
 		myTasks.addAll(theMigrationTasks);
 	}
 
-	@Override
 	public void addTask(BaseTask theTask) {
 		myTasks.add(theTask);
+	}
+
+	@Nonnull
+	public List<Callback> getCallbacks() {
+		return myCallbacks;
+	}
+
+	public void setCallbacks(@Nonnull List<Callback> theCallbacks) {
+		Validate.notNull(theCallbacks);
+		myCallbacks = theCallbacks;
 	}
 
 	@VisibleForTesting
