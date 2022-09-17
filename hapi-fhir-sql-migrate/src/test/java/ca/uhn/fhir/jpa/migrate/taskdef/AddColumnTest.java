@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
-import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -91,7 +91,7 @@ public class AddColumnTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (DbMigrate.FlywayMigrateException e) {
+		} catch (HapiMigrationException e) {
 			assertEquals("Migration failed !", e.getMessage());
 		}
 	}

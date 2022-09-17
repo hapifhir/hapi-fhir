@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -27,7 +26,7 @@ public abstract class BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private BasicDataSource myDataSource;
 	private String myUrl;
-	private FlywayMigrator myMigrator;
+	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
@@ -46,7 +45,7 @@ public abstract class BaseTest {
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-				FlywayMigrator migrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 
@@ -67,7 +66,7 @@ public abstract class BaseTest {
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-				FlywayMigrator migrator = new FlywayMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 
@@ -123,7 +122,7 @@ public abstract class BaseTest {
 		});
 	}
 
-	public FlywayMigrator getMigrator() {
+	public HapiMigrator getMigrator() {
 		return myMigrator;
 	}
 
@@ -143,9 +142,9 @@ public abstract class BaseTest {
 		private final String myUrl;
 		private final DriverTypeEnum.ConnectionProperties myConnectionProperties;
 		private final BasicDataSource myDataSource;
-		private final FlywayMigrator myMigrator;
+		private final HapiMigrator myMigrator;
 
-		public TestDatabaseDetails(String theUrl, DriverTypeEnum.ConnectionProperties theConnectionProperties, BasicDataSource theDataSource, FlywayMigrator theMigrator) {
+		public TestDatabaseDetails(String theUrl, DriverTypeEnum.ConnectionProperties theConnectionProperties, BasicDataSource theDataSource, HapiMigrator theMigrator) {
 			myUrl = theUrl;
 			myConnectionProperties = theConnectionProperties;
 			myDataSource = theDataSource;

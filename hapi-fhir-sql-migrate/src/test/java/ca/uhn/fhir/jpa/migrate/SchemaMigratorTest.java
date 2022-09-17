@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.flywaydb.core.api.FlywayException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -59,7 +58,7 @@ public class SchemaMigratorTest extends BaseTest {
 		try {
 			schemaMigrator.migrate();
 			fail();
-		} catch (FlywayException e) {
+		} catch (HapiMigrationException e) {
 			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 		}
 		schemaMigrator = createTableMigrator();
@@ -82,7 +81,7 @@ public class SchemaMigratorTest extends BaseTest {
 		try {
 			schemaMigrator.migrate();
 			fail();
-		} catch (FlywayException e) {
+		} catch (HapiMigrationException e) {
 			assertThat(e.getMessage(), containsString("Detected resolved migration not applied to database: 1.1"));
 		}
 		schemaMigrator.setStrictOrder(false);
@@ -129,7 +128,6 @@ public class SchemaMigratorTest extends BaseTest {
 
 		SchemaMigrator schemaMigrator = createTableMigrator();
 		schemaMigrator.setDriverType(getDriverType());
-		schemaMigrator.setDontUseFlyway(true);
 
 		// Validate shouldn't fail if we aren't using Flyway
 		schemaMigrator.validate();

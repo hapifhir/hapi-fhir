@@ -104,7 +104,7 @@ public class MigrationTaskSkipperTest {
 
 	private void assertSkipped(List<BaseTask> theTasks, Integer... theVersions) {
 		Set<String> expectedVersions = integersToVersions(theVersions).collect(Collectors.toSet());
-		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getFlywayVersion).collect(Collectors.toSet());
+		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getMigrationVersion).collect(Collectors.toSet());
 		assertThat(taskVersions, equalTo(expectedVersions));
 	}
 

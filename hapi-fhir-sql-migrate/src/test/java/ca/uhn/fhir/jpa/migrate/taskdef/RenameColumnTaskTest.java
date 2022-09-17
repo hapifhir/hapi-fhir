@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -166,7 +166,8 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (FlywayException e) {
+		} catch (HapiMigrationException e) {
+			// FIXME KHS get this to pass
 			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "+ Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getCause().getCause().getMessage());
 		}
 
@@ -249,7 +250,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (FlywayException e) {
+		} catch (HapiMigrationException e) {
 			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getCause().getCause().getMessage());
 		}
 
@@ -289,7 +290,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (FlywayException e) {
+		} catch (HapiMigrationException e) {
 			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getCause().getCause().getMessage());
 		}
 

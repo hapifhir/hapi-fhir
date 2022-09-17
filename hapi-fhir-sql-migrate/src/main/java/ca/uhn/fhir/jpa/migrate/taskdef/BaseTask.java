@@ -172,11 +172,11 @@ public abstract class BaseTask {
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFailureAllowed) {
-				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getFlywayVersion());
+				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new DataAccessException(Msg.code(61) + "Failed during task " + getFlywayVersion() + ": " + e, e) {
+				throw new DataAccessException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e) {
 					private static final long serialVersionUID = 8211678931579252166L;
 				};
 			}
@@ -245,7 +245,7 @@ public abstract class BaseTask {
 		myFailureAllowed = theFailureAllowed;
 	}
 
-	public String getFlywayVersion() {
+	public String getMigrationVersion() {
 		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {
 			releasePart = releasePart.substring(1);
@@ -254,7 +254,7 @@ public abstract class BaseTask {
 	}
 
 	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
-		theLog.info(getFlywayVersion() + ": " + theFormattedMessage, theArguments);
+		theLog.info(getMigrationVersion() + ": " + theFormattedMessage, theArguments);
 	}
 
 	public void validateVersion() {

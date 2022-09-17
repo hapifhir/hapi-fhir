@@ -26,7 +26,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
-import org.flywaydb.core.api.MigrationVersion;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class BaseMigrationTasks<T extends Enum> {
 
 	protected BaseTask getTaskWithVersion(String theFlywayVersion) {
 		return myTasks.values().stream()
-			.filter(task -> theFlywayVersion.equals(task.getFlywayVersion()))
+			.filter(task -> theFlywayVersion.equals(task.getMigrationVersion()))
 			.findFirst()
 			.get();
 	}
@@ -97,7 +96,7 @@ public class BaseMigrationTasks<T extends Enum> {
 	void validate(Collection<BaseTask> theTasks) {
 		for (BaseTask task : theTasks) {
 			task.validateVersion();
-			String version = task.getFlywayVersion();
+			String version = task.getMigrationVersion();
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {
 				if (migrationVersion.compareTo(lastVersion) <= 0) {

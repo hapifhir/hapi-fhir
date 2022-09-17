@@ -36,14 +36,14 @@ public class HashTest {
 		List<BaseTask> tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		Map<String, Integer> hashesByVersion = new HashMap<>();
 		for (BaseTask task : tasks1) {
-			String version = task.getFlywayVersion();
+			String version = task.getMigrationVersion();
 			assertNull(hashesByVersion.get(version), "Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName());
 			hashesByVersion.put(version, task.hashCode());
 		}
 
 		List<BaseTask> tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		for (BaseTask task : tasks2) {
-			String version = task.getFlywayVersion();
+			String version = task.getMigrationVersion();
 			int origHash = hashesByVersion.get(version);
 			assertEquals(origHash, task.hashCode(), "Hashes differ for task " + version);
 		}

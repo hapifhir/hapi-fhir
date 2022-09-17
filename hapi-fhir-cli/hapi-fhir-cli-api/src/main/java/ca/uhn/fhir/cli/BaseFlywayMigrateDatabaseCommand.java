@@ -21,11 +21,9 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.BaseMigrator;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
+import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskSkipper;
-import ca.uhn.fhir.jpa.migrate.TaskOnlyMigrator;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -50,7 +48,9 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
+	// FIXME KHS remove
 	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
+	// FIXME KHS rewmove
 	public static final String STRICT_ORDER = "strict-order";
 	public static final String SKIP_VERSIONS = "skip-versions";
 	private Set<String> myFlags;
@@ -119,30 +119,17 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.filter(StringUtils::isNotBlank)
 			.collect(Collectors.toSet());
 
-		boolean dontUseFlyway = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY);
-		boolean strictOrder = theCommandLine.hasOption(BaseFlywayMigrateDatabaseCommand.STRICT_ORDER);
-
-		BaseMigrator migrator;
-		if (dontUseFlyway || dryRun) {
-			// Flyway dryrun is not available in community edition
-			migrator = new TaskOnlyMigrator();
-		} else {
-			migrator = new FlywayMigrator(myMigrationTableName);
-		}
-
 		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
+		HapiMigrator migrator = new HapiMigrator(driverType, connectionProperties.getDataSource(), myMigrationTableName);
 
-		migrator.setDataSource(connectionProperties.getDataSource());
-		migrator.setDriverType(driverType);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
-		migrator.setStrictOrder(strictOrder);
 		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);
 		addTasks(migrator, skipVersions);
 		migrator.migrate();
 	}
 
-	protected abstract void addTasks(BaseMigrator theMigrator, String theSkippedVersions);
+	protected abstract void addTasks(HapiMigrator theMigrator, String theSkippedVersions);
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;
