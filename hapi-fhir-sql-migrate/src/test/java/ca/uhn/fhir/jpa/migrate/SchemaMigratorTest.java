@@ -5,7 +5,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
-import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;
@@ -14,8 +13,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -26,8 +23,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 public class SchemaMigratorTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SchemaMigratorTest.class);
@@ -39,11 +34,6 @@ public class SchemaMigratorTest extends BaseTest {
 		before(theTestDatabaseDetails);
 
 		SchemaMigrator schemaMigrator = createTableMigrator();
-
-		List<BaseTask> list = new ArrayList<>();
-		list.add(new DropTableTask("1", "1.1"));
-		when(myHapiMigrationStorageSvc.diff(any())).thenReturn(list);
-		when(myHapiMigrationStorageSvc.getLatestAppliedVersion()).thenReturn("unknown");
 
 		try {
 			schemaMigrator.validate();
@@ -119,7 +109,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 		ImmutableList<BaseTask> taskList = ImmutableList.of(taskA, taskB, taskC, taskD);
 		MigrationTaskSkipper.setDoNothingOnSkippedTasks(taskList, "4_1_0.20191214.2, 4_1_0.20191214.4");
-		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, ourHapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(getDriverType());
 
 		schemaMigrator.migrate();
@@ -163,7 +153,7 @@ public class SchemaMigratorTest extends BaseTest {
 
 	@Nonnull
 	private SchemaMigrator createSchemaMigrator(BaseTask... tasks) {
-		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), Lists.newArrayList(tasks), myHapiMigrationStorageSvc);
+		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), Lists.newArrayList(tasks), ourHapiMigrationStorageSvc);
 		retVal.setDriverType(getDriverType());
 		return retVal;
 	}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
@@ -52,6 +53,7 @@ public class HapiMigrator {
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
 	private final String myMigrationTableName;
+	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 	private List<Callback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
@@ -59,6 +61,7 @@ public class HapiMigrator {
 		myDataSource = theDataSource;
 		// FIXME KHS use tablename
 		myMigrationTableName = theMigrationTableName;
+		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theMigrationTableName));
 	}
 
 	public DataSource getDataSource() {
@@ -123,9 +126,12 @@ public class HapiMigrator {
 				} else {
 					ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
 				}
-				// FIXME KHS replace with different callback
+				// FIXME KHS replace with different callback probably a BaseTask consumer
 				myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
+				// FIXME KHS break up
+//				preExecute(next);
 				next.execute();
+//				postExecute(next);
 				addExecutedStatements(next.getExecutedStatements());
 			} catch (SQLException e) {
 				throw new InternalErrorException(Msg.code(48) + e);

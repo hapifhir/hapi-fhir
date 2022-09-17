@@ -2,9 +2,10 @@ package ca.uhn.fhir.jpa.migrate.dao;
 
 import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -14,25 +15,36 @@ class HapiMigrationDaoTest extends BaseMigrationTest {
 
 	@Test
 	public void findAll_empty_returnsNothing() {
-		List<HapiMigrationEntity> result = myHapiMigrationDao.findAll();
+		Set<MigrationVersion> result = ourHapiMigrationDao.fetchMigrationVersions();
 		assertThat(result, hasSize(0));
 	}
 
 	@Test
 	public void findAll_2records_returnsBoth() {
-		HapiMigrationEntity record1 = new HapiMigrationEntity();
-		String desc1 = "DESC1";
-		record1.setDescription(desc1);
-		HapiMigrationEntity result1 = myHapiMigrationDao.save(record1);
-		assertEquals(1, result1.getId());
+		HapiMigrationEntity record1 = buildEntity("DESC1", "1.1");
 
-		HapiMigrationEntity record2 = new HapiMigrationEntity();
-		String desc2 = "DESC2";
-		record2.setDescription(desc2);
-		HapiMigrationEntity result2 = myHapiMigrationDao.save(record2);
-		assertEquals(2, result2.getId());
+		HapiMigrationEntity result1 = ourHapiMigrationDao.save(record1);
+		assertEquals(1, result1.getPid());
+		{
+			Set<MigrationVersion> all = ourHapiMigrationDao.fetchMigrationVersions();
+			assertThat(all, hasSize(1));
+		}
+		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
 
-		List<HapiMigrationEntity> all = myHapiMigrationDao.findAll();
-		assertThat(all, hasSize(2));
+		HapiMigrationEntity result2 = ourHapiMigrationDao.save(record2);
+		assertEquals(2, result2.getPid());
+		{
+			Set<MigrationVersion> all = ourHapiMigrationDao.fetchMigrationVersions();
+			assertThat(all, hasSize(2));
+		}
+	}
+
+	private HapiMigrationEntity buildEntity(String theDesc, String theVersion) {
+		HapiMigrationEntity retval = new HapiMigrationEntity();
+		retval.setVersion(theVersion);
+		retval.setDescription(theDesc);
+		retval.setExecutionTime(1);
+		retval.setSuccess(true);
+		return retval;
 	}
 }

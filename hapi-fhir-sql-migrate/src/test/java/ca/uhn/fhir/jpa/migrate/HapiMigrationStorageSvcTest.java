@@ -6,12 +6,13 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
+import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -19,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	private static final String RELEASE = "V5_5_0";
-	@Autowired
-	HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	@BeforeEach
 	void before() {
@@ -29,20 +28,22 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 
 		for (BaseTask task : tasks) {
 			HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(task);
-			myHapiMigrationDao.save(entity);
+			entity.setExecutionTime(1);
+			entity.setSuccess(true);
+			ourHapiMigrationDao.save(entity);
 		}
 	}
 
 	@Test
 	void diff_oneNew_returnsNew() {
-		List<HapiMigrationEntity> appliedMigrations = myHapiMigrationStorageSvc.fetchAppliedMigrations();
+		Set<MigrationVersion> appliedMigrations = ourHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
 		assertThat(appliedMigrations, hasSize(7));
 
 		List<BaseTask> tasks = createTasks();
 		BaseTask dropTableTask = new DropTableTask(RELEASE, "20210722.4");
 		tasks.add(dropTableTask);
 
-		List<BaseTask> notAppliedYet = myHapiMigrationStorageSvc.diff(tasks);
+		List<BaseTask> notAppliedYet = ourHapiMigrationStorageSvc.diff(tasks);
 		assertThat(notAppliedYet, hasSize(1));
 		assertEquals("5_5_0.20210722.4", notAppliedYet.get(0).getMigrationVersion());
 	}

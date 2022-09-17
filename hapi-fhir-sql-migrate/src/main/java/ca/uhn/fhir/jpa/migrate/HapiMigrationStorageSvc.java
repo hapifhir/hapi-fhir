@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
-import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
 
@@ -16,10 +15,6 @@ public class HapiMigrationStorageSvc {
 		myHapiMigrationDao = theHapiMigrationDao;
 	}
 
-	public List<HapiMigrationEntity> fetchAppliedMigrations() {
-		return myHapiMigrationDao.findAll();
-	}
-
 	public List<BaseTask> diff(List<BaseTask> theTasks) {
 		Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
 
@@ -28,8 +23,8 @@ public class HapiMigrationStorageSvc {
 			.collect(Collectors.toList());
 	}
 
-	private Set<MigrationVersion> fetchAppliedMigrationVersions() {
-		return myHapiMigrationDao.fetchMigrationVersions().stream().map(MigrationVersion::fromVersion).collect(Collectors.toSet());
+	Set<MigrationVersion> fetchAppliedMigrationVersions() {
+		return myHapiMigrationDao.fetchMigrationVersions();
 	}
 
 	// FIXME KHS test

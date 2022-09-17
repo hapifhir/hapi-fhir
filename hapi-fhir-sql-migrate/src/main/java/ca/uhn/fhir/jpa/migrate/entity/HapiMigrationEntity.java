@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.springframework.data.domain.Persistable;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,17 +9,17 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import java.util.Date;
 
+// Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
+// so these annotations are for informational purposes only
 @Entity
-@Table(name = "FLY_HFJ_MIGRATION")
-public class HapiMigrationEntity implements Persistable<Integer> {
-	private static final int VERSION_MAX_SIZE = 50;
-	private static final int DESCRIPTION_MAX_SIZE = 200;
-	private static final int TYPE_MAX_SIZE = 20;
-	private static final int SCRIPT_MAX_SIZE = 1000;
-	private static final int INSTALLED_BY_MAX_SIZE = 100;
+public class HapiMigrationEntity {
+	public static final int VERSION_MAX_SIZE = 50;
+	public static final int DESCRIPTION_MAX_SIZE = 200;
+	public static final int TYPE_MAX_SIZE = 20;
+	public static final int SCRIPT_MAX_SIZE = 1000;
+	public static final int INSTALLED_BY_MAX_SIZE = 100;
 	@Id
 	@SequenceGenerator(name = "SEQ_FLY_HFJ_MIGRATION", sequenceName = "SEQ_FLY_HFJ_MIGRATION")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_FLY_HFJ_MIGRATION")
@@ -52,16 +52,6 @@ public class HapiMigrationEntity implements Persistable<Integer> {
 
 	@Column(name = "SUCCESS")
 	private Boolean mySuccess;
-
-	@Override
-	public Integer getId() {
-		return myPid;
-	}
-
-	@Override
-	public boolean isNew() {
-		return null == getId();
-	}
 
 	public Integer getPid() {
 		return myPid;
@@ -150,5 +140,22 @@ public class HapiMigrationEntity implements Persistable<Integer> {
 		retval.setChecksum(theTask.hashCode());
 		retval.setType("JDBC");
 		return retval;
+	}
+
+	public static RowMapper<HapiMigrationEntity> newRowMapper() {
+		return (rs, rowNum) -> {
+			HapiMigrationEntity entity = new HapiMigrationEntity();
+			entity.setPid(rs.getInt(1));
+			entity.setVersion(rs.getString(2));
+			entity.setDescription(rs.getString(3));
+			entity.setType(rs.getString(4));
+			entity.setScript(rs.getString(5));
+			entity.setChecksum(rs.getInt(6));
+			entity.setInstalledBy(rs.getString(7));
+			entity.setInstalledOn(rs.getTimestamp(8));
+			entity.setExecutionTime(rs.getInt(9));
+			entity.setSuccess(rs.getBoolean(10));
+			return entity;
+		};
 	}
 }

@@ -1,16 +1,13 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -24,8 +21,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 
-@ExtendWith(MockitoExtension.class)
-public abstract class BaseTest {
+public abstract class BaseTest extends BaseMigrationTest {
 
 	private static final String DATABASE_NAME = "DATABASE";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
@@ -34,8 +30,6 @@ public abstract class BaseTest {
 	private String myUrl;
 	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
-	@Mock
-	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
 		ourLog.info("H2: {}", org.h2.Driver.class.toString());

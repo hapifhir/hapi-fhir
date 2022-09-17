@@ -1,24 +1,40 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.jpa.migrate.config.HapiMigrationConfig;
-import ca.uhn.fhir.jpa.migrate.config.TestMigrationConfig;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.junit.jupiter.api.BeforeAll;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestMigrationConfig.class, HapiMigrationConfig.class})
-public class BaseMigrationTest {
-	@Autowired
-	protected
-	HapiMigrationDao myHapiMigrationDao;
+import javax.sql.DataSource;
+
+public abstract class BaseMigrationTest {
+	private static final String TABLE_NAME = "TEST_MIGRATION_TABLE";
+	private static final String TEST_DBUSER = "TEST_DBUSER";
+	protected static HapiMigrationDao ourHapiMigrationDao;
+	protected static HapiMigrationStorageSvc ourHapiMigrationStorageSvc;
+
+	@BeforeAll
+	public static void beforeAll() {
+		ourHapiMigrationDao = new HapiMigrationDao(getDataSource(), TABLE_NAME);
+		ourHapiMigrationDao.createMigrationTableIfRequired();
+		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
+	}
+
+	private static DataSource getDataSource() {
+		BasicDataSource retVal = new BasicDataSource();
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:test_migration");
+		retVal.setMaxWaitMillis(30000);
+		retVal.setUsername("");
+		retVal.setPassword("");
+		retVal.setMaxTotal(5);
+
+		return retVal;
+	}
 
 	@AfterEach
 	void after() {
-		myHapiMigrationDao.deleteAll();
+		ourHapiMigrationDao.deleteAll();
 	}
 
 }
