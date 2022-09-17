@@ -38,9 +38,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -452,7 +454,8 @@ public class UploadTerminologyCommandTest {
 				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 				"-v", theFhirVersion,
 				"-u", myICD10URL,
-				"-d", myICD10FileName
+				"-d", myICD10FileName,
+				"-s", "1GB"
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
@@ -463,6 +466,10 @@ public class UploadTerminologyCommandTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+
+		long transferSizeLimitForUnitTest = UploadTerminologyCommand.getTransferSizeLimitForUnitTest();
+		long gigaByteInBytes = 1073741824L;
+		assertThat(transferSizeLimitForUnitTest, is(equalTo(gigaByteInBytes)));
 	}
 
 	private synchronized void writeConceptAndHierarchyFiles() throws IOException {

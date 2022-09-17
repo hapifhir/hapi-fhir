@@ -42,6 +42,7 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -57,8 +58,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
-	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
+	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 100 * FileUtils.ONE_MB;
 	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+
+	public static long getTransferSizeLimitForUnitTest() {
+		return ourTransferSizeLimit;
+	}
 
 	@Override
 	public String getCommandDescription() {
@@ -77,6 +82,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
+		addOptionalOption(options, "s", "size", true, "The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
 
 		return options;
 	}
@@ -101,6 +107,13 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		String[] datafile = theCommandLine.getOptionValues("d");
 		if (datafile == null || datafile.length == 0) {
 			throw new ParseException(Msg.code(1540) + "No data file provided");
+		}
+
+		String sizeString = theCommandLine.getOptionValue("s");
+		if (isBlank(sizeString)) {
+			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+		} else {
+			ourTransferSizeLimit = DataSize.parse(sizeString).toBytes();
 		}
 
 		IGenericClient client = newClient(theCommandLine);
@@ -237,7 +250,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		if (bytes.length > ourTransferSizeLimit) {
 			ourLog.info("File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.", FileUtil.formatFileSize(ourTransferSizeLimit));
-
 			String suffix = fileName.substring(fileName.lastIndexOf("."));
 			try {
 				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
