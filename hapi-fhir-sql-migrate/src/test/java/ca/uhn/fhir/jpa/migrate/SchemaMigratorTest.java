@@ -17,7 +17,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
@@ -62,27 +61,6 @@ public class SchemaMigratorTest extends BaseTest {
 			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 		}
 		schemaMigrator = createTableMigrator();
-		schemaMigrator.migrate();
-	}
-
-	@ParameterizedTest(name = "{index}: {0}")
-	@MethodSource("data")
-	public void testOutOfOrderMigration(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
-		before(theTestDatabaseDetails);
-
-		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
-		schemaMigrator.migrate();
-
-		AddTableRawSqlTask task1 = createAddTableTask("SOMEOTHERTABLE", "create table SOMEOTHERTABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
-		AddTableRawSqlTask task2 = createAddTableTask("SOMETABLE", "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "2");
-		schemaMigrator = createSchemaMigrator(task1, task2);
-
-		try {
-			schemaMigrator.migrate();
-			fail();
-		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage(), containsString("Detected resolved migration not applied to database: 1.1"));
-		}
 		schemaMigrator.migrate();
 	}
 
