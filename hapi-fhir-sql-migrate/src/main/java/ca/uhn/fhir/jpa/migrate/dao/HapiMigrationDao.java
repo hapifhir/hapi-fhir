@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -85,9 +84,7 @@ public class HapiMigrationDao {
 	private boolean migrationTableExists() {
 		try {
 			try (Connection connection = myDataSource.getConnection()) {
-				DatabaseMetaData metadata;
-				metadata = connection.getMetaData();
-				ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
+				ResultSet tables = connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(), null, null);
 
 				while (tables.next()) {
 					String tableName = tables.getString("TABLE_NAME");
