@@ -93,7 +93,7 @@ public class AddColumnTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage(), startsWith("HAPI-0061: Failed during task 4_0_0.2001.01"));
+			assertThat(e.getMessage(), startsWith("HAPI-0061: Failed during task 4.0.0.2001.01"));
 		}
 	}
 

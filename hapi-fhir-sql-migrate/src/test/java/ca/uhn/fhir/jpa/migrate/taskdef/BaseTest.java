@@ -34,11 +34,6 @@ public abstract class BaseTest {
 	private HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
-	static {
-		// required by Derby
-		System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
-	}
-
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
 
 		ArrayList<Supplier<TestDatabaseDetails>> retVal = new ArrayList<>();

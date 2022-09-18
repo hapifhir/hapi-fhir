@@ -7,9 +7,10 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import org.flywaydb.core.api.MigrationVersion;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,37 +19,59 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	private static final String RELEASE = "V5_5_0";
+	private static final String RELEASE_VERSION_PREFIX = "5.5.0.";
+	public static final String FAILED_VERSION = "20210722.3";
+	public static final String LAST_TASK_VERSION = RELEASE_VERSION_PREFIX + FAILED_VERSION;
+	public static final String LAST_SUCCEEDED_VERSION = "20210722.2";
 
-	@BeforeEach
-	void before() {
-		MigrationTaskList taskList = createTasks();
+	@Test
+	void diff_oneNew_returnsNew() {
+		createTasks();
+		Set<MigrationVersion> appliedMigrations = ourHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
+		assertThat(appliedMigrations, hasSize(6));
+
+		MigrationTaskList taskList = buildTasks();
+		String version = "20210722.4";
+		BaseTask dropTableTask = new DropTableTask(RELEASE, version);
+		taskList.add(dropTableTask);
+
+		MigrationTaskList notAppliedYet = ourHapiMigrationStorageSvc.diff(taskList);
+		assertEquals(2, notAppliedYet.size());
+		List<BaseTask> notAppliedTasks = new ArrayList<>();
+		notAppliedYet.forEach(next -> notAppliedTasks.add(next));
+
+		assertEquals(RELEASE_VERSION_PREFIX + FAILED_VERSION, notAppliedTasks.get(0).getMigrationVersion());
+		assertEquals(RELEASE_VERSION_PREFIX + version, notAppliedTasks.get(1).getMigrationVersion());
+	}
+
+	@Test
+	void getLatestAppliedVersion_empty_unknown() {
+		String latest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
+		assertEquals(HapiMigrationStorageSvc.UNKNOWN_VERSION, latest);
+	}
+
+	@Test
+	void getLatestAppliedVersion_full_last() {
+		String latest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
+		assertEquals(HapiMigrationStorageSvc.UNKNOWN_VERSION, latest);
+		createTasks();
+		String newLatest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
+		assertEquals(RELEASE_VERSION_PREFIX + LAST_SUCCEEDED_VERSION, newLatest);
+	}
+
+	void createTasks() {
+		MigrationTaskList taskList = buildTasks();
 		assertEquals(7, taskList.size());
 
 		taskList.forEach(task -> {
 			HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(task);
 			entity.setExecutionTime(1);
-			entity.setSuccess(true);
+			entity.setSuccess(!LAST_TASK_VERSION.equals(task.getMigrationVersion()));
 			ourHapiMigrationDao.save(entity);
 		});
 	}
 
-	@Test
-	void diff_oneNew_returnsNew() {
-		Set<MigrationVersion> appliedMigrations = ourHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
-		assertThat(appliedMigrations, hasSize(7));
-
-		MigrationTaskList taskList = createTasks();
-		BaseTask dropTableTask = new DropTableTask(RELEASE, "20210722.4");
-		taskList.add(dropTableTask);
-
-		MigrationTaskList notAppliedYet = ourHapiMigrationStorageSvc.diff(taskList);
-		assertEquals(1, notAppliedYet.size());
-		notAppliedYet.forEach(next -> {
-			assertEquals("5_5_0.20210722.4", next.getMigrationVersion());
-		});
-	}
-
-	private MigrationTaskList createTasks() {
+	MigrationTaskList buildTasks() {
 		MigrationTaskList taskList = new MigrationTaskList();
 
 		Builder version = forVersion(taskList);
@@ -66,8 +89,8 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		Builder.BuilderWithTableName cmbTokNuTable = version.onTable("HFJ_IDX_CMB_TOK_NU");
 
 		cmbTokNuTable.addColumn("20210722.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
-		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
-		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
+		cmbTokNuTable.addColumn(LAST_SUCCEEDED_VERSION, "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		cmbTokNuTable.modifyColumn(FAILED_VERSION, "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
 
 		return taskList;
 	}

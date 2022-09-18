@@ -15,7 +15,7 @@ class HapiMigrationDaoTest extends BaseMigrationTest {
 
 	@Test
 	public void findAll_empty_returnsNothing() {
-		Set<MigrationVersion> result = ourHapiMigrationDao.fetchMigrationVersions();
+		Set<MigrationVersion> result = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 		assertThat(result, hasSize(0));
 	}
 
@@ -26,7 +26,7 @@ class HapiMigrationDaoTest extends BaseMigrationTest {
 		HapiMigrationEntity result1 = ourHapiMigrationDao.save(record1);
 		assertEquals(1, result1.getPid());
 		{
-			Set<MigrationVersion> all = ourHapiMigrationDao.fetchMigrationVersions();
+			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all, hasSize(1));
 		}
 		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
@@ -34,7 +34,7 @@ class HapiMigrationDaoTest extends BaseMigrationTest {
 		HapiMigrationEntity result2 = ourHapiMigrationDao.save(record2);
 		assertEquals(2, result2.getPid());
 		{
-			Set<MigrationVersion> all = ourHapiMigrationDao.fetchMigrationVersions();
+			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all, hasSize(2));
 		}
 	}

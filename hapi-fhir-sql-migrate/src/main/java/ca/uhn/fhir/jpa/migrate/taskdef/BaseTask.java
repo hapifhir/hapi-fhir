@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.flywaydb.core.api.MigrationVersion;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -262,7 +263,9 @@ public abstract class BaseTask {
 		if (releasePart.startsWith("V")) {
 			releasePart = releasePart.substring(1);
 		}
-		return releasePart + "." + mySchemaVersion;
+		String version = releasePart + "." + mySchemaVersion;
+		MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
+		return migrationVersion.getVersion();
 	}
 
 	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {

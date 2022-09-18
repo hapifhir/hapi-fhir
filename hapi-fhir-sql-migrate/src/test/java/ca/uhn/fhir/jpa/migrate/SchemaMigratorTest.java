@@ -86,7 +86,7 @@ public class SchemaMigratorTest extends BaseTest {
 		taskD.addSql(getDriverType(), "create table SOMETABLE_D (PID bigint not null, TEXTCOL varchar(255))");
 
 		MigrationTaskList taskList = new MigrationTaskList(ImmutableList.of(taskA, taskB, taskC, taskD));
-		taskList.setDoNothingOnSkippedTasks("4_1_0.20191214.2, 4_1_0.20191214.4");
+		taskList.setDoNothingOnSkippedTasks("4.1.0.20191214.2, 4.1.0.20191214.4");
 		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(getDriverType());
 

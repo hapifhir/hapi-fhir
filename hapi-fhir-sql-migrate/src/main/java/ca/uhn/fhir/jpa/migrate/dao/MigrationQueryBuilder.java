@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
@@ -33,7 +34,7 @@ public class MigrationQueryBuilder {
 	private final DbColumn myExecutionTimeCol;
 	private final DbColumn mySuccessCol;
 
-	private final String myFindVersionQuery;
+	private final String myBuildSuccessfulVersionQuery;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
 
@@ -69,13 +70,21 @@ public class MigrationQueryBuilder {
 		mySuccessCol = myTable.addColumn("SUCCESS", Types.BOOLEAN, null);
 		mySuccessCol.notNull();
 
-		myFindVersionQuery = new SelectQuery().addColumns(myVersionCol).validate().toString();
+		myBuildSuccessfulVersionQuery = buildFindSuccessfulVersionQuery();
 		myDeleteAll = new DeleteQuery(myTable).toString();
 		myHighestKeyQuery = buildHighestKeyQuery();
 	}
 
-	public String findVersionQuery() {
-		return myFindVersionQuery;
+	private String buildFindSuccessfulVersionQuery() {
+		return new SelectQuery()
+			.addColumns(myVersionCol)
+			.addCondition(  BinaryCondition.equalTo(mySuccessCol, true))
+			.validate()
+			.toString();
+	}
+
+	public String findSuccessfulVersionQuery() {
+		return myBuildSuccessfulVersionQuery;
 	}
 
 	public String deleteAll() {

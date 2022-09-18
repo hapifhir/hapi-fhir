@@ -20,7 +20,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HapiMigrationDao {
+	static {
+		// required for most databases for boolean columns
+		System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
+	}
+
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationDao.class);
+
 	private final JdbcTemplate myJdbcTemplate;
 	private final String myMigrationTablename;
 	private final MigrationQueryBuilder myMigrationQueryBuilder;
@@ -33,8 +39,8 @@ public class HapiMigrationDao {
 		myMigrationQueryBuilder = new MigrationQueryBuilder(theMigrationTablename);
 	}
 
-	public Set<MigrationVersion> fetchMigrationVersions() {
-		String query = myMigrationQueryBuilder.findVersionQuery();
+	public Set<MigrationVersion> fetchSuccessfulMigrationVersions() {
+		String query = myMigrationQueryBuilder.findSuccessfulVersionQuery();
 		List<String> result = myJdbcTemplate.queryForList(query, String.class);
 
 		return result.stream()
