@@ -167,7 +167,6 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			// FIXME KHS get this to pass
 			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "+ Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
 		}
 

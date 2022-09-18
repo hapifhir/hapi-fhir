@@ -145,7 +145,7 @@ public class HapiMigrator {
 			}
 		}
 
-		ourLog.info("Completed executing {} migration tasks", myTasks.size());
+		ourLog.info("Completed executing {} migration tasks resulting in {} changes", myTasks.size(), myChangesCount);
 
 		if (isDryRun()) {
 			StringBuilder statementBuilder = buildExecutedStatementsString();

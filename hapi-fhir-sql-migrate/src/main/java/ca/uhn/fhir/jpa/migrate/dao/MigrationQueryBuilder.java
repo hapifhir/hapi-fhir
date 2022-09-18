@@ -94,7 +94,7 @@ public class MigrationQueryBuilder {
 	}
 
 	public String insertStatement(HapiMigrationEntity theEntity) {
-		String retval = new InsertQuery(myTable)
+		return new InsertQuery(myTable)
 			.addColumn(myInstalledRankCol, theEntity.getPid())
 			.addColumn(myVersionCol, theEntity.getVersion())
 			.addColumn(myDescriptionCol, theEntity.getDescription())
@@ -107,9 +107,6 @@ public class MigrationQueryBuilder {
 			.addColumn(mySuccessCol, theEntity.getSuccess())
 			.validate()
 			.toString();
-		// FIXME KHS
-		ourLog.info(retval);
-		return retval;
 
 	}
 
