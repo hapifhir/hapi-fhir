@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
@@ -9,8 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -67,14 +76,42 @@ public class HapiMigrationDao {
 	}
 
 	public void createMigrationTableIfRequired() {
+		if (getTableNames().contains(myMigrationTablename)) {
+			return;
+		}
+		ourLog.info("Creating table {}", myMigrationTablename);
+		String createTableStatement = myMigrationQueryBuilder.createTableStatement();
+		ourLog.info(createTableStatement);
+		myJdbcTemplate.execute(createTableStatement);
+	}
+
+	private Set<String> getTableNames() {
 		try {
-			// WIP KHS find a better way to detect
-			fetchMigrationVersions();
-		} catch (Exception e) {
-			ourLog.info("Creating table {}", myMigrationTablename);
-			String createTableStatement = myMigrationQueryBuilder.createTableStatement();
-			ourLog.info(createTableStatement);
-			myJdbcTemplate.execute(createTableStatement);
+			try (Connection connection = myDataSource.getConnection()) {
+				DatabaseMetaData metadata;
+				metadata = connection.getMetaData();
+				ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
+
+				Set<String> columnNames = new HashSet<>();
+				while (tables.next()) {
+					String tableName = tables.getString("TABLE_NAME");
+					tableName = tableName.toUpperCase(Locale.US);
+
+					String tableType = tables.getString("TABLE_TYPE");
+					if ("SYSTEM TABLE".equalsIgnoreCase(tableType)) {
+						continue;
+					}
+					if (SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME.equalsIgnoreCase(tableName)) {
+						continue;
+					}
+
+					columnNames.add(tableName);
+				}
+
+				return columnNames;
+			}
+		} catch (SQLException e) {
+			throw new InternalErrorException(Msg.code(40) + e);
 		}
 	}
 }
