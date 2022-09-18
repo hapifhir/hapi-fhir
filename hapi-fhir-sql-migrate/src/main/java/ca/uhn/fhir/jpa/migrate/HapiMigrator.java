@@ -40,11 +40,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
-/**
- * This class is an alternative to {@link HapiMigrator ). It doesn't use Flyway, but instead just
- * executes all tasks.
- */
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
