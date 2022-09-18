@@ -38,7 +38,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		MigrationTaskList notAppliedYet = ourHapiMigrationStorageSvc.diff(taskList);
 		assertEquals(2, notAppliedYet.size());
 		List<BaseTask> notAppliedTasks = new ArrayList<>();
-		notAppliedYet.forEach(next -> notAppliedTasks.add(next));
+		notAppliedYet.forEach(notAppliedTasks::add);
 
 		assertEquals(RELEASE_VERSION_PREFIX + FAILED_VERSION, notAppliedTasks.get(0).getMigrationVersion());
 		assertEquals(RELEASE_VERSION_PREFIX + version, notAppliedTasks.get(1).getMigrationVersion());
