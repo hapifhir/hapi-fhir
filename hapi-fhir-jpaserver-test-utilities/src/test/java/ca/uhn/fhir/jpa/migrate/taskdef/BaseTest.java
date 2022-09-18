@@ -30,6 +30,11 @@ public abstract class BaseTest {
 	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
+	static {
+		// required by Derby
+		System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
+	}
+
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
 		ourLog.info("H2: {}", org.h2.Driver.class);
 
@@ -86,6 +91,7 @@ public abstract class BaseTest {
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
+		myMigrator.createMigrationTableIfRequired();
 	}
 
 	public String getUrl() {
