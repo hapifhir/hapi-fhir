@@ -84,7 +84,7 @@ public class SchemaMigrator {
 	}
 
 	private String getLastVersion(List<BaseTask> theMigrationTasks) {
-		// FIXME make task list a first-order class
+		// WIP KHS make task list a first-order class
 		return theMigrationTasks.stream()
 			.map(BaseTask::getMigrationVersion)
 			.map(MigrationVersion::fromVersion)
