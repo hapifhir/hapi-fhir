@@ -3,18 +3,25 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -37,12 +44,14 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -158,6 +167,38 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		assertEquals("Patient/p-123", observation.getSubject().getReference());
 		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
 
+	}
+	@Test
+	public void testPaginationContainsNextLink() {
+		//setup data
+		var totalSize = 5;
+		var mySystem = "MY_SYSTEM";
+		for (int i = 0; i < totalSize; i++) {
+			Patient patient = new Patient()
+				.addIdentifier(new Identifier().setSystem(mySystem).setValue(UUID.randomUUID().toString()))
+				.addName(new HumanName().addGiven("Test $it").setFamily("Family"));
+			myClient.create().resource(patient).execute();
+		}
+
+		Bundle searchResults = myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.hasSystemWithAnyCode(mySystem))
+			.count(totalSize + 10).returnBundle(Bundle.class).execute();
+		var list = BundleUtil.toListOfEntries(myFhirContext, searchResults);
+		assertEquals(totalSize, list.size());
+		assertNull(searchResults.getLink(IBaseBundle.LINK_NEXT));
+
+
+		var pageSize = 2;
+		searchResults = (org.hl7.fhir.r4.model.Bundle) myClient.search()
+			.forResource(Patient.class)
+			.where(Patient.IDENTIFIER.hasSystemWithAnyCode(mySystem))
+			.count(pageSize)
+			.execute();
+
+		list = BundleUtil.toListOfEntries(myFhirContext, searchResults);
+		assertEquals(pageSize, list.size());
+		assertThat(searchResults.getLink(IBaseBundle.LINK_NEXT), is(notNullValue()));
 	}
 
 	@Test
