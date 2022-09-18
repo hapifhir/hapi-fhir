@@ -124,4 +124,8 @@ public class SchemaMigrator {
 	public void setCallbacks(List<Callback> theCallbacks) {
 		myCallbacks = theCallbacks;
 	}
+
+	public void createMigrationTableIfRequired() {
+		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+	}
 }

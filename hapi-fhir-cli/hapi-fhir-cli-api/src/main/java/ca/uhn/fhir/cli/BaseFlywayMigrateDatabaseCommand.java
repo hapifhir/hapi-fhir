@@ -48,9 +48,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 	public static final String MIGRATE_DATABASE = "migrate-database";
 	public static final String NO_COLUMN_SHRINK = "no-column-shrink";
-	// FIXME KHS remove
-	public static final String DONT_USE_FLYWAY = "dont-use-flyway";
-	// FIXME KHS rewmove
 	public static final String STRICT_ORDER = "strict-order";
 	public static final String SKIP_VERSIONS = "skip-versions";
 	private Set<String> myFlags;
@@ -84,8 +81,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		addRequiredOption(retVal, "p", "password", "Password", "The JDBC database password");
 		addRequiredOption(retVal, "d", "driver", "Driver", "The database driver to use (Options are " + driverOptions() + ")");
 		addOptionalOption(retVal, "x", "flags", "Flags", "A comma-separated list of any specific migration flags (these flags are version specific, see migrator documentation for details)");
-		addOptionalOption(retVal, null, DONT_USE_FLYWAY, false, "If this option is set, the migrator will not use FlywayDB for migration. This setting should only be used if you are trying to migrate a legacy database platform that is not supported by FlywayDB.");
-		addOptionalOption(retVal, null, STRICT_ORDER, false, "If this option is set, the migrator will require migration tasks to be performed in order.");
 		addOptionalOption(retVal, null, NO_COLUMN_SHRINK, false, "If this flag is set, the system will not attempt to reduce the length of columns. This is useful in environments with a lot of existing data, where shrinking a column can take a very long time.");
 		addOptionalOption(retVal, null, SKIP_VERSIONS, "Versions", "A comma separated list of schema versions to skip.  E.g. 4_1_0.20191214.2,4_1_0.20191214.4");
 
@@ -122,6 +117,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
 		HapiMigrator migrator = new HapiMigrator(driverType, connectionProperties.getDataSource(), myMigrationTableName);
 
+		migrator.createMigrationTableIfRequired();
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
 		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);

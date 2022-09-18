@@ -16,6 +16,7 @@ public class HapiMigrationStorageSvc {
 		myHapiMigrationDao = theHapiMigrationDao;
 	}
 
+	// WIP KHS this should exclude failed tasks
 	public List<BaseTask> diff(List<BaseTask> theTasks) {
 		Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
 
@@ -28,7 +29,7 @@ public class HapiMigrationStorageSvc {
 		return myHapiMigrationDao.fetchMigrationVersions();
 	}
 
-	// FIXME KHS test
+	// WIP KHS test
 	public String getLatestAppliedVersion() {
 		return fetchAppliedMigrationVersions().stream()
 			.sorted()
@@ -42,5 +43,9 @@ public class HapiMigrationStorageSvc {
 		entity.setExecutionTime(theMillis);
 		entity.setSuccess(theSuccess);
 		myHapiMigrationDao.save(entity);
+	}
+
+	public void createMigrationTableIfRequired() {
+		myHapiMigrationDao.createMigrationTableIfRequired();
 	}
 }

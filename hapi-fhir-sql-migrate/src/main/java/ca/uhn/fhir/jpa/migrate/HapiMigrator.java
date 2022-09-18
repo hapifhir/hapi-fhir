@@ -108,11 +108,13 @@ public class HapiMigrator {
 	}
 
 	public void migrate() {
-		ourLog.info("Starting migration with {} tasks", myTasks.size());
+		ourLog.info("Loaded {} migration tasks", myTasks.size());
+		List<BaseTask> newTasks = myHapiMigrationStorageSvc.diff(myTasks);
+		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTasks.size(), myTasks.size());
 
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
-			for (BaseTask next : myTasks) {
+			for (BaseTask next : newTasks) {
 				next.setDriverType(getDriverType());
 				next.setDryRun(isDryRun());
 				next.setNoColumnShrink(isNoColumnShrink());
@@ -125,9 +127,9 @@ public class HapiMigrator {
 					} else {
 						ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
 					}
-					// FIXME KHS replace with different callback probably a BaseTask consumer
+					// WIP KHS replace with different callback probably a BaseTask consumer
 					myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
-					// FIXME KHS break up
+					// WIP KHS break up
 					next.execute();
 					postExecute(next, sw, true);
 					myChangesCount += next.getChangesCount();
@@ -178,5 +180,9 @@ public class HapiMigrator {
 	@VisibleForTesting
 	public void removeAllTasksForUnitTest() {
 		myTasks.clear();
+	}
+
+	public void createMigrationTableIfRequired() {
+		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
 	}
 }
