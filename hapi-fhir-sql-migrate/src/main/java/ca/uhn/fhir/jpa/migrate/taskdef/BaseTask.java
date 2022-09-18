@@ -53,7 +53,7 @@ public abstract class BaseTask {
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
-	private int myChangesCount;
+	private Integer myChangesCount = 0;
 	private boolean myDryRun;
 
 	/**
@@ -150,13 +150,34 @@ public abstract class BaseTask {
 			if (myTransactional) {
 				changes = getConnectionProperties().getTxTemplate().execute(t -> doExecuteSql(theSql, theArguments));
 			} else {
-				changes =  doExecuteSql(theSql, theArguments);
+				changes = doExecuteSql(theSql, theArguments);
 			}
 
 			myChangesCount += changes;
 		}
 
 		captureExecutedStatement(theTableName, theSql, theArguments);
+	}
+
+	protected void executeSqlListInTransaction(String theTableName, List<String> theSqlStatements) {
+		if (!isDryRun()) {
+			Integer changes;
+			changes = getConnectionProperties().getTxTemplate().execute(t -> doExecuteSqlList(theSqlStatements));
+			myChangesCount += changes;
+		}
+
+		for (@Language("SQL") String sqlStatement : theSqlStatements) {
+			captureExecutedStatement(theTableName, sqlStatement);
+		}
+	}
+
+	private Integer doExecuteSqlList(List<String> theSqlStatements) {
+		int changesCount = 0;
+		for (String nextSql : theSqlStatements) {
+			changesCount += doExecuteSql(nextSql);
+		}
+
+		return changesCount;
 	}
 
 	private int doExecuteSql(@Language("SQL") String theSql, Object... theArguments) {
@@ -175,14 +196,12 @@ public abstract class BaseTask {
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e) {
-					private static final long serialVersionUID = 8211678931579252166L;
-				};
+				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}
 
-	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object[] theArguments) {
+	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
 		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
 	}
 

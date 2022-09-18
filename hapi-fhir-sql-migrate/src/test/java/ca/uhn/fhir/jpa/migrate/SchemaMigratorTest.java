@@ -58,7 +58,7 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
+			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getClass());
 		}
 		schemaMigrator = createTableMigrator();
 		schemaMigrator.migrate();

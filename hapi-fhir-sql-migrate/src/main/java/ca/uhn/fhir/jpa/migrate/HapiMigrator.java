@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -141,7 +140,7 @@ public class HapiMigrator {
 						description = next.getClass().getSimpleName();
 					}
 					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-					throw new InternalErrorException(Msg.code(44) + prefix + e.getMessage(), e);
+					throw new HapiMigrationException(Msg.code(47) + prefix + e, e);
 				}
 			}
 		}

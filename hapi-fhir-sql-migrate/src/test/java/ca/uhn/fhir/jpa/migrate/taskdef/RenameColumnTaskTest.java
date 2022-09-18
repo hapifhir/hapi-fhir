@@ -168,7 +168,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			fail();
 		} catch (HapiMigrationException e) {
 			// FIXME KHS get this to pass
-			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "+ Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getCause().getCause().getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: "+ Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
 		}
 
 	}
@@ -251,7 +251,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getCause().getCause().getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getMessage());
 		}
 
 
@@ -291,7 +291,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getCause().getCause().getMessage());
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: "+ Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getMessage());
 		}
 
 
