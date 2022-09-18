@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
-import org.flywaydb.core.api.callback.Callback;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,7 @@ public class SchemaMigrator {
 	private final String myMigrationTableName;
 	private final List<BaseTask> myMigrationTasks;
 	private DriverTypeEnum myDriverType;
-	private List<Callback> myCallbacks = Collections.emptyList();
+	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	/**
@@ -121,7 +120,7 @@ public class SchemaMigrator {
 		myDriverType = theDriverType;
 	}
 
-	public void setCallbacks(List<Callback> theCallbacks) {
+	public void setCallbacks(List<IHapiMigrationCallback> theCallbacks) {
 		myCallbacks = theCallbacks;
 	}
 

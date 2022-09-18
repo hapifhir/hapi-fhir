@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -10,6 +11,7 @@ import java.util.function.Supplier;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DropTableTest extends BaseTest {
 
@@ -70,7 +72,7 @@ public class DropTableTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testFlywayGetMigrationInfo(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+	public void testHapiMigrationResult(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -81,10 +83,11 @@ public class DropTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
 
-// WIP KHS replace with dao
-		//		assertThat(getMigrator().getMigrationInfo().get().pending().length, greaterThan(0));
-		getMigrator().migrate();
-//		assertThat(getMigrator().getMigrationInfo().get().pending().length, equalTo(0));
+		MigrationResult result = getMigrator().migrate();
+		assertEquals(0, result.changes);
+		assertEquals(1, result.executedStatements.size());
+		assertEquals(1, result.succeededTasks.size());
+		assertEquals(0, result.failedTasks.size());
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
 	}

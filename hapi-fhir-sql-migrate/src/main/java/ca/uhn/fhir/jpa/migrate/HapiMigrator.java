@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.flywaydb.core.api.callback.Callback;
-import org.flywaydb.core.api.callback.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +42,12 @@ public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
 	private List<BaseTask> myTasks = new ArrayList<>();
-	private final List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
-	private List<Callback> myCallbacks = Collections.emptyList();
-	private int myChangesCount;
+	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
 		myDriverType = theDriverType;
@@ -84,10 +80,10 @@ public class HapiMigrator {
 	}
 
 
-	protected StringBuilder buildExecutedStatementsString() {
+	protected StringBuilder buildExecutedStatementsString(MigrationResult theMigrationResult) {
 		StringBuilder statementBuilder = new StringBuilder();
 		String lastTable = null;
-		for (BaseTask.ExecutedStatement next : myExecutedStatements) {
+		for (BaseTask.ExecutedStatement next : theMigrationResult.executedStatements) {
 			if (!Objects.equals(lastTable, next.getTableName())) {
 				statementBuilder.append("\n\n-- Table: ").append(next.getTableName()).append("\n");
 				lastTable = next.getTableName();
@@ -102,10 +98,12 @@ public class HapiMigrator {
 		return statementBuilder;
 	}
 
-	public void migrate() {
+	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTasks.size());
 		List<BaseTask> newTasks = myHapiMigrationStorageSvc.diff(myTasks);
 		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTasks.size(), myTasks.size());
+
+		MigrationResult retval = new MigrationResult();
 
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
@@ -122,15 +120,14 @@ public class HapiMigrator {
 					} else {
 						ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
 					}
-					// WIP KHS replace with different callback probably a BaseTask consumer
-					myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
-					// WIP KHS break up
+					preExecute(next);
 					next.execute();
 					postExecute(next, sw, true);
-					myChangesCount += next.getChangesCount();
-					myExecutedStatements.addAll(next.getExecutedStatements());
-
+					retval.changes += next.getChangesCount();
+					retval.executedStatements.addAll(next.getExecutedStatements());
+					retval.succeededTasks.add(next);
 				} catch (SQLException e) {
+					retval.failedTasks.add(next);
 					postExecute(next, sw, false);
 					String description = next.getDescription();
 					if (isBlank(description)) {
@@ -142,12 +139,19 @@ public class HapiMigrator {
 			}
 		}
 
-		ourLog.info("Completed executing {} migration tasks resulting in {} changes", myTasks.size(), myChangesCount);
+		ourLog.info(retval.summary());
 
 		if (isDryRun()) {
-			StringBuilder statementBuilder = buildExecutedStatementsString();
+			StringBuilder statementBuilder = buildExecutedStatementsString(retval);
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
+
+		return retval;
+	}
+
+	private void preExecute(BaseTask theTask) {
+		myCallbacks.forEach(action -> action.preExecution(theTask));
+
 	}
 
 	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
@@ -163,11 +167,11 @@ public class HapiMigrator {
 	}
 
 	@Nonnull
-	public List<Callback> getCallbacks() {
+	public List<IHapiMigrationCallback> getCallbacks() {
 		return myCallbacks;
 	}
 
-	public void setCallbacks(@Nonnull List<Callback> theCallbacks) {
+	public void setCallbacks(@Nonnull List<IHapiMigrationCallback> theCallbacks) {
 		Validate.notNull(theCallbacks);
 		myCallbacks = theCallbacks;
 	}
