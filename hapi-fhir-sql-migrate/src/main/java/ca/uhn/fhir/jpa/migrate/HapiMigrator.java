@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * This class is an alternative to {@link HapiMigrator ). It doesn't use Flyway, but instead just
  * executes all tasks.
@@ -53,15 +55,13 @@ public class HapiMigrator {
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
-	private final String myMigrationTableName;
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 	private List<Callback> myCallbacks = Collections.emptyList();
+	private int myChangesCount;
 
 	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
-		// FIXME KHS use tablename
-		myMigrationTableName = theMigrationTableName;
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theMigrationTableName));
 	}
 
@@ -90,10 +90,6 @@ public class HapiMigrator {
 	}
 
 
-	public void addExecutedStatements(List theExecutedStatements) {
-		myExecutedStatements.addAll(theExecutedStatements);
-	}
-
 	protected StringBuilder buildExecutedStatementsString() {
 		StringBuilder statementBuilder = new StringBuilder();
 		String lastTable = null;
@@ -113,32 +109,45 @@ public class HapiMigrator {
 	}
 
 	public void migrate() {
-		DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource());
+		ourLog.info("Starting migration with {} tasks", myTasks.size());
 
-		for (BaseTask next : myTasks) {
-			next.setDriverType(getDriverType());
-			next.setDryRun(isDryRun());
-			next.setNoColumnShrink(isNoColumnShrink());
-			next.setConnectionProperties(connectionProperties);
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
-			StopWatch sw = new StopWatch();
-			try {
-				if (isDryRun()) {
-					ourLog.info("Dry run {} {}", next.getMigrationVersion(), next.getDescription());
-				} else {
-					ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
+			for (BaseTask next : myTasks) {
+				next.setDriverType(getDriverType());
+				next.setDryRun(isDryRun());
+				next.setNoColumnShrink(isNoColumnShrink());
+				next.setConnectionProperties(connectionProperties);
+
+				StopWatch sw = new StopWatch();
+				try {
+					if (isDryRun()) {
+						ourLog.info("Dry run {} {}", next.getMigrationVersion(), next.getDescription());
+					} else {
+						ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
+					}
+					// FIXME KHS replace with different callback probably a BaseTask consumer
+					myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
+					// FIXME KHS break up
+					next.execute();
+					postExecute(next, sw, true);
+					myChangesCount += next.getChangesCount();
+					myExecutedStatements.addAll(next.getExecutedStatements());
+
+				} catch (SQLException e) {
+					postExecute(next, sw, false);
+					String description = next.getDescription();
+					if (isBlank(description)) {
+						description = next.getClass().getSimpleName();
+					}
+					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
+					throw new InternalErrorException(Msg.code(44) + prefix + e.getMessage(), e);
 				}
-				// FIXME KHS replace with different callback probably a BaseTask consumer
-				myCallbacks.forEach(action -> action.handle(Event.BEFORE_EACH_MIGRATE, null));
-				// FIXME KHS break up
-				next.execute();
-				postExecute(next, sw, true);
-				addExecutedStatements(next.getExecutedStatements());
-			} catch (SQLException e) {
-				postExecute(next, sw, false);
-				throw new InternalErrorException(Msg.code(48) + e);
 			}
 		}
+
+		ourLog.info("Completed executing {} migration tasks", myTasks.size());
+
 		if (isDryRun()) {
 			StringBuilder statementBuilder = buildExecutedStatementsString();
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);

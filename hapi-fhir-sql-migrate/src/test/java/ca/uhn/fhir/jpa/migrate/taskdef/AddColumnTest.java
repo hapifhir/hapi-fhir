@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -92,7 +93,7 @@ public class AddColumnTest extends BaseTest {
 			getMigrator().migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals("Migration failed !", e.getMessage());
+			assertThat(e.getMessage(), startsWith("HAPI-0061: Failed during task 4_0_0.2001.01"));
 		}
 	}
 

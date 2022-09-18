@@ -148,9 +148,7 @@ public abstract class BaseTask {
 		if (!isDryRun()) {
 			Integer changes;
 			if (myTransactional) {
-				changes = getConnectionProperties().getTxTemplate().execute(t -> {
-					return doExecuteSql(theSql, theArguments);
-				});
+				changes = getConnectionProperties().getTxTemplate().execute(t -> doExecuteSql(theSql, theArguments));
 			} else {
 				changes =  doExecuteSql(theSql, theArguments);
 			}
@@ -161,7 +159,7 @@ public abstract class BaseTask {
 		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
-	private int doExecuteSql(@Language("SQL") String theSql, Object[] theArguments) {
+	private int doExecuteSql(@Language("SQL") String theSql, Object... theArguments) {
 		JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
@@ -220,12 +218,6 @@ public abstract class BaseTask {
 		if (myDoNothing) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
 			return;
-		}
-		if (!myOnlyAppliesToPlatforms.isEmpty()) {
-			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
-				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
-				return;
-			}
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
