@@ -32,16 +32,16 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
-	private List<BaseTask> myTasks = new ArrayList<>();
+	private MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
@@ -99,15 +99,16 @@ public class HapiMigrator {
 	}
 
 	public MigrationResult migrate() {
-		ourLog.info("Loaded {} migration tasks", myTasks.size());
-		List<BaseTask> newTasks = myHapiMigrationStorageSvc.diff(myTasks);
-		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTasks.size(), myTasks.size());
+		ourLog.info("Loaded {} migration tasks", myTaskList.size());
+		MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
+		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
 		MigrationResult retval = new MigrationResult();
 
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
-			for (BaseTask next : newTasks) {
+			newTaskList.forEach(next -> {
+
 				next.setDriverType(getDriverType());
 				next.setDryRun(isDryRun());
 				next.setNoColumnShrink(isNoColumnShrink());
@@ -136,7 +137,7 @@ public class HapiMigrator {
 					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
 					throw new HapiMigrationException(Msg.code(47) + prefix + e, e);
 				}
-			}
+			});
 		}
 
 		ourLog.info(retval.summary());
@@ -158,12 +159,12 @@ public class HapiMigrator {
 		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
 	}
 
-	public void addTasks(List<BaseTask> theMigrationTasks) {
-		myTasks.addAll(theMigrationTasks);
+	public void addTaskList(MigrationTaskList theMigrationTasks) {
+		myTaskList.append(theMigrationTasks);
 	}
 
 	public void addTask(BaseTask theTask) {
-		myTasks.add(theTask);
+		myTaskList.add(theTask);
 	}
 
 	@Nonnull
@@ -178,7 +179,7 @@ public class HapiMigrator {
 
 	@VisibleForTesting
 	public void removeAllTasksForUnitTest() {
-		myTasks.clear();
+		myTaskList.clear();
 	}
 
 	public void createMigrationTableIfRequired() {

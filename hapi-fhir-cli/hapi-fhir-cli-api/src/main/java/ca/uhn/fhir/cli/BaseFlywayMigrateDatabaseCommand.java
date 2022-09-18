@@ -23,8 +23,6 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
-import ca.uhn.fhir.jpa.migrate.MigrationTaskSkipper;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -33,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -129,9 +126,5 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 	public void setMigrationTableName(String theMigrationTableName) {
 		myMigrationTableName = theMigrationTableName;
-	}
-
-	protected void setDoNothingOnSkippedTasks(Collection<BaseTask> theTasks, String theSkipVersions) {
-		MigrationTaskSkipper.setDoNothingOnSkippedTasks(theTasks, theSkipVersions);
 	}
 }

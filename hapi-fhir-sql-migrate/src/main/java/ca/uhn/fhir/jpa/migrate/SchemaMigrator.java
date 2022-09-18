@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import org.flywaydb.core.api.MigrationVersion;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +40,7 @@ public class SchemaMigrator {
 	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
 	private final String myMigrationTableName;
-	private final List<BaseTask> myMigrationTasks;
+	private final MigrationTaskList myMigrationTasks;
 	private DriverTypeEnum myDriverType;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
@@ -50,7 +48,7 @@ public class SchemaMigrator {
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, List<BaseTask> theMigrationTasks, HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
+	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, MigrationTaskList theMigrationTasks, HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
 		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
@@ -66,31 +64,20 @@ public class SchemaMigrator {
 			return;
 		}
 		try (Connection connection = myDataSource.getConnection()) {
-			List<BaseTask> unappliedMigrations = myHapiMigrationStorageSvc.diff(myMigrationTasks);
+			MigrationTaskList unappliedMigrations = myHapiMigrationStorageSvc.diff(myMigrationTasks);
 
 			if (unappliedMigrations.size() > 0) {
 
 				String url = connection.getMetaData().getURL();
 				throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  " +
 					"Current database schema version is " + myHapiMigrationStorageSvc.getLatestAppliedVersion() + ".  Schema version required by application is " +
-					getLastVersion(myMigrationTasks) + ".  Please run the database migrator.");
+					unappliedMigrations.getLastVersion() + ".  Please run the database migrator.");
 			}
 			ourLog.info("Database schema confirmed at expected version " + myHapiMigrationStorageSvc.getLatestAppliedVersion());
 		} catch (SQLException e) {
 			throw new ConfigurationException(Msg.code(28) + "Unable to connect to " + myDataSource, e);
 		}
 
-	}
-
-	private String getLastVersion(List<BaseTask> theMigrationTasks) {
-		// WIP KHS make task list a first-order class
-		return theMigrationTasks.stream()
-			.map(BaseTask::getMigrationVersion)
-			.map(MigrationVersion::fromVersion)
-			.sorted()
-			.map(MigrationVersion::toString)
-			.reduce((first, second) -> second)
-			.orElse(null);
 	}
 
 	public void migrate() {
@@ -111,7 +98,7 @@ public class SchemaMigrator {
 	private HapiMigrator newMigrator() {
 		HapiMigrator migrator;
 		migrator = new HapiMigrator(myDriverType, myDataSource, myMigrationTableName);
-		migrator.addTasks(myMigrationTasks);
+		migrator.addTaskList(myMigrationTasks);
 		migrator.setCallbacks(myCallbacks);
 		return migrator;
 	}

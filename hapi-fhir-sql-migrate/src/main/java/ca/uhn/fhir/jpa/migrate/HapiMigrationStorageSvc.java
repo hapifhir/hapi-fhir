@@ -5,9 +5,7 @@ import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
 
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class HapiMigrationStorageSvc {
 	private final HapiMigrationDao myHapiMigrationDao;
@@ -17,12 +15,10 @@ public class HapiMigrationStorageSvc {
 	}
 
 	// WIP KHS this should exclude failed tasks
-	public List<BaseTask> diff(List<BaseTask> theTasks) {
+	public MigrationTaskList diff(MigrationTaskList theTaskList) {
 		Set<MigrationVersion> appliedMigrationVersions = fetchAppliedMigrationVersions();
 
-		return theTasks.stream()
-			.filter(task -> !appliedMigrationVersions.contains(MigrationVersion.fromVersion(task.getMigrationVersion())))
-			.collect(Collectors.toList());
+		return theTaskList.diff(appliedMigrationVersions);
 	}
 
 	Set<MigrationVersion> fetchAppliedMigrationVersions() {

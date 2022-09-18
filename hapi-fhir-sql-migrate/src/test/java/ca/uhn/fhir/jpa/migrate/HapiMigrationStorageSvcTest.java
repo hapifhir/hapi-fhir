@@ -10,8 +10,6 @@ import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,15 +21,15 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 
 	@BeforeEach
 	void before() {
-		List<BaseTask> tasks = createTasks();
-		assertThat(tasks, hasSize(7));
+		MigrationTaskList taskList = createTasks();
+		assertEquals(7, taskList.size());
 
-		for (BaseTask task : tasks) {
+		taskList.forEach(task -> {
 			HapiMigrationEntity entity = HapiMigrationEntity.fromBaseTask(task);
 			entity.setExecutionTime(1);
 			entity.setSuccess(true);
 			ourHapiMigrationDao.save(entity);
-		}
+		});
 	}
 
 	@Test
@@ -39,19 +37,21 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		Set<MigrationVersion> appliedMigrations = ourHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
 		assertThat(appliedMigrations, hasSize(7));
 
-		List<BaseTask> tasks = createTasks();
+		MigrationTaskList taskList = createTasks();
 		BaseTask dropTableTask = new DropTableTask(RELEASE, "20210722.4");
-		tasks.add(dropTableTask);
+		taskList.add(dropTableTask);
 
-		List<BaseTask> notAppliedYet = ourHapiMigrationStorageSvc.diff(tasks);
-		assertThat(notAppliedYet, hasSize(1));
-		assertEquals("5_5_0.20210722.4", notAppliedYet.get(0).getMigrationVersion());
+		MigrationTaskList notAppliedYet = ourHapiMigrationStorageSvc.diff(taskList);
+		assertEquals(1, notAppliedYet.size());
+		notAppliedYet.forEach(next -> {
+			assertEquals("5_5_0.20210722.4", next.getMigrationVersion());
+		});
 	}
 
-	private List<BaseTask> createTasks() {
-		List<BaseTask> tasks = new ArrayList<>();
+	private MigrationTaskList createTasks() {
+		MigrationTaskList taskList = new MigrationTaskList();
 
-		Builder version = forVersion(tasks);
+		Builder version = forVersion(taskList);
 
 		Builder.BuilderAddTableByColumns cmpToks = version
 			.addTableByColumns("20210720.3", "HFJ_IDX_CMB_TOK_NU", "PID");
@@ -69,13 +69,13 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		cmbTokNuTable.addColumn("20210722.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
 		cmbTokNuTable.modifyColumn("20210722.3", "RES_ID").nullable().withType(ColumnTypeEnum.LONG);
 
-		return tasks;
+		return taskList;
 	}
 
-	public Builder forVersion(List<BaseTask> theTasks) {
+	public Builder forVersion(MigrationTaskList theTaskList) {
 		BaseMigrationTasks.IAcceptsTasks sink = theTask -> {
 			theTask.validate();
-			theTasks.add(theTask);
+			theTaskList.add(theTask);
 		};
 		return new Builder(RELEASE, sink);
 	}

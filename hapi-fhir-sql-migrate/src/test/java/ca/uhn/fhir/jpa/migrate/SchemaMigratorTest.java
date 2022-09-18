@@ -85,8 +85,8 @@ public class SchemaMigratorTest extends BaseTest {
 		taskD.setTableName("SOMETABLE_D");
 		taskD.addSql(getDriverType(), "create table SOMETABLE_D (PID bigint not null, TEXTCOL varchar(255))");
 
-		ImmutableList<BaseTask> taskList = ImmutableList.of(taskA, taskB, taskC, taskD);
-		MigrationTaskSkipper.setDoNothingOnSkippedTasks(taskList, "4_1_0.20191214.2, 4_1_0.20191214.4");
+		MigrationTaskList taskList = new MigrationTaskList(ImmutableList.of(taskA, taskB, taskC, taskD));
+		taskList.setDoNothingOnSkippedTasks("4_1_0.20191214.2, 4_1_0.20191214.4");
 		SchemaMigrator schemaMigrator = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
 		schemaMigrator.setDriverType(getDriverType());
 
@@ -110,7 +110,8 @@ public class SchemaMigratorTest extends BaseTest {
 
 	@Nonnull
 	private SchemaMigrator createSchemaMigrator(BaseTask... tasks) {
-		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), Lists.newArrayList(tasks), myHapiMigrationStorageSvc);
+		MigrationTaskList taskList = new MigrationTaskList(Lists.newArrayList(tasks));
+		SchemaMigrator retVal = new SchemaMigrator(getUrl(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, getDataSource(), new Properties(), taskList, myHapiMigrationStorageSvc);
 		retVal.setDriverType(getDriverType());
 		return retVal;
 	}

@@ -21,8 +21,8 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
-import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.cli.CommandLine;
@@ -45,9 +45,9 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 
 	@Override
 	protected void addTasks(HapiMigrator theMigrator, String theSkipVersions) {
-		List<BaseTask> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
-		super.setDoNothingOnSkippedTasks(tasks, theSkipVersions);
-		theMigrator.addTasks(tasks);
+		MigrationTaskList taskList = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
+		taskList.setDoNothingOnSkippedTasks(theSkipVersions);
+		theMigrator.addTaskList(taskList);
 	}
 
 	@Override
