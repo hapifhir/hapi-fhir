@@ -66,10 +66,9 @@ public class HapiMigrationDao {
 		return myJdbcTemplate.queryForObject(highestKeyQuery, Integer.class);
 	}
 
-	// FIXME KHS use this in migration
 	public void createMigrationTableIfRequired() {
 		try {
-			// FIXME KHS find a better way to detect
+			// WIP KHS find a better way to detect
 			fetchMigrationVersions();
 		} catch (Exception e) {
 			ourLog.info("Creating table {}", myMigrationTablename);

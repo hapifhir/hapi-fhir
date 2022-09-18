@@ -81,7 +81,7 @@ public class DropTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
 
-// FIXME KHS replace with dao
+// WIP KHS replace with dao
 		//		assertThat(getMigrator().getMigrationInfo().get().pending().length, greaterThan(0));
 		getMigrator().migrate();
 //		assertThat(getMigrator().getMigrationInfo().get().pending().length, equalTo(0));
