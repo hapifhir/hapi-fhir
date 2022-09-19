@@ -4,9 +4,11 @@ import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_STRING_TEXT;
 import static org.junit.jupiter.api.Assertions.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -94,10 +96,18 @@ public class StringParamTest {
 		}
 
 		@Test
-		void doSetValueAsQueryToken_withCustomSearchParameterAndNicknameQualifier_enablesTextSearch() {
+		void doSetValueAsQueryToken_withCustomSearchParameterAndTextQualifier_enablesTextSearch() {
 			StringParam sp = new StringParam("the-value");
 			sp.doSetValueAsQueryToken(myContext, "value-string", PARAMQUALIFIER_STRING_TEXT, "yellow");
 			assertTextQualifierSearchParameterIsValid(sp, "yellow");
+		}
+
+		@Test
+		void doGetQueryParameterQualifier_withCustomSearchParameterAndTextQualifier_returnsTextQualifier() {
+			StringParam sp = new StringParam("the-value");
+			sp.doSetValueAsQueryToken(myContext, "value-string", PARAMQUALIFIER_STRING_TEXT, "yellow");
+
+			assertEquals(PARAMQUALIFIER_STRING_TEXT, ((IQueryParameterType) sp).getQueryParameterQualifier());
 		}
 	}
 
