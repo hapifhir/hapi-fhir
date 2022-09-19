@@ -34,14 +34,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
@@ -75,7 +73,6 @@ import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -122,6 +119,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
@@ -130,9 +128,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -151,9 +146,12 @@ import static org.mockito.Mockito.when;
 	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
 	})
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
+
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
+	private static final String SPACE = "%20";
+
 	@Autowired
 	protected DaoConfig myDaoConfig;
 	@Autowired
@@ -416,6 +414,119 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Disabled
+	@Nested
+	public class StringTextSearch {
+
+		@Test
+		void secondWordFound() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Cloudy, yellow") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=yellow");
+			assertThat(resourceIds, hasItem(id1));
+		}
+
+		@Test
+		void stringMatchesPrefixAndWhole() {
+			// smit - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=smit");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void stringPlusStarMatchesPrefixAndWhole() {
+			// smit* - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?_elements=valueString&value-string:text=smit*");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void quotedStringMatchesIdenticalButNotAsPrefix() {
+			// "smit"- matches "smit", but not "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=\"smit\"");
+			assertThat(resourceIds, contains(id2));
+		}
+
+	}
+
+	@Nested
+	public class TokenTextSearch {
+
+		@Test
+		void secondWordFound() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Cloudy, yellow") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=yellow");
+			assertThat(resourceIds, hasItem(id1));
+		}
+
+		@Test
+		void stringMatchesPrefixAndWhole() {
+			// smit - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Carl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void stringPlusStarMatchesPrefixAndWhole() {
+			// smit* - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Adam Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "John Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit*");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void quotedStringMatchesIdenticalButNotAsPrefix() {
+			// "smit"- matches "smit", but not "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Karl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=\"Smit\"");
+			assertThat(resourceIds, contains(id2));
+		}
+
+	}
+
+
+
 	@Test
 	public void testResourceCodeTextSearch() {
 		IIdType id1, id2, id3, id4;
@@ -492,7 +603,14 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// prefix
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
-			assertThat("Bare prefix does not match", toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), Matchers.empty());
+			assertObservationSearchMatches("Bare prefix matches", map, id2);
+		}
+
+		{
+			// prefix
+			SearchParameterMap map = new SearchParameterMap();
+			map.add("code", new TokenParam("Bod").setModifier(TokenParamModifier.TEXT));
+			assertObservationSearchMatches("Bare prefix matches any word, not only first", map, id2);
 		}
 
 		{
@@ -514,7 +632,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// space means AND
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Body Weight").setModifier(TokenParamModifier.TEXT));
-			assertObservationSearchMatches("Multiple terms in value means and for :text", map, id2);
+			assertObservationSearchMatches("Multiple terms in value means and for :text", map, id1, id2);
 		}
 
 		{
@@ -528,6 +646,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
 		}
 	}
+
 
 	@Test
 	public void testResourceReferenceSearchForCanonicalReferences() {
