@@ -82,9 +82,14 @@ public class HapiMigrationDao {
 			return;
 		}
 		ourLog.info("Creating table {}", myMigrationTablename);
+
 		String createTableStatement = myMigrationQueryBuilder.createTableStatement();
 		ourLog.info(createTableStatement);
 		myJdbcTemplate.execute(createTableStatement);
+
+		String createIndexStatement = myMigrationQueryBuilder.createIndexStatement();
+		ourLog.info(createIndexStatement);
+		myJdbcTemplate.execute(createIndexStatement);
 	}
 
 	private boolean migrationTableExists() {

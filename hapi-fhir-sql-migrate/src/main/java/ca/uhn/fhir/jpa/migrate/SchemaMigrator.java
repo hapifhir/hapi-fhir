@@ -80,15 +80,16 @@ public class SchemaMigrator {
 
 	}
 
-	public void migrate() {
+	public MigrationResult migrate() {
 		if (mySkipValidation) {
 			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema migration.");
-			return;
+			return null;
 		}
 		try {
 			ourLog.info("Migrating " + mySchemaName);
-			newMigrator().migrate();
-			ourLog.info(mySchemaName + " migrated successfully.");
+			MigrationResult retval = newMigrator().migrate();
+			ourLog.info(mySchemaName + " migrated successfully: {}", retval.summary());
+			return retval;
 		} catch (Exception e) {
 			ourLog.error("Failed to migrate " + mySchemaName, e);
 			throw e;

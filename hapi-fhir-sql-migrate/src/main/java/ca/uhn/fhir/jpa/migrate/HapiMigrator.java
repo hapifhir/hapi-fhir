@@ -127,7 +127,7 @@ public class HapiMigrator {
 					retval.changes += next.getChangesCount();
 					retval.executedStatements.addAll(next.getExecutedStatements());
 					retval.succeededTasks.add(next);
-				} catch (SQLException e) {
+				} catch (SQLException|HapiMigrationException e) {
 					retval.failedTasks.add(next);
 					postExecute(next, sw, false);
 					String description = next.getDescription();
@@ -135,7 +135,7 @@ public class HapiMigrator {
 						description = next.getClass().getSimpleName();
 					}
 					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-					throw new HapiMigrationException(Msg.code(47) + prefix + e, e);
+					throw new HapiMigrationException(Msg.code(47) + prefix + e, retval, e);
 				}
 			});
 		}

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate.dao;
 
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
@@ -37,8 +38,11 @@ public class MigrationQueryBuilder {
 	private final String myBuildSuccessfulVersionQuery;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
+	private final String myMigrationTablename;
 
 	public MigrationQueryBuilder(String theMigrationTablename) {
+		myMigrationTablename = theMigrationTablename;
+
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
 		myTable = mySchema.addTable(theMigrationTablename);
@@ -121,6 +125,14 @@ public class MigrationQueryBuilder {
 
 	public String createTableStatement() {
 		return new CreateTableQuery(myTable, true)
+			.validate()
+			.toString();
+	}
+
+	public String createIndexStatement() {
+		return new CreateIndexQuery(myTable, myMigrationTablename.toUpperCase() + "_PK_INDEX")
+			.setIndexType(CreateIndexQuery.IndexType.UNIQUE)
+			.addColumns(myInstalledRankCol)
 			.validate()
 			.toString();
 	}

@@ -52,16 +52,25 @@ public class SchemaMigratorTest extends BaseTest {
 	@MethodSource("data")
 	public void testRepairFailedMigration(Supplier<TestDatabaseDetails> theTestDatabaseDetails) {
 		before(theTestDatabaseDetails);
-
 		SchemaMigrator schemaMigrator = createSchemaMigrator("SOMETABLE", "create fable SOMETABLE (PID bigint not null, TEXTCOL varchar(255))", "1");
 		try {
 			schemaMigrator.migrate();
 			fail();
 		} catch (HapiMigrationException e) {
-			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getClass());
+			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
+			MigrationResult failedResult = e.getResult();
+			assertEquals(0, failedResult.changes);
+			assertEquals(0, failedResult.succeededTasks.size());
+			assertEquals(1, failedResult.failedTasks.size());
+			assertEquals(0, failedResult.executedStatements.size());
 		}
 		schemaMigrator = createTableMigrator();
-		schemaMigrator.migrate();
+
+		MigrationResult result = schemaMigrator.migrate();
+		assertEquals(0, result.changes);
+		assertEquals(1, result.succeededTasks.size());
+		assertEquals(0, result.failedTasks.size());
+		assertEquals(1, result.executedStatements.size());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

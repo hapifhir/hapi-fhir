@@ -54,6 +54,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	void getLatestAppliedVersion_full_last() {
 		String latest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
 		assertEquals(HapiMigrationStorageSvc.UNKNOWN_VERSION, latest);
+
 		createTasks();
 		String newLatest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
 		assertEquals(RELEASE_VERSION_PREFIX + LAST_SUCCEEDED_VERSION, newLatest);
