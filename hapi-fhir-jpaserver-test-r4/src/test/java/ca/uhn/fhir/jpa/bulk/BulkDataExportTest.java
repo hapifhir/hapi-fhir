@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -19,10 +18,8 @@ import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,7 +198,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Encounter"));
-		options.setPatientId(Sets.newHashSet(new IdType("Patient", "P1")));
+		options.setPatientIds(Sets.newHashSet(new IdType("Patient", "P1")));
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
@@ -263,7 +260,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Encounter"));
-		options.setPatientId(Sets.newHashSet(new IdType("Patient", "P1"), new IdType("Patient", "P2")));
+		options.setPatientIds(Sets.newHashSet(new IdType("Patient", "P1"), new IdType("Patient", "P2")));
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);

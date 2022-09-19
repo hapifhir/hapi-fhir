@@ -59,12 +59,12 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -148,7 +148,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
-			additionSearchParameterForPatientExport(theParams, resourceType, patientSearchParam, map);
+			filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
 			SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
 			IResultIterator resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
@@ -159,26 +159,26 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private static void additionSearchParameterForPatientExport(ExportPIDIteratorParameters theParams, String resourceType, String patientSearchParam, SearchParameterMap map) {
-		if (!resourceType.equalsIgnoreCase("Patient")) {
-			if (theParams.getPatientId() != null) {
+	private static void filterBySpecificPatient(ExportPIDIteratorParameters theParams, String resourceType, String patientSearchParam, SearchParameterMap map) {
+		if (resourceType.equalsIgnoreCase("Patient")) {
+			if (theParams.getPatientIds() != null) {
+				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				map.add(PARAM_ID, referenceOrListParam);
+			}
+		} else {
+			if (theParams.getPatientIds() != null) {
 				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
 				map.add(patientSearchParam, referenceOrListParam);
 			} else {
 				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
 			}
-		} else {
-			if (theParams.getPatientId() != null) {
-				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
-				map.add(PARAM_ID, referenceOrListParam);
-			}
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	private static ReferenceOrListParam getReferenceOrListParam(ExportPIDIteratorParameters theParams) {
 		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
-		for (String patientId : theParams.getPatientId()) {
+		for (String patientId : theParams.getPatientIds()) {
 			referenceOrListParam.addOr(new ReferenceParam(patientId));
 		}
 		return referenceOrListParam;

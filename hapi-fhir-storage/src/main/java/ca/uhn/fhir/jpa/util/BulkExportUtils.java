@@ -49,8 +49,8 @@ public class BulkExportUtils {
 		if (theOptions.getResourceTypes() != null) {
 			parameters.setResourceTypes(new ArrayList<>(theOptions.getResourceTypes()));
 		}
-		if (theOptions.getPatientId() != null) {
-			parameters.setPatientId(theOptions.getPatientId().stream().map(IIdType::getValue).collect(Collectors.toList()));
+		if (theOptions.getPatientIds() != null) {
+			parameters.setPatientIds(theOptions.getPatientIds().stream().map(IIdType::getValue).collect(Collectors.toList()));
 		}
 		parameters.setExpandMdm(theOptions.isExpandMdm());
 		parameters.setUseExistingJobsFirst(true);

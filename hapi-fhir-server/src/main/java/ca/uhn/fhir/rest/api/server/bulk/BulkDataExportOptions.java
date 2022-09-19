@@ -23,7 +23,6 @@ package ca.uhn.fhir.rest.api.server.bulk;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 
 public class BulkDataExportOptions {
@@ -44,7 +43,7 @@ public class BulkDataExportOptions {
 	private ExportStyle myExportStyle;
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
-	private Set<IIdType> myPatientId;
+	private Set<IIdType> myPatientIds;
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
@@ -102,11 +101,11 @@ public class BulkDataExportOptions {
 		myGroupId = theGroupId;
 	}
 
-	public Set<IIdType> getPatientId() {
-		return myPatientId;
+	public Set<IIdType> getPatientIds() {
+		return myPatientIds;
 	}
 
-	public void setPatientId(Set<IIdType> thePatientId) {
-		myPatientId = thePatientId;
+	public void setPatientIds(Set<IIdType> thePatientIds) {
+		myPatientIds = thePatientIds;
 	}
 }

@@ -71,7 +71,7 @@ public class ExportPIDIteratorParameters {
 	/**
 	 * The patient id
 	 */
-	private List<String> myPatientId;
+	private List<String> myPatientIds;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -129,12 +129,12 @@ public class ExportPIDIteratorParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
-	public List<String> getPatientId() {
-		return myPatientId;
+	public List<String> getPatientIds() {
+		return myPatientIds;
 	}
 
-	public void setPatientId(List<String> thePatientId) {
-		myPatientId = thePatientId;
+	public void setPatientIds(List<String> thePatientIds) {
+		myPatientIds = thePatientIds;
 	}
 
 	@Override

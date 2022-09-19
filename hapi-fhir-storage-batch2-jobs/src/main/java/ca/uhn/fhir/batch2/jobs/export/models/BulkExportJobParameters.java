@@ -56,8 +56,8 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("exportStyle")
 	private BulkDataExportOptions.ExportStyle myExportStyle;
 
-	@JsonProperty("patientId")
-	private List<String> myPatientId;
+	@JsonProperty("patientIds")
+	private List<String> myPatientIds;
 
 	// Stuff for group export only
 
@@ -110,12 +110,12 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myExportStyle = theExportStyle;
 	}
 
-	public List<String> getPatientId() {
-		return myPatientId;
+	public List<String> getPatientIds() {
+		return myPatientIds;
 	}
 
-	public void setPatientId(List<String> thePatientId) {
-		myPatientId = thePatientId;
+	public void setPatientIds(List<String> thePatientIds) {
+		myPatientIds = thePatientIds;
 	}
 
 	public String getGroupId() {
@@ -143,7 +143,7 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setOutputFormat(theParameters.getOutputFormat());
 		params.setStartDate(theParameters.getStartDate());
 		params.setExpandMdm(theParameters.isExpandMdm());
-		params.setPatientId(theParameters.getPatientId());
+		params.setPatientIds(theParameters.getPatientIds());
 		return params;
 	}
 }
