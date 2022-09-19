@@ -142,7 +142,7 @@ public class HapiMigrationEntity {
 		return retval;
 	}
 
-	public static RowMapper<HapiMigrationEntity> newRowMapper() {
+	public static RowMapper<HapiMigrationEntity> rowMapper() {
 		return (rs, rowNum) -> {
 			HapiMigrationEntity entity = new HapiMigrationEntity();
 			entity.setPid(rs.getInt(1));

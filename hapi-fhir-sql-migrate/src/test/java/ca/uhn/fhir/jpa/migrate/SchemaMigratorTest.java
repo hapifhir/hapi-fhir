@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddTableRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTest;
@@ -13,6 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -20,6 +22,7 @@ import java.util.function.Supplier;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -63,6 +66,8 @@ public class SchemaMigratorTest extends BaseTest {
 			assertEquals(0, failedResult.succeededTasks.size());
 			assertEquals(1, failedResult.failedTasks.size());
 			assertEquals(0, failedResult.executedStatements.size());
+
+			assertThat(myHapiMigrationDao.findAll(), hasSize(1));
 		}
 		schemaMigrator = createTableMigrator();
 
@@ -71,6 +76,13 @@ public class SchemaMigratorTest extends BaseTest {
 		assertEquals(1, result.succeededTasks.size());
 		assertEquals(0, result.failedTasks.size());
 		assertEquals(1, result.executedStatements.size());
+
+		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
+		assertThat(entities, hasSize(2));
+		assertEquals(1, entities.get(0).getPid());
+		assertEquals(false, entities.get(0).getSuccess());
+		assertEquals(2, entities.get(1).getPid());
+		assertEquals(true, entities.get(1).getSuccess());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

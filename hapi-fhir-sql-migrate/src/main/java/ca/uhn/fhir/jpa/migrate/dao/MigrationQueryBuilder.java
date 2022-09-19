@@ -82,7 +82,7 @@ public class MigrationQueryBuilder {
 	private String buildFindSuccessfulVersionQuery() {
 		return new SelectQuery()
 			.addColumns(myVersionCol)
-			.addCondition(  BinaryCondition.equalTo(mySuccessCol, true))
+			.addCondition(BinaryCondition.equalTo(mySuccessCol, true))
 			.validate()
 			.toString();
 	}
@@ -133,6 +133,14 @@ public class MigrationQueryBuilder {
 		return new CreateIndexQuery(myTable, myMigrationTablename.toUpperCase() + "_PK_INDEX")
 			.setIndexType(CreateIndexQuery.IndexType.UNIQUE)
 			.addColumns(myInstalledRankCol)
+			.validate()
+			.toString();
+	}
+
+	public String findAll() {
+		return new SelectQuery()
+			.addFromTable(myTable)
+			.addAllColumns()
 			.validate()
 			.toString();
 	}

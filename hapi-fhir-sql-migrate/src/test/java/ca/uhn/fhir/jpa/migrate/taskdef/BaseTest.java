@@ -31,7 +31,7 @@ public abstract class BaseTest {
 	private String myUrl;
 	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
-	private HapiMigrationDao myHapiMigrationDao;
+	protected HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {

@@ -110,4 +110,8 @@ public class HapiMigrationDao {
 			throw new InternalErrorException(Msg.code(2141) + e);
 		}
 	}
+
+	public List<HapiMigrationEntity> findAll() {
+		return myJdbcTemplate.query(myMigrationQueryBuilder.findAll(), HapiMigrationEntity.rowMapper());
+	}
 }
