@@ -385,7 +385,9 @@ public class BulkDataExportProvider {
 
 	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, List<IPrimitiveType<String>> thePatientIds) {
 		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
-		bulkDataExportOptions.setPatientIds(thePatientIds.stream().map((pid) -> new IdType(pid.getValueAsString())).collect(Collectors.toSet()));
+		if (thePatientIds != null) {
+			bulkDataExportOptions.setPatientIds(thePatientIds.stream().map((pid) -> new IdType(pid.getValueAsString())).collect(Collectors.toSet()));
+		}
 		return bulkDataExportOptions;
 	}
 
