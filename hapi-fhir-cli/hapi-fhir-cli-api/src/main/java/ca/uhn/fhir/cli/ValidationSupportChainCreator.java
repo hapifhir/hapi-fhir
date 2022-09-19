@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.cli.CommandLine;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
@@ -27,7 +28,7 @@ public class ValidationSupportChainCreator {
 				chain.addValidationSupport(localFileValidationSupport);
 				chain.addValidationSupport(new SnapshotGeneratingValidationSupport(ctx));
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(Msg.code(2141) + "Failed to load local profile.", e);
 			}
 		}
 		if (commandLine.hasOption("r")) {
