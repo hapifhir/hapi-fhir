@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -34,9 +35,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
@@ -64,7 +65,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		if (partitionIdPredicate == null) {
 			return theCondition;
 		}
-		return toAndPredicate(partitionIdPredicate, theCondition);
+		return QueryParameterUtils.toAndPredicate(partitionIdPredicate, theCondition);
 	}
 
 
@@ -81,14 +82,14 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 			} else if (theRequestPartitionId.hasDefaultPartitionId() && defaultPartitionIsNull) {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
 				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
-				Condition partitionIdsPredicate = toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
-				condition = toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
+				Condition partitionIdsPredicate = QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
+				condition = QueryParameterUtils.toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
 			} else {
 				List<Integer> partitionIds = theRequestPartitionId.getPartitionIds();
 				partitionIds = replaceDefaultPartitionIdIfNonNull(getPartitionSettings(), partitionIds);
 
 				List<String> placeholders = generatePlaceholders(partitionIds);
-				condition = toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
+				condition = QueryParameterUtils.toEqualToOrInPredicate(getPartitionIdColumn(), placeholders);
 			}
 			return condition;
 		} else {
@@ -100,7 +101,7 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 		Validate.notNull(theResourceIds, "theResourceIds must not be null");
 
 		// Handle the _id parameter by adding it to the tail
-		Condition inResourceIds = toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
+		Condition inResourceIds = QueryParameterUtils.toEqualToOrInPredicate(getResourceIdColumn(), generatePlaceholders(theResourceIds));
 		if (theInverse) {
 			inResourceIds = new NotCondition(inResourceIds);
 		}
