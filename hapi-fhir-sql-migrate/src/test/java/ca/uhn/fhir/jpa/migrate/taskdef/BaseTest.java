@@ -92,7 +92,7 @@ public abstract class BaseTest {
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
-		myHapiMigrationDao = new HapiMigrationDao(testDatabaseDetails.myDataSource, SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+		myHapiMigrationDao = new HapiMigrationDao(testDatabaseDetails.myDataSource, testDatabaseDetails.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
 
 		myHapiMigrationDao.createMigrationTableIfRequired();
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(myHapiMigrationDao);

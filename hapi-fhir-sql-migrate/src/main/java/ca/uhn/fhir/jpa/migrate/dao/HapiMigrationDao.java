@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.VersionEnum;
@@ -20,11 +21,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class HapiMigrationDao {
-	static {
-		// required for most databases for boolean columns
-		System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
-	}
-
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationDao.class);
 
 	private final JdbcTemplate myJdbcTemplate;
@@ -32,18 +28,18 @@ public class HapiMigrationDao {
 	private final MigrationQueryBuilder myMigrationQueryBuilder;
 	private final DataSource myDataSource;
 
-	public HapiMigrationDao(DataSource theDataSource, String theMigrationTablename) {
+	public HapiMigrationDao(DataSource theDataSource, DriverTypeEnum theDriverType, String theMigrationTablename) {
 		myDataSource = theDataSource;
 		myJdbcTemplate = new JdbcTemplate(theDataSource);
 		myMigrationTablename = theMigrationTablename;
-		myMigrationQueryBuilder = new MigrationQueryBuilder(theMigrationTablename);
+		myMigrationQueryBuilder = new MigrationQueryBuilder(theDriverType, theMigrationTablename);
 	}
 
 	public Set<MigrationVersion> fetchSuccessfulMigrationVersions() {
-		String query = myMigrationQueryBuilder.findSuccessfulVersionQuery();
-		List<String> result = myJdbcTemplate.queryForList(query, String.class);
-
-		return result.stream()
+		List<HapiMigrationEntity> allEntries = findAll();
+		return allEntries.stream()
+			.filter(HapiMigrationEntity::getSuccess)
+			.map(HapiMigrationEntity::getVersion)
 			.map(MigrationVersion::fromVersion)
 			.collect(Collectors.toSet());
 	}
@@ -112,6 +108,6 @@ public class HapiMigrationDao {
 	}
 
 	public List<HapiMigrationEntity> findAll() {
-		return myJdbcTemplate.query(myMigrationQueryBuilder.findAll(), HapiMigrationEntity.rowMapper());
+		return myJdbcTemplate.query(myMigrationQueryBuilder.findAllQuery(), HapiMigrationEntity.rowMapper());
 	}
 }

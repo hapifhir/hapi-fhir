@@ -52,7 +52,7 @@ public class HapiMigrator {
 	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
-		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theMigrationTableName));
+		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
 	}
 
 	public DataSource getDataSource() {

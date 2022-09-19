@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
+import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import com.healthmarketscience.common.util.AppendableExt;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
@@ -9,6 +12,8 @@ import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
 import com.healthmarketscience.sqlbuilder.JdbcEscape;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.SqlObject;
+import com.healthmarketscience.sqlbuilder.ValidationContext;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
@@ -16,6 +21,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.sql.Types;
 
 public class MigrationQueryBuilder {
@@ -34,13 +40,14 @@ public class MigrationQueryBuilder {
 	private final DbColumn myInstalledOnCol;
 	private final DbColumn myExecutionTimeCol;
 	private final DbColumn mySuccessCol;
-
-	private final String myBuildSuccessfulVersionQuery;
 	private final String myDeleteAll;
 	private final String myHighestKeyQuery;
+	private final DriverTypeEnum myDriverType;
 	private final String myMigrationTablename;
+	private final String myBooleanType;
 
-	public MigrationQueryBuilder(String theMigrationTablename) {
+	public MigrationQueryBuilder(DriverTypeEnum theDriverType, String theMigrationTablename) {
+		myDriverType = theDriverType;
 		myMigrationTablename = theMigrationTablename;
 
 		mySpec = new DbSpec();
@@ -71,24 +78,13 @@ public class MigrationQueryBuilder {
 
 		myExecutionTimeCol = myTable.addColumn("\"execution_time\"", Types.INTEGER, null);
 		myExecutionTimeCol.notNull();
-		mySuccessCol = myTable.addColumn("\"success\"", Types.BOOLEAN, null);
+
+		myBooleanType = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(ColumnTypeEnum.BOOLEAN).get(theDriverType);
+		mySuccessCol = myTable.addColumn("\"success\"", myBooleanType, null);
 		mySuccessCol.notNull();
 
-		myBuildSuccessfulVersionQuery = buildFindSuccessfulVersionQuery();
 		myDeleteAll = new DeleteQuery(myTable).toString();
 		myHighestKeyQuery = buildHighestKeyQuery();
-	}
-
-	private String buildFindSuccessfulVersionQuery() {
-		return new SelectQuery()
-			.addColumns(myVersionCol)
-			.addCondition(BinaryCondition.equalTo(mySuccessCol, true))
-			.validate()
-			.toString();
-	}
-
-	public String findSuccessfulVersionQuery() {
-		return myBuildSuccessfulVersionQuery;
 	}
 
 	public String deleteAll() {
@@ -117,10 +113,33 @@ public class MigrationQueryBuilder {
 			.addColumn(myInstalledByCol, theEntity.getInstalledBy())
 			.addColumn(myInstalledOnCol, JdbcEscape.timestamp(theEntity.getInstalledOn()))
 			.addColumn(myExecutionTimeCol, theEntity.getExecutionTime())
-			.addColumn(mySuccessCol, theEntity.getSuccess())
+			.addColumn(mySuccessCol, getBooleanValue(theEntity.getSuccess()))
 			.validate()
 			.toString();
+	}
 
+	/**
+	 sqlbuilder doesn't know about different database types, so we have to manually map boolean columns ourselves :-(
+	 I'm gaining a new appreciation for Hibernate.  I tried using hibernate for maintaining this table, but it added
+	 a lot of overhead for managing just one table.  Seeing this sort of nonsense though makes me wonder if we should
+	 just use it instead of sqlbuilder.  Disappointed that sqlbuilder doesn't handle boolean well out of the box.
+	 (It does support a static option via System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
+	 but that only works at classloading time which isn't much help to us.
+	 */
+
+	private SqlObject getBooleanValue(Boolean theBoolean) {
+		SqlObject retval = new SqlObject() {
+			@Override
+			protected void collectSchemaObjects(ValidationContext vContext) {}
+
+			@Override
+			public void appendTo(AppendableExt app) throws IOException {
+				String stringValue = ColumnTypeToDriverTypeToSqlType.toBooleanValue(myDriverType, theBoolean);
+				app.append(stringValue);
+			}
+		};
+
+		return retval;
 	}
 
 	public String createTableStatement() {
@@ -137,7 +156,7 @@ public class MigrationQueryBuilder {
 			.toString();
 	}
 
-	public String findAll() {
+	public String findAllQuery() {
 		return new SelectQuery()
 			.addFromTable(myTable)
 			.addAllColumns()

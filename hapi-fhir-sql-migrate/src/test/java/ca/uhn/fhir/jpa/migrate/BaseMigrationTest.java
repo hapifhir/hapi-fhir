@@ -14,7 +14,7 @@ public abstract class BaseMigrationTest {
 
 	@BeforeAll
 	public static void beforeAll() {
-		ourHapiMigrationDao = new HapiMigrationDao(getDataSource(), TABLE_NAME);
+		ourHapiMigrationDao = new HapiMigrationDao(getDataSource(), DriverTypeEnum.H2_EMBEDDED, TABLE_NAME);
 		ourHapiMigrationDao.createMigrationTableIfRequired();
 		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
 	}
