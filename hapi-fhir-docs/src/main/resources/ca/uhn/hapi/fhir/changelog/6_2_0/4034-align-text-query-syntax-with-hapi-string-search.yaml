@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4034
+title: "With Elastic/Lucene indexing enabled search including `:text` qualifier was considering tokens literally but
+   standard match in HAPI-FHIR considers arguments as prefixes. This has been corrected by making Elastic/Lucene
+   `:text` search also consider arguments as prefixes."

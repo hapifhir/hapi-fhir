@@ -34,8 +34,8 @@ class TermHelperTest {
 
 	@Test
 	void unquotedSpaceContainingElements_return_splitted_in_spaces_and_star_suffixed() {
-		Set<String> result = TermHelper.makePrefixSearchTerm(Set.of("abc*", "*cde", "ef*g", "hij* klm"));
-		assertEquals( TermHelper.makePrefixSearchTerm(Set.of("abc*", "*cde", "ef*g", "hij* klm")), result );
+		Set<String> result = TermHelper.makePrefixSearchTerm(Set.of("abc", "cde", "hij klm"));
+		assertEquals( TermHelper.makePrefixSearchTerm(Set.of("abc*", "cde*", "hij* klm*")), result );
 
 	}
 }

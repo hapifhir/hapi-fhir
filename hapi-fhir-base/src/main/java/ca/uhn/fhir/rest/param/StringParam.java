@@ -75,6 +75,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else if (isContains()) {
 			return Constants.PARAMQUALIFIER_STRING_CONTAINS;
+		} else if (isText()) {
+			return Constants.PARAMQUALIFIER_STRING_TEXT;
 		} else {
 			return null;
 		}
@@ -181,7 +183,6 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setContains(false);
 			setExact(false);
 			setMissing(null);
-
 		}
 	}
 

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.search;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TermHelper {
 
@@ -14,14 +13,20 @@ public class TermHelper {
 	 */
 	public static Set<String> makePrefixSearchTerm(Set<String> theStringSet) {
 		return theStringSet.stream()
-			.flatMap(s -> isQuoted(s) || s.contains("*") ? Stream.of(s) : splitInBlanksAndStarSuffix(s) )
+			.map(s -> isQuoted(s) || s.contains("*") ? s : suffixTokensWithStar(s) )
 			.collect(Collectors.toSet());
 	}
 
-	private static Stream<String> splitInBlanksAndStarSuffix(String theStr) {
-		return Arrays.stream(theStr.trim().split(" "))
-			.map(s -> s + "*");
+
+	private static String suffixTokensWithStar(String theStr) {
+		StringBuilder sb = new StringBuilder();
+
+		Arrays.stream(theStr.trim().split(" "))
+			.forEach(s -> sb.append(s).append("* "));
+
+		return sb.toString().trim();
 	}
+
 
 	private static boolean isQuoted(String theS) {
 		return ( theS.startsWith("\"") && theS.endsWith("\"") ) ||

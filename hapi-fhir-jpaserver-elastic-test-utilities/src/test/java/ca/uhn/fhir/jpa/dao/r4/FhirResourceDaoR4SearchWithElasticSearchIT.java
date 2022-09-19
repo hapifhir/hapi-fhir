@@ -414,7 +414,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
-	@Disabled
 	@Nested
 	public class StringTextSearch {
 
@@ -632,7 +631,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			// space means AND
 			SearchParameterMap map = new SearchParameterMap();
 			map.add("code", new TokenParam("Body Weight").setModifier(TokenParamModifier.TEXT));
-			assertObservationSearchMatches("Multiple terms in value means and for :text", map, id1, id2);
+			assertObservationSearchMatches("Multiple terms in value means and for :text", map, id2);
 		}
 
 		{
