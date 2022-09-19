@@ -20,7 +20,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
@@ -204,8 +203,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	protected IIdHelperService myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-	@Autowired
-	protected IResourceProvenanceDao myResourceProvenanceDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
@@ -1207,7 +1204,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				+ defaultString(provenanceRequestId);
 
 			MetaUtil.setSource(myContext, retVal, sourceString);
-
 		}
 
 		// 7. Add partition information
@@ -1626,7 +1622,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Save resource source
 		String source = null;
-		String requestId = theRequest != null ? theRequest.getRequestId() : null;
+
 		if (theResource != null) {
 			if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 				IBaseMetaType meta = theResource.getMeta();
@@ -1644,6 +1640,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 		}
 
+		String requestId = getRequestId(theRequest, source);
+		source = cleanProvenanceSourceUri(source);
+
 		boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
 		boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 		if (haveSource || haveRequestId) {
@@ -1659,6 +1658,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			}
 			myEntityManager.persist(provenance);
 		}
+	}
+
+	private String getRequestId(RequestDetails theRequest, String theSource) {
+		if (myConfig.isPreserveRequestIdInResourceBody()) {
+			return StringUtils.substringAfter(theSource, "#");
+		}
+		return theRequest != null ? theRequest.getRequestId() : null;
 	}
 
 	private void validateIncomingResourceTypeMatchesExisting(IBaseResource theResource, BaseHasResource entity) {
