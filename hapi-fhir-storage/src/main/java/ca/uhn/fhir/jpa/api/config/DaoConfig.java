@@ -320,6 +320,11 @@ public class DaoConfig {
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private boolean myPreserveRequestIdInResourceBody = false;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2909,6 +2914,27 @@ public class DaoConfig {
 	 */
 	public void setUpdateWithHistoryRewriteEnabled(boolean theUpdateWithHistoryRewriteEnabled) {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
+	}
+
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public boolean isPreserveRequestIdInResourceBody() {
+		return myPreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 * Default is false. This means that a client provided requestId will be overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
+		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
 
