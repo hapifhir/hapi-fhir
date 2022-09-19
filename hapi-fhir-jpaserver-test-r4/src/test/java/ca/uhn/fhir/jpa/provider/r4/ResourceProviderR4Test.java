@@ -3184,7 +3184,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.next(history)
 			.execute();
 
-		assertEquals(1, history.getEntry().size());
+		assertEquals(0, history.getEntry().size());
 
 	}
 

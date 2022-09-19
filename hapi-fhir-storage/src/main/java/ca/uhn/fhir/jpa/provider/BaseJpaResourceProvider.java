@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.api.ValidationModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.SearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -63,6 +64,7 @@ import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.Map;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
@@ -118,7 +120,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		startRequest(theRequest);
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return myDao.history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theOffset, theRequestDetails);
+			return myDao.history(theId, new SearchDateRangeParam(theRequestDetails.getParameters(), sinceOrAt, theOffset), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}
