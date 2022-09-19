@@ -17,7 +17,7 @@ class TermHelperTest {
 	@Test
 	void noQuotedSpcedOrStarElements_return_star_suffixed() {
 		Set<String> result = TermHelper.makePrefixSearchTerm(Set.of("abc", "def", "ghi"));
-		assertEquals( Set.of("abc *", "def *", "ghi *"), result );
+		assertEquals( Set.of("abc*", "def*", "ghi*"), result );
 	}
 
 	@Test
