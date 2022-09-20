@@ -183,6 +183,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			setContains(false);
 			setExact(false);
 			setMissing(null);
+
 		}
 	}
 
