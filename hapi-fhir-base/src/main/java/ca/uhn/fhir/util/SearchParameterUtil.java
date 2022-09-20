@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SearchParameterUtil {
 
@@ -98,9 +100,22 @@ public class SearchParameterUtil {
 		return patientSearchParam;
 	}
 
-	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParams(FhirContext theFhirContext, String theResourceType) {
+	public static List<RuntimeSearchParam> getAllPatientCompartmentRuntimeSearchParamsForResourceType(FhirContext theFhirContext, String theResourceType) {
 		RuntimeResourceDefinition runtimeResourceDefinition = theFhirContext.getResourceDefinition(theResourceType);
 		return getAllPatientCompartmentRuntimeSearchParams(runtimeResourceDefinition);
+	}
+
+	public static List<RuntimeSearchParam> getAllPatientCompartmenRuntimeSearchParams(FhirContext theFhirContext) {
+		return theFhirContext.getResourceTypes()
+			.stream()
+			.flatMap(type -> getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).stream())
+			.collect(Collectors.toList());
+	}
+
+	public static Set<String> getAllResourceTypesThatAreInPatientCompartment(FhirContext theFhirContext) {
+		return theFhirContext.getResourceTypes().stream()
+			.filter(type -> getAllPatientCompartmentRuntimeSearchParamsForResourceType(theFhirContext, type).size() > 0)
+			.collect(Collectors.toSet());
 
 	}
 

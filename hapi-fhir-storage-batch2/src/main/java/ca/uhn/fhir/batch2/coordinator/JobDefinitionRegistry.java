@@ -25,11 +25,11 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class JobDefinitionRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinitionRegistry.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final Map<String, TreeMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 

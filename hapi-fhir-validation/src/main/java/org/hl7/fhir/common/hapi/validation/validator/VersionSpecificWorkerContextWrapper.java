@@ -131,12 +131,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean hasBinaryKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2126));
+		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s) != null;
 	}
 
 	@Override
 	public byte[] getBinaryForKey(String s) {
-		throw new UnsupportedOperationException(Msg.code(2127));
+		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s);
 	}
 
 	@Override
@@ -258,7 +258,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public void cacheResource(Resource res) {
-		throw new UnsupportedOperationException(Msg.code(660));
+
 	}
 
 	@Override

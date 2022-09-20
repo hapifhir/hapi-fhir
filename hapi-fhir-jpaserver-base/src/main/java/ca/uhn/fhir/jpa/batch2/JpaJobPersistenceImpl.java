@@ -25,16 +25,17 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.coordinator.BatchWorkChunk;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -110,18 +111,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setStatus(theInstance.getStatus());
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		entity.setFastTracking(theInstance.isFastTracking());
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
 
 		entity = myJobInstanceRepository.save(entity);
 		return entity.getId();
-	}
-
-	@Override
-	public Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.IN_PROGRESS);
-		return fetchInstance(theInstanceId);
 	}
 
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
@@ -155,24 +151,34 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Nonnull
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+		return myJobInstanceRepository.findById(theInstanceId).map(this::toInstance);
 	}
 
 	@Override
-	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int thePage, int theBatchSize) {
 		String definitionId = theRequest.getJobDefinition();
 		String params = theRequest.getParameters();
+		Set<StatusEnum> statuses = theRequest.getStatuses();
 
-		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
+		Pageable pageable = PageRequest.of(thePage, theBatchSize);
 
-		// TODO - consider adding a new index... on the JobDefinitionId (and possibly Status)
-		List<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(
-			definitionId,
-			params,
-			pageable
-		);
+		List<Batch2JobInstanceEntity> instanceEntities;
 
-		return instances == null ? new ArrayList<>() : instances;
+		if (statuses != null && !statuses.isEmpty()) {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+				definitionId,
+				params,
+				statuses,
+				pageable
+			);
+		} else {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(
+				definitionId,
+				params,
+				pageable
+			);
+		}
+		return toInstanceList(instanceEntities);
 	}
 
 	@Override
@@ -283,24 +289,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
 
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
-		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
+		Batch2JobInstanceEntity instanceEntity = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
 
-		instance.setStartTime(theInstance.getStartTime());
-		instance.setEndTime(theInstance.getEndTime());
-		instance.setStatus(theInstance.getStatus());
-		instance.setCancelled(theInstance.isCancelled());
-		instance.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		instance.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
-		instance.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
-		instance.setWorkChunksPurged(theInstance.isWorkChunksPurged());
-		instance.setProgress(theInstance.getProgress());
-		instance.setErrorMessage(theInstance.getErrorMessage());
-		instance.setErrorCount(theInstance.getErrorCount());
-		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
-		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
-		instance.setReport(theInstance.getReport());
+		instanceEntity.setStartTime(theInstance.getStartTime());
+		instanceEntity.setEndTime(theInstance.getEndTime());
+		instanceEntity.setStatus(theInstance.getStatus());
+		instanceEntity.setCancelled(theInstance.isCancelled());
+		instanceEntity.setFastTracking(theInstance.isFastTracking());
+		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
+		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
+		instanceEntity.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
+		instanceEntity.setWorkChunksPurged(theInstance.isWorkChunksPurged());
+		instanceEntity.setProgress(theInstance.getProgress());
+		instanceEntity.setErrorMessage(theInstance.getErrorMessage());
+		instanceEntity.setErrorCount(theInstance.getErrorCount());
+		instanceEntity.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
+		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		instanceEntity.setReport(theInstance.getReport());
 
-		myJobInstanceRepository.save(instance);
+		myJobInstanceRepository.save(instanceEntity);
 		return recordsChangedByStatusUpdate > 0;
 	}
 

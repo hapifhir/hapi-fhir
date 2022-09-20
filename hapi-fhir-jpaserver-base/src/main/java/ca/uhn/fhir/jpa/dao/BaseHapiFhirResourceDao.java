@@ -156,6 +156,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	public static final String BASE_RESOURCE_NAME = "resource";
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -333,6 +334,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(RequestPartitionId.class, theRequestPartitionId)
 			.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
@@ -513,7 +515,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 *
 	 * @param theId - the id of the object being deleted. Eg: Patient/123
 	 */
-	private DaoMethodOutcome createMethodOutcomeForDelete(String theId) {
+	private DaoMethodOutcome createMethodOutcomeForDelete(String theId, String theKey) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = getContext().getVersion().newIdType();
@@ -521,7 +523,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setId(id);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, "successfulDeletes", 1, 0);
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theKey, id);
 		String severity = "information";
 		String code = "informational";
 		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -546,7 +548,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue());
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "deleteResourceNotExisting");
 			return outcome;
 		}
 
@@ -556,7 +558,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue());
+			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue(), "deleteResourceAlreadyDeleted");
 
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
@@ -976,7 +978,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	protected void requestReindexForRelatedResources(Boolean theCurrentlyReindexing, List<String> theBase, RequestDetails theRequestDetails) {
 		// Avoid endless loops
-		if (Boolean.TRUE.equals(theCurrentlyReindexing)) {
+		if (Boolean.TRUE.equals(theCurrentlyReindexing) || shouldSkipReindex(theRequestDetails)) {
 			return;
 		}
 
@@ -984,11 +986,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			ReindexJobParameters params = new ReindexJobParameters();
 
-			theBase
-				.stream()
-				.map(t -> t + "?")
-				.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
-				.forEach(params::addPartitionedUrl);
+			if (!isCommonSearchParam(theBase)) {
+				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
+			}
 
 			ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
 			RequestPartitionId requestPartition = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null, details);
@@ -1004,6 +1004,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		mySearchParamRegistry.requestRefresh();
+	}
+
+	private boolean shouldSkipReindex(RequestDetails theRequestDetails) {
+		if (theRequestDetails == null) {
+			return false;
+		}
+		Object shouldSkip = theRequestDetails.getUserData().getOrDefault(JpaConstants.SKIP_REINDEX_ON_UPDATE, false);
+		return Boolean.parseBoolean(shouldSkip.toString());
+	}
+
+	private void addAllResourcesTypesToReindex(List<String> theBase, RequestDetails theRequestDetails, ReindexJobParameters params) {
+		theBase
+			.stream()
+			.map(t -> t + "?")
+			.map(url -> myUrlPartitioner.partitionUrl(url, theRequestDetails))
+			.forEach(params::addPartitionedUrl);
+	}
+
+	private boolean isCommonSearchParam(List<String> theBase) {
+		// If the base contains the special resource "Resource", this is a common SP that applies to all resources
+		return theBase.stream()
+			.map(String::toLowerCase)
+			.anyMatch(BASE_RESOURCE_NAME::equals);
 	}
 
 	@Override
@@ -1514,19 +1537,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
 			throw new MethodNotAllowedException(Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
-
-		if (getConfig().getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
-				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
-					for (IQueryParameterType next : nextOrs) {
-						if (next.getMissing() != null) {
-							throw new MethodNotAllowedException(Msg.code(985) + ":missing modifier is disabled on this server");
-						}
-					}
-				}
-			}
-		}
-
+		
 		translateListSearchParams(theParams);
 
 		notifySearchInterceptors(theParams, theRequest);

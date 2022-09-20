@@ -389,8 +389,8 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
+				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -804,16 +804,18 @@ public abstract class BaseTransactionProcessor {
 	private void replaceReferencesInEntriesWithConsolidatedUUID(List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
 			IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-			for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
-				// We're interested in any references directly to the placeholder ID, but also
-				// references that have a resource target that has the placeholder ID.
-				String nextReferenceId = nextReference.getReferenceElement().getValue();
-				if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
-					nextReferenceId = nextReference.getResource().getIdElement().getValue();
-				}
-				if (theEntryFullUrl.equals(nextReferenceId)) {
-					nextReference.setReference(existingUuid);
-					nextReference.setResource(null);
+			if (nextResource != null) {
+				for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
+					// We're interested in any references directly to the placeholder ID, but also
+					// references that have a resource target that has the placeholder ID.
+					String nextReferenceId = nextReference.getReferenceElement().getValue();
+					if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+						nextReferenceId = nextReference.getResource().getIdElement().getValue();
+					}
+					if (theEntryFullUrl.equals(nextReferenceId)) {
+						nextReference.setReference(existingUuid);
+						nextReference.setResource(null);
+					}
 				}
 			}
 		}
@@ -1865,14 +1867,14 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		private void populateResponseMapWithLastSeenException() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			ServerResponseExceptionHolder caughtEx = new ServerResponseExceptionHolder();
 			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
 	}
 
-	private static class BaseServerResponseExceptionHolder {
+	private static class ServerResponseExceptionHolder {
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {

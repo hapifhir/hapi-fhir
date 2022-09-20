@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.apicatalog.jsonld.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -169,7 +170,9 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 
 		try {
 			ActivateJobResult retval = doActivateNextReadyJob();
-			ourLog.info("Batch job submitted with batch job id {}", retval.jobId);
+			if (!StringUtils.isBlank(retval.jobId)) {
+				ourLog.info("Batch job submitted with batch job id {}", retval.jobId);
+			}
 			return retval;
 		} finally {
 			myRunningJobSemaphore.release();

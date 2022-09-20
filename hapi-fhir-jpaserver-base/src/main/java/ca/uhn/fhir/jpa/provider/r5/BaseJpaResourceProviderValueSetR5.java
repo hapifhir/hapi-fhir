@@ -22,6 +22,6 @@ package ca.uhn.fhir.jpa.provider.r5;
 
 import org.hl7.fhir.r5.model.ValueSet;
 
-public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<ValueSet> {
+public abstract class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<ValueSet> {
 	// nothing
 }

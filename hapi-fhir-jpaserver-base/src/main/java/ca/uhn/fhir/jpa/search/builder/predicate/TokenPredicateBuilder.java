@@ -32,11 +32,12 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -66,9 +67,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -90,6 +91,8 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private ModelConfig myModelConfig;
 	@Autowired
 	private FhirContext myContext;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	/**
 	 * Constructor
@@ -133,7 +136,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 		final List<FhirVersionIndependentConcept> codes = new ArrayList<>();
 
-		String paramName = QueryStack.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 
 		SearchFilterParser.CompareOperation operation = theOperation;
 
@@ -177,7 +180,10 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 			if (modifier == TokenParamModifier.IN || modifier == TokenParamModifier.NOT_IN) {
 				if (myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), new ValueSetExpansionOptions(), code);
+					ValueSetExpansionOptions valueSetExpansionOptions = new ValueSetExpansionOptions();
+					valueSetExpansionOptions.setCount(myDaoConfig.getMaximumExpansionSize());
+					IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), valueSetExpansionOptions, code);
+
 					codes.addAll(extractValueSetCodes(expanded.getValueSet()));
 				} else {
 					codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
@@ -242,7 +248,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			Condition hashIdentityPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 
 			Condition hashValuePredicate = createPredicateOrList(theResourceName, paramName, sortedCodesList, false);
-			predicate = toAndPredicate(hashIdentityPredicate, hashValuePredicate);
+			predicate = QueryParameterUtils.toAndPredicate(hashIdentityPredicate, hashValuePredicate);
 
 		} else {
 
@@ -377,7 +383,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 		if (!haveMultipleColumns && conditions.length > 1) {
 			List<Long> values = Arrays.asList(hashes);
-			return toEqualToOrInPredicate(columns[0], generatePlaceholders(values), !theWantEquals);
+			return QueryParameterUtils.toEqualToOrInPredicate(columns[0], generatePlaceholders(values), !theWantEquals);
 		}
 
 		for (int i = 0; i < conditions.length; i++) {
@@ -390,9 +396,9 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 		if (conditions.length > 1) {
 			if (theWantEquals) {
-				return toOrPredicate(conditions);
+				return QueryParameterUtils.toOrPredicate(conditions);
 			} else {
-				return toAndPredicate(conditions);
+				return QueryParameterUtils.toAndPredicate(conditions);
 			}
 		} else {
 			return conditions[0];

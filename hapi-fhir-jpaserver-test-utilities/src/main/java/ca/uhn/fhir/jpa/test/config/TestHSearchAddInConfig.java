@@ -205,7 +205,6 @@ public class TestHSearchAddInConfig {
 					.setIndexManagementWaitTimeoutMillis(10000)
 					.setRequiredIndexStatus(IndexStatus.YELLOW)
 					.setScrollTimeoutSecs(60 * 30) // 30 min for tests
-
 					.setHosts(host + ":" + httpPort)
 					.setProtocol("http")
 					.setUsername("")

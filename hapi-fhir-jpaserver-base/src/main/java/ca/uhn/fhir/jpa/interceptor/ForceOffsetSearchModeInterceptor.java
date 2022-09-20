@@ -23,7 +23,10 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -35,7 +38,12 @@ import org.apache.commons.lang3.Validate;
 @Interceptor
 public class ForceOffsetSearchModeInterceptor {
 
-	private Integer myDefaultCount = 100;
+	/**
+	 * Default value for {@link #setDefaultCount(Integer)}
+	 */
+	public static final int DEFAULT_DEFAULT_COUNT = 100;
+
+	private Integer myDefaultCount = DEFAULT_DEFAULT_COUNT;
 
 	public void setDefaultCount(Integer theDefaultCount) {
 		Validate.notNull(theDefaultCount, "theDefaultCount must not be null");
@@ -43,7 +51,15 @@ public class ForceOffsetSearchModeInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void storagePreSearchRegistered(SearchParameterMap theMap) {
+	public void storagePreSearchRegistered(SearchParameterMap theMap, RequestDetails theRequestDetails) {
+
+		// If the params indicate a synchronous search, it doesn't make
+		// sense to inject any offset processing since the search
+		// will be handled synchronously anyhow
+		if (theMap.isLoadSynchronous()) {
+			return;
+		}
+
 		if (theMap.getOffset() == null) {
 			theMap.setOffset(0);
 		}
@@ -51,5 +67,6 @@ public class ForceOffsetSearchModeInterceptor {
 			theMap.setCount(myDefaultCount);
 		}
 	}
+
 
 }

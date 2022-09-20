@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3419
+title: "With Elasticsearch configured, including terminology, an exception was raised while expanding a ValueSet
+      with more than 10,000 concepts. This has now been fixed."

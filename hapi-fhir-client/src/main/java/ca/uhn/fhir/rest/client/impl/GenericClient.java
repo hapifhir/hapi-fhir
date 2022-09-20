@@ -1514,6 +1514,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			MethodOutcome retVal = new MethodOutcome();
 			retVal.setResource(response);
 			retVal.setCreatedUsingStatusCode(theResponseStatusCode);
+			retVal.setStatusCode(theResponseStatusCode);
 			retVal.setResponseHeaders(theHeaders);
 			return retVal;
 		}

@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 
-public class BaseJpaResourceProviderStructureDefinitionDstu2 extends JpaResourceProviderDstu2<StructureDefinition> {
+public abstract class BaseJpaResourceProviderStructureDefinitionDstu2 extends JpaResourceProviderDstu2<StructureDefinition> {
 
 	// nothing yet
 

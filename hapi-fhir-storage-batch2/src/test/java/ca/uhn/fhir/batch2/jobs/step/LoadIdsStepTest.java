@@ -78,11 +78,14 @@ public class LoadIdsStepTest {
 
 		mySvc.run(details, mySink);
 
-		verify(mySink, times(41)).accept(myChunkIdsCaptor.capture());
-		for (int i = 0; i < 40; i++) {
-			assertEquals(createIdChunk(i * 1000, (i * 1000) + 1000).toString(), myChunkIdsCaptor.getAllValues().get(i).toString());
+		verify(mySink, times(81)).accept(myChunkIdsCaptor.capture());
+		for (int i = 0; i < 80; i++) {
+			String expected = createIdChunk(i * 500, (i * 500) + 500).toString();
+			String actual = myChunkIdsCaptor.getAllValues().get(i).toString();
+			assertEquals(expected, actual);
 		}
-		assertEquals(createIdChunk(40000, 40040).toString(), myChunkIdsCaptor.getAllValues().get(40).toString());
+		assertEquals(createIdChunk(40000, 40040).toString(),
+			myChunkIdsCaptor.getAllValues().get(80).toString());
 
 	}
 

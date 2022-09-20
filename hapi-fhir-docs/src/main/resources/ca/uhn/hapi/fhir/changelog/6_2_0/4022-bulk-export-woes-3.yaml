@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4022
+backport: 6.1.2
+title: "Fixed a Group Bulk Export bug in which the group members would not be expanded correctly."
+

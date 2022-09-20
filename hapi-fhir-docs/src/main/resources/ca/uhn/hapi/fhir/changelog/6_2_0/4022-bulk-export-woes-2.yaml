@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4022
+backport: 6.1.2
+title: "Fixed a Group Bulk Export bug which was causing it to fail to return resources due to an incorrect search."
+
