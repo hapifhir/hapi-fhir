@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class TermHelper {
 
 	/** characters which indicate the string parameter is a simple query string */
-	private static final char[] simpleQuerySyntaxCharacters = new char[] { '+', '|', '-', '"', '*', '(', ')', '~' };
+	private static final char[] simpleQuerySyntaxCharacters = new char[] { '+', '|', '"', '(', ')', '~' };
 
 
 	/**
@@ -40,8 +40,17 @@ public class TermHelper {
 	}
 
 
-	private static boolean isToLeftUntouched(String theS) {
-		return StringUtils.containsAny(theS, simpleQuerySyntaxCharacters);
+	/**
+	 * Returns true when the input string is recognized as Lucene Simple Query Syntax
+	 * @see "https://lucene.apache.org/core/8_11_2/queryparser/org/apache/lucene/queryparser/simple/SimpleQueryParser.html"
+	 */
+	static boolean isToLeftUntouched(String theString) {
+		// remove backslashed * and - characters from string before checking, as those shouldn't be considered
+		if (theString.startsWith("-")) { return true; } // it is SimpleQuerySyntax
+
+		if (theString.endsWith("*")) { return true; } // it is SimpleQuerySyntax
+
+		return StringUtils.containsAny(theString, simpleQuerySyntaxCharacters);
 	}
 
 
