@@ -287,6 +287,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			for (RuntimeSearchParam.Component component : theSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
+
+				// wipmb hack hack - we don't support %resource just yet.  But MolecularSequence defines an sp using it
+				if (expression.contains("%resource")) {
+					continue;
+				}
 				ourLog.trace("loading component for {} - {}", spName, componentSpRef);
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", spName, componentSpRef);
