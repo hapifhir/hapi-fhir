@@ -151,7 +151,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAllOf;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -3174,7 +3174,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			//@formatter:off

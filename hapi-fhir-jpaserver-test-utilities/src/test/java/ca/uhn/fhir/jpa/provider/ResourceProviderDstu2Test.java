@@ -70,7 +70,6 @@ import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.CustomMatchersUtil;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -2042,7 +2041,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			Bundle found = ourClient.search()

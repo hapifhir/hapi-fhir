@@ -48,7 +48,6 @@ import ca.uhn.fhir.test.utilities.CustomMatchersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cluster.ClusterState;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -1291,7 +1290,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -1313,7 +1312,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			CustomMatchersUtil.assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			CustomMatchersUtil.assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 			assertThat(patients, (hasItems(id2)));
 		}
 		{

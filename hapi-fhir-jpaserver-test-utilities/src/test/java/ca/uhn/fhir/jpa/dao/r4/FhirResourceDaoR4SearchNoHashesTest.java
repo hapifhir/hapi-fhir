@@ -1483,7 +1483,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			params.setLastUpdated(new DateRangeParam(beforeR2, null));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -1505,7 +1505,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 			assertThat(patients, (hasItems(id2)));
 		}
 		{

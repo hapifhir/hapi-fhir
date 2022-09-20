@@ -13,7 +13,7 @@ public class CustomMatchersUtil {
 	 * @param theActual the actual results
 	 * @param theShouldNotContain the items that should not be in theActual
 	 */
-	public static <T> void assertDoesNotContainAllOf(List<T> theActual, List<T> theShouldNotContain) {
+	public static <T> void assertDoesNotContainAnyOf(List<T> theActual, List<T> theShouldNotContain) {
 		for (T item : theShouldNotContain) {
 			assertThat(theActual, not(hasItem(item)));
 		}

@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.CustomMatchersUtil;
 import org.hl7.fhir.dstu3.model.Device;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -408,7 +407,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(idArray));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertDoesNotContainAllOf(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), Arrays.asList(idArray));
+		assertDoesNotContainAnyOf(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), Arrays.asList(idArray));
 
 		myPatientDao.update(patient, null, true, mockSrd());
 

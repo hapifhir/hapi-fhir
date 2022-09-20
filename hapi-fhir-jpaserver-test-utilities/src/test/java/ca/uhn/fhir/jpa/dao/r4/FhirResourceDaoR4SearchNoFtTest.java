@@ -2652,7 +2652,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeR2, null));
 		assertThat(result, hasItems(id2));
-		assertDoesNotContainAllOf(result, List.of(id1a, id1b));
+		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(beforeAny, beforeR2));
 		assertThat(result.toString(), result, not(hasItem(id2)));
@@ -2663,7 +2663,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(result, not(hasItem(id2)));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, beforeR2)));
-		assertDoesNotContainAllOf(result, List.of(id1a, id1b));
+		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
 		assertThat(result, (hasItems(id2)));
 
 		result = performSearchLastUpdatedAndReturnIds(new DateRangeParam(new DateParam(LESSTHAN_OR_EQUALS, beforeR2)));
@@ -2740,7 +2740,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdated), new DateParam(EQUAL, p0LastUpdated));
 		result = performSearchLastUpdatedAndReturnIds(dateRange);
 		assertThat(result, containsInAnyOrder(id0));
-		assertDoesNotContainAllOf(result, List.of(id1a, id1b));
+		assertDoesNotContainAnyOf(result, List.of(id1a, id1b));
 
 		DateTimeType p0LastUpdatedDay = new DateTimeType(p0LastUpdated.getValue(), TemporalPrecisionEnum.DAY);
 		dateRange = new DateRangeParam(new DateParam(EQUAL, p0LastUpdatedDay), new DateParam(EQUAL, p0LastUpdatedDay));

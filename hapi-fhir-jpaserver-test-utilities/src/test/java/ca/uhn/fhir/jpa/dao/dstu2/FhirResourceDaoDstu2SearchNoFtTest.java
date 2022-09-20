@@ -853,7 +853,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.setLastUpdated(new DateRangeParam(beforeR2, null));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, containsInAnyOrder(id2));
-			CustomMatchersUtil.assertDoesNotContainAllOf(patients, List.of(id1a, id1b));
+			CustomMatchersUtil.assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
