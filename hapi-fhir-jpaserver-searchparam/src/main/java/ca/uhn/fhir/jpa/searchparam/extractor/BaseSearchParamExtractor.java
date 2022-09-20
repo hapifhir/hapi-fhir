@@ -280,6 +280,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		@Override
 		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
+
+			if (!isConfiguredForComposite(theSearchParam)) {
+				// The FhirContext annotation defined SPs have null paths.  Skip them.
+				return;
+			}
+
 			String spName = theSearchParam.getName();
 			ourLog.debug("CompositeExtractor - extracting {}", spName);
 			ourLog.trace("CompositeExtractor - extracting {} {}", spName, theValue);
@@ -312,6 +318,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				return;
 			}
 
+
 			SearchParamSet set = new SearchParamSet<>();
 			extractSearchParam(theRuntimeSearchParam, theSubPathExpression, theParentElement, extractor, set, theWantLocalReferences);
 			theIndexBean.addComponent(theRuntimeSearchParam, set);
@@ -342,6 +349,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 			return extractor;
 		}
+	}
+
+	private boolean isConfiguredForComposite(RuntimeSearchParam theSearchParam) {
+		return RestSearchParameterTypeEnum.COMPOSITE.equals(theSearchParam.getParamType()) &&
+			theSearchParam.getComponents().stream().noneMatch(c->c.getExpression()==null);
 	}
 
 

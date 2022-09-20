@@ -254,7 +254,7 @@ public class SearchParamExtractorService {
 
 		// Composites
 		// wipmb should we have config to skip this?  Check to see if  HSearch is enabled?
-		// dst2 composites are weird, and we don't support them.
+		// dst2 composites are weird, and we don't support them.  DST3 default SPs have null paths.
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
