@@ -3,6 +3,8 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Optional;
+
 /*
  * #%L
  * HAPI FHIR - Core Library
@@ -44,6 +46,22 @@ public class ObjectUtil {
 	public static void requireNotEmpty(String str, String message) {
 		if (StringUtils.isBlank(str)) {
 			throw new IllegalArgumentException(Msg.code(1777) + message);
+		}
+	}
+
+	/**
+	 * Cast the object to the type using Optional.
+	 * Useful for streaming.
+	 * @param theObject any object
+	 * @param theClass the class to check instanceof
+	 * @return Optional present if theObject is of type theClass
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Optional<T> safeCast(Object theObject, Class<T> theClass) {
+		if (theClass.isInstance(theObject)) {
+			return Optional.of((T) theObject);
+		} else {
+			return Optional.empty();
 		}
 	}
 	

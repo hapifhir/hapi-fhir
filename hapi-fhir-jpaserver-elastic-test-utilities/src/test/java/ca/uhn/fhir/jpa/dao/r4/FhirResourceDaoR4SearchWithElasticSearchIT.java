@@ -158,7 +158,8 @@ import static org.mockito.Mockito.when;
 	DependencyInjectionTestExecutionListener.class
 	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
 	})
-public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
+public class
+FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);

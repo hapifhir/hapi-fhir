@@ -60,10 +60,6 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		// validate
 		Set<CompositeSearchIndexData> indexData = hsearchIndexData.getSearchParamComposites().get("component-code-value-concept");
 		assertThat(indexData, hasSize(1));
-		CompositeSearchIndexData data = indexData.stream().findFirst().orElseThrow();
-
-		// fixme next
-
 	}
 
 	@Override

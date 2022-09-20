@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 public class ObjectUtilTest {
 
 	@Test
@@ -54,5 +56,22 @@ public class ObjectUtilTest {
 			assertEquals(Msg.code(1777) + message, e.getMessage());
 		}
 	}
-	
+
+	@Test
+	void testCast_isInstance_present() {
+		Boolean value = Boolean.FALSE;
+
+		Optional<Boolean> result = ObjectUtil.safeCast(value, Boolean.class);
+
+		assertTrue(result.isPresent());
+	}
+
+	@Test
+	void testCast_isNotInstance_empty() {
+		Boolean value = Boolean.FALSE;
+
+		Optional<Integer> result = ObjectUtil.safeCast(value, Integer.class);
+
+		assertTrue(result.isEmpty());
+	}
 }

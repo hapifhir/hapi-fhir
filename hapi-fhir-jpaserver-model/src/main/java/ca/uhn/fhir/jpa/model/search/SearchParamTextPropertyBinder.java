@@ -176,6 +176,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("string-lower", lowerCaseNormalizer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_LOWER).multiValued();
 
 			nestedSpField.objectFieldTemplate("nestedStringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
+			nestedSpField.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
 			nestedSpField.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
 
 			// token
@@ -243,6 +244,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
 
 			// we use nested search params for the autocomplete search.
+			nestedSpField.objectFieldTemplate("nestedSpSubObject", ObjectStructure.FLATTENED).matchingPathGlob("*.*").multiValued();
 			nestedSpField.objectFieldTemplate("nestedSpObject", ObjectStructure.NESTED).matchingPathGlob("*").multiValued();
 		}
 	}

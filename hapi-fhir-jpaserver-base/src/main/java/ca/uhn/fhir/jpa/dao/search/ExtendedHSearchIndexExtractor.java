@@ -39,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -122,11 +121,11 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myCompositeParams.forEach(nextParam ->
 			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
 
-		if (theResource.fhirType().equals("Observation")) {
-			((Observation) theResource).getComponent().stream()
-				.filter(this::isComponentFreetextSearchable).forEach(
-					comp -> retVal.addObservationComponentsIndexData(getComponentParamName(comp), comp));
-		}
+//		if (theResource.fhirType().equals("Observation")) {
+//			((Observation) theResource).getComponent().stream()
+//				.filter(this::isComponentFreetextSearchable).forEach(
+//					comp -> retVal.addObservationComponentsIndexData(getComponentParamName(comp), comp));
+//		}
 
 		if (theResource.getMeta().getLastUpdated() != null) {
 			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
@@ -177,9 +176,7 @@ public class ExtendedHSearchIndexExtractor {
 	@Nonnull
 	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
 		// fixme mb head
-		return new CompositeSearchIndexData() {
-
-		};
+		return new HSearchCompositeSearchIndexDataImpl(theSearchParamComposite);
 	}
 
 
@@ -249,4 +246,5 @@ public class ExtendedHSearchIndexExtractor {
 	private void addToken_Coding(ExtendedHSearchIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
 		theRetVal.addTokenIndexData(theSpName, theNextValue);
 	}
+
 }

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.CompositeParam;
@@ -210,7 +211,9 @@ public class ExtendedHSearchSearchBuilder {
 
 				case COMPOSITE:
 					List<List<IQueryParameterType>> compositeAndOrTerms = theParams.removeByNameUnmodified(nextParam);
-					builder.addCompositeUnmodifiedSearch(nextParam, compositeAndOrTerms);
+					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have ISearchParamRegistry
+					List<RuntimeSearchParam> subSearchParams = JpaParamUtil.resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, activeParam);
+					builder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
 					break;
 
 				case URI:

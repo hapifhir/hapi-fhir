@@ -109,7 +109,7 @@ public class ExtendedHSearchIndexData {
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
 		Multimaps.asMap(mySearchParamComposites).forEach(indexWriter::writeCompositeIndex);
-		Multimaps.asMap(mySearchParamObservationComponents).forEach(ifNotContained(indexWriter::writeObservationComponentCompositeIndex));
+		// fixme Multimaps.asMap(mySearchParamObservationComponents).forEach(ifNotContained(indexWriter::writeObservationComponentCompositeIndex));
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {

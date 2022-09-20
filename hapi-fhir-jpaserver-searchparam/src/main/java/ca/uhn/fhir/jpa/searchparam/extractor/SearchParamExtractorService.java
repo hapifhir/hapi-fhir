@@ -202,6 +202,7 @@ public class SearchParamExtractorService {
 		theTargetParams.myTokenParams.addAll(theSrcParams.myTokenParams);
 		theTargetParams.myStringParams.addAll(theSrcParams.myStringParams);
 		theTargetParams.myCoordsParams.addAll(theSrcParams.myCoordsParams);
+		theTargetParams.myCompositeParams.addAll(theSrcParams.myCompositeParams);
 	}
 
 	void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {

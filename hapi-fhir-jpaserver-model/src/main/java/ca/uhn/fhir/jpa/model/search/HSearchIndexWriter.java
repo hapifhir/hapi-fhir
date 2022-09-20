@@ -98,9 +98,7 @@ public class HSearchIndexWriter {
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
 		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
 
-		nestedTokenNode.addValue("code", theValue.getCode());
-		nestedTokenNode.addValue("system", theValue.getSystem());
-		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		writeTokenFields(nestedTokenNode, theValue);
 
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
 			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
@@ -109,11 +107,15 @@ public class HSearchIndexWriter {
 
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
 		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
-		tokenIndexNode.addValue("code", theValue.getCode());
-		tokenIndexNode.addValue("system", theValue.getSystem());
-		tokenIndexNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		writeTokenFields(tokenIndexNode, theValue);
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 		// TODO mb should we write the strings here too?  Or leave it to the old spidx indexing?
+	}
+
+	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {
+		theDocumentElement.addValue("code", theValue.getCode());
+		theDocumentElement.addValue("system", theValue.getSystem());
+		theDocumentElement.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
 	}
 
 	public void writeReferenceIndex(String theSearchParam, String theValue) {
@@ -238,9 +240,7 @@ public class HSearchIndexWriter {
 		// must be nested.
 		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
 			// fixme need a way to ask for a new sub-object for nested.
-			DocumentElement nspRoot = myNodeCache.getObjectElement("nsp");
-			DocumentElement nestedComposite = nspRoot.addObject(theParamName);
-			//compositeSearchIndexDatum.writeIndex(this, nestedComposite);
+			compositeSearchIndexDatum.writeIndexEntry(this, myNodeCache);
 		}
 
 	}

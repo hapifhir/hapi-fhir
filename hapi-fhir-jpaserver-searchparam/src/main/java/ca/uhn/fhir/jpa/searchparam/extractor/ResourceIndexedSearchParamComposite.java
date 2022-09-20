@@ -47,6 +47,11 @@ public class ResourceIndexedSearchParamComposite {
 		public ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> getParamIndexValues() {
 			return myParamIndexValues;
 		}
+
+		@Override
+		public String toString() {
+			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		}
 	}
 
 	public ResourceIndexedSearchParamComposite(String theSearchParamName, String theResourceType, String thePath) {

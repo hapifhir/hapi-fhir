@@ -1753,19 +1753,19 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String nextType = BaseSearchParamExtractor.this.toRootTypeName(value);
 			switch (nextType) {
 				case "Identifier":
-					BaseSearchParamExtractor.this.addToken_Identifier(myResourceTypeName, params, searchParam, value);
+					addToken_Identifier(myResourceTypeName, params, searchParam, value);
 					break;
 				case "CodeableConcept":
-					BaseSearchParamExtractor.this.addToken_CodeableConcept(myResourceTypeName, params, searchParam, value);
+					addToken_CodeableConcept(myResourceTypeName, params, searchParam, value);
 					break;
 				case "Coding":
-					BaseSearchParamExtractor.this.addToken_Coding(myResourceTypeName, params, searchParam, value);
+					addToken_Coding(myResourceTypeName, params, searchParam, value);
 					break;
 				case "ContactPoint":
-					BaseSearchParamExtractor.this.addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
+					addToken_ContactPoint(myResourceTypeName, params, searchParam, value);
 					break;
 				default:
-					BaseSearchParamExtractor.this.addUnexpectedDatatypeWarning(params, searchParam, value);
+					addUnexpectedDatatypeWarning(params, searchParam, value);
 					break;
 			}
 		}

@@ -29,6 +29,7 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.Collection;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -109,6 +110,10 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 	 */
 	public B getRightValue() {
 		return myRightType;
+	}
+
+	public List<IQueryParameterType> getValues() {
+		return List.of(myLeftType, myRightType);
 	}
 
 	@Override

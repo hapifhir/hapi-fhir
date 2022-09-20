@@ -39,7 +39,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 	@EnabledIf("isCorrelatedSupported")
 	@Test
-	void searchComposite_onSameResource_found() {
+	void searchCodeQuantity_onSameResource_found() {
 		IIdType id1 = createObservation(
 			withObservationComponent(
 				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
@@ -51,6 +51,22 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
 			"Observation?component-code-value-quantity=|8480-6$60", id1);
+	}
+
+	@EnabledIf("isCorrelatedSupported")
+	@Test
+	void searchCodeCode_onSameResource_found() {
+		IIdType id1 = createObservation(
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
+		);
+
+		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
+			"Observation?component-code-value-concept=8480-6$some-code", id1);
 	}
 
 	@Test
@@ -66,6 +82,22 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		);
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=|8480-6$100");
+		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
+	}
+
+	@Test
+	void searchCodeCode_differentComponents_notFound() {
+		createObservation(
+			withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
+		);
+
+		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-concept=8480-6$another-code");
 		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
 	}
 

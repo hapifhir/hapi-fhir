@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.search.engine.search.common.BooleanOperator;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
@@ -127,10 +129,13 @@ public class ExtendedHSearchClauseBuilder {
 
 	/**
 	 * Provide an OR wrapper around a list of predicates.
-	 * Returns the sole predicate if it solo, or wrap as a bool/should for OR semantics.
+	 *
+	 * Wrap the predicates under a bool as should clauses with minimumShouldMatch=1 for OR semantics.
+	 * As an optimization, when there is only one clause, we avoid the redundant boolean wrapper
+	 * and return the first item as is.
 	 *
 	 * @param theOrList a list containing at least 1 predicate
-	 * @return a predicate providing or-sematics over the list.
+	 * @return a predicate providing or-semantics over the list.
 	 */
 	private PredicateFinalStep orPredicateOrSingle(List<? extends PredicateFinalStep> theOrList) {
 		PredicateFinalStep finalClause;
@@ -138,6 +143,7 @@ public class ExtendedHSearchClauseBuilder {
 			finalClause = theOrList.get(0);
 		} else {
 			BooleanPredicateClausesStep<?> orClause = myPredicateFactory.bool();
+			orClause.minimumShouldMatchNumber(1);
 			theOrList.forEach(orClause::should);
 			finalClause = orClause;
 		}
@@ -151,43 +157,38 @@ public class ExtendedHSearchClauseBuilder {
 		for (List<? extends IQueryParameterType> nextAnd : theAndOrTerms) {
 
 			ourLog.debug("addTokenUnmodifiedSearch {} {}", theSearchParamName, nextAnd);
-			List<? extends PredicateFinalStep> clauses = nextAnd.stream().map(orTerm -> {
-				if (orTerm instanceof TokenParam) {
-					TokenParam token = (TokenParam) orTerm;
-					if (StringUtils.isBlank(token.getSystem())) {
-						// bare value
-						return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(token.getValue());
-					} else if (StringUtils.isBlank(token.getValue())) {
-						// system without value
-						return myPredicateFactory.match().field(SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".system").matching(token.getSystem());
-					} else {
-						// system + value
-						return myPredicateFactory.match().field(getTokenSystemCodeFieldPath(theSearchParamName)).matching(token.getValueAsQueryToken(this.myFhirContext));
-					}
-				} else if (orTerm instanceof StringParam) {
-					// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses String but here we are
-					StringParam string = (StringParam) orTerm;
-					// treat a string as a code with no system (like _id)
-					return myPredicateFactory.match().field(getTokenCodeFieldPath(theSearchParamName)).matching(string.getValue());
-				} else {
-					throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: " + orTerm.getClass().getName());
-				}
-			}).collect(Collectors.toList());
-
+			String spPath = SEARCH_PARAM_ROOT + "." + theSearchParamName;
+			List<? extends PredicateFinalStep> clauses = nextAnd.stream()
+				.map(orTerm -> buildTokenUnmodifiedMatchOn(spPath, orTerm))
+				.collect(Collectors.toList());
 			PredicateFinalStep finalClause = orPredicateOrSingle(clauses);
+
 			myRootClause.must(finalClause);
 		}
 
 	}
 
-	@Nonnull
-	public static String getTokenCodeFieldPath(String theSearchParamName) {
-		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code";
-	}
-
-	@Nonnull
-	public static String getTokenSystemCodeFieldPath(@Nonnull String theSearchParamName) {
-		return SEARCH_PARAM_ROOT + "." + theSearchParamName + ".token" + ".code-system";
+	private PredicateFinalStep buildTokenUnmodifiedMatchOn(String thePathPrefix, IQueryParameterType orTerm) {
+		if (orTerm instanceof TokenParam) {
+			TokenParam token = (TokenParam) orTerm;
+			if (StringUtils.isBlank(token.getSystem())) {
+				// bare value
+				return myPredicateFactory.match().field(thePathPrefix + ".token" + ".code").matching(token.getValue());
+			} else if (StringUtils.isBlank(token.getValue())) {
+				// system without value
+				return myPredicateFactory.match().field(thePathPrefix + ".token" + ".system").matching(token.getSystem());
+			} else {
+				// system + value
+				return myPredicateFactory.match().field(thePathPrefix + ".token" + ".code-system").matching(token.getValueAsQueryToken(this.myFhirContext));
+			}
+		} else if (orTerm instanceof StringParam) {
+			// MB I don't quite understand why FhirResourceDaoR4SearchNoFtTest.testSearchByIdParamWrongType() uses String but here we are
+			StringParam string = (StringParam) orTerm;
+			// treat a string as a code with no system (like _id)
+			return myPredicateFactory.match().field(thePathPrefix + ".token" + ".code").matching(string.getValue());
+		} else {
+			throw new IllegalArgumentException(Msg.code(1089) + "Unexpected param type for token search-param: " + orTerm.getClass().getName());
+		}
 	}
 
 	public void addStringTextSearch(String theSearchParamName, List<List<IQueryParameterType>> stringAndOrTerms) {
@@ -632,23 +633,6 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-
-	// fixme mb the query
-	public void addCompositeUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
-		for (List<IQueryParameterType> nextAnd : theCompositeAndOrTerms) {
-			BooleanPredicateClausesStep<?> terms = myPredicateFactory.bool();
-			terms.minimumShouldMatchNumber(1);
-
-			for (IQueryParameterType orParam : nextAnd) {
-				BooleanPredicateClausesStep<?> orTerms = myPredicateFactory.bool();
-				addCompositeOrClauses(theParamName, orParam, orTerms);
-				terms.should(orTerms);
-			}
-
-			myRootClause.must(terms);
-		}
-	}
-
 	public void addNumberUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theNumberUnmodifiedAndOrTerms) {
 		String fieldPath = String.join(".", SEARCH_PARAM_ROOT, theParamName, NUMBER_VALUE);
 
@@ -667,8 +651,63 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 
+
 	// fixme mb the query
-	private void addCompositeOrClauses(String theParamName, IQueryParameterType theOrParam, BooleanPredicateClausesStep<?> theOrTerms) {
+	public void addCompositeUnmodifiedSearch(RuntimeSearchParam theSearchParam, List<RuntimeSearchParam> theSubSearchParams, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
+		for (List<IQueryParameterType> nextAnd : theCompositeAndOrTerms) {
+			List<PredicateFinalStep> orClauses =
+				nextAnd.stream()
+					.map(term -> computeCompositeTermClause(theSearchParam, theSubSearchParams, (CompositeParam) term))
+					.collect(Collectors.toList());
+
+			PredicateFinalStep combinedOrClauses = orPredicateOrSingle(orClauses);
+
+			myRootClause.must(f-> f
+				// wipmb make the top nsp the single nested object
+				.nested().objectField("nsp." + theSearchParam.getName())
+				.nest(combinedOrClauses));
+		}
+	}
+
+	/**
+	 * Compute the match clause for all the ocm
+	 * @param theSearchParam
+	 * @param theSubSearchParams
+	 * @param theTerm
+	 * @return
+	 */
+	private PredicateFinalStep computeCompositeTermClause(RuntimeSearchParam theSearchParam, List<RuntimeSearchParam> theSubSearchParams, CompositeParam theTerm) {
+		Validate.notNull(theSearchParam);
+		Validate.notNull(theSubSearchParams);
+		Validate.notNull(theTerm);
+		Validate.isTrue(theSubSearchParams.size() == 2, "Hapi only supports composite search parameters with 2 components. %s %d", theSearchParam.getName(), theSubSearchParams.size());
+		List<IQueryParameterType> values = theTerm.getValues();
+		Validate.isTrue(theSubSearchParams.size() == values.size(), "Different number of query components than defined. %s %d %d", theSearchParam.getName(), theSubSearchParams.size(), values.size());
+
+		String nestedBase = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParam.getName();
+		BooleanPredicateClausesStep<?> compositeClause = myPredicateFactory.bool();
+		for (int i = 0; i < theSubSearchParams.size(); i+=1) {
+			RuntimeSearchParam component = theSubSearchParams.get(i);
+			IQueryParameterType value = values.get(i);
+			PredicateFinalStep subMatch = null;
+			switch (component.getParamType()) {
+				case TOKEN:
+					subMatch= buildTokenUnmodifiedMatchOn(nestedBase + "." + component.getName(), value);
+				default:
+					// fixme other types
+					break;
+			}
+
+			Validate.notNull(subMatch);
+			compositeClause.must(subMatch);
+		}
+
+		return compositeClause;
+	}
+
+
+	// fixme mb the query
+	private void addCompositeOrClauses(RuntimeSearchParam theParamName, IQueryParameterType theOrParam, BooleanPredicateClausesStep<?> theOrTerms) {
 		// fixme mb
 		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theParamName + "." + COMPOS_PARAM_NAME;
 
