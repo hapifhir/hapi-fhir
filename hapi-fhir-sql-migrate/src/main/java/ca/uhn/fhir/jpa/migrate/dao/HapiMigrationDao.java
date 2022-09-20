@@ -109,7 +109,7 @@ public class HapiMigrationDao {
 
 	public List<HapiMigrationEntity> findAll() {
 		String allQuery = myMigrationQueryBuilder.findAllQuery();
-		ourLog.info("Executing query: [{}]", allQuery);
+		ourLog.debug("Executing query: [{}]", allQuery);
 		return myJdbcTemplate.query(allQuery, HapiMigrationEntity.rowMapper());
 	}
 }
