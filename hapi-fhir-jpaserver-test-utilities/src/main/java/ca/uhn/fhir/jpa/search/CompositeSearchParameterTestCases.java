@@ -112,6 +112,19 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
 			"Observation?code-value-date=8480-6$lt2021", id1);
 	}
+
+
+	@Test
+	void searchCodeString_onSameResource_found() {
+		IIdType id1 = createObservation(
+			withObservationCode( SYSTEM_LOINC_ORG, CODE_8480_6, null),
+			withDateTimeAt("valueString", "ABCDEF")
+		);
+
+		myTestDaoSearch.assertSearchFinds("token code + string prefix matches",
+			"Observation?code-value-string=8480-6$ABC", id1);
+	}
+
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myTestDataBuilder.doCreateResource(theResource);

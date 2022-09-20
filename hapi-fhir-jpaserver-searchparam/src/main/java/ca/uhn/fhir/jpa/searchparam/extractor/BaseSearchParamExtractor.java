@@ -325,16 +325,19 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				case DATE:
 					extractor = new DateExtractor(myResourceType);
 					break;
-				case TOKEN:
-					// wipmb we can't propagate the default system down - is that a problem?
-					extractor = new TokenExtractor(myResourceType, null);
-					break;
 				case QUANTITY:
 					extractor = createQuantityExtractor(myResourceType);
 					break;
+				case STRING:
+					extractor = createStringExtractor(myResourceType);
+					break;
+				case TOKEN:
+					// wipmb we don't propagate the default system down - is that a problem for composite?
+					extractor = new TokenExtractor(myResourceType, null);
+					break;
 				// wipmb implement other types
 				default:
-					// wipmb implement other types
+					// wipmb validate
 					//Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
 			}
 			return extractor;
@@ -545,8 +548,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
+		String resourceType = toRootTypeName(theResource);
+		return createStringExtractor(resourceType);
+	}
+
+	@Nonnull
+	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(String resourceType) {
 		return (params, searchParam, value, path, theWantLocalReferences) -> {
-			String resourceType = toRootTypeName(theResource);
 
 			if (value instanceof IPrimitiveType) {
 				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) value;

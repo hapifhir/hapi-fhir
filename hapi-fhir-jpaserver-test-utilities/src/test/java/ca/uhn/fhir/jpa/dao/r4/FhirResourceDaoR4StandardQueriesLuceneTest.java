@@ -41,7 +41,7 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 	@Qualifier("myObservationDaoR4")
 	IFhirResourceDao<Observation> myObservationDao;
 
-	//wipmb create an extension to restore via clone or xstream + BeanUtils.copyProperties().
+	// todo mb create an extension to restore via clone or xstream + BeanUtils.copyProperties().
 	@BeforeEach
 	void setUp() {
 		myDaoConfig.setAdvancedHSearchIndexing(true);
@@ -76,8 +76,6 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 		CompositeSearch() {
 			super(myDataBuilder, myTestDaoSearch);
 		}
-
-		// wipmb head
 
 		/** JPA doesn't know which sub-element matches */
 		@Override

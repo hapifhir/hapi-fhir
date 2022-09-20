@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.HSearchElementCache;
@@ -43,27 +44,30 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 			// Write the various index nodes.
 			// Note: we don't support modifiers with composites, so we don't bother to index :of-type, :text, etc.
 			switch (subParam.getSearchParameterType()) {
-				case DATE: {
+				case DATE:
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamDate.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertDate)
 						.forEach(d-> theHSearchIndexWriter.writeDateFields(idxElementLookup.apply("dt"), d));
-				}
-				break;
+					break;
+				case QUANTITY:
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
+						.map(ExtendedHSearchIndexExtractor::convertQuantity)
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(idxElementLookup.apply( HSearchIndexWriter.QTY_IDX_NAME), q));
+					break;
+				case STRING:
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamString.class).stream())
+						.forEach(risps-> theHSearchIndexWriter.writeBasicStringFields(idxElementLookup.apply( "string"), risps.getValueExact()));
+					break;
 				case TOKEN: {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
 						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(idxElementLookup.apply( "token"), new Tag(rispt.getSystem(), rispt.getValue())));
 				}
 				break;
-				case QUANTITY: {
-					subParam.getParamIndexValues().stream()
-						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
-						.map(ExtendedHSearchIndexExtractor::convertQuantity)
-						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(idxElementLookup.apply( HSearchIndexWriter.QTY_IDX_NAME), q));
-				}
-				break;
-				// wipmb head
+				// wipmb implement other types
 
 				default:
 					// unsupported

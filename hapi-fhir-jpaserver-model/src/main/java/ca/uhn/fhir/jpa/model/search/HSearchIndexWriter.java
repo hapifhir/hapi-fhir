@@ -74,12 +74,16 @@ public class HSearchIndexWriter {
 		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
 
 		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
-		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
+		writeBasicStringFields(stringIndexNode, theValue);
 		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
 		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
 		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
 
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
+	}
+
+	public void writeBasicStringFields(DocumentElement theIndexNode, String theValue) {
+		theIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
 	}
 
 	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {

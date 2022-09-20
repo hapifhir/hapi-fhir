@@ -133,7 +133,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @RequiresDocker
-// wipmb hierarchy for context
 @ContextHierarchy({
 	@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class),
 	@ContextConfiguration(classes = {
@@ -228,7 +227,6 @@ FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestD
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
-
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myTestDataBuilder.doCreateResource(theResource);
@@ -2643,41 +2641,6 @@ FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestD
 			return true;
 		}
 	}
-
-	/**
-	 * Strategy is to test many common combined parameters use cases on the code-value-quantity
-	 * parameter and a simple equality use case with the rest of the composite parameters
-	 *
-	 * wipmb the test
-	 */
-	@Nested
-	public class CompositeParameters {
-
-		@BeforeEach
-		public void enableResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(true);
-		}
-
-		@AfterEach
-		public void resetResourceStorage() {
-			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
-		}
-
-
-		@Nested
-		public class ContextTypeQuantity {
-
-		}
-
-		@Nested
-		public class ContextTypeValue {
-
-		}
-
-
-
-	}
-
 
 	/**
 	 * Disallow context dirtying for nested classes

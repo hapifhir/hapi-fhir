@@ -53,6 +53,7 @@ import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesS
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.RangePredicateOptionsStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.predicate.dsl.WildcardPredicateOptionsStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -272,20 +273,24 @@ public class ExtendedHSearchClauseBuilder {
 	}
 
 	public void addStringUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theStringAndOrTerms) {
-		String fieldPath = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".string." + IDX_STRING_NORMALIZED;
+		String spPath = SEARCH_PARAM_ROOT + "." + theSearchParamName;
 		for (List<? extends IQueryParameterType> nextAnd : theStringAndOrTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 			ourLog.debug("addStringUnmodifiedSearch {} {}", theSearchParamName, terms);
-			List<? extends PredicateFinalStep> orTerms = terms.stream()
+			List<PredicateFinalStep> orTerms = terms.stream()
 				.map(s ->
-					myPredicateFactory.wildcard()
-						.field(fieldPath)
-						// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
-						.matching(normalize(s) + "*"))
+					buildStringUnmodifiedClause(spPath, s))
 				.collect(Collectors.toList());
 
 			myRootClause.must(orPredicateOrSingle(orTerms));
 		}
+	}
+
+	private WildcardPredicateOptionsStep<?> buildStringUnmodifiedClause(String theSPPath, String theString) {
+		return myPredicateFactory.wildcard()
+			.field(theSPPath + ".string." + IDX_STRING_NORMALIZED)
+			// wildcard is a term-level query, so it isn't analyzed.  Do our own case-folding to match the normStringAnalyzer
+			.matching(normalize(theString) + "*");
 	}
 
 	public void addReferenceUnchainedSearch(String theSearchParamName, List<List<IQueryParameterType>> theReferenceAndOrTerms) {
@@ -697,13 +702,16 @@ public class ExtendedHSearchClauseBuilder {
 				case DATE:
 					subMatch = buildDateTermClause(subComponentPath, value);
 					break;
+				case STRING:
+					subMatch = buildStringUnmodifiedClause(subComponentPath, value.getValueAsQueryToken(myFhirContext));
+						break;
 				case TOKEN:
 					subMatch= buildTokenUnmodifiedMatchOn(subComponentPath, value);
 					break;
 				case QUANTITY:
 					subMatch = buildQuantityTermClause(subComponentPath, value);
 					break;
-				// wipmb other types
+				// wipmb implement other types
 
 				default:
 					break;
