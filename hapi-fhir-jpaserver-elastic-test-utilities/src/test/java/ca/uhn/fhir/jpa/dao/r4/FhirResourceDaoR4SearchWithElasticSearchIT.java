@@ -467,6 +467,17 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertThat(resourceIds, contains(id2));
 		}
 
+
+		@Test
+		void stringTokensAreAnded() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=car%20smit");
+			assertThat(resourceIds, hasItems(id2));
+		}
 	}
 
 	@Nested
