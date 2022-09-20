@@ -651,7 +651,6 @@ public class ExtendedHSearchClauseBuilder {
 
 
 
-	// fixme mb the query
 	public void addCompositeUnmodifiedSearch(RuntimeSearchParam theSearchParam, List<RuntimeSearchParam> theSubSearchParams, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
 		for (List<IQueryParameterType> nextAnd : theCompositeAndOrTerms) {
 			List<PredicateFinalStep> orClauses =
@@ -697,11 +696,11 @@ public class ExtendedHSearchClauseBuilder {
 				case QUANTITY:
 					subMatch = buildQuantityTermClause(subComponentPath, value);
 					break;
+				// wipmb other types
+
 				default:
-
-
-					// fixme other types
 					break;
+
 			}
 
 			Validate.notNull(subMatch);
@@ -711,37 +710,5 @@ public class ExtendedHSearchClauseBuilder {
 		return compositeClause;
 	}
 
-
-	// fixme mb the query
-	private void addCompositeOrClauses(RuntimeSearchParam theParamName, IQueryParameterType theOrParam, BooleanPredicateClausesStep<?> theOrTerms) {
-		// fixme mb
-		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theParamName + "." + COMPOS_PARAM_NAME;
-
-//		fixme jm: duplicated
-		CompositeParam<?, ?> compositeParam = (CompositeParam<?, ?>) theOrParam;
-		QuantityParam qtyParam = QuantityParam.toQuantityParam(compositeParam.getRightValue());
-		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-		setPrefixedNumericPredicate(theOrTerms, activePrefix, qtyParam.getValue(), fieldPath + "." + COMPOS_QTY_VALUE, true);
-
-		if ( isNotBlank(qtyParam.getSystem()) ) {
-			theOrTerms.must(myPredicateFactory.match().field(fieldPath + "." + COMPOS_QTY_SYSTEM).matching(qtyParam.getSystem()));
-		}
-
-		if ( isNotBlank(qtyParam.getUnits()) ) {
-			theOrTerms.must(myPredicateFactory.match().field(fieldPath + "." + COMPOS_QTY_CODE).matching(qtyParam.getUnits()) );
-		}
-//		fixme jm: duplicated end
-
-		TokenParam codeableConceptParam = (TokenParam) compositeParam.getLeftValue();
-
-		theOrTerms.must( f -> f.nested().objectField( fieldPath + "." + "codes" )
-				.nest( f.bool()
-					.must( f.match().field( fieldPath + "." + "codes" + "." + COMPOS_CODE_SYSTEM )
-						.matching( codeableConceptParam.getSystem() ) )
-					.must( f.match().field(  fieldPath + "." + "codes" + "." + COMPOS_CODE_VALUE  )
-						.matching( codeableConceptParam.getValue() ) )
-				) );
-
-	}
 
 }

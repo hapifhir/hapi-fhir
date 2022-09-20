@@ -287,7 +287,7 @@ public class TestUtil {
 				List<String> legacySPHibernateFKNames = Arrays.asList(
 					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
 				if (legacySPHibernateFKNames.contains(fk.name())) {
-					// wipmb temporarily allow the hibernate legacy sp fk names
+					// temporarily allow the hibernate legacy sp fk names
 				} else {
 					Validate.isTrue(fk.name().startsWith("FK_"),
 						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK");

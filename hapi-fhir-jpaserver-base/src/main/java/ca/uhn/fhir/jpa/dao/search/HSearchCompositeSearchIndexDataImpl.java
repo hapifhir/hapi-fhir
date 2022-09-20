@@ -40,7 +40,6 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
 						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(subIdxElement.addObject("token"), new Tag(rispt.getSystem(), rispt.getValue())));
-					// wipmb head
 				}
 				break;
 				case QUANTITY: {
@@ -50,10 +49,10 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(subIdxElement.addObject(HSearchIndexWriter.QTY_IDX_NAME), q));
 				}
 				break;
+				// wipmb head
 
 				default:
 					// unsupported
-					// fixme handle other types
 			}
 		}
 	}

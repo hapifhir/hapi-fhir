@@ -252,7 +252,7 @@ public class SearchParamExtractorService {
 		}
 
 		// Composites
-		// fixme should we have config to skip this?
+		// wipmb should we have config to skip this?  Check to see if  HSearch is enabled?
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
 		theParams.myCompositeParams.addAll(composites);

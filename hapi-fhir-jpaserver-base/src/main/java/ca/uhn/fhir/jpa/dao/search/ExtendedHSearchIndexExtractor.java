@@ -86,7 +86,7 @@ public class ExtendedHSearchIndexExtractor {
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
 
-		// fixme mb add a flag ot DaoConfig
+		// wipmb mb add a flag ot DaoConfig to suppress this
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.forEach(nextParam ->
@@ -118,7 +118,6 @@ public class ExtendedHSearchIndexExtractor {
 			retVal.addUriIndexData("_source", source);
 		}
 
-		// fixme mb extraction
 		theNewParams.myCompositeParams.forEach(nextParam ->
 			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
 
@@ -176,7 +175,6 @@ public class ExtendedHSearchIndexExtractor {
 
 	@Nonnull
 	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
-		// fixme mb head
 		return new HSearchCompositeSearchIndexDataImpl(theSearchParamComposite);
 	}
 

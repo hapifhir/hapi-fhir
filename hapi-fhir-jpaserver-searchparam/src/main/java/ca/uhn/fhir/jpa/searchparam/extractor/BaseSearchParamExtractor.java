@@ -227,7 +227,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case COMPOSITE:
 			default:
-				// fixme mb test?
 				throw new UnsupportedOperationException(Msg.code(503) + "Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
 
@@ -267,7 +266,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private IExtractor<ResourceIndexedSearchParamComposite> createCompositeExtractor(IBaseResource theResource) {
-		// fixme mb do we need to ape token and have a default system from CodeSet or ValueSet
+		// wipmb do we need to ape token and have a default system from CodeSet or ValueSet
 		return new CompositeExtractor(toRootTypeName(theResource));
 
 	}
@@ -302,7 +301,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		private <T extends BaseResourceIndexedSearchParam> void extractCompositeComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theRuntimeSearchParam, String theSubPathExpression, boolean theWantLocalReferences) {
 
 			IExtractor extractor = buildExtractor(theRuntimeSearchParam.getParamType());
-			// fixme skip unsupported types for now
+			// wipmb skip unsupported types for now
 			if (extractor==null) {
 				ourLog.warn("CompositeExtractor - no extractor for {} of type {}", theRuntimeSearchParam.getName(), theRuntimeSearchParam. getParamType());
 				return;
@@ -322,14 +321,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 //					extractor = new DateExtractor(myResourceType);
 //					break;
 				case TOKEN:
-					// fixme we can't propagate the default system down - is that a problem?
+					// wipmb we can't propagate the default system down - is that a problem?
 					extractor = new TokenExtractor(myResourceType, null);
 					break;
 				case QUANTITY:
 					extractor = createQuantityExtractor(myResourceType);
 					break;
+				// wipmb implement other types
 				default:
-					// fixme go back
+					// wipmb implement other types
 					//Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
 			}
 			return extractor;

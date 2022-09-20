@@ -222,7 +222,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
 			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
 
-			// fixme mb make generic
+			// wipmb make generic
 			// Observation-component
 			String obsComponentPathGlob = "*." + COMPOS_PARAM_NAME;
 			nestedSpField.objectFieldTemplate("observationComponentTemplate", ObjectStructure.FLATTENED).matchingPathGlob(obsComponentPathGlob);

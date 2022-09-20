@@ -51,7 +51,7 @@ public class HSearchIndexWriter {
 
 	public static final String URI_VALUE = "uri-value";
 
-	// fixme mb these are misguided
+	// wipmb these are misguided - remove them
 	public static final String COMPOS_PARAM_NAME = "obs-composite";
 	public static final String COMPOS_CODE_SYSTEM = "code-system";
 	public static final String COMPOS_CODE_VALUE = "code-value";
@@ -192,7 +192,6 @@ public class HSearchIndexWriter {
 	public void writeCompositeIndex(String theParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
 		// must be nested.
 		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
-			// fixme need a way to ask for a new sub-object for nested.
 			compositeSearchIndexDatum.writeIndexEntry(this, myNodeCache);
 		}
 
