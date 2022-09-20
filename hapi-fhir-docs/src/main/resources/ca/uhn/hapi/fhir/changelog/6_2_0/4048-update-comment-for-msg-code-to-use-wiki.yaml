@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4048
+title: "Changed the comment in Msg class to point to the wiki when new code are added, instead of updating in the comment itself."
