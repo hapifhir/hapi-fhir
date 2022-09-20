@@ -37,7 +37,6 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	 */
 	protected abstract boolean isCorrelatedSupported();
 
-	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeQuantity_onSameComponent_found() {
 		IIdType id1 = createObservation(
@@ -53,6 +52,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			"Observation?component-code-value-quantity=8480-6$60", id1);
 	}
 
+	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeQuantity_differentComponents_notFound() {
 		createObservation(
@@ -70,7 +70,6 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	}
 
 
-	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeCode_onSameComponent_found() {
 		IIdType id1 = createObservation(
@@ -86,6 +85,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			"Observation?component-code-value-concept=8480-6$some-code", id1);
 	}
 
+	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchCodeCode_differentComponents_notFound() {
 		createObservation(

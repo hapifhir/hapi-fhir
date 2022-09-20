@@ -44,6 +44,7 @@ class SearchParamExtractorServiceTest implements ITestDataBuilder.WithSupport {
 		mySvc.setInterceptorBroadcasterForUnitTest(myJpaInterceptorBroadcaster);
 		mySvc.setSearchParamExtractor(new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), myFhirContext, mySearchParamRegistry));
 		mySvc.setModelConfig(myModelConfig);
+		mySvc.setContext(myFhirContext);
 	}
 
 	@Test

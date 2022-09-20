@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -394,12 +395,14 @@ public interface ITestDataBuilder {
 
 		@Override
 		public IIdType createResource(IBaseResource theResource) {
-			throw new UnsupportedOperationException("Create not supported");
+			Validate.isTrue(false, "Create not supported");
+			return null;
 		}
 
 		@Override
 		public IIdType updateResource(IBaseResource theResource) {
-			throw new UnsupportedOperationException("Update not supported");
+			Validate.isTrue(false, "Update not supported");
+			return null;
 		}
 	}
 }
