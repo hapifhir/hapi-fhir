@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class SchemaMigrator {
-	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
+	// Note this needs to be lowercase for backwards compatibility
+	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "fly_hfj_migration";
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 	private final String mySchemaName;
 	private final DataSource myDataSource;
