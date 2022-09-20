@@ -325,7 +325,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// fixme we can't propagate the default system down - is that a problem?
 					extractor = new TokenExtractor(myResourceType, null);
 					break;
-
+				case QUANTITY:
+					extractor = createQuantityExtractor(myResourceType);
+					break;
 				default:
 					// fixme go back
 					//Validate.notNull(extractor, "Unsupported composite component type: %s", paramType);
@@ -476,13 +478,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+		return createQuantityExtractor(toRootTypeName(theResource));
+	}
+
+	@Nonnull
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(String resourceType) {
 		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
 			}
 
 			String nextType = toRootTypeName(value);
-			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
 				case "Quantity":
 					addQuantity_Quantity(resourceType, params, searchParam, value);

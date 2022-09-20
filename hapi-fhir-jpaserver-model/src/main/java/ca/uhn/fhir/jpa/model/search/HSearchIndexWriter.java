@@ -42,7 +42,7 @@ public class HSearchIndexWriter {
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
-	public static final String QTY_PARAM_NAME = "quantity";
+	public static final String QTY_IDX_NAME = "quantity";
 	public static final String QTY_CODE = "code";
 	public static final String QTY_SYSTEM = "system";
 	public static final String QTY_VALUE = "value";
@@ -138,34 +138,38 @@ public class HSearchIndexWriter {
 
 
 
-	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
+	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
-		for (QuantitySearchIndexData theValue : theValueCollection) {
-			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
+		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+		DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_IDX_NAME);
 
-			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
-			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
-			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
-			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
+		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+		writeQuantityFields(nestedQtyNode, theValue);
 
-			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
+	}
 
-			//-- convert the value/unit to the canonical form if any
-			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
-				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
-			if (canonicalForm == null) { continue; }
+	public void writeQuantityFields(DocumentElement nestedQtyNode, QuantitySearchIndexData theValue) {
+		nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
+		nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
+		nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
 
-			double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
-			String canonicalUnits = canonicalForm.getCode();
-			ourLog.trace("Adding search param normalized code and value: {} -- code:{}, value:{}",
-				theSearchParam, canonicalUnits, canonicalValue);
-
-			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
-			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
+		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+			return;
 		}
 
+		//-- convert the value/unit to the canonical form if any
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
+			BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
+		if (canonicalForm == null) {
+			return;
+		}
+
+		double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
+		String canonicalUnits = canonicalForm.getCode();
+
+		nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
+		nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
 	}
 
 
@@ -177,57 +181,6 @@ public class HSearchIndexWriter {
 		}
 	}
 
-
-	public void writeObservationComponentCompositeIndex(String theSearchParam, Collection<ObservationComponentSearchIndexData> theValueCollection) {
-		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
-
-		for (ObservationComponentSearchIndexData theValue : theValueCollection) {
-			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-			DocumentElement nestedCompNode = nestedSpNode.addObject(COMPOS_PARAM_NAME);
-
-			ourLog.trace("Adding Search Param CompositeTokenQuantity: {} -- {}", theSearchParam, theValue);
-//			fixme jm: test multiple codes
-			theValue.getCode().getCoding().forEach(code -> {
-				DocumentElement nestedCompCodeNode = nestedCompNode.addObject("codes");
-				nestedCompCodeNode.addValue(COMPOS_CODE_VALUE, code.getCode());
-				nestedCompCodeNode.addValue(COMPOS_CODE_SYSTEM, code.getSystem());
-			});
-
-			if (theValue.getQuantity() != null) {
-				nestedCompNode.addValue(COMPOS_QTY_VALUE, theValue.getQuantity().getValue().doubleValue());
-				addValueIfNotNull(nestedCompNode, COMPOS_QTY_SYSTEM, theValue.getQuantity().getSystem());
-				addValueIfNotNull(nestedCompNode, COMPOS_QTY_CODE, theValue.getQuantity().getCode());
-
-//				fixme jm: duplicate
-				if (myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
-					// convert the value/unit to the canonical form if any
-					Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getQuantity().getSystem(),
-						BigDecimal.valueOf(theValue.getQuantity().getValue().doubleValue()), theValue.getQuantity().getCode());
-					if (canonicalForm != null) {
-						double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
-						String canonicalUnits = canonicalForm.getCode();
-						ourLog.trace("Adding Search Param CompositeTokenQuantity normalized code and value: {} -- code:{}, value:{}",
-							theSearchParam, canonicalUnits, canonicalValue);
-
-						nestedCompNode.addValue(QTY_CODE_NORM, canonicalUnits);
-						nestedCompNode.addValue(QTY_VALUE_NORM, canonicalValue);
-					}
-				}
-			}
-
-			if (theValue.getConcept() != null && ! theValue.getConcept().isEmpty()) {
-				addValueIfNotNull(nestedCompNode, COMPOS_CONCEPT_CODE, theValue.getConcept().getCoding());
-				addValueIfNotNull(nestedCompNode, COMPOS_CONCEPT_TEXT, theValue.getConcept().getText());
-			}
-		}
-	}
-
-	private void addValueIfNotNull(DocumentElement theNode, String theFieldName, Object theValue) {
-		if (theValue != null) {
-			theNode.addValue(theFieldName, theValue);
-		}
-
-	}
 	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
 		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {

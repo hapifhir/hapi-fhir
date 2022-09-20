@@ -50,7 +50,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		);
 
 		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
-			"Observation?component-code-value-quantity=|8480-6$60", id1);
+			"Observation?component-code-value-quantity=8480-6$60", id1);
 	}
 
 	@EnabledIf("isCorrelatedSupported")
@@ -81,7 +81,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 				withQuantityAtPath("valueQuantity", 100, null, "mmHg"))
 		);
 
-		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=|8480-6$100");
+		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=8480-6$100");
 		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
 	}
 

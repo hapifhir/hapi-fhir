@@ -25,9 +25,11 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.QuantitySearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -100,8 +102,7 @@ public class ExtendedHSearchIndexExtractor {
 			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
 				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
 
-		theNewParams.myQuantityParams.forEach(nextParam ->
-			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
+		theNewParams.myQuantityParams.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theResource.getMeta().getTag().forEach(tag ->
 			retVal.addTokenIndexData("_tag", tag));
@@ -121,11 +122,6 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myCompositeParams.forEach(nextParam ->
 			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
 
-//		if (theResource.fhirType().equals("Observation")) {
-//			((Observation) theResource).getComponent().stream()
-//				.filter(this::isComponentFreetextSearchable).forEach(
-//					comp -> retVal.addObservationComponentsIndexData(getComponentParamName(comp), comp));
-//		}
 
 		if (theResource.getMeta().getLastUpdated() != null) {
 			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
@@ -174,29 +170,14 @@ public class ExtendedHSearchIndexExtractor {
 	}
 
 	@Nonnull
+	public static QuantitySearchIndexData convertQuantity(ResourceIndexedSearchParamQuantity nextParam) {
+		return new QuantitySearchIndexData(nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue());
+	}
+
+	@Nonnull
 	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
 		// fixme mb head
 		return new HSearchCompositeSearchIndexDataImpl(theSearchParamComposite);
-	}
-
-
-	private String getComponentParamName(Observation.ObservationComponentComponent theComponent) {
-		if(theComponent.hasValueQuantity()) {
-			return SP_COMPONENT_CODE_VALUE_QUANTITY;
-		}
-		if(theComponent.hasValueCodeableConcept()) {
-			return SP_COMPONENT_CODE_VALUE_CONCEPT;
-		}
-		return ""; // components were filtered before
-	}
-
-	/**
-	 * Only components of values Concept or Quantity participate in composite parameters
-	 *
-	 * fixme mb
-	 */
-	private boolean isComponentFreetextSearchable(Observation.ObservationComponentComponent theComponent) {
-		return theComponent.hasValueQuantity() || theComponent.hasValueCodeableConcept();
 	}
 
 	/**

@@ -499,55 +499,54 @@ public class ExtendedHSearchClauseBuilder {
 	 */
 	public void addQuantityUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theQuantityAndOrTerms) {
 
-		for (List<IQueryParameterType> nextAnd : theQuantityAndOrTerms) {
-			BooleanPredicateClausesStep<?> quantityTerms = myPredicateFactory.bool();
-			quantityTerms.minimumShouldMatchNumber(1);
+		for (List<IQueryParameterType> nextOrList : theQuantityAndOrTerms) {
+			List<PredicateFinalStep> orClauses = nextOrList.stream()
+				.map(quantityTerm -> buildQuantityTermClause(NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName, quantityTerm))
+				.collect(Collectors.toList());
 
-			for (IQueryParameterType paramType : nextAnd) {
-				BooleanPredicateClausesStep<?> orQuantityTerms = myPredicateFactory.bool();
-				addQuantityOrClauses(theSearchParamName, paramType, orQuantityTerms);
-				quantityTerms.should(orQuantityTerms);
-			}
+			PredicateFinalStep quantityTerms = orPredicateOrSingle(orClauses);
 
 			myRootClause.must(quantityTerms);
 		}
 	}
 
+	private BooleanPredicateClausesStep<?> buildQuantityTermClause(String spPath, IQueryParameterType paramType) {
+		BooleanPredicateClausesStep<?> quantityClause = myPredicateFactory.bool();
+		boolean finished = false;
 
-	private void addQuantityOrClauses(String theSearchParamName,
-			IQueryParameterType theParamType, BooleanPredicateClausesStep<?> theQuantityTerms) {
-
-		QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
+		QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-		String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
+		String quantityElement = spPath + "." + QTY_IDX_NAME;
 
 		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
 			if (canonicalQty != null) {
-				String valueFieldPath = fieldPath + "." + QTY_VALUE_NORM;
-				setPrefixedNumericPredicate(theQuantityTerms, activePrefix, canonicalQty.getValue(), valueFieldPath, true);
-				theQuantityTerms.must(myPredicateFactory.match()
-					.field(fieldPath + "." + QTY_CODE_NORM)
+				String valueFieldPath = quantityElement + "." + QTY_VALUE_NORM;
+				setPrefixedNumericPredicate(quantityClause, activePrefix, canonicalQty.getValue(), valueFieldPath, true);
+				quantityClause.must(myPredicateFactory.match()
+					.field(quantityElement + "." + QTY_CODE_NORM)
 					.matching(canonicalQty.getUnits()));
-				return;
+				finished = true;
+			}
+		}
+		if (!finished) {// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
+			String valueFieldPath = quantityElement + "." + QTY_VALUE;
+			setPrefixedNumericPredicate(quantityClause, activePrefix, qtyParam.getValue(), valueFieldPath, true);
+
+			if ( isNotBlank(qtyParam.getSystem()) ) {
+				quantityClause.must(
+					myPredicateFactory.match()
+						.field(quantityElement + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
+			}
+
+			if ( isNotBlank(qtyParam.getUnits()) ) {
+				quantityClause.must(
+					myPredicateFactory.match()
+						.field(quantityElement + "." + QTY_CODE).matching(qtyParam.getUnits()) );
 			}
 		}
 
-		// not NORMALIZED_QUANTITY_SEARCH_SUPPORTED or non-canonicalizable parameter
-		String valueFieldPath = fieldPath + "." + QTY_VALUE;
-		setPrefixedNumericPredicate(theQuantityTerms, activePrefix, qtyParam.getValue(), valueFieldPath, true);
-
-		if ( isNotBlank(qtyParam.getSystem()) ) {
-			theQuantityTerms.must(
-				myPredicateFactory.match()
-					.field(fieldPath + "." + QTY_SYSTEM).matching(qtyParam.getSystem()) );
-		}
-
-		if ( isNotBlank(qtyParam.getUnits()) ) {
-			theQuantityTerms.must(
-				myPredicateFactory.match()
-					.field(fieldPath + "." + QTY_CODE).matching(qtyParam.getUnits()) );
-		}
+		return quantityClause;
 	}
 
 
@@ -690,10 +689,17 @@ public class ExtendedHSearchClauseBuilder {
 			RuntimeSearchParam component = theSubSearchParams.get(i);
 			IQueryParameterType value = values.get(i);
 			PredicateFinalStep subMatch = null;
+			String subComponentPath = nestedBase + "." + component.getName();
 			switch (component.getParamType()) {
 				case TOKEN:
-					subMatch= buildTokenUnmodifiedMatchOn(nestedBase + "." + component.getName(), value);
+					subMatch= buildTokenUnmodifiedMatchOn(subComponentPath, value);
+					break;
+				case QUANTITY:
+					subMatch = buildQuantityTermClause(subComponentPath, value);
+					break;
 				default:
+
+
 					// fixme other types
 					break;
 			}

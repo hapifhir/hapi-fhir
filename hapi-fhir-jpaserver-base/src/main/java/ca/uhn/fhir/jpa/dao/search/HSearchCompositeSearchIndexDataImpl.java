@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.HSearchElementCache;
@@ -42,6 +43,14 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 					// wipmb head
 				}
 				break;
+				case QUANTITY: {
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
+						.map(ExtendedHSearchIndexExtractor::convertQuantity)
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(subIdxElement.addObject(HSearchIndexWriter.QTY_IDX_NAME), q));
+				}
+				break;
+
 				default:
 					// unsupported
 					// fixme handle other types
