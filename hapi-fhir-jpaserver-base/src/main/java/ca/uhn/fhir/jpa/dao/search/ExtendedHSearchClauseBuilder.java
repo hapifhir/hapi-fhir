@@ -40,11 +40,11 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.NumericParamRangeUtil;
 import ca.uhn.fhir.util.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
@@ -374,30 +374,34 @@ public class ExtendedHSearchClauseBuilder {
 	 *
 	 * @param theSearchParamName e.g code
 	 * @param theDateAndOrTerms The and/or list of DateParam values
+	 *
+	 * buildDateTermClause(subComponentPath, value);
 	 */
 	public void addDateUnmodifiedSearch(String theSearchParamName, List<List<IQueryParameterType>> theDateAndOrTerms) {
-		for (List<? extends IQueryParameterType> nextAnd : theDateAndOrTerms) {
-			// comma separated list of dates(OR list) on a date param is not applicable so grab
-			// first from default list
-			if (nextAnd.size() > 1) {
-				throw new IllegalArgumentException(Msg.code(2032) + "OR (,) searches on DATE search parameters are not supported for ElasticSearch/Lucene");
-			}
-			DateParam dateParam = (DateParam) nextAnd.stream().findFirst()
-				.orElseThrow(() -> new InvalidRequestException("Date param is missing value"));
+		for (List<? extends IQueryParameterType> nextOrList : theDateAndOrTerms) {
 
-			boolean isOrdinalSearch = ordinalSearchPrecisions.contains(dateParam.getPrecision());
+			String spPath = SEARCH_PARAM_ROOT + "." + theSearchParamName;
 
-			PredicateFinalStep searchPredicate = isOrdinalSearch
-				? generateDateOrdinalSearchTerms(theSearchParamName, dateParam)
-				: generateDateInstantSearchTerms(theSearchParamName, dateParam);
+			List<PredicateFinalStep> clauses = nextOrList.stream()
+				.map(d -> buildDateTermClause(spPath, d))
+				.collect(Collectors.toList());
 
-			myRootClause.must(searchPredicate);
+			myRootClause.must(orPredicateOrSingle(clauses));
 		}
 	}
 
-	private PredicateFinalStep generateDateOrdinalSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower-ord";
-		String upperOrdinalField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper-ord";
+	private PredicateFinalStep buildDateTermClause(String thePath, IQueryParameterType theParam) {
+		DateParam dateParam = (DateParam) theParam;
+		boolean isOrdinalSearch = ordinalSearchPrecisions.contains(dateParam.getPrecision());
+		PredicateFinalStep searchPredicate = isOrdinalSearch
+			? generateDateOrdinalSearchTerms(thePath, dateParam)
+			: generateDateInstantSearchTerms(thePath, dateParam);
+		return searchPredicate;
+	}
+
+	private PredicateFinalStep generateDateOrdinalSearchTerms(String spPath, DateParam theDateParam) {
+		String lowerOrdinalField = spPath + ".dt.lower-ord";
+		String upperOrdinalField = spPath + ".dt.upper-ord";
 		int lowerBoundAsOrdinal;
 		int upperBoundAsOrdinal;
 		ParamPrefixEnum prefix = theDateParam.getPrefix();
@@ -444,10 +448,10 @@ public class ExtendedHSearchClauseBuilder {
 		throw new IllegalArgumentException(Msg.code(2025) + "Date search param does not support prefix of type: " + prefix);
 	}
 
-	private PredicateFinalStep generateDateInstantSearchTerms(String theSearchParamName, DateParam theDateParam) {
-		String lowerInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.lower";
-		String upperInstantField = SEARCH_PARAM_ROOT + "." + theSearchParamName + ".dt.upper";
-		ParamPrefixEnum prefix = theDateParam.getPrefix();
+	private PredicateFinalStep generateDateInstantSearchTerms(String spPath, DateParam theDateParam) {
+		String lowerInstantField = spPath + ".dt.lower";
+		String upperInstantField = spPath + ".dt.upper";
+		final ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(theDateParam.getPrefix(), ParamPrefixEnum.EQUAL);
 
 		if (ParamPrefixEnum.NOT_EQUAL == prefix) {
 			Instant dateInstant = theDateParam.getValue().toInstant();
@@ -466,7 +470,7 @@ public class ExtendedHSearchClauseBuilder {
 		Instant lowerBoundAsInstant = Optional.ofNullable(dateRange.getLowerBound()).map(param -> param.getValue().toInstant()).orElse(null);
 		Instant upperBoundAsInstant = Optional.ofNullable(dateRange.getUpperBound()).map(param -> param.getValue().toInstant()).orElse(null);
 
-		if (Objects.isNull(prefix) || prefix == ParamPrefixEnum.EQUAL) {
+		if (prefix == ParamPrefixEnum.EQUAL) {
 			// For equality prefix we would like the date to fall between the lower and upper bound
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 				myPredicateFactory.range().field(lowerInstantField).atLeast(lowerBoundAsInstant),
@@ -690,6 +694,9 @@ public class ExtendedHSearchClauseBuilder {
 			PredicateFinalStep subMatch = null;
 			String subComponentPath = nestedBase + "." + component.getName();
 			switch (component.getParamType()) {
+				case DATE:
+					subMatch = buildDateTermClause(subComponentPath, value);
+					break;
 				case TOKEN:
 					subMatch= buildTokenUnmodifiedMatchOn(subComponentPath, value);
 					break;

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
@@ -11,6 +12,7 @@ import ca.uhn.fhir.util.ObjectUtil;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 
 import javax.print.Doc;
+import java.util.function.Function;
 
 /**
  * binding of HSearch apis into
@@ -33,22 +35,32 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 		DocumentElement compositeRoot = nestedParamRoot.addObject(mySearchParamComposite.getSearchParamName());
 		HSearchElementCache compositeRootCache = new HSearchElementCache(compositeRoot);
 
+		// wipmb should we make sure we have at least on value in each component before writing anything?
+		// no point writing empty nodes
+
 		for (ResourceIndexedSearchParamComposite.Component subParam : mySearchParamComposite.getComponents()) {
-			DocumentElement subIdxElement = compositeRoot.addObject(subParam.getSearchParamName());
+			Function<String, DocumentElement> idxElementLookup = typeKey -> compositeRootCache.getObjectElement(subParam.getSearchParamName(), typeKey);
 			// Write the various index nodes.
 			// Note: we don't support modifiers with composites, so we don't bother to index :of-type, :text, etc.
 			switch (subParam.getSearchParameterType()) {
+				case DATE: {
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamDate.class).stream())
+						.map(ExtendedHSearchIndexExtractor::convertDate)
+						.forEach(d-> theHSearchIndexWriter.writeDateFields(idxElementLookup.apply("dt"), d));
+				}
+				break;
 				case TOKEN: {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
-						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(compositeRootCache.getObjectElement(subParam.getSearchParamName(), "token"), new Tag(rispt.getSystem(), rispt.getValue())));
+						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(idxElementLookup.apply( "token"), new Tag(rispt.getSystem(), rispt.getValue())));
 				}
 				break;
 				case QUANTITY: {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertQuantity)
-						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(compositeRootCache.getObjectElement(subParam.getSearchParamName(), HSearchIndexWriter.QTY_IDX_NAME), q));
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(idxElementLookup.apply( HSearchIndexWriter.QTY_IDX_NAME), q));
 				}
 				break;
 				// wipmb head

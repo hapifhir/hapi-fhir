@@ -135,7 +135,11 @@ public class ExtendedHSearchIndexData {
 	}
 
 	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
-		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+		addDateIndexData(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+	}
+
+	public void addDateIndexData(String theSpName, DateSearchIndexData value) {
+		mySearchParamDates.put(theSpName, value);
 	}
 
 	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {

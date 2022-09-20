@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.QuantitySearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -40,7 +41,6 @@ import com.google.common.base.Strings;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Observation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -51,8 +51,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hl7.fhir.dstu3.model.Observation.SP_COMPONENT_CODE_VALUE_CONCEPT;
-import static org.hl7.fhir.dstu3.model.Observation.SP_COMPONENT_CODE_VALUE_QUANTITY;
 
 /**
  * Extract search params for advanced HSearch indexing.
@@ -98,9 +96,7 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myNumberParams.forEach(nextParam ->
 			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
 
-		theNewParams.myDateParams.forEach(nextParam ->
-			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
-				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
+		theNewParams.myDateParams.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
 		theNewParams.myQuantityParams.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
@@ -166,6 +162,11 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		return retVal;
+	}
+
+	@Nonnull
+	public static DateSearchIndexData convertDate(ResourceIndexedSearchParamDate nextParam) {
+		return new DateSearchIndexData(nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(), nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal());
 	}
 
 	@Nonnull

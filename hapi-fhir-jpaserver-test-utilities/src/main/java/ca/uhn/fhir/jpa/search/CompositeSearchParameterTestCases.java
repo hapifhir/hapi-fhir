@@ -39,7 +39,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 	@EnabledIf("isCorrelatedSupported")
 	@Test
-	void searchCodeQuantity_onSameResource_found() {
+	void searchCodeQuantity_onSameComponent_found() {
 		IIdType id1 = createObservation(
 			withObservationComponent(
 				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
@@ -53,24 +53,8 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			"Observation?component-code-value-quantity=8480-6$60", id1);
 	}
 
-	@EnabledIf("isCorrelatedSupported")
 	@Test
-	void searchCodeCode_onSameResource_found() {
-		IIdType id1 = createObservation(
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
-			withObservationComponent(
-				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
-				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
-		);
-
-		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
-			"Observation?component-code-value-concept=8480-6$some-code", id1);
-	}
-
-	@Test
-	void searchComposite_differentComponents_notFound() {
+	void searchCodeQuantity_differentComponents_notFound() {
 		createObservation(
 			withObservationCode(SYSTEM_LOINC_ORG, CODE_8480_6),
 			withObservationComponent(
@@ -83,6 +67,23 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 		List<String> ids = myTestDaoSearch.searchForIds("Observation?component-code-value-quantity=8480-6$100");
 		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
+	}
+
+
+	@EnabledIf("isCorrelatedSupported")
+	@Test
+	void searchCodeCode_onSameComponent_found() {
+		IIdType id1 = createObservation(
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_8480_6, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "some-code")),
+			withObservationComponent(
+				withCodingAt("code.coding", SYSTEM_LOINC_ORG, CODE_3421_5, null),
+				withCodingAt("valueCodeableConcept.coding", SYSTEM_LOINC_ORG, "another-code"))
+		);
+
+		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
+			"Observation?component-code-value-concept=8480-6$some-code", id1);
 	}
 
 	@Test
@@ -101,6 +102,16 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 		assertThat("Search for the value from one component, but the code from the other, so it shouldn't match", ids, empty());
 	}
 
+	@Test
+	void searchCodeDate_onSameResource_found() {
+		IIdType id1 = createObservation(
+			withObservationCode( SYSTEM_LOINC_ORG, CODE_8480_6, null),
+			withDateTimeAt("valueDateTime", "2020-01-01T12:34:56")
+		);
+
+		myTestDaoSearch.assertSearchFinds("search matches both sps in composite",
+			"Observation?code-value-date=8480-6$lt2021", id1);
+	}
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myTestDataBuilder.doCreateResource(theResource);

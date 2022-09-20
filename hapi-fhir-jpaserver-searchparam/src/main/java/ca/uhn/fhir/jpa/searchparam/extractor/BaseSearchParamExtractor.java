@@ -317,9 +317,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		private IExtractor buildExtractor(RestSearchParameterTypeEnum paramType) {
 			IExtractor extractor = null;
 			switch (paramType) {
-//				case DATE:
-//					extractor = new DateExtractor(myResourceType);
-//					break;
+				case DATE:
+					extractor = new DateExtractor(myResourceType);
+					break;
 				case TOKEN:
 					// wipmb we can't propagate the default system down - is that a problem?
 					extractor = new TokenExtractor(myResourceType, null);

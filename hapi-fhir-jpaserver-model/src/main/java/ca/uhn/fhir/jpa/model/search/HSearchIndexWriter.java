@@ -51,17 +51,6 @@ public class HSearchIndexWriter {
 
 	public static final String URI_VALUE = "uri-value";
 
-	// wipmb these are misguided - remove them
-	public static final String COMPOS_PARAM_NAME = "obs-composite";
-	public static final String COMPOS_CODE_SYSTEM = "code-system";
-	public static final String COMPOS_CODE_VALUE = "code-value";
-	public static final String COMPOS_QTY_CODE = "qty-code";
-	public static final String COMPOS_QTY_SYSTEM = "qty-system";
-	public static final String COMPOS_QTY_VALUE = "qty-value";
-	public static final String COMPOS_QTY_CODE_NORM = "qty-code-norm";
-	public static final String COMPOS_QTY_VALUE_NORM = "qty-value-norm";
-	public static final String COMPOS_CONCEPT_CODE = "concept-code";
-	public static final String COMPOS_CONCEPT_TEXT = "concept-text";
 	public static final String NUMBER_VALUE = "number-value";
 
 
@@ -126,16 +115,19 @@ public class HSearchIndexWriter {
 
 	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
 		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
+		writeDateFields(dateIndexNode, theValue);
+
+		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
+	}
+
+	public void writeDateFields(DocumentElement dateIndexNode, DateSearchIndexData theValue) {
 		// Lower bound
 		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
 		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
 		// Upper bound
 		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
 		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
-
-		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
 	}
-
 
 
 	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
