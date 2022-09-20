@@ -6,7 +6,6 @@ import ca.uhn.fhir.model.dstu2.resource.Composition;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 /*
  * #%L
@@ -28,7 +27,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
  * #L%
  */
 
-public class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProviderDstu2<Composition> {
+public abstract class BaseJpaResourceProviderCompositionDstu2 extends JpaResourceProviderDstu2<Composition> {
 
 	/**
 	 * Composition/123/$document

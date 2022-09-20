@@ -1,0 +1,7 @@
+---
+type: add
+jira: SMILE-4665
+backport: 6.1.2
+title: "Added support for AWS OpenSearch to Fulltext Search. If an AWS Region is configured, HAPI-FHIR will assume you intend to connect to an AWS-managed OpenSearch instance, and will use
+Amazon's [DefaultAwsCredentialsProviderChain](https://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html) to authenticate against it. If both username and password are provided, HAPI-FHIR will attempt to use them as a static credentials provider."
+

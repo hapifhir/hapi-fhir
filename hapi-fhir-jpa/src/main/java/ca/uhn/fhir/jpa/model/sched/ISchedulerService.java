@@ -54,4 +54,22 @@ public interface ISchedulerService {
 	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
 	boolean isStopping();
+
+	/**
+	 * Rather than waiting for the job to fire at its scheduled time, fire it immediately.
+	 * @param theJobDefinition
+	 */
+	default void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+
+	/**
+	 * Rather than waiting for the job to fire at its scheduled time, fire it immediately.
+	 * @param theJobDefinition
+	 */
+	default void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {}
+
+	/**
+	 * @return true if this server supports clustered scheduling
+	 */
+
+	default boolean isClusteredSchedulingEnabled() { return false; }
 }

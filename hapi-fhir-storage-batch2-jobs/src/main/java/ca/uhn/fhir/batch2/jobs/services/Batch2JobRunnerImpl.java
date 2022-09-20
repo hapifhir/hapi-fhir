@@ -21,12 +21,14 @@ package ca.uhn.fhir.batch2.jobs.services;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
+import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2BaseJobParameters;
@@ -75,6 +77,23 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 		return fromJobInstanceToBatch2JobInfo(instance);
 	}
 
+	@Override
+	public Batch2JobOperationResult cancelInstance(String theJobId) throws ResourceNotFoundException {
+		JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
+		if (cancelResult == null) {
+			throw new ResourceNotFoundException(Msg.code(2131) + " : " + theJobId);
+		}
+		return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
+	}
+
+	private Batch2JobOperationResult fromJobOperationResultToBatch2JobOperationResult(@Nonnull JobOperationResultJson theResultJson) {
+		Batch2JobOperationResult result = new Batch2JobOperationResult();
+		result.setOperation(theResultJson.getOperation());
+		result.setMessage(theResultJson.getMessage());
+		result.setSuccess(theResultJson.getSuccess());
+		return result;
+	}
+
 	private Batch2JobInfo fromJobInstanceToBatch2JobInfo(@Nonnull JobInstance theInstance) {
 		Batch2JobInfo info = new Batch2JobInfo();
 		info.setJobId(theInstance.getInstanceId());
@@ -106,7 +125,6 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	private Batch2JobStartResponse startBatch2BulkExportJob(BulkExportParameters theParameters) {
 		JobInstanceStartRequest request = createStartRequest(theParameters);
 		request.setParameters(BulkExportJobParameters.createFromExportJobParameters(theParameters));
-
 		return myJobCoordinator.startInstance(request);
 	}
 

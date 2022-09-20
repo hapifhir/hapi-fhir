@@ -33,13 +33,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.TokenOrListParam;
-import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -74,11 +70,10 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		ourLog.info("Step 2 for bulk export - Expand resources");
-
+		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
 		// search the resources
-		IBundleProvider bundle = fetchAllResources(idList);
+		List<IBaseResource> allResources = fetchAllResources(idList);
 
-		List<IBaseResource> allResources = bundle.getAllResources();
 
 		// if necessary, expand resources
 		if (jobParameters.isExpandMdm()) {
@@ -98,7 +93,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		output.setResourceType(idList.getResourceType());
 		theDataSink.accept(output);
 
-		ourLog.trace("Expanding of {} resources of type {} completed",
+		ourLog.info("Expanding of {} resources of type {} completed",
 			idList.getIds().size(),
 			idList.getResourceType());
 
@@ -106,16 +101,17 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return RunOutcome.SUCCESS;
 	}
 
-	private IBundleProvider fetchAllResources(BulkExportIdList theIds) {
+	private List<IBaseResource> fetchAllResources(BulkExportIdList theIds) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIds.getResourceType());
+		List<IBaseResource> resources = new ArrayList<>();
 
-		SearchParameterMap map = new SearchParameterMap();
-		TokenOrListParam ids = new TokenOrListParam();
 		for (Id id : theIds.getIds()) {
-			ids.addOr(new TokenParam(id.toPID().getAssociatedResourceId().getValue()));
+			String value = id.getId();
+			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
+			resources.add(dao.readByPid(new ResourcePersistentId(value)));
 		}
-		map.add(Constants.PARAM_ID, ids);
-		return dao.search(map, SystemRequestDetails.forAllPartitions());
+
+		return resources;
 	}
 
 	private List<String> encodeToString(List<IBaseResource> theResources, BulkExportJobParameters theParameters) {

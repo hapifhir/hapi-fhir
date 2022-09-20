@@ -20,6 +20,8 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+
 import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -61,7 +63,7 @@ public enum StatusEnum {
 
 	private final boolean myIncomplete;
 	private final boolean myEnded;
-	private static Set<StatusEnum> ourIncompleteStatuses;
+	private static StatusEnum[] ourIncompleteStatuses;
 	private static Set<StatusEnum> ourEndedStatuses;
 	private static Set<StatusEnum> ourNotEndedStatuses;
 
@@ -74,8 +76,8 @@ public enum StatusEnum {
 	 * Statuses that represent a job that has not yet completed. I.e.
 	 * all statuses except {@link #COMPLETED}
 	 */
-	public static Set<StatusEnum> getIncompleteStatuses() {
-		Set<StatusEnum> retVal = ourIncompleteStatuses;
+	public static StatusEnum[] getIncompleteStatuses() {
+		StatusEnum[] retVal = ourIncompleteStatuses;
 		if (retVal == null) {
 			EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
 			for (StatusEnum next : values()) {
@@ -83,7 +85,7 @@ public enum StatusEnum {
 					incompleteSet.add(next);
 				}
 			}
-			ourIncompleteStatuses = Collections.unmodifiableSet(incompleteSet);
+			ourIncompleteStatuses = incompleteSet.toArray(new StatusEnum[0]);
 			retVal = ourIncompleteStatuses;
 		}
 		return retVal;
@@ -132,4 +134,30 @@ public enum StatusEnum {
 		ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
 	}
 
+	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
+		if (theOrigStatus == theNewStatus) {
+			return true;
+		}
+
+		switch (theOrigStatus) {
+			case QUEUED:
+				// initial state can transition to anything
+				return true;
+			case IN_PROGRESS:
+				return theNewStatus != QUEUED;
+			case ERRORED:
+				return theNewStatus == FAILED;
+			case COMPLETED:
+			case CANCELLED:
+			case FAILED:
+				// terminal state cannot transition
+				return false;
+		}
+
+		throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+	}
+
+	public boolean isIncomplete() {
+		return myIncomplete;
+	}
 }
