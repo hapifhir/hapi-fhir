@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -253,9 +254,12 @@ public class SearchParamExtractorService {
 
 		// Composites
 		// wipmb should we have config to skip this?  Check to see if  HSearch is enabled?
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
-		handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
-		theParams.myCompositeParams.addAll(composites);
+		// dst2 composites are weird, and we don't support them.
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
+			handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
+			theParams.myCompositeParams.addAll(composites);
+		}
 
 		// Specials
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> specials = extractSearchParamSpecial(theResource);

@@ -29,7 +29,9 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 	public void writeIndexEntry(HSearchIndexWriter theHSearchIndexWriter, HSearchElementCache theRoot) {
 		DocumentElement nestedParamRoot = theRoot.getObjectElement(HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT);
 
+		// we want to re-use the `token`, `quantity` nodes for multiple values.
 		DocumentElement compositeRoot = nestedParamRoot.addObject(mySearchParamComposite.getSearchParamName());
+		HSearchElementCache compositeRootCache = new HSearchElementCache(compositeRoot);
 
 		for (ResourceIndexedSearchParamComposite.Component subParam : mySearchParamComposite.getComponents()) {
 			DocumentElement subIdxElement = compositeRoot.addObject(subParam.getSearchParamName());
@@ -39,14 +41,14 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 				case TOKEN: {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
-						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(subIdxElement.addObject("token"), new Tag(rispt.getSystem(), rispt.getValue())));
+						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(compositeRootCache.getObjectElement(subParam.getSearchParamName(), "token"), new Tag(rispt.getSystem(), rispt.getValue())));
 				}
 				break;
 				case QUANTITY: {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertQuantity)
-						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(subIdxElement.addObject(HSearchIndexWriter.QTY_IDX_NAME), q));
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(compositeRootCache.getObjectElement(subParam.getSearchParamName(), HSearchIndexWriter.QTY_IDX_NAME), q));
 				}
 				break;
 				// wipmb head
