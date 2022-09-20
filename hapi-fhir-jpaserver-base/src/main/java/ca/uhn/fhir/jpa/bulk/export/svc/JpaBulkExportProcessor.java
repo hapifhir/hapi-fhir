@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -75,6 +76,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 
 public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaBulkExportProcessor.class);
@@ -146,9 +148,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 			ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
 
-			if (!resourceType.equalsIgnoreCase("Patient")) {
-				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
-			}
+			filterBySpecificPatient(theParams, resourceType, patientSearchParam, map);
 
 			SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, jobId);
 			IResultIterator resultIterator = searchBuilder.createQuery(map, searchRuntime, null, RequestPartitionId.allPartitions());
@@ -157,6 +157,31 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			}
 		}
 		return pids;
+	}
+
+	private static void filterBySpecificPatient(ExportPIDIteratorParameters theParams, String resourceType, String patientSearchParam, SearchParameterMap map) {
+		if (resourceType.equalsIgnoreCase("Patient")) {
+			if (theParams.getPatientIds() != null) {
+				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				map.add(PARAM_ID, referenceOrListParam);
+			}
+		} else {
+			if (theParams.getPatientIds() != null) {
+				ReferenceOrListParam referenceOrListParam = getReferenceOrListParam(theParams);
+				map.add(patientSearchParam, referenceOrListParam);
+			} else {
+				map.add(patientSearchParam, new ReferenceParam().setMissing(false));
+			}
+		}
+	}
+
+	@Nonnull
+	private static ReferenceOrListParam getReferenceOrListParam(ExportPIDIteratorParameters theParams) {
+		ReferenceOrListParam referenceOrListParam = new ReferenceOrListParam();
+		for (String patientId : theParams.getPatientIds()) {
+			referenceOrListParam.addOr(new ReferenceParam(patientId));
+		}
+		return referenceOrListParam;
 	}
 
 	private Set<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
@@ -212,7 +237,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	private Set<ResourcePersistentId> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), SystemRequestDetails.newSystemRequestAllPartitions());
 		ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
-		Set<ResourcePersistentId> pids =  new HashSet<>();
+		Set<ResourcePersistentId> pids = new HashSet<>();
 		pids.add(pidOrNull);
 		return pids;
 	}
@@ -329,7 +354,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	 * This method takes an {@link SearchParameterMap} and adds a clause to it that will filter the search results to only
 	 * return members of the defined group.
 	 *
-	 * @param theMap the map to add the clause to.
+	 * @param theMap     the map to add the clause to.
 	 * @param theGroupId the group ID to filter by.
 	 */
 	private void addMembershipToGroupClause(SearchParameterMap theMap, String theGroupId) {
