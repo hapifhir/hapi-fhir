@@ -271,6 +271,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		org.hl7.fhir.r4.model.SearchParameter searchParameter = new org.hl7.fhir.r4.model.SearchParameter();
+		searchParameter.setId("resource-security");
+		searchParameter.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Security");
+		searchParameter.setCode("_security");
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		IIdType id = myClient.update().resource(searchParameter).execute().getId().toUnqualifiedVersionless();
+
+		assertNotNull(id);
+		assertEquals("resource-security", id.getIdPart());
+
+
+	}
+
+	@Test
 	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.addBase("BodyStructure").addBase("Procedure");
