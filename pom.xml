@@ -833,7 +833,6 @@
         <ph_schematron_version>5.6.5</ph_schematron_version>
         <ph_commons_version>9.5.4</ph_commons_version>
         <plexus_compiler_api_version>2.9.0</plexus_compiler_api_version>
- 		 <querydsl.version>4.4.0</querydsl.version>
         <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
         <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
         <swagger_version>2.1.12</swagger_version>
@@ -1005,19 +1004,6 @@
 				<artifactId>ph-commons</artifactId>
 				<version>${ph_commons_version}</version>
 			</dependency>
-
-			<!-- Query DSL -->
-			<dependency>
-				<groupId>com.querydsl</groupId>
-				<artifactId>querydsl-core</artifactId>
-				<version>${querydsl.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.querydsl</groupId>
-				<artifactId>querydsl-jpa</artifactId>
-				<version>${querydsl.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>com.jamesmurty.utils</groupId>
 				<artifactId>java-xmlbuilder</artifactId>
