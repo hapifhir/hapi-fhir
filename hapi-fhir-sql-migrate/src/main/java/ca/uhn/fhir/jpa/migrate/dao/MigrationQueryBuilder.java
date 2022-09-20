@@ -52,7 +52,7 @@ public class MigrationQueryBuilder {
 
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
-		myTable = mySchema.addTable(theMigrationTablename);
+		myTable = mySchema.addTable("\"" + theMigrationTablename + "\"");
 
 		myInstalledRankCol = myTable.addColumn("\"installed_rank\"", Types.INTEGER, null);
 		myInstalledRankCol.notNull();
