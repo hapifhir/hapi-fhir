@@ -76,12 +76,14 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 
 	private static String getOriginatingRequestUrl(@NotNull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
 		IJobInstance instance = theStepExecutionDetails.getInstance();
+		String url = "";
 		if (instance instanceof JobInstance) {
 			JobInstance jobInstance = (JobInstance) instance;
 			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
 			String originalRequestUrl = parameters.getOriginalRequestUrl();
-			return originalRequestUrl;
+			url = originalRequestUrl;
 		}
+		return url;
 	}
 
 	@NotNull

@@ -1,4 +1,4 @@
-# HAPI FHIR JPA Lucene/Elasticsearch Indexing
+**# HAPI FHIR JPA Lucene/Elasticsearch Indexing
 
 The HAPI JPA Server supports optional indexing via Hibernate Search when configured to use Lucene or Elasticsearch.
 This is required to support the `_content`, or `_text` search parameters.
@@ -15,16 +15,35 @@ The Extended Lucene string search indexing supports the default search, as well 
 - Default searching matches by prefix, insensitive to case or accents
 - `:exact` matches the entire string, matching case and accents
 - `:contains` extends the default search to match any substring of the text
-- `:text` provides a rich search syntax as using the Simple Query Syntax as defined by 
-[Lucene](https://lucene.apache.org/core/8_10_1/queryparser/org/apache/lucene/queryparser/simple/SimpleQueryParser.html) and 
-[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax).
+- `:text` provides a rich search syntax as using a [modified Simple Query Syntax](#modified-simple-query-syntax). 
 
 ## Token search
 
 The Extended Lucene Indexing supports the default token search by code, system, or system+code, 
 as well as with the `:text` modifier.
-The `:text` modifier provides the same Simple Query Syntax used by string `:text` searches.  
+The `:text` modifier provides the same modified Simple Query Syntax used by string `:text` searches.  
 See https://www.hl7.org/fhir/search.html#token.
+
+## Modified Simple Query Syntax
+
+The `:text` search for token and string, Hapi provides a modified version of the Simple Query Syntax provided by 
+[Lucene](https://lucene.apache.org/core/8_10_1/queryparser/org/apache/lucene/queryparser/simple/SimpleQueryParser.html) and
+[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax).
+Terms are delimited by whitespace, or query punctuation `"()|+'`.  Literal uses of these characters must be escaped by '\'.
+When the query only contains one or more bare terms, they are each converted to a prefix search to match the behaviour of a normal string search.
+When multiple terms are present, they must all match (i.e. `AND`).  For `OR` behaviour use the `|` operator between terms. 
+But if any special SQS syntax is active, the query is used as is.
+To ensure that the query is used as-is, quote bare terms with the `"` or  character.  E.g. `without any special syntax characters 
+
+Examples:
+
+| Fhir Query String | Executed Query   | Matches     | No Match       | Note                                       |
+|-----------------|------------------|-------------|----------------|--------------------------------------------|
+| Smit            | Smit*            | John Smith  | John Smi       |                                            |
+| Jo Smit         | Jo* Smit*        | John Smith  | John Frank     | Multiple bare terms are `AND`              |
+| frank &vert; john | frank &vert; john | Frank Smith | Franklin Smith | SQS characters disable prefix wildcard |                               
+| 'frank'          | 'frank'           | Frank Smith | Franklin Smith | Quoted terms are exact match               |
+
 
 
 ## Quantity search

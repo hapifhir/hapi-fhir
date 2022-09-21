@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
@@ -14,7 +13,7 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
-import com.vladsch.flexmark.ast.Paragraph;
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,13 +21,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
@@ -103,7 +101,84 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 	@Nested
 	public class SystemBulkExportTests {
-		//TODO add use case tests here
+		@Test
+		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
+			int patientCount = 5;
+			for (int i=0; i<patientCount; i++) {
+				Patient patient = new Patient();
+				patient.setId("pat-" + i);
+				myPatientDao.update(patient);
+			}
+
+			HashSet<String> types = Sets.newHashSet("Patient");
+			BulkExportJobResults bulkExportJobResults = startSystemBulkExportJobAndAwaitCompletion(types, new HashSet<String>());
+			Map<String, List<String>> resourceTypeToBinaryIds = bulkExportJobResults.getResourceTypeToBinaryIds();
+			assertThat(resourceTypeToBinaryIds.get("Patient"), hasSize(1));
+			String patientBinaryId = resourceTypeToBinaryIds.get("Patient").get(0);
+			String replace = patientBinaryId.replace("_history/1", "");
+
+			{ // Test with the Accept Header omitted should stream out the results.
+				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
+					Header[] headers = status.getHeaders("Content-Type");
+					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					logContentTypeAndResponse(headers, response);
+					validateNdJsonResponse(headers, response, patientCount);
+				}
+			}
+
+			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
+				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
+				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
+					Header[] headers = status.getHeaders("Content-Type");
+					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					logContentTypeAndResponse(headers, response);
+					validateNdJsonResponse(headers, response, patientCount);
+				}
+			}
+
+			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
+				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
+				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
+					Header[] headers = status.getHeaders("Content-Type");
+					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					logContentTypeAndResponse(headers, response);
+					validateNdJsonResponse(headers, response, patientCount);
+				}
+			}
+
+			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
+				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
+
+				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
+					Header[] headers = status.getHeaders("Content-Type");
+					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+					logContentTypeAndResponse(headers, response);
+
+					assertThat(headers[0].getValue(), containsString(Constants.CT_FHIR_JSON));
+					assertThat(response, is(not(containsString("\n"))));
+					Binary binary= myFhirContext.newJsonParser().parseResource(Binary.class, response);
+					assertThat(binary.getIdElement().getValue(), is(equalTo(patientBinaryId)));
+				}
+			}
+		}
+
+		private void logContentTypeAndResponse(Header[] headers, String response) {
+			ourLog.info("**************************");
+			ourLog.info("Content-Type is: {}", headers[0]);
+			ourLog.info("Response is: {}", response);
+			ourLog.info("**************************");
+		}
+
+		private void validateNdJsonResponse(Header[] headers, String response, int theExpectedCount) {
+			assertThat(headers[0].getValue(), containsString(Constants.CT_FHIR_NDJSON));
+			assertThat(response, is(containsString("\n")));
+			Bundle bundle = myFhirContext.newNDJsonParser().parseResource(Bundle.class, response);
+			assertThat(bundle.getEntry(), hasSize(theExpectedCount));
+		}
 	}
 
 	@Nested
@@ -629,7 +704,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	}
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
+	}
 
+	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters) {
+		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
 	}
 	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupOrPatientId) {
 
