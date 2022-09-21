@@ -478,6 +478,62 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=car%20smit");
 			assertThat(resourceIds, hasItems(id2));
 		}
+
+		@Nested
+		public class DocumentationSamplesTests {
+
+			@Test
+			void line1() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match
+				// | Smit             | Smit*            | John Smith  | John Smi
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smi") )).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Smit");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line2() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match      | Note
+				// | Jo Smit           | Jo* Smit*       | John Smith  | John Frank    | Multiple bare terms are `AND`
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Frank") )).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Jo%20Smit");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line3() {
+				// | Fhir Query String | Executed Query    | Matches     | No Match       | Note
+				// | frank &vert; john | frank &vert; john | Frank Smith | Franklin Smith | SQS characters disable prefix wildcard
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith") )).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith") )).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=frank|john");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line4() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match       | Note
+				// | 'frank'           | 'frank'         | Frank Smith | Franklin Smith | Quoted terms are exact match
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith") )).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith") )).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text='frank'");
+				assertThat(resourceIds, hasItems(id1));
+			}
+		}
 	}
 
 	@Nested
