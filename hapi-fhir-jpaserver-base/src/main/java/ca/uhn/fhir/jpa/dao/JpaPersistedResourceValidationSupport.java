@@ -274,13 +274,22 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			}
 			case "ImplementationGuide":
-			case "SearchParameter": {
+			case "SearchParameter":
+			{
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}
+			// TODO: find a better solution:  Start:  EXPERIMENTAL CODE
+			case "Library":
+			case "Measure" : {
+				SearchParameterMap params = new SearchParameterMap();
+				search = myDaoRegistry.getResourceDao(resourceName).search(params);
+				break;
+			}
+			// TODO: find a better solution:  End:  EXPERIMENTAL CODE
 			default:
 				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
 		}

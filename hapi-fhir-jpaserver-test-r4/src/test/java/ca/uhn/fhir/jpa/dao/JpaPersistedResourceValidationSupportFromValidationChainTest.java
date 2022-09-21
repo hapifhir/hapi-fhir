@@ -14,8 +14,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +41,10 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	private DaoRegistry myDaoRegistry;
 
 	@Mock
-	private IFhirResourceDao<ValueSet> fhirResourceDaoValueSet;
+	private IFhirResourceDao<StructureDefinition> fhirResourceDaoStructureDefinition;
 
 	@Mock
-	private IFhirResourceDao<StructureDefinition> fhirResourceDaoStructureDefinition;
+	private IFhirResourceDao<Library> fhirResourceDaoLibrary;
 
 	@Mock
 	private IBundleProvider search;
@@ -57,37 +57,49 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 	@Test
 	public void validation_Jpa_Bundle_MeasureReferencesLibraryAndLibrary() {
-		when(myDaoRegistry.getResourceDao("ValueSet")).thenReturn(fhirResourceDaoValueSet);
 		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
+		when(myDaoRegistry.getResourceDao("Library")).thenReturn(fhirResourceDaoLibrary);
 
-		when(fhirResourceDaoValueSet.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
+		when(fhirResourceDaoLibrary.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 
 		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
-		final Bundle bundleWithBadLibrary = getBundleWithBadLibrary();
+		final Bundle bundleWithBadLibrary = getBundle("/r4/3124-bundle-measure-and-library-post.json");
 		final FhirValidator validator = getFhirValidator();
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		// TODO:  think about the number of errors to assert once the Exception is resolved
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
 	public void validation_Jpa_Bundle_MeasureOnly() {
-		when(myDaoRegistry.getResourceDao("ValueSet")).thenReturn(fhirResourceDaoValueSet);
 		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
+		when(myDaoRegistry.getResourceDao("Library")).thenReturn(fhirResourceDaoLibrary);
 
-		when(fhirResourceDaoValueSet.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
+		when(fhirResourceDaoLibrary.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 
 		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
-		final Bundle bundleWithMeasureOnly = getBundleWithMeasureOnly();
+		final Bundle bundleWithMeasureOnly = getBundle("/r4/3124-bundle-measure-onLy-post.json");
 		final FhirValidator validator = getFhirValidator();
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly );
 
-		// TODO:  think about the number of errors to assert once the Exception is resolved
+		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+	}
+
+	@Test
+	public void validation_Jpa_Bundle_MeasureOnly_NoLibraryReference() {
+		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
+		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
+
+		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
+		final Bundle bundleWithMeasureOnlyNoLibraryReference = getBundle("/r4/3124-bundle-measure-onLy-no-library-reference-post.json");
+		final FhirValidator validator = getFhirValidator();
+
+		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
+
 		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
@@ -98,7 +110,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 
 		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
-		final Bundle bundleWithLibraryOnly = getBundleWithLibraryOnly();
+		final Bundle bundleWithLibraryOnly = getBundle("/r4/3124-bundle-library-only-post.json");
 		final FhirValidator validator = getFhirValidator();
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithLibraryOnly);
@@ -107,17 +119,27 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	}
 
 	@Test
-	public void validation_Jpa_Bundle_MeasureOnly_NoLibraryReference() {
+	public void validation_Jpa_Bundle_MeasureReportToMeasure() {
 		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
+		when(myDaoRegistry.getResourceDao("Library")).thenReturn(fhirResourceDaoLibrary);
+
 		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
+		when(fhirResourceDaoLibrary.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 
 		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
-		final Bundle bundleWithMeasureOnlyNoLibraryReference = getBundleWithMeasureOnlyNoLibraryReference();
+		final Bundle bundleWithMeasureReportToReport = getBundle("/r4/3124-bundle-measure-report-to-measure-post.json");
 		final FhirValidator validator = getFhirValidator();
 
-		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
+		// TODO:  this fails with the following Exception but passes when sending this message in Postman:
+		/*
+		 * java.lang.AssertionError: Resource is MeasureReport, expected Bundle or Parameters
+		 *
+		 * 	at org.hl7.fhir.validation.instance.InstanceValidator.validateContains(InstanceValidator.java:4765)
+		 * 	at org.hl7.fhir.validation.instance.InstanceValidator.checkChildByDefinition(InstanceValidator.java:5130)
+		 */
+		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureReportToReport);
 
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(2, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@NotNull
@@ -132,23 +154,8 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	}
 
 	@NotNull
-	private static Bundle getBundleWithBadLibrary() {
-		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource("/r4/3124-bundle-slim-post.json"));
-	}
-
-	@NotNull
-	private static Bundle getBundleWithLibraryOnly() {
-		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource("/r4/3124-bundle-library-only-post.json"));
-	}
-
-	@NotNull
-	private static Bundle getBundleWithMeasureOnly() {
-		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource("/r4/3124-bundle-measure-onLy-post.json"));
-	}
-
-	@NotNull
-	private static Bundle getBundleWithMeasureOnlyNoLibraryReference() {
-		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource("/r4/3124-bundle-measure-onLy-no-library-reference-post.json"));
+	private static Bundle getBundle(String jsonFilePath) {
+		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource(jsonFilePath));
 	}
 
 	@NotNull

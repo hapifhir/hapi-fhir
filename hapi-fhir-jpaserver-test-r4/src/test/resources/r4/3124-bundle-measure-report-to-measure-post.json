@@ -1,0 +1,511 @@
+{
+	"resourceType": "Bundle",
+	"id": "EXM104-8.2.000-bundle",
+	"type": "transaction",
+	"entry": [ {
+		"resource": {
+			"resourceType": "Measure",
+			"id": "measure-EXM104-8.2.000",
+			"meta": {
+				"profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
+			},
+			"extension": [ {
+				"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+				"valueCode": "boolean"
+			}, {
+				"url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+				"valueReference": {
+					"reference": "#cqf-tooling"
+				}
+			} ],
+			"url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM104",
+			"identifier": [ {
+				"use": "official",
+				"system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+				"value": "104"
+			} ],
+			"version": "8.2.000",
+			"name": "EXM104",
+			"title": "Discharged on Antithrombotic Therapy",
+			"status": "active",
+			"experimental": true,
+			"date": "2018-09-17",
+			"publisher": "The Joint Commission",
+			"contact": [ {
+				"telecom": [ {
+					"system": "url",
+					"value": "https://www.jointcommission.org/en/"
+				} ]
+			} ],
+			"description": "Ischemic stroke patients prescribed or continuing to take antithrombotic therapy at hospital discharge",
+			"useContext": [ {
+				"code": {
+					"code": "program"
+				},
+				"valueCodeableConcept": {
+					"text": "eligible-provider"
+				}
+			} ],
+			"jurisdiction": [ {
+				"coding": [ {
+					"system": "urn:iso:std:iso:3166",
+					"code": "US"
+				} ]
+			} ],
+			"purpose": "Ischemic stroke patients prescribed or continuing to take antithrombotic therapy at hospital discharge",
+			"copyright": "Measure specifications are in the Public Domain. LOINC(R) is a registered trademark of the Regenstrief Institute. This material contains SNOMED Clinical Terms(R) (SNOMED CT(C)) copyright 2004-2017 International Health Terminology Standards Development Organization. All rights reserved.",
+			"approvalDate": "2016-01-01",
+			"lastReviewDate": "2019-08-19",
+			"effectivePeriod": {
+				"start": "2019-01-01",
+				"end": "2019-12-31"
+			},
+			"topic": [ {
+				"coding": [ {
+					"system": "http://loinc.org",
+					"code": "57024-2",
+					"display": "Health Quality Measure Document"
+				} ]
+			} ],
+			"relatedArtifact": [ {
+				"type": "citation",
+				"citation": "Adams HP, del Zoppo G, Alberts MJ, Bhatt DL, Brass L, Furlan A, Grubb RL, Higashida RT, Jauch EC, Kidwell C, Lyden PD, Morgenstern LB, Qureshi AI, Rosenwasser RH, Scott PA, Wijdicks E. Guidelines for the Early Management of Adults with Ischemic Stroke: A Guideline From the American Heart Association/American Stroke Association Stroke Council, Clinical CardiologyCouncil, Cardiovascular Radiology and Intervention Council, and the Atherosclerotic Peripheral Vascular Disease and Quality of Care Outcomes in Research Interdisciplinary Working Groups. Stroke. 2007;38:1655-1711."
+			}, {
+				"type": "citation",
+				"citation": "Adams H, Adams R, Del Zoppo G, Goldstein LB. Guidelines for the Early Management of Patients With Ischemic Stroke: Guidelines Update A Scientific Statement From the Stroke Council of the American Heart Association/American Stroke Association. Stroke Vol. 36, 2005: 916:923."
+			}, {
+				"type": "citation",
+				"citation": "Albers GW, Amarenco P, Easton JD, Sacco RL, Teal P. Antithrombotic and Thrombolytic Therapy for Ischemic Stroke. Chest Vol. 119, 2001: 300-320."
+			}, {
+				"type": "citation",
+				"citation": "Brott TG, Clark WM, Grotta JC, et al. Stroke the first hours. Guidelines for acute treatment. Consensus Statement. National Stroke Association. 2000."
+			}, {
+				"type": "citation",
+				"citation": "Chen ZM, Sandercock P, Pan HC, et al. Indications for early aspirin use in acute ischemic stroke: a combined analysis of 40,000 randomized patients from the Chinese acute stroke trial and the international stroke trial. On behalf of the CAST and IST collaborative groups, Stroke 2000;31:1240-1249."
+			}, {
+				"type": "citation",
+				"citation": "Coull BM, Williams LS, Goldstein LB, et al. Anticoagulants and Antiplatelet Agents in Acute Ischemic Stroke. Report of the Joint Stroke Guideline Development Committee of the American Academy of Neurology and the American Stroke Association (a Division of the American Heart Association) Stroke. 2002;33:1934 - 1942."
+			}, {
+				"type": "citation",
+				"citation": "Guideline on the Use of Aspirin as Secondary Prophylaxis for Vascular Disease in Primary Care, Centre for Health Services Research University of Newcastle upon Tyne, & Centre for Health Economics of York, 1998."
+			}, {
+				"type": "citation",
+				"citation": "Kernan, W.N., B. Ovbiagele, H. R. Black, D. M. Bravata, M. I. Chimowitz, M. D. Ezekowitz, M. C. Fang, M. Fisher, K. L. Furie, D. V. Heck, S. C. Johnston, S. E. Kasner, S. J. Kittner, P. H. Mitchell, M. W. Rich, D. Richardson, L. H. Schwamm, J. A. Wilson. \"Guidelines for the Prevention of Stroke in Patients with Stroke and Transient Ischemic Attack: A Guideline for Healthcare Professionals from the American Heart Association/American Stroke Association.\" [in eng.]  Stroke 45, no. 7 (May 2014): 2160-223. "
+			}, {
+				"type": "depends-on",
+				"resource": "Library/library-FHIRHelpers-4.0.1"
+			}, {
+				"type": "depends-on",
+				"resource": "Library/library-MATGlobalCommonFunctions-5.0.000"
+			}, {
+				"type": "depends-on",
+				"resource": "Library/library-SupplementalDataElements-2.0.0"
+			}, {
+				"type": "depends-on",
+				"resource": "Library/library-TJCOverall-5.0.000"
+			} ],
+			"library": [ "Library/library-EXM104-8.2.000" ],
+			"disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
+			"scoring": {
+				"coding": [ {
+					"system": "http://hl7.org/fhir/measure-scoring",
+					"code": "proportion"
+				} ]
+			},
+			"type": [ {
+				"coding": [ {
+					"system": "http://hl7.org/fhir/measure-type",
+					"code": "process"
+				} ]
+			} ],
+			"rationale": "The effectiveness of antithrombotic agents in reducing stroke mortality, stroke-related morbidity and recurrence rates has been studied in several large clinical trials. While the use of these agents for patients with acute ischemic stroke and transient ischemic attacks continues to be the subject of study, substantial evidence is available from completed studies. Data at this time suggest that antithrombotic therapy should be prescribed at discharge following acute ischemic stroke to reduce stroke mortality and morbidity as long as no contraindications exist.\n\nFor patients with a stroke due to a cardioembolic source (eg atrial fibrillation, mechanical heart valve), warfarin is recommended unless contraindicated. In recent years, novel oral anticoagulant agents (NOACs) have been developed and approved by the U.S. Food and Drug Administration (FDA) for stroke prevention, and may be considered as an alternative to warfarin for select patients. Anticoagulation therapy is not generally recommended for secondary stroke prevention in patients presumed to have a non-cardioembolic stroke.\nAnticoagulants at doses to prevent venous thromboembolism are insufficient antithrombotic therapy to prevent recurrent ischemic stroke or TIA.",
+			"clinicalRecommendationStatement": "Clinical trial results suggest that antithrombotic therapy should be prescribed at discharge following acute ischemic stroke to reduce stroke mortality and morbidity as long as no contraindications exist",
+			"improvementNotation": {
+				"coding": [ {
+					"system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+					"code": "increase"
+				} ]
+			},
+			"guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.",
+			"group": [ {
+				"id": "group-1",
+				"population": [ {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "initial-population",
+							"display": "Initial Population"
+						} ]
+					},
+					"criteria": {
+						"language": "text/cql",
+						"expression": "Initial Population"
+					}
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "numerator",
+							"display": "Numerator"
+						} ]
+					},
+					"criteria": {
+						"language": "text/cql",
+						"expression": "Numerator"
+					}
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "denominator",
+							"display": "Denominator"
+						} ]
+					},
+					"criteria": {
+						"language": "text/cql",
+						"expression": "Denominator"
+					}
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "denominator-exclusion",
+							"display": "Denominator Exclusion"
+						} ]
+					},
+					"criteria": {
+						"language": "text/cql",
+						"expression": "Denominator Exclusion"
+					}
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "denominator-exception",
+							"display": "Denominator Exception"
+						} ]
+					},
+					"criteria": {
+						"language": "text/cql",
+						"expression": "Denominator Exception"
+					}
+				} ]
+			} ],
+			"supplementalData": [ {
+				"code": {
+					"text": "sde-ethnicity"
+				},
+				"usage": [ {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/measure-data-usage",
+						"code": "supplemental-data"
+					} ]
+				} ],
+				"criteria": {
+					"language": "text/cql",
+					"expression": "SDE Ethnicity"
+				}
+			}, {
+				"code": {
+					"text": "sde-payer"
+				},
+				"usage": [ {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/measure-data-usage",
+						"code": "supplemental-data"
+					} ]
+				} ],
+				"criteria": {
+					"language": "text/cql",
+					"expression": "SDE Payer"
+				}
+			}, {
+				"code": {
+					"text": "sde-race"
+				},
+				"usage": [ {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/measure-data-usage",
+						"code": "supplemental-data"
+					} ]
+				} ],
+				"criteria": {
+					"language": "text/cql",
+					"expression": "SDE Race"
+				}
+			}, {
+				"code": {
+					"text": "sde-sex"
+				},
+				"usage": [ {
+					"coding": [ {
+						"system": "http://hl7.org/fhir/measure-data-usage",
+						"code": "supplemental-data"
+					} ]
+				} ],
+				"criteria": {
+					"language": "text/cql",
+					"expression": "SDE Sex"
+				}
+			} ]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "Measure/measure-EXM104-8.2.000"
+		}
+	}, {
+		"resource": {
+			"resourceType": "MeasureReport",
+			"id": "measurereport-denom-EXM104",
+			"contained": [ {
+				"resourceType": "Bundle",
+				"id": "4e9ea2cf-bdfc-460f-b7a0-49f70201e177",
+				"type": "collection",
+				"entry": [ {
+					"fullUrl": "1a19a371-91b8-4a1d-9bb0-e8a997baa655",
+					"resource": {
+						"resourceType": "List",
+						"id": "1a19a371-91b8-4a1d-9bb0-e8a997baa655",
+						"title": "denominator",
+						"entry": [ {
+							"item": {
+								"reference": "denom-EXM104"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-2"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-1"
+							}
+						} ]
+					}
+				}, {
+					"fullUrl": "Patient/denom-EXM104",
+					"resource": {
+						"resourceType": "Patient",
+						"id": "denom-EXM104",
+						"meta": {
+							"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+						},
+						"extension": [ {
+							"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+							"extension": [ {
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2054-5",
+									"display": "Black or African American"
+								}
+							} ]
+						}, {
+							"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+							"extension": [ {
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2135-2",
+									"display": "Hispanic or Latino"
+								}
+							} ]
+						} ],
+						"identifier": [ {
+							"use": "usual",
+							"type": {
+								"coding": [ {
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical Record Number"
+								} ]
+							},
+							"system": "http://hospital.smarthealthit.org",
+							"value": "9999999910"
+						} ],
+						"name": [ {
+							"family": "Jones",
+							"given": [ "Rick" ]
+						} ],
+						"gender": "male",
+						"birthDate": "1955-11-05"
+					}
+				}, {
+					"fullUrl": "c247b95f-44a0-4ba4-af88-29419f6454af",
+					"resource": {
+						"resourceType": "List",
+						"id": "c247b95f-44a0-4ba4-af88-29419f6454af",
+						"title": "initial-population",
+						"entry": [ {
+							"item": {
+								"reference": "denom-EXM104"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-2"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-1"
+							}
+						} ]
+					}
+				}, {
+					"fullUrl": "Encounter/denom-EXM104-2",
+					"resource": {
+						"resourceType": "Encounter",
+						"id": "denom-EXM104-2",
+						"meta": {
+							"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+						},
+						"status": "finished",
+						"class": {
+							"system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+							"code": "IMP",
+							"display": "inpatient encounter"
+						},
+						"type": [ {
+							"coding": [ {
+								"system": "http://snomed.info/sct",
+								"code": "32485007",
+								"display": "Hospital admission (procedure)"
+							} ]
+						} ],
+						"subject": {
+							"reference": "Patient/denom-EXM104"
+						},
+						"period": {
+							"start": "2019-08-21T00:00:00-06:00",
+							"end": "2019-12-19T08:15:00-07:00"
+						},
+						"diagnosis": [ {
+							"condition": {
+								"reference": "Condition/denom-EXM104-1"
+							},
+							"use": {
+								"coding": [ {
+									"system": "http://terminology.hl7.org/CodeSystem/diagnosis-role",
+									"code": "billing",
+									"display": "Billing"
+								} ]
+							},
+							"rank": 1
+						} ]
+					}
+				}, {
+					"fullUrl": "0f7a251e-fc83-461c-8a9b-ce07bc2d067d",
+					"resource": {
+						"resourceType": "List",
+						"id": "0f7a251e-fc83-461c-8a9b-ce07bc2d067d",
+						"title": "numerator",
+						"entry": [ {
+							"item": {
+								"reference": "denom-EXM104"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-2"
+							}
+						}, {
+							"item": {
+								"reference": "denom-EXM104-1"
+							}
+						} ]
+					}
+				}, {
+					"fullUrl": "Condition/denom-EXM104-1",
+					"resource": {
+						"resourceType": "Condition",
+						"id": "denom-EXM104-1",
+						"meta": {
+							"profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+						},
+						"verificationStatus": {
+							"coding": [ {
+								"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+								"code": "confirmed",
+								"display": "Confirmed"
+							} ]
+						},
+						"category": [ {
+							"coding": [ {
+								"system": "http://terminology.hl7.org/CodeSystem/condition-category",
+								"code": "encounter-diagnosis",
+								"display": "Encounter Diagnosis"
+							} ]
+						} ],
+						"code": {
+							"coding": [ {
+								"system": "http://snomed.info/sct",
+								"code": "116288000",
+								"display": "Paralytic stroke (disorder)"
+							} ]
+						},
+						"subject": {
+							"reference": "Patient/denom-EXM104"
+						}
+					}
+				} ]
+			} ],
+			"status": "complete",
+			"type": "individual",
+			"measure": "Measure/measure-EXM104-8.2.000",
+			"subject": {
+				"reference": "Patient/denom-EXM104"
+			},
+			"period": {
+				"start": "2018-12-31T17:00:00-07:00",
+				"end": "2019-12-30T17:00:00-07:00"
+			},
+			"group": [ {
+				"id": "group-1",
+				"population": [ {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "initial-population",
+							"display": "Initial Population"
+						} ]
+					},
+					"count": 1
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "numerator",
+							"display": "Numerator"
+						} ]
+					},
+					"count": 0
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "denominator",
+							"display": "Denominator"
+						} ]
+					},
+					"count": 1
+				}, {
+					"code": {
+						"coding": [ {
+							"system": "http://terminology.hl7.org/CodeSystem/measure-population",
+							"code": "denominator-exclusion",
+							"display": "Denominator Exclusion"
+						} ]
+					},
+					"count": 0
+				} ],
+				"measureScore": {
+					"value": 0.0
+				}
+			} ],
+			"evaluatedResource": [ {
+				"reference": "#4e9ea2cf-bdfc-460f-b7a0-49f70201e177"
+			} ]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "MeasureReport/measurereport-denom-EXM104"
+		}
+	} ]
+}
