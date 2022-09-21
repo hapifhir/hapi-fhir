@@ -76,6 +76,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
@@ -943,7 +944,7 @@ public class RestfulServerUtils {
 
 			// If the user didn't explicitly request FHIR as a response, return binary
 			// content directly
-			if (responseEncoding == null) {
+			if (responseEncoding == null || matchesBinaryContentType(responseEncoding, bin)) {
 				if (isNotBlank(bin.getContentType())) {
 					contentType = bin.getContentType();
 				} else {
@@ -1035,6 +1036,29 @@ public class RestfulServerUtils {
 		}
 
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
+	}
+
+	/**
+	 * Determines whether we should stream out Binary resource content based on the content-type. Logic is:
+	 * - If they request octet-stream, return true;
+	 * - If the content-type happens to be a match, return true.
+	 * - Construct an EncodingEnum out of the contentType. If this matches the responseEncoding, return true.
+	 * - Otherwise, return false.
+	 *
+	 * @param theResponseEncoding the requested {@link EncodingEnum} determined by the incoming Content-Type header.
+	 * @param theBinary  the {@link IBaseBinary} resource to be streamed out.
+	 * @return True if response can be streamed as the requested encoding type, false otherwise.
+	 */
+	private static boolean matchesBinaryContentType(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
+		String contentType = theBinary.getContentType();
+		if (isBlank(contentType)) {
+			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
+		} else if (contentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
+			return true;
+		} else {
+			return Objects.equals(EncodingEnum.forContentType(contentType), theResponseEncoding.getEncoding());
+		}
+
 	}
 
 	public static String createEtag(String theVersionId) {
