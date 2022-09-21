@@ -186,6 +186,16 @@ public class OpenApiInterceptorTest {
 	}
 
 	@Test
+	public void testSwaggerUiWithNoBannerUrl() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor().setBannerImage(""));
+
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
+	}
+
+	@Test
 	public void testSwaggerUiWithCustomStylesheet() throws IOException {
 		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 

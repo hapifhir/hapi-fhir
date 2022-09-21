@@ -877,8 +877,9 @@ public class OpenApiInterceptor {
 		return myBannerImage;
 	}
 
-	public void setBannerImage(String theBannerImage) {
+	public OpenApiInterceptor setBannerImage(String theBannerImage) {
 		myBannerImage = theBannerImage;
+		return this;
 	}
 
 	/**
