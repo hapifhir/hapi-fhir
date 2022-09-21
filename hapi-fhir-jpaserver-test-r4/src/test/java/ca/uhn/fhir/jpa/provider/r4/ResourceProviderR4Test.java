@@ -2,15 +2,18 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -28,6 +31,8 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -71,6 +76,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -128,6 +134,7 @@ import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
@@ -142,8 +149,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
@@ -162,6 +172,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -169,10 +180,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -227,13 +240,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
+		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		myDaoConfig.setPreserveRequestIdInResourceBody(false);
+
 	}
 
 	@BeforeEach
@@ -2267,8 +2282,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
 			assertThat(ids, not((o2Id)));
-			assertThat(ids, not(contains(c2Id)));
-			assertThat(ids, not(contains(p2Id)));
+			assertThat(ids, not(hasItem(c2Id)));
+			assertThat(ids, not(hasItem(p2Id)));
 		}
 
 		{
@@ -2300,7 +2315,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2318,7 +2333,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2346,8 +2361,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			allresults.addAll(secondBundle);
 
 			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(allresults, not(contains(c5Id)));
+			assertThat(allresults, not(hasItem(c5Id)));
 		}
+	}
+	@Test
+	public void testContains(){
+		List<String> test = List.of("a", "b", "c");
+		String testString = "testAString";
+
+		//examined iterable must be of the same length as the specified collection of matchers
+		assertThat(test, not(contains("b"))); //replace with not(hasItem())
+
+		//examined Iterable yield at least one item that is matched
+		//it can contain "a", but it doesn't contain "d" so this passes
+		//really does "do not have one of these"
+		assertThat(test, not(hasItems("a", "d"))); //replace with individual calls to not(hasItem())
+		//MatchersUtil.assertDoesNotContainAnyOf(test, List.of("a", "d"));
+
+		//examined iterable must be of the same length as the specified collection of matchers
+		assertThat(test, not(containsInAnyOrder("a", "b"))); //replace with indiv calls to not(hasItem())
 	}
 
 	@Test
@@ -2488,7 +2520,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
-			assertThat(ids, not(contains(c3Id)));
+			assertThat(ids, not(hasItem(c3Id)));
 		}
 
 
@@ -4564,7 +4596,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, hasItems(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			//@formatter:off
@@ -4576,7 +4608,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, not(hasItem(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
@@ -4590,7 +4622,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
+			assertThat(patients, not(hasItem(id2)));
 		}
 	}
 
@@ -4634,7 +4666,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(contains(oid2)));
+			assertThat(ids, not(hasItem(oid2)));
 		}
 
 	}
@@ -5739,7 +5771,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(contains(id2.getValue())));
+			assertThat(ids, not(hasItem(id2.getValue())));
 		}
 
 	}
@@ -7081,6 +7113,231 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String expectedMetaSource = "mySource#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String metaSource = "mySource#123456789012345678901234567890";
+		String expectedMetaSource = "mySource#1234567890123456";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(metaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
+		String sourceURL = "mySource";
+		String requestId = "#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceURL + requestId);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertTrue(returnedPatientMetaSource.startsWith(sourceURL));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+	}
+
+	@Test
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String sourceUri = "mySource";
+		String requestId = "345676";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri + "%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
+		String sourceURI = "mySource";
+		String requestId = "345676";
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceURI + "#" + requestId);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceURI + "%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
+	}
+
+	@Test
+	public void searchResource_bySourceWithPreserveRequestIdDisabled_isSuccess() {
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(sourceUri + "#" + requestId);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertTrue(returnedPatientMetaSource.startsWith(sourceUri));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+	}
+
+	@Test
+	public void searchResource_bySourceWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_byRequestIdWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_bySourceAndWrongRequestIdWithPreserveRequestIdEnabled_fails() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		Patient patient = new Patient();
+		patient.getMeta().setSource("urn:source:0#my-fragment123");
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23my-fragment000")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
+	}
+
 	@Nonnull
 	private IIdType createNewPatientWithHistory() {
 		String TEST_SYSTEM_NAME = "testHistoryRewrite";
@@ -7142,6 +7399,317 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		IIdType oId = myClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 		return oId;
+	}
+
+	@Nested
+	public class MissingSearchParameterTests {
+
+		private interface XtoY<X, Y> {
+			Y doTask(X theInput);
+		}
+
+		private static class MissingSearchTestParameters {
+			/**
+			 * The setting for IndexMissingFields
+			 */
+			public final DaoConfig.IndexEnabledEnum myEnableMissingFieldsValue;
+
+			/**
+			 * Whether to use :missing=true/false
+			 */
+			public final boolean myIsMissing;
+
+			/**
+			 * Whether or not the field is populated or not.
+			 * True -> populate field.
+			 * False -> not populated
+			 */
+			public final boolean myIsValuePresentOnResource;
+
+			public MissingSearchTestParameters(
+				DaoConfig.IndexEnabledEnum theEnableMissingFields,
+				boolean theIsMissing,
+				boolean theHasField
+			) {
+				myEnableMissingFieldsValue = theEnableMissingFields;
+				myIsMissing = theIsMissing;
+				myIsValuePresentOnResource = theHasField;
+			}
+		}
+
+		private IParser myParser;
+
+		@BeforeEach
+		public void init() {
+			myParser = myFhirContext.newJsonParser();
+			myParser.setPrettyPrint(true);
+
+			myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		}
+
+		/**
+		 * Verifies that the returned Bundle contains the resource
+		 * with the id provided.
+		 * @param theBundle - returned bundle
+		 * @param theType - provided resource id
+		 */
+		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
+			ourLog.info(myParser.encodeResourceToString(theBundle));
+
+			assertEquals(1, theBundle.getTotal());
+			List<IIdType> list = toUnqualifiedVersionlessIds(theBundle);
+			ourLog.info(list.size() + " resources found");
+			IIdType type = list.get(0);
+			assertEquals(theType.toString(), type.toString());
+		}
+
+		private void verifyBundleIsEmpty(Bundle theBundle) {
+			ourLog.info(myParser.encodeResourceToString(theBundle));
+			assertEquals(0, theBundle.getTotal());
+		}
+
+		private IIdType createResource(Resource theResource) {
+			IIdType id = myClient.create()
+				.resource(theResource)
+				.prettyPrint()
+				.encodedXml()
+				.execute()
+				.getId()
+				.toUnqualifiedVersionless();
+			theResource.setId(id);
+			ourLog.info("Created:\n{}",
+				myParser.encodeResourceToString(theResource));
+			return id;
+		}
+
+		/**
+		 * Runs the search on the given resource type with the given (missing) criteria
+		 * @param theResourceClass - the resource type class
+		 * @param theCriteria - the missing critia to use
+		 * @return - the found bundle
+		 */
+		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
+			//@formatter:off
+			return myClient
+				.search()
+				.forResource(theResourceClass)
+				.where(theCriteria)
+				.count(100)
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			//@formatter:on
+		}
+
+		/**
+		 * The method that generates parameters for tests
+		 */
+		private static Stream<Arguments> provideParameters() {
+			return Stream.of(
+				// 1
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, true)),
+				// 2
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, false)),
+				// 3
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, false, true)),
+				// 4
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.ENABLED, true, false)),
+				// 5
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, true)),
+				// 6
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, true)),
+				// 7
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, true, false)),
+				// 8
+				Arguments.of(new MissingSearchTestParameters(DaoConfig.IndexEnabledEnum.DISABLED, false, false))
+			);
+		}
+
+		/**
+		 * Runs the actual test for whichever search parameter and given inputs we want.
+		 */
+		private void runTest(
+			MissingSearchTestParameters theParams,
+			XtoY<Boolean, Resource> theResourceProvider,
+			XtoY<Boolean, Bundle> theRunner
+		) {
+			String testMethod = new Exception().getStackTrace()[1].getMethodName();
+			ourLog.info(
+				"\nStarting {}.\nMissing fields indexed: {},\nHas Field Present: {},\nReturn resources with Missing Field: {}.\nWe expect {} returned result(s).",
+				testMethod,
+				theParams.myEnableMissingFieldsValue.name(),
+				theParams.myIsValuePresentOnResource,
+				theParams.myIsMissing,
+				theParams.myIsValuePresentOnResource == theParams.myIsMissing ? "0" : "1"
+			);
+
+			// setup
+			myDaoConfig.setIndexMissingFields(theParams.myEnableMissingFieldsValue);
+
+			// create our resource
+			Resource resource = theResourceProvider.doTask(theParams.myIsValuePresentOnResource);
+
+			// save the resource
+			IIdType resourceId = createResource(resource);
+
+			// run test
+			Bundle found = theRunner.doTask(theParams.myIsMissing);
+
+			if ((theParams.myIsMissing && !theParams.myIsValuePresentOnResource)
+				|| (theParams.myIsValuePresentOnResource && !theParams.myIsMissing)) {
+				verifyFoundBundle(found, resourceId);
+			} else {
+				verifyBundleIsEmpty(found);
+			}
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingStringParameter(MissingSearchTestParameters theParams) {
+			runTest(
+				theParams, (hasField) -> {
+					Organization org = new Organization();
+					if (hasField) {
+						org.setName("anything");
+					}
+					return org;
+				}, (isMissing) -> {
+					return doSearch(Organization.class, Organization.NAME.isMissing(isMissing));
+				}
+			);
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingDateParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				(hasField) -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						patient.setBirthDate(new Date(2000, Calendar.DECEMBER, 25));
+					}
+					return patient;
+				}, (isMissing) -> {
+					return doSearch(Patient.class, Patient.BIRTHDATE.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingTokenClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						patient.setGender(AdministrativeGender.FEMALE);
+					}
+					return patient;
+				}, isMissing -> {
+					return doSearch(Patient.class, Patient.GENDER.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingReferenceClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Patient patient = new Patient();
+					if (hasField) {
+						Practitioner practitioner = new Practitioner();
+						IIdType practitionerId = createResource(practitioner);
+
+						patient.setGeneralPractitioner(Collections.singletonList(new Reference(practitionerId)));
+					}
+					return patient;
+				}, isMissing -> {
+					return doSearch(Patient.class, Patient.GENERAL_PRACTITIONER.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingReferenceClientParameterOnIndexedContainedResources(MissingSearchTestParameters theParams) {
+			myModelConfig.setIndexOnContainedResources(true);
+			runTest(theParams,
+				hasField -> {
+					Observation obs = new Observation();
+					if (hasField) {
+						Encounter enc = new Encounter();
+						IIdType id = createResource(enc);
+
+						obs.setEncounter(new Reference(id));
+					}
+					return obs;
+				}, isMissing -> {
+					ICriterion<?> criterion = Observation.ENCOUNTER.isMissing(isMissing);
+					return doSearch(Observation.class, criterion);
+				});
+
+			myModelConfig.setIndexOnContainedResources(false);
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingURLParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					String methodName = new Exception().getStackTrace()[0].getMethodName();
+
+					SearchParameter sp = new SearchParameter();
+					sp.addBase("MolecularSequence");
+					sp.setCode(methodName);
+					sp.setType(Enumerations.SearchParamType.NUMBER);
+					sp.setExpression("MolecularSequence.variant-end");
+					sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+					sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+					if (hasField) {
+						sp.setUrl("http://example.com");
+					}
+					return sp;
+				}, isMissing -> {
+					return doSearch(SearchParameter.class, SearchParameter.URL.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingQuantityClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					Observation obs = new Observation();
+					if (hasField) {
+						obs.setValue(new Quantity(3));
+					}
+					return obs;
+				}, isMissing -> {
+					return doSearch(Observation.class, Observation.VALUE_QUANTITY.isMissing(isMissing));
+				});
+		}
+
+		@ParameterizedTest
+		@MethodSource("provideParameters")
+		public void testMissingNumberClientParameter(MissingSearchTestParameters theParams) {
+			runTest(theParams,
+				hasField -> {
+					String methodName = new Exception().getStackTrace()[0].getMethodName();
+
+					MolecularSequence molecularSequence = new MolecularSequence();
+					if (hasField) {
+						molecularSequence.setVariant(Collections.singletonList(
+							new MolecularSequence.MolecularSequenceVariantComponent().setEnd(1)
+						));
+					}
+
+					return molecularSequence;
+				}, isMissing -> {
+					NumberClientParam numberClientParam = new NumberClientParam("variant-end");
+					return doSearch(
+						MolecularSequence.class,
+						numberClientParam.isMissing(isMissing)
+					);
+				});
+		}
 	}
 
 }

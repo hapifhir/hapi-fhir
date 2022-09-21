@@ -1,17 +1,10 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /*
  * #%L
@@ -33,7 +26,7 @@ import java.util.Map;
  * #L%
  */
 
-public interface IResourceProvenanceDao extends JpaRepository<ResourceHistoryProvenanceEntity, Long>, IHapiFhirJpaRepository {
+public interface IResourceHistoryProvenanceDao extends JpaRepository<ResourceHistoryProvenanceEntity, Long>, IHapiFhirJpaRepository {
 
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryProvenanceEntity t WHERE t.myId = :pid")

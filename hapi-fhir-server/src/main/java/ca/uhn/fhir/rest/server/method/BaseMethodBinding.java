@@ -76,7 +76,7 @@ public abstract class BaseMethodBinding {
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getRestOperationType());
+		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider);
 		myQueryParameters = myParameters
 			.stream()
 			.filter(t -> t instanceof BaseQueryParameter)
