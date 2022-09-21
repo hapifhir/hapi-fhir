@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -26,6 +28,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -102,6 +105,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -276,6 +280,44 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertNotNull(result);
 		assertEquals("resource-security", result.getId().toUnqualifiedVersionless().getIdPart());
 
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("my-gender");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Gender");
+		searchParameter.setCode("mygender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender | Person.gender");
+
+		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("Mykola");
+		patient.setGender(AdministrativeGender.MALE);
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		Person person = new Person();
+		person.setGender(AdministrativeGender.MALE);
+		IIdType personId = ourClient.create().resource(person).execute().getId();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("mygender", new TokenParam(null, "male"));
+
+		IBundleProvider patientResult = myPatientDao.search(map);
+		IBundleProvider personResult = myPersonDao.search(map);
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+		List<String> foundPersons = toUnqualifiedVersionlessIdValues(personResult);
+
+		assertEquals(1, foundPatients.size());
+		assertEquals(1, foundPersons.size());
+		assertNotNull(result);
+		assertEquals("my-gender", result.getId().toUnqualifiedVersionless().getIdPart());
 	}
 
 	@Test

@@ -160,6 +160,7 @@ import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Procedure;
@@ -406,6 +407,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	@Qualifier("myPatientDaoR4")
 	protected IFhirResourceDaoPatient<Patient> myPatientDao;
+	@Autowired
+	@Qualifier("myPersonDaoR4")
+	protected IFhirResourceDao<Person> myPersonDao;
 	@Autowired
 	@Qualifier("myExplanationOfBenefitDaoR4")
 	protected IFhirResourceDao<ExplanationOfBenefit> myExplanationOfBenefitDao;

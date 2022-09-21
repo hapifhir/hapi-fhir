@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -22,6 +23,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -121,6 +124,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Quantity;
@@ -272,13 +276,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
-		org.hl7.fhir.r4.model.SearchParameter searchParameter = new org.hl7.fhir.r4.model.SearchParameter();
+		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setId("resource-security");
-		searchParameter.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setName("Security");
 		searchParameter.setCode("_security");
 		searchParameter.addBase("Patient").addBase("Account");
-		searchParameter.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
 
 		IIdType id = myClient.update().resource(searchParameter).execute().getId().toUnqualifiedVersionless();
@@ -286,7 +290,44 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertNotNull(id);
 		assertEquals("resource-security", id.getIdPart());
 
+	}
 
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("my-gender");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Gender");
+		searchParameter.setCode("mygender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender | Person.gender");
+
+		MethodOutcome result= myClient.update().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("Mykola");
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType patientId = myClient.create().resource(patient).execute().getId();
+
+		Person person = new Person();
+		person.setGender(Enumerations.AdministrativeGender.MALE);
+		IIdType personId = myClient.create().resource(person).execute().getId();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("mygender", new TokenParam(null, "male"));
+
+		IBundleProvider patientResult = myPatientDao.search(map);
+		IBundleProvider personResult = myPersonDao.search(map);
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+		List<String> foundPersons = toUnqualifiedVersionlessIdValues(personResult);
+
+		assertEquals(1, foundPatients.size());
+		assertEquals(1, foundPersons.size());
+		assertNotNull(result);
+		assertEquals("my-gender", result.getId().toUnqualifiedVersionless().getIdPart());
 	}
 
 	@Test

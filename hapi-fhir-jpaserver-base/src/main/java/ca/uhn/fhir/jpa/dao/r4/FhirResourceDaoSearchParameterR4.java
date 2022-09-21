@@ -148,51 +148,23 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 			}
 
-			FhirVersionEnum currentVersion = theContext.getVersion().getVersion();
-			if (currentVersion.isEquivalentTo(FhirVersionEnum.DSTU2)) {
+			FhirVersionEnum fhirVersion = theContext.getVersion().getVersion();
+			if (fhirVersion.isEquivalentTo(FhirVersionEnum.DSTU2)) {
 				// omitting validation for DSTU2
 			}
-			else if (currentVersion.isEquivalentTo(FhirVersionEnum.DSTU3)) {
-				String[] expressionSplit = theSearchParamExtractor.split(expression);
-				for (String nextPath : expressionSplit) {
-					nextPath = nextPath.trim();
-
-					int dotIdx = nextPath.indexOf('.');
-					String resourceName = (dotIdx == -1) ? nextPath : nextPath.substring(0, dotIdx);
-
-					if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
-
-						try {
-							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
-							try {
-								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
-							} catch (Exception e) {
-								String msg = theContext.getLocalizer().getMessageSanitized(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-								throw new UnprocessableEntityException(Msg.code(1119) + msg, e);
-							}
-						} catch (DataFormatException e) {
-							parseExpression(isUnique, theResource, expression, theContext);
-						}
-					}
-
+			else if (fhirVersion.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+				if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
+					throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid");
 				}
-			} else {
-				parseExpression(isUnique, theResource, expression, theContext);
+
+				try {
+					theContext.newFluentPath().parse(expression);
+				} catch (Exception exception) {
+					throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + exception.getMessage());
+				}
 			}
 		}
 
-	}
-
-	private static void parseExpression(boolean isUnique, SearchParameter theResource, String theExpression, FhirContext theContext) {
-		if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(theExpression).matches()) {
-			throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + theExpression + "\" is invalid");
-		}
-
-		try {
-			theContext.newFluentPath().parse(theExpression);
-		} catch (Exception exception) {
-			throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + theExpression + "\": " + exception.getMessage());
-		}
 	}
 
 }
