@@ -944,15 +944,10 @@ public class RestfulServerUtils {
 
 			// If the user didn't explicitly request FHIR as a response, return binary
 			// content directly
-			if (responseEncoding == null || matchesBinaryContentType(responseEncoding, bin)) {
-				if (isNotBlank(bin.getContentType())) {
-					contentType = bin.getContentType();
-				} else {
-					contentType = Constants.CT_OCTET_STREAM;
-				}
-
+			if (shouldStreamContents(responseEncoding, bin)) {
 				// Force binary resources to download - This is a security measure to prevent
 				// malicious images or HTML blocks being served up as content.
+				contentType = getBinaryContentTypeOrDefault(bin);
 				response.addHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 
 				return response.sendAttachmentResponse(bin, theStatusCode, contentType);
@@ -1038,6 +1033,16 @@ public class RestfulServerUtils {
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
+	private static String getBinaryContentTypeOrDefault(IBaseBinary bin) {
+		String contentType;
+		if (isNotBlank(bin.getContentType())) {
+			contentType = bin.getContentType();
+		} else {
+			contentType = Constants.CT_OCTET_STREAM;
+		}
+		return contentType;
+	}
+
 	/**
 	 * Determines whether we should stream out Binary resource content based on the content-type. Logic is:
 	 * - If they request octet-stream, return true;
@@ -1049,16 +1054,17 @@ public class RestfulServerUtils {
 	 * @param theBinary  the {@link IBaseBinary} resource to be streamed out.
 	 * @return True if response can be streamed as the requested encoding type, false otherwise.
 	 */
-	private static boolean matchesBinaryContentType(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
+	private static boolean shouldStreamContents(ResponseEncoding theResponseEncoding, IBaseBinary theBinary) {
 		String contentType = theBinary.getContentType();
-		if (isBlank(contentType)) {
+		if (theResponseEncoding == null) {
+			return true;
+		} if (isBlank(contentType)) {
 			return Constants.CT_OCTET_STREAM.equals(theResponseEncoding.getContentType());
 		} else if (contentType.equalsIgnoreCase(theResponseEncoding.getContentType())) {
 			return true;
 		} else {
 			return Objects.equals(EncodingEnum.forContentType(contentType), theResponseEncoding.getEncoding());
 		}
-
 	}
 
 	public static String createEtag(String theVersionId) {
