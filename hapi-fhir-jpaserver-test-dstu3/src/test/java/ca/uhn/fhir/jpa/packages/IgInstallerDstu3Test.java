@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -11,6 +15,9 @@ import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +26,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
+import static com.healthmarketscience.sqlbuilder.Conditions.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -168,6 +181,54 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		runInTransaction(() -> {
 			assertTrue(myPackageVersionDao.findByPackageIdAndVersion("nictiz.fhir.nl.stu3.questionnaires", "1.0.2").isPresent());
 		});
+	}
+
+	private void ensureNoCreatesOrUpdates(Callable theCallable) throws Exception {
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, t) -> {
+			IBaseResource iBaseResource = t.get(IBaseResource.class);
+			if (iBaseResource instanceof IBaseBinary) {
+				return;
+			}
+			throw new RuntimeException("Not allowed!");
+		});
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t) -> {
+			IBaseResource iBaseResource = t.get(IBaseResource.class);
+			if (iBaseResource instanceof IBaseBinary) {
+				return;
+			}
+			throw new RuntimeException("Not allowed!");
+		});
+
+		try {
+			theCallable.call();
+		} finally {
+			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		}
+
+
+	}
+	@Test
+	public void testMultipleUploads() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+		PackageInstallationSpec installationSpec = new PackageInstallationSpec()
+			.setName("nictiz.fhir.nl.stu3.questionnaires")
+			.setVersion("1.0.2")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setPackageUrl("classpath:/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
+
+
+		igInstaller.install(installationSpec);
+
+		installationSpec.setReloadExisting(true);
+		try {
+			ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
+			fail();
+		} catch (RuntimeException e) {
+			assertThat(e.getMessage(), is(containsString("Not allowed!")));
+		}
+
+		installationSpec.setReloadExisting(false);
+		ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
 
 	}
 
