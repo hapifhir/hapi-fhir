@@ -18,7 +18,7 @@ import java.util.function.Function;
 /**
  * binding of HSearch apis into
  *
- * searchparam and hsearch aren't friends.  Bring them together here.
+ * We have a diamond dependency pattern, and searchparam and hsearch aren't friends.  Bring them together here.
  */
 class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 
@@ -30,47 +30,63 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 
 	@Override
 	public void writeIndexEntry(HSearchIndexWriter theHSearchIndexWriter, HSearchElementCache theRoot) {
+		// optimization - An empty sub-component will never match.
+		// Storing the rest only wastes resources
+		boolean hasAnEmptyComponent =
+			mySearchParamComposite.getComponents().stream()
+				.anyMatch(c->c.getParamIndexValues().isEmpty());
+
+		if (hasAnEmptyComponent) {
+			return;
+		}
+
 		DocumentElement nestedParamRoot = theRoot.getObjectElement(HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT);
 
 		// we want to re-use the `token`, `quantity` nodes for multiple values.
 		DocumentElement compositeRoot = nestedParamRoot.addObject(mySearchParamComposite.getSearchParamName());
 		HSearchElementCache compositeRootCache = new HSearchElementCache(compositeRoot);
 
-		// wipmb should we make sure we have at least on value in each component before writing anything?
-		// no point writing empty nodes
 
 		for (ResourceIndexedSearchParamComposite.Component subParam : mySearchParamComposite.getComponents()) {
-			Function<String, DocumentElement> idxElementLookup = typeKey -> compositeRootCache.getObjectElement(subParam.getSearchParamName(), typeKey);
 			// Write the various index nodes.
 			// Note: we don't support modifiers with composites, so we don't bother to index :of-type, :text, etc.
+			DocumentElement subParamElement = compositeRoot.addObject(subParam.getSearchParamName());
 			switch (subParam.getSearchParameterType()) {
 				case DATE:
+					DocumentElement dateElement = subParamElement.addObject("dt");
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamDate.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertDate)
-						.forEach(d-> theHSearchIndexWriter.writeDateFields(idxElementLookup.apply("dt"), d));
+						.forEach(d-> theHSearchIndexWriter.writeDateFields(dateElement, d));
 					break;
 				case QUANTITY:
+					DocumentElement quantityElement =  subParamElement.addObject(HSearchIndexWriter.QTY_IDX_NAME);
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertQuantity)
-						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(idxElementLookup.apply( HSearchIndexWriter.QTY_IDX_NAME), q));
+						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(quantityElement, q));
 					break;
 				case STRING:
+					DocumentElement stringElement =  subParamElement.addObject("string");
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamString.class).stream())
-						.forEach(risps-> theHSearchIndexWriter.writeBasicStringFields(idxElementLookup.apply( "string"), risps.getValueExact()));
+						.forEach(risps-> theHSearchIndexWriter.writeBasicStringFields(stringElement, risps.getValueExact()));
 					break;
 				case TOKEN: {
+					DocumentElement tokenElement =  subParamElement.addObject("token");
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
-						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(idxElementLookup.apply( "token"), new Tag(rispt.getSystem(), rispt.getValue())));
+						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
 				}
 				break;
-				// wipmb implement other types
-
-				default:
+				// wipmb implement these
+				case URI:
+				case NUMBER:
+				case REFERENCE:
 					// unsupported
+				case SPECIAL:
+				case HAS:
+					break;
 			}
 		}
 	}

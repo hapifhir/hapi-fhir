@@ -266,7 +266,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private IExtractor<ResourceIndexedSearchParamComposite> createCompositeExtractor(IBaseResource theResource) {
-		// wipmb do we need to ape token and have a default system from CodeSet or ValueSet
 		return new CompositeExtractor(theResource);
 
 	}
@@ -283,23 +282,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		@Override
 		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 
-			if (!isConfiguredForComposite(theSearchParam)) {
-				// The FhirContext annotation defined SPs have null paths.  Skip them.
+			if (!isExtractableComposite(theSearchParam)) {
 				return;
 			}
 
 			String spName = theSearchParam.getName();
-			ourLog.debug("CompositeExtractor - extracting {}", spName);
 			ourLog.trace("CompositeExtractor - extracting {} {}", spName, theValue);
 			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(spName, myResourceType, thePath);
 			for (RuntimeSearchParam.Component component : theSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
 
-				// wipmb hack hack - we don't support %resource just yet.  But MolecularSequence defines an sp using it
-				if (expression.contains("%resource")) {
-					continue;
-				}
 				ourLog.trace("loading component for {} - {}", spName, componentSpRef);
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", spName, componentSpRef);
@@ -307,13 +300,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			theParams.add(e);
-
-			//mySearchParamRegistry
 		}
 
 		private void extractCompositeComponent(IBase theParentElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theParentSearchParam, RuntimeSearchParam theComponentSearchParam, String theSubPathExpression, boolean theWantLocalReferences) {
 
-			IExtractor extractor = buildExtractor(theComponentSearchParam.getParamType());
+			IExtractor extractor = buildComponentExtractor(theComponentSearchParam);
 			// skip unsupported types
 			if (extractor==null) {
 				ourLog.warn("Unsupported composite component type for SearchParameter {}: {} of type {}", theParentSearchParam.getName(), theComponentSearchParam.getName(), theComponentSearchParam.getParamType());
@@ -326,21 +317,21 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			ourLog.debug("CompositeExtractor - extracted {} index values for {}", set.size(), theComponentSearchParam.getName());
 		}
 
-		private IExtractor buildExtractor(RestSearchParameterTypeEnum paramType) {
+		private IExtractor buildComponentExtractor(RuntimeSearchParam theComponentSearchParam) {
 			IExtractor extractor;
-			switch (paramType) {
+			switch (theComponentSearchParam.getParamType()) {
 				case DATE:
-					extractor = new DateExtractor(myResourceType);
+					extractor = new DateExtractor(myResource);
 					break;
 				case QUANTITY:
-					extractor = createQuantityExtractor(myResourceType);
+					extractor = createQuantityExtractor(myResource);
 					break;
 				case STRING:
-					extractor = createStringExtractor(myResourceType);
+					extractor = createStringExtractor(myResource);
 					break;
 				case TOKEN:
 					// wipmb we don't propagate the default system down - is that a problem for composite?
-					extractor = new TokenExtractor(myResourceType, null);
+					extractor = createTokenExtractor(myResource);
 					break;
 				// wipmb implement other types
 				case URI:
@@ -351,11 +342,27 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 			return extractor;
 		}
+
 	}
 
-	private boolean isConfiguredForComposite(RuntimeSearchParam theSearchParam) {
+	/**
+	 * Is this an extractable composite SP?
+	 * @param theSearchParam of type composite
+	 * @return can we extract from this?
+	 */
+	private boolean isExtractableComposite(RuntimeSearchParam theSearchParam) {
+		// this is a composite SP
 		return RestSearchParameterTypeEnum.COMPOSITE.equals(theSearchParam.getParamType()) &&
-			theSearchParam.getComponents().stream().noneMatch(c->c.getExpression()==null);
+			theSearchParam.getComponents().stream()
+				.noneMatch(c->
+					// the component expressions are null in the FhirContextSearchParamRegistry.
+					// We can't do anything with them.
+					c.getExpression()==null ||
+						// does the sub-param link work?
+						mySearchParamRegistry.getActiveSearchParamByUrl(c.getReference()) == null ||
+						// wipmb hack hack alert: we don't support the %resource variable yet, but some standard SPs on MolecularSequence use it.
+						// skip them for now
+						c.getExpression().contains("%resource"));
 	}
 
 
@@ -500,11 +507,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
-		return createQuantityExtractor(toRootTypeName(theResource));
-	}
-
-	@Nonnull
-	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(String resourceType) {
+		String resourceType = toRootTypeName(theResource);
 		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
@@ -563,11 +566,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(IBaseResource theResource) {
 		String resourceType = toRootTypeName(theResource);
-		return createStringExtractor(resourceType);
-	}
-
-	@Nonnull
-	private IExtractor<ResourceIndexedSearchParamString> createStringExtractor(String resourceType) {
 		return (params, searchParam, value, path, theWantLocalReferences) -> {
 
 			if (value instanceof IPrimitiveType) {
