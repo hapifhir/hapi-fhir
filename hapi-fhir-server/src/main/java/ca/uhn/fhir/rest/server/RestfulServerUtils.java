@@ -1033,10 +1033,10 @@ public class RestfulServerUtils {
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
-	private static String getBinaryContentTypeOrDefault(IBaseBinary bin) {
+	private String getBinaryContentTypeOrDefault(IBaseBinary theBinary) {
 		String contentType;
-		if (isNotBlank(bin.getContentType())) {
-			contentType = bin.getContentType();
+		if (isNotBlank(theBinary.getContentType())) {
+			contentType = theBinary.getContentType();
 		} else {
 			contentType = Constants.CT_OCTET_STREAM;
 		}
