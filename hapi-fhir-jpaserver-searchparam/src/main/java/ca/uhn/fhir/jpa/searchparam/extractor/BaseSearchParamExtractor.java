@@ -330,7 +330,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					extractor = createStringExtractor(myResource);
 					break;
 				case TOKEN:
-					// wipmb we don't propagate the default system down - is that a problem for composite?
 					extractor = createTokenExtractor(myResource);
 					break;
 				// wipmb implement other types

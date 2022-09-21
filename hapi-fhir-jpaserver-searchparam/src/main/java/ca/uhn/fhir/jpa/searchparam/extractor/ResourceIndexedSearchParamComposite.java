@@ -89,7 +89,6 @@ public class ResourceIndexedSearchParamComposite {
 	}
 
 	public void addComponent(String theSearchParameterName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theExtractedParams) {
-		// wipmb theSearchParameterName is likely redundant since it will be in the params
 		myComponents.add(new Component(theSearchParameterName, theSearchParameterType, theExtractedParams));
 	}
 
