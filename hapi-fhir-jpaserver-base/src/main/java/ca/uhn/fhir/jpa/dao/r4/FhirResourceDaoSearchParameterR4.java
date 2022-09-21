@@ -158,7 +158,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 
 				try {
-					theContext.newFluentPath().parse(expression);
+					theContext.newFhirPath().parse(expression);
 				} catch (Exception exception) {
 					throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + exception.getMessage());
 				}
