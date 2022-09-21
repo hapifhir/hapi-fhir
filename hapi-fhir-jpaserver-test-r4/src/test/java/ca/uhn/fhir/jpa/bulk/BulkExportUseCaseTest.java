@@ -87,8 +87,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				}
 			}
 
-
-
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
 				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
