@@ -1033,7 +1033,7 @@ public class RestfulServerUtils {
 		return response.sendWriterResponse(theStatusCode, contentType, charset, writer);
 	}
 
-	private String getBinaryContentTypeOrDefault(IBaseBinary theBinary) {
+	private static String getBinaryContentTypeOrDefault(IBaseBinary theBinary) {
 		String contentType;
 		if (isNotBlank(theBinary.getContentType())) {
 			contentType = theBinary.getContentType();
