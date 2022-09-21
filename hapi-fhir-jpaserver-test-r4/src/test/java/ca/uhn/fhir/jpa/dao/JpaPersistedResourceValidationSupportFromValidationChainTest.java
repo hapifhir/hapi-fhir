@@ -15,6 +15,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,9 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 	@Mock
 	private IFhirResourceDao<Library> fhirResourceDaoLibrary;
+
+	@Mock
+	private IFhirResourceDao<Measure> fhirResourceDaoMeasure;
 
 	@Mock
 	private IBundleProvider search;
@@ -122,15 +126,17 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	public void validation_Jpa_Bundle_MeasureReportToMeasure() {
 		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
 		when(myDaoRegistry.getResourceDao("Library")).thenReturn(fhirResourceDaoLibrary);
+		when(myDaoRegistry.getResourceDao("Measure")).thenReturn(fhirResourceDaoMeasure);
 
 		when(fhirResourceDaoStructureDefinition.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 		when(fhirResourceDaoLibrary.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
+		when(fhirResourceDaoMeasure.search(Mockito.any(SearchParameterMap.class))).thenReturn(search);
 
 		ourCtx.setValidationSupport(getValidationSupportWithJpaPersistedResourceValidationSupport());
 		final Bundle bundleWithMeasureReportToReport = getBundle("/r4/3124-bundle-measure-report-to-measure-post.json");
 		final FhirValidator validator = getFhirValidator();
 
-		// TODO:  this fails with the following Exception but passes when sending this message in Postman:
+		// TODO:  see if pipeline passes -ea or doesn't:  if it does, this will fail:
 		/*
 		 * java.lang.AssertionError: Resource is MeasureReport, expected Bundle or Parameters
 		 *
@@ -139,7 +145,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		 */
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureReportToReport);
 
-		assertEquals(2, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(29, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@NotNull
