@@ -16,16 +16,13 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 
 class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport {
 	FhirContext myFhirContext = FhirContext.forR4Cached();
@@ -38,15 +35,15 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 	@Test
 	void testExtract_composite_producesValues() {
 		// setup
-		ResourceIndexedSearchParamComposite composite = new ResourceIndexedSearchParamComposite("component-code-value-concept", "Observation", "Observation.component");
+		ResourceIndexedSearchParamComposite composite = new ResourceIndexedSearchParamComposite("component-code-value-concept", "Observation.component");
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> codeParams = new ISearchParamExtractor.SearchParamSet<>();
-		codeParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-code", "http://example.com", "8480-6"));
+		codeParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-code", "https://example.com", "8480-6"));
 		composite.addComponent("component-code", RestSearchParameterTypeEnum.TOKEN, codeParams);
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> valueParams = new ISearchParamExtractor.SearchParamSet<>();
-		codeParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-value-concept", "http://example.com", "some_other_value"));
-		composite.addComponent("component-value-concept", RestSearchParameterTypeEnum.TOKEN, codeParams);
+		valueParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-value-concept", "https://example.com", "some_other_value"));
+		composite.addComponent("component-value-concept", RestSearchParameterTypeEnum.TOKEN, valueParams);
 
 		ResourceIndexedSearchParams extractedParams = new ResourceIndexedSearchParams();
 		extractedParams.myCompositeParams.add(composite);
@@ -55,11 +52,11 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation");
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
-		ExtendedHSearchIndexData hsearchIndexData = extractor.extract(new Observation(), extractedParams);
+		ExtendedHSearchIndexData indexData = extractor.extract(new Observation(), extractedParams);
 
 		// validate
-		Set<CompositeSearchIndexData> indexData = hsearchIndexData.getSearchParamComposites().get("component-code-value-concept");
-		assertThat(indexData, hasSize(1));
+		Set<CompositeSearchIndexData> spIndexData = indexData.getSearchParamComposites().get("component-code-value-concept");
+		assertThat(spIndexData, hasSize(1));
 	}
 
 	@Override

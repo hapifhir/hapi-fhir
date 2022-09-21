@@ -51,13 +51,13 @@ public class ObjectUtil {
 
 	/**
 	 * Cast the object to the type using Optional.
-	 * Useful for streaming.
+	 * Useful for streaming with flatMap.
 	 * @param theObject any object
 	 * @param theClass the class to check instanceof
 	 * @return Optional present if theObject is of type theClass
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Optional<T> safeCast(Object theObject, Class<T> theClass) {
+	public static <T> Optional<T> castIfInstanceof(Object theObject, Class<T> theClass) {
 		if (theClass.isInstance(theObject)) {
 			return Optional.of((T) theObject);
 		} else {

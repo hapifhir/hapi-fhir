@@ -47,7 +47,6 @@ public class ExtendedHSearchIndexData {
 	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
 
-	// wipmb replace with Multiset and HashMultiset
 	final SetMultimap<String, String> mySearchParamStrings = HashMultimap.create();
 	final SetMultimap<String, IBaseCoding> mySearchParamTokens = HashMultimap.create();
 	final SetMultimap<String, BigDecimal> mySearchParamNumbers = HashMultimap.create();

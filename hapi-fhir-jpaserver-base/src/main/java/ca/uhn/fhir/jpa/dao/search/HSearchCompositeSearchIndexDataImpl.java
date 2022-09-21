@@ -12,9 +12,6 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.util.ObjectUtil;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 
-import javax.print.Doc;
-import java.util.function.Function;
-
 /**
  * binding of HSearch apis into
  *
@@ -28,6 +25,54 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 		mySearchParamComposite = theSearchParamComposite;
 	}
 
+	/**
+	 * Write a nested index document for this composite.
+	 * We use a nested document to support correlation queries on the same parent element for
+	 * proper composite SP semantics.  Each component will have a sub-node for each component SP.
+	 *
+	 * Example for component-code-value-quantity, which composes
+	 * component-code and component-value-quantity:
+	 <pre>
+	 { "nsp: {
+	 "component-code-value-quantity": [
+	 {
+	 "component-code": {
+	 "token": {
+	 "code": "8480-6",
+	 "system": "http://loinc.org",
+	 "code-system": "http://loinc.org|8480-6"
+	 }
+	 },
+	 "component-value-quantity": {
+	 "quantity": {
+	 "code": "mmHg",
+	 "system": "null",
+	 "value": 60.0
+	 }
+	 }
+	 },
+	 {
+	 "component-code": {
+	 "token": {
+	 "code": "3421-5",
+	 "system": "http://loinc.org",
+	 "code-system": "http://loinc.org|3421-5"
+	 }
+	 },
+	 "component-value-quantity": {
+	 "quantity": {
+	 "code": "mmHg",
+	 "system": "null",
+	 "value": 100.0
+	 }
+	 }
+	 }
+	 ]
+	 }
+	 </pre>
+	 *
+	 * @param theRoot our cache wrapper around the root HSearch DocumentElement
+	 */
 	@Override
 	public void writeIndexEntry(HSearchIndexWriter theHSearchIndexWriter, HSearchElementCache theRoot) {
 		// optimization - An empty sub-component will never match.
@@ -44,7 +89,6 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 
 		// we want to re-use the `token`, `quantity` nodes for multiple values.
 		DocumentElement compositeRoot = nestedParamRoot.addObject(mySearchParamComposite.getSearchParamName());
-		HSearchElementCache compositeRootCache = new HSearchElementCache(compositeRoot);
 
 
 		for (ResourceIndexedSearchParamComposite.Component subParam : mySearchParamComposite.getComponents()) {
@@ -55,40 +99,48 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 				case DATE:
 					DocumentElement dateElement = subParamElement.addObject("dt");
 					subParam.getParamIndexValues().stream()
-						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamDate.class).stream())
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamDate.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertDate)
 						.forEach(d-> theHSearchIndexWriter.writeDateFields(dateElement, d));
 					break;
+
 				case QUANTITY:
 					DocumentElement quantityElement =  subParamElement.addObject(HSearchIndexWriter.QTY_IDX_NAME);
 					subParam.getParamIndexValues().stream()
-						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamQuantity.class).stream())
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamQuantity.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertQuantity)
 						.forEach(q-> theHSearchIndexWriter.writeQuantityFields(quantityElement, q));
 					break;
+
 				case STRING:
 					DocumentElement stringElement =  subParamElement.addObject("string");
 					subParam.getParamIndexValues().stream()
-						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamString.class).stream())
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamString.class).stream())
 						.forEach(risps-> theHSearchIndexWriter.writeBasicStringFields(stringElement, risps.getValueExact()));
 					break;
-				case TOKEN: {
+
+				case TOKEN:
 					DocumentElement tokenElement =  subParamElement.addObject("token");
 					subParam.getParamIndexValues().stream()
-						.flatMap(o->ObjectUtil.safeCast(o, ResourceIndexedSearchParamToken.class).stream())
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamToken.class).stream())
 						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
-				}
 				break;
+
 				// wipmb implement these
 				case URI:
 				case NUMBER:
 				case REFERENCE:
-					// unsupported
+					break;
+
+				case COMPOSITE:
+					assert false: "composite components can't be composite";
+					break;
+
+				// unsupported
 				case SPECIAL:
 				case HAS:
 					break;
 			}
 		}
 	}
-
 }

@@ -11,28 +11,83 @@ import java.util.List;
 
 /**
  * Intermediate holder for indexing composite search parameters.
+ * There will be one instance for each element extracted by the parent composite path expression.
  */
 public class ResourceIndexedSearchParamComposite {
+
 	/**
-	 * the SP name
+	 * the SP name for this composite SP
 	 */
 	private final String mySearchParamName;
 
-	private final String myResourceType;
 	/**
-	 * The path of the parent element
+	 * The path expression of the composite SP
 	 */
 	private final String myPath;
-	private List<Component> myComponents = new ArrayList<>();
 
+	/**
+	 * Subcomponent index data for this composite
+	 */
+	private final List<Component> myComponents = new ArrayList<>();
+
+	public ResourceIndexedSearchParamComposite(String theSearchParamName, String thePath) {
+		mySearchParamName = theSearchParamName;
+		myPath = thePath;
+	}
+
+	public String getSearchParamName() {
+		return mySearchParamName;
+	}
+
+	public String getPath() {
+		return myPath;
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+	}
+
+	public List<Component> getComponents() {
+		return myComponents;
+	}
+
+	/**
+	 * Add subcomponent index data.
+	 * @param theComponentSearchParam the component SP we are extracting
+	 * @param theExtractedParams index data extracted by the sub-extractor
+	 */
+	public void addComponent(RuntimeSearchParam theComponentSearchParam, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+		addComponent(theComponentSearchParam.getName(), theComponentSearchParam.getParamType(), theExtractedParams);
+	}
+
+	public void addComponent(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theExtractedParams) {
+		myComponents.add(new Component(theComponentSearchParamName, theComponentSearchParamType, theExtractedParams));
+	}
+
+	/**
+	 * Nested holder of index data for a single component of a composite SP.
+	 * E.g. hold token info for component-code under parent of component-code-value-quantity.
+	 */
 	public static class Component {
+		/**
+		 * The SP name of this subcomponent.
+		 * E.g. "component-code" when the parent composite SP is component-code-value-quantity.
+		 */
 		final String mySearchParamName;
+		/**
+		 * The SP type of this subcomponent.
+		 * E.g. TOKEN when indexing "component-code" of parent composite SP is component-code-value-quantity.
+		 */
 		final RestSearchParameterTypeEnum mySearchParameterType;
-		final ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> myParamIndexValues;
+		/**
+		 * Any of the extracted data of any type for this subcomponent.
+		 */
+		final ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> myParamIndexValues;
 
-		public Component(String theSearchParamName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theParamIndexValues) {
-			mySearchParamName = theSearchParamName;
-			mySearchParameterType = theSearchParameterType;
+		public Component(String theComponentSearchParamName, RestSearchParameterTypeEnum theComponentSearchParamType, ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> theParamIndexValues) {
+			mySearchParamName = theComponentSearchParamName;
+			mySearchParameterType = theComponentSearchParamType;
 			myParamIndexValues = theParamIndexValues;
 		}
 
@@ -44,7 +99,7 @@ public class ResourceIndexedSearchParamComposite {
 			return mySearchParameterType;
 		}
 
-		public ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> getParamIndexValues() {
+		public ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> getParamIndexValues() {
 			return myParamIndexValues;
 		}
 
@@ -53,44 +108,5 @@ public class ResourceIndexedSearchParamComposite {
 			return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		}
 	}
-
-	public ResourceIndexedSearchParamComposite(String theSearchParamName, String theResourceType, String thePath) {
-		mySearchParamName = theSearchParamName;
-		myResourceType = theResourceType;
-		myPath = thePath;
-	}
-
-
-	public String getSearchParamName() {
-		return mySearchParamName;
-	}
-
-	public String getResourceType() {
-		return myResourceType;
-	}
-
-	public String getPath() {
-		return myPath;
-	}
-
-
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-	}
-
-	public List<Component> getComponents() {
-		return myComponents;
-	}
-
-
-	public void addComponent(RuntimeSearchParam theRuntimeSearchParam, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theExtractedParams) {
-		addComponent(theRuntimeSearchParam.getName(), theRuntimeSearchParam.getParamType(), theExtractedParams);
-	}
-
-	public void addComponent(String theSearchParameterName, RestSearchParameterTypeEnum theSearchParameterType, ISearchParamExtractor.SearchParamSet<? extends BaseResourceIndexedSearchParam> theExtractedParams) {
-		myComponents.add(new Component(theSearchParameterName, theSearchParameterType, theExtractedParams));
-	}
-
 
 }

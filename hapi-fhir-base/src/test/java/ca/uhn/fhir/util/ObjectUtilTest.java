@@ -61,7 +61,7 @@ public class ObjectUtilTest {
 	void testCast_isInstance_present() {
 		Boolean value = Boolean.FALSE;
 
-		Optional<Boolean> result = ObjectUtil.safeCast(value, Boolean.class);
+		Optional<Boolean> result = ObjectUtil.castIfInstanceof(value, Boolean.class);
 
 		assertTrue(result.isPresent());
 	}
@@ -70,7 +70,7 @@ public class ObjectUtilTest {
 	void testCast_isNotInstance_empty() {
 		Boolean value = Boolean.FALSE;
 
-		Optional<Integer> result = ObjectUtil.safeCast(value, Integer.class);
+		Optional<Integer> result = ObjectUtil.castIfInstanceof(value, Integer.class);
 
 		assertTrue(result.isEmpty());
 	}
