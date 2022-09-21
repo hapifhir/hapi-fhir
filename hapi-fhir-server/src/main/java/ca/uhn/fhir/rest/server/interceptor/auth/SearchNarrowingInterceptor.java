@@ -469,7 +469,7 @@ public class SearchNarrowingInterceptor {
 			String url = theModifiableBundleEntry.getRequestUrl();
 
 			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
-			BaseMethodBinding<?> method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
+			BaseMethodBinding method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
 			RestOperationTypeEnum restOperationType = method.getRestOperationType();
 			subServletRequestDetails.setRestOperationType(restOperationType);
 

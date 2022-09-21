@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
@@ -66,8 +67,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	public static final String GLOBAL = "GLOBAL";
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
 	private Collection<ResourceBinding> resourceBindings;
-	private List<BaseMethodBinding<?>> serverBindings;
-	private List<BaseMethodBinding<?>> myGlobalBindings;
+	private List<BaseMethodBinding> serverBindings;
+	private List<BaseMethodBinding> myGlobalBindings;
 	private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
 	private String myImplementationDescription;
 	private String myServerName = "HAPI FHIR";
@@ -107,14 +108,14 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 *
 	 * @return the serverBindings
 	 */
-	public List<BaseMethodBinding<?>> getServerBindings() {
+	public List<BaseMethodBinding> getServerBindings() {
 		return serverBindings;
 	}
 
 	/**
 	 * Set the theServerBindings
 	 */
-	public RestfulServerConfiguration setServerBindings(List<BaseMethodBinding<?>> theServerBindings) {
+	public RestfulServerConfiguration setServerBindings(List<BaseMethodBinding> theServerBindings) {
 		this.serverBindings = theServerBindings;
 		return this;
 	}
@@ -248,8 +249,8 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		IdentityHashMap<OperationMethodBinding, String> operationBindingToId = new IdentityHashMap<>();
 		HashMap<String, List<OperationMethodBinding>> operationIdToBindings = new HashMap<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
-		List<BaseMethodBinding<?>> methodBindings = resourceToMethods
+		Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings();
+		List<BaseMethodBinding> methodBindings = resourceToMethods
 			.values()
 			.stream().flatMap(t -> t.stream())
 			.collect(Collectors.toList());
@@ -258,7 +259,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		}
 
 		ListMultimap<String, OperationMethodBinding> nameToOperationMethodBindings = ArrayListMultimap.create();
-		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+		for (BaseMethodBinding nextMethodBinding : methodBindings) {
 			if (nextMethodBinding instanceof OperationMethodBinding) {
 				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 				nameToOperationMethodBindings.put(methodBinding.getName(), methodBinding);
@@ -332,7 +333,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 			nextMethodBindings.forEach(t->operationBindingToId.put(t, operationId));
 		}
 
-		for (BaseMethodBinding<?> nextMethodBinding : methodBindings) {
+		for (BaseMethodBinding nextMethodBinding : methodBindings) {
 			if (nextMethodBinding instanceof OperationMethodBinding) {
 				OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 				if (operationBindingToId.containsKey(methodBinding)) {
@@ -353,18 +354,18 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return new Bindings(namedSearchMethodBindingToName, searchNameToBindings, operationIdToBindings, operationBindingToId);
 	}
 
-	public Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
+	public Map<String, List<BaseMethodBinding>> collectMethodBindings() {
+		Map<String, List<BaseMethodBinding>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getResourceBindings()) {
 			String resourceName = next.getResourceName();
-			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
+			for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
 					resourceToMethods.put(resourceName, new ArrayList<>());
 				}
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding<?> nextMethodBinding : getServerBindings()) {
+		for (BaseMethodBinding nextMethodBinding : getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
 				resourceToMethods.put(resourceName, new ArrayList<>());
@@ -374,11 +375,11 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 		return resourceToMethods;
 	}
 
-	public List<BaseMethodBinding<?>> getGlobalBindings() {
+	public List<BaseMethodBinding> getGlobalBindings() {
 		return myGlobalBindings;
 	}
 
-	public void setGlobalBindings(List<BaseMethodBinding<?>> theGlobalBindings) {
+	public void setGlobalBindings(List<BaseMethodBinding> theGlobalBindings) {
 		myGlobalBindings = theGlobalBindings;
 	}
 

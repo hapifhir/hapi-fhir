@@ -60,6 +60,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,6 +182,31 @@ public class OpenApiInterceptorTest {
 		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 		String resp = fetchSwaggerUi(url);
 		assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
+		assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
+	}
+
+	@Test
+	public void testSwaggerUiWithCustomStylesheet() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		interceptor.setCssText("BODY {\nfont-size: 1.1em;\n}");
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		// Fetch Swagger UI HTML
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		assertThat(resp, resp, containsString("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>"));
+
+		// Fetch Custom CSS
+		url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
+		resp = fetchSwaggerUi(url);
+		String expected = """
+			BODY {
+			font-size: 1.1em;
+			}
+			""";
+		assertEquals(expected, resp);
 	}
 
 	@Test

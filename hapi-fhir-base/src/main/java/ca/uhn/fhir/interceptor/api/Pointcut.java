@@ -364,6 +364,12 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.server.interceptor.IServerInterceptor$ActionRequestDetails"
 	),
 
+
+	// FIXME: remove
+	SERVER_PROVIDER_METHOD_BOUND("ca.uhn.fhir.rest.server.method.BaseMethodBinding",
+		"ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
+
+
 	/**
 	 * <b>Server Hook:</b>
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes
