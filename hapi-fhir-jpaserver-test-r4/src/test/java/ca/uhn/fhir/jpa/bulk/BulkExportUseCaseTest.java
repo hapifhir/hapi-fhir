@@ -4,6 +4,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
 import ca.uhn.fhir.parser.IParser;
@@ -12,14 +14,21 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import com.google.common.collect.Sets;
+import com.vladsch.flexmark.ast.Paragraph;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
@@ -30,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,8 +48,12 @@ import java.util.List;
 import java.util.Map;
 
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +65,42 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
 
+	@Nested
+	public class SpecConformanceTests {
+		@Test
+		public void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
+
+			//Given a patient exists
+			Patient p = new Patient();
+			p.setId("Pat-1");
+			myClient.update().resource(p).execute();
+
+			//And Given we start a bulk export job
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_type=Patient");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation =  headers[0].getValue();
+			}
+			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//Then: When the poll shows as complete, all attributes should be filled.
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				ourLog.info(responseContent);
+
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(myClient.getServerBase() + "/$export?_type=Patient")));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertThat(result.getError(), is(empty()));
+				assertThat(result.getOutput(), is(not(empty())));
+			}
+		}
+	}
 	@Nested
 	public class SystemBulkExportTests {
 		//TODO add use case tests here

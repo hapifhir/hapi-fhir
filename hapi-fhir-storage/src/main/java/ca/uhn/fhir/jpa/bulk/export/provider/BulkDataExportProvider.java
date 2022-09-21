@@ -123,8 +123,13 @@ public class BulkDataExportProvider {
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
+
+
 		BulkExportParameters parameters = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
 		parameters.setUseExistingJobsFirst(useCache);
+
+		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and is needed for the report.
+		parameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
 
 		// start job
 		Batch2JobStartResponse response = myJobRunner.startNewJob(parameters);
@@ -282,6 +287,9 @@ public class BulkDataExportProvider {
 					BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
 					bulkResponseDocument.setTransactionTime(info.getEndTime()); // completed
 
+					bulkResponseDocument.setRequiresAccessToken(true);
+
+
 					String report = info.getReport();
 					if (isEmpty(report)) {
 						// this should never happen, but just in case...
@@ -289,9 +297,8 @@ public class BulkDataExportProvider {
 						response.getWriter().close();
 					} else {
 						BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-
-						// if there is a message....
 						bulkResponseDocument.setMsg(results.getReportMsg());
+						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
 						String serverBase = getDefaultPartitionServerBase(theRequestDetails);
 
