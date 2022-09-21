@@ -81,6 +81,8 @@ public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);
 
+	public static final int FIRST_PAGE_PREFETCH_SIZE = 50;
+
 	private final SearchParameterMap myParams;
 	private final IDao myCallingDao;
 	private final String myResourceType;
@@ -560,19 +562,15 @@ public class SearchTask implements Callable<Void> {
 		 */
 		int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
 		int minWanted = 0;
-		boolean useMinWanted = false;
 		if (myParams.getCount() != null) {
-			if (currentlyLoaded == 0) {
-				minWanted = myParams.getCount();
-				useMinWanted = true;
-			} else {
-				minWanted = myParams.getCount();
-				minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
-				minWanted += currentlyLoaded;
-			}
+			minWanted = myParams.getCount();
+			minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
+			minWanted += currentlyLoaded;
 		}
 
-		for (Iterator<Integer> iter = myDaoConfig.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
+		List<Integer> actingPreFetchThresholds = new ArrayList<>(myDaoConfig.getSearchPreFetchThresholds());
+		actingPreFetchThresholds.add(0, FIRST_PAGE_PREFETCH_SIZE);
+		for (Iterator<Integer> iter = actingPreFetchThresholds.iterator(); iter.hasNext(); ) {
 			int next = iter.next();
 			if (next != -1 && next <= currentlyLoaded) {
 				continue;
@@ -581,7 +579,7 @@ public class SearchTask implements Callable<Void> {
 			if (next == -1) {
 				sb.setMaxResultsToFetch(null);
 			} else {
-				myMaxResultsToFetch = useMinWanted ? minWanted : Math.max(next, minWanted);
+				myMaxResultsToFetch = Math.max(next, minWanted);
 				sb.setMaxResultsToFetch(myMaxResultsToFetch);
 			}
 

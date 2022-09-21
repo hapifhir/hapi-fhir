@@ -34,14 +34,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
@@ -49,8 +47,11 @@ import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -75,7 +76,6 @@ import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -87,6 +87,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -116,6 +117,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
+import static ca.uhn.fhir.rest.server.BasePagingProvider.DEFAULT_MAX_PAGE_SIZE;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -130,9 +133,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -149,7 +149,7 @@ import static org.mockito.Mockito.when;
 @TestExecutionListeners(listeners = {
 	DependencyInjectionTestExecutionListener.class
 	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
-	})
+})
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
@@ -2604,7 +2604,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Disabled("keeping to debug search scrolling")
 	@Test
 	public void withoutCount() {
-		createObservations(600);
+		String theCodeSystem = "http://example.com";
+		createObservations(theCodeSystem, 600);
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("code", new TokenParam().setSystem("http://example.com"));
@@ -2615,10 +2616,10 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 
-	private void createObservations(int theCount) {
+	private void createObservations(String theTheCodeSystem, int theCount) {
 		for (int i = 0; i < theCount; i++) {
 			myTestDataBuilder.createObservation(asArray(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-" + i)));
+				myTestDataBuilder.withObservationCode(theTheCodeSystem, "code-" + i)));
 		}
 	}
 
@@ -2630,7 +2631,63 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	}
 
 
+	@Nested
+	public class Asynch {
 
+		@BeforeEach
+		public void enableResourceStorage() {
+			myDaoConfig.setStoreResourceInHSearchIndex(true);
+		}
+
+		@AfterEach
+		public void resetResourceStorage() {
+			myDaoConfig.setStoreResourceInHSearchIndex(new DaoConfig().isStoreResourceInHSearchIndex());
+		}
+
+
+		@Test
+		public void asynchSearch() {
+			String theCodeSystem = "http://example.com";
+			createObservations(theCodeSystem, 1_000);
+//			IIdType id = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode(theCodeSystem, "theCode")));
+			myCaptureQueriesListener.clear();
+			myHSearchEventDispatcher.register(mySearchEventListener);
+
+			warmup(20);
+
+			StopWatch sw = new StopWatch();
+			int size = 480;
+			IBundleProvider result = myTestDaoSearch.searchForBundleProvider("Observation?code=" + theCodeSystem + "|", false);
+			await().until(() -> result.getResources(size-1, size).size() == 1);
+			ourLog.info("Test query took overall {}ms", sw.getMillis());
+
+//			assertEquals(((Observation) result.get(0)).getId(), id.getIdPart());
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle built using hsearch");
+
+			// only one hibernate search took place
+			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
+
+			assertEquals(DEFAULT_MAX_PAGE_SIZE, result.getResources(0, DEFAULT_MAX_PAGE_SIZE).size());
+
+
+		}
+
+	}
+
+	private void warmup(int iterations) {
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		ch.qos.logback.classic.Logger logger = loggerContext.getLogger("ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl");
+		Level oldLevel = logger.getLevel();
+		logger.setLevel(Level.OFF);
+
+		for (int i = 0; i < iterations; i++) {
+
+			myTestDaoSearch.searchForBundleProvider("Observation?code=any_" + i, false);
+
+		}
+
+		logger.setLevel(oldLevel);
+	}
 
 
 	/**
