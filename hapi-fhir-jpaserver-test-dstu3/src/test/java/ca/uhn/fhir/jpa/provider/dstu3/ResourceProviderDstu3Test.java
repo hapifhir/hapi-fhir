@@ -278,6 +278,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
 
+		Patient patientMR = new Patient();
+		patientMR.setMeta(new Meta().addSecurity(new Coding().setCode("MR")));
+		IIdType patientIdMR = ourClient.create().resource(patientMR).execute().getId();
+
+		Patient patientL = new Patient();
+		patientL.setMeta(new Meta().addSecurity(new Coding().setCode("L")));
+		IIdType patientIdL = ourClient.create().resource(patientL).execute().getId();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("_security", new TokenParam(null, "MR"));
+
+		IBundleProvider patientResult = myPatientDao.search(map);
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+
+		assertEquals(1, foundPatients.size());
 		assertNotNull(result);
 		assertEquals("resource-security", result.getId().toUnqualifiedVersionless().getIdPart());
 
