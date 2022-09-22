@@ -276,8 +276,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			}
 			case "ImplementationGuide":
-			case "SearchParameter":
-			{
+			case "SearchParameter": {
 				SearchParameterMap params = new SearchParameterMap();
 				params.setLoadSynchronousUpTo(1);
 				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
