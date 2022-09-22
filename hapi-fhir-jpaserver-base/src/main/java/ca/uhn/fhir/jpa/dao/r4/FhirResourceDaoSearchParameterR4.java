@@ -153,14 +153,16 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				// omitting validation for DSTU2
 			}
 			else if (fhirVersion.isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-				if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
-					throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid");
-				}
+				if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+					if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
+						throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid");
+					}
 
-				try {
-					theContext.newFhirPath().parse(expression);
-				} catch (Exception exception) {
-					throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + exception.getMessage());
+					try {
+						theContext.newFhirPath().parse(expression);
+					} catch (Exception exception) {
+						throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + exception.getMessage());
+					}
 				}
 			}
 		}
