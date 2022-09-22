@@ -70,10 +70,16 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 	 */
 	private boolean myExpandMdm;
 
+
 	/**
 	 * Patient id(s)
 	 */
 	private List<String> myPatientIds;
+
+	/**
+	 * The request which originated the request.
+	 */
+	private String myOriginalRequestUrl;
 
 	public boolean isExpandMdm() {
 		return myExpandMdm;
@@ -144,5 +150,13 @@ public class BulkExportParameters extends Batch2BaseJobParameters {
 
 	public void setPatientIds(List<String> thePatientIds) {
 		myPatientIds = thePatientIds;
+	}
+
+	public String getOriginalRequestUrl() {
+		return myOriginalRequestUrl;
+	}
+
+	public void setOriginalRequestUrl(String theOriginalRequestUrl) {
+		myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 }
