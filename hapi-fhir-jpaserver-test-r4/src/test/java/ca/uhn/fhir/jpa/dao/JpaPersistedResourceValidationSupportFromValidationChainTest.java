@@ -136,13 +136,6 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		final Bundle bundleWithMeasureReportToReport = getBundle("/r4/3124-bundle-measure-report-to-measure-post.json");
 		final FhirValidator validator = getFhirValidator();
 
-		// TODO:  see if pipeline passes -ea or doesn't:  if it does, this will fail:
-		/*
-		 * java.lang.AssertionError: Resource is MeasureReport, expected Bundle or Parameters
-		 *
-		 * 	at org.hl7.fhir.validation.instance.InstanceValidator.validateContains(InstanceValidator.java:4765)
-		 * 	at org.hl7.fhir.validation.instance.InstanceValidator.checkChildByDefinition(InstanceValidator.java:5130)
-		 */
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureReportToReport);
 
 		assertEquals(29, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
