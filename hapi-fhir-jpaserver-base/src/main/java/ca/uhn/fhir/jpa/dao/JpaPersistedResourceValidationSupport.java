@@ -45,8 +45,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ImplementationGuide;
-import org.hl7.fhir.r4.model.Library;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
@@ -283,24 +281,12 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}
-			case "Library":
-			{
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(Library.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
-				break;
-			}
-			case "Measure":
-			{
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(Measure.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
-				break;
-			}
 			default:
-				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
+				// N.B.: this code assumes that we are searching by canonical URL and that the CanonicalType in question has a URL
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add("url", new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 		}
 
 		Integer size = search.size();
