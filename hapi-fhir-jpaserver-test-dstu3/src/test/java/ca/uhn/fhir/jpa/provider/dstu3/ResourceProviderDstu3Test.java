@@ -271,12 +271,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		searchParameter.setId("resource-security");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setName("Security");
-		searchParameter.setCode("_security");
+		searchParameter.setCode("security");
 		searchParameter.addBase("Patient").addBase("Account");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
 
 		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
 
 		Patient patientMR = new Patient();
 		patientMR.setMeta(new Meta().addSecurity(new Coding().setCode("MR")));
@@ -287,7 +288,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType patientIdL = ourClient.create().resource(patientL).execute().getId();
 
 		SearchParameterMap map = new SearchParameterMap();
-		map.add("_security", new TokenParam(null, "MR"));
+		map.add("security", new TokenParam(null, "MR"));
 
 		IBundleProvider patientResult = myPatientDao.search(map);
 		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
