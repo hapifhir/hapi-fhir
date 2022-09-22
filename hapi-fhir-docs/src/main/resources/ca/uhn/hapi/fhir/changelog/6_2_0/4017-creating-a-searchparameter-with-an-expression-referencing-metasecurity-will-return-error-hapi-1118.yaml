@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4037
+jira: SMILE-5046
+title: "Previously, when we created a search parameter with an expression without resource name in DSTU3, an error was thrown. This has been corrected."
