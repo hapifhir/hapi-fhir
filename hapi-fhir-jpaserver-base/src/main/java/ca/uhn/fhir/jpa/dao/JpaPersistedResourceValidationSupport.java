@@ -284,7 +284,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}
-			// TODO: find a better solution:  Start:  EXPERIMENTAL CODE
 			case "Library":
 			{
 				SearchParameterMap params = new SearchParameterMap();
@@ -301,7 +300,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 				break;
 			}
-			// TODO: find a better solution:  End:  EXPERIMENTAL CODE
 			default:
 				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
 		}
