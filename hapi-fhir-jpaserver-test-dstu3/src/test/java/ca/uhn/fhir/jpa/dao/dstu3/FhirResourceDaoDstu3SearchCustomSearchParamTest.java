@@ -252,6 +252,30 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 	}
 
 	@Test
+	public void testIndexFailsIfInvalidSearchParameterExists() {
+		myDaoConfig.setValidateSearchParameterExpressionsOnSave(false);
+
+		SearchParameter threadIdSp = new SearchParameter();
+		threadIdSp.addBase("Communication");
+		threadIdSp.setCode("has-attachments");
+		threadIdSp.setType(Enumerations.SearchParamType.REFERENCE);
+		threadIdSp.setExpression("Communication.payload[1].contentAttachment is not null");
+		threadIdSp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(threadIdSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		Communication com = new Communication();
+		com.setStatus(Communication.CommunicationStatus.INPROGRESS);
+		try {
+			myCommunicationDao.create(com, mySrd);
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage(), startsWith(Msg.code(504) + "Failed to extract values from resource using FHIRPath \"Communication.payload[1].contentAttachment is not null\": org.hl7.fhir"));
+		}
+	}
+
+	@Test
 	public void testRejectSearchParamWithInvalidExpression() {
 		SearchParameter threadIdSp = new SearchParameter();
 		threadIdSp.addBase("Communication");
@@ -267,6 +291,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid SearchParameter.expression value \"Communication.payload[1].contentAttachment is not null\": Error at 1, 4: Premature ExpressionNode termination at unexpected token \"null\""));
 		}
 	}
+
 
 	/**
 	 * See #863
