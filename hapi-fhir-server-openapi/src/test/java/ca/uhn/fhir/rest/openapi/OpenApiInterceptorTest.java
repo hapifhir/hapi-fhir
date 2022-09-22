@@ -57,12 +57,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -220,6 +222,21 @@ public class OpenApiInterceptorTest {
 	}
 
 	@Test
+	public void testSwaggerUiNotPaged() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		interceptor.setUseResourcePages(false);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		// Fetch Swagger UI HTML
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		List<String> buttonTexts = parsePageButtonTexts(resp, url);
+		assertThat(buttonTexts.toString(), buttonTexts, empty());
+	}
+
+	@Test
 	public void testSwaggerUiWithResourceCounts_OneResourceOnly() throws IOException {
 		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
 		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
@@ -274,6 +291,10 @@ public class OpenApiInterceptorTest {
 	private List<String> parsePageButtonTexts(String resp, String url) throws IOException {
 		HtmlPage html = HtmlUtil.parseAsHtml(resp, new URL(url));
 		HtmlDivision pageButtons = (HtmlDivision) html.getElementById("pageButtons");
+		if (pageButtons == null) {
+			return Collections.emptyList();
+		}
+
 		List<String> buttonTexts = new ArrayList<>();
 		for (DomElement next : pageButtons.getChildElements()) {
 			buttonTexts.add(next.asNormalizedText());

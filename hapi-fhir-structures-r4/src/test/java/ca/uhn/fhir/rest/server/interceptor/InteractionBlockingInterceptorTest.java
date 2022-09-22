@@ -47,33 +47,6 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	@Test
 	public void testAllowInteractions() {
 		// Setup
-		mySvc.addAllowedInteraction("Patient", RestOperationTypeEnum.READ);
-		mySvc.addAllowedInteraction("Observation", RestOperationTypeEnum.READ);
-		mySvc.addAllowedInteraction("Observation", RestOperationTypeEnum.CREATE);
-
-		// Test
-		registerProviders();
-
-		// Verify CapabilityStatement
-		Set<String> supportedOps = fetchCapabilityInteractions();
-		assertThat(supportedOps.toString(), supportedOps, containsInAnyOrder(
-			"Observation:create",
-			"Observation:read",
-			"Observation:vread",
-			"OperationDefinition:read",
-			"Patient:read",
-			"Patient:vread"
-		));
-
-		// Verify Server
-		verifyCreateObservationOk();
-		verifyReadObservationOk();
-		verifyReadEncounterFails();
-	}
-
-	@Test
-	public void testAllowInteractions_BySpec() {
-		// Setup
 		mySvc.addAllowedSpec("Patient:read");
 		mySvc.addAllowedSpec("Observation:read");
 		mySvc.addAllowedSpec("Observation:create");

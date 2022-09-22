@@ -365,7 +365,21 @@ public enum Pointcut implements IPointcut {
 	),
 
 
-	// FIXME: remove
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called when a resource provider method is registered and being bound
+	 * by the HAPI FHIR Plain Server / RestfulServer.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.method.BaseMethodBinding - The method binding.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hook methods  may modify the method binding, replace it, or return <code>null</code> to cancel the binding.
+	 * </p>
+	 */
 	SERVER_PROVIDER_METHOD_BOUND("ca.uhn.fhir.rest.server.method.BaseMethodBinding",
 		"ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
 

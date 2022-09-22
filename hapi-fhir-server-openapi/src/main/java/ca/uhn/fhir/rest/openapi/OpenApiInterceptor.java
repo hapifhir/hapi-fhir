@@ -58,6 +58,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -152,6 +153,7 @@ public class OpenApiInterceptor {
 
 	private void initResources() {
 		setBannerImage(RACCOON_PNG);
+		setUseResourcePages(true);
 
 		addResourcePathToClasspath("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
 		addResourcePathToClasspath("/swagger-ui/" + RACCOON_PNG, "/ca/uhn/fhir/rest/openapi/raccoon.png");
@@ -292,6 +294,28 @@ public class OpenApiInterceptor {
 		return theUrl;
 	}
 
+	/**
+	 * If supplied, this field can be used to provide additional CSS text that should
+	 * be loaded by the swagger-ui page. The contents should be raw CSS text, e.g.
+	 * <code>
+	 * BODY { font-size: 1.1em; }
+	 * </code>
+	 */
+	public String getCssText() {
+		return myCssText;
+	}
+
+	/**
+	 * If supplied, this field can be used to provide additional CSS text that should
+	 * be loaded by the swagger-ui page. The contents should be raw CSS text, e.g.
+	 * <code>
+	 * BODY { font-size: 1.1em; }
+	 * </code>
+	 */
+	public void setCssText(String theCssText) {
+		myCssText = theCssText;
+	}
+
 	@SuppressWarnings("unchecked")
 	private void serveSwaggerUiHtml(ServletRequestDetails theRequestDetails, HttpServletResponse theResponse) throws IOException {
 		CapabilityStatement cs = getCapabilityStatement(theRequestDetails);
@@ -310,7 +334,8 @@ public class OpenApiInterceptor {
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
 		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
-		context.setVariable("ADDITIONAL_CSS_TEXT", myCssText);
+		context.setVariable("ADDITIONAL_CSS_TEXT", getCssText());
+		context.setVariable("USE_RESOURCE_PAGES", isUseResourcePages());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
 		String copyright = cs.getCopyright();
@@ -353,7 +378,12 @@ public class OpenApiInterceptor {
 		context.setVariable("PAGE_NAMES", pageNames);
 		context.setVariable("PAGE_NAME_TO_COUNT", resourceToCount);
 
-		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
+		String page;
+		if (isUseResourcePages()) {
+			page = extractPageName(theRequestDetails, PAGE_SYSTEM);
+		} else {
+			page = PAGE_ALL;
+		}
 		context.setVariable("PAGE", page);
 
 		populateOIDCVariables(theRequestDetails, context);
@@ -840,7 +870,6 @@ public class OpenApiInterceptor {
 		};
 	}
 
-
 	private Content provideContentFhirResource(OpenAPI theOpenApi, FhirContext theExampleFhirContext, Supplier<IBaseResource> theExampleSupplier) {
 		addSchemaFhirResource(theOpenApi);
 		Content retVal = new Content();
@@ -879,19 +908,8 @@ public class OpenApiInterceptor {
 	}
 
 	public OpenApiInterceptor setBannerImage(String theBannerImage) {
-		myBannerImage = theBannerImage;
+		myBannerImage = StringUtils.defaultIfBlank(theBannerImage, null);
 		return this;
-	}
-
-	/**
-	 * If supplied, this field can be used to provide additional CSS text that should
-	 * be loaded by the swagger-ui page. The contents should be raw CSS text, e.g.
-	 * <code>
-	 * BODY { font-size: 1.1em; }
-	 * </code>
-	 */
-	public void setCssText(String theCssText) {
-		myCssText = theCssText;
 	}
 
 	public boolean isUseResourcePages() {

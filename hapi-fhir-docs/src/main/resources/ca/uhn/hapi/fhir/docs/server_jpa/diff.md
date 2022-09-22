@@ -45,9 +45,9 @@ The server will produce a response resembling the following:
 }
 ```
 
-# Diff Instance
+# Diff Server
 
-When the $diff operation is invoked at the instance level (meaning it is invoked on a specific resource ID), it will compare two versions of the given resource.
+When the $diff operation is invoked at the server level (meaning it is invoked against the server base URL), it will compare two arbitrary resources of any type.
 
 ## Parameters
 
