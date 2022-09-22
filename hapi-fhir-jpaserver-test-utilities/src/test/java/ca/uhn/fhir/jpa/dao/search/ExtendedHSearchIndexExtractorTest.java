@@ -39,11 +39,11 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> codeParams = new ISearchParamExtractor.SearchParamSet<>();
 		codeParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-code", "https://example.com", "8480-6"));
-		composite.addComponent("component-code", RestSearchParameterTypeEnum.TOKEN, codeParams);
+		composite.addComponentIndexedSearchParams("component-code", RestSearchParameterTypeEnum.TOKEN, codeParams);
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> valueParams = new ISearchParamExtractor.SearchParamSet<>();
 		valueParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-value-concept", "https://example.com", "some_other_value"));
-		composite.addComponent("component-value-concept", RestSearchParameterTypeEnum.TOKEN, valueParams);
+		composite.addComponentIndexedSearchParams("component-value-concept", RestSearchParameterTypeEnum.TOKEN, valueParams);
 
 		ResourceIndexedSearchParams extractedParams = new ResourceIndexedSearchParams();
 		extractedParams.myCompositeParams.add(composite);

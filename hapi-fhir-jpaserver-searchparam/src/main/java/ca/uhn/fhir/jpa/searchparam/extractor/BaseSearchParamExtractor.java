@@ -87,6 +87,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
+import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -192,6 +194,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public List<String> extractParamValuesAsStrings(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
+		IExtractor extractor = createExtractor(theSearchParam, theResource);
+
+		if (theSearchParam.getParamType().equals(REFERENCE)) {
+			return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
+		} else {
+			return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
+		}
+
+	}
+
+	@Nonnull
+	private IExtractor createExtractor(RuntimeSearchParam theSearchParam, IBaseResource theResource) {
 		IExtractor extractor;
 		switch (theSearchParam.getParamType()) {
 			case DATE:
@@ -208,7 +222,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case REFERENCE:
 				extractor = createReferenceExtractor();
-				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
+				break;
 			case QUANTITY:
 				if (myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
 					extractor = new MultiplexExtractor(
@@ -229,8 +243,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			default:
 				throw new UnsupportedOperationException(Msg.code(503) + "Type " + theSearchParam.getParamType() + " not supported for extraction");
 		}
-
-		return extractParamsAsQueryTokens(theSearchParam, theResource, extractor);
+		return extractor;
 	}
 
 	private List<String> extractReferenceParamsAsQueryTokens(RuntimeSearchParam theSearchParam, IBaseResource theResource, IExtractor<PathAndRef> theExtractor) {
@@ -286,33 +299,43 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		/**
 		 * Extract the subcomponent index data for each component of a composite SP from an IBase element.
 		 *
-		 * @param theParams will add 1 or 0 ResourceIndexedSearchParamComposite instances for theValue
+		 * @param theParams               will add 1 or 0 ResourceIndexedSearchParamComposite instances for theValue
 		 * @param theCompositeSearchParam the composite SP
-		 * @param theValue the focus element for the subcomponent extraction
-		 * @param thePath ignored - for api
-		 * @param theWantLocalReferences passed down to URI extraction
+		 * @param theValue                the focus element for the subcomponent extraction
+		 * @param thePath                 unused api param
+		 * @param theWantLocalReferences  passed down to reference extraction
 		 */
 		@Override
 		public void extract(SearchParamSet<ResourceIndexedSearchParamComposite> theParams, RuntimeSearchParam theCompositeSearchParam, IBase theValue, String thePath, boolean theWantLocalReferences) {
 
 			// skip broken SPs
 			if (!isExtractableComposite(theCompositeSearchParam)) {
+				ourLog.info("CompositeExtractor - skipping unsupported search parameter {}", theCompositeSearchParam.getName());
 				return;
 			}
 
 			String compositeSpName = theCompositeSearchParam.getName();
 			ourLog.trace("CompositeExtractor - extracting {} {}", compositeSpName, theValue);
 			ResourceIndexedSearchParamComposite e = new ResourceIndexedSearchParamComposite(compositeSpName, thePath);
+
+			// extract the index data for each component.
 			for (RuntimeSearchParam.Component component : theCompositeSearchParam.getComponents()) {
 				String componentSpRef = component.getReference();
 				String expression = component.getExpression();
 
-				ourLog.trace("loading component for {} - {}", compositeSpName, componentSpRef);
 				RuntimeSearchParam componentSp = mySearchParamRegistry.getActiveSearchParamByUrl(componentSpRef);
 				Validate.notNull(componentSp, "Misconfigured SP %s - failed to load component %s", compositeSpName, componentSpRef);
-				extractCompositeComponent(theValue, e, componentSp, expression, theWantLocalReferences, theCompositeSearchParam);
+
+				SearchParamSet<BaseResourceIndexedSearchParam> componentIndexedSearchParams = extractCompositeComponentIndexData(theValue, componentSp, expression, theWantLocalReferences, theCompositeSearchParam);
+				if (componentIndexedSearchParams.isEmpty()) {
+					// If any of the components are empty, no search can ever match.  Short circuit, and bail out.
+					return;
+				} else {
+					e.addComponentIndexedSearchParams(componentSp, componentIndexedSearchParams);
+				}
 			}
 
+			// every component has data.  Add it for indexing.
 			theParams.add(e);
 		}
 
@@ -320,29 +343,26 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 * Extract the subcomponent index data for a single component of a composite SP.
 		 *
 		 * @param theFocusElement         the element to use as the root for sub-extraction
-		 * @param theIndexBean            the holder for extracted index data
 		 * @param theComponentSearchParam the active subcomponent SP for extraction
 		 * @param theSubPathExpression    the sub-expression to extract values from theFocusElement
 		 * @param theWantLocalReferences  flag for URI processing
 		 * @param theCompositeSearchParam the parent composite SP
+		 * @return the extracted index beans for theFocusElement
 		 */
-		private void extractCompositeComponent(IBase theFocusElement, ResourceIndexedSearchParamComposite theIndexBean, RuntimeSearchParam theComponentSearchParam, String theSubPathExpression, boolean theWantLocalReferences, RuntimeSearchParam theCompositeSearchParam) {
-
-			IExtractor componentExtractor = buildComponentExtractor(theComponentSearchParam);
-			// skip unsupported types
-			if (componentExtractor==null) {
-				ourLog.warn("Unsupported composite component type for SearchParameter {}: {} of type {}", theCompositeSearchParam.getName(), theComponentSearchParam.getName(), theComponentSearchParam.getParamType());
-				return;
-			}
-
+		@Nonnull
+		private SearchParamSet<BaseResourceIndexedSearchParam> extractCompositeComponentIndexData(IBase theFocusElement, RuntimeSearchParam theComponentSearchParam, String theSubPathExpression, boolean theWantLocalReferences, RuntimeSearchParam theCompositeSearchParam) {
+			IExtractor componentExtractor = createExtractor(theComponentSearchParam, myResource);
 			SearchParamSet<BaseResourceIndexedSearchParam> componentIndexData = new SearchParamSet<>();
+
 			extractSearchParam(theComponentSearchParam, theSubPathExpression, theFocusElement, componentExtractor, componentIndexData, theWantLocalReferences);
-			theIndexBean.addComponent(theComponentSearchParam, componentIndexData);
 			ourLog.trace("CompositeExtractor - extracted {} index values for {}", componentIndexData.size(), theComponentSearchParam.getName());
+
+			return componentIndexData;
 		}
 
 		/**
 		 * Is this an extractable composite SP?
+		 *
 		 * @param theSearchParam of type composite
 		 * @return can we extract useful index data from this?
 		 */
@@ -350,41 +370,23 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			// this is a composite SP
 			return RestSearchParameterTypeEnum.COMPOSITE.equals(theSearchParam.getParamType()) &&
 				theSearchParam.getComponents().stream()
-					.noneMatch(this::isExtractableCompositeComponent);
-		}
-		private boolean isExtractableCompositeComponent(RuntimeSearchParam.Component c) {
-			// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We can't do anything with them.
-			return c.getExpression()==null ||
-				// does the sub-param link work?
-				mySearchParamRegistry.getActiveSearchParamByUrl(c.getReference()) == null ||
-				// wipmb hack hack alert: we don't support the %resource variable yet, but some standard SPs on MolecularSequence use it.
-				// skip them for now
-				c.getExpression().contains("%resource");
+					.noneMatch(this::isNotExtractableCompositeComponent);
 		}
 
-		private IExtractor buildComponentExtractor(RuntimeSearchParam theComponentSearchParam) {
-			IExtractor extractor;
-			switch (theComponentSearchParam.getParamType()) {
-				case DATE:
-					extractor = createDateExtractor(myResource);
-					break;
-				case QUANTITY:
-					extractor = createQuantityExtractor(myResource);
-					break;
-				case STRING:
-					extractor = createStringExtractor(myResource);
-					break;
-				case TOKEN:
-					extractor = createTokenExtractor(myResource);
-					break;
-				// wipmb implement other types
-				case URI:
-				case NUMBER:
-				case REFERENCE:
-				default:
-					extractor = null;
-			}
-			return extractor;
+		private boolean isNotExtractableCompositeComponent(RuntimeSearchParam.Component c) {
+			RuntimeSearchParam componentSearchParam = mySearchParamRegistry.getActiveSearchParamByUrl(c.getReference());
+			return // Does the sub-param link work?
+				componentSearchParam == null ||
+					// Is this the right type?
+					RestSearchParameterTypeEnum.COMPOSITE.equals(componentSearchParam.getParamType()) ||
+
+					// Bug workaround: the component expressions are null in the FhirContextSearchParamRegistry. We can't do anything with them.
+					c.getExpression() == null ||
+
+					// wipmb hack hack alert:
+					// Bug workaround: we don't support the %resource variable, but standard SPs on MolecularSequence use it.
+					// Skip them for now.
+					c.getExpression().contains("%resource");
 		}
 
 	}
@@ -471,7 +473,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = createDateExtractor(theResource);
-		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.DATE, false);
+		return extractSearchParams(theResource, extractor, DATE, false);
 	}
 
 	private IExtractor<ResourceIndexedSearchParamDate> createDateExtractor(IBaseResource theResource) {
@@ -634,10 +636,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				List<? extends IBase> allValues;
 
 				// This path is hard to parse and isn't likely to produce anything useful anyway
-				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
-					if (nextPath.equals("Bundle.entry.resource(0)")) {
-						continue;
-					}
+				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU2)
+					&& nextPath.equals("Bundle.entry.resource(0)")) {
+					continue;
 				}
 
 				nextPath = trim(nextPath);
@@ -1828,6 +1829,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	/**
 	 * Extractor that delegates to two other extractors.
+	 *
 	 * @param <T> the type (currently only used for Numberic)
 	 */
 	private static class MultiplexExtractor<T> implements IExtractor<T> {
