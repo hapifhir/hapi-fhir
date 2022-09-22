@@ -205,8 +205,6 @@ public class BulkDataExportProviderTest {
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
 
-		InstantType now = InstantType.now();
-
 		Parameters input = new Parameters();
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
@@ -356,6 +354,7 @@ public class BulkDataExportProviderTest {
 		ids.add(new IdType("Binary/222").getValueAsString());
 		ids.add(new IdType("Binary/333").getValueAsString());
 		BulkExportJobResults results = new BulkExportJobResults();
+
 		HashMap<String, List<String>> map = new HashMap<>();
 		map.put("Patient", ids);
 		results.setResourceTypeToBinaryIds(map);
@@ -665,7 +664,6 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());

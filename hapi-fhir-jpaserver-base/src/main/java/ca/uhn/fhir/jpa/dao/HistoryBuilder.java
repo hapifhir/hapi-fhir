@@ -53,7 +53,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 
 
 /**
