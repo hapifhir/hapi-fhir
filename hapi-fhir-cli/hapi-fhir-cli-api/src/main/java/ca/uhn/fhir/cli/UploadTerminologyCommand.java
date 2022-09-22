@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -58,10 +57,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
-	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 100 * FileUtils.ONE_MB;
-	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
+	private long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
 
-	public static long getTransferSizeLimitForUnitTest() {
+	public long getTransferSizeLimit() {
 		return ourTransferSizeLimit;
 	}
 
@@ -110,11 +109,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		}
 
 		String sizeString = theCommandLine.getOptionValue("s");
-		if (isBlank(sizeString)) {
-			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
-		} else {
-			ourTransferSizeLimit = DataSize.parse(sizeString).toBytes();
-		}
+		this.setTransferSizeLimitHuman(sizeString);
 
 		IGenericClient client = newClient(theCommandLine);
 
@@ -276,12 +271,22 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		SNAPSHOT, ADD, REMOVE
 	}
 
-	@VisibleForTesting
-	static void setTransferSizeLimitForUnitTest(long theTransferSizeLimit) {
-		if (theTransferSizeLimit <= 0) {
+	public void setTransferSizeBytes(long theTransferSizeBytes) {
+		if (ourTransferSizeLimit < 0) {
 			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
-		}else {
-			ourTransferSizeLimit = theTransferSizeLimit;
+		} else {
+			ourTransferSizeLimit = theTransferSizeBytes;
+		}
+	}
+	public void setTransferSizeLimitHuman(String sizeString) {
+		if (isBlank(sizeString)) {
+			setTransferSizeBytes(DEFAULT_TRANSFER_SIZE_LIMIT);
+		} else {
+			long bytes = DataSize.parse(sizeString).toBytes();
+			if (bytes < 0) {
+				bytes = DEFAULT_TRANSFER_SIZE_LIMIT;
+			}
+			setTransferSizeBytes(bytes);
 		}
 	}
 
