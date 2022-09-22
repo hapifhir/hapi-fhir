@@ -24,8 +24,8 @@ public final class Msg {
 	private static final String ERROR_CODE_PREFIX = "HAPI";
 
 	/**
-	 * IMPORTANT: Please update the table in the following link after you add a new code
-	 * https://gitlab.com/simpatico.ai/cdr/-/wikis/Bumping-Error-Code
+	 * IMPORTANT: Please update the following comment after you add a new code
+	 * Last used code value: 2141
 	 */
 
 	private Msg() {}
