@@ -101,9 +101,9 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	@Test
 	public void testAllowOperations() {
 		// Setup
-		mySvc.addAllowedOperation(SERVER_OP);
-		mySvc.addAllowedOperation(TYPE_OP);
-		mySvc.addAllowedOperation(INSTANCE_OP);
+		mySvc.addAllowedSpec(SERVER_OP);
+		mySvc.addAllowedSpec(TYPE_OP);
+		mySvc.addAllowedSpec(INSTANCE_OP);
 
 		// Test
 		registerProviders();

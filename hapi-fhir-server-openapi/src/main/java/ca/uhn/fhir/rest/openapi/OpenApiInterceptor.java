@@ -128,6 +128,7 @@ public class OpenApiInterceptor {
 	private final Map<String, String> myExtensionToContentType = new HashMap<>();
 	private String myBannerImage;
 	private String myCssText;
+	private boolean myUseResourcePages;
 
 	/**
 	 * Constructor
@@ -891,6 +892,14 @@ public class OpenApiInterceptor {
 	 */
 	public void setCssText(String theCssText) {
 		myCssText = theCssText;
+	}
+
+	public boolean isUseResourcePages() {
+		return myUseResourcePages;
+	}
+
+	public void setUseResourcePages(boolean theUseResourcePages) {
+		myUseResourcePages = theUseResourcePages;
 	}
 
 	@SuppressWarnings("unchecked")

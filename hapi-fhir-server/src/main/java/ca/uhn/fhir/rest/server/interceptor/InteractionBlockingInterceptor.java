@@ -167,8 +167,14 @@ public class InteractionBlockingInterceptor {
 	 */
 	public void addAllowedSpec(String theSpec) {
 		Validate.notBlank(theSpec, "theSpec must not be null or blank");
+
+		if (theSpec.startsWith("$")) {
+			addAllowedOperation(theSpec);
+			return;
+		}
+
 		int colonIdx = theSpec.indexOf(':');
-		Validate.isTrue(colonIdx > 0, "Invalid spec: %s", theSpec);
+		Validate.isTrue(colonIdx > 0, "Invalid interaction allowed spec: %s", theSpec);
 
 		String resourceName = theSpec.substring(0, colonIdx);
 		String interactionName = theSpec.substring(colonIdx + 1);
