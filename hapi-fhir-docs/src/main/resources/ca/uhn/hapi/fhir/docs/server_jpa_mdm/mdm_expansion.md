@@ -24,7 +24,7 @@ This behaviour is also supported on the `$everything` operation, via a slightly 
 GET http://example.com:8000/Patient/1/$everything?_mdm=true
 ```
 
-The above call will perform an `$everything` operation on Patient/1, and also include all resources referred to by patients linked to Patient/1 via MDM.
+This will first lookup all Patients linked to Patient/1, and then  perform an `$everything` including all resources for these patients.
 
 <div class="helpWarningCalloutBox">
 One important caveat is that chaining is currently not supported when using this prefix.
