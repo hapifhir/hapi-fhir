@@ -60,7 +60,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
