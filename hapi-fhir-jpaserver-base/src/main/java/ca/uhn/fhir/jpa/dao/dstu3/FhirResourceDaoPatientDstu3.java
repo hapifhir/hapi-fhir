@@ -39,6 +39,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -89,6 +91,7 @@ public class FhirResourceDaoPatientDstu3 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
 		TokenOrListParam id = new TokenOrListParam().addOr(new TokenParam(theId.getIdPart()));
 		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
