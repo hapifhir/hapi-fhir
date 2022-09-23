@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3276
+title: "Added a new optional parameter to the `upload-terminology` operation of the HAPI-FHIR CLI. you can pass the `-s` or `--size` parameter to specify
+the maximum size that will be transmitted to the server, before a local file reference is used. This parameter can be filled in using human-readable format, for example: 
+ `upload-terminology -s \"1GB\"` will permit zip files up to 1 gigabyte, and anything larger than that would default to using a local file reference."
