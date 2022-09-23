@@ -79,7 +79,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String pollingLocation;
 			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 				Header[] headers = status.getHeaders("Content-Location");
-				pollingLocation =  headers[0].getValue();
+				pollingLocation = headers[0].getValue();
 			}
 			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
@@ -100,12 +100,13 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 		}
 	}
+
 	@Nested
 	public class SystemBulkExportTests {
 		@Test
 		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
 			int patientCount = 5;
-			for (int i=0; i<patientCount; i++) {
+			for (int i = 0; i < patientCount; i++) {
 				Patient patient = new Patient();
 				patient.setId("pat-" + i);
 				myPatientDao.update(patient);
@@ -161,7 +162,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 					assertThat(headers[0].getValue(), containsString(Constants.CT_FHIR_JSON));
 					assertThat(response, is(not(containsString("\n"))));
-					Binary binary= myFhirContext.newJsonParser().parseResource(Binary.class, response);
+					Binary binary = myFhirContext.newJsonParser().parseResource(Binary.class, response);
 					assertThat(binary.getIdElement().getValue(), is(equalTo(patientBinaryId)));
 				}
 			}
@@ -197,7 +198,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 		@Test
 		public void testPatientExportIgnoresResourcesNotInPatientCompartment() {
-
 			Patient patient = new Patient();
 			patient.setId("pat-1");
 			myPatientDao.update(patient);
@@ -220,10 +220,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
 			assertThat(typeToContents.get("Observation"), containsString("obs-included"));
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
-
 		}
 	}
-
 
 	@Nested
 	public class GroupBulkExportTests {
@@ -257,8 +255,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(firstMap.get("Group"), hasSize(1));
 			assertThat(firstMap.get("Patient"), hasSize(600));
 			assertThat(firstMap.get("Observation"), hasSize(600));
-
-
 		}
 
 		@Test
@@ -293,8 +289,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			Map<String, List<IBaseResource>> firstMap = convertJobResultsToResources(bulkExportJobResults);
 			assertThat(firstMap.get("Patient"), hasSize(1));
 			assertThat(firstMap.get("Group"), hasSize(1));
-
-
 		}
 
 		@Test
@@ -703,6 +697,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 		return contents;
 	}
+
 	BulkExportJobResults startGroupBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupId) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
 	}
@@ -710,8 +705,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
 	}
-	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupOrPatientId) {
 
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupOrPatientId) {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(theResourceTypes);
 		options.setFilters(theFilters);
@@ -736,7 +731,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		return results;
-
 	}
 
 	private void verifyBulkExportResults(String theGroupId, HashSet<String> theFilters, List<String> theContainedList, List<String> theExcludedList) {
@@ -781,6 +775,4 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private BulkExportJobResults startPatientBulkExportJobAndAwaitResults(HashSet<String> theTypes, HashSet<String> theFilters, String thePatientId) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.PATIENT, theTypes, theFilters, thePatientId);
 	}
-
-
 }
