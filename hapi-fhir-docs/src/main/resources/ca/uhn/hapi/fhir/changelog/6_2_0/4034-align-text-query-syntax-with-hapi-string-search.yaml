@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4034
+title: "Added support for the `:text` modifier on string search parameters.  This corrects an issue when using Elastic/Lucene indexing enabled where prefix match was used instead."

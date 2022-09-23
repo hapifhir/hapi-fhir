@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -66,12 +65,12 @@ import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
 import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
-import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -115,10 +114,6 @@ import javax.persistence.Query;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -160,29 +155,7 @@ public class SearchBuilder implements ISearchBuilder {
 	public static boolean myUseMaxPageSize50ForTest = false;
 	private final String myResourceName;
 	private final Class<? extends IBaseResource> myResourceType;
-	private final IDao myCallingDao;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
-	protected IResourceTagDao myResourceTagDao;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
-	@Autowired
-	private IResourceSearchViewDao myResourceSearchViewDao;
-	@Autowired
-	private FhirContext myContext;
-	@Autowired
-	private IIdHelperService myIdHelperService;
-	@Autowired(required = false)
-	private IFulltextSearchSvc myFulltextSearchSvc;
-	@Autowired(required = false)
-	private IElasticsearchSvc myIElasticsearchSvc;
-	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+
 	private List<ResourcePersistentId> myAlsoIncludePids;
 	private CriteriaBuilder myCriteriaBuilder;
 	private SearchParameterMap myParams;
@@ -192,25 +165,69 @@ public class SearchBuilder implements ISearchBuilder {
 	private Set<ResourcePersistentId> myPidSet;
 	private boolean myHasNextIteratorQuery = false;
 	private RequestPartitionId myRequestPartitionId;
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
-	@Autowired
-	private SqlObjectFactory mySqlBuilderFactory;
-	@Autowired
-	private HibernatePropertiesProvider myDialectProvider;
-	@Autowired
-	private ModelConfig myModelConfig;
 
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	protected EntityManager myEntityManager;
+	@Autowired(required = false)
+	private IFulltextSearchSvc myFulltextSearchSvc;
+	@Autowired(required = false)
+	private IElasticsearchSvc myIElasticsearchSvc;
+
+	private final HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+	private final SqlObjectFactory mySqlBuilderFactory;
+	private final HibernatePropertiesProvider myDialectProvider;
+	private final ModelConfig myModelConfig;
+	private final ISearchParamRegistry mySearchParamRegistry;
+	private final PartitionSettings myPartitionSettings;
+	protected final IInterceptorBroadcaster myInterceptorBroadcaster;
+	protected final IResourceTagDao myResourceTagDao;
+	private final DaoRegistry myDaoRegistry;
+	private final IResourceSearchViewDao myResourceSearchViewDao;
+	private final FhirContext myContext;
+	private final IIdHelperService myIdHelperService;
+
+	private final DaoConfig myDaoConfig;
+
+	private final IDao myCallingDao;
 
 	/**
 	 * Constructor
 	 */
-	public SearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+	public SearchBuilder(
+		IDao theDao,
+		String theResourceName,
+		DaoConfig theDaoConfig,
+		HapiFhirLocalContainerEntityManagerFactoryBean theEntityManagerFactory,
+		SqlObjectFactory theSqlBuilderFactory,
+		HibernatePropertiesProvider theDialectProvider,
+		ModelConfig theModelConfig,
+		ISearchParamRegistry theSearchParamRegistry,
+		PartitionSettings thePartitionSettings,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		IResourceTagDao theResourceTagDao,
+		DaoRegistry theDaoRegistry,
+		IResourceSearchViewDao theResourceSearchViewDao,
+		FhirContext theContext,
+		IIdHelperService theIdHelperService,
+		Class<? extends IBaseResource> theResourceType
+	) {
 		myCallingDao = theDao;
 		myResourceName = theResourceName;
 		myResourceType = theResourceType;
+		myDaoConfig = theDaoConfig;
+
+		myEntityManagerFactory = theEntityManagerFactory;
+		mySqlBuilderFactory = theSqlBuilderFactory;
+		myDialectProvider = theDialectProvider;
+		myModelConfig = theModelConfig;
+		mySearchParamRegistry = theSearchParamRegistry;
+		myPartitionSettings = thePartitionSettings;
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+		myResourceTagDao = theResourceTagDao;
+		myDaoRegistry = theDaoRegistry;
+		myResourceSearchViewDao = theResourceSearchViewDao;
+		myContext = theContext;
+		myIdHelperService = theIdHelperService;
 	}
 
 	@Override
@@ -1236,7 +1253,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (theReverseMode) {
 				if (theLastUpdated != null && (theLastUpdated.getLowerBoundAsInstant() != null || theLastUpdated.getUpperBoundAsInstant() != null)) {
-					pidsToInclude = new HashSet<>(filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
+					pidsToInclude = new HashSet<>(QueryParameterUtils.filterResourceIdsByLastUpdated(theEntityManager, theLastUpdated, pidsToInclude));
 				}
 			}
 
@@ -1453,11 +1470,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public String getResourceName() {
 		return myResourceName;
-	}
-
-	@VisibleForTesting
-	public void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
-		myDaoConfig = theDaoConfig;
 	}
 
 	public class IncludesIterator extends BaseIterator<ResourcePersistentId> implements Iterator<ResourcePersistentId> {
@@ -1766,44 +1778,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public static void setMaxPageSize50ForTest(boolean theIsTest) {
 		myUseMaxPageSize50ForTest = theIsTest;
-	}
-
-	private static List<Predicate> createLastUpdatedPredicates(final DateRangeParam theLastUpdated, CriteriaBuilder builder, From<?, ResourceTable> from) {
-		List<Predicate> lastUpdatedPredicates = new ArrayList<>();
-		if (theLastUpdated != null) {
-			if (theLastUpdated.getLowerBoundAsInstant() != null) {
-				ourLog.debug("LastUpdated lower bound: {}", new InstantDt(theLastUpdated.getLowerBoundAsInstant()));
-				Predicate predicateLower = builder.greaterThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getLowerBoundAsInstant());
-				lastUpdatedPredicates.add(predicateLower);
-			}
-			if (theLastUpdated.getUpperBoundAsInstant() != null) {
-				Predicate predicateUpper = builder.lessThanOrEqualTo(from.get("myUpdated"), theLastUpdated.getUpperBoundAsInstant());
-				lastUpdatedPredicates.add(predicateUpper);
-			}
-		}
-		return lastUpdatedPredicates;
-	}
-
-	private static List<ResourcePersistentId> filterResourceIdsByLastUpdated(EntityManager theEntityManager, final DateRangeParam theLastUpdated, Collection<ResourcePersistentId> thePids) {
-		if (thePids.isEmpty()) {
-			return Collections.emptyList();
-		}
-		CriteriaBuilder builder = theEntityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = builder.createQuery(Long.class);
-		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.select(from.get("myId").as(Long.class));
-
-		List<Predicate> lastUpdatedPredicates = createLastUpdatedPredicates(theLastUpdated, builder, from);
-		lastUpdatedPredicates.add(from.get("myId").as(Long.class).in(ResourcePersistentId.toLongList(thePids)));
-
-		cq.where(SearchBuilder.toPredicateArray(lastUpdatedPredicates));
-		TypedQuery<Long> query = theEntityManager.createQuery(cq);
-
-		return ResourcePersistentId.fromLongList(query.getResultList());
-	}
-
-	public static Predicate[] toPredicateArray(List<Predicate> thePredicates) {
-		return thePredicates.toArray(new Predicate[0]);
 	}
 
 }
