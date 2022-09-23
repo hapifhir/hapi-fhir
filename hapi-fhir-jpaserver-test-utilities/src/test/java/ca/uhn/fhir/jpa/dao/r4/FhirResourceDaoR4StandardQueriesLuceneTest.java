@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.search.CompositeSearchParameterTestCases;
+import ca.uhn.fhir.jpa.search.QuantitySearchParameterTestCases;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.storage.test.BaseDateSearchDaoTests;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
@@ -68,6 +68,13 @@ public class FhirResourceDaoR4StandardQueriesLuceneTest extends BaseJpaTest {
 		@Override
 		protected Fixture constructFixture() {
 			return new TestDataBuilderFixture<>(myDataBuilder, myObservationDao);
+		}
+	}
+
+	@Nested
+	class QuantityAndNormalizedQuantitySearch extends QuantitySearchParameterTestCases {
+		QuantityAndNormalizedQuantitySearch() {
+			super(myDataBuilder, myTestDaoSearch, myDaoConfig);
 		}
 	}
 

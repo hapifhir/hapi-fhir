@@ -60,7 +60,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 	}
 
 	@Override
-	public Support getSupport() {
+	public Support getTestDataBuilderSupport() {
 		return new SupportNoDao(myFhirContext);
 	}
 }

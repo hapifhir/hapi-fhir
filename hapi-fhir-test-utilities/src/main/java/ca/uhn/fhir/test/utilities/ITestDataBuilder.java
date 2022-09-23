@@ -354,26 +354,27 @@ public interface ITestDataBuilder {
 
 	interface Support {
 		FhirContext getFhirContext();
-		IIdType createResource(IBaseResource theResource);
-		IIdType updateResource(IBaseResource theResource);
+		IIdType doCreateResource(IBaseResource theResource);
+		IIdType doUpdateResource(IBaseResource theResource);
 	}
 
+	// todo mb make this the norm.
 	interface WithSupport extends ITestDataBuilder {
-		Support getSupport();
+		Support getTestDataBuilderSupport();
 
 		@Override
 		default FhirContext getFhirContext() {
-			return getSupport().getFhirContext();
+			return getTestDataBuilderSupport().getFhirContext();
 		}
 
 		@Override
 		default IIdType doCreateResource(IBaseResource theResource) {
-			return getSupport().createResource(theResource);
+			return getTestDataBuilderSupport().doCreateResource(theResource);
 		}
 
 		@Override
 		default IIdType doUpdateResource(IBaseResource theResource) {
-			return getSupport().updateResource(theResource);
+			return getTestDataBuilderSupport().doUpdateResource(theResource);
 		}
 	}
 
@@ -394,13 +395,13 @@ public interface ITestDataBuilder {
 		}
 
 		@Override
-		public IIdType createResource(IBaseResource theResource) {
+		public IIdType doCreateResource(IBaseResource theResource) {
 			Validate.isTrue(false, "Create not supported");
 			return null;
 		}
 
 		@Override
-		public IIdType updateResource(IBaseResource theResource) {
+		public IIdType doUpdateResource(IBaseResource theResource) {
 			Validate.isTrue(false, "Update not supported");
 			return null;
 		}

@@ -17,20 +17,27 @@ import static org.hamcrest.Matchers.empty;
  * Test cases for composite search parameters.
  * https://www.hl7.org/fhir/search.html#composite
  *
- * Intended to be nested in a context that provides a ITestDataBuilder and TestDaoSearch.
+ * Intended to be nested in a context that provides a ITestDataBuilder.Support and TestDaoSearch.
  */
-public abstract class CompositeSearchParameterTestCases implements ITestDataBuilder {
+public abstract class CompositeSearchParameterTestCases implements ITestDataBuilder.WithSupport {
 	static final String SYSTEM_LOINC_ORG = "http://loinc.org";
 	static final String CODE_8480_6 = "8480-6";
 	static final String CODE_3421_5 = "3421-5";
 
-	final ITestDataBuilder myTestDataBuilder;
+	final ITestDataBuilder.Support myTestDataBuilder;
 	final TestDaoSearch myTestDaoSearch;
 
-	public CompositeSearchParameterTestCases(ITestDataBuilder theTestDataBuilder, TestDaoSearch theTestDaoSearch) {
+	protected CompositeSearchParameterTestCases(ITestDataBuilder.Support theTestDataBuilder, TestDaoSearch theTestDaoSearch) {
 		myTestDataBuilder = theTestDataBuilder;
 		myTestDaoSearch = theTestDaoSearch;
 	}
+
+	@Override
+	public Support getTestDataBuilderSupport() {
+		return myTestDataBuilder;
+	}
+
+
 
 	/**
 	 * Does this engine support sub-element correlation?
@@ -125,18 +132,4 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			"Observation?code-value-string=8480-6$ABC", id1);
 	}
 
-	@Override
-	public IIdType doCreateResource(IBaseResource theResource) {
-		return myTestDataBuilder.doCreateResource(theResource);
-	}
-
-	@Override
-	public IIdType doUpdateResource(IBaseResource theResource) {
-		return myTestDataBuilder.doUpdateResource(theResource);
-	}
-
-	@Override
-	public FhirContext getFhirContext() {
-		return myTestDataBuilder.getFhirContext();
-	}
 }
