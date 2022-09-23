@@ -79,7 +79,7 @@ public class ITestDataBuilderTest {
 		@Test
 		void createObservation_withValueQuantity_createsQuantity() {
 			myTDB.createObservation(
-					myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
+				myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
 
 			assertEquals(1, myCreatedList.size());
 			Observation o = (Observation) myCreatedList.get(0);
@@ -119,7 +119,5 @@ public class ITestDataBuilderTest {
 		}
 
 	}
-
-
 
 }

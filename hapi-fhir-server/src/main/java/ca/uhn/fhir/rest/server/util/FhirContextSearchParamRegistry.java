@@ -84,6 +84,7 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	@Nullable
 	@Override
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
+		// simple implementation for test support
 		return myCtx.getResourceTypes().stream()
 			.flatMap(type->getActiveSearchParams(type).values().stream())
 			.filter(rsp->theUrl.equals(rsp.getUri()))

@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.i18n.Msg;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /*
@@ -27,14 +28,12 @@ import java.util.Optional;
 
 public class ObjectUtil {
 
+	/**
+	 * Just use Objects.equals() instead;
+	 */
+	@Deprecated
 	public static boolean equals(Object object1, Object object2) {
-		if (object1 == object2) {
-			return true;
-		}
-		if ((object1 == null) || (object2 == null)) {
-			return false;
-		}
-		return object1.equals(object2);
+		return Objects.equals(object1, object2);
 	}
 	
 	public static <T> T requireNonNull(T obj, String message) {

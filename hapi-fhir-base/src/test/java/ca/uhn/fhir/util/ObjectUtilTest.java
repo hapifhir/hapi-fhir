@@ -1,18 +1,22 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-public class ObjectUtilTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+class ObjectUtilTest {
 
 	@Test
-	public void testEquals() {
-		String a = new String("a");
-		String b = new String("b");
+	void testEquals() {
+		String a = "a";
+		String b = "b";
 		assertFalse(ObjectUtil.equals(b, a));
 		assertFalse(ObjectUtil.equals(a, b));
 		assertFalse(ObjectUtil.equals(a, null));
@@ -22,7 +26,7 @@ public class ObjectUtilTest {
 	}
 	
 	@Test
-	public void testRequireNonNull() {
+	void testRequireNonNull() {
 		String message = "Must not be null in test";
 		try {
 			ObjectUtil.requireNonNull(null, message);
@@ -34,7 +38,7 @@ public class ObjectUtilTest {
 	}
 	
 	@Test
-	public void testRequireNotEmpty() {
+	void testRequireNotEmpty() {
 		//All these are empty, null or whitespace strings.
 		testRequireNotEmptyErrorScenario(null);
 		testRequireNotEmptyErrorScenario("");

@@ -99,7 +99,7 @@ public class TestHSearchAddInConfig {
 			luceneProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
 			return (theProperties) -> {
-				ourLog.info("Configuring Hibernate Search - {}", luceneProperties);
+				ourLog.debug("Configuring Hibernate Search - {}", luceneProperties);
 				theProperties.putAll(luceneProperties);
 			};
 		}
