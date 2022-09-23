@@ -2,9 +2,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -183,6 +185,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.DEFAULT_PRESERVE_VERSION_REFS;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -244,6 +247,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 		myDaoConfig.setUpdateWithHistoryRewriteEnabled(false);
+		myDaoConfig.setPreserveRequestIdInResourceBody(false);
+
 	}
 
 	@BeforeEach
@@ -2277,8 +2282,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id));
 			assertThat(ids, not((o2Id)));
-			assertThat(ids, not(contains(c2Id)));
-			assertThat(ids, not(contains(p2Id)));
+			assertThat(ids, not(hasItem(c2Id)));
+			assertThat(ids, not(hasItem(p2Id)));
 		}
 
 		{
@@ -2310,7 +2315,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2328,7 +2333,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(ids, not(contains(c5Id)));
+			assertThat(ids, not(hasItem(c5Id)));
 		}
 
 		{
@@ -2356,8 +2361,25 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			allresults.addAll(secondBundle);
 
 			assertThat(allresults, containsInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id));
-			assertThat(allresults, not(contains(c5Id)));
+			assertThat(allresults, not(hasItem(c5Id)));
 		}
+	}
+	@Test
+	public void testContains(){
+		List<String> test = List.of("a", "b", "c");
+		String testString = "testAString";
+
+		//examined iterable must be of the same length as the specified collection of matchers
+		assertThat(test, not(contains("b"))); //replace with not(hasItem())
+
+		//examined Iterable yield at least one item that is matched
+		//it can contain "a", but it doesn't contain "d" so this passes
+		//really does "do not have one of these"
+		assertThat(test, not(hasItems("a", "d"))); //replace with individual calls to not(hasItem())
+		//MatchersUtil.assertDoesNotContainAnyOf(test, List.of("a", "d"));
+
+		//examined iterable must be of the same length as the specified collection of matchers
+		assertThat(test, not(containsInAnyOrder("a", "b"))); //replace with indiv calls to not(hasItem())
 	}
 
 	@Test
@@ -2498,7 +2520,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids, containsInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id));
-			assertThat(ids, not(contains(c3Id)));
+			assertThat(ids, not(hasItem(c3Id)));
 		}
 
 
@@ -4574,7 +4596,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, hasItems(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			//@formatter:off
@@ -4586,7 +4608,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, not(hasItem(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
@@ -4600,7 +4622,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
+			assertThat(patients, not(hasItem(id2)));
 		}
 	}
 
@@ -4644,7 +4666,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(contains(oid2)));
+			assertThat(ids, not(hasItem(oid2)));
 		}
 
 	}
@@ -5749,7 +5771,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(contains(id2.getValue())));
+			assertThat(ids, not(hasItem(id2.getValue())));
 		}
 
 	}
@@ -7089,6 +7111,231 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("No ID supplied for resource to update"));
 		}
+	}
+
+	@Test
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String expectedMetaSource = "mySource#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedMetaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String metaSource = "mySource#123456789012345678901234567890";
+		String expectedMetaSource = "mySource#1234567890123456";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(metaSource);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedMetaSource, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
+		String sourceURL = "mySource";
+		String requestId = "#345676";
+		String patientId = "1234a";
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceURL + requestId);
+
+		patient.setId(patientId);
+		patient.addName().addGiven("Phil").setFamily("Sick");
+
+		MethodOutcome outcome = myClient.update().resource(patient).execute();
+
+		IIdType iIdType = outcome.getId();
+
+		Patient returnedPatient = myClient.read().resource(Patient.class).withId(iIdType).execute();
+
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertTrue(returnedPatientMetaSource.startsWith(sourceURL));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+	}
+
+	@Test
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+
+		String sourceUri = "mySource";
+		String requestId = "345676";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri + "%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
+		String sourceURI = "mySource";
+		String requestId = "345676";
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(sourceURI + "#" + requestId);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceURI + "%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
+	}
+
+	@Test
+	public void searchResource_bySourceWithPreserveRequestIdDisabled_isSuccess() {
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(sourceUri + "#" + requestId);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertTrue(returnedPatientMetaSource.startsWith(sourceUri));
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
+	}
+
+	@Test
+	public void searchResource_bySourceWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient p1 = new Patient();
+		p1.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(p1)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=" + sourceUri)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(1, results.getEntry().size());
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_byRequestIdWithPreserveRequestIdEnabled_isSuccess() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		String sourceUri = "http://acme.org";
+		String requestId = "my-fragment";
+		String expectedSourceUrl = sourceUri + "#" + requestId;
+
+		Patient patient = new Patient();
+		patient.getMeta().setSource(expectedSourceUrl);
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23" + requestId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
+		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
+
+		assertEquals(expectedSourceUrl, returnedPatientMetaSource);
+	}
+
+	@Test
+	public void searchResource_bySourceAndWrongRequestIdWithPreserveRequestIdEnabled_fails() {
+		myDaoConfig.setPreserveRequestIdInResourceBody(true);
+		Patient patient = new Patient();
+		patient.getMeta().setSource("urn:source:0#my-fragment123");
+
+		myClient
+			.create()
+			.resource(patient)
+			.execute();
+
+		Bundle results = myClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%23my-fragment000")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(0, results.getEntry().size());
 	}
 
 	@Nonnull

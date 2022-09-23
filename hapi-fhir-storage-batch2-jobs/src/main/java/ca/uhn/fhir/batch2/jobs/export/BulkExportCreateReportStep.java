@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -51,6 +53,9 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 								 @NotNull IJobDataSink<BulkExportJobResults> theDataSink) throws JobExecutionFailedException {
 		BulkExportJobResults results = new BulkExportJobResults();
 
+		String requestUrl = getOriginatingRequestUrl(theStepExecutionDetails, results);
+		results.setOriginalRequestUrl(requestUrl);
+
 		if (myResourceToBinaryIds != null) {
 			ourLog.info("Bulk Export Report creation step");
 
@@ -67,6 +72,18 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		// accept saves the report
 		theDataSink.accept(results);
 		return RunOutcome.SUCCESS;
+	}
+
+	private static String getOriginatingRequestUrl(@NotNull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
+		IJobInstance instance = theStepExecutionDetails.getInstance();
+		String url = "";
+		if (instance instanceof JobInstance) {
+			JobInstance jobInstance = (JobInstance) instance;
+			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
+			String originalRequestUrl = parameters.getOriginalRequestUrl();
+			url = originalRequestUrl;
+		}
+		return url;
 	}
 
 	@NotNull

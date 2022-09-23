@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -114,19 +115,14 @@ public class ExpandResourcesStepTest {
 			resources.add(patient);
 		}
 		idList.setIds(ids);
-		IBundleProvider bundleProvider = mock(IBundleProvider.class);
 
 		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = createInput(
 			idList,
 			createParameters(),
 			instance
 		);
-
-		// when
-		when(bundleProvider.getAllResources())
-			.thenReturn(resources);
-		when(patientDao.search(any(SearchParameterMap.class), any()))
-			.thenReturn(bundleProvider);
+		ArrayList<IBaseResource> clone = new ArrayList<>(resources);
+		when(patientDao.readByPid(any(ResourcePersistentId.class))).thenAnswer(i -> clone.remove(0));
 
 		// test
 		RunOutcome outcome = mySecondStep.run(input, sink);
@@ -134,28 +130,6 @@ public class ExpandResourcesStepTest {
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
-		// search parameters
-		ArgumentCaptor<SearchParameterMap> captor = ArgumentCaptor.forClass(SearchParameterMap.class);
-		verify(patientDao)
-			.search(captor.capture(), any());
-		assertEquals(1, captor.getAllValues().size());
-		SearchParameterMap map = captor.getValue();
-		Collection<List<List<IQueryParameterType>>> values = map.values();
-
-		Set<String> idValues = new HashSet<>();
-		for (List<List<IQueryParameterType>> parameterTypes : values) {
-			for (List<IQueryParameterType> param : parameterTypes) {
-				for (IQueryParameterType type : param) {
-					String value = type.getValueAsQueryToken(myFhirContext);
-					idValues.add(value);
-					Id findingId = new Id();
-					findingId.setId(value);
-					findingId.setResourceType("Patient");
-					assertTrue(ids.contains(findingId));
-				}
-			}
-		}
-		assertEquals(ids.size(), idValues.size());
 
 		// data sink
 		ArgumentCaptor<BulkExportExpandedResources> expandedCaptor = ArgumentCaptor.forClass(BulkExportExpandedResources.class);

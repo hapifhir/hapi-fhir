@@ -40,6 +40,8 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -87,6 +89,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);
@@ -96,6 +99,7 @@ public class FhirResourceDaoPatientDstu2 extends BaseHapiFhirResourceDao<Patient
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, TokenOrListParam theIds) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, getResourceName(), null);

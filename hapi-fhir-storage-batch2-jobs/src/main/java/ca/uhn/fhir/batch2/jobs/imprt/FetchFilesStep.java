@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -47,12 +48,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParameters, NdJsonFileJson> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchFilesStep.class);
+	private static final List<String> ourValidContentTypes = Arrays.asList(Constants.CT_APP_NDJSON,  Constants.CT_FHIR_NDJSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.CT_JSON, Constants.CT_TEXT);
+	private static final List<String> ourValidNonNdJsonContentTypes = Arrays.asList(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.CT_JSON, Constants.CT_TEXT);
 
 	@Nonnull
 	@Override
@@ -82,8 +86,10 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 					}
 
 					String contentType = response.getEntity().getContentType().getValue();
-					EncodingEnum encoding = EncodingEnum.forContentType(contentType);
-					Validate.isTrue(encoding == EncodingEnum.NDJSON, "Received non-NDJSON content type \"%s\" from URL: %s", contentType, nextUrl);
+					Validate.isTrue(hasMatchingSubstring(contentType, ourValidContentTypes), "Received content type \"%s\" from URL: %s. This format is not one of the supported content type: %s", contentType, nextUrl, getContentTypesString());
+					if (hasMatchingSubstring(contentType, ourValidNonNdJsonContentTypes)) {
+						ourLog.info("Received non-NDJSON content type \"{}\" from URL: {}. It will be processed but it may not complete correctly if the actual data is not NDJSON.", contentType, nextUrl);
+					}
 
 					try (InputStream inputStream = response.getEntity().getContent()) {
 						try (LineIterator lineIterator = new LineIterator(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -148,6 +154,14 @@ public class FetchFilesStep implements IFirstJobStepWorker<BulkImportJobParamete
 		}
 
 		return builder.build();
+	}
+
+	private static boolean hasMatchingSubstring(String str, List<String> substrings) {
+		return substrings.stream().anyMatch(str::contains);
+	}
+
+	private static String getContentTypesString() {
+		return String.join(", ", ourValidContentTypes);
 	}
 
 }
