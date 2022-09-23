@@ -29,7 +29,7 @@ import java.util.Optional;
 public class ObjectUtil {
 
 	/**
-	 * Just use Objects.equals() instead;
+	 * @deprecated Just use Objects.equals() instead;
 	 */
 	@Deprecated
 	public static boolean equals(Object object1, Object object2) {
