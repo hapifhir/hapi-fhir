@@ -86,12 +86,13 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			//Then: When the poll shows as complete, all attributes should be filled.
 			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(responseContent);
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-				assertThat(result.getRequest(), is(equalTo(myClient.getServerBase() + "/$export?_type=Patient")));
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
 				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
 				assertThat(result.getTransactionTime(), is(notNullValue()));
 				assertThat(result.getError(), is(empty()));
