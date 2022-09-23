@@ -239,8 +239,8 @@ public class SearchParameterMap implements Serializable {
 				b.append(Constants.PARAM_INCLUDE_QUALIFIER_RECURSE);
 			}
 			b.append('=');
-			if ("*".equals(nextInclude.getValue())) {
-				b.append("*");
+			if (Constants.INCLUDE_STAR.equals(nextInclude.getValue())) {
+				b.append(Constants.INCLUDE_STAR);
 			} else {
 				b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 				b.append(':');

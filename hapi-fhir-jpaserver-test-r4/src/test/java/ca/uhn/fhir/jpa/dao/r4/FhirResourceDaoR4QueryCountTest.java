@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -20,6 +21,7 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -917,6 +919,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map);
+		assertEquals(SimpleBundleProvider.class, outcome.getClass());
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
 			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1", "CareTeam/CT1-2",
 			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1", "CareTeam/CT2-2"
@@ -944,7 +947,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		map.addInclude(Observation.INCLUDE_ENCOUNTER);
 		map.addInclude(Observation.INCLUDE_PATIENT);
 		map.addInclude(Observation.INCLUDE_SUBJECT);
-		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		IBundleProvider results = myObservationDao.search(map, mySrd);
+		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, results.getClass());
+		ids = toUnqualifiedVersionlessIdValues(results);
 		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
 
 		// Verify

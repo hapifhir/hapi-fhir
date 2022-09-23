@@ -276,6 +276,13 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
+	public enum RuntimeSearchParamStatusEnum {
+		ACTIVE,
+		DRAFT,
+		RETIRED,
+		UNKNOWN
+	}
+
 	/**
 	 * This method tests whether a given FHIRPath expression <i>could</i>
 	 * possibly apply to the given resource type.
@@ -291,13 +298,13 @@ public class RuntimeSearchParam {
 				return true;
 			}
 			if (Character.isLetter(nextChar)) {
-				if (thePath.startsWith(theResourceName, i) && thePath.length() > theResourceName.length() && thePath.charAt(theResourceName.length() + i) == '.') {
+				if (fhirPathExpressionStartsWith(theResourceName, thePath, i)) {
 					return true;
 				}
-				if (thePath.startsWith("Resource", i) && "Resource".length() > theResourceName.length() && thePath.charAt("Resource".length() + i) == '.') {
+				if (fhirPathExpressionStartsWith("Resource", thePath, i)) {
 					return true;
 				}
-				if (thePath.startsWith("DomainResource", i) && "DomainResource".length() > theResourceName.length() && thePath.charAt("DomainResource".length() + i) == '.') {
+				if (fhirPathExpressionStartsWith("DomainResource", thePath, i)) {
 					return true;
 				}
 				return false;
@@ -307,11 +314,18 @@ public class RuntimeSearchParam {
 		return false;
 	}
 
-	public enum RuntimeSearchParamStatusEnum {
-		ACTIVE,
-		DRAFT,
-		RETIRED,
-		UNKNOWN
+	private static boolean fhirPathExpressionStartsWith(String theResourceName, String thePath, int theStartingIndex) {
+		if (thePath.startsWith(theResourceName, theStartingIndex) && thePath.length() > theResourceName.length()) {
+			for (int i = theResourceName.length() + theStartingIndex; i < thePath.length(); i++) {
+				char nextChar = thePath.charAt(i);
+				if (nextChar == '.') {
+					return true;
+				} else if (nextChar != ' ') {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	public static class Component {
