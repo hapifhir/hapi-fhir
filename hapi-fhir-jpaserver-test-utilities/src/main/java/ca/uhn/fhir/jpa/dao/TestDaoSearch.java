@@ -51,6 +51,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
@@ -144,7 +145,7 @@ public class TestDaoSearch {
 
 		// getAllResources is not safe as size is not always set
 		return result.getResources(0, Integer.MAX_VALUE)
-					.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
+			.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toList());
 	}
 
 	public IBundleProvider searchForBundleProvider(String theQueryUrl, boolean theSynchronousMode) {
@@ -195,10 +196,19 @@ public class TestDaoSearch {
 		uriComponents.getQueryParams()
 			.forEach((key, value) -> spiedReqDetails.addParameter(key, value.toArray(new String[0])));
 
+		// this is to avoid BaseHapiFhirResourceDao.notifySearchInterceptors() to force make ParameterMap synchronous
 		IPagingProvider mockPagingProvider = mock(IPagingProvider.class);
 		IRestfulServerDefaults mockServerDfts = mock(IRestfulServerDefaults.class);
 		doReturn(mockServerDfts).when(spiedReqDetails).getServer();
 		doReturn(mockPagingProvider).when(mockServerDfts).getPagingProvider();
+
+		// this is to avoid BaseHapiFhirResourceDao.notifySearchInterceptors() to force ParameterMap.count to 0
+		lenient().doReturn(null).when(mockServerDfts).getDefaultPageSize();
+		// this is to avoid BaseHapiFhirResourceDao.notifySearchInterceptors() to request count to 0 when request includes _count
+		if (theQueryUrl.contains("_count=")) {
+			doReturn(null).when(mockServerDfts).getMaximumPageSize();
+		}
+
 		return spiedReqDetails;
 	}
 

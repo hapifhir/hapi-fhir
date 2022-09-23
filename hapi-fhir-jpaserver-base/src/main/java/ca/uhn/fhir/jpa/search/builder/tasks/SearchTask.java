@@ -101,6 +101,8 @@ public class SearchTask implements Callable<Void> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchTask.class);
 
+	public static final int FIRST_PAGE_PREFETCH_SIZE = 50;
+
 	private final SearchParameterMap myParams;
 	private final IDao myCallingDao;
 	private final String myResourceType;
@@ -586,7 +588,9 @@ public class SearchTask implements Callable<Void> {
 			minWanted += currentlyLoaded;
 		}
 
-		for (Iterator<Integer> iter = myDaoConfig.getSearchPreFetchThresholds().iterator(); iter.hasNext(); ) {
+		List<Integer> actingPreFetchThresholds = new ArrayList<>(myDaoConfig.getSearchPreFetchThresholds());
+		actingPreFetchThresholds.add(0, FIRST_PAGE_PREFETCH_SIZE);
+		for (Iterator<Integer> iter = actingPreFetchThresholds.iterator(); iter.hasNext(); ) {
 			int next = iter.next();
 			if (next != -1 && next <= currentlyLoaded) {
 				continue;
