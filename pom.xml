@@ -97,13 +97,6 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.woodstox</groupId>
-			<artifactId>woodstox-core</artifactId>
-			<version>6.2.7</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
 	</dependencies>
 
 	<developers>
