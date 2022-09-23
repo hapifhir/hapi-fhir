@@ -69,7 +69,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.*;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_EXACT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_NORMALIZED;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.IDX_STRING_TEXT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_IDX_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.SEARCH_PARAM_ROOT;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ExtendedHSearchClauseBuilder {

@@ -30,6 +30,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
@@ -224,14 +225,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createReferenceExtractor();
 				break;
 			case QUANTITY:
-				if (myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
-					extractor = new MultiplexExtractor(
-						createQuantityExtractor(theResource),
-						createQuantityNormalizedExtractor(theResource)
-					);
-				} else {
-					extractor = createQuantityExtractor(theResource);
-				}
+				extractor = createQuantityExtractor(theResource);
 				break;
 			case URI:
 				extractor = createUriExtractor(theResource);
@@ -520,7 +514,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
-		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityExtractor(theResource);
+		IExtractor<ResourceIndexedSearchParamQuantity> extractor = createQuantityUnnormalizedExtractor(theResource);
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false);
 	}
 
@@ -531,7 +525,22 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY, false);
 	}
 
-	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+	@Nonnull
+	private IExtractor<? extends BaseResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+		IExtractor<? extends BaseResourceIndexedSearchParamQuantity> result;
+		if (myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+			result = new MultiplexExtractor(
+				createQuantityUnnormalizedExtractor(theResource),
+				createQuantityNormalizedExtractor(theResource)
+			);
+		} else {
+			result = createQuantityUnnormalizedExtractor(theResource);
+		}
+		return result;
+	}
+
+	@Nonnull
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityUnnormalizedExtractor(IBaseResource theResource) {
 		String resourceType = toRootTypeName(theResource);
 		return (params, searchParam, value, path, theWantLocalReferences) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
