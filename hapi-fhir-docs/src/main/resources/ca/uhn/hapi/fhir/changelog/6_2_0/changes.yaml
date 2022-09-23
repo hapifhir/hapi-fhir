@@ -4,7 +4,7 @@
     title: "The version of a few dependencies have been bumped to the latest versions
 (dependent HAPI modules listed in brackets):
 <ul>
-<li>Woodstox (Base): 6.2.5 -> 6.3.1 (Addresses CVE-2022-40151 through CVE-2022-40156 - HAPI FHIR was not vulnerable to this issue as we do not leverage the vulnerable Xstream component but this upgrade avoids unnecessary OWASP scan notices)</li>
+<li>Woodstox (Base): 6.2.5 -> 6.3.1</li>
 </ul>
 "
 
