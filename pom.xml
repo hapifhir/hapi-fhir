@@ -88,6 +88,22 @@
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- dependencies required for Android -->
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.12.2</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.woodstox</groupId>
+			<artifactId>woodstox-core</artifactId>
+			<version>6.2.7</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
 
 	<developers>
@@ -2630,6 +2646,23 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<version>1.22</version>
+				<configuration>
+					<signature>
+						<groupId>net.sf.androidscents.signature</groupId>
+						<!--artifactId>android-api-level-24</artifactId>
+						<version>7.0_r2</version-->
+						<!--artifactId>android-api-level-26</artifactId>
+						<version>8.0.0_r2</version-->
+						<artifactId>android-api-level-32</artifactId>
+						<version>12_r1</version>
+					</signature>
+					<failOnError>false</failOnError>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
