@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.api.pid;
  */
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import io.micrometer.core.lang.NonNull;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.List;
  * A resource pid list where the pids can have different resource types
  */
 public class MixedResourcePidList extends BaseResourcePidList {
-	@NonNull
+	@Nonnull
 	final List<String> myResourceTypes;
 
 	public MixedResourcePidList(List<String> theResourceTypes, Collection<ResourcePersistentId> theIds, Date theLastDate) {

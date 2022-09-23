@@ -16,7 +16,6 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -90,8 +89,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private DatabaseBackedPagingProvider myPagingProvider;
 	private int myPreviousMaxPageSize;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 
 	@Override
 	@AfterEach

@@ -32,7 +32,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -107,8 +106,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach

@@ -10,7 +10,6 @@ import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -38,8 +37,6 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 	private MdmSettings myMdmSettings;
 	@Autowired
 	private MdmControllerHelper myMdmHelper;
-	@Autowired
-	BatchJobHelper myBatchJobHelper;
 	@Autowired
 	Batch2JobHelper myBatch2JobHelper;
 	@Autowired
