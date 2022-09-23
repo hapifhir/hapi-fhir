@@ -132,7 +132,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 	 * 	at org.hl7.fhir.validation.instance.InstanceValidator.checkChildByDefinition(InstanceValidator.java:5130)
 	 */
 	@Test
-	@Disabled("Note that running this test with the -ea VM options triggers an assertion failure.  it's not clear if -ea is passed in production.  See comment for details")
+	@Disabled("Note that running this test with the -ea VM options triggers an assertion failure.  Please refer to this hapi-fhir issue: https://github.com/hapifhir/org.hl7.fhir.core/issues/930. See comment for details on the Exception.")
 	public void validation_Jpa_Bundle_MeasureReportToMeasure() {
 		when(myDaoRegistry.getResourceDao("StructureDefinition")).thenReturn(fhirResourceDaoStructureDefinition);
 		when(myDaoRegistry.getResourceDao("Library")).thenReturn(fhirResourceDaoLibrary);
