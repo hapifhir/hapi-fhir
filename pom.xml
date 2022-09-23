@@ -2352,9 +2352,6 @@
 								<copy todir="target/site/apidocs-jpaserver-mdm">
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-jpaserver-batch">
-									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
-								</copy>
 								<copy todir="target/site/apidocs-storage-batch2">
 									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
 								</copy>

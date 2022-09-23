@@ -60,6 +60,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
+import static ca.uhn.fhir.jpa.batch.config.BatchConstants.BULK_IMPORT_JOB_NAME;
+
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
 	private final Semaphore myRunningJobSemaphore = new Semaphore(1);
@@ -284,8 +286,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		jobParameters.setBatchSize(batchSize);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		// WIP KHS find equivalent in batch2
-//		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
+		request.setJobDefinitionId(BULK_IMPORT_JOB_NAME);
 		request.setParameters(jobParameters);
 
 		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);
