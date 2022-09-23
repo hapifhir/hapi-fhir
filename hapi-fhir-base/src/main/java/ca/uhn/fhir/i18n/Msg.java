@@ -24,8 +24,8 @@ public final class Msg {
 	private static final String ERROR_CODE_PREFIX = "HAPI";
 
 	/**
-	 * IMPORTANT: Please update the following comment after you add a new code
-	 * Last used code value: 2140
+	 * IMPORTANT: Please update the table in the following link after you add a new code:
+	 * https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code
 	 */
 
 	private Msg() {}

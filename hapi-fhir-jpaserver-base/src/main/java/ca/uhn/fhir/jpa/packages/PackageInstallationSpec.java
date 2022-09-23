@@ -34,12 +34,10 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Schema(
-	name = "PackageInstallationSpec",
-	description =
-		"Defines a set of instructions for package installation"
-)
+	name = "PackageInstallationSpec", description = "Defines a set of instructions for package installation"
+	)
 @JsonPropertyOrder({
-	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode"
+	"name", "version", "packageUrl", "installMode", "installResourceTypes", "validationMode", "reloadExisting"
 })
 @ExampleSupplier({PackageInstallationSpec.ExampleSupplier.class, PackageInstallationSpec.ExampleSupplier2.class})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -64,6 +62,9 @@ public class PackageInstallationSpec {
 	@Schema(description = "Should dependencies be automatically resolved, fetched and installed with the same settings")
 	@JsonProperty("fetchDependencies")
 	private boolean myFetchDependencies;
+	@Schema(description = "Should existing resources be reloaded. Defaults to true, but can be set to false to avoid re-index operations for existing search parameters")
+	@JsonProperty("reloadExisting")
+	private boolean myReloadExisting = true;
 	@Schema(description = "Any values provided here will be interpreted as a regex. Dependencies with an ID matching any regex will be skipped.")
 	private List<String> myDependencyExcludes;
 	@JsonIgnore
@@ -143,6 +144,14 @@ public class PackageInstallationSpec {
 	public PackageInstallationSpec setPackageContents(byte[] thePackageContents) {
 		myPackageContents = thePackageContents;
 		return this;
+	}
+
+	public boolean isReloadExisting() {
+		return myReloadExisting;
+	}
+
+	public void setReloadExisting(boolean reloadExisting) {
+		this.myReloadExisting = reloadExisting;
 	}
 
 	public PackageInstallationSpec addDependencyExclude(String theExclude) {

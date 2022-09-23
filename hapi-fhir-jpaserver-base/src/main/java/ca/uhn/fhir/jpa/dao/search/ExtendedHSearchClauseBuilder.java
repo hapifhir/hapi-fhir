@@ -224,7 +224,7 @@ public class ExtendedHSearchClauseBuilder {
 		}
 
 		for (List<? extends IQueryParameterType> nextAnd : stringAndOrTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
+			Set<String> terms = TermHelper.makePrefixSearchTerm(extractOrStringParams(nextAnd));
 			ourLog.debug("addStringTextSearch {}, {}", theSearchParamName, terms);
 			if (!terms.isEmpty()) {
 				String query = terms.stream()
