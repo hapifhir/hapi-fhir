@@ -26,7 +26,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
@@ -64,12 +63,11 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class RestfulServerConfiguration implements ISearchParamRegistry {
 
-	public static final String GLOBAL = "GLOBAL";
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServerConfiguration.class);
-	private Collection<ResourceBinding> resourceBindings;
-	private List<BaseMethodBinding> serverBindings;
+	private Collection<ResourceBinding> myResourceBindings;
+	private List<BaseMethodBinding> myServerBindings;
 	private List<BaseMethodBinding> myGlobalBindings;
-	private Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype;
+	private Map<String, Class<? extends IBaseResource>> myResourceNameToSharedSupertype;
 	private String myImplementationDescription;
 	private String myServerName = "HAPI FHIR";
 	private String myServerVersion = VersionUtil.getVersion();
@@ -90,7 +88,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the resourceBindings
 	 */
 	public Collection<ResourceBinding> getResourceBindings() {
-		return resourceBindings;
+		return myResourceBindings;
 	}
 
 	/**
@@ -99,7 +97,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @param resourceBindings the resourceBindings to set
 	 */
 	public RestfulServerConfiguration setResourceBindings(Collection<ResourceBinding> resourceBindings) {
-		this.resourceBindings = resourceBindings;
+		this.myResourceBindings = resourceBindings;
 		return this;
 	}
 
@@ -109,23 +107,23 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 	 * @return the serverBindings
 	 */
 	public List<BaseMethodBinding> getServerBindings() {
-		return serverBindings;
+		return myServerBindings;
 	}
 
 	/**
 	 * Set the theServerBindings
 	 */
 	public RestfulServerConfiguration setServerBindings(List<BaseMethodBinding> theServerBindings) {
-		this.serverBindings = theServerBindings;
+		this.myServerBindings = theServerBindings;
 		return this;
 	}
 
 	public Map<String, Class<? extends IBaseResource>> getNameToSharedSupertype() {
-		return resourceNameToSharedSupertype;
+		return myResourceNameToSharedSupertype;
 	}
 
 	public RestfulServerConfiguration setNameToSharedSupertype(Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype) {
-		this.resourceNameToSharedSupertype = resourceNameToSharedSupertype;
+		this.myResourceNameToSharedSupertype = resourceNameToSharedSupertype;
 		return this;
 	}
 
@@ -404,7 +402,7 @@ public class RestfulServerConfiguration implements ISearchParamRegistry {
 				scanner.register(resourceClass);
 			});
 
-		resourceNameToSharedSupertype = resourceNameToScanner.entrySet().stream()
+		myResourceNameToSharedSupertype = resourceNameToScanner.entrySet().stream()
 			.filter(entry -> entry.getValue().getLowestCommonSuperclass().isPresent())
 			.collect(Collectors.toMap(
 				entry -> entry.getKey(),

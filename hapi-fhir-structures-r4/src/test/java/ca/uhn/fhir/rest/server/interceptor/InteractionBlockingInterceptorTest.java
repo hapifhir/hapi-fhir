@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -17,12 +16,12 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -32,24 +31,26 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
-	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final Logger ourLog = LoggerFactory.getLogger(InteractionBlockingInterceptorTest.class);
 	public static final String SERVER_OP = "$server-op";
 	public static final String TYPE_OP = "$type-op";
 	public static final String INSTANCE_OP = "$instance-op";
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final Logger ourLog = LoggerFactory.getLogger(InteractionBlockingInterceptorTest.class);
 	@RegisterExtension
 	private final RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
 	private final HashMapResourceProvider<Patient> myPatientProvider = new HashMapResourceProvider<>(ourCtx, Patient.class);
 	private final HashMapResourceProvider<Observation> myObservationProvider = new HashMapResourceProvider<>(ourCtx, Observation.class);
 	private final HashMapResourceProvider<Organization> myOrganizationProvider = new HashMapResourceProvider<>(ourCtx, Organization.class);
-	private final InteractionBlockingInterceptor mySvc = new InteractionBlockingInterceptor(ourCtx);
+	private InteractionBlockingInterceptor mySvc;
 
 	@Test
 	public void testAllowInteractions() {
 		// Setup
-		mySvc.addAllowedSpec("Patient:read");
-		mySvc.addAllowedSpec("Observation:read");
-		mySvc.addAllowedSpec("Observation:create");
+		mySvc = new InteractionBlockingInterceptor.Builder(ourCtx)
+			.addAllowedSpec("Patient:read")
+			.addAllowedSpec("Observation:read")
+			.addAllowedSpec("Observation:create")
+			.build();
 
 		// Test
 		registerProviders();
@@ -74,9 +75,11 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 	@Test
 	public void testAllowOperations() {
 		// Setup
-		mySvc.addAllowedSpec(SERVER_OP);
-		mySvc.addAllowedSpec(TYPE_OP);
-		mySvc.addAllowedSpec(INSTANCE_OP);
+		mySvc = new InteractionBlockingInterceptor.Builder(ourCtx)
+			.addAllowedSpec(SERVER_OP)
+			.addAllowedSpec(TYPE_OP)
+			.addAllowedSpec(INSTANCE_OP)
+			.build();
 
 		// Test
 		registerProviders();
@@ -132,7 +135,7 @@ public class InteractionBlockingInterceptorTest implements ITestDataBuilder {
 		myServer.registerProvider(new DummyOperationProvider());
 	}
 
-	@NotNull
+	@Nonnull
 	private Set<String> fetchCapabilityInteractions() {
 		CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
 		TreeSet<String> supportedOps = new TreeSet<>();
