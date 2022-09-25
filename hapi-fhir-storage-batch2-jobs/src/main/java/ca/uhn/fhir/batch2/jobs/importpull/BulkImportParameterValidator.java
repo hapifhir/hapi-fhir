@@ -25,10 +25,10 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class BulkImportParameterValidator implements IJobParametersValidator<Bat
 
 	@Nullable
 	@Override
-	public List<String> validate(@NotNull Batch2BulkImportPullJobParameters theParameters) {
+	public List<String> validate(@Nonnull Batch2BulkImportPullJobParameters theParameters) {
 		ourLog.info("BulkImportPull parameter validation begin");
 
 		ArrayList<String> errors = new ArrayList<>();

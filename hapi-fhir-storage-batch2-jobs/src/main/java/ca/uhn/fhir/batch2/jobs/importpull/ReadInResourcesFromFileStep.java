@@ -34,10 +34,10 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.util.IoUtil;
 import com.google.common.io.LineReader;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 
@@ -51,13 +51,13 @@ public class ReadInResourcesFromFileStep implements IJobStepWorker<Batch2BulkImp
 		myBulkDataImportSvc = theBulkDataImportSvc;
 	}
 
-	// because we are using an unstable google api
+	// because we are using an unstable Google api
 	@SuppressWarnings("UnstableApiUsage")
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> theStepExecutionDetails,
-		@NotNull IJobDataSink<BulkImportRecord> theDataSink
+		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportFilePartitionResult> theStepExecutionDetails,
+		@Nonnull IJobDataSink<BulkImportRecord> theDataSink
 	) throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 		int fileIndex = theStepExecutionDetails.getData().getFileIndex();

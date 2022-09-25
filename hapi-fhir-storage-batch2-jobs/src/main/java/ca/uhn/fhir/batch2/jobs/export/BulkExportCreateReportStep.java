@@ -74,18 +74,6 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		return RunOutcome.SUCCESS;
 	}
 
-	private static String getOriginatingRequestUrl(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
-		IJobInstance instance = theStepExecutionDetails.getInstance();
-		String url = "";
-		if (instance instanceof JobInstance) {
-			JobInstance jobInstance = (JobInstance) instance;
-			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
-			String originalRequestUrl = parameters.getOriginalRequestUrl();
-			url = originalRequestUrl;
-		}
-		return url;
-	}
-
 	@Nonnull
 	@Override
 	public ChunkOutcome consume(ChunkExecutionDetails<BulkExportJobParameters,
@@ -100,5 +88,17 @@ public class BulkExportCreateReportStep implements IReductionStepWorker<BulkExpo
 		myResourceToBinaryIds.get(fileId.getResourceType()).add(fileId.getBinaryId());
 
 		return ChunkOutcome.SUCCESS();
+	}
+
+	private static String getOriginatingRequestUrl(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportBinaryFileId> theStepExecutionDetails, BulkExportJobResults results) {
+		IJobInstance instance = theStepExecutionDetails.getInstance();
+		String url = "";
+		if (instance instanceof JobInstance) {
+			JobInstance jobInstance = (JobInstance) instance;
+			BulkExportJobParameters parameters = jobInstance.getParameters(BulkExportJobParameters.class);
+			String originalRequestUrl = parameters.getOriginalRequestUrl();
+			url = originalRequestUrl;
+		}
+		return url;
 	}
 }

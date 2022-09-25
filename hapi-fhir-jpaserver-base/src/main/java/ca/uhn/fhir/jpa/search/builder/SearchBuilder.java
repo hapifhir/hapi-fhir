@@ -1027,7 +1027,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Collection<Include> theIncludes,
 																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
@@ -1132,6 +1132,8 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 
 					List<String> paths;
+
+					// Start replace
 					RuntimeSearchParam param;
 					String resType = nextInclude.getParamType();
 					if (isBlank(resType)) {
@@ -1154,7 +1156,8 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = theReverseMode ? param.getPathsSplitForResourceType(resType) : param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
+					// end replace
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
@@ -1224,10 +1227,10 @@ public class SearchBuilder implements ISearchBuilder {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
 
-							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
+							List<Tuple> results = q.getResultList();
 							for (Tuple result : results) {
 								if (result != null) {
 									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));

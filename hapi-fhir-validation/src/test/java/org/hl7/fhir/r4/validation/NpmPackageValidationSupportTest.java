@@ -23,7 +23,6 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmPackageValidationSupportTest {
 
@@ -34,6 +33,7 @@ public class NpmPackageValidationSupportTest {
 		"dummyBinary1.txt", "myDummyContent1".getBytes(),
 		"dummyBinary2.txt", "myDummyContent2".getBytes()
 	);
+
 	@Test
 	public void testValidateWithPackage() throws IOException {
 

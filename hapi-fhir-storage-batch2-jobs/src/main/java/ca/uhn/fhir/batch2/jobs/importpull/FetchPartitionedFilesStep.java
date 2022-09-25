@@ -30,8 +30,9 @@ import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.importpull.models.BulkImportFilePartitionResult;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
+import javax.annotation.Nonnull;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -44,11 +45,11 @@ public class FetchPartitionedFilesStep implements IFirstJobStepWorker<Batch2Bulk
 		myBulkDataImportSvc = theBulkDataImportSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
-		@NotNull IJobDataSink<BulkImportFilePartitionResult> theDataSink
+		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, VoidModel> theStepExecutionDetails,
+		@Nonnull IJobDataSink<BulkImportFilePartitionResult> theDataSink
 	) throws JobExecutionFailedException {
 		String jobId = theStepExecutionDetails.getParameters().getJobId();
 
