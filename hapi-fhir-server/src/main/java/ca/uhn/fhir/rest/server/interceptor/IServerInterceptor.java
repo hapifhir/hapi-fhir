@@ -119,7 +119,6 @@ public interface IServerInterceptor {
 	 * Invoked before an incoming request is processed. Note that this method is called
 	 * after the server has begin preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * {@link #incomingRequestPreHandled(RestOperationTypeEnum, ActionRequestDetails)} and
 	 * {@link #incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
 	 * are.
 	 * <p>
