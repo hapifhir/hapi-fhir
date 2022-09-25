@@ -1,0 +1,10 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+(dependent HAPI modules listed in brackets):
+<ul>
+<li>Woodstox (Base): 6.2.5 -> 6.3.1</li>
+</ul>
+"
+

@@ -124,7 +124,7 @@ public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider 
     private Response execute(final Builder theRequestBuilder, final String methodKey)
             throws IOException {
         final JaxRsRequest theRequest = theRequestBuilder.build();
-        final BaseMethodBinding<?> method = getBinding(theRequest.getRestOperationType(), methodKey);
+        final BaseMethodBinding method = getBinding(theRequest.getRestOperationType(), methodKey);
         try {
             return (Response) method.invokeServer(this, theRequest);
         }
@@ -151,7 +151,7 @@ public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider 
      * @param theBindingKey the key determining the method to be executed (needed for e.g. custom operation)
      * @return
      */
-    protected BaseMethodBinding<?> getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
+    protected BaseMethodBinding getBinding(final RestOperationTypeEnum restOperation, final String theBindingKey) {
         return getBindings().getBinding(restOperation, theBindingKey);
     }
 

@@ -12,11 +12,11 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
 
@@ -71,7 +71,7 @@ public class NpmPackageValidationSupportTest {
 
 	}
 
-	@NotNull
+	@Nonnull
 	private NpmPackageValidationSupport getNpmPackageValidationSupport(String theClasspath) throws IOException {
 		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(myFhirContext);
 		npmPackageSupport.loadPackageFromClasspath(theClasspath);
