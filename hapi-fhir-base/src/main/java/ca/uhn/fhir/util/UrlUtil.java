@@ -71,12 +71,12 @@ public class UrlUtil {
 	/**
 	 * Cleans up a value that will be serialized as an HTTP header. This method:
 	 * <p>
-	 * - Strips any newline characters
+	 * - Strips any newline (\r or \n) characters
 	 *
 	 * @since 6.2.0
 	 */
-	public static String sanitizeHeaderValue(String thePollLocation) {
-		return thePollLocation.replace("\n", "");
+	public static String sanitizeHeaderValue(String theHeader) {
+		return theHeader.replace("\n", "").replace("\r", "");
 	}
 
 	public static String sanitizeBaseUrl(String theBaseUrl) {

@@ -149,8 +149,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		String linkSelfBase = theRequest.getFhirServerBase(); // myServerAddressStrategy.determineServerBase(getServletContext(),
-		// theRequest.getServletRequest());
+		String linkSelfBase = theRequest.getFhirServerBase();
 		String completeUrl = theRequest.getCompleteUrl();
 		String linkSelf = linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
 
