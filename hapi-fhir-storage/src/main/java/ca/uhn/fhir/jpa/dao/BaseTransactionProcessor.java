@@ -203,11 +203,6 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
-		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
-			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
-			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
-		}
-
 		String actionName = "Transaction";
 		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 
@@ -547,7 +542,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = requestDetails.getRequestPath();
 
-				BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
+				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
 				}

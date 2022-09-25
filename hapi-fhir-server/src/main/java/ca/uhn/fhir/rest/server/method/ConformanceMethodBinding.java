@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 
@@ -152,15 +151,15 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			// Handle server action interceptors
 			RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 			if (operationType != null) {
-				IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+
+				populateRequestDetailsForInterceptor(theRequest, theMethodParams);
+
 				// Interceptor hook: SERVER_INCOMING_REQUEST_PRE_HANDLED
 				if (theRequest.getInterceptorBroadcaster() != null) {
 					HookParams preHandledParams = new HookParams();
 					preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 					preHandledParams.add(RequestDetails.class, theRequest);
 					preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-					preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
 					theRequest
 						.getInterceptorBroadcaster()
 						.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
@@ -196,7 +195,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 			myCachedResponse.set(conf);
 			myCachedResponseExpires.set(System.currentTimeMillis() + getCacheMillis());
 		}
-		
+
 		return conf;
 	}
 
@@ -239,7 +238,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public IBaseConformance provideCapabilityStatement(RestfulServer theServer, RequestDetails theRequest) {
 		Object[] params = createMethodParams(theRequest);
 		IBundleProvider resultObj = invokeServer(theServer, theRequest, params);
-		return (IBaseConformance) resultObj.getResources(0,1).get(0);
+		return (IBaseConformance) resultObj.getResources(0, 1).get(0);
 	}
 
 }

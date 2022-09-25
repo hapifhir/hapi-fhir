@@ -98,8 +98,10 @@ public class TestHSearchAddInConfig {
 			luceneProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
 			luceneProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
-			return (theProperties) ->
+			return (theProperties) -> {
+				ourLog.debug("Configuring Hibernate Search - {}", luceneProperties);
 				theProperties.putAll(luceneProperties);
+			};
 		}
 
 

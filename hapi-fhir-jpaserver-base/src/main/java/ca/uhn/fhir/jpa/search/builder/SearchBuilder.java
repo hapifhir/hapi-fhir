@@ -368,7 +368,6 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			if (theSearchRuntimeDetails != null) {
-				// wipmb we no longer have full size.
 				theSearchRuntimeDetails.setFoundIndexMatchesCount(resultCount);
 				HookParams params = new HookParams()
 					.add(RequestDetails.class, theRequest)
@@ -377,7 +376,7 @@ public class SearchBuilder implements ISearchBuilder {
 				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INDEXSEARCH_QUERY_COMPLETE, params);
 			}
 
-			// wipmb extract
+			// todo MB extract this and move to FullText svc
 			// can we skip the database entirely and return the pid list from here?
 			boolean canSkipDatabase =
 				// if we processed an AND clause, and it returned nothing, then nothing can match.
@@ -388,12 +387,10 @@ public class SearchBuilder implements ISearchBuilder {
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
 						theParams.getNearDistanceParam() == null &&
+						// todo MB don't we support _lastUpdated and _offset now?
 						theParams.getLastUpdated() == null &&
 						theParams.getEverythingMode() == null &&
 						theParams.getOffset() == null
-//						&&
-//						// or sorting?
-//						theParams.getSort() == null
 					);
 
 			if (canSkipDatabase) {
@@ -406,7 +403,6 @@ public class SearchBuilder implements ISearchBuilder {
 				ourLog.trace("Query needs db after HSearch.  Chunking.");
 				// Finish the query in the database for the rest of the search parameters, sorting, partitioning, etc.
 				// We break the pids into chunks that fit in the 1k limit for jdbc bind params.
-				// wipmb change chunk to take iterator
 				new QueryChunker<Long>()
 					.chunk(Streams.stream(fulltextExecutor).collect(Collectors.toList()), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCountOnlyFlag, theRequest, queries));
 			}
@@ -1016,7 +1012,6 @@ public class SearchBuilder implements ISearchBuilder {
 		if (myDaoConfig.isAdvancedHSearchIndexing() && myDaoConfig.isStoreResourceInHSearchIndex()) {
 			List<Long> pidList = thePids.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 
-			// wipmb standardize on ResourcePersistentId
 			List<IBaseResource> resources = myFulltextSearchSvc.getResources(pidList);
 			return resources;
 		} else if (!Objects.isNull(myParams) && myParams.isLastN()) {
@@ -1032,7 +1027,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 * so it can't be Collections.emptySet() or some such thing
 	 */
 	@Override
-	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Set<Include> theIncludes,
+	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Collection<Include> theIncludes,
 																 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest, Integer theMaxCount) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
@@ -1137,6 +1132,8 @@ public class SearchBuilder implements ISearchBuilder {
 				} else {
 
 					List<String> paths;
+
+					// Start replace
 					RuntimeSearchParam param;
 					String resType = nextInclude.getParamType();
 					if (isBlank(resType)) {
@@ -1159,7 +1156,8 @@ public class SearchBuilder implements ISearchBuilder {
 						continue;
 					}
 
-					paths = theReverseMode ? param.getPathsSplitForResourceType(resType) : param.getPathsSplit();
+					paths = param.getPathsSplitForResourceType(resType);
+					// end replace
 
 					String targetResourceType = defaultString(nextInclude.getParamTargetType(), null);
 					for (String nextPath : paths) {
@@ -1229,10 +1227,10 @@ public class SearchBuilder implements ISearchBuilder {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
 
-							List<Tuple> results = q.getResultList();
 							if (theMaxCount != null) {
 								q.setMaxResults(theMaxCount);
 							}
+							List<Tuple> results = q.getResultList();
 							for (Tuple result : results) {
 								if (result != null) {
 									Long resourceId = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_ID_ALIAS)));
@@ -1693,7 +1691,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			if (myQueryList.isEmpty()) {
-				// wipmb what is this?
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 				myQueryList = createQuery(myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);

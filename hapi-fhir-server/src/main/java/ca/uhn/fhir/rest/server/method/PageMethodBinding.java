@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.Include;
@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -54,11 +53,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PageMethodBinding.class);
+
 	public PageMethodBinding(FhirContext theContext, Method theMethod) {
 		super(null, theMethod, theContext, null);
 	}
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PageMethodBinding.class);
 
 	public IBaseResource provider() {
 		return null;
@@ -83,7 +82,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		return handlePagingRequest(theServer, theRequest, theRequest.getParameters().get(Constants.PARAM_PAGINGACTION)[0]);
 	}
-	
+
 	private IBaseResource handlePagingRequest(IRestfulServer<?> theServer, RequestDetails theRequest, String thePagingAction) {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
@@ -91,13 +90,11 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
-		IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
-		populateActionRequestDetailsForInterceptor(theRequest, details, ReflectionUtil.EMPTY_OBJECT_ARRAY);
+		populateRequestDetailsForInterceptor(theRequest, ReflectionUtil.EMPTY_OBJECT_ARRAY);
 		HookParams preHandledParams = new HookParams();
 		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 		preHandledParams.add(RequestDetails.class, theRequest);
 		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
 		if (theRequest.getInterceptorBroadcaster() != null) {
 			theRequest
 				.getInterceptorBroadcaster()
@@ -152,8 +149,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 
-		String linkSelfBase = theRequest.getFhirServerBase(); // myServerAddressStrategy.determineServerBase(getServletContext(),
-																				// theRequest.getServletRequest());
+		String linkSelfBase = theRequest.getFhirServerBase();
 		String completeUrl = theRequest.getCompleteUrl();
 		String linkSelf = linkSelfBase + completeUrl.substring(theRequest.getCompleteUrl().indexOf('?'));
 
