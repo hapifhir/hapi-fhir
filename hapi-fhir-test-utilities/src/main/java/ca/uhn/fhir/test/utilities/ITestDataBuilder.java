@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.MetaUtil;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,8 +35,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Date;
@@ -51,6 +53,7 @@ import static org.hamcrest.Matchers.matchesPattern;
  */
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public interface ITestDataBuilder {
+	Logger ourLog = LoggerFactory.getLogger(ITestDataBuilder.class);
 
 	/**
 	 * Set Patient.active = true
@@ -106,6 +109,13 @@ public interface ITestDataBuilder {
 	 */
 	default Consumer<IBaseResource> withEffectiveDate(String theDate) {
 		return t -> __setPrimitiveChild(getFhirContext(), t, "effectiveDateTime", "dateTime", theDate);
+	}
+
+	/**
+	 * Set Observation.effectiveDate
+	 */
+	default Consumer<IBaseResource> withDateTimeAt(String thePath, String theDate) {
+		return t -> __setPrimitiveChild(getFhirContext(), t, thePath, "dateTime", theDate);
 	}
 
 	/**
@@ -197,6 +207,10 @@ public interface ITestDataBuilder {
 	default IIdType createResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = buildResource(theResourceType, theModifiers);
 
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Creating {}", getFhirContext().newJsonParser().encodeResourceToString(resource));
+		}
+
 		if (isNotBlank(resource.getIdElement().getValue())) {
 			return doUpdateResource(resource);
 		} else {
@@ -225,7 +239,7 @@ public interface ITestDataBuilder {
 		return withReference("encounter", new IdType(theEncounter));
 	}
 
-	@NotNull
+	@Nonnull
 	private Consumer<IBaseResource> withReference(String theReferenceName, @Nullable IIdType theReferenceValue) {
 		return t -> {
 			if (theReferenceValue != null && theReferenceValue.getValue() != null) {
@@ -245,15 +259,15 @@ public interface ITestDataBuilder {
 		};
 	}
 
-	default <T extends IBase> Consumer<T> withElementAt(String thePath, Consumer<IBase>... theModifiers) {
+	default <T extends IBase, E extends IBase> Consumer<T> withElementAt(String thePath, Consumer<E>... theModifiers) {
 		return t->{
 			FhirTerser terser = getFhirContext().newTerser();
-			IBase element = terser.addElement(t, thePath);
+			E element = terser.addElement(t, thePath);
 			applyElementModifiers(element, theModifiers);
 		};
 	}
 
-	default Consumer<IBaseResource> withQuantityAtPath(String thePath, double theValue, String theSystem, String theCode) {
+	default <T extends IBase> Consumer<T> withQuantityAtPath(String thePath, Number theValue, String theSystem, String theCode) {
 		return withElementAt(thePath,
 			withPrimitiveAttribute("value", theValue),
 			withPrimitiveAttribute("system", theSystem),
@@ -274,8 +288,8 @@ public interface ITestDataBuilder {
 		return element;
 	}
 
-	default void applyElementModifiers(IBase element, Consumer<IBase>[] theModifiers) {
-		for (Consumer<IBase> nextModifier : theModifiers) {
+	default <E extends IBase> void applyElementModifiers(E element, Consumer<E>[] theModifiers) {
+		for (Consumer<E> nextModifier : theModifiers) {
 			nextModifier.accept(element);
 		}
 	}
@@ -284,16 +298,24 @@ public interface ITestDataBuilder {
 		return withObservationCode(theSystem, theCode, null);
 	}
 
-	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, String theDisplay) {
-		return t -> {
-			FhirTerser terser = getFhirContext().newTerser();
-			IBase coding = terser.addElement(t, "code.coding");
-			terser.addElement(coding, "system", theSystem);
-			terser.addElement(coding, "code", theCode);
-			if (StringUtils.isNotEmpty(theDisplay)) {
-				terser.addElement(coding, "display", theDisplay);
-			}
-		};
+	default Consumer<IBaseResource> withObservationCode(@Nullable String theSystem, @Nullable String theCode, @Nullable String theDisplay) {
+		return withCodingAt("code.coding", theSystem, theCode, theDisplay);
+	}
+
+	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue) {
+		return withCodingAt(thePath, theSystem, theValue, null);
+	}
+
+	default <T extends IBase> Consumer<T> withCodingAt(String thePath, @Nullable String theSystem, @Nullable String theValue, @Nullable String theDisplay) {
+		return withElementAt(thePath,
+			withPrimitiveAttribute("system", theSystem),
+			withPrimitiveAttribute("code", theValue),
+			withPrimitiveAttribute("display", theDisplay)
+		);
+	}
+
+	default <T extends IBaseResource, E extends IBase> Consumer<T> withObservationComponent(Consumer<E>... theModifiers) {
+		return withElementAt("component", theModifiers);
 	}
 
 	default Consumer<IBaseResource> withObservationHasMember(@Nullable IIdType theHasMember) {
@@ -304,6 +326,7 @@ public interface ITestDataBuilder {
 		return withReference("managingOrganization", theHasMember);
 	}
 
+	// todo mb extract these to something like TestDataBuilderBacking.  Maybe split out create* into child interface since people skip it.
 	/**
 	 * Users of this API must implement this method
 	 */
@@ -329,5 +352,59 @@ public interface ITestDataBuilder {
 		IPrimitiveType<?> booleanType = (IPrimitiveType<?>) activeChild.getChildByName(theElementName).newInstance();
 		booleanType.setValueAsString(theValue);
 		activeChild.getMutator().addValue(theTarget, booleanType);
+	}
+
+	interface Support {
+		FhirContext getFhirContext();
+		IIdType createResource(IBaseResource theResource);
+		IIdType updateResource(IBaseResource theResource);
+	}
+
+	interface WithSupport extends ITestDataBuilder {
+		Support getSupport();
+
+		@Override
+		default FhirContext getFhirContext() {
+			return getSupport().getFhirContext();
+		}
+
+		@Override
+		default IIdType doCreateResource(IBaseResource theResource) {
+			return getSupport().createResource(theResource);
+		}
+
+		@Override
+		default IIdType doUpdateResource(IBaseResource theResource) {
+			return getSupport().updateResource(theResource);
+		}
+	}
+
+	/**
+	 * Dummy support to use ITestDataBuilder as just a builder, not a DAO
+	 * todo mb Maybe we should split out the builder into a super-interface and drop this?
+	 */
+	class SupportNoDao implements Support {
+		final FhirContext myFhirContext;
+
+		public SupportNoDao(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return myFhirContext;
+		}
+
+		@Override
+		public IIdType createResource(IBaseResource theResource) {
+			Validate.isTrue(false, "Create not supported");
+			return null;
+		}
+
+		@Override
+		public IIdType updateResource(IBaseResource theResource) {
+			Validate.isTrue(false, "Update not supported");
+			return null;
+		}
 	}
 }
