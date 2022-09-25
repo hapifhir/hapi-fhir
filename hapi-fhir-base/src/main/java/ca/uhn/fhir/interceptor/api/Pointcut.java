@@ -344,9 +344,6 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.RestOperationTypeEnum - The type of operation that the FHIR server has determined that the client is trying to invoke
 	 * </li>
-	 * <li>
-	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - This parameter is provided for legacy reasons only and will be removed in the future. Do not use.
-	 * </li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -360,8 +357,7 @@ public enum Pointcut implements IPointcut {
 	SERVER_INCOMING_REQUEST_PRE_HANDLED(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.rest.api.RestOperationTypeEnum",
-		"ca.uhn.fhir.rest.server.interceptor.IServerInterceptor$ActionRequestDetails"
+		"ca.uhn.fhir.rest.api.RestOperationTypeEnum"
 	),
 
 

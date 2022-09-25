@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -34,7 +34,6 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.method.TransactionParameter.ParamStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -58,8 +57,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			if (next instanceof TransactionParameter) {
 				if (myTransactionParamIndex != -1) {
 					throw new ConfigurationException(Msg.code(372) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " has multiple parameters annotated with the @"
-							+ TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
-							+ " methods");
+						+ TransactionParam.class + " annotation, exactly one is required for @" + Transaction.class
+						+ " methods");
 				}
 				myTransactionParamIndex = index;
 				myTransactionParamStyle = ((TransactionParameter) next).getParamStyle();
@@ -69,7 +68,7 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 		if (myTransactionParamIndex == -1) {
 			throw new ConfigurationException(Msg.code(373) + "Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " does not have a parameter annotated with the @"
-					+ TransactionParam.class + " annotation");
+				+ TransactionParam.class + " annotation");
 		}
 	}
 
@@ -143,8 +142,8 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 	}
 
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
 
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
@@ -158,10 +157,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		theRequestDetails.setResource(resource);
-		if (theDetails != null) {
-			theDetails.setResource(resource);
-		}
-
 	}
 
 }

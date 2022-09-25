@@ -224,8 +224,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		transaction(bundle);
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(2)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), myParamsCaptor.capture());
@@ -326,9 +326,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		entry.getRequest().setIfNoneExist("Patient?name=" + methodName);
 		transaction(bundle);
 
-		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(2)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
+		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
-		assertEquals(RestOperationTypeEnum.UPDATE, myParamsCaptor.getAllValues().get(1).get(RestOperationTypeEnum.class));
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
 
