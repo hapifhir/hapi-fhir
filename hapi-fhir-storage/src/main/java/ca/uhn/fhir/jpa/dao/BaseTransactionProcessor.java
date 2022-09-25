@@ -547,7 +547,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = requestDetails.getRequestPath();
 
-				BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
+				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
 				}

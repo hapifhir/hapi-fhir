@@ -45,7 +45,7 @@ public class RawParamsParameter implements IParameter {
 
 	
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		HashMap<String, List<String>> retVal = null;
 
 		for (String nextName : theRequest.getParameters().keySet()) {
