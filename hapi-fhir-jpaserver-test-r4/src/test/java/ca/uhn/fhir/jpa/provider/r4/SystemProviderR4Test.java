@@ -572,7 +572,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.transaction().withBundle(input).execute();
 			assertEquals(1, counter0.get());
 			assertEquals(1, counter1.get());
-			assertEquals(6, counter2.get());
+			assertEquals(5, counter2.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);

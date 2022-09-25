@@ -6,6 +6,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -4429,6 +4430,7 @@ public class AuthorizationInterceptorR4Test {
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
+				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
 				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 
@@ -4608,6 +4610,7 @@ public class AuthorizationInterceptorR4Test {
 				params.add(RequestDetails.class, theRequestDetails);
 				params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 				params.add(TransactionDetails.class, new TransactionDetails());
+				params.add(RequestPartitionId.class, RequestPartitionId.defaultPartition());
 				ourServlet.getInterceptorService().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, params);
 			}
 			{
