@@ -94,7 +94,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     super(theServerConfiguration);
   }
 
-  private void checkBindingForSystemOps(CapabilityStatementRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
+  private void checkBindingForSystemOps(CapabilityStatementRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding nextMethodBinding) {
     if (nextMethodBinding.getRestOperationType() != null) {
       String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
       if (sysOpCode != null) {
@@ -115,18 +115,18 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
   }
 
-  private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings(RequestDetails theRequestDetails) {
-    Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
+  private Map<String, List<BaseMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
+    Map<String, List<BaseMethodBinding>> resourceToMethods = new TreeMap<>();
     for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
       String resourceName = next.getResourceName();
-      for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
+      for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
         if (resourceToMethods.containsKey(resourceName) == false) {
           resourceToMethods.put(resourceName, new ArrayList<>());
         }
         resourceToMethods.get(resourceName).add(nextMethodBinding);
       }
     }
-    for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration(theRequestDetails).getServerBindings()) {
+    for (BaseMethodBinding nextMethodBinding : getServerConfiguration(theRequestDetails).getServerBindings()) {
       String resourceName = "";
       if (resourceToMethods.containsKey(resourceName) == false) {
         resourceToMethods.put(resourceName, new ArrayList<>());
@@ -235,9 +235,9 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     Set<SystemRestfulInteraction> systemOps = new HashSet<>();
     Set<String> operationNames = new HashSet<>();
 
-    Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings(theRequestDetails);
+    Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
     Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = serverConfiguration.getNameToSharedSupertype();
-    for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+    for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
       if (nextEntry.getKey().isEmpty() == false) {
         Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
@@ -258,7 +258,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
 
         // Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
         // CapabilityStatement.RestResourceSearchParam>();
-        for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+        for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
           if (nextMethodBinding.getRestOperationType() != null) {
             String resOpCode = nextMethodBinding.getRestOperationType().getCode();
             if (resOpCode != null) {
@@ -350,7 +350,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           resource.addSearchInclude(nextInclude);
         }
       } else {
-        for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+        for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
           checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
           if (nextMethodBinding instanceof OperationMethodBinding) {
             OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;

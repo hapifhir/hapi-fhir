@@ -56,6 +56,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
@@ -236,6 +237,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
+
+	@Autowired
+	protected ISearchIncludeDao mySearchIncludeEntityDao;
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired

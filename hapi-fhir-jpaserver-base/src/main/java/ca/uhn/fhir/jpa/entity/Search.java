@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -99,7 +100,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	@OneToMany(mappedBy = "mySearch")
+	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)

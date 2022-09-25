@@ -72,7 +72,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
+public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
 
 	private MethodReturnTypeEnum myMethodReturnType;

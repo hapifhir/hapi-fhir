@@ -23,9 +23,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -38,10 +36,6 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 
 	@Override
 	public Meta metaGetOperation(RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-		notifyInterceptors(RestOperationTypeEnum.META, requestDetails);
-
 		String sql = "SELECT d FROM TagDefinition d WHERE d.myId IN (SELECT DISTINCT t.myTagId FROM ResourceTag t)";
 		TypedQuery<TagDefinition> q = myEntityManager.createQuery(sql, TagDefinition.class);
 		List<TagDefinition> tagDefinitions = q.getResultList();
