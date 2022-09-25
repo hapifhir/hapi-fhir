@@ -2315,6 +2315,41 @@
 					<artifactId>maven-install-plugin</artifactId>
 					<version>2.5.2</version>
 				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>animal-sniffer-maven-plugin</artifactId>
+					<version>1.22</version>
+					<configuration>
+						<signature>
+							<groupId>net.sf.androidscents.signature</groupId>
+							<artifactId>android-api-level-26</artifactId>
+							<version>8.0.0_r2</version>
+							<!-- Other Options -->
+							<!--
+							<artifactId>android-api-level-24</artifactId>
+							<version>7.0_r2</version>
+							<artifactId>android-api-level-32</artifactId>
+							<version>12_r1</version>
+							-->
+
+							<!-- 24 with desugaring -->
+							<!--
+							<groupId>com.toasttab.android</groupId>
+							<artifactId>gummy-bears-api-24</artifactId>
+							<version>0.4.0</version>
+							-->
+						</signature>
+					</configuration>
+					<executions>
+						<execution>
+							<id>check-android-26-compliance</id>
+							<phase>test</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -2639,23 +2674,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<version>1.22</version>
-				<configuration>
-					<signature>
-						<groupId>net.sf.androidscents.signature</groupId>
-						<!--artifactId>android-api-level-24</artifactId>
-						<version>7.0_r2</version-->
-						<!--artifactId>android-api-level-26</artifactId>
-						<version>8.0.0_r2</version-->
-						<artifactId>android-api-level-32</artifactId>
-						<version>12_r1</version>
-					</signature>
-					<failOnError>false</failOnError>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
