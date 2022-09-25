@@ -147,6 +147,7 @@ public class RenameColumnTask extends BaseTableTask {
 				break;
 			case POSTGRES_9_4:
 			case ORACLE_12C:
+			case COCKROACHDB_21_1:
 				sql = "ALTER TABLE " + getTableName() + " RENAME COLUMN " + myOldName + " TO " + myNewName;
 				break;
 			case MSSQL_2012:

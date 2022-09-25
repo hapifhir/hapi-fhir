@@ -7,10 +7,22 @@
 	<property name="charset" value="UTF-8"/>
 	<property name="cacheFile" value="target/cache_non_main_files"/>
 
+	<module name="SuppressionFilter">
+		<property name="file" value="src/checkstyle/checkstyle_suppressions.xml" />
+	</module>
 	<module name="TreeWalker">
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>
 			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="org\.jetbrains\.annotations\.NotNull"/>
+		</module>
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="org\.jetbrains\.annotations\.Nullable"/>
+		</module>
+		<module name="AbstractClassName">
+			<property name="format" value="^(Base|Abstract).+$"/>
 		</module>
 	</module>
 

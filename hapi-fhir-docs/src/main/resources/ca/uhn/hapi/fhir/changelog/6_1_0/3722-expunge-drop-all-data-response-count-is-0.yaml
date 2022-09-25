@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3722
+jira: SMILE-2323
+title: "Fixed the $expunge operation that expunge everything response will return the correct number of dropped resources."

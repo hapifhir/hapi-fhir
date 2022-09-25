@@ -90,8 +90,8 @@ public class SearchParameterMapTest {
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
-		assertEquals("?birthdate=ap2011&_include=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", queryString);
-		assertEquals("?birthdate=ap2011&_include=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", UrlUtil.unescape(queryString));
+		assertEquals("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", queryString);
+		assertEquals("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", UrlUtil.unescape(queryString));
 	}
 
 	@Test
@@ -108,8 +108,8 @@ public class SearchParameterMapTest {
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
-		assertEquals("?birthdate=ap2011&_revinclude=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", queryString);
-		assertEquals("?birthdate=ap2011&_revinclude=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", UrlUtil.unescape(queryString));
+		assertEquals("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", queryString);
+		assertEquals("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", UrlUtil.unescape(queryString));
 	}
 
 	@Test

@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -73,9 +73,9 @@ import java.util.stream.Collectors;
 @Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
-	// Do not reuse previously used index name: IDX_INDEXSTATUS
+	// Do not reuse previously used index name: IDX_INDEXSTATUS, IDX_RES_TYPE
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
-	@Index(name = "IDX_RES_TYPE", columnList = "RES_TYPE"),
+	@Index(name = "IDX_RES_TYPE_DEL_UPDATED", columnList = "RES_TYPE,RES_DELETED_AT,RES_UPDATED,PARTITION_ID,RES_ID"),
 })
 @NamedEntityGraph(name = "Resource.noJoins")
 public class ResourceTable extends BaseHasResource implements Serializable, IBasePersistedResource, IResourceLookup {
@@ -138,7 +138,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	@PropertyBinding(binder = @PropertyBinderRef(type = SearchParamTextPropertyBinder.class))
-	private ExtendedLuceneIndexData myLuceneIndexData;
+	private ExtendedHSearchIndexData myLuceneIndexData;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -772,7 +772,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return myCreatedByMatchUrl;
 	}
 
-	public void setLuceneIndexData(ExtendedLuceneIndexData theLuceneIndexData) {
+	public void setLuceneIndexData(ExtendedHSearchIndexData theLuceneIndexData) {
 		myLuceneIndexData = theLuceneIndexData;
 	}
 

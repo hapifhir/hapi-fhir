@@ -75,7 +75,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 					break;
 			}
 
-			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+			return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, theRuleApplier);
 		}
 
 		return null;

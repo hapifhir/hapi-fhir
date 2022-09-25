@@ -47,6 +47,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -118,16 +120,10 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	@Override
 	@Transactional
 	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
-
-		CodeableConcept sourceCodeableConcept = new CodeableConcept();
-		sourceCodeableConcept
-			.addCoding()
-			.setSystem(theRequest.getSourceSystemUrl())
-			.setCode(theRequest.getSourceCode());
-
-		TranslationRequest request = new TranslationRequest();
-		request.setCodeableConcept(sourceCodeableConcept);
-		request.setTargetSystem(new UriType(theRequest.getTargetSystemUrl()));
+		TranslationRequest request = TranslationRequest.fromTranslateCodeRequest(theRequest);
+		if (request.hasReverse() && request.getReverseAsBoolean()) {
+			return translateWithReverse(request);
+		}
 
 		return translate(request);
 	}

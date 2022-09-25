@@ -20,9 +20,9 @@ package ca.uhn.fhir.rest.server.method;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -52,6 +52,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -60,6 +61,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public static final String WILDCARD_NAME = "$" + Operation.NAME_MATCH_ALL;
 	private final boolean myIdempotent;
+	private final boolean myDeleteEnabled;
 	private final Integer myIdParamIndex;
 	private final String myName;
 	private final RestOperationTypeEnum myOtherOperationType;
@@ -81,7 +83,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	 */
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 											Operation theAnnotation) {
-		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.deleteEnabled(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
 			theAnnotation.bundleType(), theAnnotation.global());
 
 		myManualRequestMode = theAnnotation.manualRequest();
@@ -89,12 +91,13 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
+												boolean theIdempotent, boolean theDeleteEnabled, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
 												OperationParam[] theReturnParams, BundleTypeEnum theBundleType, boolean theGlobal) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
+		myDeleteEnabled = theDeleteEnabled;
 		myDescription = ParametersUtil.extractDescription(theMethod);
 		myShortDescription = ParametersUtil.extractShortDefinition(theMethod);
 		myGlobal = theGlobal;
@@ -218,6 +221,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
+		assert myOtherOperationType != null;
 		return myOtherOperationType;
 	}
 
@@ -255,8 +259,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		RequestTypeEnum requestType = theRequest.getRequestType();
-		if (requestType != RequestTypeEnum.GET && requestType != RequestTypeEnum.POST) {
-			// Operations can only be invoked with GET and POST
+		if (requestType != RequestTypeEnum.GET && requestType != RequestTypeEnum.POST && requestType != RequestTypeEnum.DELETE) {
+			// Operations can only be invoked with GET, POST and DELETE
 			return MethodMatchEnum.NONE;
 		}
 
@@ -311,20 +315,27 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
+		List<RequestTypeEnum> allowedRequestTypes = new ArrayList<>(List.of(RequestTypeEnum.POST));
+		if (myIdempotent) {
+			allowedRequestTypes.add(RequestTypeEnum.GET);
+		}
+		if (myDeleteEnabled) {
+			allowedRequestTypes.add(RequestTypeEnum.DELETE);
+		}
+		String messageParameter = allowedRequestTypes.stream().map(RequestTypeEnum::name).collect(Collectors.joining(", "));
+		String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), messageParameter);
 		if (theRequest.getRequestType() == RequestTypeEnum.POST) {
 			// all good
 		} else if (theRequest.getRequestType() == RequestTypeEnum.GET) {
 			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(Msg.code(426) + message, RequestTypeEnum.POST);
+				throw new MethodNotAllowedException(Msg.code(426) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
+			}
+		} else if (theRequest.getRequestType() == RequestTypeEnum.DELETE) {
+			if (!myDeleteEnabled) {
+				throw new MethodNotAllowedException(Msg.code(427) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 			}
 		} else {
-			if (!myIdempotent) {
-				String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.POST.name());
-				throw new MethodNotAllowedException(Msg.code(427) + message, RequestTypeEnum.POST);
-			}
-			String message = getContext().getLocalizer().getMessage(OperationMethodBinding.class, "methodNotSupported", theRequest.getRequestType(), RequestTypeEnum.GET.name(), RequestTypeEnum.POST.name());
-			throw new MethodNotAllowedException(Msg.code(428) + message, RequestTypeEnum.GET, RequestTypeEnum.POST);
+			throw new MethodNotAllowedException(Msg.code(428) + message, allowedRequestTypes.toArray(RequestTypeEnum[]::new));
 		}
 
 		if (myIdParamIndex != null) {
@@ -354,6 +365,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public boolean isIdempotent() {
 		return myIdempotent;
+	}
+
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
 	}
 
 	@Override

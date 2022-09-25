@@ -20,13 +20,14 @@ package ca.uhn.fhir.batch2.config;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.impl.BatchJobSender;
-import ca.uhn.fhir.batch2.impl.JobCleanerServiceImpl;
-import ca.uhn.fhir.batch2.impl.JobCoordinatorImpl;
-import ca.uhn.fhir.batch2.impl.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
+import ca.uhn.fhir.batch2.coordinator.JobCoordinatorImpl;
+import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
+import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
+import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -42,24 +44,52 @@ public abstract class BaseBatch2Config {
 
 	public static final String CHANNEL_NAME = "batch2-work-notification";
 
+	@Autowired
+	private IJobPersistence myPersistence;
+	@Autowired
+	private IChannelFactory myChannelFactory;
+
 	@Bean
 	public JobDefinitionRegistry batch2JobDefinitionRegistry() {
 		return new JobDefinitionRegistry();
 	}
 
 	@Bean
-	public IJobCoordinator batch2JobCoordinator(IChannelFactory theChannelFactory, IJobPersistence theJobInstancePersister, JobDefinitionRegistry theJobDefinitionRegistry) {
-		return new JobCoordinatorImpl(
-			new BatchJobSender(batch2ProcessingChannelProducer(theChannelFactory)),
-			batch2ProcessingChannelReceiver(theChannelFactory),
-			theJobInstancePersister,
-			theJobDefinitionRegistry
-		);
+	public WorkChunkProcessor jobStepExecutorService(BatchJobSender theBatchJobSender) {
+		return new WorkChunkProcessor(myPersistence, theBatchJobSender);
 	}
 
 	@Bean
-	public IJobCleanerService batch2JobCleaner(ISchedulerService theSchedulerService, IJobPersistence theJobPersistence) {
-		return new JobCleanerServiceImpl(theSchedulerService, theJobPersistence);
+	public BatchJobSender batchJobSender() {
+		return new BatchJobSender(batch2ProcessingChannelProducer(myChannelFactory));
+	}
+
+	@Bean
+	public IJobCoordinator batch2JobCoordinator(JobDefinitionRegistry theJobDefinitionRegistry,
+															  BatchJobSender theBatchJobSender,
+															  WorkChunkProcessor theExecutor,
+															  IJobMaintenanceService theJobMaintenanceService) {
+		return new JobCoordinatorImpl(
+			theBatchJobSender,
+			batch2ProcessingChannelReceiver(myChannelFactory),
+			myPersistence,
+			theJobDefinitionRegistry,
+			theExecutor,
+			theJobMaintenanceService);
+	}
+
+	@Bean
+	public IJobMaintenanceService batch2JobMaintenanceService(ISchedulerService theSchedulerService,
+																				 JobDefinitionRegistry theJobDefinitionRegistry,
+																				 BatchJobSender theBatchJobSender,
+																				 WorkChunkProcessor theExecutor
+	) {
+		return new JobMaintenanceServiceImpl(theSchedulerService,
+			myPersistence,
+			theJobDefinitionRegistry,
+			theBatchJobSender,
+			theExecutor
+		);
 	}
 
 	@Bean

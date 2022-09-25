@@ -53,7 +53,6 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -147,8 +146,8 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 	}
 
 	@Override
-	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete) {
-		super.preDelete(theResourceToDelete, theEntityToDelete);
+	protected void preDelete(CodeSystem theResourceToDelete, ResourceTable theEntityToDelete, RequestDetails theRequestDetails) {
+		super.preDelete(theResourceToDelete, theEntityToDelete, theRequestDetails);
 
 		myTermDeferredStorageSvc.deleteCodeSystemForResource(theEntityToDelete);
 
@@ -160,10 +159,12 @@ public class FhirResourceDaoCodeSystemR5 extends BaseHapiFhirResourceDao<CodeSys
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 		if (!retVal.isUnchangedInCurrentOperation()) {
 
-			CodeSystem cs = (CodeSystem) theResource;
-			addPidToResource(theEntity, theResource);
+			CodeSystem csR5 = (CodeSystem) theResource;
 
-			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded((org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(cs, new BaseAdvisor_40_50(false)), (ResourceTable) theEntity);
+			org.hl7.fhir.r4.model.CodeSystem cs = (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(csR5, new BaseAdvisor_40_50(false));
+			addPidToResource(theEntity, cs);
+
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, (ResourceTable) theEntity);
 		}
 
 		return retVal;

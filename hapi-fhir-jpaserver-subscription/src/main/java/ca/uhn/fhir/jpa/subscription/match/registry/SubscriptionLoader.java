@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -241,7 +242,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			+ theSubscription.getIdElement().getIdPart()
 			+ " could not be activated."
 			+ " This will not prevent startup, but it could lead to undesirable outcomes! "
-			+ error
+			+ (StringUtils.isBlank(error) ? "" : "Error: " + error)
 		);
 	}
 

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3619
+title: "The `ValueSet/$expand` operation can now optionally support the displayLanugage parameter. Thanks to
+   Gjergj Sheldija for the pull request!"

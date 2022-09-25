@@ -40,10 +40,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,7 +71,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	private ValidationSupportChain myValidationSupportChain;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	@Autowired
+	@Autowired(required = false)
 	private IFulltextSearchSvc myFulltextSearch;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
@@ -108,6 +106,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@OperationParam(name = "contextDirection", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theContextDirection,
 		@OperationParam(name = "offset", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theOffset,
 		@OperationParam(name = "count", min = 0, max = 1, typeName = "integer") IPrimitiveType<Integer> theCount,
+		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE, min = 0, max = 1, typeName = "code") IPrimitiveType<String> theDisplayLanguage,
 		@OperationParam(name = JpaConstants.OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY, min = 0, max = 1, typeName = "boolean") IPrimitiveType<Boolean> theIncludeHierarchy,
 		RequestDetails theRequestDetails) {
 
@@ -125,8 +124,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			ValueSetAutocompleteOptions options = ValueSetAutocompleteOptions.validateAndParseOptions(myDaoConfig, theContext, theFilter, theCount, theId, theUrl, theValueSet);
 			startRequest(theServletRequest);
 			try {
-
-				return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+				if (myFulltextSearch == null || myFulltextSearch.isDisabled()) {
+					throw new InvalidRequestException(Msg.code(2083) +  " Autocomplete is not supported on this server, as the fulltext search service is not configured.");
+				} else {
+					return myFulltextSearch.tokenAutocompleteValueSetSearch(options);
+				}
 			} finally {
 				endRequest(theServletRequest);
 			}
@@ -140,7 +142,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
-		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter);
+		ValueSetExpansionOptions options = createValueSetExpansionOptions(myDaoConfig, theOffset, theCount, theIncludeHierarchy, theFilter, theDisplayLanguage);
 
 		startRequest(theServletRequest);
 		try {
@@ -262,7 +264,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	}
 
 
-	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter) {
+	public static ValueSetExpansionOptions createValueSetExpansionOptions(DaoConfig theDaoConfig, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<Boolean> theIncludeHierarchy, IPrimitiveType<String> theFilter, IPrimitiveType<String> theDisplayLanguage) {
 		int offset = theDaoConfig.getPreExpandValueSetsDefaultOffset();
 		if (theOffset != null && theOffset.hasValue()) {
 			if (theOffset.getValue() >= 0) {
@@ -294,6 +296,10 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 		if (theFilter != null) {
 			options.setFilter(theFilter.getValue());
+		}
+
+		if( theDisplayLanguage != null ) {
+			options.setTheDisplayLanguage(theDisplayLanguage.getValue());
 		}
 
 		return options;

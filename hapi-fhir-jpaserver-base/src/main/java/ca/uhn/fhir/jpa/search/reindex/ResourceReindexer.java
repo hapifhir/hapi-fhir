@@ -41,6 +41,9 @@ import org.springframework.stereotype.Service;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * @deprecated
+ */
 @Service
 public class ResourceReindexer {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReindexer.class);
@@ -102,7 +105,7 @@ public class ResourceReindexer {
 		Class<T> resourceClass = (Class<T>) resourceDefinition.getImplementingClass();
 		final IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(resourceClass);
 		dao.reindex(theResource, theResourceTable);
-		if (myFulltextSearchSvc != null) {
+		if (myFulltextSearchSvc != null && !myFulltextSearchSvc.isDisabled()) {
 			// update the full-text index, if active.
 			myFulltextSearchSvc.reindex(theResourceTable);
 		}

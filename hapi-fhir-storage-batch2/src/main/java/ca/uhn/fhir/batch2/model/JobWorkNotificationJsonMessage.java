@@ -23,6 +23,8 @@ package ca.uhn.fhir.batch2.model;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nonnull;
+
 public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotification> {
 
 	@JsonProperty("payload")
@@ -43,6 +45,7 @@ public class JobWorkNotificationJsonMessage extends BaseJsonMessage<JobWorkNotif
 	}
 
 	@Override
+	@Nonnull
 	public JobWorkNotification getPayload() {
 		return myPayload;
 	}

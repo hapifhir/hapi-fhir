@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3256
+backport: 5.6.4
+title: "An occasional concurrency failure in AuthorizationInterceptor has been resolved. Thanks to 
+  Martin Visser for reporting and providing a reproducible test case!"

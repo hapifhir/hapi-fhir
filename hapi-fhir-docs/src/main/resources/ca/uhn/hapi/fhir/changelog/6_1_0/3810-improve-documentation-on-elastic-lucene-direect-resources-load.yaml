@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3810
+title: "Elastic/Lucene documentation was updated to indicate that full reindex is required when enabling
+      storing resource bodies in indexes when indexed resources exist."

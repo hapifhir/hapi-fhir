@@ -20,37 +20,198 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCleanerService;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import org.hamcrest.Matchers;
-import org.springframework.beans.factory.annotation.Autowired;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.thymeleaf.util.ArrayUtils;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class Batch2JobHelper {
+	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobHelper.class);
 
-	@Autowired
-	private IJobCleanerService myJobCleanerService;
+	private static final int BATCH_SIZE = 100;
 
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
+	private final IJobMaintenanceService myJobMaintenanceService;
+	private final IJobCoordinator myJobCoordinator;
+	private final IJobPersistence myJobPersistence;
 
-	public void awaitJobCompletion(String theId) {
-		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
-			return myJobCoordinator.getInstance(theId).getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
+		myJobMaintenanceService = theJobMaintenanceService;
+		myJobCoordinator = theJobCoordinator;
+		myJobPersistence = theJobPersistence;
 	}
 
-	public JobInstance awaitJobFailure(String theId) {
-		await().until(() -> {
-			myJobCleanerService.runCleanupPass();
-			return myJobCoordinator.getInstance(theId).getStatus();
-		}, Matchers.anyOf(equalTo(StatusEnum.ERRORED),equalTo(StatusEnum.FAILED)));
+	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
+		return awaitJobCompletion(theStartResponse.getJobId());
+	}
+
+	public JobInstance awaitJobCompletion(String theId) {
+		return awaitJobHasStatus(theId, StatusEnum.COMPLETED);
+	}
+
+	public JobInstance awaitJobCancelled(String theId) {
+		return awaitJobHasStatus(theId, StatusEnum.CANCELLED);
+	}
+
+	public JobInstance awaitJobCompletion(String theId, int theSecondsToWait) {
+		return awaitJobHasStatus(theId, theSecondsToWait, StatusEnum.COMPLETED);
+	}
+
+	public JobInstance awaitJobHasStatus(String theId, StatusEnum... theExpectedStatus) {
+		return awaitJobHasStatus(theId, 10, theExpectedStatus);
+	}
+
+	public JobInstance awaitJobHasStatus(String theId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+
+		try {
+			await()
+				.atMost(theSecondsToWait, TimeUnit.SECONDS)
+				.until(() -> checkStatusWithMaintenancePass(theId, theExpectedStatus));
+		} catch (ConditionTimeoutException e) {
+			String statuses = myJobPersistence.fetchInstances(100, 0)
+				.stream()
+				.map(t -> t.getJobDefinitionId() + "/" + t.getStatus().name())
+				.collect(Collectors.joining("\n"));
+			String currentStatus = myJobCoordinator.getInstance(theId).getStatus().name();
+			fail("Job still has status " + currentStatus + " - All statuses:\n" + statuses);
+		}
 		return myJobCoordinator.getInstance(theId);
 	}
 
+	private boolean checkStatusWithMaintenancePass(String theId, StatusEnum... theExpectedStatuses) {
+		if (hasStatus(theId, theExpectedStatuses)) {
+			return true;
+		}
+		myJobMaintenanceService.runMaintenancePass();
+		return hasStatus(theId, theExpectedStatuses);
+	}
+
+	private boolean hasStatus(String theId, StatusEnum[] theExpectedStatuses) {
+		return ArrayUtils.contains(theExpectedStatuses, getStatus(theId));
+	}
+
+	private StatusEnum getStatus(String theId) {
+		return myJobCoordinator.getInstance(theId).getStatus();
+	}
+
+	public JobInstance awaitJobFailure(Batch2JobStartResponse theStartResponse) {
+		return awaitJobFailure(theStartResponse.getJobId());
+	}
+
+	public JobInstance awaitJobFailure(String theJobId) {
+		return awaitJobHasStatus(theJobId, StatusEnum.ERRORED, StatusEnum.FAILED);
+	}
+
+	public void awaitJobInProgress(String theId) {
+		await().until(() -> checkStatusWithMaintenancePass(theId, StatusEnum.IN_PROGRESS));
+	}
+
+	public void assertNotFastTracking(String theInstanceId) {
+		assertFalse(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
+	}
+
+	public void assertFastTracking(String theInstanceId) {
+		assertTrue(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
+	}
+
+	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
+		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+	}
+
+	public long getCombinedRecordsProcessed(String theJobId) {
+		JobInstance job = myJobCoordinator.getInstance(theJobId);
+		return job.getCombinedRecordsProcessed();
+
+	}
+
+	public void awaitAllJobsOfJobDefinitionIdToComplete(String theJobDefinitionId) {
+		// fetch all jobs of any status type
+		List<JobInstance> instances = myJobCoordinator.getJobInstancesByJobDefinitionId(
+			theJobDefinitionId,
+			BATCH_SIZE,
+			0);
+		// then await completion status
+		awaitJobCompletions(instances);
+	}
+
+	protected void awaitJobCompletions(Collection<JobInstance> theJobInstances) {
+		// This intermittently fails for unknown reasons, so I've added a bunch
+		// of extra junk here to improve what we output when it fails
+		for (JobInstance jobInstance : theJobInstances) {
+			try {
+				awaitJobCompletion(jobInstance.getInstanceId());
+			} catch (ConditionTimeoutException e) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Failed waiting for job to complete.\n");
+				msg.append("Error: ").append(e).append("\n");
+				msg.append("Statuses:");
+				for (JobInstance instance : theJobInstances) {
+					msg.append("\n * Execution ")
+						.append(instance.getInstanceId())
+						.append(" has status ")
+						.append(instance.getStatus());
+				}
+				fail(msg.toString());
+			}
+		}
+	}
+
+	public List<JobInstance> findJobsByDefinition(String theJobDefinitionId) {
+		return myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(theJobDefinitionId, null, 100, 0);
+	}
+
+	public void awaitNoJobsRunning() {
+		awaitNoJobsRunning(false);
+	}
+
+	public void awaitNoJobsRunning(boolean theExpectAtLeastOneJobToExist) {
+		HashMap<String, String> map = new HashMap<>();
+		Awaitility.await().atMost(10, TimeUnit.SECONDS)
+			.until(() -> {
+				myJobMaintenanceService.runMaintenancePass();
+
+				List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+				// "All Jobs" assumes at least one job exists
+				if (theExpectAtLeastOneJobToExist && jobs.isEmpty()) {
+					ourLog.warn("No jobs found yet...");
+					return false;
+				}
+
+				for (JobInstance job : jobs) {
+					if (job.getStatus() != StatusEnum.COMPLETED) {
+						map.put(job.getInstanceId(), job.getStatus().name());
+					} else {
+						map.remove(job.getInstanceId());
+					}
+				}
+				return map.isEmpty();
+			});
+
+
+		String msg = map.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(", \n "));
+		ourLog.info("The following jobs did not complete as expected: {}", msg);
+	}
+
+	public void runMaintenancePass() {
+		myJobMaintenanceService.runMaintenancePass();
+	}
 }

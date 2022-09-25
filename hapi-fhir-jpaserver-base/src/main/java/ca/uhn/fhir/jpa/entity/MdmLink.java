@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import javax.persistence.Column;
@@ -36,6 +37,7 @@ import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
@@ -52,6 +54,8 @@ import java.util.Date;
 	// v---- this one
 	//TODO GGG revisit adding this: @UniqueConstraint(name = "IDX_EMPI_GR_TGT", columnNames = {"GOLDEN_RESOURCE_PID", "TARGET_PID"}),
 	//TODO GGG Should i make individual indices for PERSON/TARGET?
+}, indexes = {
+	@Index(name = "IDX_EMPI_MATCH_TGT_VER", columnList = "MATCH_RESULT, TARGET_PID, VERSION")
 })
 public class MdmLink extends BasePartitionable implements IMdmLink {
 	public static final int VERSION_LENGTH = 16;
@@ -134,12 +138,38 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	@Column(name = "TARGET_TYPE", nullable = true, length = SOURCE_TYPE_LENGTH)
 	private String myMdmSourceType;
 
-	public Long getId() {
-		return myId;
+	@Override
+	public ResourcePersistentId getId() {
+		return new ResourcePersistentId(myId);
 	}
 
-	public MdmLink setId(Long theId) {
-		myId = theId;
+	@Override
+	public MdmLink setId(ResourcePersistentId theId) {
+		myId = theId.getIdAsLong();
+		return this;
+	}
+
+	@Override
+	public ResourcePersistentId getGoldenResourcePersistenceId() {
+		return new ResourcePersistentId(myGoldenResourcePid);
+	}
+
+	@Override
+	public IMdmLink setGoldenResourcePersistenceId(ResourcePersistentId theGoldenResourcePid) {
+		setPersonPid(theGoldenResourcePid.getIdAsLong());
+
+		myGoldenResourcePid = theGoldenResourcePid.getIdAsLong();
+		return this;
+	}
+
+	@Override
+	public ResourcePersistentId getSourcePersistenceId() {
+		return new ResourcePersistentId(mySourcePid);
+	}
+
+	@Override
+	public IMdmLink setSourcePersistenceId(ResourcePersistentId theSourcePid) {
+		mySourcePid = theSourcePid.getIdAsLong();
 		return this;
 	}
 
@@ -157,6 +187,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	@Deprecated
 	public Long getGoldenResourcePid() {
 		return myGoldenResourcePid;
 	}
@@ -170,6 +201,10 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	/**
+	 * @deprecated  Use {@link #setGoldenResourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
 		setPersonPid(theGoldenResourcePid);
 
@@ -187,101 +222,92 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return this;
 	}
 
+	@Deprecated
 	public Long getSourcePid() {
 		return mySourcePid;
 	}
 
+	/**
+	 * @deprecated  Use {@link #setSourcePersistenceId(ResourcePersistentId)} instead
+	 */
+	@Deprecated
 	public MdmLink setSourcePid(Long theSourcePid) {
 		mySourcePid = theSourcePid;
 		return this;
 	}
 
+	@Override
 	public MdmMatchResultEnum getMatchResult() {
 		return myMatchResult;
 	}
 
+	@Override
 	public MdmLink setMatchResult(MdmMatchResultEnum theMatchResult) {
 		myMatchResult = theMatchResult;
 		return this;
 	}
 
-	public boolean isNoMatch() {
-		return myMatchResult == MdmMatchResultEnum.NO_MATCH;
-	}
-
-	public boolean isMatch() {
-		return myMatchResult == MdmMatchResultEnum.MATCH;
-	}
-
-	public boolean isPossibleMatch() {
-		return myMatchResult == MdmMatchResultEnum.POSSIBLE_MATCH;
-	}
-
-	public boolean isRedirect() {
-		return myMatchResult == MdmMatchResultEnum.REDIRECT;
-	}
-
-	public boolean isPossibleDuplicate() {
-		return myMatchResult == MdmMatchResultEnum.POSSIBLE_DUPLICATE;
-	}
-
+	@Override
 	public MdmLinkSourceEnum getLinkSource() {
 		return myLinkSource;
 	}
 
+	@Override
 	public MdmLink setLinkSource(MdmLinkSourceEnum theLinkSource) {
 		myLinkSource = theLinkSource;
 		return this;
 	}
 
-	public boolean isAuto() {
-		return myLinkSource == MdmLinkSourceEnum.AUTO;
-	}
-
-	public boolean isManual() {
-		return myLinkSource == MdmLinkSourceEnum.MANUAL;
-	}
-
+	@Override
 	public Date getCreated() {
 		return myCreated;
 	}
 
+	@Override
 	public MdmLink setCreated(Date theCreated) {
 		myCreated = theCreated;
 		return this;
 	}
 
+	@Override
 	public Date getUpdated() {
 		return myUpdated;
 	}
 
+	@Override
 	public MdmLink setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 		return this;
 	}
 
+	@Override
 	public String getVersion() {
 		return myVersion;
 	}
 
+	@Override
 	public MdmLink setVersion(String theVersion) {
 		myVersion = theVersion;
 		return this;
 	}
 
+	@Override
 	public Long getVector() {
 		return myVector;
 	}
 
+	@Override
 	public MdmLink setVector(Long theVector) {
 		myVector = theVector;
 		return this;
 	}
 
+	@Override
 	public Double getScore() {
 		return myScore;
 	}
 
+	@Override
 	public MdmLink setScore(Double theScore) {
 		myScore = theScore;
 		return this;
@@ -296,19 +322,23 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 	 * <code>isEidMatch</code> because Hibernate Search complains about having
 	 * 2 accessors for this property
 	 */
-	public boolean isEidMatchPresent() {
+	@Override
+	public Boolean isEidMatchPresent() {
 		return myEidMatch != null && myEidMatch;
 	}
 
+	@Override
 	public MdmLink setEidMatch(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
 	}
 
-	public boolean getHadToCreateNewGoldenResource() {
+	@Override
+	public Boolean getHadToCreateNewGoldenResource() {
 		return myHadToCreateNewGoldenResource != null && myHadToCreateNewGoldenResource;
 	}
 
+	@Override
 	public MdmLink setHadToCreateNewGoldenResource(Boolean theHadToCreateNewResource) {
 		myHadToCreateNewGoldenResource = theHadToCreateNewResource;
 		return this;
@@ -344,8 +374,9 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 		return myRuleCount;
 	}
 
-	public void setRuleCount(Long theRuleCount) {
+	public MdmLink setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
+		return this;
 	}
 
 }

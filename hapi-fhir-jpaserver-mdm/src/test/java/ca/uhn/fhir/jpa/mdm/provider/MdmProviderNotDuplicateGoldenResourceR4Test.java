@@ -34,7 +34,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 
 	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
 		super.before();
 
 		myGoldenPatient = createGoldenPatient();
@@ -56,7 +56,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		myMdmProvider.notDuplicate(myGoldenPatientId, myTargetPatientId, myRequestDetails);
 		assertLinkCount(1);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(myTargetPatient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myTargetPatient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}
@@ -98,7 +98,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		myMdmProvider.notDuplicate(goldenPatientId, targetPatientId, myRequestDetails);
 		assertLinkCount(1);
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(targetPatient);
+		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(targetPatient);
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}

@@ -35,12 +35,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 class ConditionalParamBinder implements IParameter {
 
-	private RestOperationTypeEnum myOperationType;
 	private boolean mySupportsMultiple;
 
-	ConditionalParamBinder(RestOperationTypeEnum theOperationType, boolean theSupportsMultiple) {
-		Validate.notNull(theOperationType, "theOperationType can not be null");
-		myOperationType = theOperationType;
+	ConditionalParamBinder(boolean theSupportsMultiple) {
 		mySupportsMultiple = theSupportsMultiple;
 	}
 
@@ -56,8 +53,8 @@ class ConditionalParamBinder implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getConditionalUrl(myOperationType);
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
+		return theRequest.getConditionalUrl(theMethodBinding.getRestOperationType());
 	}
 
 }

@@ -1,15 +1,15 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -331,6 +330,23 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return fetchValueSet(theValueSetUrl) != null;
 	}
 
+	@Override
+	public TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
+		IGenericClient client = provideClient();
+		FhirContext fhirContext = client.getFhirContext();
+
+		IBaseParameters params = RemoteTerminologyUtil.buildTranslateInputParameters(fhirContext, theRequest);
+
+		IBaseParameters outcome = client
+			.operation()
+			.onType("ConceptMap")
+			.named("$translate")
+			.withParameters(params)
+			.execute();
+
+		return RemoteTerminologyUtil.translateOutcomeToResults(fhirContext, outcome);
+	}
+
 	private IGenericClient provideClient() {
 		IGenericClient retVal = myCtx.newRestfulGenericClient(myBaseUrl);
 		for (Object next : myClientInterceptors) {
@@ -417,7 +433,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		return params;
 	}
 
-
 	/**
 	 * Sets the FHIR Terminology Server base URL
 	 *
@@ -441,5 +456,4 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		Validate.notNull(theClientInterceptor, "theClientInterceptor must not be null");
 		myClientInterceptors.add(theClientInterceptor);
 	}
-
 }

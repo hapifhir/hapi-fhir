@@ -144,6 +144,7 @@ public class Constants {
 	public static final String HEADER_PREFER_RETURN_OPERATION_OUTCOME = "OperationOutcome";
 	public static final String HEADER_SUFFIX_CT_UTF_8 = "; charset=UTF-8";
 	public static final String HEADERVALUE_CORS_ALLOW_METHODS_ALL = "GET, POST, PUT, DELETE, OPTIONS";
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
 	public static final Map<Integer, String> HTTP_STATUS_NAMES;
 	public static final String LINK_FHIR_BASE = "fhir-base";
 	public static final String LINK_FIRST = "first";
@@ -213,10 +214,12 @@ public class Constants {
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
+	public static final String PARAMQUALIFIER_STRING_TEXT = ":text";
 	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";
 	public static final String PARAMQUALIFIER_MDM = ":mdm";
+	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
 	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
 	public static final int STATUS_HTTP_200_OK = 200;
@@ -247,6 +250,7 @@ public class Constants {
 	public static final String POWERED_BY_HEADER = "X-Powered-By";
 	public static final Charset CHARSET_US_ASCII;
 	public static final String PARAM_PAGEID = "_pageId";
+	public static final String JAVA_VALIDATOR_DETAILS_SYSTEM = "http://hl7.org/fhir/java-core-messageId";
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */

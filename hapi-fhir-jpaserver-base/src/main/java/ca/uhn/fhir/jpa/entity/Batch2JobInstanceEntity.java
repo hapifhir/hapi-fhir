@@ -25,10 +25,12 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Lob;
@@ -38,6 +40,7 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -80,6 +83,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
+	@Column(name = "FAST_TRACKING", nullable = true)
+	private Boolean myFastTracking;
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 	@Lob
@@ -101,6 +106,25 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private int myErrorCount;
 	@Column(name = "EST_REMAINING", length = TIME_REMAINING_LENGTH, nullable = true)
 	private String myEstimatedTimeRemaining;
+	@Column(name = "CUR_GATED_STEP_ID", length = ID_MAX_LENGTH, nullable = true)
+	private String myCurrentGatedStepId;
+
+	/**
+	 * Any output from the job can be held in this column
+	 * Even serialized json
+	 */
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
+	private String myReport;
+
+	public String getCurrentGatedStepId() {
+		return myCurrentGatedStepId;
+	}
+
+	public void setCurrentGatedStepId(String theCurrentGatedStepId) {
+		myCurrentGatedStepId = theCurrentGatedStepId;
+	}
 
 	public boolean isCancelled() {
 		return myCancelled;
@@ -247,6 +271,14 @@ public class Batch2JobInstanceEntity implements Serializable {
 		myEstimatedTimeRemaining = left(theEstimatedTimeRemaining, TIME_REMAINING_LENGTH);
 	}
 
+	public String getReport() {
+		return myReport;
+	}
+
+	public void setReport(String theReport) {
+		myReport = theReport;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -266,6 +298,21 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("progress", myProgress)
 			.append("errorMessage", myErrorMessage)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+			.append("report", myReport)
 			.toString();
+	}
+
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
+	public boolean isFastTracking() {
+		if (myFastTracking == null) {
+			myFastTracking = false;
+		}
+		return myFastTracking;
+	}
+
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
 	}
 }

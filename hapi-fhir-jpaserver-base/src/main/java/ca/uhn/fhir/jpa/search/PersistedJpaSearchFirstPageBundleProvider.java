@@ -22,9 +22,10 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.SearchTask;
+import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -61,7 +62,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
 		mySearchTask.awaitInitialSync();
 
@@ -117,11 +118,11 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 
 	@Override
 	public Integer size() {
-		ourLog.trace("Waiting for initial sync");
+		ourLog.trace("size() - Waiting for initial sync");
 		Integer size = mySearchTask.awaitInitialSync();
-		ourLog.trace("Finished waiting for local sync");
+		ourLog.trace("size() - Finished waiting for local sync");
 
-		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 		if (size != null) {
 			return size;
 		}

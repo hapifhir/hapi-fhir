@@ -99,6 +99,7 @@ public class ProviderConstants {
 	public static final String OPERATION_MDM_CLEAR_RESOURCE_NAME = "resourceType";
 	public static final String OPERATION_MDM_CLEAR_BATCH_SIZE = "batchSize";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
+	public static final String OPERATION_MDM_SUBMIT_OUT_PARAM_SUBMITTED = "submitted";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
 	/**

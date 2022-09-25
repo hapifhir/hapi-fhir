@@ -20,33 +20,144 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+
+import javax.annotation.Nonnull;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 public enum StatusEnum {
 
 	/**
 	 * Task is waiting to execute and should begin with no intervention required.
 	 */
-	QUEUED,
+	QUEUED(true, false),
 
 	/**
 	 * Task is current executing
 	 */
-	IN_PROGRESS,
+	IN_PROGRESS(true, false),
 
 	/**
 	 * Task completed successfully
 	 */
-	COMPLETED,
+	COMPLETED(false, true),
 
 	/**
 	 * Task execution resulted in an error but the error may be transient (or transient status is unknown).
 	 * Retrying may result in success.
 	 */
-	ERRORED,
+	ERRORED(true, true),
 
 	/**
 	 * Task has failed and is known to be unrecoverable. There is no reason to believe that retrying will
 	 * result in a different outcome.
 	 */
-	FAILED
+	FAILED(true, true),
 
+	/**
+	 * Task has been cancelled.
+	 */
+	CANCELLED(true, true);
+
+	private final boolean myIncomplete;
+	private final boolean myEnded;
+	private static StatusEnum[] ourIncompleteStatuses;
+	private static Set<StatusEnum> ourEndedStatuses;
+	private static Set<StatusEnum> ourNotEndedStatuses;
+
+	StatusEnum(boolean theIncomplete, boolean theEnded) {
+		myIncomplete = theIncomplete;
+		myEnded = theEnded;
+	}
+
+	/**
+	 * Statuses that represent a job that has not yet completed. I.e.
+	 * all statuses except {@link #COMPLETED}
+	 */
+	public static StatusEnum[] getIncompleteStatuses() {
+		StatusEnum[] retVal = ourIncompleteStatuses;
+		if (retVal == null) {
+			EnumSet<StatusEnum> incompleteSet = EnumSet.noneOf(StatusEnum.class);
+			for (StatusEnum next : values()) {
+				if (next.myIncomplete) {
+					incompleteSet.add(next);
+				}
+			}
+			ourIncompleteStatuses = incompleteSet.toArray(new StatusEnum[0]);
+			retVal = ourIncompleteStatuses;
+		}
+		return retVal;
+	}
+
+	/**
+	 * Statuses that represent a job that has ended. I.e.
+	 * all statuses except {@link #QUEUED and #COMPLETED}
+	 */
+	@Nonnull
+	public static Set<StatusEnum> getEndedStatuses() {
+		Set<StatusEnum> retVal = ourEndedStatuses;
+		if (retVal == null) {
+			initializeStaticEndedStatuses();
+		}
+		retVal = ourEndedStatuses;
+		return retVal;
+	}
+
+	/**
+	 * Statuses that represent a job that has not ended. I.e.
+	 * {@link #QUEUED and #COMPLETED}
+	 */
+	@Nonnull
+	public static Set<StatusEnum> getNotEndedStatuses() {
+		Set<StatusEnum> retVal = ourNotEndedStatuses;
+		if (retVal == null) {
+			initializeStaticEndedStatuses();
+		}
+		retVal = ourNotEndedStatuses;
+		return retVal;
+	}
+
+	@Nonnull
+	private static void initializeStaticEndedStatuses() {
+		EnumSet<StatusEnum> endedSet = EnumSet.noneOf(StatusEnum.class);
+		EnumSet<StatusEnum> notEndedSet = EnumSet.noneOf(StatusEnum.class);
+		for (StatusEnum next : values()) {
+			if (next.myEnded) {
+				endedSet.add(next);
+			} else {
+				notEndedSet.add(next);
+			}
+		}
+		ourEndedStatuses = Collections.unmodifiableSet(endedSet);
+		ourNotEndedStatuses = Collections.unmodifiableSet(notEndedSet);
+	}
+
+	public static boolean isLegalStateTransition(StatusEnum theOrigStatus, StatusEnum theNewStatus) {
+		if (theOrigStatus == theNewStatus) {
+			return true;
+		}
+
+		switch (theOrigStatus) {
+			case QUEUED:
+				// initial state can transition to anything
+				return true;
+			case IN_PROGRESS:
+				return theNewStatus != QUEUED;
+			case ERRORED:
+				return theNewStatus == FAILED;
+			case COMPLETED:
+			case CANCELLED:
+			case FAILED:
+				// terminal state cannot transition
+				return false;
+		}
+
+		throw new IllegalStateException(Msg.code(2131) + "Unknown batch state " + theOrigStatus);
+	}
+
+	public boolean isIncomplete() {
+		return myIncomplete;
+	}
 }

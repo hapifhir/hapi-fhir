@@ -20,6 +20,16 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import java.util.List;
+
 // Tag interface for Spring auto-wiring
-public interface IDeleteExpungeJobSubmitter extends IMultiUrlJobSubmitter {
+public interface IDeleteExpungeJobSubmitter {
+	/**
+	 * @param theBatchSize     For each pass, when synchronously searching for resources, limit the number of matching resources to this number
+	 * @param theUrlsToProcess A list of strings of the form "/Patient?active=true"
+	 * @return The Batch2 JobId that was started to run this batch job
+	 */
+	String submitJob(Integer theBatchSize, List<String> theUrlsToProcess, RequestDetails theRequest);
 }

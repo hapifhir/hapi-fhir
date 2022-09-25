@@ -63,7 +63,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * @since 5.3.0 
  *
  */
-public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexedSearchParamBaseQuantity {
+public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
 	

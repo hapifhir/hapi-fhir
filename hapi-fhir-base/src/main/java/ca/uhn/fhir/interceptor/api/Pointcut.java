@@ -360,6 +360,26 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.rest.api.RestOperationTypeEnum"
 	),
 
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called when a resource provider method is registered and being bound
+	 * by the HAPI FHIR Plain Server / RestfulServer.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.method.BaseMethodBinding - The method binding.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hook methods  may modify the method binding, replace it, or return <code>null</code> to cancel the binding.
+	 * </p>
+	 */
+	SERVER_PROVIDER_METHOD_BOUND("ca.uhn.fhir.rest.server.method.BaseMethodBinding",
+		"ca.uhn.fhir.rest.server.method.BaseMethodBinding"),
+
+
 	/**
 	 * <b>Server Hook:</b>
 	 * This method is called upon any exception being thrown within the server's request processing code. This includes
@@ -867,11 +887,15 @@ public enum Pointcut implements IPointcut {
 	 * Hooks may make changes to the delivery payload, or make changes to the
 	 * canonical subscription such as adding headers, modifying the channel
 	 * endpoint, etc.
+	 * Furthermore, you may modify the outgoing message wrapper, for example adding headers via ResourceModifiedJsonMessage field.
+	 *
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage</li>
+	 *
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -879,7 +903,7 @@ public enum Pointcut implements IPointcut {
 	 * returns <code>false</code>, processing will be aborted.
 	 * </p>
 	 */
-	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage"),
+	SUBSCRIPTION_BEFORE_MESSAGE_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage"),
 
 
 	/**
@@ -1338,7 +1362,36 @@ public enum Pointcut implements IPointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
-		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails"
+		"ca.uhn.fhir.rest.api.server.storage.TransactionDetails",
+		"ca.uhn.fhir.interceptor.model.RequestPartitionId"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked before client-assigned id is created.
+	 * <p>
+	 * Hooks will have access to the contents of the resource being created
+	 * so that client-assigned ids can be allowed/denied. These changes will
+	 * be reflected in permanent storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails"
 	),
 
 	/**
@@ -1972,6 +2025,23 @@ public enum Pointcut implements IPointcut {
 		"ca.uhn.fhir.validation.ValidationResult"
 	),
 
+	/**
+	 * <b>MDM(EMPI) Hook:</b>
+	 * Invoked when a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) enters the MDM module. The purpose of the pointcut is to permit a pseudo
+	 * modification of the resource elements to influence the MDM linking process.  Any modifications to the resource are not persisted.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	MDM_BEFORE_PERSISTED_RESOURCE_CHECKED(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
 	 * <b>MDM(EMPI) Hook:</b>

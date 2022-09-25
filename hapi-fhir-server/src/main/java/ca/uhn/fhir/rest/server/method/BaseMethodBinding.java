@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public abstract class BaseMethodBinding<T> {
+public abstract class BaseMethodBinding {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseMethodBinding.class);
 	private final List<BaseQueryParameter> myQueryParameters;
@@ -75,7 +75,7 @@ public abstract class BaseMethodBinding<T> {
 		myMethod = theMethod;
 		myContext = theContext;
 		myProvider = theProvider;
-		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider, getRestOperationType());
+		myParameters = MethodUtil.getResourceParameters(theContext, theMethod, theProvider);
 		myQueryParameters = myParameters
 			.stream()
 			.filter(t -> t instanceof BaseQueryParameter)
@@ -326,7 +326,7 @@ public abstract class BaseMethodBinding<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static BaseMethodBinding<?> bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
+	public static BaseMethodBinding bindMethod(Method theMethod, FhirContext theContext, Object theProvider) {
 		Read read = theMethod.getAnnotation(Read.class);
 		Search search = theMethod.getAnnotation(Search.class);
 		Metadata conformance = theMethod.getAnnotation(Metadata.class);

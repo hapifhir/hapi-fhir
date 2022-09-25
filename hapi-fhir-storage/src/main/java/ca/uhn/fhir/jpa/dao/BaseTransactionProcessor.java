@@ -99,7 +99,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,6 +132,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -276,13 +276,18 @@ public abstract class BaseTransactionProcessor {
 
 		populateIdToPersistedOutcomeMap(idToPersistedOutcome, newId, outcome);
 
+		if(shouldSwapBinaryToActualResource(theRes, theResourceType, nextResourceId)) {
+			theRes = idToPersistedOutcome.get(newId).getResource();
+			theResourceType = idToPersistedOutcome.get(newId).getResource().fhirType();
+		}
+
 		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
 		}
-		Date lastModifier = getLastModified(theRes);
-		myVersionAdapter.setResponseLastModified(newEntry, lastModifier);
+		Date lastModified = getLastModified(theRes);
+		myVersionAdapter.setResponseLastModified(newEntry, lastModified);
 
 		if (theRequestDetails != null) {
 			String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
@@ -379,8 +384,8 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
+				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -537,7 +542,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = requestDetails.getRequestPath();
 
-				BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
+				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
 				}
@@ -794,16 +799,18 @@ public abstract class BaseTransactionProcessor {
 	private void replaceReferencesInEntriesWithConsolidatedUUID(List<IBase> theEntries, String theEntryFullUrl, String existingUuid) {
 		for (IBase nextEntry : theEntries) {
 			IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
-			for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
-				// We're interested in any references directly to the placeholder ID, but also
-				// references that have a resource target that has the placeholder ID.
-				String nextReferenceId = nextReference.getReferenceElement().getValue();
-				if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
-					nextReferenceId = nextReference.getResource().getIdElement().getValue();
-				}
-				if (theEntryFullUrl.equals(nextReferenceId)) {
-					nextReference.setReference(existingUuid);
-					nextReference.setResource(null);
+			if (nextResource != null) {
+				for (IBaseReference nextReference : myContext.newTerser().getAllPopulatedChildElementsOfType(nextResource, IBaseReference.class)) {
+					// We're interested in any references directly to the placeholder ID, but also
+					// references that have a resource target that has the placeholder ID.
+					String nextReferenceId = nextReference.getReferenceElement().getValue();
+					if (isBlank(nextReferenceId) && nextReference.getResource() != null) {
+						nextReferenceId = nextReference.getResource().getIdElement().getValue();
+					}
+					if (theEntryFullUrl.equals(nextReferenceId)) {
+						nextReference.setReference(existingUuid);
+						nextReference.setResource(null);
+					}
 				}
 			}
 		}
@@ -1074,12 +1081,19 @@ public abstract class BaseTransactionProcessor {
 
 						IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
 						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
-						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, patchBodyParameters, theRequest);
+
+						String conditionalUrl = isNull(patchId.getIdPart()) ? url : matchUrl;
+
+						DaoMethodOutcome outcome = dao.patch(patchId, conditionalUrl, patchType, patchBody, patchBodyParameters, theRequest);
 						setConditionalUrlToBeValidatedLater(conditionalUrlToIdMap, matchUrl, outcome.getId());
 						updatedEntities.add(outcome.getEntity());
 						if (outcome.getResource() != null) {
 							updatedResources.add(outcome.getResource());
 						}
+						if (nextResourceId != null) {
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
+						}
+						entriesToProcess.put(nextRespEntry, outcome.getId());
 
 						break;
 					}
@@ -1176,6 +1190,14 @@ public abstract class BaseTransactionProcessor {
 			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
+		}
+	}
+
+	private boolean shouldSwapBinaryToActualResource(IBaseResource theResource, String theResourceType, IIdType theNextResourceId) {
+		if ("Binary".equalsIgnoreCase(theResourceType) && theNextResourceId.getResourceType() != null && !theNextResourceId.getResourceType().equalsIgnoreCase("Binary")) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -1840,14 +1862,14 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		private void populateResponseMapWithLastSeenException() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			ServerResponseExceptionHolder caughtEx = new ServerResponseExceptionHolder();
 			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
 	}
 
-	private static class BaseServerResponseExceptionHolder {
+	private static class ServerResponseExceptionHolder {
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {

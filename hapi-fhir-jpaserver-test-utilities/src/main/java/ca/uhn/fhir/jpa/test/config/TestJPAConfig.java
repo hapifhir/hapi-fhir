@@ -20,11 +20,15 @@ package ca.uhn.fhir.jpa.test.config;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
@@ -47,7 +51,8 @@ import javax.persistence.EntityManagerFactory;
 @Import({
 	SubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
-	SubscriptionChannelConfig.class
+	SubscriptionChannelConfig.class,
+	SearchParamSubmitterConfig.class
 })
 public class TestJPAConfig {
 	@Bean
@@ -102,8 +107,8 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public Batch2JobHelper batch2JobHelper() {
-		return new Batch2JobHelper();
+	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
+		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
 	}
 
 	@Bean

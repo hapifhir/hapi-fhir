@@ -35,6 +35,7 @@ public class BulkDataExportOptions {
 		GROUP,
 		SYSTEM
 	}
+
 	private String myOutputFormat;
 	private Set<String> myResourceTypes;
 	private Date mySince;
@@ -42,8 +43,7 @@ public class BulkDataExportOptions {
 	private ExportStyle myExportStyle;
 	private boolean myExpandMdm;
 	private IIdType myGroupId;
-
-
+	private Set<IIdType> myPatientIds;
 
 	public void setOutputFormat(String theOutputFormat) {
 		myOutputFormat = theOutputFormat;
@@ -99,5 +99,13 @@ public class BulkDataExportOptions {
 
 	public void setGroupId(IIdType theGroupId) {
 		myGroupId = theGroupId;
+	}
+
+	public Set<IIdType> getPatientIds() {
+		return myPatientIds;
+	}
+
+	public void setPatientIds(Set<IIdType> thePatientIds) {
+		myPatientIds = thePatientIds;
 	}
 }

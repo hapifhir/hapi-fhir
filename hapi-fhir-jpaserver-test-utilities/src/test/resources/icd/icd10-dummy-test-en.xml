@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ClaML version="2.0.0">
+	<!-- All dummy data -->
+	<Title date="2022-06-23" name="ICD-10-EN" version="2022-tree-expanded">International Statistical Classification of Diseases and Related Health Problems 10th Revision</Title>
+	<Class code="A" kind="chapter">
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Fruit</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-585" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Include fruit</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-587" kind="exclusion">
+			<Label xml:lang="en" xml:space="default">Things that are not fruit</Label>
+		</Rubric>
+	</Class>
+	<Class code="B" kind="chapter">
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Trees</Label>
+		</Rubric>
+		<Rubric id="id-icd10_20190322-1587556953279-585" kind="inclusion">
+			<Label xml:lang="en" xml:space="default">Anything that we think is a tree</Label>
+		</Rubric>
+	</Class>
+	<Class code="A1-A3" kind="block">
+		<SuperClass code="A"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">A1 to A3 type fruit</Label>
+		</Rubric>
+	</Class>
+	<Class code="A1" kind="category">
+		<SuperClass code="A1-A3"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Apples</Label>
+		</Rubric>
+	</Class>
+	<Class code="A2" kind="category">
+		<SuperClass code="A1-A3"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Pears</Label>
+		</Rubric>
+	</Class>
+	<Class code="A3" kind="category">
+		<SuperClass code="A1-A3"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Bananas</Label>
+		</Rubric>
+	</Class>
+	<Class code="B1-B2" kind="block">
+		<SuperClass code="B"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">A group of trees</Label>
+		</Rubric>
+	</Class>
+	<Class code="B1" kind="category">
+		<SuperClass code="B1-B2"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Oak trees</Label>
+		</Rubric>
+	</Class>
+	<Class code="B2" kind="category">
+		<SuperClass code="B1-B2"/>
+		<Rubric kind="preferred">
+			<Label xml:lang="en" xml:space="default">Ash trees</Label>
+		</Rubric>
+	</Class>
+</ClaML>

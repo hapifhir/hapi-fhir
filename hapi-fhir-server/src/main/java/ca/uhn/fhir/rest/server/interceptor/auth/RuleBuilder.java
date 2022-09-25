@@ -185,6 +185,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			return this;
 		}
 
+		@Override
+		public IAuthRuleFinished withFilterTester(String theQueryParameters) {
+			return withTester(new FhirQueryRuleTester(theQueryParameters));
+		}
+
 		private class TenantCheckingTester implements IAuthRuleTester {
 			private final Collection<String> myTenantIds;
 			private final boolean myOutcome;
@@ -316,6 +321,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		@Override
 		public IAuthRuleBuilderRuleBulkExport bulkExport() {
 			return new RuleBuilderBulkExport();
+		}
+
+		@Override
+		public IAuthRuleBuilderUpdateHistoryRewrite updateHistoryRewrite() {
+			return new UpdateHistoryRewriteBuilder();
 		}
 
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
@@ -576,6 +586,43 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					return finished(rule);
 				}
 
+				@Override
+				public IAuthRuleFinished inCompartmentWithFilter(String theCompartmentName, IIdType theIdElement, String theFilter) {
+					Validate.notBlank(theCompartmentName, "theCompartmentName must not be null");
+					Validate.notNull(theIdElement, "theOwner must not be null");
+					validateOwner(theIdElement);
+
+					// inlined from inCompartmentWithAdditionalSearchParams()
+					myClassifierType = ClassifierTypeEnum.IN_COMPARTMENT;
+					myInCompartmentName = theCompartmentName;
+					myAdditionalSearchParamsForCompartmentTypes = new AdditionalCompartmentSearchParameters();
+					// todo JR/MB this is a quick and dirty fix at the last minute before the release.
+					//  We should revisit approach so that findMatchingRule() takes the filters into account
+					//  and only merges the rules if the filters are compatible
+//					Optional<RuleImplOp> oRule = findMatchingRule();
+//					if (oRule.isPresent()) {
+//						RuleImplOp rule = oRule.get();
+//						rule.setAdditionalSearchParamsForCompartmentTypes(myAdditionalSearchParamsForCompartmentTypes);
+//						rule.addClassifierCompartmentOwner(theIdElement);
+//						return new RuleBuilderFinished(rule);
+//					}
+					myInCompartmentOwners = Collections.singletonList(theIdElement);
+
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
+
+				}
+
+				@Override
+				public IAuthRuleFinished withFilter(String theFilter) {
+					myClassifierType = ClassifierTypeEnum.ANY_ID;
+
+					RuleBuilderFinished result = finished();
+					result.withTester(new FhirQueryRuleTester(theFilter));
+					return result;
+				}
+
 				RuleBuilderFinished addInstances(Collection<IIdType> theInstances) {
 					myAppliesToInstances.addAll(theInstances);
 					return new RuleBuilderFinished(myRule);
@@ -744,6 +791,22 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleFinished allRequests() {
 				BaseRule rule = new RuleImplPatch(myRuleName)
+					.setAllRequests(true)
+					.setMode(myRuleMode);
+				myRules.add(rule);
+				return new RuleBuilderFinished(rule);
+			}
+		}
+
+		private class UpdateHistoryRewriteBuilder implements IAuthRuleBuilderUpdateHistoryRewrite {
+
+			UpdateHistoryRewriteBuilder() {
+				super();
+			}
+
+			@Override
+			public IAuthRuleFinished allRequests() {
+				BaseRule rule = new RuleImplUpdateHistoryRewrite(myRuleName)
 					.setAllRequests(true)
 					.setMode(myRuleMode);
 				myRules.add(rule);

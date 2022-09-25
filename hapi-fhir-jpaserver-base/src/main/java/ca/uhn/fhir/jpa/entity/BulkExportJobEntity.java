@@ -49,12 +49,21 @@ import java.util.Date;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.left;
 
+
+/*
+ * These classes are no longer needed.
+ * Metadata on the job is contained in the job itself
+ * (no separate storage required).
+ *
+ * See the BulkExportAppCtx for job details
+ */
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
 		  @UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
 }, indexes = {
 		  @Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
+@Deprecated
 public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 1024;
@@ -78,7 +87,7 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "EXP_TIME", nullable = false)
+	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
@@ -146,7 +155,7 @@ public class BulkExportJobEntity implements Serializable {
 		if (myStatus != null) {
 			b.append("status", myStatus + " " + new InstantType(myStatusTime).getValueAsString());
 		}
-		b.append("created", new InstantType(myExpiry).getValueAsString());
+		b.append("created", new InstantType(myCreated).getValueAsString());
 		b.append("expiry", new InstantType(myExpiry).getValueAsString());
 		b.append("request", myRequest);
 		b.append("since", mySince);

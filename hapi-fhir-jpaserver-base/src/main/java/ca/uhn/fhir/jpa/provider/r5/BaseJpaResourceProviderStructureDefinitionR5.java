@@ -36,7 +36,7 @@ import org.hl7.fhir.r5.model.StructureDefinition;
  * #L%
  */
 
-public class BaseJpaResourceProviderStructureDefinitionR5 extends JpaResourceProviderR5<StructureDefinition> {
+public abstract class BaseJpaResourceProviderStructureDefinitionR5 extends JpaResourceProviderR5<StructureDefinition> {
 
 	/**
 	 * <code>$snapshot</code> operation

@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -69,8 +68,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -270,7 +267,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			myFhirInstanceValidator.invalidateCaches();
 		}
 		DaoConfig defaultConfig = new DaoConfig();
-		myDaoConfig.setAdvancedLuceneIndexing(defaultConfig.isAdvancedLuceneIndexing());
+		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		myDaoConfig.setAllowContainsSearches(defaultConfig.isAllowContainsSearches());
 
 
@@ -555,16 +552,6 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<>();
-		for (Entry next : theFound.getEntry()) {
-			// if (next.getResource()!= null) {
-			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-			// }
-		}
-		return retVal;
-	}
-
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
 
 		List<IIdType> retVal = new ArrayList<>();
@@ -767,7 +754,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
 		boolean expungeEnabled = theDaoConfig.isExpungeEnabled();
+		boolean multiDeleteEnabled = theDaoConfig.isAllowMultipleDelete();
 		theDaoConfig.setExpungeEnabled(true);
+		theDaoConfig.setAllowMultipleDelete(true);
 
 		for (int count = 0; ; count++) {
 			try {
@@ -787,6 +776,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			}
 		}
 		theDaoConfig.setExpungeEnabled(expungeEnabled);
+		theDaoConfig.setAllowMultipleDelete(multiDeleteEnabled);
 
 		theSearchParamRegistry.forceRefresh();
 	}

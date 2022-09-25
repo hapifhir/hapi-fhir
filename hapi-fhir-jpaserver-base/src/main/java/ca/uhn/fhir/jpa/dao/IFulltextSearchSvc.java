@@ -21,8 +21,9 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.search.ExtendedLuceneIndexData;
+import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
+import ca.uhn.fhir.jpa.search.builder.ISearchQueryExecutor;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -44,6 +45,17 @@ public interface IFulltextSearchSvc {
 	 */
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
+
+	/**
+	 * Query the index for a plain list (non-scrollable) iterator of results.
+	 *
+	 * @param theResourceName e.g. Patient
+	 * @param theParams The search query
+	 * @param theMaxResultsToFetch maximum results to fetch
+	 * @return Iterator of result PIDs
+	 */
+	ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch);
+
 	/**
 	 * Autocomplete search for NIH $expand contextDirection=existing
 	 * @param theOptions operation options
@@ -55,7 +67,7 @@ public interface IFulltextSearchSvc {
 
 	boolean isDisabled();
 
-	ExtendedLuceneIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
+	ExtendedHSearchIndexData extractLuceneIndexData(IBaseResource theResource, ResourceIndexedSearchParams theNewParams);
 
 	boolean supportsSomeOf(SearchParameterMap myParams);
 
@@ -79,4 +91,22 @@ public interface IFulltextSearchSvc {
 	 */
 	List<IBaseResource> getResources(Collection<Long> thePids);
 
+	/**
+	 * Returns accurate hit count
+	 */
+	long count(String theResourceName, SearchParameterMap theParams);
+
+	List<IBaseResource> searchForResources(String theResourceType, SearchParameterMap theParams);
+
+	boolean supportsAllOf(SearchParameterMap theParams);
+
+	/**
+	 * Given a resource type that is indexed by hibernate search, and a list of objects reprenting the IDs you wish to delete,
+	 * this method will delete the resources from the Hibernate Search index. This is useful for situations where a deletion occurred
+	 * outside a Hibernate ORM session, leaving dangling documents in the index.
+	 *
+	 * @param theClazz The class, which must be annotated with {@link  org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed}
+	 * @param theGivenIds The list of IDs for the given document type. Note that while this is a List<Object>, the type must match the type of the `@Id` field on the given class.
+	 */
+	void deleteIndexedDocumentsByTypeAndId(Class theClazz, List<Object> theGivenIds);
 }

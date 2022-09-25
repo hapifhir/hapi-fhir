@@ -36,7 +36,7 @@ class ServletRequestParameter implements IParameter {
 	}
 	
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		return ((ServletRequestDetails) theRequest).getServletRequest();
 	}
 

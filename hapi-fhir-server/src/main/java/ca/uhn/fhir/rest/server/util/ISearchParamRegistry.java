@@ -22,7 +22,9 @@ package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.annotation.Nullable;
@@ -40,6 +42,7 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+
 	/**
 	 * @return Returns all active search params for the given resource
 	 */
@@ -56,7 +59,6 @@ public interface ISearchParamRegistry {
 	 */
 	default void requestRefresh() {
 	}
-
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize
@@ -101,4 +103,22 @@ public interface ISearchParamRegistry {
 	@Nullable
 	RuntimeSearchParam getActiveSearchParamByUrl(String theUrl);
 
+	/**
+	 * Find a search param for a resource. First, check the resource itself, then check the top-level `Resource` resource.
+	 *
+	 * @param theResourceType the resource type.
+	 * @param theParamName the search parameter name.
+	 *
+	 * @return the {@link RuntimeSearchParam} that is found.
+	 */
+	default RuntimeSearchParam getRuntimeSearchParam(String theResourceType, String theParamName) {
+		RuntimeSearchParam availableSearchParamDef = getActiveSearchParam(theResourceType, theParamName);
+		if (availableSearchParamDef == null) {
+			availableSearchParamDef = getActiveSearchParam("Resource", theParamName);
+		}
+		if (availableSearchParamDef == null) {
+			throw new InvalidRequestException(Msg.code(1209) + "Unknown parameter name: " + theResourceType + ':' + theParamName);
+		}
+		return availableSearchParamDef;
+	}
 }

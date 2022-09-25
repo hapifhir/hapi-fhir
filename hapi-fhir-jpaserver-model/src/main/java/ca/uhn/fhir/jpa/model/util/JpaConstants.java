@@ -192,6 +192,10 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_PATIENT = "patient";
 
 	/**
 	 * Parameter for the $import operation
@@ -257,8 +261,17 @@ public class JpaConstants {
 	 * Parameter for the $expand operation
 	 */
 	public static final String OPERATION_EXPAND_PARAM_INCLUDE_HIERARCHY = "includeHierarchy";
+	public static final String OPERATION_EXPAND_PARAM_DISPLAY_LANGUAGE = "displayLanguage";
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK = "X-Upsert-Extistence-Check";
 	public static final String HEADER_UPSERT_EXISTENCE_CHECK_DISABLED = "disabled";
+
+
+	/**
+	 * Parameters for the rewrite history operation
+	 */
+	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
+
+	public static final String SKIP_REINDEX_ON_UPDATE = "SKIP-REINDEX-ON-UPDATE";
 
 	/**
 	 * Non-instantiable

@@ -406,6 +406,14 @@ The following algorithms are currently supported:
                Match names as strings in any order
             </td>
             <td>John Henry = John HENRY when exact=false, John Henry != Henry John</td>
+        </tr>
+        <tr>
+            <td>NICKNAME</td>
+            <td>matcher</td>
+            <td>
+               True if one name is a nickname of the other
+            </td>
+            <td>Ken = Kenneth, Kenny = Ken.  Allen != Allan.</td>
         </tr>     
 				<tr>
             <td>IDENTIFIER</td>

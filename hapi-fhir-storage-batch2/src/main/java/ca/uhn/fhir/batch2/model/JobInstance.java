@@ -20,9 +20,11 @@ package ca.uhn.fhir.batch2.model;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.jpa.util.JsonDateDeserializer;
 import ca.uhn.fhir.jpa.util.JsonDateSerializer;
 import ca.uhn.fhir.model.api.IModelJson;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -30,8 +32,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
+import java.util.Objects;
 
-public class JobInstance extends JobInstanceStartRequest implements IModelJson {
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+public class JobInstance extends JobInstanceStartRequest implements IModelJson, IJobInstance {
 
 	@JsonProperty(value = "jobDefinitionVersion")
 	private int myJobDefinitionVersion;
@@ -45,11 +50,19 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	@JsonProperty(value = "cancelled")
 	private boolean myCancelled;
 
+	/**
+	 * True if every step of the job has produced exactly 1 chunk.
+	 */
+	@JsonProperty(value = "fastTracking")
+	private boolean myFastTracking;
+
+	// time when the job instance was actually first created/stored
 	@JsonProperty(value = "createTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myCreateTime;
 
+	// time when the current status was 'started'
 	@JsonProperty(value = "startTime")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
@@ -74,15 +87,20 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 
 	@JsonProperty(value = "progress", access = JsonProperty.Access.READ_ONLY)
 	private double myProgress;
-
+	@JsonProperty(value = "currentGatedStepId", access = JsonProperty.Access.READ_ONLY)
+	private String myCurrentGatedStepId;
 	@JsonProperty(value = "errorMessage", access = JsonProperty.Access.READ_ONLY)
 	private String myErrorMessage;
-
 	@JsonProperty(value = "errorCount", access = JsonProperty.Access.READ_ONLY)
 	private int myErrorCount;
-
 	@JsonProperty(value = "estimatedCompletion", access = JsonProperty.Access.READ_ONLY)
 	private String myEstimatedTimeRemaining;
+
+	@JsonProperty(value = "report", access = JsonProperty.Access.READ_WRITE)
+	private String myReport;
+
+	@JsonIgnore
+	private JobDefinition<?> myJobDefinition;
 
 	/**
 	 * Constructor
@@ -97,6 +115,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 	public JobInstance(JobInstance theJobInstance) {
 		super(theJobInstance);
 		setCancelled(theJobInstance.isCancelled());
+		setFastTracking(theJobInstance.isFastTracking());
 		setCombinedRecordsProcessed(theJobInstance.getCombinedRecordsProcessed());
 		setCombinedRecordsProcessedPerSecond(theJobInstance.getCombinedRecordsProcessedPerSecond());
 		setCreateTime(theJobInstance.getCreateTime());
@@ -111,8 +130,37 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		setStatus(theJobInstance.getStatus());
 		setTotalElapsedMillis(theJobInstance.getTotalElapsedMillis());
 		setWorkChunksPurged(theJobInstance.isWorkChunksPurged());
+		setCurrentGatedStepId(theJobInstance.getCurrentGatedStepId());
+		setReport(theJobInstance.getReport());
+		myJobDefinition = theJobInstance.getJobDefinition();
 	}
 
+	public static JobInstance fromJobDefinition(JobDefinition<?> theJobDefinition) {
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinition(theJobDefinition);
+		if (theJobDefinition.isGatedExecution()) {
+			instance.setFastTracking(true);
+			instance.setCurrentGatedStepId(theJobDefinition.getFirstStepId());
+		}
+		return instance;
+	}
+
+	public static JobInstance fromInstanceId(String theInstanceId) {
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId(theInstanceId);
+		return instance;
+	}
+
+	@Override
+	public String getCurrentGatedStepId() {
+		return myCurrentGatedStepId;
+	}
+
+	public void setCurrentGatedStepId(String theCurrentGatedStepId) {
+		myCurrentGatedStepId = theCurrentGatedStepId;
+	}
+
+	@Override
 	public int getErrorCount() {
 		return myErrorCount;
 	}
@@ -122,6 +170,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public String getEstimatedTimeRemaining() {
 		return myEstimatedTimeRemaining;
 	}
@@ -130,6 +179,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myEstimatedTimeRemaining = theEstimatedTimeRemaining;
 	}
 
+	@Override
 	public boolean isWorkChunksPurged() {
 		return myWorkChunksPurged;
 	}
@@ -138,6 +188,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myWorkChunksPurged = theWorkChunksPurged;
 	}
 
+	@Override
 	public StatusEnum getStatus() {
 		return myStatus;
 	}
@@ -147,6 +198,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public int getJobDefinitionVersion() {
 		return myJobDefinitionVersion;
 	}
@@ -155,6 +207,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myJobDefinitionVersion = theJobDefinitionVersion;
 	}
 
+	@Override
 	public String getInstanceId() {
 		return myInstanceId;
 	}
@@ -163,6 +216,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myInstanceId = theInstanceId;
 	}
 
+	@Override
 	public Date getStartTime() {
 		return myStartTime;
 	}
@@ -172,6 +226,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Date getEndTime() {
 		return myEndTime;
 	}
@@ -181,6 +236,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Integer getCombinedRecordsProcessed() {
 		return myCombinedRecordsProcessed;
 	}
@@ -189,6 +245,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCombinedRecordsProcessed = theCombinedRecordsProcessed;
 	}
 
+	@Override
 	public Double getCombinedRecordsProcessedPerSecond() {
 		return myCombinedRecordsProcessedPerSecond;
 	}
@@ -197,6 +254,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myCombinedRecordsProcessedPerSecond = theCombinedRecordsProcessedPerSecond;
 	}
 
+	@Override
 	public Date getCreateTime() {
 		return myCreateTime;
 	}
@@ -206,6 +264,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+	@Override
 	public Integer getTotalElapsedMillis() {
 		return myTotalElapsedMillis;
 	}
@@ -214,6 +273,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myTotalElapsedMillis = theTotalElapsedMillis;
 	}
 
+	@Override
 	public double getProgress() {
 		return myProgress;
 	}
@@ -222,6 +282,7 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		myProgress = theProgress;
 	}
 
+	@Override
 	public String getErrorMessage() {
 		return myErrorMessage;
 	}
@@ -231,12 +292,34 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 		return this;
 	}
 
+
+	public void setJobDefinition(JobDefinition<?> theJobDefinition) {
+		myJobDefinition = theJobDefinition;
+		setJobDefinitionId(theJobDefinition.getJobDefinitionId());
+		setJobDefinitionVersion(theJobDefinition.getJobDefinitionVersion());
+	}
+
+	@Override
+	public JobDefinition<?> getJobDefinition() {
+		return myJobDefinition;
+	}
+
+	@Override
 	public boolean isCancelled() {
 		return myCancelled;
 	}
 
 	public void setCancelled(boolean theCancelled) {
 		myCancelled = theCancelled;
+	}
+
+	@Override
+	public String getReport() {
+		return myReport;
+	}
+
+	public void setReport(String theReport) {
+		myReport = theReport;
 	}
 
 	@Override
@@ -256,6 +339,41 @@ public class JobInstance extends JobInstanceStartRequest implements IModelJson {
 			.append("errorMessage", myErrorMessage)
 			.append("errorCount", myErrorCount)
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
+			.append("record", myReport)
 			.toString();
+	}
+
+	/**
+	 * Returns true if the job instance is in {@link StatusEnum#IN_PROGRESS} and is not cancelled
+	 */
+	public boolean isRunning() {
+		return getStatus() == StatusEnum.IN_PROGRESS && !isCancelled();
+	}
+
+	public boolean isFinished() {
+		return myStatus == StatusEnum.COMPLETED ||
+			myStatus == StatusEnum.FAILED ||
+			myStatus == StatusEnum.CANCELLED;
+	}
+
+	public boolean hasGatedStep() {
+		return !isBlank(myCurrentGatedStepId);
+	}
+
+	public boolean isPendingCancellationRequest() {
+		return myCancelled && (myStatus == StatusEnum.QUEUED || myStatus == StatusEnum.IN_PROGRESS);
+	}
+
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
+	@Override
+	public boolean isFastTracking() {
+		return myFastTracking;
+	}
+
+	@Override
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
 	}
 }

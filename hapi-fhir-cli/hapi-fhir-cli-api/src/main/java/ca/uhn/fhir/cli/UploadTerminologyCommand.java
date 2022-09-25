@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -42,6 +41,7 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.springframework.util.unit.DataSize;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -58,7 +58,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
 	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
-	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+	private long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+
+	public long getTransferSizeLimit() {
+		return ourTransferSizeLimit;
+	}
 
 	@Override
 	public String getCommandDescription() {
@@ -77,6 +81,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
+		addOptionalOption(options, "s", "size", true, "The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
 
 		return options;
 	}
@@ -102,6 +107,9 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		if (datafile == null || datafile.length == 0) {
 			throw new ParseException(Msg.code(1540) + "No data file provided");
 		}
+
+		String sizeString = theCommandLine.getOptionValue("s");
+		this.setTransferSizeLimitHuman(sizeString);
 
 		IGenericClient client = newClient(theCommandLine);
 
@@ -140,8 +148,10 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
+				File dataFile = new File(nextDataFile);
+				ourLog.info("Reading {}", dataFile.getAbsolutePath());
 
-				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
+				try (FileInputStream fileInputStream = new FileInputStream(dataFile)) {
 					boolean isFhirType = nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml");
 					if (nextDataFile.endsWith(".csv") || nextDataFile.endsWith(".properties") || isFhirType) {
 
@@ -168,6 +178,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							IOUtils.copy(countingInputStream, zipOutputStream);
 							haveCompressedContents = true;
 							compressedSourceBytesCount += countingInputStream.getCount();
+							++compressedFileCount;
 
 							zipOutputStream.flush();
 							ourLog.info("Finished compressing {}", nextDataFile);
@@ -234,7 +245,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		if (bytes.length > ourTransferSizeLimit) {
 			ourLog.info("File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.", FileUtil.formatFileSize(ourTransferSizeLimit));
-
 			String suffix = fileName.substring(fileName.lastIndexOf("."));
 			try {
 				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
@@ -261,12 +271,22 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		SNAPSHOT, ADD, REMOVE
 	}
 
-	@VisibleForTesting
-	static void setTransferSizeLimitForUnitTest(long theTransferSizeLimit) {
-		if (theTransferSizeLimit <= 0) {
+	public void setTransferSizeBytes(long theTransferSizeBytes) {
+		if (ourTransferSizeLimit < 0) {
 			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
-		}else {
-			ourTransferSizeLimit = theTransferSizeLimit;
+		} else {
+			ourTransferSizeLimit = theTransferSizeBytes;
+		}
+	}
+	public void setTransferSizeLimitHuman(String sizeString) {
+		if (isBlank(sizeString)) {
+			setTransferSizeBytes(DEFAULT_TRANSFER_SIZE_LIMIT);
+		} else {
+			long bytes = DataSize.parse(sizeString).toBytes();
+			if (bytes < 0) {
+				bytes = DEFAULT_TRANSFER_SIZE_LIMIT;
+			}
+			setTransferSizeBytes(bytes);
 		}
 	}
 

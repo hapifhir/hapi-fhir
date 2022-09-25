@@ -4,17 +4,26 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Base64Utils;
 
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
+import static ca.uhn.fhir.rest.api.Constants.CT_APP_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW;
+import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_JSON;
+import static ca.uhn.fhir.rest.api.Constants.CT_TEXT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,8 +36,10 @@ import static org.mockito.Mockito.verify;
 public class FetchFilesStepTest {
 
 	public static final String INSTANCE_ID = "instance-id";
+	public static final JobInstance ourTestInstance = JobInstance.fromInstanceId(INSTANCE_ID);
 	public static final String CHUNK_ID = "chunk-id";
-	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
+
+	private final ContentTypeHeaderModifiableBulkImportFileServlet myBulkImportFileServlet = new ContentTypeHeaderModifiableBulkImportFileServlet();
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
 		.withServlet(myBulkImportFileServlet);
@@ -37,17 +48,18 @@ public class FetchFilesStepTest {
 	@Mock
 	private IJobDataSink<NdJsonFileJson> myJobDataSink;
 
-	@Test
-	public void testFetchWithBasicAuth() {
+	@ParameterizedTest
+	@ValueSource(strings = {CT_FHIR_NDJSON, CT_FHIR_JSON, CT_FHIR_JSON_NEW, CT_APP_NDJSON, CT_JSON, CT_TEXT})
+	public void testFetchWithBasicAuth(String theHeaderContentType) {
 
 		// Setup
-
+		myBulkImportFileServlet.setHeaderContentTypeValue(theHeaderContentType);
 		String index = myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Patient\"}");
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin:password");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -76,7 +88,7 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setMaxBatchResourceCount(3);
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test
 
@@ -98,10 +110,26 @@ public class FetchFilesStepTest {
 		BulkImportJobParameters parameters = new BulkImportJobParameters()
 			.addNdJsonUrl(myHttpServletExtension.getBaseUrl() + "/download?index=" + index)
 			.setHttpBasicCredentials("admin");
-		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, INSTANCE_ID, CHUNK_ID);
+		StepExecutionDetails<BulkImportJobParameters, VoidModel> details = new StepExecutionDetails<>(parameters, null, ourTestInstance, CHUNK_ID);
 
 		// Test & Verify
 
 		assertThrows(JobExecutionFailedException.class, () -> mySvc.run(details, myJobDataSink));
 	}
+
+	public static class ContentTypeHeaderModifiableBulkImportFileServlet extends BulkImportFileServlet{
+
+		public String myContentTypeValue;
+
+
+		public void setHeaderContentTypeValue(String theContentTypeValue) {
+			myContentTypeValue = theContentTypeValue;
+		}
+
+		@Override
+		public String getHeaderContentType() {
+			return Objects.nonNull(myContentTypeValue) ? myContentTypeValue : super.getHeaderContentType();
+		}
+	}
+
 }

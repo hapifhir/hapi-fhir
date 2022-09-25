@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3651
+jira: SMILE-4394
+title: "MS SQL Standard Edition does not support the ONLINE=ON feature for index creation, and failed during upgrades to 6.0.
+  Upgrades now detect these limitations and avoid this feature when unsupported."

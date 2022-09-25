@@ -53,7 +53,7 @@ public enum EncodingEnum {
 		}
 	},
 
-        NDJSON(Constants.CT_FHIR_NDJSON, Constants.CT_FHIR_NDJSON, Constants.FORMAT_NDJSON) {
+	NDJSON(Constants.CT_FHIR_NDJSON, Constants.CT_FHIR_NDJSON, Constants.FORMAT_NDJSON) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newNDJsonParser();
