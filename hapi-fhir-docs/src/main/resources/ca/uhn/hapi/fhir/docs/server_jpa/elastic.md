@@ -42,11 +42,14 @@ See https://www.hl7.org/fhir/search.html#string.
 The `:text` modifier for token and string uses a modified version of the Simple Query Syntax provided by
 [Lucene](https://lucene.apache.org/core/8_10_1/queryparser/org/apache/lucene/queryparser/simple/SimpleQueryParser.html) and
 [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax).
-Terms are delimited by whitespace, or query punctuation `"()|+'`.  Literal uses of these characters must be escaped by '\'.
-When the query only contains one or more bare terms, they are each converted to a prefix search to match the behaviour of a normal string search.
-When multiple terms are present, they must all match (i.e. `AND`).  For `OR` behaviour use the `|` operator between terms.
-If any special SQS syntax is active, the query is used as is.
-To ensure that the query is used as-is, quote bare terms with the `"` or  character.  I.e. without any special syntax characters.
+Terms are delimited by whitespace, or query punctuation `"'()|+`.  
+Literal uses of these characters must be escaped by `&#92;`.
+If the query contains any SQS query punctuation, the query is treated as a normal SQS query.
+But when the query only contains one or more bare terms, and does not use any query punctuation, a modified syntax is used.
+In modified syntax, each search term is converted to a prefix search to match standard FHIR string searching behaviour.
+When multiple terms are present, they must all match (i.e. `AND`).
+For `OR` behaviour use the `|` operator between terms.
+To match only whole words, but not match by prefix, quote bare terms with the `"` or `'` characters.
 
 Examples:
 
