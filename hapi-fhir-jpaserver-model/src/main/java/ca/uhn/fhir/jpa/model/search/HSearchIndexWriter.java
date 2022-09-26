@@ -90,15 +90,15 @@ public class HSearchIndexWriter {
 
 		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
 		writeBasicStringFields(stringIndexNode, theValue);
-		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
-		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
-		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_EXACT, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_TEXT, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_LOWER, theValue);
 
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
 	}
 
 	public void writeBasicStringFields(DocumentElement theIndexNode, String theValue) {
-		theIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
+		addDocumentValue(theIndexNode, IDX_STRING_NORMALIZED, theValue);
 	}
 
 	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {
@@ -110,7 +110,7 @@ public class HSearchIndexWriter {
 
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
 			DocumentElement nestedStringNode = nestedSpNode.addObject(INDEX_TYPE_STRING);
-			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
+			addDocumentValue(nestedStringNode, IDX_STRING_TEXT, theValue.getDisplay());
 		}
 
 		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_TOKEN);
@@ -121,14 +121,20 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {
-		theDocumentElement.addValue(TOKEN_CODE, theValue.getCode());
-		theDocumentElement.addValue(TOKEN_SYSTEM, theValue.getSystem());
-		theDocumentElement.addValue(TOKEN_SYSTEM_CODE, theValue.getSystem() + "|" + theValue.getCode());
+		addDocumentValue(theDocumentElement, TOKEN_CODE, theValue.getCode());
+		addDocumentValue(theDocumentElement, TOKEN_SYSTEM, theValue.getSystem());
+		addDocumentValue(theDocumentElement, TOKEN_SYSTEM_CODE, theValue.getSystem() + "|" + theValue.getCode());
+	}
+
+	private void addDocumentValue(DocumentElement theDocumentElement, String theKey, Object theValue) {
+		if (theValue != null) {
+			theDocumentElement.addValue(theKey, theValue);
+		}
 	}
 
 	public void writeReferenceIndex(String theSearchParam, String theValue) {
 		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
-		referenceIndexNode.addValue(VALUE_FIELD, theValue);
+		addDocumentValue(referenceIndexNode, VALUE_FIELD, theValue);
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 
@@ -141,11 +147,11 @@ public class HSearchIndexWriter {
 
 	public void writeDateFields(DocumentElement dateIndexNode, DateSearchIndexData theValue) {
 		// Lower bound
-		dateIndexNode.addValue(DATE_LOWER_ORD, theValue.getLowerBoundOrdinal());
-		dateIndexNode.addValue(DATE_LOWER, theValue.getLowerBoundDate().toInstant());
+		addDocumentValue(dateIndexNode, DATE_LOWER_ORD, theValue.getLowerBoundOrdinal());
+		addDocumentValue(dateIndexNode, DATE_LOWER, theValue.getLowerBoundDate().toInstant());
 		// Upper bound
-		dateIndexNode.addValue(DATE_UPPER_ORD, theValue.getUpperBoundOrdinal());
-		dateIndexNode.addValue(DATE_UPPER, theValue.getUpperBoundDate().toInstant());
+		addDocumentValue(dateIndexNode, DATE_UPPER_ORD, theValue.getUpperBoundOrdinal());
+		addDocumentValue(dateIndexNode, DATE_UPPER, theValue.getUpperBoundDate().toInstant());
 	}
 
 
@@ -161,9 +167,9 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeQuantityFields(DocumentElement nestedQtyNode, QuantitySearchIndexData theValue) {
-		nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
-		nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
-		nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
+		addDocumentValue(nestedQtyNode, QTY_CODE, theValue.getCode());
+		addDocumentValue(nestedQtyNode, QTY_SYSTEM, theValue.getSystem());
+		addDocumentValue(nestedQtyNode, QTY_VALUE, theValue.getValue());
 
 		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
 			return;
@@ -179,8 +185,8 @@ public class HSearchIndexWriter {
 		double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 		String canonicalUnits = canonicalForm.getCode();
 
-		nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
-		nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
+		addDocumentValue(nestedQtyNode, QTY_CODE_NORM, canonicalUnits);
+		addDocumentValue(nestedQtyNode, QTY_VALUE_NORM, canonicalValue);
 	}
 
 
@@ -193,7 +199,7 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeUriFields(DocumentElement uriNode, String uriSearchIndexValue) {
-		uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+		addDocumentValue(uriNode, URI_VALUE, uriSearchIndexValue);
 	}
 
 	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
@@ -205,7 +211,7 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeNumberFields(DocumentElement numberNode, BigDecimal numberSearchIndexValue) {
-		numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
+		addDocumentValue(numberNode, NUMBER_VALUE, numberSearchIndexValue.doubleValue());
 	}
 
 	/**
