@@ -11,8 +11,6 @@ import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.Appointment;
-import org.hl7.fhir.r4.model.AppointmentResponse;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
@@ -32,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -399,7 +396,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + provId + "\"", "\"" + devId + "\"", "\"" + devId2 + "\""), List.of("\"P2\"", "\"" + provId2 + "\"", "\"" + devId3 + "\""));
 	}
-	
+
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));
 

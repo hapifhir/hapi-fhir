@@ -92,7 +92,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.Validate;
@@ -149,6 +148,9 @@ public class SearchBuilder implements ISearchBuilder {
 	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
+	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
+
+	private static final String MY_SOURCE_RESOURCE_TYPE = "mySourceResourceType";
 	private static final String MY_TARGET_RESOURCE_VERSION = "myTargetResourceVersion";
 	public static final String RESOURCE_ID_ALIAS = "resource_id";
 	public static final String RESOURCE_VERSION_ALIAS = "resource_version";
@@ -290,7 +292,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@SuppressWarnings("ConstantConditions")
 	@Override
 	public Long createCountQuery(SearchParameterMap theParams, String theSearchUuid,
-				RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
+										  RequestDetails theRequest, @Nonnull RequestPartitionId theRequestPartitionId) {
 
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
@@ -342,7 +344,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private List<ISearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCountOnlyFlag, RequestDetails theRequest,
-																		 SearchRuntimeDetails theSearchRuntimeDetails) {
+																  SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
@@ -383,7 +385,7 @@ public class SearchBuilder implements ISearchBuilder {
 				!fulltextExecutor.hasNext() ||
 					// Our hibernate search query doesn't respect partitions yet
 					(!myPartitionSettings.isPartitioningEnabled() &&
-					// were there AND terms left?  Then we still need the db.
+						// were there AND terms left?  Then we still need the db.
 						theParams.isEmpty() &&
 						// not every param is a param. :-(
 						theParams.getNearDistanceParam() == null &&
@@ -991,8 +993,9 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Check if we can load the resources from Hibernate Search instead of the database.
 	 * We assume this is faster.
-	 *
+	 * <p>
 	 * Hibernate Search only stores the current version, and only if enabled.
+	 *
 	 * @param thePids the pids to check for versioned references
 	 * @return can we fetch from Hibernate Search?
 	 */
@@ -1001,7 +1004,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return myDaoConfig.isStoreResourceInHSearchIndex() &&
 			myDaoConfig.isAdvancedHSearchIndexing() &&
 			// we don't support history
-			thePids.stream().noneMatch(p->p.getVersion()!=null) &&
+			thePids.stream().noneMatch(p -> p.getVersion() != null) &&
 			// skip the complexity for metadata in dstu2
 			myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
@@ -1037,6 +1040,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 		String searchPidFieldName = theReverseMode ? MY_TARGET_RESOURCE_PID : MY_SOURCE_RESOURCE_PID;
 		String findPidFieldName = theReverseMode ? MY_SOURCE_RESOURCE_PID : MY_TARGET_RESOURCE_PID;
+		String findResourceTypeFieldName = theReverseMode ? MY_SOURCE_RESOURCE_TYPE : MY_TARGET_RESOURCE_TYPE;
 		String findVersionFieldName = null;
 		if (!theReverseMode && myModelConfig.isRespectVersionsForSearchIncludes()) {
 			findVersionFieldName = MY_TARGET_RESOURCE_VERSION;
@@ -1077,6 +1081,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (matchAll) {
 					StringBuilder sqlBuilder = new StringBuilder();
 					sqlBuilder.append("SELECT r.").append(findPidFieldName);
+					sqlBuilder.append(", r.").append(findResourceTypeFieldName);
 					if (findVersionFieldName != null) {
 						sqlBuilder.append(", r." + findVersionFieldName);
 					}
@@ -1117,16 +1122,16 @@ public class SearchBuilder implements ISearchBuilder {
 								continue;
 							}
 
-							Long resourceLink;
 							Long version = null;
+							Long resourceLink = (Long) ((Object[]) nextRow)[0];
+							String resourceType = (String) ((Object[]) nextRow)[1];
 							if (findVersionFieldName != null) {
-								resourceLink = (Long) ((Object[]) nextRow)[0];
-								version = (Long) ((Object[]) nextRow)[1];
-							} else {
-								resourceLink = (Long) nextRow;
+								version = (Long) ((Object[]) nextRow)[2];
 							}
 
-							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
+							ResourcePersistentId pid = new ResourcePersistentId(resourceLink, version);
+							pid.setResourceType(resourceType);
+							pidsToInclude.add(pid);
 						}
 					}
 				} else {
@@ -1179,16 +1184,16 @@ public class SearchBuilder implements ISearchBuilder {
 							" WHERE r.src_path = :src_path AND " +
 							" r.target_resource_id IS NOT NULL AND " +
 							" r." + searchPidFieldSqlColumn + " IN (:target_pids) ");
-						if(targetResourceType != null) {
+						if (targetResourceType != null) {
 							resourceIdBasedQuery.append(" AND r.target_resource_type = :target_resource_type ");
-						} else if(haveTargetTypesDefinedByParam) {
+						} else if (haveTargetTypesDefinedByParam) {
 							resourceIdBasedQuery.append(" AND r.target_resource_type in (:target_resource_types) ");
 						}
 
 						// Case 2:
 						String fieldsToLoadFromSpidxUriTable = "rUri.res_id";
 						// to match the fields loaded in union
-						if(fieldsToLoad.split(",").length > 1) {
+						if (fieldsToLoad.split(",").length > 1) {
 							for (int i = 0; i < fieldsToLoad.split(",").length - 1; i++) {
 								fieldsToLoadFromSpidxUriTable += ", NULL";
 							}
@@ -1200,10 +1205,10 @@ public class SearchBuilder implements ISearchBuilder {
 							"   r.target_resource_url = rUri.sp_uri AND " +
 							"   rUri.sp_name = 'url' ");
 
-						if(targetResourceType != null) {
+						if (targetResourceType != null) {
 							resourceUrlBasedQuery.append(" AND rUri.res_type = :target_resource_type ");
 
-						} else if(haveTargetTypesDefinedByParam) {
+						} else if (haveTargetTypesDefinedByParam) {
 							resourceUrlBasedQuery.append(" AND rUri.res_type IN (:target_resource_types) ");
 						}
 

@@ -35,6 +35,7 @@ import java.util.Optional;
 public class ResourcePersistentId {
 	private Object myId;
 	private Long myVersion;
+	private String myResourceType;
 	private IIdType myAssociatedResourceId;
 
 	public ResourcePersistentId(Object theId) {
@@ -111,6 +112,19 @@ public class ResourcePersistentId {
 	 */
 	public void setVersion(Long theVersion) {
 		myVersion = theVersion;
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	/**
+	 * @param theResourceType This should only be populated if an _include is used in the export processor,
+	 *                        since the resource added to the pid list will not be just the resourceType of the export.
+	 *                        Leave null for non _include using exports.
+	 */
+	public void setResourceType(String theResourceType) {
+		myResourceType = theResourceType;
 	}
 
 	public static List<Long> toLongList(Collection<ResourcePersistentId> thePids) {
