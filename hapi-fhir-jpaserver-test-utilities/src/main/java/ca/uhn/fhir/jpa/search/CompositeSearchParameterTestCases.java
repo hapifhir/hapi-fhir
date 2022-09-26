@@ -140,8 +140,11 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 	/**
 	 * Create a goofy SP to test composite component support
-	 * for uri and number
+	 * for uri and number.
+	 *
+	 * Note - JPA doesn't support this either yet.  Just piggyback on this flag.
 	 */
+	@EnabledIf("isCorrelatedSupported")
 	@Test
 	void searchUriNumber_onSameResource_found() {
 		// Combine existing SPs to test uri + number
