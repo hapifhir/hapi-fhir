@@ -449,7 +449,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			Set<Include> includes = Collections.singleton(new Include("*", true));
 			SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
 			Set<ResourcePersistentId> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, myReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getJobId(), requestDetails, null);
-			myReadPids.addAll(includeIds);
+			// gets rid of the Patient duplicates
+			myReadPids.addAll(includeIds.stream().filter((id) -> !id.getResourceType().equals("Patient")).collect(Collectors.toSet()));
 		}
 	}
 

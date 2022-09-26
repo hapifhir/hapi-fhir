@@ -1129,9 +1129,11 @@ public class SearchBuilder implements ISearchBuilder {
 								version = (Long) ((Object[]) nextRow)[2];
 							}
 
-							ResourcePersistentId pid = new ResourcePersistentId(resourceLink, version);
-							pid.setResourceType(resourceType);
-							pidsToInclude.add(pid);
+							if (resourceLink != null) {
+								ResourcePersistentId pid = new ResourcePersistentId(resourceLink, version);
+								pid.setResourceType(resourceType);
+								pidsToInclude.add(pid);
+							}
 						}
 					}
 				} else {
