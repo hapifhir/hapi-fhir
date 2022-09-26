@@ -34,44 +34,44 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 	 *
 	 * Example for component-code-value-quantity, which composes
 	 * component-code and component-value-quantity:
-	 <pre>
-	 { "nsp: {
+ <pre>
+ { "nsp: {
 	 "component-code-value-quantity": [
-	 {
-	 "component-code": {
-	 "token": {
-	 "code": "8480-6",
-	 "system": "http://loinc.org",
-	 "code-system": "http://loinc.org|8480-6"
-	 }
-	 },
-	 "component-value-quantity": {
-	 "quantity": {
-	 "code": "mmHg",
-	 "system": "null",
-	 "value": 60.0
-	 }
-	 }
-	 },
-	 {
-	 "component-code": {
-	 "token": {
-	 "code": "3421-5",
-	 "system": "http://loinc.org",
-	 "code-system": "http://loinc.org|3421-5"
-	 }
-	 },
-	 "component-value-quantity": {
-	 "quantity": {
-	 "code": "mmHg",
-	 "system": "null",
-	 "value": 100.0
-	 }
-	 }
-	 }
+		 {
+			 "component-code": {
+				 "token": {
+					 "code": "8480-6",
+					 "system": "http://loinc.org",
+					 "code-system": "http://loinc.org|8480-6"
+				 }
+			 },
+			 "component-value-quantity": {
+				 "quantity": {
+					 "code": "mmHg",
+					 "system": "null",
+					 "value": 60.0
+				 }
+	 		 }
+		 },
+		 {
+			 "component-code": {
+				 "token": {
+					 "code": "3421-5",
+					 "system": "http://loinc.org",
+					 "code-system": "http://loinc.org|3421-5"
+				 }
+			 },
+			 "component-value-quantity": {
+				 "quantity": {
+					 "code": "mmHg",
+					 "system": "null",
+					 "value": 100.0
+				 }
+			 }
+		 }
 	 ]
-	 }
-	 </pre>
+ }
+ </pre>
 	 *
 	 * @param theRoot our cache wrapper around the root HSearch DocumentElement
 	 */

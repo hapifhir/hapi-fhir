@@ -40,7 +40,13 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 
 
 	/**
-	 * Does this engine support sub-element correlation?
+	 * Should we run test cases that depend on engine support sub-element correlation?
+	 *
+	 * JPA currently reuses the extracted values from each sub-param.
+	 * This works fine for non-repeating elements, but can fail for repeating elements
+	 * like Observation.component.  For the composites defined on Observation.component,
+	 * both sub-params must match on the specific component (eg systolic vs diasystolic readings),
+	 * and JPA doesn't track down to the element level.
 	 */
 	protected abstract boolean isCorrelatedSupported();
 

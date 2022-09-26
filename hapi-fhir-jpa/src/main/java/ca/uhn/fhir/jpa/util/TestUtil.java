@@ -290,7 +290,7 @@ public class TestUtil {
 				List<String> legacySPHibernateFKNames = Arrays.asList(
 					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
 				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
-					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK");
+					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
 
 				if ( ! duplicateNameValidationExceptionList.contains(fk.name())) {
 					assertNotADuplicateName(fk.name(), theNames);
