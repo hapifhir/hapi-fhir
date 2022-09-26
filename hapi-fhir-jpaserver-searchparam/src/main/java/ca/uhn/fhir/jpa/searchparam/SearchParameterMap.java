@@ -239,12 +239,16 @@ public class SearchParameterMap implements Serializable {
 				b.append(Constants.PARAM_INCLUDE_QUALIFIER_RECURSE);
 			}
 			b.append('=');
-			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
-			b.append(':');
-			b.append(UrlUtil.escapeUrlParam(nextInclude.getParamName()));
-			if (isNotBlank(nextInclude.getParamTargetType())) {
+			if (Constants.INCLUDE_STAR.equals(nextInclude.getValue())) {
+				b.append(Constants.INCLUDE_STAR);
+			} else {
+				b.append(UrlUtil.escapeUrlParam(nextInclude.getParamType()));
 				b.append(':');
-				b.append(nextInclude.getParamTargetType());
+				b.append(UrlUtil.escapeUrlParam(nextInclude.getParamName()));
+				if (isNotBlank(nextInclude.getParamTargetType())) {
+					b.append(':');
+					b.append(nextInclude.getParamTargetType());
+				}
 			}
 		}
 	}
@@ -585,6 +589,13 @@ public class SearchParameterMap implements Serializable {
 	 */
 	public boolean hasIncludes() {
 		return myIncludes != null && !myIncludes.isEmpty();
+	}
+
+	/**
+	 * @since 6.2.0
+	 */
+	public boolean hasRevIncludes() {
+		return myRevIncludes != null && !myRevIncludes.isEmpty();
 	}
 
 	@Override

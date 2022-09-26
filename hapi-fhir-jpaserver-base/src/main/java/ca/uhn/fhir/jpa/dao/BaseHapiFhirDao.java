@@ -82,7 +82,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
@@ -224,27 +223,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	@Autowired
 	ExpungeService myExpungeService;
 	@Autowired
-	private HistoryBuilderFactory myHistoryBuilderFactory;
-	@Autowired
 	private DaoConfig myConfig;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
-	@Autowired
-	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	@Autowired
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
-	@Autowired
-	private RequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
 	@Autowired
@@ -272,7 +261,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+	public void setApplicationContext(@Nonnull ApplicationContext theApplicationContext) throws BeansException {
 		/*
 		 * We do a null check here because Smile's module system tries to
 		 * initialize the application context twice if two modules depend on
@@ -363,9 +352,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
 		HashSet<ResourceTag> retVal = Sets.newHashSet();
 		if (theEntity.isHasTags()) {
-			for (ResourceTag next : theEntity.getTags()) {
-				retVal.add(next);
-			}
+			retVal.addAll(theEntity.getTags());
 		}
 		return retVal;
 	}
@@ -1505,9 +1492,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				oldResource = toResource(entity, false);
 			}
 
-			if (theRequest.getServer() != null) {
-				ActionRequestDetails actionRequestDetails = new ActionRequestDetails(theRequest, theResource, theResourceId.getResourceType(), theResourceId);
-			}
 			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
 
 			ResourceTable savedEntity = updateEntity(theRequest, theResource, entity, null, true, false, theTransactionDetails, false, false);
@@ -1683,13 +1667,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		// We'll update the resource ID with the correct version later but for
 		// now at least set it to something useful for the interceptors
 		theResource.setId(entity.getIdDt());
-
-		// Notify interceptors
-		ActionRequestDetails requestDetails;
-		if (theRequestDetails != null && theRequestDetails.getServer() != null) {
-			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
-			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
-		}
 
 		// Notify IServerOperationInterceptors about pre-action call
 		notifyInterceptors(theRequestDetails, theResource, theOldResource, theTransactionDetails, true);

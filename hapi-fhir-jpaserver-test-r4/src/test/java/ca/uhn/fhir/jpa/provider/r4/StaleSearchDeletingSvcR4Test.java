@@ -1,10 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -42,8 +40,6 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
-	@Autowired
-	private ISearchIncludeDao mySearchIncludeDao;
 
 	@Override
 	@AfterEach()
@@ -136,18 +132,14 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 				mySearchResultDao.save(sr);
 			}
 
-
-			SearchInclude si = new SearchInclude(search, "Patient:name", false, false);
-			mySearchIncludeDao.save(si);
-
 		});
 
 		// It should take two passes to delete the search fully
-		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 	}
 
@@ -166,13 +158,13 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		});
 
 		// It should take one pass to delete the search fully
-		runInTransaction(()-> {
+		runInTransaction(() -> {
 			assertEquals(1, mySearchEntityDao.count());
 		});
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
-		runInTransaction(()-> {
+		runInTransaction(() -> {
 			assertEquals(0, mySearchEntityDao.count());
 		});
 	}
@@ -198,15 +190,15 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		});
 
 		// Should not delete right now
-		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->assertEquals(1, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 
 		sleepAtLeast(1100);
 
 		// Now it's time to delete
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		runInTransaction(()->assertEquals(0, mySearchEntityDao.count()));
+		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
 
 	}
 

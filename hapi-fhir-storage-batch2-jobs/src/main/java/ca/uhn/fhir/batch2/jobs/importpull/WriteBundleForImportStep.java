@@ -35,9 +35,10 @@ import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.parser.IParser;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
 
 public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkImportPullJobParameters, BulkImportRecord> {
 
@@ -53,11 +54,11 @@ public class WriteBundleForImportStep implements ILastJobStepWorker<Batch2BulkIm
 	}
 
 	@SuppressWarnings({"SwitchStatementWithTooFewBranches", "rawtypes", "unchecked"})
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportRecord> theStepExecutionDetails,
-		@NotNull IJobDataSink<VoidModel> theDataSink
+		@Nonnull StepExecutionDetails<Batch2BulkImportPullJobParameters, BulkImportRecord> theStepExecutionDetails,
+		@Nonnull IJobDataSink<VoidModel> theDataSink
 	) throws JobExecutionFailedException {
 
 		BulkImportRecord record = theStepExecutionDetails.getData();
