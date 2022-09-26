@@ -51,7 +51,7 @@ public class BulkExportResponseJson {
 	private List<Output> myOutput;
 
 	/*
-	 * Note that we override the include functionality here as ONC regulations rquire that we actually serialize the empty error array.
+	 * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
 	 */
 	@JsonInclude
 	@JsonProperty("error")
