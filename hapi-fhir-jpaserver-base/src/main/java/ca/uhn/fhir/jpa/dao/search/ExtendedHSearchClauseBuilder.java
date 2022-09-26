@@ -732,7 +732,6 @@ public class ExtendedHSearchClauseBuilder {
 					subMatch = buildQuantityTermClause(value, componentContext);
 					break;
 				case URI:
-					// wipmb neat - we could combine subComponentPath with predicate factory
 					subMatch = buildURIClause(List.of(value), componentContext);
 					break;
 				case NUMBER:
