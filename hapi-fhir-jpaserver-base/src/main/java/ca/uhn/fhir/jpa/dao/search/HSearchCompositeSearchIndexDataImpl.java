@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.HSearchElementCache;
 import ca.uhn.fhir.jpa.model.search.HSearchIndexWriter;
@@ -105,7 +107,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 					break;
 
 				case QUANTITY:
-					DocumentElement quantityElement =  subParamElement.addObject(HSearchIndexWriter.QTY_IDX_NAME);
+					DocumentElement quantityElement =  subParamElement.addObject(HSearchIndexWriter.INDEX_TYPE_QUANTITY);
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamQuantity.class).stream())
 						.map(ExtendedHSearchIndexExtractor::convertQuantity)
@@ -126,14 +128,24 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
 				break;
 
-				// wipmb implement these
 				case URI:
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamUri.class).stream())
+						.forEach(rispu->theHSearchIndexWriter.writeUriFields(subParamElement, rispu.getUri()));
+					break;
+
 				case NUMBER:
-				case REFERENCE:
+					subParam.getParamIndexValues().stream()
+						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamNumber.class).stream())
+						.forEach(rispn->theHSearchIndexWriter.writeNumberFields(subParamElement, rispn.getValue()));
 					break;
 
 				case COMPOSITE:
 					assert false: "composite components can't be composite";
+					break;
+
+				// wipmb Can any of these be part of a composite?
+				case REFERENCE:
 					break;
 
 				// unsupported

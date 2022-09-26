@@ -191,9 +191,11 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			// uri
 			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
+			nestedSpField.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
 
 			// number
 			spfield.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
+			nestedSpField.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
 
 			//quantity
 			String quantityPathGlob = "*.quantity";

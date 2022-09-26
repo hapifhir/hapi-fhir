@@ -213,11 +213,24 @@ public interface ITestDataBuilder {
 		}
 	}
 
+	default IIdType createResourceFromJson(String theJson, Consumer<IBaseResource>... theModifiers) {
+		IBaseResource resource = getFhirContext().newJsonParser().parseResource(theJson);
+		applyElementModifiers(resource, theModifiers);
+
+		if (ourLog.isDebugEnabled()) {
+			ourLog.debug("Creating {}", getFhirContext().newJsonParser().encodeResourceToString(resource));
+		}
+
+		if (isNotBlank(resource.getIdElement().getValue())) {
+			return doUpdateResource(resource);
+		} else {
+			return doCreateResource(resource);
+		}
+	}
+
 	default IBaseResource buildResource(String theResourceType, Consumer<IBaseResource>... theModifiers) {
 		IBaseResource resource = getFhirContext().getResourceDefinition(theResourceType).newInstance();
-		for (Consumer<IBaseResource> next : theModifiers) {
-			next.accept(resource);
-		}
+		applyElementModifiers(resource, theModifiers);
 		return resource;
 	}
 

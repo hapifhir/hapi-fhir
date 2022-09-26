@@ -132,4 +132,56 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			"Observation?code-value-string=8480-6$ABC", id1);
 	}
 
+	/**
+	 * Create a goofy SP to test composite component support
+	 * for uri and number
+	 */
+	@Test
+	void searchUriAndNumberMatching() {
+		// Combine existing SPs to test uri + number
+		createResourceFromJson("""
+{
+  "resourceType": "SearchParameter",
+  "name": "uri-number-compound-test",
+  "status": "active",
+  "description": "dummy to exercise uri + number",
+  "code": "uri-number-compound-test",
+  "base": [ "RiskAssessment" ],
+  "type": "composite",
+  "expression": "RiskAssessment",
+  "component": [ {
+      "definition": "http://hl7.org/fhir/SearchParameter/Resource-source",
+      "expression": "meta.source"
+    }, {
+      "definition": "http://hl7.org/fhir/SearchParameter/RiskAssessment-probability",
+      "expression": "prediction.probability"
+    } ]
+ }""");
+		// enable this sp.
+		myTestDaoSearch.getSearchParamRegistry().forceRefresh();
+
+		IIdType raId = createResourceFromJson("""
+			{
+			  "resourceType": "RiskAssessment",
+			  "meta": {
+			     "source": "https://example.com/ourSource"
+			     },
+			  "prediction": [
+			      {
+			        "outcome": {
+			          "text": "Heart Attack"
+			        },
+			        "probabilityDecimal": 0.02
+			      }
+			  ]
+			}
+			""");
+
+		myTestDaoSearch.assertSearchFinds("simple uri search works", "RiskAssessment?_source=https://example.com/ourSource", raId);
+		myTestDaoSearch.assertSearchFinds("simple number search works", "RiskAssessment?probability=0.02", raId);
+		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.02", raId);
+		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08", raId);
+		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02", raId);
+	}
+
 }

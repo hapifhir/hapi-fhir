@@ -253,9 +253,8 @@ public class SearchParamExtractorService {
 		}
 
 		// Composites
-		// wipmb should we have config to skip this?  Check to see if  HSearch is enabled?
-		//  Is this still true?
-		// dst2 composites are weird, and we don't support them.
+		// wipmb should we have config to skip this cpu work?  Check to see if  HSearch is enabled?
+		// dst2 composites use stuff like value[x] , and we don't support them.
 		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);

@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -77,7 +78,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARA
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NUMBER_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE_NORM;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_IDX_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
@@ -541,12 +542,12 @@ public class ExtendedHSearchClauseBuilder {
 
 	private BooleanPredicateClausesStep<?> buildQuantityTermClause(String spPath, IQueryParameterType paramType, SearchPredicateFactory theContextPredicateFactory) {
 
-		// wipmb collect as list, and use bool if only one.
+		// todo mb Optimization: collect as list, and use bool if only one.
 		BooleanPredicateClausesStep<?> quantityClause = theContextPredicateFactory.bool();
 
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(paramType);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
-		String quantityElement = spPath + "." + QTY_IDX_NAME;
+		String quantityElement = spPath + "." + INDEX_TYPE_QUANTITY;
 
 		if (myModelConfig.getNormalizedQuantitySearchLevel() == NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED) {
 			QuantityParam canonicalQty = UcumServiceUtil.toCanonicalQuantityOrNull(qtyParam);
@@ -582,6 +583,16 @@ public class ExtendedHSearchClauseBuilder {
 	private void setPrefixedNumericPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
 				ParamPrefixEnum thePrefix, BigDecimal theNumberValue, String valueFieldPath, boolean theIsMust) {
 
+		PredicateFinalStep predicate = buildNumericPredicate(valueFieldPath, thePrefix, theNumberValue);
+		if (predicate != null) {
+			addMustOrShouldPredicate(theQuantityTerms, predicate, theIsMust);
+		}
+	}
+
+	@Nonnull
+	private PredicateFinalStep buildNumericPredicate(String valueFieldPath, ParamPrefixEnum thePrefix, BigDecimal theNumberValue) {
+		PredicateFinalStep predicate = null;
+
 		double value = theNumberValue.doubleValue();
 		Pair<BigDecimal, BigDecimal> range = NumericParamRangeUtil.getRange(theNumberValue);
 		double approxTolerance = value * QTY_APPROX_TOLERANCE_PERCENT;
@@ -590,56 +601,51 @@ public class ExtendedHSearchClauseBuilder {
 		switch (activePrefix) {
 			//	searches for resource quantity between passed param value +/- 10%
 			case APPROXIMATE:
-				var predApp = myRootPredicateFactory.range().field(valueFieldPath)
+				predicate = myRootPredicateFactory.range().field(valueFieldPath)
 					.between(value-approxTolerance, value+approxTolerance);
-				addMustOrShouldPredicate(theQuantityTerms, predApp, theIsMust);
 				break;
 
 			// searches for resource quantity between passed param value +/- 5%
 			case EQUAL:
-				var predEq = myRootPredicateFactory.range().field(valueFieldPath)
+				predicate  = myRootPredicateFactory.range().field(valueFieldPath)
 					.between(range.getLeft().doubleValue(), range.getRight().doubleValue());
-				addMustOrShouldPredicate(theQuantityTerms, predEq, theIsMust);
 				break;
 
 			// searches for resource quantity > param value
 			case GREATERTHAN:
 			case STARTS_AFTER:  // treated as GREATERTHAN because search doesn't handle ranges
-				var predGt = myRootPredicateFactory.range().field(valueFieldPath).greaterThan(value);
-				addMustOrShouldPredicate(theQuantityTerms, predGt, theIsMust);
+				predicate  = myRootPredicateFactory.range().field(valueFieldPath).greaterThan(value);
 				break;
 
 			// searches for resource quantity not < param value
 			case GREATERTHAN_OR_EQUALS:
-				theQuantityTerms.must(myRootPredicateFactory.range().field(valueFieldPath).atLeast(value));
-
-				var predGe = myRootPredicateFactory.range().field(valueFieldPath).atLeast(value);
-				addMustOrShouldPredicate(theQuantityTerms, predGe, theIsMust);
+				predicate  = myRootPredicateFactory.range().field(valueFieldPath).atLeast(value);
 				break;
 
 			// searches for resource quantity < param value
 			case LESSTHAN:
 			case ENDS_BEFORE:  // treated as LESSTHAN because search doesn't handle ranges
-				var predLt = myRootPredicateFactory.range().field(valueFieldPath).lessThan(value);
-				addMustOrShouldPredicate(theQuantityTerms, predLt, theIsMust);
+				predicate  = myRootPredicateFactory.range().field(valueFieldPath).lessThan(value);
 				break;
 
 			// searches for resource quantity not > param value
 			case LESSTHAN_OR_EQUALS:
-				var predLe = myRootPredicateFactory.range().field(valueFieldPath).atMost(value);
-				addMustOrShouldPredicate(theQuantityTerms, predLe, theIsMust);
+				predicate  = myRootPredicateFactory.range().field(valueFieldPath).atMost(value);
 				break;
 
 			// NOT_EQUAL: searches for resource quantity not between passed param value +/- 5%
 			case NOT_EQUAL:
-				theQuantityTerms.mustNot(myRootPredicateFactory.range()
-					.field(valueFieldPath).between(range.getLeft().doubleValue(), range.getRight().doubleValue()));
+				RangePredicateOptionsStep<?> negRange = myRootPredicateFactory.range()
+					.field(valueFieldPath).between(range.getLeft().doubleValue(), range.getRight().doubleValue());
+				predicate = myRootPredicateFactory.bool().mustNot(negRange);
 				break;
 		}
+		Validate.notNull(predicate, "Unsupported prefix: %s", thePrefix);
+		return predicate;
 	}
 
 	private void addMustOrShouldPredicate(BooleanPredicateClausesStep<?> theQuantityTerms,
-			 RangePredicateOptionsStep<?> thePredicateToAdd, boolean theIsMust) {
+													  PredicateFinalStep thePredicateToAdd, boolean theIsMust) {
 
 		if (theIsMust) {
 			theQuantityTerms.must(thePredicateToAdd);
@@ -650,22 +656,32 @@ public class ExtendedHSearchClauseBuilder {
 
 
 	public void addUriUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theUriUnmodifiedAndOrTerms) {
-		for (List<IQueryParameterType> nextAnd : theUriUnmodifiedAndOrTerms) {
+		for (List<IQueryParameterType> nextOrList : theUriUnmodifiedAndOrTerms) {
 
-			List<String> orTerms = nextAnd.stream().map(p -> ((UriParam) p).getValue()).collect(Collectors.toList());
-			PredicateFinalStep orTermPredicate = myRootPredicateFactory.terms()
-				.field(String.join(".", SEARCH_PARAM_ROOT, theParamName, URI_VALUE))
-				.matchingAny(orTerms);
+			String spContext = SEARCH_PARAM_ROOT + "." + theParamName;
+			PredicateFinalStep orTermPredicate = buildURIClause(spContext, nextOrList);
 
 			myRootClause.must(orTermPredicate);
 		}
 	}
 
+	private PredicateFinalStep buildURIClause(String spContext, List<IQueryParameterType> theOrList) {
+		List<String> orTerms = theOrList.stream()
+			.map(p -> ((UriParam) p).getValue())
+			.collect(Collectors.toList());
+
+		PredicateFinalStep orTermPredicate = myRootPredicateFactory.terms()
+			.field( spContext + "." + URI_VALUE)
+			.matchingAny(orTerms);
+
+		return orTermPredicate;
+	}
+
 	public void addNumberUnmodifiedSearch(String theParamName, List<List<IQueryParameterType>> theNumberUnmodifiedAndOrTerms) {
 		String fieldPath = String.join(".", SEARCH_PARAM_ROOT, theParamName, NUMBER_VALUE);
 
-		for (List<IQueryParameterType> nextAnd : theNumberUnmodifiedAndOrTerms) {
-			List<NumberParam> orTerms = nextAnd.stream().map(NumberParam.class::cast).collect(Collectors.toList());
+		for (List<IQueryParameterType> nextOrList : theNumberUnmodifiedAndOrTerms) {
+			List<NumberParam> orTerms = nextOrList.stream().map(NumberParam.class::cast).collect(Collectors.toList());
 
 			BooleanPredicateClausesStep<?> numberPredicateStep = myRootPredicateFactory.bool();
 			numberPredicateStep.minimumShouldMatchNumber(1);
@@ -678,7 +694,11 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
+	private PredicateFinalStep buildNumberClause(String theSubComponentPath, IQueryParameterType theValue) {
+		NumberParam p = (NumberParam) theValue;
 
+		return buildNumericPredicate(theSubComponentPath + "." + NUMBER_VALUE, p.getPrefix(), p.getValue());
+	}
 
 	public void addCompositeUnmodifiedSearch(RuntimeSearchParam theSearchParam, List<RuntimeSearchParam> theSubSearchParams, List<List<IQueryParameterType>> theCompositeAndOrTerms) {
 		for (List<IQueryParameterType> nextOrList : theCompositeAndOrTerms) {
@@ -744,6 +764,15 @@ public class ExtendedHSearchClauseBuilder {
 				case QUANTITY:
 					subMatch = buildQuantityTermClause(subComponentPath, value, theContextPredicateFactory);
 					break;
+				case URI:
+					// wipmb neat - we could combine subComponentPath with predicate factory
+					subMatch = buildURIClause(subComponentPath, List.of(value));
+					break;
+				case NUMBER:
+					subMatch = buildNumberClause(subComponentPath, value);
+					break;
+				case REFERENCE:
+					//subMatch =
 				// wipmb implement other types
 
 				default:
@@ -751,12 +780,11 @@ public class ExtendedHSearchClauseBuilder {
 
 			}
 
-			Validate.notNull(subMatch);
+			Validate.notNull(subMatch, "Unsupported composite type in %s: %s %s", theSearchParam.getName(), component.getName(), component.getParamType());
 			compositeClause.must(subMatch);
 		}
 
 		return compositeClause;
 	}
-
 
 }

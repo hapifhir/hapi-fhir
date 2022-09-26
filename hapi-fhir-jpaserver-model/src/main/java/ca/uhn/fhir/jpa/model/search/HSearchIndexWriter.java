@@ -35,6 +35,7 @@ import java.util.Set;
 
 public class HSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);
+	public static final String INDEX_TYPE_STRING = "string";
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
@@ -42,7 +43,7 @@ public class HSearchIndexWriter {
 	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
 	public static final String SEARCH_PARAM_ROOT = "sp";
 
-	public static final String QTY_IDX_NAME = "quantity";
+	public static final String INDEX_TYPE_QUANTITY = "quantity";
 	public static final String QTY_CODE = "code";
 	public static final String QTY_SYSTEM = "system";
 	public static final String QTY_VALUE = "value";
@@ -71,7 +72,7 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
-		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
+		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_STRING);
 
 		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
 		writeBasicStringFields(stringIndexNode, theValue);
@@ -94,7 +95,7 @@ public class HSearchIndexWriter {
 		writeTokenFields(nestedTokenNode, theValue);
 
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
-			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
+			DocumentElement nestedStringNode = nestedSpNode.addObject(INDEX_TYPE_STRING);
 			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
 		}
 
@@ -138,7 +139,7 @@ public class HSearchIndexWriter {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-		DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_IDX_NAME);
+		DocumentElement nestedQtyNode = nestedSpNode.addObject(INDEX_TYPE_QUANTITY);
 
 		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
 		writeQuantityFields(nestedQtyNode, theValue);
@@ -173,16 +174,24 @@ public class HSearchIndexWriter {
 		DocumentElement uriNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
-			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+			writeUriFields(uriNode, uriSearchIndexValue);
 		}
+	}
+
+	public void writeUriFields(DocumentElement uriNode, String uriSearchIndexValue) {
+		uriNode.addValue(URI_VALUE, uriSearchIndexValue);
 	}
 
 	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
 		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {
 			ourLog.trace("Adding Search Param Number: {} -- {}", theParamName, numberSearchIndexValue);
-			numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
+			writeNumberFields(numberNode, numberSearchIndexValue);
 		}
+	}
+
+	public void writeNumberFields(DocumentElement numberNode, BigDecimal numberSearchIndexValue) {
+		numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
 	}
 
 	public void writeCompositeIndex(String theParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
