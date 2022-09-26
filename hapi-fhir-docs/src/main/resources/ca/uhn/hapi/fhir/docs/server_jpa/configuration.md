@@ -78,7 +78,7 @@ myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*
 
 By default, search results will be cached for one minute. This means that if a client performs a search for <code>Patient?name=smith</code> and gets back 500 results, if a client performs the same search within 60000 milliseconds the previously loaded search results will be returned again. This also means that any new Patient resources named "Smith" within the last minute will not be reflected in the results.
 
-Under many normal scenarios this is a n acceptable performance tradeoff, but in some cases it is not. If you want to disable caching, you have two options:
+Under many normal scenarios this is an acceptable performance tradeoff, but in some cases it is not. If you want to disable caching, you have two options:
 
 ### Globally Disable / Change Caching Timeout
 
