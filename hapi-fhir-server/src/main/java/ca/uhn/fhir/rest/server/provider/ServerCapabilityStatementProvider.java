@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
@@ -134,7 +135,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		myValidationSupport = theValidationSupport;
 	}
 
-	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding<?> theMethodBinding) {
+	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding theMethodBinding) {
 		RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
 		if (restOperationType.isSystemLevel()) {
 			String sysOp = restOperationType.getCode();
@@ -236,15 +237,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		Set<String> systemOps = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
+		Map<String, List<BaseMethodBinding>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
-		List<BaseMethodBinding<?>> globalMethodBindings = configuration.getGlobalBindings();
+		List<BaseMethodBinding> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
-		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 			String resourceName = nextEntry.getKey();
-			for (BaseMethodBinding<?> nextMethod : nextEntry.getValue()) {
+			for (BaseMethodBinding nextMethod : nextEntry.getValue()) {
 				if (nextMethod instanceof SearchMethodBinding) {
 					resourceNameToIncludes.putAll(resourceName, nextMethod.getIncludes());
 					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
@@ -253,7 +254,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		}
 
-		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			Set<String> operationNames = new HashSet<>();
 			String resourceName = nextEntry.getKey();
@@ -273,7 +274,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				terser.addElement(resource, "type", def.getName());
 				terser.addElement(resource, "profile", def.getResourceProfile(serverBase));
 
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					RestOperationTypeEnum resOpCode = nextMethodBinding.getRestOperationType();
 					if (resOpCode.isTypeLevel() || resOpCode.isInstanceLevel()) {
 						String resOp;
@@ -358,7 +359,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// global flag set to true, meaning they apply to all resource types)
 				if (globalMethodBindings != null) {
 					Set<String> globalOperationNames = new HashSet<>();
-					for (BaseMethodBinding<?> next : globalMethodBindings) {
+					for (BaseMethodBinding next : globalMethodBindings) {
 						if (next instanceof OperationMethodBinding) {
 							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 							if (methodBinding.isGlobalMethod()) {
@@ -482,7 +483,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				}
 
 			} else {
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
@@ -507,7 +508,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		// global flag set to true, meaning they apply to all resource types)
 		if (globalMethodBindings != null) {
 			Set<String> globalOperationNames = new HashSet<>();
-			for (BaseMethodBinding<?> next : globalMethodBindings) {
+			for (BaseMethodBinding next : globalMethodBindings) {
 				if (next instanceof OperationMethodBinding) {
 					OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 					if (methodBinding.isGlobalMethod()) {

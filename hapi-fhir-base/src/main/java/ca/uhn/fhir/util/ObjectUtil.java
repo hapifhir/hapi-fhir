@@ -28,10 +28,13 @@ import java.util.Optional;
 
 public class ObjectUtil {
 
+	// hide
+	private ObjectUtil() {}
+
 	/**
-	 * Just use Objects.equals() instead;
+	 * @deprecated Just use Objects.equals() instead;
 	 */
-	@Deprecated
+	@Deprecated(since = "6.2")
 	public static boolean equals(Object object1, Object object2) {
 		return Objects.equals(object1, object2);
 	}

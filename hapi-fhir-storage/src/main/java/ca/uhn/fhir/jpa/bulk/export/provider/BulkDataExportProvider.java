@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.bulk.export.model.BulkExportJobStatusEnum;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.BulkExportUtils;
+import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.util.ArrayUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -113,7 +115,7 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails,
-								 BulkDataExportOptions theOptions){
+								 BulkDataExportOptions theOptions) {
 		// permission check
 		HookParams params = (new HookParams()).add(BulkDataExportOptions.class, theOptions)
 			.add(RequestDetails.class, theRequestDetails)
@@ -122,8 +124,6 @@ public class BulkDataExportProvider {
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
-
-
 
 		BulkExportParameters parameters = BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions);
 		parameters.setUseExistingJobsFirst(useCache);
@@ -391,7 +391,12 @@ public class BulkDataExportProvider {
 	}
 
 	private BulkDataExportOptions buildPatientBulkExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, List<IPrimitiveType<String>> thePatientIds) {
-		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, theType, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
+		IPrimitiveType<String> type = theType;
+		if (type == null) {
+			// Type is optional, but the job requires it
+			type = new StringDt("Patient");
+		}
+		BulkDataExportOptions bulkDataExportOptions = buildBulkDataExportOptions(theOutputFormat, type, theSince, theTypeFilter, BulkDataExportOptions.ExportStyle.PATIENT);
 		if (thePatientIds != null) {
 			bulkDataExportOptions.setPatientIds(thePatientIds.stream().map((pid) -> new IdType(pid.getValueAsString())).collect(Collectors.toSet()));
 		}
@@ -434,6 +439,7 @@ public class BulkDataExportProvider {
 			throw new InternalErrorException(Msg.code(2136) + "Unable to get the server base.");
 		}
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + theOutcome.getJobMetadataId();
+		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 
@@ -443,14 +449,6 @@ public class BulkDataExportProvider {
 		// Successful 202 Accepted
 		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
 		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
-	}
-
-	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		if (prefer.getRespondAsync() == false) {
-			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
-		}
 	}
 
 	private Set<String> splitTypeFilters(List<IPrimitiveType<String>> theTypeFilter) {
@@ -469,5 +467,13 @@ public class BulkDataExportProvider {
 		}
 
 		return retVal;
+	}
+
+	public static void validatePreferAsyncHeader(ServletRequestDetails theRequestDetails, String theOperationName) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (prefer.getRespondAsync() == false) {
+			throw new InvalidRequestException(Msg.code(513) + "Must request async processing for " + theOperationName);
+		}
 	}
 }

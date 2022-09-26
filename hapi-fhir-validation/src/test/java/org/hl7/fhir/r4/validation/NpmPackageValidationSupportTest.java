@@ -12,18 +12,17 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmPackageValidationSupportTest {
 
@@ -34,6 +33,7 @@ public class NpmPackageValidationSupportTest {
 		"dummyBinary1.txt", "myDummyContent1".getBytes(),
 		"dummyBinary2.txt", "myDummyContent2".getBytes()
 	);
+
 	@Test
 	public void testValidateWithPackage() throws IOException {
 
@@ -71,7 +71,7 @@ public class NpmPackageValidationSupportTest {
 
 	}
 
-	@NotNull
+	@Nonnull
 	private NpmPackageValidationSupport getNpmPackageValidationSupport(String theClasspath) throws IOException {
 		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(myFhirContext);
 		npmPackageSupport.loadPackageFromClasspath(theClasspath);

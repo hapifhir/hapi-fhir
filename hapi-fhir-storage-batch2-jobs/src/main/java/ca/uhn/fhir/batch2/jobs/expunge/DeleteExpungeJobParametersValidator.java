@@ -22,9 +22,9 @@ package ca.uhn.fhir.batch2.jobs.expunge;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlListValidator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class DeleteExpungeJobParametersValidator implements IJobParametersValidator<DeleteExpungeJobParameters> {
@@ -36,7 +36,7 @@ public class DeleteExpungeJobParametersValidator implements IJobParametersValida
 
 	@Nullable
 	@Override
-	public List<String> validate(@NotNull DeleteExpungeJobParameters theParameters) {
+	public List<String> validate(@Nonnull DeleteExpungeJobParameters theParameters) {
 		return myUrlListValidator.validatePartitionedUrls(theParameters.getPartitionedUrls());
 	}
 }

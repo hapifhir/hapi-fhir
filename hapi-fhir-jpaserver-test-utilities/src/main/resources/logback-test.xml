@@ -20,6 +20,7 @@
 	<logger name="ca.uhn.fhir.jpa.dao" level="info"/>
 
 	<!-- set to debug to enable term expansion logs -->
+
 	<logger name="ca.uhn.fhir.jpa.term" level="info"/>
 	<!-- Set to 'trace' to enable SQL logging -->
 	<logger name="org.hibernate.SQL" level="info"/>
@@ -29,7 +30,7 @@
 	<logger name="org.springframework.test.context.cache" level="info"/>
 	<logger name="ca.uhn.fhir.jpa.bulk" level="info"/>
 
-	<!-- debugging -->
+	<!-- more debugging -->
 	<!--
 	<logger name="org.elasticsearch.client" level="trace"/>
 	<logger name="org.hibernate.search.elasticsearch.request" level="TRACE"/>

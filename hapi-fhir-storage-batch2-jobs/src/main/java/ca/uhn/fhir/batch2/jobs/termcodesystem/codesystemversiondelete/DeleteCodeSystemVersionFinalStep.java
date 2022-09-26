@@ -29,7 +29,8 @@ import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.models.CodeSystemVersionPIDResult;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
-import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nonnull;
 
 public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> {
 
@@ -39,11 +40,11 @@ public class DeleteCodeSystemVersionFinalStep implements ILastJobStepWorker<Term
 		myTermCodeSystemSvc = theCodeSystemDeleteJobSvc;
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public RunOutcome run(
-		@NotNull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
-		@NotNull IJobDataSink<VoidModel> theDataSink
+		@Nonnull StepExecutionDetails<TermCodeSystemDeleteVersionJobParameters, CodeSystemVersionPIDResult> theStepExecutionDetails,
+		@Nonnull IJobDataSink<VoidModel> theDataSink
 	) throws JobExecutionFailedException {
 		long versionPid = theStepExecutionDetails.getParameters().getCodeSystemVersionPid();
 
