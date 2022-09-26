@@ -137,7 +137,7 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 	 * for uri and number
 	 */
 	@Test
-	void searchUriAndNumberMatching() {
+	void searchUriNumber_onSameResource_found() {
 		// Combine existing SPs to test uri + number
 		createResourceFromJson("""
 {
@@ -177,8 +177,10 @@ public abstract class CompositeSearchParameterTestCases implements ITestDataBuil
 			}
 			""");
 
+		// verify config
 		myTestDaoSearch.assertSearchFinds("simple uri search works", "RiskAssessment?_source=https://example.com/ourSource", raId);
 		myTestDaoSearch.assertSearchFinds("simple number search works", "RiskAssessment?probability=0.02", raId);
+		// verify composite queries
 		myTestDaoSearch.assertSearchFinds("composite uri + number", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.02", raId);
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/ourSource$0.08", raId);
 		myTestDaoSearch.assertSearchNotFound("both params must match ", "RiskAssessment?uri-number-compound-test=https://example.com/otherUrI$0.02", raId);
