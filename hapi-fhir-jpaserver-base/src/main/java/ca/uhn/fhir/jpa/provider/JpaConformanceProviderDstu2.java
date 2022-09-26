@@ -140,7 +140,9 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			}
 		}
 
-		retVal.getImplementation().setDescription(myImplementationDescription);
+		if (isNotBlank(myImplementationDescription)) {
+			retVal.getImplementation().setDescription(myImplementationDescription);
+		}
 		myCachedValue = retVal;
 		return retVal;
 	}
