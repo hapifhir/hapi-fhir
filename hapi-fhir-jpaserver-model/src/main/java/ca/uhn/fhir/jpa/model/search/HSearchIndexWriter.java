@@ -35,24 +35,38 @@ import java.util.Set;
 
 public class HSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);
+
+	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
+	public static final String SEARCH_PARAM_ROOT = "sp";
 	public static final String INDEX_TYPE_STRING = "string";
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
 	public static final String IDX_STRING_LOWER = "lower";
-	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
-	public static final String SEARCH_PARAM_ROOT = "sp";
 
+	public static final String INDEX_TYPE_TOKEN = "token";
+	public static final String TOKEN_CODE = "code";
+	public static final String TOKEN_SYSTEM = "system";
+	public static final String TOKEN_SYSTEM_CODE = "code-system";
 	public static final String INDEX_TYPE_QUANTITY = "quantity";
-	public static final String QTY_CODE = "code";
-	public static final String QTY_SYSTEM = "system";
-	public static final String QTY_VALUE = "value";
+
+	// numeric
+	public static final String VALUE_FIELD = "value";
+	public static final String QTY_CODE = TOKEN_CODE;
+	public static final String QTY_SYSTEM = TOKEN_SYSTEM;
+	public static final String QTY_VALUE = VALUE_FIELD;
 	public static final String QTY_CODE_NORM = "code-norm";
 	public static final String QTY_VALUE_NORM = "value-norm";
 
 	public static final String URI_VALUE = "uri-value";
 
 	public static final String NUMBER_VALUE = "number-value";
+
+
+	public static final String DATE_LOWER_ORD = "lower-ord";
+	public static final String DATE_LOWER = "lower";
+	public static final String DATE_UPPER_ORD = "upper-ord";
+	public static final String DATE_UPPER = "upper";
 
 
 	final HSearchElementCache myNodeCache;
@@ -90,7 +104,7 @@ public class HSearchIndexWriter {
 	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
+		DocumentElement nestedTokenNode = nestedSpNode.addObject(INDEX_TYPE_TOKEN);
 
 		writeTokenFields(nestedTokenNode, theValue);
 
@@ -99,7 +113,7 @@ public class HSearchIndexWriter {
 			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
 		}
 
-		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
+		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_TOKEN);
 		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
 		writeTokenFields(tokenIndexNode, theValue);
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
@@ -107,14 +121,14 @@ public class HSearchIndexWriter {
 	}
 
 	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {
-		theDocumentElement.addValue("code", theValue.getCode());
-		theDocumentElement.addValue("system", theValue.getSystem());
-		theDocumentElement.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		theDocumentElement.addValue(TOKEN_CODE, theValue.getCode());
+		theDocumentElement.addValue(TOKEN_SYSTEM, theValue.getSystem());
+		theDocumentElement.addValue(TOKEN_SYSTEM_CODE, theValue.getSystem() + "|" + theValue.getCode());
 	}
 
 	public void writeReferenceIndex(String theSearchParam, String theValue) {
 		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
-		referenceIndexNode.addValue("value", theValue);
+		referenceIndexNode.addValue(VALUE_FIELD, theValue);
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 
@@ -127,11 +141,11 @@ public class HSearchIndexWriter {
 
 	public void writeDateFields(DocumentElement dateIndexNode, DateSearchIndexData theValue) {
 		// Lower bound
-		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
-		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
+		dateIndexNode.addValue(DATE_LOWER_ORD, theValue.getLowerBoundOrdinal());
+		dateIndexNode.addValue(DATE_LOWER, theValue.getLowerBoundDate().toInstant());
 		// Upper bound
-		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
-		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
+		dateIndexNode.addValue(DATE_UPPER_ORD, theValue.getUpperBoundOrdinal());
+		dateIndexNode.addValue(DATE_UPPER, theValue.getUpperBoundDate().toInstant());
 	}
 
 
@@ -194,7 +208,11 @@ public class HSearchIndexWriter {
 		numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
 	}
 
-	public void writeCompositeIndex(String theParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
+	/**
+	 * @param ignoredParamName unused - for consistent api
+	 * @param theCompositeSearchIndexData extracted index data for this sp
+	 */
+	public void writeCompositeIndex(String ignoredParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
 		// must be nested.
 		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
 			compositeSearchIndexDatum.writeIndexEntry(this, myNodeCache);

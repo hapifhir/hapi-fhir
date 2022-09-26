@@ -27,6 +27,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 		mySearchParamComposite = theSearchParamComposite;
 	}
 
+
 	/**
 	 * Write a nested index document for this composite.
 	 * We use a nested document to support correlation queries on the same parent element for
@@ -48,7 +49,6 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 			 "component-value-quantity": {
 				 "quantity": {
 					 "code": "mmHg",
-					 "system": "null",
 					 "value": 60.0
 				 }
 	 		 }
@@ -64,13 +64,12 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 			 "component-value-quantity": {
 				 "quantity": {
 					 "code": "mmHg",
-					 "system": "null",
 					 "value": 100.0
 				 }
 			 }
 		 }
 	 ]
- }
+ }}
  </pre>
 	 *
 	 * @param theRoot our cache wrapper around the root HSearch DocumentElement
@@ -126,7 +125,7 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 					subParam.getParamIndexValues().stream()
 						.flatMap(o->ObjectUtil.castIfInstanceof(o, ResourceIndexedSearchParamToken.class).stream())
 						.forEach(rispt-> theHSearchIndexWriter.writeTokenFields(tokenElement, new Tag(rispt.getSystem(), rispt.getValue())));
-				break;
+					break;
 
 				case URI:
 					subParam.getParamIndexValues().stream()
@@ -155,4 +154,5 @@ class HSearchCompositeSearchIndexDataImpl implements CompositeSearchIndexData {
 			}
 		}
 	}
+
 }

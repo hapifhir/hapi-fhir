@@ -1839,7 +1839,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	/**
 	 * Extractor that delegates to two other extractors.
 	 *
-	 * @param <T> the type (currently only used for Numberic)
+	 * @param <T> the type (currently only used for Numeric)
 	 */
 	private static class MultiplexExtractor<T> implements IExtractor<T> {
 
