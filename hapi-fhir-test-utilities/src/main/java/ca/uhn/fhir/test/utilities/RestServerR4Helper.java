@@ -21,7 +21,6 @@ package ca.uhn.fhir.test.utilities;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IncomingRequestAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
@@ -69,11 +67,11 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	public RestServerR4Helper(boolean theInitialize) {
 		super(FhirContext.forR4Cached());
 		myRestServer = new MyRestfulServer(myFhirContext);
-		if(theInitialize){
+		if (theInitialize) {
 			try {
 				myRestServer.initialize();
 			} catch (ServletException e) {
-				throw new RuntimeException(Msg.code(2110)+"Failed to initialize server", e);
+				throw new RuntimeException(Msg.code(2110) + "Failed to initialize server", e);
 			}
 		}
 	}
@@ -186,6 +184,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		return myRestServer.getObservationResourceProvider();
 	}
 
+	public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
+		myRestServer.setObservationResourceProvider(theResourceProvider);
+	}
+
 	@Override
 	public HashMapResourceProvider<Patient> getPatientResourceProvider() {
 		return myRestServer.getPatientResourceProvider();
@@ -210,7 +212,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 	@Override
 	public IIdType createPatient(IBaseResource theBaseResource) {
-		return  myRestServer.getPatientResourceProvider().store((Patient) theBaseResource);
+		return myRestServer.getPatientResourceProvider().store((Patient) theBaseResource);
 	}
 
 	@Override
@@ -223,7 +225,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 	@Override
 	public IIdType createObservation(IBaseResource theBaseResource) {
-		return  myRestServer.getObservationResourceProvider().store((Observation) theBaseResource);
+		return myRestServer.getObservationResourceProvider().store((Observation) theBaseResource);
 	}
 
 	public List<String> getRequestUrls() {
@@ -232,10 +234,6 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 	public List<String> getRequestVerbs() {
 		return myRestServer.myRequestVerbs;
-	}
-
-	public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
-		myRestServer.setObservationResourceProvider(theResourceProvider);
 	}
 
 	public List<Map<String, String>> getRequestHeaders() {
@@ -247,20 +245,20 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	@Override
-	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy){
+	public void setServerAddressStrategy(IServerAddressStrategy theServerAddressStrategy) {
 		myRestServer.setServerAddressStrategy(theServerAddressStrategy);
 	}
 
 	private static class MyRestfulServer extends RestfulServer {
+		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
+		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
+		private final List<Map<String, String>> myRequestHeaders = Collections.synchronizedList(new ArrayList<>());
 		private boolean myFailNextPut;
 		private HashMapResourceProvider<Patient> myPatientResourceProvider;
 		private HashMapResourceProvider<Observation> myObservationResourceProvider;
 		private HashMapResourceProvider<Organization> myOrganizationResourceProvider;
 		private HashMapResourceProvider<ConceptMap> myConceptMapResourceProvider;
 		private RestServerDstu3Helper.MyPlainProvider myPlainProvider;
-		private final List<String> myRequestUrls = Collections.synchronizedList(new ArrayList<>());
-		private final List<String> myRequestVerbs = Collections.synchronizedList(new ArrayList<>());
-		private final List<Map<String, String>> myRequestHeaders= Collections.synchronizedList(new ArrayList<>());
 
 		public MyRestfulServer(FhirContext theFhirContext) {
 			super(theFhirContext);
@@ -297,7 +295,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			super.service(theReq, theResp);
 		}
 
-		private Map<String,String> pullOutHeaders(HttpServletRequest theReq) {
+		private Map<String, String> pullOutHeaders(HttpServletRequest theReq) {
 			Enumeration<String> headerNames = theReq.getHeaderNames();
 			Map<String, String> headers = new HashMap<>();
 			while (headerNames.hasMoreElements()) {
@@ -321,12 +319,28 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			return myObservationResourceProvider;
 		}
 
+		public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
+			myObservationResourceProvider.getStoredResources().forEach(o -> theResourceProvider.store(o));
+
+			unregisterProvider(myObservationResourceProvider);
+			registerProvider(theResourceProvider);
+			myObservationResourceProvider = theResourceProvider;
+		}
+
 		public HashMapResourceProvider<Organization> getOrganizationResourceProvider() {
 			return myOrganizationResourceProvider;
 		}
 
 		public HashMapResourceProvider<ConceptMap> getConceptMapResourceProvider() {
 			return myConceptMapResourceProvider;
+		}
+
+		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
+			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
+
+			unregisterProvider(myConceptMapResourceProvider);
+			registerProvider(theResourceProvider);
+			myConceptMapResourceProvider = theResourceProvider;
 		}
 
 		public HashMapResourceProvider<Patient> getPatientResourceProvider() {
@@ -353,23 +367,6 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			setPagingProvider(new FifoMemoryPagingProvider(20));
 		}
 
-		public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
-			myObservationResourceProvider.getStoredResources().forEach(o -> theResourceProvider.store(o));
-
-			unregisterProvider(myObservationResourceProvider);
-			registerProvider(theResourceProvider);
-			myObservationResourceProvider = theResourceProvider;
-		}
-
-		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
-			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
-
-			unregisterProvider(myConceptMapResourceProvider);
-			registerProvider(theResourceProvider);
-			myConceptMapResourceProvider = theResourceProvider;
-		}
-
-
 		public class MyHashMapResourceProvider<T extends IBaseResource> extends HashMapResourceProvider<T> {
 			public MyHashMapResourceProvider(FhirContext theContext, Class theType) {
 				super(theContext, theType);
@@ -378,7 +375,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			@Override
 			public MethodOutcome update(T theResource, String theConditional, RequestDetails theRequestDetails) {
 				if (myFailNextPut) {
-					throw new PreconditionFailedException(Msg.code(2111)+"Failed update operation");
+					throw new PreconditionFailedException(Msg.code(2111) + "Failed update operation");
 				}
 				return super.update(theResource, theConditional, theRequestDetails);
 			}

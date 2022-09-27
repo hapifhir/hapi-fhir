@@ -32,7 +32,7 @@ import java.util.Collection;
 class SearchTotalModeParameter implements IParameter {
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		return getTypeForRequestOrThrowInvalidRequestException(theRequest);
 	}
 

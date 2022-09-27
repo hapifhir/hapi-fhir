@@ -18,6 +18,13 @@ GET http://example.com:8000/Observation?subject:mdm=Patient/1
 
 This `:mdm` parameter qualifier instructs an interceptor in HAPI fhir to expand the set of resources included in the search by their MDM-matched resources. The two above HTTP requests will return the same result. 
 
+This behaviour is also supported on the `$everything` operation, via a slightly different mechanism. If you call the operation with `_mdm=true`, then MDM expansion will occur on the base Patient instance. For example: 
+
+```http request
+GET http://example.com:8000/Patient/1/$everything?_mdm=true
+```
+
+This will first lookup all Patients linked to Patient/1, and then  perform an `$everything` including all resources for these patients.
 
 <div class="helpWarningCalloutBox">
 One important caveat is that chaining is currently not supported when using this prefix.

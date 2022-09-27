@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsNot.not;
 
@@ -33,7 +34,7 @@ public class DropTableTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -53,7 +54,7 @@ public class DropTableTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -67,7 +68,7 @@ public class DropTableTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -87,7 +88,7 @@ public class DropTableTest extends BaseTest {
 		getMigrator().migrate();
 		assertThat(getMigrator().getMigrationInfo().get().pending().length, equalTo(0));
 
-		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
 	}
 
 

@@ -23,12 +23,16 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
@@ -418,7 +422,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), contains(idArray));
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("NAMEBBB"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), not(contains(idArray)));
+		assertDoesNotContainAnyOf(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), Arrays.asList(idArray));
 
 		myPatientDao.update(patient, null, true, mockSrd());
 

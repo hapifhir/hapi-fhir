@@ -12,7 +12,9 @@ import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -41,7 +43,10 @@ public class BaseSearchSvc {
 	protected DaoRegistry myDaoRegistry;
 
 	@Mock
-	protected DaoConfig myDaoConfig;
+	protected BeanFactory myBeanFactory;
+
+	@Spy
+	protected DaoConfig myDaoConfig = new DaoConfig();
 
 	protected static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 

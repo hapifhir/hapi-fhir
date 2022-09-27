@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -99,7 +100,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	@OneToMany(mappedBy = "mySearch")
+	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
@@ -228,7 +229,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
-		if (System.getProperty(SearchCoordinatorSvcImpl.UNIT_TEST_CAPTURE_STACK) != null) {
+		if (System.getProperty(QueryParameterUtils.UNIT_TEST_CAPTURE_STACK) != null) {
 			myFailureMessage = theFailureMessage;
 		}
 	}

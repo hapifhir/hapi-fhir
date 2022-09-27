@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -222,6 +221,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
+		assert myOtherOperationType != null;
 		return myOtherOperationType;
 	}
 
@@ -372,14 +372,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	}
 
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails
-		theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
 		IBaseResource resource = (IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
 		theRequestDetails.setResource(resource);
-		if (theDetails != null) {
-			theDetails.setResource(resource);
-		}
 	}
 
 	public boolean isManualRequestMode() {

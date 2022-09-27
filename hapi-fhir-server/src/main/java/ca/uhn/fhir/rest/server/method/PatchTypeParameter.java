@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 class PatchTypeParameter implements IParameter {
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		return getTypeForRequestOrThrowInvalidRequestException(theRequest);
 	}
 

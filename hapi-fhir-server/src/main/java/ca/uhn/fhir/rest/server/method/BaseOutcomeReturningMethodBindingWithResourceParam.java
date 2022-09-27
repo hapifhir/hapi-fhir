@@ -36,11 +36,10 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 
 abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOutcomeReturningMethodBinding {
-	private Integer myIdParamIndex;
-	private String myResourceName;
+	private final Integer myIdParamIndex;
+	private final String myResourceName;
 	private int myResourceParameterIndex = -1;
 	private Class<? extends IBaseResource> myResourceType;
 	private Class<? extends IIdType> myIdParamType;
@@ -122,8 +121,8 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 	}
 
 	@Override
-	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
-		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
+	protected void populateRequestDetailsForInterceptor(RequestDetails theRequestDetails, Object[] theMethodParams) {
+		super.populateRequestDetailsForInterceptor(theRequestDetails, theMethodParams);
 
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
@@ -136,10 +135,6 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 
 		theRequestDetails.setResource(resource);
-		if (theDetails != null) {
-			theDetails.setResource(resource);
-		}
-
 	}
 
 	/**
