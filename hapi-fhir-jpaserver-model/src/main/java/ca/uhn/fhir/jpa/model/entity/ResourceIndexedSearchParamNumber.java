@@ -128,7 +128,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getValue(), obj.getValue()); // NEW CODE
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
