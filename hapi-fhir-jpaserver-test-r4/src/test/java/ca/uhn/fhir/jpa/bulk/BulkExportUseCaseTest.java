@@ -89,14 +89,17 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
 				ourLog.info(responseContent);
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
 				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
 				assertThat(result.getTransactionTime(), is(notNullValue()));
-				assertThat(result.getError(), is(empty()));
 				assertThat(result.getOutput(), is(not(empty())));
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
 			}
 		}
 	}
