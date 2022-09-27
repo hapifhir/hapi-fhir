@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -8,8 +9,12 @@ import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +22,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParametersUtilR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(ParametersUtilR4Test.class);
+
 	private static final String TEST_PERSON_ID = "Person/32768";
-	private static FhirContext ourFhirContext = FhirContext.forR4();
+	private static final FhirContext ourFhirContext = FhirContext.forR4();
+
+	private IParser myParser;
+
+	@BeforeEach
+	public void init() {
+		myParser = ourFhirContext.newJsonParser();
+	}
 
 	@Test
 	public void testCreateParameters() {
@@ -88,5 +103,58 @@ public class ParametersUtilR4Test {
 		p.addParameter().setName("my-other-parameter").setValue(new StringType("my-other-value"));
 		Type parameter = p.getParameter("my-parameter");
 		assertThat(parameter.primitiveValue(), is("my-value"));
+	}
+
+	private Parameters createParametersWithPart(String theParamName) {
+		Parameters.ParametersParameterComponent sub = new Parameters.ParametersParameterComponent();
+		sub.setName("Sub-p1").setValue(new StringType("1"));
+
+		Parameters p = new Parameters();
+		p.addParameter().setName(theParamName)
+			.setPart(Collections.singletonList(sub));
+
+		return p;
+	}
+
+	@Test
+	public void getByName_nestedParametersManuallyConstructed_works() {
+		// setup
+		String parameterName = "P1";
+
+		Parameters p = createParametersWithPart(parameterName);
+
+		// test
+		verifyParameterGetByName(p, parameterName);
+	}
+
+	@Test
+	public void getByName_nestedParametersParsedFromJson_works() {
+		String jsonParams = """
+			{
+				 "resourceType": "Parameters",
+				 "parameter": [
+					  {
+							"name": "P1",
+							"part": [
+								 {
+									  "name": "Sub-p1",
+									  "valueString": "1"
+								 }
+							]
+					  }
+				 ]
+			}
+			""";
+
+		Parameters parameters = myParser.parseResource(Parameters.class, jsonParams);
+		verifyParameterGetByName(parameters, "P1");
+	}
+
+	private void verifyParameterGetByName(Parameters theParameters, String theParamName) {
+		assertNotNull(theParameters.getParameter(theParamName));
+		List<Type> sub = theParameters.getParameters(theParamName);
+		assertNotNull(sub);
+		assertEquals(1, sub.size());
+		assertNotNull(sub.get(0));
 	}
 }
