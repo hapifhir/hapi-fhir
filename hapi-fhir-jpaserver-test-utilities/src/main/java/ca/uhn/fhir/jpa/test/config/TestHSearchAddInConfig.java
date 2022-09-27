@@ -135,9 +135,12 @@ public class TestHSearchAddInConfig {
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 			luceneHeapProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 			luceneHeapProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
+			luceneHeapProperties.put(BackendSettings.backendKey(LuceneIndexSettings.IO_WRITER_INFOSTREAM), "true");
 
-			return (theProperties) ->
+			return (theProperties) -> {
+				ourLog.info("Configuring Hibernate Search - {}", luceneHeapProperties);
 				theProperties.putAll(luceneHeapProperties);
+			};
 		}
 
 
