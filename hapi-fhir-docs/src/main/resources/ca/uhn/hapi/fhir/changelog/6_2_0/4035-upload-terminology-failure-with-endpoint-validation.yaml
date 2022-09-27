@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4035
+jira: SMILE-3977
+title: "Previously, when uploading terminology file from LOINC, there is validation error due to missing content type.
+This has been fixed by adding content type due to upload file suffix, and validation error won't happen any more."
