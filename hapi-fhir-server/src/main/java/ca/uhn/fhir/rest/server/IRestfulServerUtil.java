@@ -32,13 +32,13 @@ public interface IRestfulServerUtil {
     Object getResourceParameter(
             RequestDetails requestDetails, 
             Mode myMode, 
-            BaseMethodBinding<?> theMethodBinding, 
+            BaseMethodBinding theMethodBinding,
             Class<? extends IBaseResource> myResourceType);
 
     Object getRequestResource(RequestDetails theRequest, ParamStyle myParamStyle, Class<? extends IBaseResource> myResourceBundleType);
 
-    <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType);
+    <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<T> theResourceType);
 
-    IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType);
+    IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType);
 
 }

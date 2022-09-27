@@ -13,6 +13,7 @@ import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.base.Charsets;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
@@ -22,6 +23,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -46,8 +48,10 @@ import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -131,7 +135,6 @@ public class UploadTerminologyCommandTest {
 		FileUtils.deleteQuietly(myTextFile);
 		FileUtils.deleteQuietly(myArchiveFile);
 		FileUtils.deleteQuietly(myPropertiesFile);
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
 	}
 
 	@ParameterizedTest
@@ -267,6 +270,23 @@ public class UploadTerminologyCommandTest {
 		}
 	}
 
+	@Test
+	public void testModifyingSizeLimitConvertsCorrectlyR4() throws ParseException {
+
+		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
+		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
+		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 1024L * 1024L)));
+
+		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
+		bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 500L)));
+
+		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
+		bytes = uploadTerminologyCommand.getTransferSizeLimit();
+		assertThat(bytes, is(equalTo(1024L * 1024L * 10L)));
+	}
+
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testDeltaAddUsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
@@ -367,6 +387,7 @@ public class UploadTerminologyCommandTest {
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));
+		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
@@ -413,7 +434,6 @@ public class UploadTerminologyCommandTest {
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testSnapshotLargeFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
-		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
 
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
@@ -430,7 +450,8 @@ public class UploadTerminologyCommandTest {
 				"-m", "SNAPSHOT",
 				"-u", "http://foo",
 				"-d", myConceptsFileName,
-				"-d", myHierarchyFileName
+				"-d", myHierarchyFileName,
+				"-s", "10MB"
 			},
 			"-t", theIncludeTls, myBaseRestServerHelper
 		));

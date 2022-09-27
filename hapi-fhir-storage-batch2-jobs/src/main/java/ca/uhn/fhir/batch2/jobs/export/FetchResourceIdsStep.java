@@ -81,7 +81,11 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
-					idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+					if (pid.getResourceType() != null) {
+						idsToSubmit.add(Id.getIdFromPID(pid, pid.getResourceType()));
+					} else {
+						idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+					}
 
 					// >= so that we know (with confidence)
 					// that every batch is <= 1000 items

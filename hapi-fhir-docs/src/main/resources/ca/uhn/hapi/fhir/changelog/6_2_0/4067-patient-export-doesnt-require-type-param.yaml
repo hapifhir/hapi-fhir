@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4067
+jira: SMILE-5186
+title: "Fixed a bug where /Patient/$export would fail if _type=Patient parameter
+      was not included."

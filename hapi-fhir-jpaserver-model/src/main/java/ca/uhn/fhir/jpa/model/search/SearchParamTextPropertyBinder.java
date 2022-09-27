@@ -52,6 +52,7 @@ import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE_NORM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.URI_VALUE;
 
+
 /**
  * Allows hibernate search to index
  * <p>
@@ -165,6 +166,7 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			spfield.fieldTemplate("string-lower", lowerCaseNormalizer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_LOWER).multiValued();
 
 			nestedSpField.objectFieldTemplate("nestedStringIndex", ObjectStructure.FLATTENED).matchingPathGlob(stringPathGlob);
+			nestedSpField.fieldTemplate("string-norm", normStringAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_NORMALIZED).multiValued();
 			nestedSpField.fieldTemplate("string-text", standardAnalyzer).matchingPathGlob(stringPathGlob + "." + IDX_STRING_TEXT).multiValued();
 
 			// token
@@ -189,9 +191,11 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 
 			// uri
 			spfield.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
+			nestedSpField.fieldTemplate("uriValueTemplate", keywordFieldType).matchingPathGlob("*." + URI_VALUE).multiValued();
 
 			// number
 			spfield.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
+			nestedSpField.fieldTemplate("numberValueTemplate", bigDecimalFieldType).matchingPathGlob("*." + NUMBER_VALUE);
 
 			//quantity
 			String quantityPathGlob = "*.quantity";
@@ -205,15 +209,22 @@ public class SearchParamTextPropertyBinder implements PropertyBinder, PropertyBr
 			// date
 			String dateTimePathGlob = "*.dt";
 			spfield.objectFieldTemplate("datetimeIndex", ObjectStructure.FLATTENED).matchingPathGlob(dateTimePathGlob);
-			spfield.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord");
-			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower");
-			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord");
-			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper");
+			spfield.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord").multiValued();
+			spfield.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower").multiValued();
+			spfield.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord").multiValued();
+			spfield.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper").multiValued();
+
+			nestedSpField.objectFieldTemplate("nestedDatetimeIndex", ObjectStructure.FLATTENED).matchingPathGlob(dateTimePathGlob);
+			nestedSpField.fieldTemplate("datetime-lower-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".lower-ord").multiValued();
+			nestedSpField.fieldTemplate("datetime-lower-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".lower").multiValued();
+			nestedSpField.fieldTemplate("datetime-upper-ordinal", dateTimeOrdinalFieldType).matchingPathGlob(dateTimePathGlob + ".upper-ord").multiValued();
+			nestedSpField.fieldTemplate("datetime-upper-value", dateTimeFieldType).matchingPathGlob(dateTimePathGlob + ".upper").multiValued();
 
 			// last, since the globs are matched in declaration order, and * matches even nested nodes.
 			spfield.objectFieldTemplate("spObject", ObjectStructure.FLATTENED).matchingPathGlob("*");
 
 			// we use nested search params for the autocomplete search.
+			nestedSpField.objectFieldTemplate("nestedSpSubObject", ObjectStructure.FLATTENED).matchingPathGlob("*.*").multiValued();
 			nestedSpField.objectFieldTemplate("nestedSpObject", ObjectStructure.NESTED).matchingPathGlob("*").multiValued();
 		}
 	}

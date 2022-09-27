@@ -59,7 +59,8 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 	@JsonProperty("patientIds")
 	private List<String> myPatientIds;
 
-	// Stuff for group export only
+	@JsonProperty("originalRequestUrl")
+	private String myOriginalRequestUrl;
 
 	/**
 	 * The group id
@@ -134,6 +135,14 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		myExpandMdm = theExpandMdm;
 	}
 
+	private void setOriginalRequestUrl(String theOriginalRequestUrl) {
+		this.myOriginalRequestUrl = theOriginalRequestUrl;
+	}
+
+	public String getOriginalRequestUrl() {
+		return myOriginalRequestUrl;
+	}
+
 	public static BulkExportJobParameters createFromExportJobParameters(BulkExportParameters theParameters) {
 		BulkExportJobParameters params = new BulkExportJobParameters();
 		params.setResourceTypes(theParameters.getResourceTypes());
@@ -144,6 +153,8 @@ public class BulkExportJobParameters extends BulkExportJobBase {
 		params.setStartDate(theParameters.getStartDate());
 		params.setExpandMdm(theParameters.isExpandMdm());
 		params.setPatientIds(theParameters.getPatientIds());
+		params.setOriginalRequestUrl(theParameters.getOriginalRequestUrl());
 		return params;
 	}
+
 }

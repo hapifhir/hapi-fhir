@@ -20,10 +20,10 @@ package ca.uhn.fhir.rest.openapi;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
@@ -58,6 +58,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -127,6 +128,8 @@ public class OpenApiInterceptor {
 	private final Map<String, String> myResourcePathToClasspath = new HashMap<>();
 	private final Map<String, String> myExtensionToContentType = new HashMap<>();
 	private String myBannerImage;
+	private String myCssText;
+	private boolean myUseResourcePages;
 
 	/**
 	 * Constructor
@@ -150,6 +153,7 @@ public class OpenApiInterceptor {
 
 	private void initResources() {
 		setBannerImage(RACCOON_PNG);
+		setUseResourcePages(true);
 
 		addResourcePathToClasspath("/swagger-ui/index.html", "/ca/uhn/fhir/rest/openapi/index.html");
 		addResourcePathToClasspath("/swagger-ui/" + RACCOON_PNG, "/ca/uhn/fhir/rest/openapi/raccoon.png");
@@ -245,6 +249,15 @@ public class OpenApiInterceptor {
 
 
 		String resourcePath = requestPath.substring("/swagger-ui/".length());
+
+		if (resourcePath.equals("swagger-ui-custom.css") && isNotBlank(myCssText)) {
+			theResponse.setContentType("text/css");
+			theResponse.setStatus(200);
+			theResponse.getWriter().println(myCssText);
+			theResponse.getWriter().close();
+			return true;
+		}
+
 		try (InputStream resource = ClasspathUtil.loadResourceAsStream("/META-INF/resources/webjars/swagger-ui/" + mySwaggerUiVersion + "/" + resourcePath)) {
 
 			if (resourcePath.endsWith(".js") || resourcePath.endsWith(".map")) {
@@ -275,10 +288,32 @@ public class OpenApiInterceptor {
 	}
 
 	public String removeTrailingSlash(String theUrl) {
-		while(theUrl != null && theUrl.endsWith("/")) {
+		while (theUrl != null && theUrl.endsWith("/")) {
 			theUrl = theUrl.substring(0, theUrl.length() - 1);
 		}
 		return theUrl;
+	}
+
+	/**
+	 * If supplied, this field can be used to provide additional CSS text that should
+	 * be loaded by the swagger-ui page. The contents should be raw CSS text, e.g.
+	 * <code>
+	 * BODY { font-size: 1.1em; }
+	 * </code>
+	 */
+	public String getCssText() {
+		return myCssText;
+	}
+
+	/**
+	 * If supplied, this field can be used to provide additional CSS text that should
+	 * be loaded by the swagger-ui page. The contents should be raw CSS text, e.g.
+	 * <code>
+	 * BODY { font-size: 1.1em; }
+	 * </code>
+	 */
+	public void setCssText(String theCssText) {
+		myCssText = theCssText;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -299,6 +334,8 @@ public class OpenApiInterceptor {
 		context.setVariable("BANNER_IMAGE_URL", getBannerImage());
 		context.setVariable("OPENAPI_DOCS", baseUrl + "/api-docs");
 		context.setVariable("FHIR_VERSION", cs.getFhirVersion().toCode());
+		context.setVariable("ADDITIONAL_CSS_TEXT", getCssText());
+		context.setVariable("USE_RESOURCE_PAGES", isUseResourcePages());
 		context.setVariable("FHIR_VERSION_CODENAME", FhirVersionEnum.forVersionString(cs.getFhirVersion().toCode()).name());
 
 		String copyright = cs.getCopyright();
@@ -341,7 +378,12 @@ public class OpenApiInterceptor {
 		context.setVariable("PAGE_NAMES", pageNames);
 		context.setVariable("PAGE_NAME_TO_COUNT", resourceToCount);
 
-		String page = extractPageName(theRequestDetails, PAGE_SYSTEM);
+		String page;
+		if (isUseResourcePages()) {
+			page = extractPageName(theRequestDetails, PAGE_SYSTEM);
+		} else {
+			page = PAGE_ALL;
+		}
 		context.setVariable("PAGE", page);
 
 		populateOIDCVariables(theRequestDetails, context);
@@ -828,7 +870,6 @@ public class OpenApiInterceptor {
 		};
 	}
 
-
 	private Content provideContentFhirResource(OpenAPI theOpenApi, FhirContext theExampleFhirContext, Supplier<IBaseResource> theExampleSupplier) {
 		addSchemaFhirResource(theOpenApi);
 		Content retVal = new Content();
@@ -862,12 +903,34 @@ public class OpenApiInterceptor {
 		return new ClassLoaderTemplateResource(myResourcePathToClasspath.get("/swagger-ui/index.html"), StandardCharsets.UTF_8.name());
 	}
 
-	public void setBannerImage(String theBannerImage) {
-		myBannerImage = theBannerImage;
-	}
-
 	public String getBannerImage() {
 		return myBannerImage;
+	}
+
+	public OpenApiInterceptor setBannerImage(String theBannerImage) {
+		myBannerImage = StringUtils.defaultIfBlank(theBannerImage, null);
+		return this;
+	}
+
+	public boolean isUseResourcePages() {
+		return myUseResourcePages;
+	}
+
+	public void setUseResourcePages(boolean theUseResourcePages) {
+		myUseResourcePages = theUseResourcePages;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
+		IBaseResource canonical;
+		if (theNonCanonical instanceof org.hl7.fhir.dstu3.model.Resource) {
+			canonical = VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical);
+		} else if (theNonCanonical instanceof org.hl7.fhir.r5.model.Resource) {
+			canonical = VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
+		} else {
+			canonical = theNonCanonical;
+		}
+		return (T) canonical;
 	}
 
 	private class SwaggerUiTemplateResolver implements ITemplateResolver {
@@ -917,19 +980,6 @@ public class OpenApiInterceptor {
 
 			return builder.toString();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Resource> T toCanonicalVersion(IBaseResource theNonCanonical) {
-		IBaseResource canonical;
-		if (theNonCanonical instanceof org.hl7.fhir.dstu3.model.Resource) {
-			canonical = VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical);
-		} else if (theNonCanonical instanceof org.hl7.fhir.r5.model.Resource) {
-			canonical = VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
-		} else {
-			canonical = theNonCanonical;
-		}
-		return (T) canonical;
 	}
 
 

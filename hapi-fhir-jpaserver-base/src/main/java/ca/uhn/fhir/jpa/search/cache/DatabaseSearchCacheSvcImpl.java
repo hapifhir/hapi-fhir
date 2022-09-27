@@ -90,15 +90,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	@Transactional(Transactional.TxType.REQUIRED)
 	@Override
 	public Search save(Search theSearch) {
-		Search newSearch;
-		if (theSearch.getId() == null) {
-			newSearch = mySearchDao.save(theSearch);
-			for (SearchInclude next : theSearch.getIncludes()) {
-				mySearchIncludeDao.save(next);
-			}
-		} else {
-			newSearch = mySearchDao.save(theSearch);
-		}
+		Search newSearch = mySearchDao.save(theSearch);
 		return newSearch;
 	}
 
