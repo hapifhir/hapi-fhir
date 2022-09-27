@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Configuration;
  * Add the inner {@link Config} to your spring context to inject this.
  * For convenience, you can still implement ITestDataBuilder on your test class, and delegate the missing methods to this bean.
  */
-public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
+public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDataBuilder.Support, AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoTestDataBuilder.class);
 
 	final FhirContext myFhirCtx;
@@ -76,6 +76,11 @@ public class DaoTestDataBuilder implements ITestDataBuilder, AfterEachCallback {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		//noinspection unchecked
 		return dao.update(theResource, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	@Override
+	public Support getTestDataBuilderSupport() {
+		return this;
 	}
 
 	@Override
