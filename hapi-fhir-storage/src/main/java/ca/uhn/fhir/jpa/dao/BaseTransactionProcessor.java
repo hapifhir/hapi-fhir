@@ -166,6 +166,9 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 
+	@Autowired
+	private ThreadPoolFactory myThreadPoolFactory;
+
 	private TaskExecutor myExecutor;
 
 	@Autowired
@@ -192,12 +195,8 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
-			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
 				myExecutor = ThreadPoolUtil.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
-			} else {
-				SyncTaskExecutor executor = new SyncTaskExecutor();
-				myExecutor = executor;
-			}
+				myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
 		}
 		return myExecutor;
 	}
@@ -374,7 +373,11 @@ public abstract class BaseTransactionProcessor {
 		//Execute all non-gets on calling thread.
 		nonGetCalls.forEach(RetriableBundleTask::run);
 		//Execute all gets (potentially in a pool)
-		getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
+		if (myDaoConfig.getBundleBatchPoolSize() == 1) {
+			getCalls.forEach(RetriableBundleTask::run);
+		} else {
+			getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
+		}
 
 		// waiting for all async tasks to be completed
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
