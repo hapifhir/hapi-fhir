@@ -217,6 +217,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		public void setValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue);
 		}
+
+		@Override
+		public void remove(IBase theTarget, int theIndex) {
+			throw new UnsupportedOperationException(Msg.code(2142) + "Remove by index can only be called on a list-valued field.  '" + myField.getName() + "' is a single-valued field.");
+		}
 	}
 
 	private static void setFieldValue(IBase theTarget, Object theValue, Field theField) {

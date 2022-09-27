@@ -96,7 +96,7 @@ public abstract class BaseRuntimeChildDefinition {
 		 * @param theIndex the index of the item to be removed (e.g. 1 for patient.name[1])
 		 */
 		default void remove(IBase theTarget, int theIndex) {
-			throw new UnsupportedOperationException();
+			// implemented in subclasses
 		}
 	}
 
