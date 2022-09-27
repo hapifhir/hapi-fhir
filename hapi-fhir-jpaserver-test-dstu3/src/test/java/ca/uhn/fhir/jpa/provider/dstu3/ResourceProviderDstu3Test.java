@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -103,6 +106,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -152,7 +156,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -268,16 +271,70 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		searchParameter.setId("resource-security");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		searchParameter.setName("Security");
-		searchParameter.setCode("_security");
+		searchParameter.setCode("security");
 		searchParameter.addBase("Patient").addBase("Account");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
 
 		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
 
+		Patient patientMR = new Patient();
+		patientMR.setMeta(new Meta().addSecurity(new Coding().setCode("MR")));
+		IIdType patientIdMR = ourClient.create().resource(patientMR).execute().getId();
+
+		Patient patientL = new Patient();
+		patientL.setMeta(new Meta().addSecurity(new Coding().setCode("L")));
+		IIdType patientIdL = ourClient.create().resource(patientL).execute().getId();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("security", new TokenParam(null, "MR"));
+
+		IBundleProvider patientResult = myPatientDao.search(map);
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+
+		assertEquals(1, foundPatients.size());
 		assertNotNull(result);
 		assertEquals("resource-security", result.getId().toUnqualifiedVersionless().getIdPart());
 
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("my-gender");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Gender");
+		searchParameter.setCode("mygender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender | Person.gender");
+
+		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		Patient patient = new Patient();
+		patient.addName().addGiven("Mykola");
+		patient.setGender(AdministrativeGender.MALE);
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		Person person = new Person();
+		person.setGender(AdministrativeGender.MALE);
+		IIdType personId = ourClient.create().resource(person).execute().getId();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("mygender", new TokenParam(null, "male"));
+
+		IBundleProvider patientResult = myPatientDao.search(map);
+		IBundleProvider personResult = myPersonDao.search(map);
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+		List<String> foundPersons = toUnqualifiedVersionlessIdValues(personResult);
+
+		assertEquals(1, foundPatients.size());
+		assertEquals(1, foundPersons.size());
+		assertNotNull(result);
+		assertEquals("my-gender", result.getId().toUnqualifiedVersionless().getIdPart());
 	}
 
 	@Test
@@ -3193,7 +3250,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
+			assertThat(patients, not(hasItems(id1a, id1b)));
 		}
 		{
 			//@formatter:off
@@ -3205,7 +3262,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
+			assertThat(patients.toString(), patients, not(hasItems(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
@@ -3219,7 +3276,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients, not(hasItems(id2)));
 		}
 	}
 
@@ -3716,7 +3773,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(hasItem(oid2)));
+			assertThat(ids, not(contains(oid2)));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -3903,7 +3960,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(hasItem(id2.getValue())));
+			assertThat(ids, not(contains(id2.getValue())));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
