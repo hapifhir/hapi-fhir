@@ -7,6 +7,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -78,5 +79,14 @@ public class ParametersUtilR4Test {
 		assertThat(values.get(0), is(TEST_PERSON_ID));
 		assertThat(values.get(1), is(TEST_PERSON_ID));
 		assertThat(values.get(2), is(TEST_PERSON_ID));
+	}
+
+	@Test
+	public void testParametersGetByName() {
+		Parameters p = new Parameters();
+		p.addParameter().setName("my-parameter").setValue(new StringType("my-value"));
+		p.addParameter().setName("my-other-parameter").setValue(new StringType("my-other-value"));
+		Type parameter = p.getParameter("my-parameter");
+		assertThat(parameter.primitiveValue(), is("my-value"));
 	}
 }
