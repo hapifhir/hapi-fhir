@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -202,9 +203,10 @@ public class SearchParamExtractorService {
 		theTargetParams.myTokenParams.addAll(theSrcParams.myTokenParams);
 		theTargetParams.myStringParams.addAll(theSrcParams.myStringParams);
 		theTargetParams.myCoordsParams.addAll(theSrcParams.myCoordsParams);
+		theTargetParams.myCompositeParams.addAll(theSrcParams.myCompositeParams);
 	}
 
-	private void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
+	void extractSearchIndexParameters(RequestDetails theRequestDetails, ResourceIndexedSearchParams theParams, IBaseResource theResource, ResourceTable theEntity) {
 
 		// Strings
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> strings = extractSearchParamStrings(theResource);
@@ -248,6 +250,15 @@ public class SearchParamExtractorService {
 			} else {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
+		}
+
+		// Composites
+		// wipmb should we have config to skip this cpu work?  Check to see if  HSearch is enabled?
+		// dst2 composites use stuff like value[x] , and we don't support them.
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> composites = extractSearchParamComposites(theResource);
+			handleWarnings(theRequestDetails, myInterceptorBroadcaster, composites);
+			theParams.myCompositeParams.addAll(composites);
 		}
 
 		// Specials
@@ -559,6 +570,11 @@ public class SearchParamExtractorService {
 	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		return mySearchParamExtractor.extractSearchParamUri(theResource);
 	}
+
+	private ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamComposites(theResource);
+	}
+
 
 	@VisibleForTesting
 	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {

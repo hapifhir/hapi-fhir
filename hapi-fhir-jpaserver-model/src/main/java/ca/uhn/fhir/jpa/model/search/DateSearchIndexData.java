@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.model.search;
 
 import java.util.Date;
 
-class DateSearchIndexData {
+public class DateSearchIndexData {
 	private final Date myLowerBoundDate;
 	private final int myLowerBoundOrdinal;
 	private final Date myUpperBoundDate;
 	private final int myUpperBoundOrdinal;
 
-	DateSearchIndexData(Date theLowerBoundDate, int theLowerBoundOrdinal, Date theUpperBoundDate, int theUpperBoundOrdinal) {
+	public DateSearchIndexData(Date theLowerBoundDate, int theLowerBoundOrdinal, Date theUpperBoundDate, int theUpperBoundOrdinal) {
 		myLowerBoundDate = theLowerBoundDate;
 		myLowerBoundOrdinal = theLowerBoundOrdinal;
 		myUpperBoundDate = theUpperBoundDate;

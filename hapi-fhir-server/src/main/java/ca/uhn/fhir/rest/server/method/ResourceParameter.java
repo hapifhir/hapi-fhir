@@ -93,7 +93,7 @@ public class ResourceParameter implements IParameter {
 
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		switch (myMode) {
 			case BODY:
 				try {
@@ -141,7 +141,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
+	static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
@@ -195,7 +195,7 @@ public class ResourceParameter implements IParameter {
 		return retVal;
 	}
 
-	static IBaseResource parseResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+	static IBaseResource parseResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		if (theRequest.getResource() != null) {
 			return theRequest.getResource();
 		}

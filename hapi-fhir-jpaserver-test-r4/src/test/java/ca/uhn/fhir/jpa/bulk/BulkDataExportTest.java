@@ -12,12 +12,17 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -268,6 +273,129 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + encId + "\"", "\"P2\"", "\"" + obsId2 + "\"", "\"" + encId2 + "\""), List.of("\"P3\"", "\"" + obsId3 + "\"", "\"" + encId3 + "\""));
 	}
 
+	@Test
+	public void testGroupBulkExportGroupIncludePractitionerOrganizationLocation_ShouldShowUp() {
+		// Create some resources
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		String practId = myClient.create().resource(practitioner).execute().getId().getIdPart();
+
+		Organization organization = new Organization();
+		organization.setActive(true);
+		String orgId = myClient.create().resource(organization).execute().getId().getIdPart();
+
+		organization = new Organization();
+		organization.setActive(true);
+		String orgId2 = myClient.create().resource(organization).execute().getId().getIdPart();
+
+		Location location = new Location();
+		location.setStatus(Location.LocationStatus.ACTIVE);
+		String locId = myClient.create().resource(location).execute().getId().getIdPart();
+
+		location = new Location();
+		location.setStatus(Location.LocationStatus.ACTIVE);
+		String locId2 = myClient.create().resource(location).execute().getId().getIdPart();
+
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("P2");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Encounter encounter = new Encounter();
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		encounter.setSubject(new Reference("Patient/P1"));
+		Encounter.EncounterParticipantComponent encounterParticipantComponent = new Encounter.EncounterParticipantComponent();
+		encounterParticipantComponent.setIndividual(new Reference("Practitioner/" + practId));
+		encounter.addParticipant(encounterParticipantComponent);
+		Encounter.EncounterLocationComponent encounterLocationComponent = new Encounter.EncounterLocationComponent();
+		encounterLocationComponent.setLocation(new Reference("Location/" + locId));
+		encounter.addLocation(encounterLocationComponent);
+		encounter.setServiceProvider(new Reference("Organization/" + orgId));
+		String encId = myClient.create().resource(encounter).execute().getId().getIdPart();
+
+		encounter = new Encounter();
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		encounter.setSubject(new Reference("Patient/P2"));
+		encounterLocationComponent.setLocation(new Reference("Location/" + locId2));
+		String encId2 = myClient.create().resource(encounter).execute().getId().getIdPart();
+
+		Group group = new Group();
+		group.setId("Group/G1");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter"));
+		options.setGroupId(new IdType("Group", "G1"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + practId + "\"", "\"" + orgId + "\"", "\"" + encId + "\"", "\"" + locId + "\""), List.of("\"P2\"", "\"" + orgId2 + "\"", "\"" + encId2 + "\"", "\"" + locId2 + "\""));
+	}
+
+	@Test
+	public void testGroupBulkExportGroupIncludeDevice_ShouldShowUp() {
+		// Create some resources
+		Device device = new Device();
+		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		String devId = myClient.create().resource(device).execute().getId().getIdPart();
+
+		device = new Device();
+		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		String devId2 = myClient.create().resource(device).execute().getId().getIdPart();
+
+		device = new Device();
+		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
+		String devId3 = myClient.create().resource(device).execute().getId().getIdPart();
+
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		patient = new Patient();
+		patient.setId("P2");
+		patient.setActive(true);
+		myClient.update().resource(patient).execute();
+
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.setDevice(new Reference("Device/" + devId));
+		observation.setSubject(new Reference("Patient/P1"));
+		String obsId = myClient.create().resource(observation).execute().getId().getIdPart();
+
+		Provenance provenance = new Provenance();
+		provenance.addAgent().setWho(new Reference("Device/" + devId2));
+		provenance.addTarget(new Reference("Patient/P1"));
+		String provId = myClient.create().resource(provenance).execute().getId().getIdPart();
+
+		provenance = new Provenance();
+		provenance.addAgent().setWho(new Reference("Device/" + devId3));
+		provenance.addTarget(new Reference("Patient/P2"));
+		String provId2 = myClient.create().resource(provenance).execute().getId().getIdPart();
+
+		Group group = new Group();
+		group.setId("Group/G1");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "Provenance"));
+		options.setGroupId(new IdType("Group", "G1"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + provId + "\"", "\"" + devId + "\"", "\"" + devId2 + "\""), List.of("\"P2\"", "\"" + provId2 + "\"", "\"" + devId3 + "\""));
+	}
 
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(theOptions));

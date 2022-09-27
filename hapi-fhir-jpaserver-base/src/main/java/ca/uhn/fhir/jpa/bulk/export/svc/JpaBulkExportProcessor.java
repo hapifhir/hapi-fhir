@@ -44,6 +44,7 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -65,7 +66,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,6 +110,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 	@Autowired
 	private MdmExpansionCacheSvc myMdmExpansionCacheSvc;
+
+	@Autowired
+	private EntityManager myEntityManager;
 
 	private IFhirPath myFhirPath;
 
@@ -438,6 +444,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 			while (resultIterator.hasNext()) {
 				myReadPids.add(resultIterator.next());
 			}
+
+			// add _include to results to support ONC
+			Set<Include> includes = Collections.singleton(new Include("*", true));
+			SystemRequestDetails requestDetails = SystemRequestDetails.newSystemRequestAllPartitions();
+			Set<ResourcePersistentId> includeIds = searchBuilder.loadIncludes(myContext, myEntityManager, myReadPids, includes, false, expandedSpMap.getLastUpdated(), theParams.getJobId(), requestDetails, null);
+			// gets rid of the Patient duplicates
+			myReadPids.addAll(includeIds.stream().filter((id) -> !id.getResourceType().equals("Patient")).collect(Collectors.toSet()));
 		}
 	}
 

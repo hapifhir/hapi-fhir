@@ -20,21 +20,19 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
-import java.io.IOException;
+import ca.uhn.fhir.model.api.TagList;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import ca.uhn.fhir.rest.api.server.ResponseDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.model.api.TagList;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import java.io.IOException;
 
 /**
  * Base class for {@link IServerInterceptor} implementations. Provides a No-op implementation
@@ -44,7 +42,7 @@ public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws ServletException, IOException {
+		throws ServletException, IOException {
 		return true;
 	}
 
@@ -54,7 +52,7 @@ public class InterceptorAdapter implements IServerInterceptor {
 	}
 
 	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, RequestDetails theProcessedRequest) {
 		// nothing
 	}
 
@@ -82,7 +80,7 @@ public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
+		throws AuthenticationException {
 		return true;
 	}
 
@@ -99,7 +97,7 @@ public class InterceptorAdapter implements IServerInterceptor {
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-			throws AuthenticationException {
+		throws AuthenticationException {
 		return true;
 	}
 
