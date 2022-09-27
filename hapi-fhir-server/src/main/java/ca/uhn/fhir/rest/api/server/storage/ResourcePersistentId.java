@@ -31,6 +31,8 @@ import java.util.Optional;
 /**
  * This class is an abstraction for however primary keys are stored in the underlying storage engine. This might be
  * a Long, a String, or something else.
+ *
+ * @param myId This is the only required field that needs to be populated, other fields can be populated for specific use cases.
  */
 public class ResourcePersistentId {
 	private Object myId;
@@ -118,11 +120,6 @@ public class ResourcePersistentId {
 		return myResourceType;
 	}
 
-	/**
-	 * @param theResourceType This should only be populated if an _include is used in the export processor,
-	 *                        since the resource added to the pid list will not be just the resourceType of the export.
-	 *                        Leave null for non _include using exports.
-	 */
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
 	}

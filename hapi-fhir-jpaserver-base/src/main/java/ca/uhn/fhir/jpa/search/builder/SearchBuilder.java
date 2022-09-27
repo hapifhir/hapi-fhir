@@ -1027,7 +1027,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 	/**
 	 * THIS SHOULD RETURN HASHSET and not just Set because we add to it later
-	 * so it can't be Collections.emptySet() or some such thing
+	 * so it can't be Collections.emptySet() or some such thing.
+	 * The ResourcePersistentId returned will have resource type populated.
 	 */
 	@Override
 	public Set<ResourcePersistentId> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<ResourcePersistentId> theMatches, Collection<Include> theIncludes,
