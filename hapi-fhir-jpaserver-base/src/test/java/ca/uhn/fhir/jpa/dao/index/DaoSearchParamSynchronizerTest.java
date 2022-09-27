@@ -65,7 +65,7 @@ public class DaoSearchParamSynchronizerTest {
 	}
 
 	@Test
-	void testMe() {
+	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
 
 		assertEquals(0, addRemoveCount.getRemoveCount());
