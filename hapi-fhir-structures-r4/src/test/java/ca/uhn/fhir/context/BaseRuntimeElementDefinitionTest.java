@@ -50,7 +50,11 @@ public class BaseRuntimeElementDefinitionTest {
 		RuntimeResourceDefinition def = ourFhirContext.getResourceDefinition(patient);
 		BaseRuntimeChildDefinition child = def.getChildByName("gender");
 		BaseRuntimeChildDefinition.IMutator mutator = child.getMutator();
-
-		mutator.remove(patient, 0);
+		try {
+			mutator.remove(patient, 0);
+			fail();
+		} catch (UnsupportedOperationException e) {
+			assertEquals("HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.", e.getMessage());
+		}
 	}
 }
