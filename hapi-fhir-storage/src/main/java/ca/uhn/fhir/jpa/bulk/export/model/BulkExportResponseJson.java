@@ -49,8 +49,13 @@ public class BulkExportResponseJson {
 	private Boolean myRequiresAccessToken;
 	@JsonProperty("output")
 	private List<Output> myOutput;
+
+	/*
+	 * Note that we override the include here as ONC regulations require that we actually serialize the empty error array.
+	 */
+	@JsonInclude
 	@JsonProperty("error")
-	private List<Output> myError;
+	private List<Output> myError = new ArrayList<>();
 
 	@JsonProperty("message")
 	private String myMsg;
