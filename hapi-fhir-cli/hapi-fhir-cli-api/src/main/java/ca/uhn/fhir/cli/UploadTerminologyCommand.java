@@ -275,16 +275,18 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	 * Content Type reference: https://smilecdr.com/docs/terminology/uploading.html#delta-add-operation
 	 */
 	private String getContentType(String theSuffix) {
-		String rtnVal = "text/plain";
+		String retVal = "";
 		if(StringUtils.isNotBlank(theSuffix)) {
 			switch (theSuffix.toLowerCase()) {
-				case "csv" : rtnVal = "text/csv"; break;
-				case "xml" : rtnVal = "application/xml"; break;
-				case "json" : rtnVal = "application/json"; break;
-				case "zip" : rtnVal = "application/zip"; break;
+				case "csv" : retVal = "text/csv"; break;
+				case "xml" : retVal = "application/xml"; break;
+				case "json" : retVal = "application/json"; break;
+				case "zip" : retVal = "application/zip"; break;
+				default: retVal = "text/plain";
 			}
 		}
-		return rtnVal;
+		ourLog.debug("File suffix given was {} and contentType is {}, defaulting to content type text/plain", theSuffix, retVal);
+		return retVal;
 	}
 
 	private enum ModeEnum {
