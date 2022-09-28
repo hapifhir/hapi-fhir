@@ -60,9 +60,9 @@ public class MigrationTaskList {
 		return myTasks.stream()
 			.map(BaseTask::getMigrationVersion)
 			.map(MigrationVersion::fromVersion)
-			.sorted()
+			.sorted(Comparator.naturalOrder().reversed())
 			.map(MigrationVersion::toString)
-			.reduce((first, second) -> second)
+			.findFirst()
 			.orElse(null);
 	}
 }
