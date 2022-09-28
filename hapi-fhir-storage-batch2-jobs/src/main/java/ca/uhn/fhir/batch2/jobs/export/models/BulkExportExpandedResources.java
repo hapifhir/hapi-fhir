@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.jobs.export.models;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Multimap;
 
 import java.util.List;
 

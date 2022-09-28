@@ -1,19 +1,26 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
+import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
+import ca.uhn.fhir.validation.FhirValidator;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -460,6 +467,19 @@ public class UploadTerminologyCommandTest {
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
 	public void testUploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
+		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
+	}
+
+	@ParameterizedTest
+	@MethodSource("paramsProvider")
+	public void testUploadTerminologyWithEndpointValidation(String theFhirVersion, boolean theIncludeTls) throws IOException {
+		RequestValidatingInterceptor requestValidatingInterceptor = createRequestValidatingInterceptor();
+		myBaseRestServerHelper.registerInterceptor(requestValidatingInterceptor);
+
+		uploadICD10UsingCompressedFile(theFhirVersion, theIncludeTls);
+	}
+
+	private void uploadICD10UsingCompressedFile(String theFhirVersion, boolean theIncludeTls) throws IOException {
 		if (FHIR_VERSION_DSTU3.equals(theFhirVersion)) {
 			when(myTermLoaderSvc.loadIcd10cm(anyList(), any())).thenReturn(new UploadStatistics(100, new org.hl7.fhir.dstu3.model.IdType("CodeSystem/101")));
 		} else if (FHIR_VERSION_R4.equals(theFhirVersion)) {
@@ -484,6 +504,23 @@ public class UploadTerminologyCommandTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*files.*\\.zip$"));
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	private RequestValidatingInterceptor createRequestValidatingInterceptor(){
+		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator(myCtx);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+			new DefaultProfileValidationSupport(myCtx),
+			new InMemoryTerminologyServerValidationSupport(myCtx),
+			new CommonCodeSystemsTerminologyService(myCtx)
+		);
+
+		fhirInstanceValidator.setValidationSupport(validationSupport);
+		FhirValidator fhirValidator = myCtx.newValidator();
+		fhirValidator.registerValidatorModule(fhirInstanceValidator);
+
+		RequestValidatingInterceptor requestValidatingInterceptor = new RequestValidatingInterceptor();
+		requestValidatingInterceptor.setValidatorModules(List.of(fhirInstanceValidator));
+		return requestValidatingInterceptor;
 	}
 
 	private synchronized void writeConceptAndHierarchyFiles() throws IOException {
