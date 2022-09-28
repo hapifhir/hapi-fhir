@@ -98,7 +98,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			.addTableRawSql("1", "A")
 			.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
 
-		getMigrator().addTaskList(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");
@@ -128,7 +128,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 		MigrationTaskList taskList = migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0);
 		ourLog.info("Have tasks: {}", taskList);
-		getMigrator().addTaskList(taskList);
+		getMigrator().addTasks(taskList);
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");

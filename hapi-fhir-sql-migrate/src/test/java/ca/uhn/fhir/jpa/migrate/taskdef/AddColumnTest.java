@@ -88,7 +88,7 @@ public class AddColumnTest extends BaseTest {
 			.nullable()
 			.type(ColumnTypeEnum.INT);
 
-		getMigrator().addTaskList(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
 			getMigrator().migrate();
 			fail();
@@ -112,7 +112,7 @@ public class AddColumnTest extends BaseTest {
 			.type(ColumnTypeEnum.INT)
 			.failureAllowed();
 
-		getMigrator().addTaskList(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 	}

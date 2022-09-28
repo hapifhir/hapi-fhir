@@ -159,7 +159,7 @@ public class HapiMigrator {
 		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
 	}
 
-	public void addTaskList(MigrationTaskList theMigrationTasks) {
+	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
 		myTaskList.append(theMigrationTasks);
 	}
 

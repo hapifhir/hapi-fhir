@@ -2,15 +2,17 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class MigrationTaskList {
+public class MigrationTaskList implements Iterable<BaseTask>{
 	private final List<BaseTask> myTasks;
 
 	public MigrationTaskList() {
@@ -40,8 +42,10 @@ public class MigrationTaskList {
 		return new MigrationTaskList(unappliedTasks);
 	}
 
-	public void append(MigrationTaskList theMigrationTasks) {
-		myTasks.addAll(theMigrationTasks.myTasks);
+	public void append(Iterable<BaseTask> theMigrationTasks) {
+		for (BaseTask next : theMigrationTasks) {
+			myTasks.add(next);
+		}
 	}
 
 	public void add(BaseTask theTask) {
@@ -52,6 +56,12 @@ public class MigrationTaskList {
 		myTasks.clear();
 	}
 
+	@NotNull
+	@Override
+	public Iterator<BaseTask> iterator() {
+		return myTasks.iterator();
+	}
+
 	public void forEach(Consumer<? super BaseTask> theAction) {
 		myTasks.forEach(theAction);
 	}
@@ -60,9 +70,9 @@ public class MigrationTaskList {
 		return myTasks.stream()
 			.map(BaseTask::getMigrationVersion)
 			.map(MigrationVersion::fromVersion)
-			.sorted(Comparator.naturalOrder().reversed())
+			.sorted()
 			.map(MigrationVersion::toString)
-			.findFirst()
+			.reduce((first, second) -> second)
 			.orElse(null);
 	}
 }

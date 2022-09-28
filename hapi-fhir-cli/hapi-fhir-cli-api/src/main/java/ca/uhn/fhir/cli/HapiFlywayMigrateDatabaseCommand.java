@@ -47,7 +47,7 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 	protected void addTasks(HapiMigrator theMigrator, String theSkipVersions) {
 		MigrationTaskList taskList = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
 		taskList.setDoNothingOnSkippedTasks(theSkipVersions);
-		theMigrator.addTaskList(taskList);
+		theMigrator.addTasks(taskList);
 	}
 
 	@Override

@@ -99,7 +99,7 @@ public class SchemaMigrator {
 	private HapiMigrator newMigrator() {
 		HapiMigrator migrator;
 		migrator = new HapiMigrator(myMigrationTableName, myDataSource, myDriverType);
-		migrator.addTaskList(myMigrationTasks);
+		migrator.addTasks(myMigrationTasks);
 		migrator.setCallbacks(myCallbacks);
 		return migrator;
 	}
