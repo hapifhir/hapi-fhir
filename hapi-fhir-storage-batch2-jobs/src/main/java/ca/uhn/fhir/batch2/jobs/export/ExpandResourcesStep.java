@@ -45,7 +45,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -73,6 +75,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 		ourLog.info("Step 2 for bulk export - Expand resources");
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
+
 		// search the resources
 		List<IBaseResource> allResources = fetchAllResources(idList);
 
