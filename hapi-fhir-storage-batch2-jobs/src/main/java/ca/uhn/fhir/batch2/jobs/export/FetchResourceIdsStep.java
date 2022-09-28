@@ -39,8 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
@@ -67,6 +69,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 		int submissionCount = 0;
 		try {
+			Set<Id> submittedIds = new HashSet<>();
+
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
@@ -81,11 +85,18 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
+					Id id;
 					if (pid.getResourceType() != null) {
-						idsToSubmit.add(Id.getIdFromPID(pid, pid.getResourceType()));
+						id = Id.getIdFromPID(pid, pid.getResourceType());
 					} else {
-						idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+						id = Id.getIdFromPID(pid, resourceType);
 					}
+
+					if (!submittedIds.add(id)) {
+						continue;
+					}
+
+					idsToSubmit.add(id);
 
 					// >= so that we know (with confidence)
 					// that every batch is <= 1000 items
