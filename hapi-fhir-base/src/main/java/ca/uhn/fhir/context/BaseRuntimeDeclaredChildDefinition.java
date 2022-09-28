@@ -177,6 +177,18 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		public void setValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue, true);
 		}
+
+		@Override
+		public void remove(IBase theTarget, int theIndex) {
+			List<IBase> existingList = (List<IBase>) getFieldValue(theTarget, myField);
+			if (existingList == null) {
+				throw new IndexOutOfBoundsException(Msg.code(2143) + "Can not remove element at index " + theIndex + " from list - List is null");
+			}
+			if (theIndex >= existingList.size()) {
+				throw new IndexOutOfBoundsException(Msg.code(2144) + "Can not remove element at index " + theIndex + " from list - List size is " + existingList.size());
+			}
+			existingList.remove(theIndex);
+		}
 	}
 
 	private final class FieldPlainAccessor implements IAccessor {
@@ -204,6 +216,11 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		@Override
 		public void setValue(IBase theTarget, IBase theValue) {
 			addValue(theTarget, theValue);
+		}
+
+		@Override
+		public void remove(IBase theTarget, int theIndex) {
+			throw new UnsupportedOperationException(Msg.code(2142) + "Remove by index can only be called on a list-valued field.  '" + myField.getName() + "' is a single-valued field.");
 		}
 	}
 
