@@ -97,7 +97,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testGroupBulkExportNotInGroup_DoeNotShowUp() {
+	public void testGroupBulkExportNotInGroup_DoesNotShowUp() {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -327,11 +327,25 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		encounter.setServiceProvider(new Reference(orgId));
 		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
-		encounter = new Encounter();
-		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		encounter.setSubject(new Reference("Patient/P2"));
-		encounterLocationComponent.setLocation(new Reference(locId2));
-		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+		// Second encounter that links to the same location and practitioner
+		Encounter encounter2 = new Encounter();
+		encounter2.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		encounter2.setSubject(new Reference("Patient/P1"));
+		Encounter.EncounterParticipantComponent encounterParticipantComponent2 = new Encounter.EncounterParticipantComponent();
+		encounterParticipantComponent2.setIndividual(new Reference(practId));
+		encounter2.addParticipant(encounterParticipantComponent2);
+		Encounter.EncounterLocationComponent encounterLocationComponent2 = new Encounter.EncounterLocationComponent();
+		encounterLocationComponent2.setLocation(new Reference(locId));
+		encounter2.addLocation(encounterLocationComponent2);
+		encounter2.setServiceProvider(new Reference(orgId));
+		String encId2 = myClient.create().resource(encounter2).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Encounter encounter3 = new Encounter();
+		encounter3.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		encounter3.setSubject(new Reference("Patient/P2"));
+		Encounter.EncounterLocationComponent encounterLocationComponent3 = encounter3.getLocationFirstRep();
+		encounterLocationComponent3.setLocation(new Reference(locId2));
+		String encId3 = myClient.create().resource(encounter3).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -346,7 +360,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, locId), List.of("Patient/P2", orgId2, encId2, locId2));
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, encId2, locId), List.of("Patient/P2", orgId2, encId3, locId2));
 	}
 
 	@Test
@@ -438,7 +452,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 							if (!resourceType.equals(nextId.getResourceType())) {
 								fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
 							} else {
-								foundIds.add(nextId.getValue());
+								if (!foundIds.add(nextId.getValue())) {
+									fail("Found duplicate ID: " + nextId.getValue());
+								}
 							}
 						}
 					});
