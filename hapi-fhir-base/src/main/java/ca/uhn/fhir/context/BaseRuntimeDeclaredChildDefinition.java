@@ -182,10 +182,10 @@ public abstract class BaseRuntimeDeclaredChildDefinition extends BaseRuntimeChil
 		public void remove(IBase theTarget, int theIndex) {
 			List<IBase> existingList = (List<IBase>) getFieldValue(theTarget, myField);
 			if (existingList == null) {
-				throw new IndexOutOfBoundsException("Can not remove element at index " + theIndex + " from list - List is null");
+				throw new IndexOutOfBoundsException(Msg.code(2143) + "Can not remove element at index " + theIndex + " from list - List is null");
 			}
 			if (theIndex >= existingList.size()) {
-				throw new IndexOutOfBoundsException("Can not remove element at index " + theIndex + " from list - List size is " + existingList.size());
+				throw new IndexOutOfBoundsException(Msg.code(2144) + "Can not remove element at index " + theIndex + " from list - List size is " + existingList.size());
 			}
 			existingList.remove(theIndex);
 		}
