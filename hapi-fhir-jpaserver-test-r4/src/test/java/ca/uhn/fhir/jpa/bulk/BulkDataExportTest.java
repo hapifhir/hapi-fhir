@@ -10,7 +10,10 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import org.apache.commons.io.LineIterator;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
@@ -30,16 +33,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportTest.class);
@@ -84,7 +93,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(Sets.newHashSet("Patient?gender=female"));
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, Collections.singletonList("\"PF\""), Collections.singletonList("\"PM\""));
+		verifyBulkExportResults(options, Collections.singletonList("Patient/PF"), Collections.singletonList("Patient/PM"));
 	}
 
 	@Test
@@ -122,7 +131,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("\"PING1\"", "\"PING2\""), Collections.singletonList("\"PNING3\""));
+		verifyBulkExportResults(options, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
 	}
 
 	@Test
@@ -149,12 +158,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		myCaptureQueriesListener.clear();
-		verifyBulkExportResults(options, List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+		verifyBulkExportResults(options, List.of("Patient/PING1"), Collections.singletonList("Patient/PNING3"));
 		myCaptureQueriesListener.logSelectQueries();
 		ourLog.error("************");
 		myCaptureQueriesListener.clear();
 		try {
-			verifyBulkExportResults(options, List.of("\"PING1\""), Collections.singletonList("\"PNING3\""));
+			verifyBulkExportResults(options, List.of("Patient/PING1"), Collections.singletonList("Patient/PNING3"));
 		} finally {
 			myCaptureQueriesListener.logSelectQueries();
 
@@ -173,12 +182,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Observation observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P1"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P1"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId = myClient.create().resource(encounter).execute().getId().getIdPart();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// diff patient
 		patient = new Patient();
@@ -189,16 +198,16 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P2"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId2 = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId2 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P2"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId2 = myClient.create().resource(encounter).execute().getId().getIdPart();
+		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId3 = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId3 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -208,7 +217,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + encId + "\""), List.of("\"P2\"", "\"" + obsId2 + "\"", "\"" + encId2 + "\"", "\"" + obsId3 + "\""));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId), List.of("Patient/P2", obsId2, encId2, obsId3));
 	}
 
 	@Test
@@ -223,12 +232,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		Observation observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P1"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Encounter encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P1"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId = myClient.create().resource(encounter).execute().getId().getIdPart();
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// diff patient
 		patient = new Patient();
@@ -239,12 +248,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P2"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId2 = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId2 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P2"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId2 = myClient.create().resource(encounter).execute().getId().getIdPart();
+		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// yet another diff patient
 		patient = new Patient();
@@ -255,12 +264,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		observation = new Observation();
 		observation.setSubject(new Reference().setReference("Patient/P3"));
 		observation.setStatus(Observation.ObservationStatus.PRELIMINARY);
-		String obsId3 = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId3 = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setSubject(new Reference().setReference("Patient/P3"));
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
-		String encId3 = myClient.create().resource(encounter).execute().getId().getIdPart();
+		String encId3 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		// set the export options
 		BulkDataExportOptions options = new BulkDataExportOptions();
@@ -270,7 +279,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + encId + "\"", "\"P2\"", "\"" + obsId2 + "\"", "\"" + encId2 + "\""), List.of("\"P3\"", "\"" + obsId3 + "\"", "\"" + encId3 + "\""));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, encId, "Patient/P2", obsId2, encId2), List.of("Patient/P3", obsId3, encId3));
 	}
 
 	@Test
@@ -278,23 +287,23 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Create some resources
 		Practitioner practitioner = new Practitioner();
 		practitioner.setActive(true);
-		String practId = myClient.create().resource(practitioner).execute().getId().getIdPart();
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Organization organization = new Organization();
 		organization.setActive(true);
-		String orgId = myClient.create().resource(organization).execute().getId().getIdPart();
+		String orgId = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
 
 		organization = new Organization();
 		organization.setActive(true);
-		String orgId2 = myClient.create().resource(organization).execute().getId().getIdPart();
+		String orgId2 = myClient.create().resource(organization).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Location location = new Location();
 		location.setStatus(Location.LocationStatus.ACTIVE);
-		String locId = myClient.create().resource(location).execute().getId().getIdPart();
+		String locId = myClient.create().resource(location).execute().getId().toUnqualifiedVersionless().getValue();
 
 		location = new Location();
 		location.setStatus(Location.LocationStatus.ACTIVE);
-		String locId2 = myClient.create().resource(location).execute().getId().getIdPart();
+		String locId2 = myClient.create().resource(location).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -310,19 +319,19 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter.setSubject(new Reference("Patient/P1"));
 		Encounter.EncounterParticipantComponent encounterParticipantComponent = new Encounter.EncounterParticipantComponent();
-		encounterParticipantComponent.setIndividual(new Reference("Practitioner/" + practId));
+		encounterParticipantComponent.setIndividual(new Reference(practId));
 		encounter.addParticipant(encounterParticipantComponent);
 		Encounter.EncounterLocationComponent encounterLocationComponent = new Encounter.EncounterLocationComponent();
-		encounterLocationComponent.setLocation(new Reference("Location/" + locId));
+		encounterLocationComponent.setLocation(new Reference(locId));
 		encounter.addLocation(encounterLocationComponent);
-		encounter.setServiceProvider(new Reference("Organization/" + orgId));
-		String encId = myClient.create().resource(encounter).execute().getId().getIdPart();
+		encounter.setServiceProvider(new Reference(orgId));
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		encounter = new Encounter();
 		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
 		encounter.setSubject(new Reference("Patient/P2"));
-		encounterLocationComponent.setLocation(new Reference("Location/" + locId2));
-		String encId2 = myClient.create().resource(encounter).execute().getId().getIdPart();
+		encounterLocationComponent.setLocation(new Reference(locId2));
+		String encId2 = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -337,7 +346,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + practId + "\"", "\"" + orgId + "\"", "\"" + encId + "\"", "\"" + locId + "\""), List.of("\"P2\"", "\"" + orgId2 + "\"", "\"" + encId2 + "\"", "\"" + locId2 + "\""));
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, orgId, encId, locId), List.of("Patient/P2", orgId2, encId2, locId2));
 	}
 
 	@Test
@@ -345,15 +354,15 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Create some resources
 		Device device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId = myClient.create().resource(device).execute().getId().getIdPart();
+		String devId = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId2 = myClient.create().resource(device).execute().getId().getIdPart();
+		String devId2 = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		device = new Device();
 		device.setStatus(Device.FHIRDeviceStatus.ACTIVE);
-		String devId3 = myClient.create().resource(device).execute().getId().getIdPart();
+		String devId3 = myClient.create().resource(device).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Patient patient = new Patient();
 		patient.setId("P1");
@@ -367,19 +376,19 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 		Observation observation = new Observation();
 		observation.setStatus(Observation.ObservationStatus.AMENDED);
-		observation.setDevice(new Reference("Device/" + devId));
+		observation.setDevice(new Reference(devId));
 		observation.setSubject(new Reference("Patient/P1"));
-		String obsId = myClient.create().resource(observation).execute().getId().getIdPart();
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Provenance provenance = new Provenance();
-		provenance.addAgent().setWho(new Reference("Device/" + devId2));
+		provenance.addAgent().setWho(new Reference(devId2));
 		provenance.addTarget(new Reference("Patient/P1"));
-		String provId = myClient.create().resource(provenance).execute().getId().getIdPart();
+		String provId = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
 		provenance = new Provenance();
-		provenance.addAgent().setWho(new Reference("Device/" + devId3));
+		provenance.addAgent().setWho(new Reference(devId3));
 		provenance.addTarget(new Reference("Patient/P2"));
-		String provId2 = myClient.create().resource(provenance).execute().getId().getIdPart();
+		String provId2 = myClient.create().resource(provenance).execute().getId().toUnqualifiedVersionless().getValue();
 
 		Group group = new Group();
 		group.setId("Group/G1");
@@ -394,7 +403,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setFilters(new HashSet<>());
 		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		verifyBulkExportResults(options, List.of("\"P1\"", "\"" + obsId + "\"", "\"" + provId + "\"", "\"" + devId + "\"", "\"" + devId2 + "\""), List.of("\"P2\"", "\"" + provId2 + "\"", "\"" + devId3 + "\""));
+		verifyBulkExportResults(options, List.of("Patient/P1", obsId, provId, devId, devId2), List.of("Patient/P2", provId2, devId3));
 	}
 
 	private void verifyBulkExportResults(BulkDataExportOptions theOptions, List<String> theContainedList, List<String> theExcludedList) {
@@ -410,21 +419,41 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Iterate over the files
 		String report = myJobRunner.getJobInfo(startResponse.getJobId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
-		String contents = "";
+
+		Set<String> foundIds = new HashSet<>();
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
+			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
-			assertEquals(1, binaryIds.size());
-			Binary binary = myBinaryDao.read(new IdType(binaryIds.get(0)));
-			assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
-			contents += new String(binary.getContent(), Constants.CHARSET_UTF8) + "\n";
-			ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), new String(binary.getContent(), Constants.CHARSET_UTF8));
+			for (var nextBinaryId : binaryIds) {
+
+				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+
+				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
+				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
+					iter.forEachRemaining(t -> {
+						if (isNotBlank(t)) {
+							IBaseResource next = myFhirContext.newJsonParser().parseResource(t);
+							IIdType nextId = next.getIdElement().toUnqualifiedVersionless();
+							if (!resourceType.equals(nextId.getResourceType())) {
+								fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
+							} else {
+								foundIds.add(nextId.getValue());
+							}
+						}
+					});
+				} catch (IOException e) {
+					fail(e.toString());
+				}
+
+			}
 		}
 
 		for (String containedString : theContainedList) {
-			assertThat(contents, Matchers.containsString(containedString));
+			assertThat(foundIds, hasItem(containedString));
 		}
 		for (String excludedString : theExcludedList) {
-			assertThat(contents, not(Matchers.containsString(excludedString)));
+			assertThat(foundIds, not(hasItem(excludedString)));
 		}
 	}
 
