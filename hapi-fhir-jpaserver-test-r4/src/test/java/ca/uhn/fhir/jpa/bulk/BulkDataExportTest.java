@@ -364,6 +364,47 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testGroupBulkExportGroupIncludePractitionerLinkedFromTwoResourceTypes() {
+		// Create some resources
+		Practitioner practitioner = new Practitioner();
+		practitioner.setActive(true);
+		String practId = myClient.create().resource(practitioner).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Patient patient = new Patient();
+		patient.setId("P1");
+		patient.setActive(true);
+		patient.addGeneralPractitioner().setReference(practId);
+		myClient.update().resource(patient).execute();
+
+		Encounter encounter = new Encounter();
+		encounter.setStatus(Encounter.EncounterStatus.INPROGRESS);
+		encounter.setSubject(new Reference("Patient/P1"));
+		encounter.addParticipant().setIndividual(new Reference(practId));
+		String encId = myClient.create().resource(encounter).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setSubject(new Reference("Patient/P1"));
+		observation.getPerformerFirstRep().setReference(practId);
+		String obsId = myClient.create().resource(observation).execute().getId().toUnqualifiedVersionless().getValue();
+
+		Group group = new Group();
+		group.setId("Group/G1");
+		group.setActive(true);
+		group.addMember().getEntity().setReference("Patient/P1");
+		myClient.update().resource(group).execute();
+
+		// set the export options
+		BulkDataExportOptions options = new BulkDataExportOptions();
+		options.setResourceTypes(Sets.newHashSet("Patient", "Encounter", "Observation"));
+		options.setGroupId(new IdType("Group", "G1"));
+		options.setFilters(new HashSet<>());
+		options.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		verifyBulkExportResults(options, List.of("Patient/P1", practId, encId, obsId), Collections.emptyList());
+	}
+
+	@Test
 	public void testGroupBulkExportGroupIncludeDevice_ShouldShowUp() {
 		// Create some resources
 		Device device = new Device();
