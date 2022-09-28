@@ -46,7 +46,7 @@ public abstract class BaseTest {
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(DriverTypeEnum.H2_EMBEDDED, dataSource, SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.H2_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 
@@ -67,7 +67,7 @@ public abstract class BaseTest {
 				dataSource.setUsername("SA");
 				dataSource.setPassword("SA");
 				dataSource.setDriverClassName(DriverTypeEnum.DERBY_EMBEDDED.getDriverClassName());
-				HapiMigrator migrator = new HapiMigrator(DriverTypeEnum.DERBY_EMBEDDED, dataSource, SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+				HapiMigrator migrator = new HapiMigrator(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME, dataSource, DriverTypeEnum.DERBY_EMBEDDED);
 				return new TestDatabaseDetails(url, connectionProperties, dataSource, migrator);
 			}
 

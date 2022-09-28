@@ -112,7 +112,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 			.collect(Collectors.toSet());
 
 		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
-		HapiMigrator migrator = new HapiMigrator(driverType, connectionProperties.getDataSource(), myMigrationTableName);
+		HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
 
 		migrator.createMigrationTableIfRequired();
 		migrator.setDryRun(dryRun);

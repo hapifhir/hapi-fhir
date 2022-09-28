@@ -49,7 +49,7 @@ public class HapiMigrator {
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
-	public HapiMigrator(DriverTypeEnum theDriverType, DataSource theDataSource, String theMigrationTableName) {
+	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
