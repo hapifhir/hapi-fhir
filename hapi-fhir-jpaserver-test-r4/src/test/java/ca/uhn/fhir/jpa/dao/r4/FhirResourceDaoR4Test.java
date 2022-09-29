@@ -3403,6 +3403,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSortByMissingAttribute() {
+		String methodName = "testSortByMissingAttribute";
+
+		Patient p = new Patient();
+		p.setGender(AdministrativeGender.MALE);
+		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setGender(AdministrativeGender.FEMALE);
+		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap spMap;
+		List<IIdType> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.setSort(new SortSpec(Patient.SP_GENDER));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(spMap));
+		assertEquals(3, actual.size());
+	}
+
+	@Test
 	public void testSortByLastUpdated() {
 		String methodName = "testSortByLastUpdated";
 
