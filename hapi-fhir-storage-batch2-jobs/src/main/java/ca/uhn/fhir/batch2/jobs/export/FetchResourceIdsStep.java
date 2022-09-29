@@ -39,13 +39,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	public static final int MAX_IDS_TO_BATCH = 1000;
+	public static final int MAX_IDS_TO_BATCH = 900;
 
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
@@ -62,25 +64,39 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setStartDate(params.getStartDate());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
+		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
-		ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
 
 		int submissionCount = 0;
 		try {
+			Set<Id> submittedIds = new HashSet<>();
+
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
+				ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
 
 				if (!pidIterator.hasNext()) {
-					ourLog.warn("Bulk Export generated an iterator with no results!");
+					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
-					idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+					Id id;
+					if (pid.getResourceType() != null) {
+						id = Id.getIdFromPID(pid, pid.getResourceType());
+					} else {
+						id = Id.getIdFromPID(pid, resourceType);
+					}
+
+					if (!submittedIds.add(id)) {
+						continue;
+					}
+
+					idsToSubmit.add(id);
 
 					// >= so that we know (with confidence)
 					// that every batch is <= 1000 items

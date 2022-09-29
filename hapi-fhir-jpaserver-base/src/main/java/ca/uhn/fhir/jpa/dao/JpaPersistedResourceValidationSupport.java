@@ -282,7 +282,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			}
 			default:
-				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
+				// N.B.: this code assumes that we are searching by canonical URL and that the CanonicalType in question has a URL
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add("url", new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 		}
 
 		Integer size = search.size();

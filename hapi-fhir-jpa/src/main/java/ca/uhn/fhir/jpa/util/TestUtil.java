@@ -284,14 +284,14 @@ public class TestUtil {
 			} else {
 				Validate.notNull(fk);
 				Validate.isTrue(isNotBlank(fk.name()), "Foreign key on " + theAnnotatedElement + " has no name()");
+
+				// Validate FK naming.
+				// temporarily allow two hibernate legacy sp fk names until we fix them
 				List<String> legacySPHibernateFKNames = Arrays.asList(
 					"FKC97MPK37OKWU8QVTCEG2NH9VN", "FKGXSREUTYMMFJUWDSWV3Y887DO");
-				if (legacySPHibernateFKNames.contains(fk.name())) {
-					// wipmb temporarily allow the hibernate legacy sp fk names
-				} else {
-					Validate.isTrue(fk.name().startsWith("FK_"),
-						"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK");
-				}
+				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
+					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
+
 				if ( ! duplicateNameValidationExceptionList.contains(fk.name())) {
 					assertNotADuplicateName(fk.name(), theNames);
 				}

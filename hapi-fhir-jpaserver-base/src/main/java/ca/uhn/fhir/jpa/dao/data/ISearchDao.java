@@ -43,7 +43,7 @@ public interface ISearchDao extends JpaRepository<Search, Long>, IHapiFhirJpaRep
 	@Query("SELECT s.myId FROM Search s WHERE s.myDeleted = TRUE")
 	Slice<Long> findDeleted(Pageable thePage);
 
-	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")
+	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND s.mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = FALSE AND s.myStatus <> 'FAILED'")
 	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
 
 	@Query("SELECT COUNT(s) FROM Search s WHERE s.myDeleted = TRUE")

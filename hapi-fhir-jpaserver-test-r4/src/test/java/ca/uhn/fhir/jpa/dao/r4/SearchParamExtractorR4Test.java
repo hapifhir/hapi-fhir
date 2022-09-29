@@ -13,11 +13,16 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
+import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -32,11 +37,13 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,23 +52,23 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class SearchParamExtractorR4Test {
+public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private FhirContextSearchParamRegistry mySearchParamRegistry;
-	private PartitionSettings myPartitionSettings;
-
-	@BeforeEach
-	public void before() {
-
-		mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
-		myPartitionSettings = new PartitionSettings();
-
-	}
+	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
+	private final PartitionSettings myPartitionSettings = new PartitionSettings();
+	final ModelConfig myModelConfig = new ModelConfig();
 
 	@Test
 	public void testParamWithOrInPath() {
@@ -377,4 +384,174 @@ public class SearchParamExtractorR4Test {
 
 	}
 
+	@Nested
+	class CompositeSearchParameter {
+		SearchParamExtractorR4 myExtractor = new SearchParamExtractorR4(myModelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+
+		/**
+		 * Install a full definition of component-code-value-concept in the SP registry.
+		 *
+		 * We can't use the base FhirContext SP definitions since @SearchParamDefinition
+		 * only includes the sub-SP ids, and lacks the composite sub-paths.
+		 * @see ca.uhn.fhir.model.api.annotation.SearchParamDefinition#compositeOf
+		 */
+		@BeforeEach
+		public void setUp() {
+			String spJson = """
+				{
+				  "resourceType": "SearchParameter",
+				  "id": "Observation-component-code-value-concept",
+				  "extension": [ {
+				  "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+				  "valueCode": "trial-use"
+				  } ],
+				  "url": "http://hl7.org/fhir/SearchParameter/Observation-component-code-value-concept",
+				  "version": "4.0.1",
+				  "name": "component-code-value-concept",
+				  "status": "active",
+				  "experimental": false,
+				  "date": "2019-11-01T09:29:23+11:00",
+				  "publisher": "Health Level Seven International (Orders and Observations)",
+				  "contact": [ {
+				  "telecom": [ {
+					"system": "url",
+					"value": "http://hl7.org/fhir"
+				  } ]
+				  }, {
+				  "telecom": [ {
+					"system": "url",
+					"value": "http://www.hl7.org/Special/committees/orders/index.cfm"
+				  } ]
+				  } ],
+				  "description": "Component code and component coded value parameter pair",
+				  "code": "component-code-value-concept",
+				  "base": [ "Observation" ],
+				  "type": "composite",
+				  "expression": "Observation.component",
+				  "xpathUsage": "normal",
+				  "multipleOr": false,
+				  "component": [ {
+				  "definition": "http://hl7.org/fhir/SearchParameter/Observation-component-code",
+				  "expression": "code"
+				  }, {
+				  "definition": "http://hl7.org/fhir/SearchParameter/Observation-component-value-concept",
+				  "expression": "value.as(CodeableConcept)"
+				  } ]
+				 }
+				""";
+			SearchParameter sp = (SearchParameter) getFhirContext().newJsonParser().parseResource(spJson);
+			RuntimeSearchParam runtimeSP = new SearchParameterCanonicalizer(getFhirContext()).canonicalizeSearchParameter(sp);
+			mySearchParamRegistry.addSearchParam(runtimeSP);
+		}
+
+		@Test
+		void testExtractSearchParamComposites_componentCodeCode_producesOneCompositeComponentForEachElement() {
+			IBaseResource resource = buildResource("Observation",
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_token", null)),
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token2", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_toke2", null)),
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token3", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_toke3", null))
+			);
+
+			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
+
+			assertThat(c, not(empty()));
+			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("searchParamName", equalTo("component-code-value-concept"))));
+
+			List<ResourceIndexedSearchParamComposite> components = c.stream()
+				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
+				.collect(Collectors.toList());
+			assertThat("one components per element", components, hasSize(3));
+
+		}
+
+		@Test
+		void testExtractSearchParamComposites_componentCodeCode_yieldsTwoSubComponents() {
+			IBaseResource resource = buildResource("Observation",
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token", null),
+					withCodingAt("valueCodeableConcept.coding", null, "value_token", null))
+			);
+
+			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
+
+			List<ResourceIndexedSearchParamComposite> components = c.stream()
+				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
+				.toList();
+			assertThat(components, hasSize(1));
+			ResourceIndexedSearchParamComposite componentCodeValueConcept = components.get(0);
+
+			// component-code-value-concept is two token params - component-code and component-value-concept
+			List<ResourceIndexedSearchParamComposite.Component> indexedComponentsOfElement = componentCodeValueConcept.getComponents();
+			assertThat("component-code-value-concept has two sub-params", indexedComponentsOfElement, hasSize(2));
+
+			final ResourceIndexedSearchParamComposite.Component component0 = indexedComponentsOfElement.get(0);
+			assertThat(component0.getSearchParamName(), equalTo("component-code"));
+			assertThat(component0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+
+			final ResourceIndexedSearchParamComposite.Component component1 = indexedComponentsOfElement.get(1);
+			assertThat(component1.getSearchParamName(), equalTo("component-value-concept"));
+			assertThat(component1.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+		}
+
+		@Test
+		void testExtractSearchParamComposites_componentCodeCode_subValueExtraction() {
+			IBaseResource resource = buildResource("Observation",
+				withObservationComponent(
+					withCodingAt("code.coding", "http://example.com", "code_token", "display value"),
+					withCodingAt("valueCodeableConcept.coding", null, "value_token", null))
+			);
+
+			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
+
+			List<ResourceIndexedSearchParamComposite> components = c.stream()
+				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))
+				.toList();
+			assertThat(components, hasSize(1));
+			ResourceIndexedSearchParamComposite spEntry = components.get(0);
+
+			// this SP has two sub-components
+			assertThat(spEntry.getComponents(), hasSize(2));
+
+			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);
+			assertThat(indexComponent0.getSearchParamName(), notNullValue());
+			assertThat(indexComponent0.getSearchParamName(), equalTo("component-code"));
+			assertThat(indexComponent0.getSearchParameterType(), equalTo(RestSearchParameterTypeEnum.TOKEN));
+			assertThat(indexComponent0.getParamIndexValues(), hasSize(2));
+			// token indexes both the token, and the display text
+			ResourceIndexedSearchParamToken tokenIdx0 = (ResourceIndexedSearchParamToken) indexComponent0.getParamIndexValues().stream()
+				.filter(i -> i instanceof ResourceIndexedSearchParamToken)
+				.findFirst().orElseThrow();
+			assertThat(tokenIdx0.getParamName(), equalTo("component-code"));
+			assertThat(tokenIdx0.getResourceType(), equalTo("Observation"));
+			assertThat(tokenIdx0.getValue(), equalTo("code_token"));
+
+			ResourceIndexedSearchParamString tokenDisplayIdx0 = (ResourceIndexedSearchParamString) indexComponent0.getParamIndexValues().stream()
+				.filter(i -> i instanceof ResourceIndexedSearchParamString)
+				.findFirst().orElseThrow();
+			assertThat(tokenDisplayIdx0.getParamName(), equalTo("component-code"));
+			assertThat(tokenDisplayIdx0.getResourceType(), equalTo("Observation"));
+			assertThat(tokenDisplayIdx0.getValueExact(), equalTo("display value"));
+		}
+	}
+
+	@Override
+	public IIdType doCreateResource(IBaseResource theResource) {
+		return null;
+	}
+
+	@Override
+	public IIdType doUpdateResource(IBaseResource theResource) {
+		return null;
+	}
+
+	@Override
+	public FhirContext getFhirContext() {
+		return ourCtx;
+	}
 }

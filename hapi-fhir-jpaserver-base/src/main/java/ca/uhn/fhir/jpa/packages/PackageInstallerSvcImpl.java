@@ -92,7 +92,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		"ConceptMap",
 		"SearchParameter",
 		"Subscription"
-	));
+		));
 
 	boolean enabled = true;
 	@Autowired
@@ -163,7 +163,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					return existing.isPresent();
 				});
 				if (exists) {
-					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+						ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
@@ -225,7 +225,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					create(next, theOutcome);
+					create(next, theInstallationSpec, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
 					throw new ImplementationGuideInstallationException(Msg.code(1286) + String.format("Error installing IG %s#%s: %s", name, version, e), e);
@@ -323,7 +323,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return resources;
 	}
 
-	private void create(IBaseResource theResource, PackageInstallOutcomeJson theOutcome) {
+	private void create(IBaseResource theResource, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource);
 		IBundleProvider searchResult = searchResource(dao, map);
@@ -347,11 +347,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					ourLog.info("Created resource with existing id");
 				}
 			} else {
-			ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
-				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
-				DaoMethodOutcome outcome = updateResource(dao, theResource);
-				if (!outcome.isNop()) {
-					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+				if (theInstallationSpec.isReloadExisting()) {
+					ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
+					theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+					DaoMethodOutcome outcome = updateResource(dao, theResource);
+					if (!outcome.isNop()) {
+						theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+					}
+				} else {
+					ourLog.info("Skipping update of existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				}
 			}
 		}

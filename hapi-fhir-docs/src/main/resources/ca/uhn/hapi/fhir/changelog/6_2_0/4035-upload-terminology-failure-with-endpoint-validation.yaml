@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4091
+jira: SMILE-3977
+title: "Previously, when the upload-terminology command was used to upload a terminology file with endpoint validation enabled, a validation error occurred due to a missing file content type.
+ This has been fixed by specifying the file content type of the uploaded file."

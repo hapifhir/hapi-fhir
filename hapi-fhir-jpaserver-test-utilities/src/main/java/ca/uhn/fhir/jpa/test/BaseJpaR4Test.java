@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
@@ -56,6 +57,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceReindexJobDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.data.ITagDefinitionDao;
@@ -236,6 +238,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
+
+	@Autowired
+	protected ISearchIncludeDao mySearchIncludeEntityDao;
 	@Autowired
 	protected ISearchResultDao mySearchResultDao;
 	@Autowired
@@ -262,6 +267,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
+	@Autowired
+	protected BulkDataExportProvider myBulkDataExportProvider;
 	@Autowired
 	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
 	@Autowired

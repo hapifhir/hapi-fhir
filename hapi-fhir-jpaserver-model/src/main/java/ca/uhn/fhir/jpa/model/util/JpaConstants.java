@@ -192,6 +192,10 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_PATIENT = "patient";
 
 	/**
 	 * Parameter for the $import operation

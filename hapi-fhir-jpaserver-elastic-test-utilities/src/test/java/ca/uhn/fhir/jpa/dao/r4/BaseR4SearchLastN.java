@@ -65,7 +65,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 	private static final Map<String, String> observationCategoryMap = new HashMap<>();
 	private static final Map<String, String> observationCodeMap = new HashMap<>();
 	private static final Map<String, Date> observationEffectiveMap = new HashMap<>();
-	// wipmb make thise normal fields.  This static setup wasn't working
+	// todo mb make these normal fields.  This static setup wasn't working
 	protected static IIdType patient0Id = null;
 	protected static IIdType patient1Id = null;
 	protected static IIdType patient2Id = null;

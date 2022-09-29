@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
+import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import com.helger.commons.io.file.FileHelper;
@@ -40,7 +41,6 @@ import org.fusesource.jansi.Ansi.Color;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -136,40 +136,27 @@ public class ValidateCommand extends BaseCommand {
 		FhirContext ctx = getFhirContext();
 		FhirValidator val = ctx.newValidator();
 
-		IBaseResource localProfileResource = null;
+		ValidationOptions options = new ValidationOptions();
 		if (theCommandLine.hasOption("l")) {
 			String localProfile = theCommandLine.getOptionValue("l");
-			ourLog.info("Loading profile: {}", localProfile);
-			String input = loadFile(localProfile);
-
-			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
+			options.addProfile(localProfile);
 		}
 
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
-					ValidationSupportChain validationSupport = new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
-
-					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu2());
-					}
 					FhirInstanceValidator instanceValidator;
-					instanceValidator = new FhirInstanceValidator(validationSupport);
+					ValidationSupportChain validationSupportChain = ValidationSupportChainCreator.getValidationSupportChainDstu2(ctx, theCommandLine);
+					instanceValidator = new FhirInstanceValidator(validationSupportChain);
 					val.registerValidatorModule(instanceValidator);
-
 					break;
 				}
 				case DSTU3:
 				case R4: {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
-					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
-
-					if (theCommandLine.hasOption("r")) {
-						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
-					}
-					instanceValidator.setValidationSupport(validationSupport);
+					ValidationSupportChain validationSupportChain = ValidationSupportChainCreator.getValidationSupportChainR4(ctx, theCommandLine);
+					instanceValidator.setValidationSupport(validationSupportChain);
 					break;
 				}
 				default:
@@ -182,7 +169,7 @@ public class ValidateCommand extends BaseCommand {
 
 		ValidationResult results;
 		try {
-			results = val.validateWithResult(contents);
+			results = val.validateWithResult(contents, options);
 		} catch (DataFormatException e) {
 			throw new CommandFailureException(Msg.code(1621) + e.getMessage());
 		}

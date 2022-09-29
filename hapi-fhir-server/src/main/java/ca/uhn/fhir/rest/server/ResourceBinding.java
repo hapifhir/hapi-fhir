@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 
 import java.util.LinkedList;
@@ -35,7 +36,7 @@ public class ResourceBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceBinding.class);
 
 	private String resourceName;
-	private LinkedList<BaseMethodBinding<?>> myMethodBindings = new LinkedList<>();
+	private LinkedList<BaseMethodBinding> myMethodBindings = new LinkedList<>();
 
 	/**
 	 * Constructor
@@ -44,7 +45,7 @@ public class ResourceBinding {
 		super();
 	}
 
-	public BaseMethodBinding<?> getMethod(RequestDetails theRequest) {
+	public BaseMethodBinding getMethod(RequestDetails theRequest) {
 		if (null == myMethodBindings) {
 			ourLog.warn("No methods exist for resource: {}", resourceName);
 			return null;
@@ -56,10 +57,10 @@ public class ResourceBinding {
 		 * Look for the method with the highest match strength
 		 */
 
-		BaseMethodBinding<?> matchedMethod = null;
+		BaseMethodBinding matchedMethod = null;
 		MethodMatchEnum matchedMethodStrength = null;
 
-		for (BaseMethodBinding<?> rm : myMethodBindings) {
+		for (BaseMethodBinding rm : myMethodBindings) {
 			MethodMatchEnum nextMethodMatch = rm.incomingServerRequestMatchesMethod(theRequest);
 			if (nextMethodMatch != MethodMatchEnum.NONE) {
 				if (matchedMethodStrength == null || matchedMethodStrength.ordinal() < nextMethodMatch.ordinal()) {
@@ -83,11 +84,11 @@ public class ResourceBinding {
 		this.resourceName = resourceName;
 	}
 
-	public List<BaseMethodBinding<?>> getMethodBindings() {
+	public List<BaseMethodBinding> getMethodBindings() {
 		return myMethodBindings;
 	}
 
-	public void addMethod(BaseMethodBinding<?> method) {
+	public void addMethod(BaseMethodBinding method) {
 		this.myMethodBindings.push(method);
 	}
 
