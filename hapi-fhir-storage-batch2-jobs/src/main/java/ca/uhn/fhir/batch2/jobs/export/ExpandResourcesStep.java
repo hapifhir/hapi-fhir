@@ -34,16 +34,20 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -71,6 +75,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 		ourLog.info("Step 2 for bulk export - Expand resources");
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
+
 		// search the resources
 		List<IBaseResource> allResources = fetchAllResources(idList);
 
@@ -85,28 +90,33 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		}
 
 		// encode them
-		List<String> resources = encodeToString(allResources, jobParameters);
+		ListMultimap<String, String> resources = encodeToString(allResources, jobParameters);
 
 		// set to datasink
-		BulkExportExpandedResources output = new BulkExportExpandedResources();
-		output.setStringifiedResources(resources);
-		output.setResourceType(idList.getResourceType());
-		theDataSink.accept(output);
+		for (String nextResourceType : resources.keySet()) {
 
-		ourLog.info("Expanding of {} resources of type {} completed",
-			idList.getIds().size(),
-			idList.getResourceType());
+			BulkExportExpandedResources output = new BulkExportExpandedResources();
+			output.setStringifiedResources(resources.get(nextResourceType));
+			output.setResourceType(nextResourceType);
+			theDataSink.accept(output);
+
+			ourLog.info("Expanding of {} resources of type {} completed",
+				idList.getIds().size(),
+				idList.getResourceType());
+
+
+		}
 
 		// and return
 		return RunOutcome.SUCCESS;
 	}
 
 	private List<IBaseResource> fetchAllResources(BulkExportIdList theIds) {
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIds.getResourceType());
 		List<IBaseResource> resources = new ArrayList<>();
 
 		for (Id id : theIds.getIds()) {
 			String value = id.getId();
+			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
 			resources.add(dao.readByPid(new ResourcePersistentId(value)));
 		}
@@ -114,15 +124,19 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return resources;
 	}
 
-	private List<String> encodeToString(List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
+	/**
+	 * @return A map - Key is resource type, Value is a collection of serialized resources of that type
+	 */
+	private ListMultimap<String, String> encodeToString(List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
 		IParser parser = getParser(theParameters);
 
-		List<String> resources = new ArrayList<>();
+		ListMultimap<String, String> retVal = ArrayListMultimap.create();
 		for (IBaseResource resource : theResources) {
+			String type = myFhirContext.getResourceType(resource);
 			String jsonResource = parser.encodeResourceToString(resource);
-			resources.add(jsonResource);
+			retVal.put(type, jsonResource);
 		}
-		return resources;
+		return retVal;
 	}
 
 	private IParser getParser(BulkExportJobParameters theParameters) {

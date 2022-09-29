@@ -11,6 +11,8 @@ jobs:
       pool:
          vmImage: ubuntu-latest
       steps:
+         -  checkout: self
+            fetchDepth: 1
          -  task: Cache@2
             inputs:
                key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
@@ -38,6 +40,8 @@ jobs:
          pool:
             vmImage: ubuntu-latest
          steps:
+            -  checkout: self
+               fetchDepth: 1
             -  script: echo testing module ${{ p.module }}
             -  script: echo $(SourceBranchName)
             -  task: DockerInstaller@0
@@ -49,15 +53,6 @@ jobs:
                inputs:
                   key: 'maven | "$(Agent.OS)" | "$(Build.SourceVersion)" | ./pom.xml'
                   path: $(MAVEN_CACHE_FOLDER)
-#            -  task: Maven@3
-#               env:
-#                  JAVA_HOME_11_X64: /usr/java/openjdk-17
-#               displayName: Checkstyle Build
-#               inputs:
-#                  mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
-#                  goals: 'clean install'
-#                  options: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-#                  jdkVersionOption: 1.11
             -  task: Maven@3
                env:
                   JAVA_HOME_11_X64: /usr/java/openjdk-17
@@ -100,6 +95,8 @@ jobs:
          -  ${{ each p in parameters.modules }}:
             - ${{ p.name }}
       steps:
+         -  checkout: self
+            fetchDepth: 1
          -  ${{ each p in parameters.modules }}:
             -  task: Bash@3
                inputs:
