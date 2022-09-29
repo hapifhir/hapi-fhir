@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.jpa.api.config;
 
 /*-
  * #%L
- * HAPI FHIR JPA Model
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,6 +20,18 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-public interface CompositeSearchIndexData {
-	void writeIndexEntry(HSearchIndexWriter theHSearchIndexWriter, HSearchElementCache theRoot);
+import ca.uhn.fhir.jpa.dao.ThreadPoolFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * This class exists to help generating thread pools for other parts of the code.
+ */
+@Configuration
+public class ThreadPoolFactoryConfig {
+
+	@Bean
+	public ThreadPoolFactory threadPoolFactory() {
+		return new ThreadPoolFactory();
+	}
 }
