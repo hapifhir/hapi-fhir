@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import com.healthmarketscience.sqlbuilder.JdbcEscape;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.persistence.Column;
@@ -9,6 +11,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
@@ -156,6 +160,25 @@ public class HapiMigrationEntity {
 			entity.setExecutionTime(rs.getInt(9));
 			entity.setSuccess(rs.getBoolean(10));
 			return entity;
+		};
+	}
+
+	public PreparedStatementSetter asPreparedStatementSetter() {
+		return ps -> {
+			ps.setInt(1, getPid());
+			ps.setString(2, getVersion());
+			ps.setString(3, getDescription());
+			ps.setString(4, getType());
+			ps.setString(5, getScript());
+			if (getChecksum() == null) {
+				ps.setNull(6, java.sql.Types.INTEGER);
+			} else {
+				ps.setInt(6, getChecksum());
+			}
+			ps.setString(7, getInstalledBy());
+			ps.setTimestamp(8, new java.sql.Timestamp(getInstalledOn().getTime()));
+			ps.setInt(9, getExecutionTime());
+			ps.setBoolean(10, getSuccess());
 		};
 	}
 }

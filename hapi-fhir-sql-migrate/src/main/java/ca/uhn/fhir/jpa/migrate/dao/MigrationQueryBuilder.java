@@ -102,18 +102,18 @@ public class MigrationQueryBuilder {
 			.toString();
 	}
 
-	public String insertStatement(HapiMigrationEntity theEntity) {
+	public String insertPreparedStatement() {
 		return new InsertQuery(myTable)
-			.addColumn(myInstalledRankCol, theEntity.getPid())
-			.addColumn(myVersionCol, theEntity.getVersion())
-			.addColumn(myDescriptionCol, theEntity.getDescription())
-			.addColumn(myTypeCol, theEntity.getType())
-			.addColumn(myScriptCol, theEntity.getScript())
-			.addColumn(myChecksumCol, theEntity.getChecksum())
-			.addColumn(myInstalledByCol, theEntity.getInstalledBy())
-			.addColumn(myInstalledOnCol, JdbcEscape.timestamp(theEntity.getInstalledOn()))
-			.addColumn(myExecutionTimeCol, theEntity.getExecutionTime())
-			.addColumn(mySuccessCol, getBooleanValue(theEntity.getSuccess()))
+			.addPreparedColumns(myInstalledRankCol,
+				myVersionCol,
+				myDescriptionCol,
+				myTypeCol,
+				myScriptCol,
+				myChecksumCol,
+				myInstalledByCol,
+				myInstalledOnCol,
+				myExecutionTimeCol,
+				mySuccessCol)
 			.validate()
 			.toString();
 	}

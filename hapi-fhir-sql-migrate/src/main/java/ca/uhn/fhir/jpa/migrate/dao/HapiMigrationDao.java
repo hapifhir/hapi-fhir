@@ -63,8 +63,8 @@ public class HapiMigrationDao {
 		theEntity.setScript("HAPI FHIR");
 		theEntity.setInstalledBy(VersionEnum.latestVersion().name());
 		theEntity.setInstalledOn(new Date());
-		String insertRecordStatement = myMigrationQueryBuilder.insertStatement(theEntity);
-		int result = myJdbcTemplate.update(insertRecordStatement);
+		String insertRecordStatement = myMigrationQueryBuilder.insertPreparedStatement();
+		int result = myJdbcTemplate.update(insertRecordStatement, theEntity.asPreparedStatementSetter());
 		return theEntity;
 	}
 

@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -56,7 +56,7 @@ public class MigrationTaskList implements Iterable<BaseTask>{
 		myTasks.clear();
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public Iterator<BaseTask> iterator() {
 		return myTasks.iterator();
