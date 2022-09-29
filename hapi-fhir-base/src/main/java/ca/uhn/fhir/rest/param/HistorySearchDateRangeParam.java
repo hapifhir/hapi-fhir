@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -20,29 +20,27 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
-import java.util.Arrays;
+import java.util.Map;
 
-public enum SearchParameterTypeEnum {
-	AT("_at"),
-	SINCE("_since"),
-	COUNT("_count");
+public class HistorySearchDateRangeParam extends DateRangeParam {
+	public HistorySearchDateRangeParam(Map<String, String[]> theParameters, DateRangeParam theDateRange,
+												  Integer theOffset){
+		super(theDateRange);
+		this.myOffset = theOffset;
 
-	public String getValue() {
-		return value;
+		this.myHistorySearchType = theParameters == null? null
+			: theParameters.keySet().stream().map(key -> HistorySearchStyleEnum.parse(key))
+			.filter(type -> type != null).findAny().orElse(null);
+	}
+	private HistorySearchStyleEnum myHistorySearchType;
+
+	private Integer myOffset;
+
+	public HistorySearchStyleEnum getHistorySearchType() {
+		return myHistorySearchType;
 	}
 
-	private final String value;
-
-	SearchParameterTypeEnum(String value) {
-		this.value = value;
-	}
-
-	public static SearchParameterTypeEnum parse(String value){
-		return Arrays.stream(SearchParameterTypeEnum.values())
-			.filter(type -> type.value.equals(value)).findAny().orElse(null);
-	}
-
-	public boolean isAt(){
-		return this == SearchParameterTypeEnum.AT;
+	public Integer getOffset() {
+		return myOffset;
 	}
 }

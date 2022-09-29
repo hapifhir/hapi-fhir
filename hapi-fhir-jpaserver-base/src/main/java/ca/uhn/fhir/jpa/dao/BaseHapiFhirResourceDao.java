@@ -89,7 +89,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HasParam;
-import ca.uhn.fhir.rest.param.SearchDateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -939,14 +939,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
-	public IBundleProvider history(final IIdType theId, final SearchDateRangeParam searchDateRangeParam, RequestDetails theRequest) {
+	public IBundleProvider history(final IIdType theId, final HistorySearchDateRangeParam theHistorySearchDateRangeParam,
+											 RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
 		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
 		BaseHasResource entity = readEntity(id, theRequest);
 
-		IBundleProvider retVal = super.history(theRequest, myResourceName, entity.getId(), searchDateRangeParam.getLowerBoundAsInstant(),
-			searchDateRangeParam.getUpperBoundAsInstant(), searchDateRangeParam.getTheOffset(), searchDateRangeParam.getSearchParameterType());
+		IBundleProvider retVal = super.history(theRequest, myResourceName, entity.getId(),
+			theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
+			theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
+			theHistorySearchDateRangeParam.getOffset(),
+			theHistorySearchDateRangeParam.getHistorySearchType());
 
 		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
 		return retVal;

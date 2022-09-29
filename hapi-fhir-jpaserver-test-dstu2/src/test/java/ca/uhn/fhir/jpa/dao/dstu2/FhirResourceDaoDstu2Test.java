@@ -1094,7 +1094,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, null, mySrd);
-		assertEquals(halfSize + 1, history.size().intValue());
+		assertEquals(halfSize, history.size().intValue());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1168,7 +1168,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(halfSize + 1, history.size().intValue());
+		assertEquals(halfSize, history.size().intValue());
 
 		// By type
 		history = myPatientDao.history(middleDate, null, null, mySrd);

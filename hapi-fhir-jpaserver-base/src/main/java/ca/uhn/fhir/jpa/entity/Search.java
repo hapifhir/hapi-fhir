@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.SearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -164,7 +164,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 * search parameter, this is used to keep the search criteria type.
 	 */
 	@Transient
-	private SearchParameterTypeEnum searchParameterType;
+	private HistorySearchStyleEnum myHistorySearchStyle;
 
 	/**
 	 * Constructor
@@ -423,12 +423,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 		myOffset = theOffset;
 	}
 
-	public SearchParameterTypeEnum getSearchParameterType() {
-		return searchParameterType;
+	public HistorySearchStyleEnum getHistorySearchStyle() {
+		return myHistorySearchStyle;
 	}
 
-	public void setSearchParameterType(SearchParameterTypeEnum searchParameterType) {
-		this.searchParameterType = searchParameterType;
+	public void setHistorySearchStyle(HistorySearchStyleEnum theHistorySearchStyle) {
+		this.myHistorySearchStyle = theHistorySearchStyle;
 	}
 
 	@Nonnull
