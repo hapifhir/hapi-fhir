@@ -288,7 +288,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 			mySearchParameterDao.create(threadIdSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid SearchParameter.expression value \"Communication.payload[1].contentAttachment is not null\": Error at 1, 4: Premature ExpressionNode termination at unexpected token \"null\""));
+			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\": Error at 1, 4: Premature ExpressionNode termination at unexpected token \"null\""));
 		}
 	}
 

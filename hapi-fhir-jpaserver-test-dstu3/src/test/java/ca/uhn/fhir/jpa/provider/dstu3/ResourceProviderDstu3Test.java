@@ -267,74 +267,45 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Test
 	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		String spCallingName = "securitySP";
+		String secCode = "secCode";
+
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("resource-security");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setName("Security");
-		searchParameter.setCode("security");
+		searchParameter.setCode(spCallingName);
 		searchParameter.addBase("Patient").addBase("Account");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("meta.security");
 
-		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
+		ourClient.create().resource(searchParameter).execute();
 		mySearchParamRegistry.forceRefresh();
 
-		Patient patientMR = new Patient();
-		patientMR.setMeta(new Meta().addSecurity(new Coding().setCode("MR")));
-		IIdType patientIdMR = ourClient.create().resource(patientMR).execute().getId();
+		IIdType expectedPatientId = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode(secCode)));
+		IIdType dontCare = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode("L")));
 
-		Patient patientL = new Patient();
-		patientL.setMeta(new Meta().addSecurity(new Coding().setCode("L")));
-		IIdType patientIdL = ourClient.create().resource(patientL).execute().getId();
+		Bundle searchResultBundle = ourClient.search().forResource(Patient.class).where(new StringClientParam(spCallingName).matches().value(secCode)).returnBundle(Bundle.class).execute();
 
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("security", new TokenParam(null, "MR"));
-
-		IBundleProvider patientResult = myPatientDao.search(map);
-		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(searchResultBundle);
 
 		assertEquals(1, foundPatients.size());
-		assertNotNull(result);
-		assertEquals("resource-security", result.getId().toUnqualifiedVersionless().getIdPart());
+
+		assertEquals(foundPatients.get(0), expectedPatientId.getValue());
 
 	}
 
 	@Test
 	public void createSearchParameter_with2Expressions_succeeds(){
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("my-gender");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setName("Gender");
-		searchParameter.setCode("mygender");
+		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender | Person.gender");
+		searchParameter.setExpression("Patient.gender|Person.gender");
 
-		MethodOutcome result= ourClient.update().resource(searchParameter).execute();
-		mySearchParamRegistry.forceRefresh();
+		MethodOutcome result= ourClient.create().resource(searchParameter).execute();
 
-		Patient patient = new Patient();
-		patient.addName().addGiven("Mykola");
-		patient.setGender(AdministrativeGender.MALE);
-		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+		assertEquals(true, result.getCreated());
 
-		Person person = new Person();
-		person.setGender(AdministrativeGender.MALE);
-		IIdType personId = ourClient.create().resource(person).execute().getId();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("mygender", new TokenParam(null, "male"));
-
-		IBundleProvider patientResult = myPatientDao.search(map);
-		IBundleProvider personResult = myPersonDao.search(map);
-
-		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
-		List<String> foundPersons = toUnqualifiedVersionlessIdValues(personResult);
-
-		assertEquals(1, foundPatients.size());
-		assertEquals(1, foundPersons.size());
-		assertNotNull(result);
-		assertEquals("my-gender", result.getId().toUnqualifiedVersionless().getIdPart());
 	}
 
 	@Test
@@ -4853,5 +4824,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
+	private IIdType createPatientWithMeta(Meta theMeta){
+
+		Patient patient = new Patient();
+		patient.setMeta(theMeta);
+		return ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	}
 
 }
