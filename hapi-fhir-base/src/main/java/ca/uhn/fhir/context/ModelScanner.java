@@ -546,6 +546,8 @@ class ModelScanner {
 					// Resources
 					String resName = nextKey.substring("resource.".length()).toLowerCase();
 					try {
+						//TODO GGG FIXME remove this shim once core has real capability statement.
+						nextValue = nextValue.replace("CapabilityStatement2", "CapabilityStatement");
 						@SuppressWarnings("unchecked")
 						Class<? extends IBaseResource> nextClass = (Class<? extends IBaseResource>) Class.forName(nextValue);
 						if (theExistingElementDefinitions.containsKey(nextClass)) {
