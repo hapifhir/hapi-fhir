@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -50,7 +51,8 @@ import javax.persistence.EntityManagerFactory;
 	SubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
 	SubscriptionChannelConfig.class,
-	SearchParamSubmitterConfig.class
+	SearchParamSubmitterConfig.class,
+	ThreadPoolFactoryConfig.class
 })
 public class TestJPAConfig {
 	@Bean
