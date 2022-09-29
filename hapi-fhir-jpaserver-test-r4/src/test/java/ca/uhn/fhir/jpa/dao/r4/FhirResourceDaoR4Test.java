@@ -112,6 +112,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -3402,20 +3404,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
 	}
 
-	@Test
-	public void testSortByMissingAttribute() {
-		String methodName = "testSortByMissingAttribute";
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSortByMissingAttribute(boolean theIndexMissingData) {
+		myDaoConfig.setIndexMissingFields(theIndexMissingData ? DaoConfig.IndexEnabledEnum.ENABLED : DaoConfig.IndexEnabledEnum.DISABLED);
 
 		Patient p = new Patient();
 		p.setGender(AdministrativeGender.MALE);
-		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
 		p.setGender(AdministrativeGender.FEMALE);
-		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap spMap;
 		List<IIdType> actual;
@@ -3426,6 +3429,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(spMap));
 		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, actual.size());
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
 	@Test
