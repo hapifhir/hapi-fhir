@@ -3422,7 +3422,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		spMap = SearchParameterMap.newSynchronous();
 		spMap.setSort(new SortSpec(Patient.SP_GENDER));
+		myCaptureQueriesListener.clear();
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(spMap));
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(3, actual.size());
 	}
 
