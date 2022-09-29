@@ -38,6 +38,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
@@ -242,10 +243,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		byte[] bytes = theBytes;
 		String fileName = theFileName;
+		String suffix = fileName.substring(fileName.lastIndexOf("."));
 
 		if (bytes.length > ourTransferSizeLimit) {
 			ourLog.info("File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.", FileUtil.formatFileSize(ourTransferSizeLimit));
-			String suffix = fileName.substring(fileName.lastIndexOf("."));
+
 			try {
 				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
 				tempFile.deleteOnExit();
@@ -260,11 +262,31 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		}
 
 		ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
+		AttachmentUtil.setContentType(myFhirCtx, attachment, getContentType(suffix));
 		AttachmentUtil.setUrl(myFhirCtx, attachment, fileName);
 		if (bytes != null) {
 			AttachmentUtil.setData(myFhirCtx, attachment, bytes);
 		}
 		ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+	}
+
+	/*
+	 * Files may be included in the attachment as raw CSV/JSON/XML files, or may also be combined into a compressed ZIP file.
+	 * Content Type reference: https://smilecdr.com/docs/terminology/uploading.html#delta-add-operation
+	 */
+	private String getContentType(String theSuffix) {
+		String retVal = "";
+		if(StringUtils.isNotBlank(theSuffix)) {
+			switch (theSuffix.toLowerCase()) {
+				case "csv" : retVal = "text/csv"; break;
+				case "xml" : retVal = "application/xml"; break;
+				case "json" : retVal = "application/json"; break;
+				case "zip" : retVal = "application/zip"; break;
+				default: retVal = "text/plain";
+			}
+		}
+		ourLog.debug("File suffix given was {} and contentType is {}, defaulting to content type text/plain", theSuffix, retVal);
+		return retVal;
 	}
 
 	private enum ModeEnum {
