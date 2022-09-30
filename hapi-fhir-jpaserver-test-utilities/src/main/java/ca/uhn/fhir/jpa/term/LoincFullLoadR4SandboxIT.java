@@ -26,6 +26,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -50,13 +51,14 @@ import org.springframework.util.ResourceUtils;
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -67,6 +69,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toSet;
@@ -101,10 +104,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(LoincFullLoadR4SandboxIT.class);
 
+	private static final DecimalFormat ourDecimalFormat = new DecimalFormat("#,###");
 
 	public static final boolean USE_REAL_DB = true;
-	public static final boolean LOAD_DB = true;
-	public static final String DB_NAME = "testDB";
+	public static final boolean LOAD_DB = false;
+	public static final String DB_NAME = "testDB_new";
 
 
 	public static final String LOINC_URL = "http://loinc.org";
@@ -131,8 +135,8 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	public static final String LOINC_ZIP_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_1.11.zip";
 
-	public static final String LOINC_CSV_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc.csv";
+	public static final String LOINC_CSV_ZIP_CLASSPATH =
+		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc.csv.gz";
 // -----------------------------------------------------------------------------------------
 
 	@Autowired private FhirContext myFhirCtx;
@@ -154,10 +158,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 	private long termCodeSystemVersionWithVersionId;
 
-	private int conceptsNotFoundInDbCount = 0;
-	private int conceptsFoundInDbCount = 0;
 	private int associatedObservationsCount = 0;
 	private int askAtOrderEntryCount = 0;
+	private int processedPropertiesCounter = 0;
 
 	private static List<String> recordPropertyNames;
 	private static List<String> newRecordPropertyNames = List.of(
@@ -219,10 +222,10 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 		validateCreatedConceptsHaveAllProperties( conceptPropertyRecords );
 
-		ourLog.info("Concepts not found in Db count: {}", conceptsNotFoundInDbCount);
-		ourLog.info("Concepts found in Db count    : {}", conceptsFoundInDbCount);
+		ourLog.info("Processed properties          : {}", processedPropertiesCounter);
 		ourLog.info("associatedObservationsCount   : {}", associatedObservationsCount);
 		ourLog.info("askAtOrderEntryCount          : {}", askAtOrderEntryCount);
+		ourLog.info("");
 
 		assertEquals(ASK_AT_ORDER_ENTRY_COUNT, askAtOrderEntryCount);
 		assertEquals(ASSOCIATED_OBSERVATIONS_COUNT, associatedObservationsCount);
@@ -260,21 +263,24 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	private void validateCreatedConceptsHaveAllProperties(List<Map<String, String>> theConceptPropertyInputMap) {
 		TermCodeSystemVersion tcsVersion = getTermCodeSystemVersion();
 
+		ourLog.info("Properties to process: {}", ourDecimalFormat.format(theConceptPropertyInputMap.size()));
+
 		for (Map<String, String> tcRecordMap : theConceptPropertyInputMap) {
 			String recordCode = getRecordCode(tcRecordMap);
+			processedPropertiesCounter++;
 
 			runInTransaction(() -> {
 				Optional<TermConcept> tcFomDbOpt = myTermConceptDao.findByCodeSystemAndCode(tcsVersion, recordCode);
-				if (tcFomDbOpt.isPresent()) {
-					validateTermConceptEntry(tcFomDbOpt.get(), tcRecordMap);
-				} else {
-					ourLog.error("Couldn't find TermConcept with code: {} in DB", recordCode);
-					conceptsNotFoundInDbCount++;
-				}
+				tcFomDbOpt.ifPresentOrElse(
+					tc -> validateTermConceptEntry(tc, tcRecordMap),
+					() -> ourLog.error("Couldn't find TermConcept with code: {} in DB", recordCode));
 			});
 
-			conceptsFoundInDbCount++;
+			if (processedPropertiesCounter % 10_000 == 0) {
+				ourLog.info("Processed properties: {}", ourDecimalFormat.format(processedPropertiesCounter));
+			}
 		}
+		ourLog.info("");
 	}
 
 
@@ -391,11 +397,17 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	}
 
 
+	public String getCvsStringFromZip(String theFilePath)  throws Exception {
+		InputStream stream = new FileInputStream(ResourceUtils.getFile(theFilePath));
+		assertNotNull(stream);
+		stream = new GZIPInputStream(stream);
+		return IOUtils.toString(stream, StandardCharsets.UTF_8);
+	}
+
+
 	@Nonnull
 	private CSVParser getCsvRecords() throws Exception {
-		InputStream is = new BufferedInputStream(new FileInputStream(ResourceUtils.getFile(LOINC_CSV_CLASSPATH)));
-		assertNotNull(is);
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		Reader reader = new StringReader(getCvsStringFromZip(LOINC_CSV_ZIP_CLASSPATH));
 
 		CSVFormat format = CSVFormat
 			.newFormat(',')
@@ -422,7 +434,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		int dbVersionedTermConceptCount = runInTransaction(() ->
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId) );
 		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
-//		assertEquals(CS_CONCEPTS_COUNT, dbVersionedTermConceptCount);
+		assertEquals(CS_CONCEPTS_COUNT, dbVersionedTermConceptCount);
 	}
 
 
