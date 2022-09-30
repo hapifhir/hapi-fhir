@@ -36,8 +36,6 @@ stages:
                      module: hapi-fhir-android
                   -  name: hapi_fhir_base
                      module: hapi-fhir-base
-                  -  name: hapi_fhir_batch
-                     module: hapi-fhir-batch
                   -  name: hapi_fhir_checkstyle
                      module: hapi-fhir-checkstyle
                   -  name: hapi_fhir_cli_api
