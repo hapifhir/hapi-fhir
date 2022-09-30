@@ -37,8 +37,6 @@ import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -79,13 +77,9 @@ public class TestJPAConfig {
 		return config;
 	}
 
-	/*
-	Please do not rename this bean to "transactionManager()" as this will conflict with the transactionManager
-	provided by Spring Batch.
-	 */
 	@Bean
 	@Primary
-	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
@@ -101,11 +95,6 @@ public class TestJPAConfig {
 	@Primary
 	public SubscriptionDeliveringRestHookSubscriber stoppableSubscriptionDeliveringRestHookSubscriber() {
 		return new StoppableSubscriptionDeliveringRestHookSubscriber();
-	}
-
-	@Bean
-	public BatchJobHelper batchJobHelper(JobExplorer theJobExplorer) {
-		return new BatchJobHelper(theJobExplorer);
 	}
 
 	@Bean
