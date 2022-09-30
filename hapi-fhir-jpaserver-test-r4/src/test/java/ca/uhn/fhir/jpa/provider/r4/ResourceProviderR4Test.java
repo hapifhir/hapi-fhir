@@ -309,40 +309,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void createSearchParameter_with2Expressions_succeeds(){
+
 		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("my-gender");
+
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setName("Gender");
-		searchParameter.setCode("mygender");
+		searchParameter.setCode("myGender");
 		searchParameter.addBase("Patient").addBase("Person");
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setExpression("Patient.gender | Person.gender");
+		searchParameter.setExpression("Patient.gender|Person.gender");
 
-		MethodOutcome result= myClient.update().resource(searchParameter).execute();
-		mySearchParamRegistry.forceRefresh();
+		MethodOutcome result= myClient.create().resource(searchParameter).execute();
 
-		Patient patient = new Patient();
-		patient.addName().addGiven("Mykola");
-		patient.setGender(Enumerations.AdministrativeGender.MALE);
-		IIdType patientId = myClient.create().resource(patient).execute().getId();
+		assertEquals(true, result.getCreated());
 
-		Person person = new Person();
-		person.setGender(Enumerations.AdministrativeGender.MALE);
-		IIdType personId = myClient.create().resource(person).execute().getId();
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("mygender", new TokenParam(null, "male"));
-
-		IBundleProvider patientResult = myPatientDao.search(map);
-		IBundleProvider personResult = myPersonDao.search(map);
-
-		List<String> foundPatients = toUnqualifiedVersionlessIdValues(patientResult);
-		List<String> foundPersons = toUnqualifiedVersionlessIdValues(personResult);
-
-		assertEquals(1, foundPatients.size());
-		assertEquals(1, foundPersons.size());
-		assertNotNull(result);
-		assertEquals("my-gender", result.getId().toUnqualifiedVersionless().getIdPart());
 	}
 
 	@Test
