@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -146,5 +147,11 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 			}
 		}
 		return retVal;
+	}
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrNull() {
+		return myPayloadId;
 	}
 }
