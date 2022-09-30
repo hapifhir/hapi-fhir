@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.batch;
+package ca.uhn.fhir.jpa.dao;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,20 +20,15 @@ package ca.uhn.fhir.jpa.batch;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.processor.GoldenResourceAnnotatingProcessor;
-import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import ca.uhn.fhir.util.ThreadPoolUtil;
+import org.springframework.core.task.AsyncTaskExecutor;
 
-@Configuration
-@Deprecated
-public class CommonBatchJobConfig {
-	public static final int MINUTES_IN_FUTURE_TO_PROCESS_FROM = 1;
+/**
+ * Basic bean which will create a Task Executor
+ */
+public class ThreadPoolFactory {
 
-	@Bean
-	@StepScope
-	public GoldenResourceAnnotatingProcessor goldenResourceAnnotatingProcessor() {
-		return new GoldenResourceAnnotatingProcessor();
+	public AsyncTaskExecutor newThreadPool(Integer theBundleBatchPoolSize, Integer theBundleBatchMaxPoolSize, String theThreadPrefix) {
+		return ThreadPoolUtil.newThreadPool(theBundleBatchPoolSize, theBundleBatchMaxPoolSize, theThreadPrefix);
 	}
-
 }

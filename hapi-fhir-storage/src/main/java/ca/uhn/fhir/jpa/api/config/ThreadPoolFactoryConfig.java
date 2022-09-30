@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.bulk.export.job;
+package ca.uhn.fhir.jpa.api.config;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -20,16 +20,18 @@ package ca.uhn.fhir.jpa.bulk.export.job;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
+import ca.uhn.fhir.jpa.dao.ThreadPoolFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public class GroupBulkExportJobParametersBuilder extends BulkExportJobParametersBuilder {
-	public GroupBulkExportJobParametersBuilder setGroupId(String theGroupId) {
-		this.addString(BatchConstants.GROUP_ID_PARAMETER, theGroupId);
-		return this;
-	}
+/**
+ * This class exists to help generating thread pools for other parts of the code.
+ */
+@Configuration
+public class ThreadPoolFactoryConfig {
 
-	public GroupBulkExportJobParametersBuilder setMdm(boolean theMdm) {
-		this.addString(BatchConstants.EXPAND_MDM_PARAMETER, String.valueOf(theMdm));
-		return this;
+	@Bean
+	public ThreadPoolFactory threadPoolFactory() {
+		return new ThreadPoolFactory();
 	}
 }
