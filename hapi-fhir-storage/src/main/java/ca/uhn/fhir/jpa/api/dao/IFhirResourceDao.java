@@ -127,7 +127,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * @deprecated Just use history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails) instead;
 	 */
-	@Deprecated
+	@Deprecated(since = "6.2")
 	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
 	IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails);
