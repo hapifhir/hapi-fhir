@@ -17,7 +17,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import javax.annotation.Nonnull;
 import java.util.function.Predicate;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
@@ -151,7 +151,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		assertEquals(29, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
-	@NotNull
+	@Nonnull
 	private static FhirValidator getFhirValidator() {
 		FhirValidator validator;
 		final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ourCtx);
@@ -162,12 +162,12 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		return validator;
 	}
 
-	@NotNull
+	@Nonnull
 	private static Bundle getBundle(String jsonFilePath) {
 		return ourCtx.newJsonParser().parseResource(Bundle.class, loadResource(jsonFilePath));
 	}
 
-	@NotNull
+	@Nonnull
 	private IValidationSupport getValidationSupportWithJpaPersistedResourceValidationSupport() {
 		return new ValidationSupportChain(
 			new DefaultProfileValidationSupport(ourCtx),
@@ -175,7 +175,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 		);
 	}
 
-	@NotNull
+	@Nonnull
 	private static Predicate<SingleValidationMessage> errorMessagePredicate() {
 		return message -> message.getSeverity() == ResultSeverityEnum.ERROR;
 	}

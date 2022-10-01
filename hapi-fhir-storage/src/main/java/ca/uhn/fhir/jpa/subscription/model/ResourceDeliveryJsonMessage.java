@@ -26,6 +26,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nullable;
+
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> {
 	private static final ObjectMapper ourObjectMapper = new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
 
@@ -53,6 +55,15 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 
 	public void setPayload(ResourceDeliveryMessage thePayload) {
 		myPayload = thePayload;
+	}
+
+	@Override
+	@Nullable
+	public String getMessageKeyOrNull() {
+		if (myPayload == null) {
+			return null;
+		}
+		return myPayload.getMessageKeyOrNull();
 	}
 
 	@Override
