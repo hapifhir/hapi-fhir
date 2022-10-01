@@ -153,7 +153,7 @@ public class HapiMigrationEntity {
 			entity.setScript(rs.getString(5));
 			entity.setChecksum(rs.getInt(6));
 			entity.setInstalledBy(rs.getString(7));
-			entity.setInstalledOn(rs.getTimestamp(8));
+			entity.setInstalledOn(rs.getDate(8));
 			entity.setExecutionTime(rs.getInt(9));
 			entity.setSuccess(rs.getBoolean(10));
 			return entity;

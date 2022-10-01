@@ -10,7 +10,6 @@ import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
-import com.healthmarketscience.sqlbuilder.JdbcEscape;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SqlObject;
 import com.healthmarketscience.sqlbuilder.ValidationContext;
@@ -73,7 +72,7 @@ public class MigrationQueryBuilder {
 		myInstalledByCol = myTable.addColumn("\"installed_by\"", Types.VARCHAR, HapiMigrationEntity.INSTALLED_BY_MAX_SIZE);
 		myInstalledByCol.notNull();
 
-		myInstalledOnCol = myTable.addColumn("\"installed_on\"", Types.TIMESTAMP, null);
+		myInstalledOnCol = myTable.addColumn("\"installed_on\"", Types.DATE, null);
 		myInstalledOnCol.notNull();
 
 		myExecutionTimeCol = myTable.addColumn("\"execution_time\"", Types.INTEGER, null);
