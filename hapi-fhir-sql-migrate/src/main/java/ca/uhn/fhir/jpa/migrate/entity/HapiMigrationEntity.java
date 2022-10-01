@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.entity;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import com.healthmarketscience.sqlbuilder.JdbcEscape;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -11,8 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Date;
 
 // Note even though we are using javax.persistence annotations here, we are managing these records outside of jpa
@@ -176,7 +173,7 @@ public class HapiMigrationEntity {
 				ps.setInt(6, getChecksum());
 			}
 			ps.setString(7, getInstalledBy());
-			ps.setTimestamp(8, new java.sql.Timestamp(getInstalledOn().getTime()));
+			ps.setDate(8, getInstalledOn() != null ? new java.sql.Date(getInstalledOn().getTime()) : null);
 			ps.setInt(9, getExecutionTime());
 			ps.setBoolean(10, getSuccess());
 		};
