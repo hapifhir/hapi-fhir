@@ -2040,8 +2040,8 @@
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
-					<artifactId>hibernate54-ddl-maven-plugin</artifactId>
-					<version>2.3.0</version>
+					<artifactId>hibernate56-ddl-maven-plugin</artifactId>
+					<version>2.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

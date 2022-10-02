@@ -59,6 +59,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 	@Autowired
 	private MdmSettings myMdmSettings;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
@@ -69,6 +70,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 		myMdmSettings.setEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myMdmSettings.setEnabled(false);

@@ -47,13 +47,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Interceptor
 public class RequestTenantPartitionInterceptor {
 
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
+	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY)
 	public RequestPartitionId partitionIdentifyCreate(RequestDetails theRequestDetails) {
-		return extractPartitionIdFromRequest(theRequestDetails);
-	}
-
-	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId partitionIdentifyRead(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
