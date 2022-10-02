@@ -51,14 +51,13 @@ import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCal
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
 import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
 
-public abstract class BaseRequestPartitionHelperSvc implements IRequestPartitionHelperSvc{
+public abstract class BaseRequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	private final HashSet<Object> myNonPartitionableResourceNames;
-
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected FhirContext myFhirContext;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
@@ -107,9 +106,18 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
 				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
+			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
+				// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
 			} else if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_READ, myInterceptorBroadcaster, theRequest)) {
 				// Interceptor call: STORAGE_PARTITION_IDENTIFY_READ
-				HookParams params = new HookParams().add(RequestDetails.class, theRequest).addIfMatchesType(ServletRequestDetails.class, theRequest).add(ReadPartitionIdRequestDetails.class, theDetails);
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(ReadPartitionIdRequestDetails.class, theDetails);
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
 				requestPartitionId = null;
@@ -181,10 +189,21 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 			if (theRequest instanceof SystemRequestDetails && systemRequestHasExplicitPartition((SystemRequestDetails) theRequest)) {
 				requestPartitionId = getSystemRequestPartitionId((SystemRequestDetails) theRequest, nonPartitionableResource);
 			} else {
-				//This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition via interceptor.
-				// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
-				HookParams params = new HookParams().add(IBaseResource.class, theResource).add(RequestDetails.class, theRequest).addIfMatchesType(ServletRequestDetails.class, theRequest);
-				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+				if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequest)) {
+					// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+				} else {
+					//This is an external Request (e.g. ServletRequestDetails) so we want to figure out the partition via interceptor.
+					// Interceptor call: STORAGE_PARTITION_IDENTIFY_CREATE
+					HookParams params = new HookParams()
+						.add(IBaseResource.class, theResource)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
+				}
 
 				//If the interceptors haven't selected a partition, and its a non-partitionable resource anyhow, send to DEFAULT
 				if (nonPartitionableResource && requestPartitionId == null) {

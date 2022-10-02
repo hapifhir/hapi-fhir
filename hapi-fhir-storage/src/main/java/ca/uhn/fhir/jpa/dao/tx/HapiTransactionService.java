@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -41,17 +42,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+
+import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
+import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
 
 public class HapiTransactionService {
 
 	public static final String XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS = HapiTransactionService.class.getName() + "_RESOLVED_TAG_DEFINITIONS";
 	public static final String XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS = HapiTransactionService.class.getName() + "_EXISTING_SEARCH_PARAMS";
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiTransactionService.class);
+	private static final ThreadLocal<RequestPartitionId> ourRequestPartition = new ThreadLocal<>();
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
@@ -79,68 +83,83 @@ public class HapiTransactionService {
 
 	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
 
-		for (int i = 0; ; i++) {
-			try {
-
-				return doExecuteCallback(theCallback);
-
-			} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
-				ourLog.debug("Version conflict detected", e);
-
-				if (theOnRollback != null) {
-					theOnRollback.run();
-				}
-
-				int maxRetries = 0;
-
-				/*
-				 * If two client threads both concurrently try to add the same tag that isn't
-				 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-				 * which is the tag definition table. In that case, a constraint error will be
-				 * thrown by one of the client threads, so we auto-retry in order to avoid
-				 * annoying spurious failures for the client.
-				 */
-				if (DaoFailureUtil.isTagStorageFailure(e)) {
-					maxRetries = 3;
-				}
-
-				if (maxRetries == 0) {
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
-					if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-						maxRetries = conflictResolutionStrategy.getMaxRetries();
-					}
-				}
-
-				if (i < maxRetries) {
-					theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
-					theTransactionDetails.clearRollbackUndoActions();
-					theTransactionDetails.clearResolvedItems();
-					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-					double sleepAmount = (250.0d * i) * Math.random();
-					long sleepAmountLong = (long) sleepAmount;
-					TestUtil.sleepAtLeast(sleepAmountLong, false);
-
-					ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-					continue;
-				}
-
-				IBaseOperationOutcome oo = null;
-				if (e instanceof ResourceVersionConflictException) {
-					oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-				}
-
-				if (maxRetries > 0) {
-					String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-					ourLog.info(msg, maxRetries);
-					throw new ResourceVersionConflictException(Msg.code(549) + msg);
-				}
-
-				throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+		if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
+			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			RequestPartitionId requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+			if (requestPartitionId != null) {
+				ourRequestPartition.set(requestPartitionId);
 			}
+		}
+
+		try {
+			for (int i = 0; ; i++) {
+				try {
+
+					return doExecuteCallback(theCallback);
+
+				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+					ourLog.debug("Version conflict detected", e);
+
+					if (theOnRollback != null) {
+						theOnRollback.run();
+					}
+
+					int maxRetries = 0;
+
+					/*
+					 * If two client threads both concurrently try to add the same tag that isn't
+					 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+					 * which is the tag definition table. In that case, a constraint error will be
+					 * thrown by one of the client threads, so we auto-retry in order to avoid
+					 * annoying spurious failures for the client.
+					 */
+					if (DaoFailureUtil.isTagStorageFailure(e)) {
+						maxRetries = 3;
+					}
+
+					if (maxRetries == 0) {
+						HookParams params = new HookParams()
+							.add(RequestDetails.class, theRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+							maxRetries = conflictResolutionStrategy.getMaxRetries();
+						}
+					}
+
+					if (i < maxRetries) {
+						theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+						theTransactionDetails.clearRollbackUndoActions();
+						theTransactionDetails.clearResolvedItems();
+						theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+						theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						double sleepAmount = (250.0d * i) * Math.random();
+						long sleepAmountLong = (long) sleepAmount;
+						TestUtil.sleepAtLeast(sleepAmountLong, false);
+
+						ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+						continue;
+					}
+
+					IBaseOperationOutcome oo = null;
+					if (e instanceof ResourceVersionConflictException) {
+						oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+					}
+
+					if (maxRetries > 0) {
+						String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+						ourLog.info(msg, maxRetries);
+						throw new ResourceVersionConflictException(Msg.code(549) + msg);
+					}
+
+					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+				}
+			}
+		} finally {
+			ourRequestPartition.remove();
 		}
 
 	}
@@ -167,5 +186,9 @@ public class HapiTransactionService {
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
 		}
+	}
+
+	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
+		return ourRequestPartition.get();
 	}
 }

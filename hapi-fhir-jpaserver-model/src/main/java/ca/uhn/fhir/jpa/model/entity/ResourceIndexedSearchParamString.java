@@ -75,8 +75,8 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
 	@Id
-//	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
-	@GenericGenerator(name = "SEQ_SPIDX_STRING", strategy = "ca.uhn.fhir.jpa.model.dialect.Generator")
+	@SequenceGenerator(name = "SEQ_SPIDX_STRING", sequenceName = "SEQ_SPIDX_STRING")
+//	@GenericGenerator(name = "SEQ_SPIDX_STRING", strategy = "ca.uhn.fhir.jpa.model.dialect.Generator")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_STRING")
 	@Column(name = "SP_ID")
 	private Long myId;
