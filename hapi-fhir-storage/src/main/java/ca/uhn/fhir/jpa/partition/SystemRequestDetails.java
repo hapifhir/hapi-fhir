@@ -155,6 +155,11 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
+	public boolean isSystemRequest() {
+		return true;
+	}
+
+	@Override
 	public IRestfulServerDefaults getServer() {
 		return new MyRestfulServerDefaults();
 	}

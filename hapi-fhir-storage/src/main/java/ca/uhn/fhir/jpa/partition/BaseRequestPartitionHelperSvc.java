@@ -131,6 +131,26 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		return RequestPartitionId.allPartitions();
 	}
 
+	@Override
+	public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
+		RequestPartitionId retVal = null;
+
+		if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
+			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			retVal = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
+
+			if (retVal != null) {
+				retVal = validateNormalizeAndNotifyHooksForRead(retVal, theRequestDetails, null);
+			}
+
+		}
+
+		return retVal;
+	}
+
 	/**
 	 * For system requests, read partition from tenant ID if present, otherwise set to DEFAULT. If the resource they are attempting to partition
 	 * is non-partitionable scream in the logs and set the partition to DEFAULT.
@@ -248,7 +268,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	 * If the partition has both, they are validated to ensure that they correspond.
 	 */
 	@Nonnull
-	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, @Nonnull String theResourceType) {
+	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, @Nullable String theResourceType) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
 		if (!myPartitionSettings.isUnnamedPartitionMode()) {
@@ -274,7 +294,11 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
 			RuntimeResourceDefinition runtimeResourceDefinition;
 			runtimeResourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
-			HookParams params = new HookParams().add(RequestPartitionId.class, theRequestPartitionId).add(RequestDetails.class, theRequest).addIfMatchesType(ServletRequestDetails.class, theRequest).add(RuntimeResourceDefinition.class, runtimeResourceDefinition);
+			HookParams params = new HookParams()
+				.add(RequestPartitionId.class, theRequestPartitionId)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RuntimeResourceDefinition.class, runtimeResourceDefinition);
 			doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_SELECTED, params);
 		}
 	}

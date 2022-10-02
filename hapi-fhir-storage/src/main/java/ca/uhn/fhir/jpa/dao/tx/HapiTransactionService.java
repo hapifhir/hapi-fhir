@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.ResourceVersionConflictResolutionStrategy;
 import ca.uhn.fhir.jpa.dao.DaoFailureUtil;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -60,6 +61,9 @@ public class HapiTransactionService {
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected PlatformTransactionManager myTransactionManager;
+	@Autowired
+	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	protected TransactionTemplate myTxTemplate;
 
 	@VisibleForTesting
@@ -83,15 +87,11 @@ public class HapiTransactionService {
 
 	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
 
-		if (hasHooks(Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, myInterceptorBroadcaster, theRequestDetails)) {
-			// Interceptor call: STORAGE_PARTITION_IDENTIFY_ANY
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			RequestPartitionId requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PARTITION_IDENTIFY_ANY, params);
-			if (requestPartitionId != null) {
-				ourRequestPartition.set(requestPartitionId);
-			}
+		final RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
+		RequestPartitionId previousRequestPartitionId = null;
+		if (requestPartitionId != null) {
+			previousRequestPartitionId = ourRequestPartition.get();
+			ourRequestPartition.set(requestPartitionId);
 		}
 
 		try {
@@ -159,7 +159,9 @@ public class HapiTransactionService {
 				}
 			}
 		} finally {
-			ourRequestPartition.remove();
+			if (requestPartitionId != null) {
+				ourRequestPartition.set(previousRequestPartitionId);
+			}
 		}
 
 	}

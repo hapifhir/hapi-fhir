@@ -873,6 +873,11 @@ public class GiantTransactionPerfTest {
 			return RequestPartitionId.defaultPartition();
 		}
 
+		@Override
+		public RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails) {
+			return RequestPartitionId.defaultPartition();
+		}
+
 		@Nonnull
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {

@@ -542,4 +542,10 @@ public abstract class RequestDetails {
 	public void setRewriteHistory(boolean theRewriteHistory) {
 		myRewriteHistory = theRewriteHistory;
 	}
+
+
+	public boolean isSystemRequest() {
+		return false;
+	}
+
 }

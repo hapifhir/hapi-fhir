@@ -58,6 +58,9 @@ public class RequestTenantPartitionInterceptor {
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();
 		if (isBlank(tenantId)) {
+			if (theRequestDetails.isSystemRequest()) {
+				return RequestPartitionId.defaultPartition();
+			}
 			throw new InternalErrorException(Msg.code(343) + "No tenant ID has been specified");
 		}
 
