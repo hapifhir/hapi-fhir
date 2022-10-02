@@ -20,9 +20,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-import java.math.BigDecimal;
-
-class QuantitySearchIndexData {
+public class QuantitySearchIndexData {
 
 	// unit is also referred as code
 	private final String myCode;
@@ -30,7 +28,7 @@ class QuantitySearchIndexData {
 	private final double myValue;
 
 
-	QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
+	public QuantitySearchIndexData(String theCode, String theSystem, double theValue) {
 		myCode = theCode;
 		mySystem = theSystem;
 		myValue = theValue;

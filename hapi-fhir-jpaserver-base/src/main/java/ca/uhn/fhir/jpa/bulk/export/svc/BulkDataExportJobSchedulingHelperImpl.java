@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
@@ -61,9 +60,6 @@ public class BulkDataExportJobSchedulingHelperImpl implements IBulkDataExportJob
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	@Autowired
-	private IBatchJobSubmitter myJobSubmitter;
 
 	@Autowired
 	private IBulkExportCollectionDao myBulkExportCollectionDao;

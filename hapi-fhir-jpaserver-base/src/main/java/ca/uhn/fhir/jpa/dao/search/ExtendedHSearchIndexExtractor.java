@@ -25,9 +25,14 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.QuantitySearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
@@ -71,7 +76,7 @@ public class ExtendedHSearchIndexExtractor {
 
 	@Nonnull
 	public ExtendedHSearchIndexData extract(IBaseResource theResource, ResourceIndexedSearchParams theNewParams) {
-		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myModelConfig);
+		ExtendedHSearchIndexData retVal = new ExtendedHSearchIndexData(myContext, myModelConfig, theResource);
 
 		if(myDaoConfig.isStoreResourceInHSearchIndex()) {
 			retVal.setRawResourceData(myContext.newJsonParser().encodeResourceToString(theResource));
@@ -79,6 +84,7 @@ public class ExtendedHSearchIndexExtractor {
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
 
+		// wipmb mb add a flag ot DaoConfig to suppress this
 		extractAutocompleteTokens(theResource, retVal);
 
 		theNewParams.myStringParams.forEach(nextParam ->
@@ -90,12 +96,9 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myNumberParams.forEach(nextParam ->
 			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
 
-		theNewParams.myDateParams.forEach(nextParam ->
-			retVal.addDateIndexData(nextParam.getParamName(), nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(),
-				nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal()));
+		theNewParams.myDateParams.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
-		theNewParams.myQuantityParams.forEach(nextParam ->
-			retVal.addQuantityIndexData(nextParam.getParamName(), nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue()));
+		theNewParams.myQuantityParams.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theResource.getMeta().getTag().forEach(tag ->
 			retVal.addTokenIndexData("_tag", tag));
@@ -110,6 +113,10 @@ public class ExtendedHSearchIndexExtractor {
 		if (isNotBlank(source)) {
 			retVal.addUriIndexData("_source", source);
 		}
+
+		theNewParams.myCompositeParams.forEach(nextParam ->
+			retVal.addCompositeIndexData(nextParam.getSearchParamName(), buildCompositeIndexData(nextParam)));
+
 
 		if (theResource.getMeta().getLastUpdated() != null) {
 			int ordinal = ResourceIndexedSearchParamDate.calculateOrdinalValue(theResource.getMeta().getLastUpdated()).intValue();
@@ -155,6 +162,21 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		return retVal;
+	}
+
+	@Nonnull
+	public static DateSearchIndexData convertDate(ResourceIndexedSearchParamDate nextParam) {
+		return new DateSearchIndexData(nextParam.getValueLow(), nextParam.getValueLowDateOrdinal(), nextParam.getValueHigh(), nextParam.getValueHighDateOrdinal());
+	}
+
+	@Nonnull
+	public static QuantitySearchIndexData convertQuantity(ResourceIndexedSearchParamQuantity nextParam) {
+		return new QuantitySearchIndexData(nextParam.getUnits(), nextParam.getSystem(), nextParam.getValue().doubleValue());
+	}
+
+	@Nonnull
+	private CompositeSearchIndexData buildCompositeIndexData(ResourceIndexedSearchParamComposite theSearchParamComposite) {
+		return new HSearchCompositeSearchIndexDataImpl(theSearchParamComposite);
 	}
 
 	/**
@@ -204,4 +226,5 @@ public class ExtendedHSearchIndexExtractor {
 	private void addToken_Coding(ExtendedHSearchIndexData theRetVal, String theSpName, IBaseCoding theNextValue) {
 		theRetVal.addTokenIndexData(theSpName, theNextValue);
 	}
+
 }

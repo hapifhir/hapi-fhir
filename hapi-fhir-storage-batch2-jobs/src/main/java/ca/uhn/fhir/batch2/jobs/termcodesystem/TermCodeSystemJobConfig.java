@@ -40,11 +40,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 
 @Configuration
 public class TermCodeSystemJobConfig {
+	/**
+	 * TermCodeSystem delete
+	 */
+	public static final String TERM_CODE_SYSTEM_DELETE_JOB_NAME 			= "termCodeSystemDeleteJob";
+
+	/**
+	 * TermCodeSystemVersion delete
+	 */
+	public static final String TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME 						= "termCodeSystemVersionDeleteJob";
+
 
 	@Autowired
 	private ITermCodeSystemDeleteJobSvc myITermCodeSystemSvc;

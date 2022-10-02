@@ -175,7 +175,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return theMax;
 		}
 
-		// wipmb we should really pass this in.
+		// todo mb we should really pass this in.
 		if (theParams.getCount() != null) {
 			return theParams.getCount();
 		}
@@ -271,7 +271,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 		validateHibernateSearchIsEnabled();
 
-		// wipmb what about max results here?
+		// todo mb what about max results here?
 		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
