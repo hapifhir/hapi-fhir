@@ -67,25 +67,26 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
 		</dependency>
-
-		<!-- SQL Builder -->
 		<dependency>
-			<groupId>com.healthmarketscience.sqlbuilder</groupId>
-			<artifactId>sqlbuilder</artifactId>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-sqlserver</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
-		<!-- test -->
-
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-commons</artifactId>
 		</dependency>
-		</dependencies>
+
+	</dependencies>
 
 	<build>
 

@@ -149,10 +149,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	private List<IBaseResource> doHistoryInTransaction(Integer theOffset, int theFromIndex, int theToIndex) {
 
-		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
+		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(),
+			mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
 		RequestPartitionId partitionId = getRequestPartitionIdForHistory();
-		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex, theToIndex);
+		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex,
+			theToIndex, mySearchEntity.getHistorySearchStyle());
 
 		List<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {

@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class MigrationTaskList implements Iterable<BaseTask>{
+public class MigrationTaskList implements Iterable<BaseTask> {
 	private final List<BaseTask> myTasks;
 
 	public MigrationTaskList() {

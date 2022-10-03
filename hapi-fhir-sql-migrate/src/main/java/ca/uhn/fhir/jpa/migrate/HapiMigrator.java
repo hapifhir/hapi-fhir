@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.migrate;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -160,7 +161,16 @@ public class HapiMigrator {
 	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
-		myTaskList.append(theMigrationTasks);
+		if ("true".equals(System.getProperty("unit_test_mode"))) {
+			// Tests only need to initialize the schemas. No need to run all the migrations for every test.
+			for (BaseTask task : theMigrationTasks) {
+				if (task instanceof InitializeSchemaTask) {
+					addTask(task);
+				}
+			}
+		} else {
+			myTaskList.append(theMigrationTasks);
+		}
 	}
 
 	public void addTask(BaseTask theTask) {

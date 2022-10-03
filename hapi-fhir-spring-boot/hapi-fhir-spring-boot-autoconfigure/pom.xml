@@ -5,7 +5,11 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
+<<<<<<< HEAD
 		<version>6.2.0-PRE12-SNAPSHOT</version>
+=======
+		<version>6.2.0-PRE12-SNAPSHOT</version>
+>>>>>>> origin/master
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
