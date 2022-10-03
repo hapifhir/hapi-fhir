@@ -2,11 +2,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -21,10 +19,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -34,17 +29,8 @@ import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.rest.param.NumberParam;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringOrListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -56,101 +42,34 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.AuditEvent;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.Coverage;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.DecimalType;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.DocumentManifest;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ImagingStudy;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Media;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.MolecularSequence;
-import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationComponentComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -170,15 +89,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -189,32 +100,8 @@ import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContain
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -1262,6 +1149,81 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(mediaId, returnedBundle.getEntryFirstRep().getResource().getIdElement());
+	}
+
+	@Test
+	public void testAddExtensionToExtension() throws IOException {
+
+		// Add a procedure
+		Extension extension = new Extension();
+		extension.setUrl("planning-datetime");
+		Procedure procedure = new Procedure();
+		procedure.setExtension(List.of(extension));
+		String procedureResource = myFhirContext.newXmlParser().encodeResourceToString(procedure);
+		HttpPost procedurePost = new HttpPost(ourServerBase + "/Procedure");
+		procedurePost.setEntity(new StringEntity(procedureResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(procedurePost);
+		IdType id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Procedure/"));
+			id = new IdType(newIdString);
+		} finally {
+			response.close();
+		}
+
+		// Add an extension to the procedure
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		BundleEntryComponent entry = new BundleEntryComponent();
+		Bundle.BundleEntryRequestComponent requestComponent = new Bundle.BundleEntryRequestComponent();
+		requestComponent.setMethod(HTTPVerb.PATCH);
+		requestComponent.setUrl("Procedure/" + id.getIdPart());
+		entry.setRequest(requestComponent);
+
+		Parameters parameter = new Parameters();
+		Parameters.ParametersParameterComponent part1 = new Parameters.ParametersParameterComponent();
+		part1.setName("type");
+		part1.setValue(new CodeType("add"));
+		Parameters.ParametersParameterComponent part2 = new Parameters.ParametersParameterComponent();
+		part2.setName("path");
+		part2.setValue(new StringType("Procedure.extension[0]"));
+		Parameters.ParametersParameterComponent part3 = new Parameters.ParametersParameterComponent();
+		part3.setName("name");
+		part3.setValue(new StringType("extension"));
+		Parameters.ParametersParameterComponent nestedPart = new Parameters.ParametersParameterComponent();
+		nestedPart.setName("value");
+		nestedPart.addPart().setName("url").setValue(new UriType("is-preferred"));
+		nestedPart.addPart().setName("valueBoolean").setValue(new BooleanType(false));
+		List<Parameters.ParametersParameterComponent> parts = Arrays.asList(part1, part2, part3, nestedPart);
+		parameter.addParameter()
+			.setName("operation")
+			.setPart(parts);
+		entry.setResource(parameter);
+		bundle.setEntry(List.of(entry));
+
+		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
+		HttpPost parameterPost = new HttpPost(ourServerBase);
+		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		response = ourHttpClient.execute(parameterPost);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		} finally {
+			response.close();
+		}
+
+		// Get procedures
+		HttpGet procedureGet = new HttpGet(ourServerBase + "/Procedure");
+		response = ourHttpClient.execute(procedureGet);
+		try {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			HttpEntity entity = response.getEntity();
+			String responseString = EntityUtils.toString(entity, "UTF-8");
+			System.out.printf("");
+		} finally {
+			response.close();
+		}
 	}
 
 	@Test
@@ -2364,8 +2326,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(allresults, not(hasItem(c5Id)));
 		}
 	}
+
 	@Test
-	public void testContains(){
+	public void testContains() {
 		List<String> test = List.of("a", "b", "c");
 		String testString = "testAString";
 
@@ -4079,6 +4042,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
+
 	private void assertOneResult(Bundle theResponse) {
 		assertThat(theResponse.getEntry().size(), is(equalTo(1)));
 	}
@@ -4960,7 +4924,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY t0")));
 		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
@@ -5823,7 +5787,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
-	public void testSearchTagWithInvalidTokenParam(String searchParam){
+	public void testSearchTagWithInvalidTokenParam(String searchParam) {
 
 		try {
 			myClient
@@ -5832,7 +5796,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			fail();
-		} catch (InvalidRequestException ex){
+		} catch (InvalidRequestException ex) {
 			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
 		}
 
@@ -7114,7 +7078,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
@@ -7137,7 +7101,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String metaSource = "mySource#123456789012345678901234567890";
@@ -7161,7 +7125,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten() {
 		String sourceURL = "mySource";
 		String requestId = "#345676";
 		String patientId = "1234a";
@@ -7184,7 +7148,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String sourceUri = "mySource";
@@ -7213,7 +7177,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails() {
 		String sourceURI = "mySource";
 		String requestId = "345676";
 
@@ -7450,8 +7414,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		/**
 		 * Verifies that the returned Bundle contains the resource
 		 * with the id provided.
+		 *
 		 * @param theBundle - returned bundle
-		 * @param theType - provided resource id
+		 * @param theType   - provided resource id
 		 */
 		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
 			ourLog.info(myParser.encodeResourceToString(theBundle));
@@ -7484,8 +7449,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		/**
 		 * Runs the search on the given resource type with the given (missing) criteria
+		 *
 		 * @param theResourceClass - the resource type class
-		 * @param theCriteria - the missing critia to use
+		 * @param theCriteria      - the missing critia to use
 		 * @return - the found bundle
 		 */
 		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
