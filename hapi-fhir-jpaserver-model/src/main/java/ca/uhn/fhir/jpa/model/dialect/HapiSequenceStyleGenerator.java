@@ -20,36 +20,39 @@ package ca.uhn.fhir.jpa.model.dialect;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
+import org.hibernate.boot.registry.StandardServiceInitiator;
+import org.hibernate.boot.registry.internal.StandardServiceRegistryImpl;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.id.PersistentIdentifierGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
+import org.hibernate.service.Service;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.spi.ServiceRegistryImplementor;
 import org.hibernate.type.Type;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Properties;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @SuppressWarnings("unused")
 public class HapiSequenceStyleGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
-
-	@Nonnull
-	private static IMassager ourIdMassager;
-
-	static {
-		NoopMassager idMassager = new NoopMassager();
-		setIdMassager(idMassager);
-	}
-
-	private SequenceStyleGenerator myGen = new SequenceStyleGenerator();
+	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
+	@Autowired
+	private ModelConfig myModelConfig;
+	private ISequenceValueMassager myIdMassager;
 	private boolean myConfigured;
 	private String myGeneratorName;
 
@@ -66,22 +69,30 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	@Override
 	public Serializable generate(SharedSessionContractImplementor theSession, Object theObject) throws HibernateException {
 		Long next = (Long) myGen.generate(theSession, theObject);
-		return ourIdMassager.massage(myGeneratorName, next);
+		return myIdMassager.massage(myGeneratorName, next);
 	}
 
 	@Override
-	public void configure(Type type, Properties params, ServiceRegistry serviceRegistry) throws MappingException {
-		myConfigured = true;
+	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry) throws MappingException {
 
-		myGeneratorName = params.getProperty(IdentifierGenerator.GENERATOR_NAME);
+		// Instantiate the ID massager
+		// ModelConfig should only be null when running in the DDL generation maven plugin
+		if (myModelConfig != null) {
+			myIdMassager = ReflectionUtil.newInstance(myModelConfig.getSequenceValueMassagerClass());
+		}
+
+		// Create a HAPI FHIR sequence style generator
+		myGeneratorName = theParams.getProperty(IdentifierGenerator.GENERATOR_NAME);
 		Validate.notBlank(myGeneratorName, "No generator name found");
 
-		Properties props = new Properties(params);
+		Properties props = new Properties(theParams);
 		props.put(SequenceStyleGenerator.OPT_PARAM, StandardOptimizerDescriptor.POOLED.getExternalName());
 		props.put(SequenceStyleGenerator.INITIAL_PARAM, "1");
 		props.put(SequenceStyleGenerator.INCREMENT_PARAM, "50");
 
-		myGen.configure(type, props, serviceRegistry);
+		myGen.configure(theType, props, theServiceRegistry);
+
+		myConfigured = true;
 	}
 
 	@Override
@@ -100,25 +111,6 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 	@Override
 	public boolean supportsJdbcBatchInserts() {
 		return myGen.supportsJdbcBatchInserts();
-	}
-
-	public interface IMassager {
-
-		Long massage(String theGeneratorName, Long theId);
-
-	}
-
-	public static final class NoopMassager implements IMassager {
-
-		@Override
-		public Long massage(String theGeneratorName, Long theId) {
-			return theId;
-		}
-	}
-
-	public static void setIdMassager(@Nonnull NoopMassager theIdMassager) {
-		Validate.notNull(theIdMassager);
-		ourIdMassager = theIdMassager;
 	}
 
 }

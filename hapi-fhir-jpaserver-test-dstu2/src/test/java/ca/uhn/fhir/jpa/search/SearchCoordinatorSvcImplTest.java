@@ -108,6 +108,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	private SearchCoordinatorSvcImpl mySvc;
 
+	@Override
 	@AfterEach
 	public void after() {
 		System.clearProperty(QueryParameterUtils.UNIT_TEST_CAPTURE_STACK);
@@ -127,7 +128,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			myContext,
 			myDaoConfig,
 			myInterceptorBroadcaster,
-			myTxManager,
+			myTransactionService,
 			mySearchCacheSvc,
 			mySearchResultCacheSvc,
 			myDaoRegistry,
@@ -303,7 +304,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			ISearchBuilder searchBuilder = t.getArgument(3, ISearchBuilder.class);
 			PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, searchTask, searchBuilder, requestDetails);
 			retVal.setDaoConfigForUnitTest(new DaoConfig());
-			retVal.setTxManagerForUnitTest(myTxManager);
+			retVal.setTxServiceForUnitTest(myTransactionService);
 			retVal.setSearchCoordinatorSvcForUnitTest(mySvc);
 			return retVal;
 		});
@@ -354,6 +355,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 			// good
 		}
 
+		//noinspection ResultOfMethodCallIgnored
 		completionLatch.await(10, TimeUnit.SECONDS);
 	}
 
@@ -484,7 +486,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
 		provider = new PersistedJpaBundleProvider(null, uuid);
-		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setTxServiceForUnitTest(myTransactionService);
 		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
 		provider.setContext(ourCtx);
 		provider.setDaoRegistryForUnitTest(myDaoRegistry);
@@ -503,7 +505,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	private PersistedJpaBundleProvider newPersistedJpaBundleProvider(String theUuid) {
 		PersistedJpaBundleProvider provider;
 		provider = new PersistedJpaBundleProvider(null, theUuid);
-		provider.setTxManagerForUnitTest(myTxManager);
+		provider.setTxServiceForUnitTest(myTransactionService);
 		provider.setSearchCacheSvcForUnitTest(mySearchCacheSvc);
 		provider.setContext(ourCtx);
 		provider.setSearchBuilderFactoryForUnitTest(mySearchBuilderFactory);
@@ -750,7 +752,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 					case SearchConfig.SEARCH_TASK:
 						return new SearchTask(
 							invocation.getArgument(1),
-							myTxManager,
+							myTransactionService,
 							ourCtx,
 							mySearchStrategyFactory,
 							myInterceptorBroadcaster,
@@ -763,7 +765,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 					case SearchConfig.CONTINUE_TASK:
 						return new SearchContinuationTask(
 							invocation.getArgument(1),
-							myTxManager,
+							myTransactionService,
 							ourCtx,
 							mySearchStrategyFactory,
 							myInterceptorBroadcaster,

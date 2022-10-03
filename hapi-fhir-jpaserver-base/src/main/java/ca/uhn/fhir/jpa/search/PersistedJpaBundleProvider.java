@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -58,11 +59,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -81,9 +79,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	/*
 	 * Autowired fields
 	 */
-	private final RequestDetails myRequest;
+	protected final RequestDetails myRequest;
 	@Autowired
-	protected PlatformTransactionManager myTxManager;
+	protected HapiTransactionService myTxService;
 	@PersistenceContext
 	private EntityManager myEntityManager;
 	@Autowired
@@ -219,11 +217,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
-		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
-
-		TransactionTemplate template = new TransactionTemplate(myTxManager);
-		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return template.execute(theStatus -> toResourceList(sb, pidsSubList));
+		return myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () ->{
+			final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, null);
+			return toResourceList(sb, pidsSubList);
+		});
 	}
 
 
@@ -232,7 +229,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	public boolean ensureSearchEntityLoaded() {
 		if (mySearchEntity == null) {
-			Optional<Search> searchOpt = mySearchCacheSvc.fetchByUuid(myUuid);
+			Optional<Search> searchOpt = myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchCacheSvc.fetchByUuid(myUuid));
 			if (!searchOpt.isPresent()) {
 				return false;
 			}
@@ -269,7 +266,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			key = MemoryCacheService.HistoryCountKey.forSystem();
 		}
 
-		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> new TransactionTemplate(myTxManager).execute(t -> {
+		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 			Long count = historyBuilder.fetchCount(getRequestPartitionIdForHistory());
 			return count.intValue();
@@ -306,14 +303,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-		TransactionTemplate template = new TransactionTemplate(myTxManager);
-
-		template.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				boolean entityLoaded = ensureSearchEntityLoaded();
-				assert entityLoaded;
-			}
+		myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+			boolean entityLoaded = ensureSearchEntityLoaded();
+			assert entityLoaded;
 		});
 
 		assert mySearchEntity != null;
@@ -321,7 +313,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return template.execute(theStatus -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
+				return myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
@@ -372,8 +364,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@VisibleForTesting
-	public void setTxManagerForUnitTest(PlatformTransactionManager theTxManager) {
-		myTxManager = theTxManager;
+	public void setTxServiceForUnitTest(HapiTransactionService theTxManager) {
+		myTxService = theTxManager;
 	}
 
 	// Note: Leave as protected, HSPC depends on this

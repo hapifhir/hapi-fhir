@@ -142,13 +142,6 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>de.jpdigital</groupId>-->
-<!--			<artifactId>hibernate56-ddl-maven-plugin</artifactId>-->
-<!--			<version>2.5.0</version>-->
-<!--			<type>jar</type>-->
-<!--		</dependency>-->
-
 	</dependencies>
 	<build>
 		<pluginManagement>

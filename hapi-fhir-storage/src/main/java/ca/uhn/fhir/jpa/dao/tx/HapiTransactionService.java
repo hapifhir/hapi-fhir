@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -41,15 +42,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaDialect;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-
-import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.doCallHooksAndReturnObject;
-import static ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster.hasHooks;
 
 public class HapiTransactionService {
 
@@ -64,7 +70,16 @@ public class HapiTransactionService {
 	@Autowired
 	protected IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
+	/**
+	 * Isolation: REQUIRED
+	 */
 	protected TransactionTemplate myTxTemplate;
+	private boolean myCustomIsolationSupported;
+	private boolean myRequireNewTransactionForDefaultPartition;
+
+	public void setRequireNewTransactionForDefaultPartition(boolean theRequireNewTransactionForDefaultPartition) {
+		myRequireNewTransactionForDefaultPartition = theRequireNewTransactionForDefaultPartition;
+	}
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -79,13 +94,60 @@ public class HapiTransactionService {
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
+		myCustomIsolationSupported = isCustomIsolationSupported();
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback) {
+
+	public <T> T executeInDefaultPartition(@Nonnull ICallable<T> theCallback) {
+		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
+		ourRequestPartition.set(RequestPartitionId.defaultPartition());
+		try {
+
+			TransactionTemplate txTemplat = new TransactionTemplate(myTransactionManager);
+			if (myRequireNewTransactionForDefaultPartition) {
+				txTemplat.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+			}
+			return txTemplat.execute(tx -> {
+				return theCallback.call();
+			});
+
+		} finally {
+			ourRequestPartition.set(previousRequestPartitionId);
+		}
+	}
+
+	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
-	public <T> T execute(RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, TransactionCallback<T> theCallback, Runnable theOnRollback) {
+	public void execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
+		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				theCallback.run();
+			}
+		};
+		execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
+	}
+
+	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+		TransactionCallback<T> callback = new TransactionCallback<>() {
+			@Override
+			public T doInTransaction(TransactionStatus status) {
+				return theCallback.call();
+			}
+		};
+		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
+	}
+
+	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
+		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, Propagation.REQUIRED, Isolation.DEFAULT);
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
+		assert theRequestDetails != null;
+		assert theCallback != null;
 
 		final RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
 		RequestPartitionId previousRequestPartitionId = null;
@@ -98,7 +160,11 @@ public class HapiTransactionService {
 			for (int i = 0; ; i++) {
 				try {
 
-					return doExecuteCallback(theCallback);
+					if (thePropagation == Propagation.REQUIRED && theIsolation == Isolation.DEFAULT) {
+						return doExecuteCallback(theCallback);
+					} else {
+						return doExecuteCallbackReqNew(theCallback, thePropagation, theIsolation);
+					}
 
 				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
 					ourLog.debug("Version conflict detected", e);
@@ -131,11 +197,13 @@ public class HapiTransactionService {
 					}
 
 					if (i < maxRetries) {
-						theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
-						theTransactionDetails.clearRollbackUndoActions();
-						theTransactionDetails.clearResolvedItems();
-						theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-						theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						if (theTransactionDetails != null) {
+							theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+							theTransactionDetails.clearRollbackUndoActions();
+							theTransactionDetails.clearResolvedItems();
+							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						}
 						double sleepAmount = (250.0d * i) * Math.random();
 						long sleepAmountLong = (long) sleepAmount;
 						TestUtil.sleepAtLeast(sleepAmountLong, false);
@@ -166,6 +234,9 @@ public class HapiTransactionService {
 
 	}
 
+	/**
+	 * Execute the callback in a transaction with REQUIRED propagation level
+	 */
 	@Nullable
 	protected <T> T doExecuteCallback(TransactionCallback<T> theCallback) {
 		try {
@@ -177,6 +248,35 @@ public class HapiTransactionService {
 				throw new InternalErrorException(Msg.code(551) + e);
 			}
 		}
+	}
+
+	/**
+	 * Execute the callback in a transaction with REQUIRES_NEW propagation level
+	 */
+	@Nullable
+	protected <T> T doExecuteCallbackReqNew(TransactionCallback<T> theCallback, Propagation thePropagation, Isolation theIsolation) {
+		try {
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+			txTemplate.setPropagationBehavior(thePropagation.value());
+			if (myCustomIsolationSupported && theIsolation != Isolation.DEFAULT) {
+				txTemplate.setIsolationLevel(theIsolation.value());
+			}
+			return txTemplate.execute(theCallback);
+		} catch (MyException e) {
+			if (e.getCause() instanceof RuntimeException) {
+				throw (RuntimeException) e.getCause();
+			} else {
+				throw new InternalErrorException(Msg.code(551) + e);
+			}
+		}
+	}
+
+	public boolean isCustomIsolationSupported() {
+		if (myTransactionManager instanceof JpaTransactionManager) {
+			JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
+			return (jpaDialect instanceof HibernateJpaDialect);
+		}
+		return false;
 	}
 
 	/**

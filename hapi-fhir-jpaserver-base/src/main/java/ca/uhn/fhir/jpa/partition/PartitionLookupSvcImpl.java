@@ -20,12 +20,14 @@ package ca.uhn.fhir.jpa.partition;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.List;
@@ -67,6 +70,10 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private FhirContext myFhirCtx;
+	@Autowired
+	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private HapiTransactionService myTxService;
 
 	/**
 	 * Constructor
@@ -173,7 +180,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Override
 	public List<PartitionEntity> listPartitions() {
-		List<PartitionEntity> allPartitions =  myPartitionDao.findAll();
+		List<PartitionEntity> allPartitions = myPartitionDao.findAll();
 		return allPartitions;
 	}
 
@@ -208,16 +215,29 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		}
 	}
 
+	private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
+		return myTxService.executeInDefaultPartition(()->myPartitionDao
+			.findForName(theName)
+			.orElseThrow(() -> {
+				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
+				return new ResourceNotFoundException(msg);
+			}));
+	}
+
+	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
+		return myTxService.executeInDefaultPartition(()-> myPartitionDao
+			.findById(theId)
+			.orElseThrow(() -> {
+				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
+				return new ResourceNotFoundException(msg);
+			}));
+	}
+
 	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {
 		@Nullable
 		@Override
 		public PartitionEntity load(@NonNull String theName) {
-			return myTxTemplate.execute(t -> myPartitionDao
-				.findForName(theName)
-				.orElseThrow(() -> {
-					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
-					return new ResourceNotFoundException(msg);
-				}));
+			return myTxTemplate.execute(t -> lookupPartitionByName(theName));
 		}
 	}
 
@@ -225,12 +245,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		@Nullable
 		@Override
 		public PartitionEntity load(@NonNull Integer theId) {
-			return myTxTemplate.execute(t -> myPartitionDao
-				.findById(theId)
-				.orElseThrow(() -> {
-					String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
-					return new ResourceNotFoundException(msg);
-				}));
+			return myTxTemplate.execute(t -> lookupPartitionById(theId));
 		}
 	}
 

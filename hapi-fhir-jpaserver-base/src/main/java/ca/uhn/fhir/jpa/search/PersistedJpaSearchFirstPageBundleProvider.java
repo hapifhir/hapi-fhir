@@ -22,20 +22,20 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -70,9 +70,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		final List<ResourcePersistentId> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		List<IBaseResource> retVal = txTemplate.execute(theStatus -> toResourceList(mySearchBuilder, pids));
+		List<IBaseResource> retVal = myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> toResourceList(mySearchBuilder, pids));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal
