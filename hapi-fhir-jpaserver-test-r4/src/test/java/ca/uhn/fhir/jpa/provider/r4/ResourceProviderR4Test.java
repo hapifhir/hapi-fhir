@@ -1157,11 +1157,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Add a procedure
 		Extension extension = new Extension();
 		extension.setUrl("planning-datetime");
+		extension.setValue(new DateTimeType(("2022-09-16")));
 		Procedure procedure = new Procedure();
 		procedure.setExtension(List.of(extension));
-		String procedureResource = myFhirContext.newXmlParser().encodeResourceToString(procedure);
+		String procedureString = myFhirContext.newXmlParser().encodeResourceToString(procedure);
 		HttpPost procedurePost = new HttpPost(ourServerBase + "/Procedure");
-		procedurePost.setEntity(new StringEntity(procedureResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		procedurePost.setEntity(new StringEntity(procedureString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
 		CloseableHttpResponse response = ourHttpClient.execute(procedurePost);
 		IdType id;
 		try {
@@ -1181,7 +1183,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		requestComponent.setMethod(HTTPVerb.PATCH);
 		requestComponent.setUrl("Procedure/" + id.getIdPart());
 		entry.setRequest(requestComponent);
-
 		Parameters parameter = new Parameters();
 		Parameters.ParametersParameterComponent part1 = new Parameters.ParametersParameterComponent();
 		part1.setName("type");
@@ -1202,7 +1203,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.setPart(parts);
 		entry.setResource(parameter);
 		bundle.setEntry(List.of(entry));
-
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
 		HttpPost parameterPost = new HttpPost(ourServerBase);
 		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -1219,8 +1220,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			HttpEntity entity = response.getEntity();
-			String responseString = EntityUtils.toString(entity, "UTF-8");
-			System.out.printf("");
 		} finally {
 			response.close();
 		}
