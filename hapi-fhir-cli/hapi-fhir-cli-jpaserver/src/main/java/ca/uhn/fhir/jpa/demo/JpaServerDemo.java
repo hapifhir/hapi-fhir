@@ -179,7 +179,7 @@ public class JpaServerDemo extends RestfulServer {
 
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, null);
 		getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 
 		getInterceptorService().registerInterceptor(new ResponseHighlighterInterceptor());
