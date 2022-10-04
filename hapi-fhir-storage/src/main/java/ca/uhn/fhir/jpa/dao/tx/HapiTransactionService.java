@@ -56,6 +56,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import java.util.concurrent.Callable;
 
 public class HapiTransactionService {
 
@@ -116,11 +117,11 @@ public class HapiTransactionService {
 		}
 	}
 
-	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
-	public void execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
+	public void execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
 		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -130,7 +131,7 @@ public class HapiTransactionService {
 		execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
-	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
 		TransactionCallback<T> callback = new TransactionCallback<>() {
 			@Override
 			public T doInTransaction(TransactionStatus status) {
@@ -140,16 +141,34 @@ public class HapiTransactionService {
 		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
-	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
+	public <T> T executeCallable(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Callable<T> theCallback) {
+		TransactionCallback<T> callback = new TransactionCallback<>() {
+			@Override
+			public T doInTransaction(TransactionStatus status) {
+				try {
+					return theCallback.call();
+				} catch (Exception e) {
+					throw new InternalErrorException(e);
+				}
+			}
+		};
+		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
+	}
+
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, Propagation.REQUIRED, Isolation.DEFAULT);
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	public <T> T execute(@Nonnull RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
-		assert theRequestDetails != null;
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
 		assert theCallback != null;
 
-		final RequestPartitionId requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
+		final RequestPartitionId requestPartitionId;
+		if (theRequestDetails != null) {
+			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
+		} else {
+			requestPartitionId = null;
+		}
 		RequestPartitionId previousRequestPartitionId = null;
 		if (requestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartition.get();

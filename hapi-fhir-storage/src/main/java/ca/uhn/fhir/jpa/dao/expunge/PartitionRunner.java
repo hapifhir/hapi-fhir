@@ -21,14 +21,20 @@ package ca.uhn.fhir.jpa.dao.expunge;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,6 +47,7 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);
@@ -50,12 +57,27 @@ public class PartitionRunner {
 	private final String myThreadPrefix;
 	private final int myBatchSize;
 	private final int myThreadCount;
+	private final HapiTransactionService myTransactionService;
+	private final RequestDetails myRequestDetails;
 
+	/**
+	 * Constructor - Use this constructor if you do not want any transaction management
+	 */
 	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount) {
+		this(theProcessName, theThreadPrefix, theBatchSize, theThreadCount, null, null);
+	}
+
+	/**
+	 * Constructor - Use this constructor and provide a {@link RequestDetails} and {@link HapiTransactionService} if
+	 * you want each individual callable task to be performed in a managed transaction.
+	 */
+	public PartitionRunner(String theProcessName, String theThreadPrefix, int theBatchSize, int theThreadCount, @Nullable HapiTransactionService theTransactionService, @Nullable RequestDetails theRequestDetails) {
 		myProcessName = theProcessName;
 		myThreadPrefix = theThreadPrefix;
 		myBatchSize = theBatchSize;
 		myThreadCount = theThreadCount;
+		myTransactionService = theTransactionService;
+		myRequestDetails = theRequestDetails;
 	}
 
 	public void runInPartitionedThreads(List<ResourcePersistentId> theResourceIds, Consumer<List<ResourcePersistentId>> partitionConsumer) {
@@ -63,6 +85,17 @@ public class PartitionRunner {
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {
 			return;
+		}
+
+		if (myTransactionService != null) {
+			// Wrap each Callable task in an invocation to HapiTransactionService#executeCallable
+			callableTasks = callableTasks
+				.stream()
+				.map(t-> (Callable<Void>) () -> {
+					myTransactionService.executeCallable(myRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, t);
+					return null;
+				})
+				.collect(Collectors.toList());
 		}
 
 		if (callableTasks.size() == 1) {
