@@ -116,47 +116,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	}
 
 	@Test
-	public void testMigrateFrom340_NoFlyway() throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_340_current_noflyway");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		String initSql = "/persistence_create_h2_340.sql";
-		executeSqlStatements(connectionProperties, initSql);
-
-		seedDatabase340(connectionProperties);
-
-		ourLog.info("**********************************************");
-		ourLog.info("Done Setup, Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--" + BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY
-		};
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
-		App.main(args);
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RES_REINDEX_JOB"));
-
-		connectionProperties.getTxTemplate().execute(t -> {
-			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
-			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
-			assertEquals(1, values.size());
-			assertEquals("identifier", values.get(0).get("SP_NAME"));
-			assertEquals("12345678", values.get(0).get("SP_VALUE"));
-			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
-			return null;
-		});
-	}
-
-	@Test
 	public void testMigrateFrom340_dryRun() throws IOException, SQLException {
 
 		File location = getLocation("migrator_h2_test_340_dryrun");
@@ -243,34 +202,6 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-u", url,
 			"-n", "SA",
 			"-p", "SA"
-		};
-
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
-		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
-		App.main(args);
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE")); // Early table
-		assertTrue(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB")); // Late table
-	}
-
-	@Test
-	public void testMigrateFromEmptySchema_NoFlyway() throws IOException, SQLException {
-
-		File location = getLocation("migrator_h2_test_empty_current_noflyway");
-
-		String url = "jdbc:h2:" + location.getAbsolutePath();
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
-
-		ourLog.info("**********************************************");
-		ourLog.info("Starting Migration...");
-		ourLog.info("**********************************************");
-
-		String[] args = new String[]{
-			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
-			"-d", "H2_EMBEDDED",
-			"-u", url,
-			"-n", "",
-			"-p", "",
-			"--" + BaseFlywayMigrateDatabaseCommand.DONT_USE_FLYWAY
 		};
 
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
