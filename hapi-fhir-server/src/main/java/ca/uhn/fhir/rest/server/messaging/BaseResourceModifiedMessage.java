@@ -207,6 +207,9 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@Nullable
 	@Override
 	public String getMessageKeyOrNull() {
+		if (super.getMessageKeyOrNull() != null) {
+			return super.getMessageKeyOrNull();
+		}
 		return myPayloadId;
 	}
 
