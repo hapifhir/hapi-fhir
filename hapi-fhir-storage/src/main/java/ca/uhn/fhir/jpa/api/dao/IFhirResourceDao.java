@@ -131,7 +131,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
 	default IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails){
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
 	/**
