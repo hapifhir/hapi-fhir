@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -34,8 +33,6 @@ import static org.mockito.Mockito.when;
 class DeleteExpungeDaoTest extends BaseJpaR4Test {
 	@Autowired
 	DaoConfig myDaoConfig;
-	@Autowired
-	BatchJobHelper myBatchJobHelper;
 
 	@BeforeEach
 	public void before() {

@@ -75,7 +75,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -102,10 +101,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.batch.core.repository.dao.JobExecutionDao;
-import org.springframework.batch.core.repository.dao.JobInstanceDao;
-import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
-import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -202,8 +197,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
-	protected BatchJobHelper myBatchJobHelper;
-	@Autowired(required = false)
 	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
@@ -230,22 +223,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
-	@Autowired(required = false)
-	private JobExecutionDao myMapJobExecutionDao;
-	@Autowired(required = false)
-	private JobInstanceDao myMapJobInstanceDao;
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
-	}
-
-	@AfterEach
-	public void afterEnsureNoStaleBatchJobs() {
-		if (myMapJobInstanceDao != null) {
-			myBatchJobHelper.ensureNoRunningJobs();
-			ProxyUtil.getSingletonTarget(myMapJobExecutionDao, MapJobExecutionDao.class).clear();
-			ProxyUtil.getSingletonTarget(myMapJobInstanceDao, MapJobInstanceDao.class).clear();
-		}
 	}
 
 	@AfterEach

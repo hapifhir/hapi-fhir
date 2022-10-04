@@ -130,7 +130,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -2090,10 +2090,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
+		IIdType idCreated = myPatientDao.create(patient, mySrd).getId();
+		ids.add(idCreated.toUnqualified().getValue());
+		IIdType id = idCreated.toUnqualifiedVersionless();
+
 		for (int i = 0; i < 10; i++) {
 			Thread.sleep(100);
 			preDates.add(new Date());
@@ -2106,13 +2109,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		List<String> idValues;
 
 		idValues = toUnqualifiedIdValues(myPatientDao.history(id, preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = toUnqualifiedIdValues(myPatientDao.history(preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = toUnqualifiedIdValues(mySystemDao.history(preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 	}
 
 	@Test

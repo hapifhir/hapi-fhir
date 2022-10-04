@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.api.pid;
  */
 
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import io.micrometer.core.lang.NonNull;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Date;
 
@@ -30,7 +30,7 @@ import java.util.Date;
  * A resource pid list where all pids have the same resource type
  */
 public class HomogeneousResourcePidList extends BaseResourcePidList {
-	@NonNull
+	@Nonnull
 	final String myResourceType;
 
 	public HomogeneousResourcePidList(String theResourceType, Collection<ResourcePersistentId> theIds, Date theLastDate) {
