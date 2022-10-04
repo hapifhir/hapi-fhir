@@ -27,7 +27,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.Objects;
 
 public abstract class BaseTableTask extends BaseTask {
-	protected final ColumnTypeToDriverTypeToSqlType myColumnTypeToDriverTypeToSqlType = new ColumnTypeToDriverTypeToSqlType();
 	private String myTableName;
 
 
@@ -57,7 +56,7 @@ public abstract class BaseTableTask extends BaseTask {
 	}
 
 	protected String getSqlType(ColumnTypeEnum theColumnType, Long theColumnLength) {
-		String retVal = myColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(theColumnType).get(getDriverType());
+		String retVal = ColumnTypeToDriverTypeToSqlType.getColumnTypeToDriverTypeToSqlType().get(theColumnType).get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (theColumnType == ColumnTypeEnum.STRING) {

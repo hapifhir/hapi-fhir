@@ -25,14 +25,14 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 
 		MyMigrationTasks migrationTasks = new MyMigrationTasks("123456.7");
-		getMigrator().addTasks(migrationTasks.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrationTasks.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
 
 		// Second time, should produce no action
 		migrationTasks = new MyMigrationTasks("123456.8");
-		getMigrator().addTasks(migrationTasks.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrationTasks.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
