@@ -26,7 +26,7 @@ public class DropIdGeneratorTaskTest extends BaseTest {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
 
 		MyMigrationTasks migrator = new MyMigrationTasks();
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());

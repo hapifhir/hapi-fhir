@@ -26,10 +26,12 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ColumnTypeToDriverTypeToSqlType {
-	Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
+public final class ColumnTypeToDriverTypeToSqlType {
 
-	public ColumnTypeToDriverTypeToSqlType() {
+	private ColumnTypeToDriverTypeToSqlType() {}
+	static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
+
+	static {
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
@@ -111,15 +113,26 @@ public class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 	}
 
-	public Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {
+	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {
 		return myColumnTypeToDriverTypeToSqlType;
 	}
 
-	private void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
+	private static void setColumnType(ColumnTypeEnum theColumnType, DriverTypeEnum theDriverType, String theColumnTypeSql) {
 		Map<DriverTypeEnum, String> columnSqlType = myColumnTypeToDriverTypeToSqlType.computeIfAbsent(theColumnType, k -> new HashMap<>());
 		if (columnSqlType.containsKey(theDriverType)) {
 			throw new IllegalStateException(Msg.code(65) + "Duplicate key: " + theDriverType);
 		}
 		columnSqlType.put(theDriverType, theColumnTypeSql);
+	}
+
+	public static String toBooleanValue(DriverTypeEnum theDriverType, Boolean theBoolean) {
+		switch (theDriverType) {
+			case H2_EMBEDDED:
+			case DERBY_EMBEDDED:
+			case POSTGRES_9_4:
+				return theBoolean.toString();
+			default:
+				return theBoolean ? "1" : "0";
+		}
 	}
 }
