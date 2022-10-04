@@ -124,6 +124,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -484,21 +485,33 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (isNotBlank(theId.getValue())) {
-				deleteConflicts.setResourceIdMarkedForDeletion(theId);
-			}
+		ourLog.info("LUKE: OUTSIDE transaction: id: {} requestDetails: {}", theId, theRequestDetails);
+		try {
+			return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
+				ourLog.info("LUKE: INSIDE transaction: id: {} requestDetails: {}", theId, theRequestDetails);
+				DeleteConflictList deleteConflicts = new DeleteConflictList();
+				if (isNotBlank(theId.getValue())) {
+					deleteConflicts.setResourceIdMarkedForDeletion(theId);
+				}
 
-			StopWatch w = new StopWatch();
+				StopWatch w = new StopWatch();
 
-			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
+				DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+				DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
-			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-			return retVal;
-		});
+				ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+				return retVal;
+			});
+		} catch (Exception exception) {
+			ourLog.info("LUKE: rolling back to savepoint: {}", transactionDetails.getSavepointIfExists());
+			final Optional<TransactionStatus> savepointIfExists = transactionDetails.getSavepointIfExists();
+
+			transactionDetails.getSavepointIfExists().ifPresent(transactionStatus -> myTransactionService.rollbackToSavepoint(transactionStatus));
+
+			// TODO:  this is totally wrong:  fix this:
+			throw exception;
+		}
 	}
 
 	/**
@@ -544,6 +557,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "deleteResourceNotExisting");
 			return outcome;
 		}
+
+//		ourLog.info("LUKE: READ entity latest version type: {}, ID: {}, version: {}", entity.getResourceType(), entity.getId(), entity.getVersion());
 
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException(Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");

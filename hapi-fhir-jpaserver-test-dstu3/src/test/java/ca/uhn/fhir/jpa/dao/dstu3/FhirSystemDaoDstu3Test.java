@@ -1759,7 +1759,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE});
 		mySrd.setParameters(params);
 
-		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster);
+		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, null);
 		myInterceptorBroadcaster.registerInterceptor(deleteInterceptor);
 
 

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
@@ -46,6 +47,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -85,20 +88,23 @@ public class CascadingDeleteInterceptor {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final FhirContext myFhirContext;
+	private final HapiTransactionService myHapiTransactionService;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull HapiTransactionService theHapiTransactionService) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+//		Validate.notNull(theHapiTransactionService, "theHapiTransactionService must not be null");
 
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myFhirContext = theFhirContext;
+		myHapiTransactionService = theHapiTransactionService;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
@@ -139,6 +145,9 @@ public class CascadingDeleteInterceptor {
 
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
+				// TODO:  add a transaction checkpoint here and then try-catch to handle this
+				final TransactionStatus savepoint = myHapiTransactionService.savepoint(TransactionDefinition.withDefaults());
+				theTransactionDetails.setSavepoint(savepoint);
 				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
 			}
 		}

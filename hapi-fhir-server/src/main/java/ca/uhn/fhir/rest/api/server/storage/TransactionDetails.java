@@ -27,6 +27,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,6 +38,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -62,6 +64,7 @@ public class TransactionDetails {
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 	private boolean myIsPointcutDeferred;
+	private TransactionStatus myNullableSavepoint;
 
 	/**
 	 * Constructor
@@ -296,6 +299,14 @@ public class TransactionDetails {
 
 	public boolean hasResolvedResourceIds() {
 		return !myResolvedResourceIds.isEmpty();
+	}
+
+	public Optional<TransactionStatus> getSavepointIfExists() {
+		return Optional.ofNullable(myNullableSavepoint);
+	}
+
+	public void setSavepoint(TransactionStatus savepoint) {
+		myNullableSavepoint = savepoint;
 	}
 }
 

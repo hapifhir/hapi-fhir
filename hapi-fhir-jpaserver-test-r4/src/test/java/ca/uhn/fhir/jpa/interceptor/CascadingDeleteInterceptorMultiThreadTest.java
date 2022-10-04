@@ -363,7 +363,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 		try {
 			Future<Boolean> future1 = executor.submit(job1);
-			Thread.sleep(100L);
+			// 100ms seems to be too short
+			Thread.sleep(300L);
 			Future<Boolean> future2 = executor.submit(job2);
 			List<Boolean> results = new ArrayList<>();
 			results.add(future1.get());
@@ -376,7 +377,6 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		} finally {
 			executor.shutdown();
 		}
-
 	}
 
 	@Test

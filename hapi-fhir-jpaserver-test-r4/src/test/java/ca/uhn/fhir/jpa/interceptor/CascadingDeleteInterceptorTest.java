@@ -106,7 +106,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		DaoRegistry mockDaoRegistry = mock(DaoRegistry.class);
 		IFhirResourceDao mockResourceDao = mock (IFhirResourceDao.class);
 		IBaseResource mockResource = mock(IBaseResource.class);
-		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster);
+		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, null);
 		ourRestServer.getInterceptorService().unregisterInterceptor(myDeleteInterceptor);
 		ourRestServer.getInterceptorService().registerInterceptor(aDeleteInterceptor);
 		when(mockDaoRegistry.getResourceDao(any(String.class))).thenReturn(mockResourceDao);

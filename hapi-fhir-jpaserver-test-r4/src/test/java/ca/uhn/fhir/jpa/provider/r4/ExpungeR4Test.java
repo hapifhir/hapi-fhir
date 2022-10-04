@@ -209,7 +209,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry));
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, null));
 
 		// setup
 		Organization organization = new Organization();
