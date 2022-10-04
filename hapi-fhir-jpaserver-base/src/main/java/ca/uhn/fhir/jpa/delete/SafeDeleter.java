@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -17,7 +18,6 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.List;
 
@@ -34,7 +34,9 @@ public class SafeDeleter {
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
-	public void delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
+	public Integer delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
+		Integer retVal = 0;
+
 		List<String> cascadeDeleteIdCache = CascadingDeleteInterceptor.getCascadedDeletesList(theRequest, true);
 		for (DeleteConflict next : theConflictList) {
 			IdDt nextSource = next.getSourceId();
@@ -57,12 +59,14 @@ public class SafeDeleter {
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
 				// TODO:  add a transaction checkpoint here and then try-catch to handle this
-				final TransactionStatus savepoint = myHapiTransactionService.savepoint();
+//				final TransactionStatus savepoint = myHapiTransactionService.savepoint();
 				// FIXME LUKE: do we need this?
 //				theTransactionDetails.setSavepoint(savepoint);
-				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+				DaoMethodOutcome result = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+				++retVal;
 			}
 		}
 
+		return retVal;
 	}
 }
