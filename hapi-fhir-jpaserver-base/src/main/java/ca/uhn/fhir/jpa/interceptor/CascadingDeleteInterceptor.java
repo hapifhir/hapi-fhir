@@ -32,14 +32,14 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -47,7 +47,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
@@ -146,7 +145,7 @@ public class CascadingDeleteInterceptor {
 				// Actually perform the delete
 				ourLog.info("Have delete conflict {} - Cascading delete", next);
 				// TODO:  add a transaction checkpoint here and then try-catch to handle this
-				final TransactionStatus savepoint = myHapiTransactionService.savepoint(TransactionDefinition.withDefaults());
+				final TransactionStatus savepoint = myHapiTransactionService.savepoint();
 				theTransactionDetails.setSavepoint(savepoint);
 				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
 			}

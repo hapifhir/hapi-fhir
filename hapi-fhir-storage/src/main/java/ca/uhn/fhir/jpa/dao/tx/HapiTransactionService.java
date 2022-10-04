@@ -147,14 +147,11 @@ public class HapiTransactionService {
 
 	}
 
-	public TransactionStatus savepoint(TransactionDefinition theTransactionDefinition) {
-		// TODO:  figure out a pattern similar to this
+	public TransactionStatus savepoint() {
 		return myTransactionManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
-//			.createSavepoint();
 	}
 
 	public void rollbackToSavepoint(TransactionStatus savepoint) {
-		ourLog.info("LUKE: rolling back to savepoint");
 		myTransactionManager.rollback(savepoint);
 	}
 
