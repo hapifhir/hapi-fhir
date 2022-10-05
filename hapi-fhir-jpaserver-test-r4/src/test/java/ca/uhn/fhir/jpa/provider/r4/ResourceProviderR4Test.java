@@ -1213,7 +1213,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
 			assertTrue(responseString.contains("Extension contains both a value and nested extensions"));
-			System.out.println(responseString);
 		} finally {
 			response.close();
 		}
@@ -6942,7 +6941,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-			System.out.println("pid0 " + pid0);
+			ourLog.info("pid0 " + pid0);
 		}
 
 		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
