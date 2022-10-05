@@ -97,9 +97,6 @@ public class HapiSequenceStyleGenerator implements IdentifierGenerator, Persiste
 
 	@Override
 	public void registerExportables(Database database) {
-		if (!myConfigured) {
-			return;
-		}
 		myGen.registerExportables(database);
 	}
 

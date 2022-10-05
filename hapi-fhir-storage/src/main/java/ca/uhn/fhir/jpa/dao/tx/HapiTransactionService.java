@@ -169,10 +169,15 @@ public class HapiTransactionService {
 		} else {
 			requestPartitionId = null;
 		}
+		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, thePropagation, theIsolation, requestPartitionId);
+
+	}
+
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, RequestPartitionId theRequestPartitionId) {
 		RequestPartitionId previousRequestPartitionId = null;
-		if (requestPartitionId != null) {
+		if (theRequestPartitionId != null) {
 			previousRequestPartitionId = ourRequestPartition.get();
-			ourRequestPartition.set(requestPartitionId);
+			ourRequestPartition.set(theRequestPartitionId);
 		}
 
 		try {
@@ -246,11 +251,10 @@ public class HapiTransactionService {
 				}
 			}
 		} finally {
-			if (requestPartitionId != null) {
+			if (theRequestPartitionId != null) {
 				ourRequestPartition.set(previousRequestPartitionId);
 			}
 		}
-
 	}
 
 	/**
