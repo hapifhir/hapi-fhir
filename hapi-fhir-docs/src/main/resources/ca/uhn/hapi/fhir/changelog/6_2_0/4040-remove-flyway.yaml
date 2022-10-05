@@ -1,0 +1,7 @@
+---
+type: change
+issue: 4040
+title: "Removed Flyway database migration engine.  The migration table still tracks successful and failed migrations
+to determine which migrations need to be run at startup.  Database migrations no longer need to run differently when
+using an older database version."
+

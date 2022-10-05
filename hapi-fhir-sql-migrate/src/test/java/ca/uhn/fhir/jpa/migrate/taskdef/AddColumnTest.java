@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
-import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -87,12 +88,12 @@ public class AddColumnTest extends BaseTest {
 			.nullable()
 			.type(ColumnTypeEnum.INT);
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (DbMigrate.FlywayMigrateException e) {
-			assertEquals("Migration failed !", e.getMessage());
+		} catch (HapiMigrationException e) {
+			assertThat(e.getMessage(), startsWith("HAPI-0047: Failure executing task \"Add column FOO_COLUMN on table FOO_TABLE\", aborting! Cause: ca.uhn.fhir.jpa.migrate.HapiMigrationException: HAPI-0061: Failed during task 4.0.0.2001.01: "));
 		}
 	}
 
@@ -111,7 +112,7 @@ public class AddColumnTest extends BaseTest {
 			.type(ColumnTypeEnum.INT)
 			.failureAllowed();
 
-		getMigrator().addTasks(tasks.getTasks(VersionEnum.V0_1, VersionEnum.V4_0_0));
+		getMigrator().addTasks(tasks.getTaskList(VersionEnum.V0_1, VersionEnum.V4_0_0));
 		getMigrator().migrate();
 
 	}
