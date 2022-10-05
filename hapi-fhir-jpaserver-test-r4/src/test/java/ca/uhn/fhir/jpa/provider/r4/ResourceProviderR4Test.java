@@ -98,6 +98,7 @@ import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static ca.uhn.fhir.rest.param.BaseParamWithPrefix.MSG_PREFIX_INVALID_FORMAT;
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
+import static com.google.common.collect.testing.Helpers.assertContains;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -1175,7 +1176,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			response.close();
 		}
 
-		// Add an extension to the procedure
+		// Add an extension to the procedure's extension
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.TRANSACTION);
 		BundleEntryComponent entry = new BundleEntryComponent();
@@ -1209,7 +1210,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(parameterPost);
 		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
+			assertTrue(responseString.contains("Extension contains both a value and nested extensions"));
+			System.out.println(responseString);
 		} finally {
 			response.close();
 		}

@@ -70,6 +70,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -112,6 +113,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -1140,6 +1142,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@SuppressWarnings("unchecked")
 		T destinationCasted = (T) destination;
+		myFhirContext.newJsonParser().setParserErrorHandler(new StrictErrorHandler()).encodeResourceToString(destinationCasted);
 		return update(destinationCasted, null, true, theRequest);
 	}
 
