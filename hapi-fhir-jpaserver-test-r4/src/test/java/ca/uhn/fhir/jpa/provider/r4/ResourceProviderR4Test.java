@@ -1165,15 +1165,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost procedurePost = new HttpPost(ourServerBase + "/Procedure");
 		procedurePost.setEntity(new StringEntity(procedureString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
-		CloseableHttpResponse response = ourHttpClient.execute(procedurePost);
 		IdType id;
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedurePost)) {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString, startsWith(ourServerBase + "/Procedure/"));
 			id = new IdType(newIdString);
-		} finally {
-			response.close();
 		}
 
 		// Add an extension to the procedure's extension
@@ -1208,23 +1205,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
 		HttpPost parameterPost = new HttpPost(ourServerBase);
 		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		response = ourHttpClient.execute(parameterPost);
-		try {
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(parameterPost)) {
 			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
 			assertTrue(responseString.contains("Extension contains both a value and nested extensions"));
-		} finally {
-			response.close();
 		}
 
 		// Get procedures
 		HttpGet procedureGet = new HttpGet(ourServerBase + "/Procedure");
-		response = ourHttpClient.execute(procedureGet);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedureGet)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
-			HttpEntity entity = response.getEntity();
-		} finally {
-			response.close();
 		}
 	}
 
