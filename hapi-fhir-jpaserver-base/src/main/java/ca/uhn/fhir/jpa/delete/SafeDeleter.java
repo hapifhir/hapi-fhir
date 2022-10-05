@@ -16,11 +16,13 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.List;
 
@@ -29,12 +31,16 @@ public class SafeDeleter {
 	private static final Logger ourLog = LoggerFactory.getLogger(SafeDeleter.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
+	// TODO: LUKE:  get rid of this if this is no longer needed as part of the final solution
 	private final HapiTransactionService myHapiTransactionService;
 
-	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService theHapiTransactionService) {
+	private final RetryTemplate myRetryTemplate;
+
+	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService theHapiTransactionService, RetryTemplate theRetryTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myHapiTransactionService = theHapiTransactionService;
+		myRetryTemplate = theRetryTemplate;
 	}
 
 	public Integer delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
@@ -47,51 +53,59 @@ public class SafeDeleter {
 
 			if (!cascadeDeleteIdCache.contains(nextSourceId)) {
 				cascadeDeleteIdCache.add(nextSourceId);
-
-				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
-
-				// Interceptor call: STORAGE_CASCADE_DELETE
-				IBaseResource resource = dao.read(nextSource, theRequest);
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(DeleteConflictList.class, theConflictList)
-					.add(IBaseResource.class, resource);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
-
-				// Actually perform the delete
-				ourLog.info("Have delete conflict {} - Cascading delete", next);
-				// TODO:  add a transaction checkpoint here and then try-catch to handle this
-//				final TransactionStatus savepoint = myHapiTransactionService.savepoint();
-				// FIXME LUKE: do we need this?
-//				theTransactionDetails.setSavepoint(savepoint);
-
-				final RetryTemplate retryTemplate = getRetryTemplate();
-
-				try {
-					final DaoMethodOutcome result = retryTemplate.execute(retryContext -> {
-						ourLog.info("LUKE: retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
-						try {
-							final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-							dao.flush();
-							return outcome;
-						} catch (Throwable exception) {
-							// TODO:  LUKE:  clean this up once testing is complete
-							ourLog.error("LUKE RETRY: " + exception.getMessage(), exception);
-							throw exception;
-						}
-					});
-					ourLog.info("LUKE: past retry next: {}", nextSourceId);
-				} catch (Throwable exception) {
-					// TODO:  LUKE:  clean this up once testing is complete
-					ourLog.error("LUKE OUTSIDE RETRY: " + exception.getMessage(), exception);
-					throw exception;
-				}
-				++retVal;
+				retVal = handleNextSource(theRequest, theConflictList, theTransactionDetails, retVal, next, nextSource, nextSourceId);
 			}
 		}
 
 		return retVal;
+	}
+
+	@NotNull
+	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, Integer retVal, DeleteConflict next, IdDt nextSource, String nextSourceId) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
+
+		// Interceptor call: STORAGE_CASCADE_DELETE
+		IBaseResource resource = dao.read(nextSource, theRequest);
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(DeleteConflictList.class, theConflictList)
+			.add(IBaseResource.class, resource);
+		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+
+		deleteWithRetry(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId, dao);
+		++retVal;
+		return retVal;
+	}
+
+	private void deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
+		ourLog.info("Have delete conflict {} - Cascading delete", next);
+		// TODO:  add a transaction checkpoint here and then try-catch to handle this
+//		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
+
+		try {
+			final DaoMethodOutcome result = myRetryTemplate.execute(retryContext -> {
+				ourLog.info("LUKE: retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
+				try {
+					// Actually perform the delete
+					final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+					// TODO:
+					dao.flush();
+					// FIXME LUKE: do we need this?
+					return outcome;
+				} catch (Throwable exception) {
+					// TODO:  LUKE:  clean this up once testing is complete
+					ourLog.error(String.format("LUKE RETRY # %s exception: %s: ", retryContext.getRetryCount(), exception.getMessage()), exception);
+//					myHapiTransactionService.rollbackToSavepoint(savepoint);
+					throw exception;
+				}
+			});
+			ourLog.info("LUKE: past retry next: {}", nextSourceId);
+		} catch (Throwable exception) {
+			// TODO:  LUKE:  clean this up once testing is complete
+			ourLog.error("LUKE OUTSIDE RETRY: " + exception.getMessage(), exception);
+			throw exception;
+		}
 	}
 
 	// TODO:  set this up in a Config class:  somewhere

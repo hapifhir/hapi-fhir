@@ -66,6 +66,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.answers.CallsRealMethods;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -110,6 +111,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
+	@Autowired
+	private RetryTemplate myRetryTemplate;
 
 	@AfterEach
 	public void after() {
@@ -1759,7 +1762,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE});
 		mySrd.setParameters(params);
 
-		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, null);
+		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, null, myRetryTemplate);
 		myInterceptorBroadcaster.registerInterceptor(deleteInterceptor);
 
 

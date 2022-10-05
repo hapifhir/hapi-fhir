@@ -136,6 +136,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
@@ -197,8 +200,8 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService, RetryTemplate theRetryTemplate) {
+		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService, theRetryTemplate);
 	}
 
 	@Lazy
@@ -715,5 +718,25 @@ public class JpaConfig {
 	@Bean
 	public ISynchronousSearchSvc synchronousSearchSvc(){
 		return new SynchronousSearchSvcImpl();
+	}
+
+	@Bean
+	public RetryTemplate retryTemplate() {
+		// TODO:  source these values from config, somehow?
+//		final long BACKOFF_PERIOD = 100L;
+		final long BACKOFF_PERIOD = 500L;
+		final int MAX_ATTEMPTS = 4;
+
+		RetryTemplate retryTemplate = new RetryTemplate();
+
+		FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+		fixedBackOffPolicy.setBackOffPeriod(BACKOFF_PERIOD);
+		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		retryPolicy.setMaxAttempts(MAX_ATTEMPTS);
+		retryTemplate.setRetryPolicy(retryPolicy);
+
+		return retryTemplate;
 	}
 }

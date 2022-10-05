@@ -42,6 +42,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -81,23 +84,28 @@ public class CascadingDeleteInterceptor {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final FhirContext myFhirContext;
+	// TODO: LUKE:  get rid of this from list of fields, constructor and constructor calls if it's no longer needed in the final solution
 	private final HapiTransactionService myHapiTransactionService;
+	private final RetryTemplate myRetryTemplate;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull HapiTransactionService theHapiTransactionService) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull HapiTransactionService theHapiTransactionService, @Nonnull RetryTemplate theRetryTemplate) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
 //		Validate.notNull(theHapiTransactionService, "theHapiTransactionService must not be null");
+		Validate.notNull(theRetryTemplate, "theRetryTemplate must not be null");
 
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myFhirContext = theFhirContext;
+		// TODO: LUKE:  get rid of this from list of fields, constructor and constructor calls if it's no longer needed in the final solution
 		myHapiTransactionService = theHapiTransactionService;
+		myRetryTemplate = theRetryTemplate;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
@@ -117,7 +125,7 @@ public class CascadingDeleteInterceptor {
 			return null;
 		}
 
-		SafeDeleter deleter = new SafeDeleter(myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
+		SafeDeleter deleter = new SafeDeleter(myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService, getRetryTemplate());
 		deleter.delete(theRequest, theConflictList, theTransactionDetails);
 
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
@@ -184,5 +192,22 @@ public class CascadingDeleteInterceptor {
 		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
 	}
 
+	// TODO:  set this up in a Config class:  somewhere
+	private static RetryTemplate getRetryTemplate() {
+		final long BACKOFF_PERIOD = 100L;
+		final int MAX_ATTEMPTS = 4;
+
+		RetryTemplate retryTemplate = new RetryTemplate();
+
+		FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+		fixedBackOffPolicy.setBackOffPeriod(BACKOFF_PERIOD);
+		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		retryPolicy.setMaxAttempts(MAX_ATTEMPTS);
+		retryTemplate.setRetryPolicy(retryPolicy);
+
+		return retryTemplate;
+	}
 
 }

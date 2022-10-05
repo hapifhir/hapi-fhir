@@ -87,6 +87,7 @@ public class HapiTransactionService {
 				return doExecuteCallback(theCallback);
 
 			} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+				ourLog.error("LUKE: Exception on Execute: " + e.getMessage(), e);
 				ourLog.debug("Version conflict detected", e);
 
 				if (theOnRollback != null) {
@@ -160,6 +161,7 @@ public class HapiTransactionService {
 		try {
 			return myTxTemplate.execute(theCallback);
 		} catch (MyException e) {
+			ourLog.error("LUKE: Exception on doExecuteCallback: " + e.getMessage(), e);
 			if (e.getCause() instanceof RuntimeException) {
 				throw (RuntimeException) e.getCause();
 			} else {

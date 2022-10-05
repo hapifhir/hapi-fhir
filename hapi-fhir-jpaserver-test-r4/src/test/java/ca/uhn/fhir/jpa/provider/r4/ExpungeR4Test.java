@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -75,6 +76,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private RetryTemplate myRetryTemplate;
 
 	@AfterEach
 	public void afterDisableExpunge() {
@@ -209,7 +212,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, null));
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, null, myRetryTemplate));
 
 		// setup
 		Organization organization = new Organization();

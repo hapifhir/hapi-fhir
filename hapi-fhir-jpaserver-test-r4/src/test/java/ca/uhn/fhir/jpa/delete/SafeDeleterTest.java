@@ -20,8 +20,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -53,12 +55,15 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
+	@Autowired
+	private RetryTemplate myRetryTemplate;
+
 	private TransactionDetails myTransactionDetails = new TransactionDetails();
 
 
 	@BeforeEach
 	void beforeEach() {
-		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService);
+		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService, myRetryTemplate);
 
 //		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_CASCADE_DELETE, myPointcutLatch);
 	}
@@ -126,8 +131,7 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 			fail();
 		}
 
-		future1.get();
-
+		assertEquals(2,future1.get());
 
 		fail("not implenmented");
 	}
@@ -136,41 +140,15 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 	// Create a PointCutLatch on STORAGE_CASCADE_DELETE and call safedeleter delete while one thread is blocked to force the concurrent error that was initially reported
 	// Block the first two times it is called, release the third time so we retry the wait 100ms then retry works
 	// Use Spring RetryTemplate for the retry mechanism
-
 	@Test
-	void delete_delete_two_thread_blocked_pointcut() throws ExecutionException, InterruptedException {
-		DeleteConflictList conflictList1 = new DeleteConflictList();
-		DeleteConflictList conflictList2 = new DeleteConflictList();
-		IIdType orgId = createOrganization();
-		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
-		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
-		IIdType patient3Id = createPatient(withId(PATIENT2_ID));
-		IIdType patient4Id = createPatient(withId(PATIENT2_ID));
-
-		conflictList1.add(buildDeleteConflict(patient1Id, orgId));
-		conflictList1.add(buildDeleteConflict(patient2Id, orgId));
-		conflictList2.add(buildDeleteConflict(patient3Id, orgId));
-		conflictList2.add(buildDeleteConflict(patient4Id, orgId));
-
-		assertEquals(2, countPatients());
-
-//		myPointcutLatch.setExpectedCount(2);
-
-		final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-		final Future<Integer> future1 = executorService.submit(() -> {
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList1, myTransactionDetails));
-			myPointcutLatch.awaitExpectedWithTimeout(10);
-			myPointcutLatch.awaitExpected();
-			return 1;
+	@Disabled
+	void retryRetryTest() throws ExecutionException, InterruptedException {
+		myRetryTemplate.execute(retryContext -> {
+			ourLog.info("retry # {}", retryContext.getRetryCount());
+			throw new RuntimeException("retrying");
 		});
 
-		myPointcutLatch.runWithExpectedCount(10, () -> myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList2, myTransactionDetails)));
-
-		future1.get();
-
-		fail("not implenmented");
-
+		ourLog.info("retries done");
 	}
 
 	@Test
@@ -189,9 +167,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
-		final Future<Integer> future = executorService.submit(() -> {
-			return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
-		});
+		final Future<Integer> future = executorService.submit(() ->
+			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
@@ -212,7 +189,7 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		// Unpause and delete the second patient
 		myCascadeDeleteInterceptor.release("second");
 
-		assertEquals(2, future.get());
+		assertEquals(1, future.get());
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
