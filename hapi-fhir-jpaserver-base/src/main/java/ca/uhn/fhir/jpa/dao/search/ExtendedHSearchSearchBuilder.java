@@ -46,6 +46,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_MISSING;
+
 /**
  * Search builder for HSearch for token, string, and reference parameters.
  */
@@ -103,6 +105,9 @@ public class ExtendedHSearchSearchBuilder {
 	 */
 	private boolean isParamTypeSupported(IQueryParameterType param) {
 		String modifier = StringUtils.defaultString(param.getQueryParameterQualifier(), EMPTY_MODIFIER);
+
+		//TODO EP return false here if the modifier is :missing in all cases.
+
 		if (param instanceof TokenParam) {
 			switch (modifier) {
 				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
@@ -157,12 +162,17 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	public void addAndConsumeAdvancedQueryClauses(ExtendedHSearchClauseBuilder builder, String theResourceType, SearchParameterMap theParams, ISearchParamRegistry theSearchParamRegistry) {
+		//TODO EP Might have to skip any :missing params here
+
 		// copy the keys to avoid concurrent modification error
 		ArrayList<String> paramNames = compileParamNames(theParams);
 		for (String nextParam : paramNames) {
+
 			if (ourUnsafeSearchParmeters.contains(nextParam)) {
 				continue;
 			}
+
+
 			RuntimeSearchParam activeParam = theSearchParamRegistry.getActiveSearchParam(theResourceType, nextParam);
 			if (activeParam == null) {
 				// ignore magic params handled in JPA

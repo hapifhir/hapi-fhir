@@ -83,6 +83,7 @@ public class ExtendedHSearchIndexExtractor {
 		}
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
+		//TODO EP: skip any which have the modified :missing
 
 		// wipmb mb add a flag ot DaoConfig to suppress this
 		extractAutocompleteTokens(theResource, retVal);
