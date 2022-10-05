@@ -47,6 +47,10 @@ import java.util.Properties;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+/**
+ * This is a sequence generator that wraps the Hibernate default sequence generator {@link SequenceStyleGenerator}
+ * and by default will therefore work exactly as the default would, but allows for customization.
+ */
 @SuppressWarnings("unused")
 public class HapiSequenceStyleGenerator implements IdentifierGenerator, PersistentIdentifierGenerator, BulkInsertionCapableIdentifierGenerator {
 	private final SequenceStyleGenerator myGen = new SequenceStyleGenerator();
