@@ -84,6 +84,7 @@ public class ExtendedHSearchIndexExtractor {
 
 		retVal.setForcedId(theResource.getIdElement().getIdPart());
 		//TODO EP: skip any which have the modified :missing
+		//TODO EP: Write a test which enables both settings, and then: Creates a patient with gender male, creates a patient with no gender. And then searches on patient?gender:missing=true
 
 		// wipmb mb add a flag ot DaoConfig to suppress this
 		extractAutocompleteTokens(theResource, retVal);
