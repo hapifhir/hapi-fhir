@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,14 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -47,12 +52,22 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * The API is super simplistic, and caches are all 1-minute, max 10000 entries for starters. We could definitely add nuance to this,
  * which will be much easier now that this is being centralized. Some logging/monitoring would be good too.
  */
+@SuppressWarnings("unchecked")
 public class MemoryCacheService {
 
 	@Autowired
 	DaoConfig myDaoConfig;
 
 	private EnumMap<CacheEnum, Cache<?, ?>> myCaches;
+	private ICacheKeyDecorator myCacheKeyDecorator;
+
+
+	/**
+	 * Constructor
+	 */
+	public MemoryCacheService() {
+		super();
+	}
 
 	@PostConstruct
 	public void start() {
@@ -97,11 +112,10 @@ public class MemoryCacheService {
 
 	}
 
-
 	public <K, T> T get(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
 		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
-		Cache<K, T> cache = getCache(theCache);
-		return cache.get(theKey, theSupplier);
+		Cache<Object, Object> cache = getCache(theCache);
+		return (T) doCacheGet(cache, theKey, theSupplier);
 	}
 
 	/**
@@ -113,23 +127,25 @@ public class MemoryCacheService {
 	public <K, T> T getThenPutAfterCommit(CacheEnum theCache, K theKey, Function<K, T> theSupplier) {
 		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
 
-		Cache<K, T> cache = getCache(theCache);
-		T retVal = cache.getIfPresent(theKey);
+		Cache<Object, Object> cache = getCache(theCache);
+		Object retVal = doCacheGetIfPresent(theKey, cache);
 		if (retVal == null) {
 			retVal = theSupplier.apply(theKey);
 			putAfterCommit(theCache, theKey, retVal);
 		}
-		return retVal;
+		return (T) retVal;
 	}
 
 	public <K, V> V getIfPresent(CacheEnum theCache, K theKey) {
 		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
-		return (V) getCache(theCache).getIfPresent(theKey);
+		Cache<Object, Object> cache = getCache(theCache);
+		return (V) doCacheGetIfPresent(theKey, cache);
 	}
 
 	public <K, V> void put(CacheEnum theCache, K theKey, V theValue) {
 		assert theCache.myKeyType.isAssignableFrom(theKey.getClass());
-		getCache(theCache).put(theKey, theValue);
+		Cache<Object, Object> cache = getCache(theCache);
+		doCachePut(theKey, theValue, cache);
 	}
 
 	/**
@@ -157,8 +173,26 @@ public class MemoryCacheService {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Iterable<K> theKeys) {
-		return (Map<K, V>) getCache(theCache).getAllPresent(theKeys);
+	public <K, V> Map<K, V> getAllPresent(CacheEnum theCache, Collection<K> theKeys) {
+		Cache<Object, Object> cache = getCache(theCache);
+		return (Map<K, V>) doCacheGetAllPresent(theKeys, cache);
+	}
+
+	protected Map<Object, Object> doCacheGetAllPresent(Collection<?> theKeys, Cache<Object, Object> theCache) {
+		if (myCacheKeyDecorator != null) {
+			Object decoration = myCacheKeyDecorator.getCacheKeyDecoration();
+			Collection keys = new ArrayList<>(theKeys.size());
+			for (Object nextKey : theKeys) {
+				keys.add(new DecoratedCacheKey(nextKey, decoration));
+			}
+			return theCache
+				.getAllPresent(keys)
+				.entrySet()
+				.stream()
+				.collect(Collectors.toMap(t -> ((DecoratedCacheKey) t.getKey()).myKey, t -> t.getValue()));
+		} else {
+			return theCache.getAllPresent(theKeys);
+		}
 	}
 
 	public void invalidateAllCaches() {
@@ -172,6 +206,59 @@ public class MemoryCacheService {
 	public long getEstimatedSize(CacheEnum theCache) {
 		return getCache(theCache).estimatedSize();
 	}
+
+	protected void doCachePut(Object theKey, Object theValue, Cache<Object, Object> cache) {
+		Object key = theKey;
+		if (myCacheKeyDecorator != null) {
+			key = new DecoratedCacheKey(key, myCacheKeyDecorator.getCacheKeyDecoration());
+		}
+		cache.put(key, theValue);
+	}
+
+	@Nullable
+	protected Object doCacheGet(Cache<Object, Object> theCache, Object theKey, Function<?, ?> theSupplier) {
+		Object key = theKey;
+		if (myCacheKeyDecorator != null) {
+			Object decoration = myCacheKeyDecorator.getCacheKeyDecoration();
+			key = new DecoratedCacheKey(key, decoration);
+
+			Function<Object, Object> newSupplier = theSuppliedDecoratedKey -> {
+				DecoratedCacheKey decoratedKey = (DecoratedCacheKey) theSuppliedDecoratedKey;
+				return ((Function) theSupplier).apply(decoratedKey.myKey);
+			};
+			return theCache.get(key, newSupplier);
+		} else {
+			return theCache.get(theKey, (Function<? super Object, ?>) theSupplier);
+		}
+	}
+
+	@Nullable
+	protected Object doCacheGetIfPresent(Object theKey, Cache<Object, Object> cache) {
+		Object key = theKey;
+		if (myCacheKeyDecorator != null) {
+			Object decoration = myCacheKeyDecorator.getCacheKeyDecoration();
+			key = new DecoratedCacheKey(key, decoration);
+		}
+		return cache.getIfPresent(key);
+	}
+
+	/**
+	 * If this is set, all keys will be "decorated" with an additional prefix value when they are
+	 * stored in the cache. This can be used to create logical partitions in the cache, in other
+	 * words to break the cache up into multiple mini-caches where each one does not conflict or
+	 * bleed into the others, while still respecting the sizing limits.
+	 * <p>
+	 * Note: This method is not thread safe - Don't call while the cache is in use
+	 */
+	public void setCacheKeyDecorator(ICacheKeyDecorator theCacheKeyDecorator) {
+		myCacheKeyDecorator = theCacheKeyDecorator;
+	}
+
+	@VisibleForTesting
+	void setDaoConfigForUnitTest(DaoConfig theDaoConfig) {
+		myDaoConfig = theDaoConfig;
+	}
+
 
 	public enum CacheEnum {
 
@@ -196,6 +283,11 @@ public class MemoryCacheService {
 		}
 	}
 
+	public interface ICacheKeyDecorator {
+
+		Object getCacheKeyDecoration();
+
+	}
 
 	public static class TagDefinitionCacheKey {
 
@@ -220,7 +312,6 @@ public class MemoryCacheService {
 			boolean retVal = false;
 			if (theO instanceof TagDefinitionCacheKey) {
 				TagDefinitionCacheKey that = (TagDefinitionCacheKey) theO;
-
 				retVal = new EqualsBuilder()
 					.append(myType, that.myType)
 					.append(mySystem, that.mySystem)
@@ -236,7 +327,6 @@ public class MemoryCacheService {
 		}
 	}
 
-
 	public static class HistoryCountKey {
 		private final String myTypeName;
 		private final Long myInstanceId;
@@ -246,20 +336,6 @@ public class MemoryCacheService {
 			myTypeName = theTypeName;
 			myInstanceId = theInstanceId;
 			myHashCode = new HashCodeBuilder().append(myTypeName).append(myInstanceId).toHashCode();
-		}
-
-		public static HistoryCountKey forSystem() {
-			return new HistoryCountKey(null, null);
-		}
-
-		public static HistoryCountKey forType(@Nonnull String theType) {
-			assert isNotBlank(theType);
-			return new HistoryCountKey(theType, null);
-		}
-
-		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
-			assert theInstanceId != null;
-			return new HistoryCountKey(null, theInstanceId);
 		}
 
 		@Override
@@ -277,6 +353,47 @@ public class MemoryCacheService {
 			return myHashCode;
 		}
 
+		public static HistoryCountKey forSystem() {
+			return new HistoryCountKey(null, null);
+		}
+
+		public static HistoryCountKey forType(@Nonnull String theType) {
+			assert isNotBlank(theType);
+			return new HistoryCountKey(theType, null);
+		}
+
+		public static HistoryCountKey forInstance(@Nonnull Long theInstanceId) {
+			assert theInstanceId != null;
+			return new HistoryCountKey(null, theInstanceId);
+		}
+
+	}
+
+	private static class DecoratedCacheKey {
+
+		private final Object myKey;
+		private final Object myDecoration;
+		private final int myHashCode;
+
+		private DecoratedCacheKey(Object theKey, Object theDecoration) {
+			myKey = theKey;
+			myDecoration = theDecoration;
+			myHashCode = new HashCodeBuilder().append(myKey.hashCode()).append(myDecoration.hashCode()).toHashCode();
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (theO instanceof DecoratedCacheKey) {
+				DecoratedCacheKey that = (DecoratedCacheKey) theO;
+				return myKey.equals(that.myKey) && myDecoration.equals(that.myDecoration);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
 	}
 
 }
