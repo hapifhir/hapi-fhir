@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.delete;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -9,8 +11,11 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -18,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +40,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_CASCADE_DELETE);
 //	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED);
+
+	private final MyCascadeDeleteInterceptor myCascadeDeleteInterceptor = new MyCascadeDeleteInterceptor();
 
 	private SafeDeleter mySafeDeleter;
 	@Autowired
@@ -58,6 +66,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 	@AfterEach
 	void tearDown() {
 		myInterceptorService.unregisterInterceptor(myPointcutLatch);
+		myInterceptorService.unregisterInterceptor(myCascadeDeleteInterceptor);
+		myCascadeDeleteInterceptor.clear();
 	}
 
 	@Test
@@ -119,7 +129,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		future1.get();
 
 
-
 		fail("not implenmented");
 	}
 
@@ -164,6 +173,51 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	void delete_retryTest() throws ExecutionException, InterruptedException {
+		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
+
+		DeleteConflictList conflictList = new DeleteConflictList();
+		IIdType orgId = createOrganization();
+		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+
+		conflictList.add(buildDeleteConflict(patient1Id, orgId));
+		conflictList.add(buildDeleteConflict(patient2Id, orgId));
+
+		assertEquals(2, countPatients());
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		final Future<Integer> future = executorService.submit(() -> {
+			return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
+		});
+
+		// We are paused before deleting the first patient.
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		// Unpause and delete the first patient
+		myCascadeDeleteInterceptor.release("first");
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		// The first patient has now been deleted
+
+		// We are paused before deleting the second patient.
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		//   Let's delete the second patient from under its nose.
+		// FIXME LUKE: note this test passes if you comment out this line
+		myPatientDao.delete(patient2Id);
+
+		// Unpause and delete the second patient
+		myCascadeDeleteInterceptor.release("second");
+
+		assertEquals(2, future.get());
+
+		assertEquals(0, countPatients());
+		assertEquals(1, countOrganizations());
+	}
+
 	@Nullable
 	private Integer countPatients() {
 		SearchParameterMap map = SearchParameterMap.newSynchronous();
@@ -180,4 +234,40 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		return new DeleteConflict(new IdDt(thePatient1Id), "managingOrganization", new IdDt(theOrgId));
 	}
 
+	private class MyCascadeDeleteInterceptor implements IPointcutLatch {
+		private final PointcutLatch myCalledLatch = new PointcutLatch("Called");
+		private final PointcutLatch myWaitLatch = new PointcutLatch("Wait");
+
+		MyCascadeDeleteInterceptor() {
+			myWaitLatch.setExpectedCount(1);
+		}
+
+		@Hook(Pointcut.STORAGE_CASCADE_DELETE)
+		public void cascadeDelete(RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource) throws InterruptedException {
+			myCalledLatch.call(theResource);
+			myWaitLatch.awaitExpected();
+			ourLog.info("Cascade Delete proceeding: {}", myWaitLatch.getLatchInvocationParameter());
+			myWaitLatch.setExpectedCount(1);
+		}
+
+		void release(String theMessage) {
+			myWaitLatch.call(theMessage);
+		}
+
+		@Override
+		public void clear() {
+			myCalledLatch.clear();
+			myWaitLatch.clear();
+		}
+
+		@Override
+		public void setExpectedCount(int count) {
+			myCalledLatch.setExpectedCount(count);
+		}
+
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return myCalledLatch.awaitExpected();
+		}
+	}
 }

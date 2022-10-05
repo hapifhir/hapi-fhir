@@ -97,7 +97,7 @@ public class SafeDeleter {
 	// TODO:  set this up in a Config class:  somewhere
 	private RetryTemplate getRetryTemplate() {
 		final long BACKOFF_PERIOD = 100L;
-		final int MAX_ATTEMPTS = 2;
+		final int MAX_ATTEMPTS = 4;
 
 		RetryTemplate retryTemplate = new RetryTemplate();
 
