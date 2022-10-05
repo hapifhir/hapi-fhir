@@ -18,6 +18,9 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.List;
 
@@ -62,11 +65,50 @@ public class SafeDeleter {
 //				final TransactionStatus savepoint = myHapiTransactionService.savepoint();
 				// FIXME LUKE: do we need this?
 //				theTransactionDetails.setSavepoint(savepoint);
-				DaoMethodOutcome result = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+
+				final RetryTemplate retryTemplate = getRetryTemplate();
+
+				try {
+					final DaoMethodOutcome result = retryTemplate.execute(retryContext -> {
+						ourLog.info("LUKE: retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
+						try {
+							final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+							dao.flush();
+							return outcome;
+						} catch (Throwable exception) {
+							// TODO:  LUKE:  clean this up once testing is complete
+							ourLog.error("LUKE RETRY: " + exception.getMessage(), exception);
+							throw exception;
+						}
+					});
+					ourLog.info("LUKE: past retry next: {}", nextSourceId);
+				} catch (Throwable exception) {
+					// TODO:  LUKE:  clean this up once testing is complete
+					ourLog.error("LUKE OUTSIDE RETRY: " + exception.getMessage(), exception);
+					throw exception;
+				}
 				++retVal;
 			}
 		}
 
 		return retVal;
+	}
+
+	// TODO:  set this up in a Config class:  somewhere
+	private RetryTemplate getRetryTemplate() {
+		final long BACKOFF_PERIOD = 100L;
+		final int MAX_ATTEMPTS = 2;
+
+		RetryTemplate retryTemplate = new RetryTemplate();
+
+		FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+		fixedBackOffPolicy.setBackOffPeriod(BACKOFF_PERIOD);
+		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		retryPolicy.setMaxAttempts(MAX_ATTEMPTS);
+		retryTemplate.setRetryPolicy(retryPolicy);
+
+		return retryTemplate;
 	}
 }

@@ -300,8 +300,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		Callable<Boolean> job1 = () -> {
 			try {
 				return deleteOrganization(myHttpClient1);
-			} catch (IOException theE) {
-				theE.printStackTrace();
+			} catch (Exception exception) {
+				ourLog.error("LUKE: Exception from Callable 1: " + exception.getMessage(), exception);
 			}
 			return false;
 		};
@@ -309,8 +309,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		Callable<Boolean> job2 = () -> {
 			try {
 				return deletePractitioner(myHttpClient2);
-			} catch (IOException theE) {
-				theE.printStackTrace();
+			} catch (Exception exception) {
+				ourLog.error("LUKE: Exception from Callable 2: " + exception.getMessage(), exception);
 			}
 			return false;
 		};

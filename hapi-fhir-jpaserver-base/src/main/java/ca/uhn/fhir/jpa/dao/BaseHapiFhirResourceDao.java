@@ -514,6 +514,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
+	@Override
+	public void flush() {
+		myEntityManager.flush();
+	}
+
 	/**
 	 * Creates a base method outcome for a delete request for the provided ID.
 	 * <p>
