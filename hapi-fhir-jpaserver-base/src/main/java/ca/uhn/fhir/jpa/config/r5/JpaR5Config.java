@@ -54,8 +54,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({
 	FhirContextR5Config.class,
 	GeneratedDaoAndResourceProviderConfigR5.class,
-	SharedConfigDstu3Plus.class,
-	JpaConfig.class
+	SharedConfigDstu3Plus.class
 })
 public class JpaR5Config {
 

@@ -23,14 +23,13 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ICallable;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -61,19 +60,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
-	private PlatformTransactionManager myTxManager;
-	@Autowired
 	private IPartitionDao myPartitionDao;
 
 	private LoadingCache<String, PartitionEntity> myNameToPartitionCache;
 	private LoadingCache<Integer, PartitionEntity> myIdToPartitionCache;
-	private TransactionTemplate myTxTemplate;
 	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
-	private MemoryCacheService myMemoryCacheService;
-	@Autowired
-	private HapiTransactionService myTxService;
+	private PlatformTransactionManager myTxManager;
 
 	/**
 	 * Constructor
@@ -93,7 +87,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			.newBuilder()
 			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build(new IdToPartitionCacheLoader());
-		myTxTemplate = new TransactionTemplate(myTxManager);
 	}
 
 	@Override
@@ -184,6 +177,12 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		return allPartitions;
 	}
 
+	public <T> T executeInTransaction(ICallable<T> theCallable) {
+		return new TransactionTemplate(myTxManager).execute(tx->{
+			return theCallable.call();
+		});
+	}
+
 	private void validatePartitionNameDoesntAlreadyExist(String theName) {
 		if (myPartitionDao.findForName(theName).isPresent()) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDuplicatePartitionName", theName);
@@ -216,7 +215,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionByName(@Nonnull String theName) {
-		return myTxService.executeInDefaultPartition(()->myPartitionDao
+		return executeInTransaction(() -> myPartitionDao
 			.findForName(theName)
 			.orElseThrow(() -> {
 				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "invalidName", theName);
@@ -225,7 +224,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	}
 
 	private PartitionEntity lookupPartitionById(@Nonnull Integer theId) {
-		return myTxService.executeInDefaultPartition(()-> myPartitionDao
+		return executeInTransaction(() -> myPartitionDao
 			.findById(theId)
 			.orElseThrow(() -> {
 				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "unknownPartitionId", theId);
@@ -233,11 +232,18 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			}));
 	}
 
+	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
+		if (thePartitionId == null) {
+			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
+			throw new InvalidRequestException(Msg.code(1314) + msg);
+		}
+	}
+
 	private class NameToPartitionCacheLoader implements @NonNull CacheLoader<String, PartitionEntity> {
 		@Nullable
 		@Override
 		public PartitionEntity load(@NonNull String theName) {
-			return myTxTemplate.execute(t -> lookupPartitionByName(theName));
+			return executeInTransaction(() -> lookupPartitionByName(theName));
 		}
 	}
 
@@ -245,14 +251,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 		@Nullable
 		@Override
 		public PartitionEntity load(@NonNull Integer theId) {
-			return myTxTemplate.execute(t -> lookupPartitionById(theId));
-		}
-	}
-
-	public static void validatePartitionIdSupplied(FhirContext theFhirContext, Integer thePartitionId) {
-		if (thePartitionId == null) {
-			String msg = theFhirContext.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "noIdSupplied");
-			throw new InvalidRequestException(Msg.code(1314) + msg);
+			return executeInTransaction(() -> lookupPartitionById(theId));
 		}
 	}
 }

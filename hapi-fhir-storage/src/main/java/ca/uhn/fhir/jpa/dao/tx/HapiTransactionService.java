@@ -46,6 +46,7 @@ import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -76,11 +77,6 @@ public class HapiTransactionService {
 	 */
 	protected TransactionTemplate myTxTemplate;
 	private boolean myCustomIsolationSupported;
-	private boolean myRequireNewTransactionForDefaultPartition;
-
-	public void setRequireNewTransactionForDefaultPartition(boolean theRequireNewTransactionForDefaultPartition) {
-		myRequireNewTransactionForDefaultPartition = theRequireNewTransactionForDefaultPartition;
-	}
 
 	@VisibleForTesting
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -99,19 +95,11 @@ public class HapiTransactionService {
 	}
 
 
-	public <T> T executeInDefaultPartition(@Nonnull ICallable<T> theCallback) {
+	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
 		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
 		ourRequestPartition.set(RequestPartitionId.defaultPartition());
 		try {
-
-			TransactionTemplate txTemplat = new TransactionTemplate(myTransactionManager);
-			if (myRequireNewTransactionForDefaultPartition) {
-				txTemplat.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-			}
-			return txTemplat.execute(tx -> {
 				return theCallback.call();
-			});
-
 		} finally {
 			ourRequestPartition.set(previousRequestPartitionId);
 		}

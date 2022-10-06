@@ -342,7 +342,7 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public IRequestPartitionHelperSvc requestPartitionHelperService() {
+	public IRequestPartitionHelperSvc requestPartitionHelperService(IPartitionLookupSvc thePartitionLookupSvc) {
 		return new RequestPartitionHelperSvc();
 	}
 
