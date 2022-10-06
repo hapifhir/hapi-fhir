@@ -179,7 +179,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getErrorCount();
-			}, equalTo(3));
+			}, greaterThan(0));
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
