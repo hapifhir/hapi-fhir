@@ -76,19 +76,19 @@ public class SafeDeleter {
 			.add(IBaseResource.class, resource);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
 
-		deleteWithRetry(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId, dao);
-		++retVal;
+		int count = deleteWithRetry(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId, dao);
+		retVal = retVal + count;
 		return retVal;
 	}
 
-	private void deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
+	private int deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
 		ourLog.info("Have delete conflict {} - Cascading delete", next);
-		// TODO:  add a transaction checkpoint here and then try-catch to handle this
-//		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
-//		final Savepoint savepoint = myHapiTransactionService.savepointHibernate();
+		int retVal = 0;
 
 		try {
 			final DaoMethodOutcome outcome = myTxTemplate.execute(s -> dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails));
+//			final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+			retVal++;
 		} catch (ResourceVersionConflictException exception) {
 			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
 //			myHapiTransactionService.rollbackToSavepoint(savepoint);
@@ -103,10 +103,9 @@ public class SafeDeleter {
 			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
 //			myHapiTransactionService.rollbackToSavepoint(savepoint);
 			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
-		} catch (Exception e) {
-			ourLog.error(e.getMessage(), e);
-			throw e;// do not catch Exception, just let it propagate up
 		}
+
+		return retVal;
 	}
 
 	// TODO:  set this up in a Config class:  somewhere
