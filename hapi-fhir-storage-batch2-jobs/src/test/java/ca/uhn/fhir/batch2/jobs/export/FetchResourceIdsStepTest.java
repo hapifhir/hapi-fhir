@@ -176,7 +176,7 @@ public class FetchResourceIdsStepTest {
 		int maxFileCapacity = 5;
 		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
-		for (int i = 0; i < maxFileCapacity + 1; i++) {
+		for (int i = 0; i <= maxFileCapacity; i++) {
 			ResourcePersistentId id = new ResourcePersistentId("Patient/RED" + i);
 			patientIds.add(id);
 		}

@@ -103,7 +103,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 					idsToSubmit.add(id);
 
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() == myDaoConfig.getBulkExportFileMaximumCapacity()) {
+					if (idsToSubmit.size() >= myDaoConfig.getBulkExportFileMaximumCapacity()) {
 						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();

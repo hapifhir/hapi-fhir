@@ -327,7 +327,7 @@ public class DaoConfig {
 	/**
 	 * Since 6.2.0
 	 */
-	private int myBulkExportFileMaximumCapacity = 1000;
+	private int myBulkExportFileMaximumCapacity = 1_000;
 
 	/**
 	 * Constructor
