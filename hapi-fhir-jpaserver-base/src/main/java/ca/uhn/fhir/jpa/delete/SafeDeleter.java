@@ -70,12 +70,6 @@ public class SafeDeleter {
 //		IBaseResource resource;
 //		try {
 //			resource = dao.read(nextSource, theRequest);
-//		} catch (ResourceGoneException exception) {
-//			ourLog.info("LUKE:  ResourceGoneException ");
-//			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
-//			// do not increment retVal
-//			return retVal;
-//		}
 //		// Interceptor call: STORAGE_CASCADE_DELETE
 //		HookParams params = new HookParams()
 //			.add(RequestDetails.class, theRequest)
@@ -83,6 +77,14 @@ public class SafeDeleter {
 //			.add(DeleteConflictList.class, theConflictList)
 //			.add(IBaseResource.class, resource);
 //		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+//
+//		} catch (ResourceGoneException exception) {
+//			ourLog.info("LUKE:  ResourceGoneException ");
+//			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+//			// do not increment retVal
+////				status.setRollbackOnly(); we don't have access to the status outside the inner transaction
+//			return retVal;
+//		}
 //
 //		int count = deleteWithRetry(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId, dao);
 //		retVal = retVal + count;
@@ -104,6 +106,7 @@ public class SafeDeleter {
 			} catch (ResourceGoneException exception) {
 				ourLog.info("LUKE:  ResourceGoneException ");
 				ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+				status.setRollbackOnly(); // this is needed to prevent UnexpectedRollbackException on the outer transaction commit
 				// do not increment retVal
 			}
 			return count;

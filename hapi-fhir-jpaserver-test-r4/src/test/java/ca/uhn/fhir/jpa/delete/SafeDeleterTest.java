@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.UnexpectedRollbackException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -160,10 +161,40 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		ourLog.info("retries done");
 	}
 
-	// TODO: figure out how to solve these
+	@Test
+	void transactionInnerTransactionException() throws ExecutionException, InterruptedException {
+		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+
+		try {
+			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> {
+				txTemplate.execute(innerStatus -> {
+					ourLog.info("starting inner");
+					try {
+						final Patient patient1 = myPatientDao.read(patient1Id);
+						myPatientDao.delete(patient1Id);
+						myPatientDao.delete(patient2Id);
+						if (1 == 1) {
+							throw new RuntimeException("test");
+						}
+					} catch (RuntimeException exception) {
+						ourLog.info("inner catch RuntimeException");
+					}
+					return null;
+				});
+				return 1;
+			});
+		} catch (RuntimeException exception) {
+			fail("RuntimeException  throw by commit!");
+		}
+	}
+
 	// 1. delete_delete_retryTest:
 	// * catch (ResourceGoneException) will cause UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
 	// >>> this happens even if I push up the call to myTexTemplate.execute to within the handleNextSource() method
+	// >>>> RESOLUTION?  seems this was fixed by calling status.setRollbackOnly() in the catch block
 	@Test
 	void delete_delete_retryTest() throws ExecutionException, InterruptedException {
 		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
