@@ -52,7 +52,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
-	private int myMaximumBinarySize = Integer.MAX_VALUE;
+	private long myMaximumBinarySize = Long.MAX_VALUE;
 	private int myMinimumBinarySize;
 
 	@Autowired
@@ -63,13 +63,13 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public int getMaximumBinarySize() {
+	public long getMaximumBinarySize() {
 		return myMaximumBinarySize;
 	}
 
 	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
+	public void setMaximumBinarySize(long theMaximumBinarySize) {
+		Validate.inclusiveBetween(1, Long.MAX_VALUE, theMaximumBinarySize);
 		myMaximumBinarySize = theMaximumBinarySize;
 	}
 
