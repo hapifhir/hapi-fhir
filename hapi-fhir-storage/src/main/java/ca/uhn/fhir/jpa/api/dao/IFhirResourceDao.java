@@ -219,9 +219,24 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Search for IDs, return as a stream
+	 *
+	 * fixme what does it mean if theParams contains _offset, _count, or _total? Suggest we don't support _offset, or _total=accurate.  _count is ok.
+	 * fixme do we cache this result, or just stream from the db?  Suggest: no-cache to start.
+	 * fixme what hooks to we still want to call? Long to review the current hooks and list them.
+	 * fixme how do we stream includes?  Do we need includes?  If so, do we batch them?  Or merge them into the sql?  Suggest yes, if it is easy.  Done as batches (50?).
+	 * tasks:
+	 * - first implement pure jpa stream using SearchBuilder.createChunkedQuery.
+	 * - fancier - figure out how to batch by 50 or so.
+	 * - Adapt Iterator(Long) -> Spliterator -> Stream.  Then apply.map(pid->dao.loadResourceByPid)
+	 * https://stackoverflow.com/questions/30641383/java-8-stream-with-batch-processing
+	 * maybe Guava Iterators.partition(queryIterator, 50) -> iterator(List<PID)).flatMap(pids->fetchResources(pids).stream())
+	 * This would be a good place to inject _include and _revinclude if we support them.  See SearchBuilder.loadIncludes()
+	 * - implement HSearch path when all SPs supported - use scroll.
+	 * - [OPT] re-implement the cached path via this.  The batches are obvious sync points for caching into SearchResult.
+	 * - [OPT] do combo stream of JPA, then use HSearch to filter batches or vice-versa. (use a _pid operator).
 	 */
 
-	default Stream<IBaseResource> searchForIdsAsStream(SearchParameterMap theParams, RequestDetails theRequest) {
+	default Stream<IBaseResource> searchAndReturnAsStream(SearchParameterMap theParams, RequestDetails theRequest) {
 		return searchForIds(theParams, theRequest).stream().map(this::readByPid);
 	}
 

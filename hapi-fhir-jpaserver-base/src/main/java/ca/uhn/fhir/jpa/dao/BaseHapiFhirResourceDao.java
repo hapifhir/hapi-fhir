@@ -149,6 +149,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1561,6 +1562,40 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		return retVal;
+	}
+
+	@Override
+	public Stream<IBaseResource> searchAndReturnAsStream(SearchParameterMap theParams, RequestDetails theRequest) {
+		if (theParams.getSearchContainedMode() == SearchContainedModeEnum.BOTH) {
+			throw new MethodNotAllowedException(Msg.code(983) + "Contained mode 'both' is not currently supported");
+		}
+		if (theParams.getSearchContainedMode() != SearchContainedModeEnum.FALSE && !myModelConfig.isIndexOnContainedResources()) {
+			throw new MethodNotAllowedException(Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
+		}
+
+		translateListSearchParams(theParams);
+
+		notifySearchInterceptors(theParams, theRequest);
+
+		CacheControlDirective cacheControlDirective = new CacheControlDirective();
+		if (theRequest != null) {
+			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+		}
+
+		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams, null);
+		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
+
+//		if (retVal instanceof PersistedJpaBundleProvider) {
+//			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
+//			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
+//				if (theRequest != null) {
+//					String value = "HIT from " + theRequest.getFhirServerBase();
+//					theRequest.addHeader(Constants.HEADER_X_CACHE, value);
+//				}
+//			}
+//		}
+
+		return null;
 	}
 
 	private void translateListSearchParams(SearchParameterMap theParams) {
