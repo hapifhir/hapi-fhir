@@ -150,4 +150,13 @@ public @interface Operation {
 	 */
 	boolean global() default false;
 
+	/**
+	 * The canonical URL of the operation, e.g. "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match|1.0.0"
+	 *
+	 * <p>
+	 * This may be specified with or without a version
+	 * </p>
+	 */
+	String canonicalUrl() default "";
+
 }

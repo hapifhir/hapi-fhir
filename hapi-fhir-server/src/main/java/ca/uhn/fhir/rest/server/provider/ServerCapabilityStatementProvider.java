@@ -416,7 +416,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					
+
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}
@@ -555,7 +555,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
-		theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		if (isNotBlank(theMethodBinding.getCanonicalUrl())) {
+			theTerser.addElement(theOperation, "definition", theMethodBinding.getCanonicalUrl());
+		}
+		else {
+			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		}
 		if (isNotBlank(theMethodBinding.getDescription())) {
 			theTerser.addElement(theOperation, "documentation", theMethodBinding.getDescription());
 		}
