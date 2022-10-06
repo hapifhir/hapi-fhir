@@ -35,7 +35,7 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
 	LOINC_XML_FILE("loinc.xml"),
 
-	LOINC_MAPTO_FILE("MapTo.csv"),
+	LOINC_MAPTO_FILE("loinc.mapto.file"),
 	LOINC_MAPTO_FILE_DEFAULT("LoincTable/MapTo.csv"),
 
 	/*
