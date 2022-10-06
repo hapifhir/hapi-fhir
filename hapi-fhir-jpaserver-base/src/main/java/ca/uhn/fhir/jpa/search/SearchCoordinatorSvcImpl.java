@@ -76,7 +76,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,7 +91,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.DEFAULT_SYNC_SIZE;
-import static ca.uhn.fhir.jpa.util.SearchParameterMapCalculator.isWantCount;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -116,20 +114,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private final SearchStrategyFactory mySearchStrategyFactory;
 	private final ExceptionService myExceptionSvc;
 	private final BeanFactory myBeanFactory;
-
-	private Integer myLoadingThrottleForUnitTests = null;
-	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
-	private boolean myNeverUseLocalSearchForUnitTests;
-
-	private int mySyncSize = DEFAULT_SYNC_SIZE;
-
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
-
 	private final Consumer<String> myOnRemoveSearchTask = (theId) -> {
 		myIdToSearchTask.remove(theId);
 	};
-
 	private final StorageInterceptorHooksFacade myStorageInterceptorHooks;
+	private Integer myLoadingThrottleForUnitTests = null;
+	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
+	private boolean myNeverUseLocalSearchForUnitTests;
+	private int mySyncSize = DEFAULT_SYNC_SIZE;
 
 	/**
 	 * Constructor
@@ -211,7 +204,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 * fetch resources.
 	 */
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public List<ResourcePersistentId> getResources(final String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails) {
 		// If we're actively searching right now, don't try to do anything until at least one batch has been
 		// persisted in the DB
@@ -304,13 +296,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		ourLog.trace("Finished looping");
 
-		List<ResourcePersistentId> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
-		if (pids == null) {
-			throw myExceptionSvc.newUnknownSearchException(theUuid);
-		}
+		List<ResourcePersistentId> pids = fetchResultPids(theUuid, theFrom, theTo, theRequestDetails, search);
 
 		ourLog.trace("Fetched {} results", pids.size());
 
+		return pids;
+	}
+
+	@Nonnull
+	private List<ResourcePersistentId> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
+		List<ResourcePersistentId> pids = myTxService.executeCallable(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		if (pids == null) {
+			throw myExceptionSvc.newUnknownSearchException(theUuid);
+		}
 		return pids;
 	}
 
@@ -342,7 +340,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null || isOffsetQuery) {
 			if (mySearchStrategyFactory.isSupportsHSearchDirect(theResourceType, theParams, theRequestDetails)) {
 				ourLog.info("Search {} is using direct load strategy", searchUuid);
-				SearchStrategyFactory.ISearchStrategy direct =  mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
+				SearchStrategyFactory.ISearchStrategy direct = mySearchStrategyFactory.makeDirectStrategy(searchUuid, theResourceType, theParams, theRequestDetails);
 
 				try {
 					return direct.get();

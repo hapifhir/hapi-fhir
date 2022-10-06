@@ -302,6 +302,11 @@ public class HapiTransactionService {
 		return false;
 	}
 
+	@VisibleForTesting
+	public void setRequestPartitionSvcForUnitTest(IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
+	}
+
 	/**
 	 * This is just an unchecked exception so that we can catch checked exceptions inside TransactionTemplate
 	 * and rethrow them outside of it

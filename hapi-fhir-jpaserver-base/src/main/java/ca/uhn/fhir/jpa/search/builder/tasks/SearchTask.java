@@ -119,8 +119,6 @@ public class SearchTask implements Callable<Void> {
 	private final int mySyncSize;
 	private final Integer myLoadingThrottleForUnitTests;
 
-	private boolean myCustomIsolationSupported;
-
 	// injected beans
 	protected final HapiTransactionService myTxService;
 	protected final FhirContext myContext;
@@ -171,12 +169,6 @@ public class SearchTask implements Callable<Void> {
 		mySearchRuntimeDetails.setQueryString(myParams.toNormalizedQueryString(myCallingDao.getContext()));
 		myRequestPartitionId = theCreationParams.RequestPartitionId;
 		myParentTransaction = ElasticApm.currentTransaction();
-
-		myCustomIsolationSupported = myTxService.isCustomIsolationSupported();
-
-		if (!myCustomIsolationSupported) {
-			ourLog.warn("JPA dialect does not support transaction isolation! This can have an impact on search performance.");
-		}
 	}
 
 	/**

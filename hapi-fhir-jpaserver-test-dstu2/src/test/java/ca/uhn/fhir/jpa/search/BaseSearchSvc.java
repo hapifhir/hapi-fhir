@@ -34,8 +34,7 @@ public class BaseSearchSvc {
 
 	@Mock
 	protected PlatformTransactionManager myTxManager;
-	@Mock
-	protected HapiTransactionService myTransactionService;
+	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
 	protected SearchBuilder mySearchBuilder;
 

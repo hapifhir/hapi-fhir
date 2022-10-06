@@ -24,10 +24,12 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.util.ICallable;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
@@ -42,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -292,8 +296,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	private void initSearches() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 	}
 
 	private void initAsyncSearches() {
@@ -441,7 +443,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 	@Test
 	public void testLoadSearchResultsFromDifferentCoordinator() {
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
-		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
 		final String uuid = UUID.randomUUID().toString();
 

@@ -30,6 +30,7 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -345,13 +346,25 @@ public class TestUtil {
 
 		GeneratedValue gen = theAnnotatedElement.getAnnotation(GeneratedValue.class);
 		SequenceGenerator sg = theAnnotatedElement.getAnnotation(SequenceGenerator.class);
-		Validate.isTrue((gen != null) == (sg != null));
+		GenericGenerator gg = theAnnotatedElement.getAnnotation(GenericGenerator.class);
+		if ((sg != null || gg != null)) {
+			Validate.isTrue(gen != null);
+		}
 		if (gen != null) {
+			Validate.isTrue(sg != null ^ gg != null);
 			assertNotADuplicateName(gen.generator(), theNames);
-			assertNotADuplicateName(sg.name(), null);
-			assertNotADuplicateName(sg.sequenceName(), null);
-			assertEquals(gen.generator(), sg.name());
-			assertEquals(gen.generator(), sg.sequenceName());
+			if (sg != null) {
+				assertNotADuplicateName(sg.name(), null);
+				assertNotADuplicateName(sg.sequenceName(), null);
+				assertEquals(gen.generator(), sg.name());
+				assertEquals(gen.generator(), sg.sequenceName());
+			}
+			if (gg != null) {
+				assertEquals(gen.generator(), gg.name());
+			}
+		}
+		if (gg != null) {
+			assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", gg.strategy());
 		}
 
 	}

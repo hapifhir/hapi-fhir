@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -126,6 +127,8 @@ public class GiantTransactionPerfTest {
 	private ApplicationContext myAppCtx;
 	@Mock
 	private IInstanceValidatorModule myInstanceValidatorSvc;
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
@@ -171,6 +174,7 @@ public class GiantTransactionPerfTest {
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
+		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
 		myHapiTransactionService.start();
 
 		myTransactionProcessor = new TransactionProcessor();

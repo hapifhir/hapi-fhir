@@ -34,10 +34,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -81,7 +79,7 @@ public class SearchContinuationTask extends SearchTask {
 	@Override
 	public Void call() {
 		try {
-			myTxService.execute(myRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, ()->{
+			myTxService.execute(myRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
 				List<ResourcePersistentId> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());

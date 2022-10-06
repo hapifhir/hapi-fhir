@@ -219,8 +219,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
+		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 		return myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () ->{
-			final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, null);
 			return toResourceList(sb, pidsSubList);
 		});
 	}
