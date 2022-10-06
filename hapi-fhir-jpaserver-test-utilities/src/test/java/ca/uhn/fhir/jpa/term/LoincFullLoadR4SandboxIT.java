@@ -23,8 +23,6 @@ import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
-import com.google.common.collect.testing.google.MultimapAsMapGetTester;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -68,7 +66,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,7 +74,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -95,22 +91,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Sandbox test (not intended to run on CI build) so must be kept disabled
  *
- *	 Requires the loinc-full resource directory to contain the following three files:
- *	 _ Loinc.csv.gz
- *	 _ Loinc_1.11.zip and
+ *	 Requires the loinc-full resource directory to contain the following files:
+ *	 _ Loinc_1.11.zip
  *	 _ v1.11_loincupload.properties
  *
- *	 but they are too large for the repo, so before running this test, copy them from:
+ *	 but last one is too large for the repo, so before running this test, copy it from:
  *	 https://drive.google.com/drive/folders/18be2R5IurlWnugkl18nDG7wrwPsOtfR-?usp=sharing
  *	 (SmileCDR has access)
  *
  * Can be executed with Lucene or Elastic configuration
- *
- * Requires 4Gb mem to run, so pom needs to be changed to run from IDE:
- *    <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx5g</surefire_jvm_args>
- * or to run from maven use:
- * mvn test -pl :hapi-fhir-jpaserver-test-utilities -Dtest=LoincFullLoadR4SandboxIT#uploadLoincCodeSystem -Dsurefire_jvm_args="-Xmx5g"
- *
+ * 
  */
 @Disabled("Sandbox test")
 @ExtendWith(SpringExtension.class)
@@ -162,12 +152,12 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	public static final String LOINC_PROPERTIES_CLASSPATH =
 		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "v1.11_loincupload.properties";
 
+	public static final String BASE_LOINC_FILE_NAME = "Loinc_1.11";
+
 	public static final String LOINC_ZIP_CLASSPATH =
-		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + "Loinc_1.11_changed.zip";
-
-	public static final String LOINC_CSV_FILE_ZIP_PATH = "Loinc_1.11_changed/LoincTable/Loinc.csv";
-
-	public static final String LOINC_MAP_TO_FILE_ZIP_PATH = "Loinc_1.11_changed/LoincTable/MapTo.csv";
+		ResourceUtils.CLASSPATH_URL_PREFIX + TEST_FILES_CLASSPATH + BASE_LOINC_FILE_NAME + ".zip";
+	public static final String LOINC_CSV_ZIP_ENTRY_PATH 		= BASE_LOINC_FILE_NAME + "/LoincTable/Loinc.csv";
+	public static final String LOINC_MAP_TO_ZIP_ENTRY_PATH 	= BASE_LOINC_FILE_NAME + "/LoincTable/MapTo.csv";
 // -----------------------------------------------------------------------------------------
 
 	@Autowired private FhirContext myFhirCtx;
@@ -180,12 +170,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	@Autowired private ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 
-
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
-
-
+	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 
 	private long termCodeSystemVersionWithVersionId;
 
@@ -225,6 +212,9 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 	public void uploadLoincCodeSystem() throws Exception {
 
 		if (USE_REAL_DB && LOAD_DB) {
+			// real test load requires longer time than unit tests
+			TermDeferredStorageSvcImpl.ourAllowTimeout = false;
+
 			List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
 
 			// upload terminology
@@ -443,7 +433,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 
 	private List<Map<String, String>> readLoincCsvRecordsAsMap() throws Exception {
-		CSVParser parser = getParserForZipFile(LOINC_ZIP_CLASSPATH, LOINC_CSV_FILE_ZIP_PATH);
+		CSVParser parser = getParserForZipFile(LOINC_ZIP_CLASSPATH, LOINC_CSV_ZIP_ENTRY_PATH);
 		Iterator<CSVRecord> iter = parser.iterator();
 
 		Map<String, Integer> headerMap = parser.getHeaderMap();
@@ -472,7 +462,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 
 	private Multimap<String, Pair<String, String>> readMapToCsvRecordsAsMap() throws Exception {
-		CSVParser parser = getParserForZipFile(LOINC_ZIP_CLASSPATH, LOINC_MAP_TO_FILE_ZIP_PATH);
+		CSVParser parser = getParserForZipFile(LOINC_ZIP_CLASSPATH, LOINC_MAP_TO_ZIP_ENTRY_PATH);
 
 		Map<String, Integer> headerMap = parser.getHeaderMap();
 		recordPropertyNames = headerMap.entrySet().stream()
