@@ -30,6 +30,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -51,6 +52,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
+
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@Nonnull
 	@Override
@@ -98,9 +102,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 					idsToSubmit.add(id);
 
-					// >= so that we know (with confidence)
-					// that every batch is <= 1000 items
-					if (idsToSubmit.size() >= MAX_IDS_TO_BATCH) {
+					// Make sure resources stored in each batch does not go over the max capacity
+					if (idsToSubmit.size() == myDaoConfig.getBulkExportFileMaximumCapacity()) {
 						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
