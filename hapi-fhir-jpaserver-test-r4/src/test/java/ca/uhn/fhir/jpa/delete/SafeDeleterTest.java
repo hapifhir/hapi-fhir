@@ -202,6 +202,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		// Unpause and fail to delete the second patient
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		myCascadeDeleteInterceptor.release("second");
+
+		// Red Green: If you delete the updatePatient above, it will timeout here
 		myCascadeDeleteInterceptor.awaitExpected();
 
 		// Unpause and succeed in deleting the second patient because we will get the correct version now

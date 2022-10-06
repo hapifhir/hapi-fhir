@@ -69,7 +69,9 @@ public class SafeDeleter {
 
 		return myRetryTemplate.execute(retryContext -> {
 			try {
-				ourLog.info("LUKE: retry count: {}", retryContext.getRetryCount());
+				if (retryContext.getRetryCount() > 0) {
+					ourLog.info("Retrying delete of {} - Attempt #{}", nextSourceId, retryContext.getRetryCount());
+				}
 				myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 				return 1;
 			} catch (ResourceGoneException exception) {
