@@ -13,10 +13,11 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
@@ -60,7 +61,6 @@ public class SafeDeleter {
 		return retVal;
 	}
 
-	@NotNull
 	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, Integer retVal, DeleteConflict next, IdDt nextSource, String nextSourceId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
@@ -81,31 +81,27 @@ public class SafeDeleter {
 	private void deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
 		ourLog.info("Have delete conflict {} - Cascading delete", next);
 		// TODO:  add a transaction checkpoint here and then try-catch to handle this
-//		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
+		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
+//		final Savepoint savepoint = myHapiTransactionService.savepointHibernate();
 
 		try {
-			final DaoMethodOutcome result = myRetryTemplate.execute(retryContext -> {
-				ourLog.info("LUKE: retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
-				try {
-					// Actually perform the delete
-					final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-					// TODO:
-					dao.flush();
-					// FIXME LUKE: do we need this?
-					return outcome;
-				} catch (Throwable exception) {
-					// TODO:  LUKE:  clean this up once testing is complete
-					ourLog.error(String.format("LUKE RETRY # %s exception: %s: ", retryContext.getRetryCount(), exception.getMessage()), exception);
-//					myHapiTransactionService.rollbackToSavepoint(savepoint);
-					throw exception;
-				}
+			final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+			dao.flush();
+		} catch (ResourceVersionConflictException exception) {
+			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
+			myHapiTransactionService.rollbackToSavepoint(savepoint);
+//			- read the latest version, retry with latest version (max 3 retries then rethrow ResourceVersionConflictException)
+			myRetryTemplate.execute(retryContext -> {
+				ourLog.info("LUKE: ResourceVersionConflictException retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
+				// TODO:  try this first and
+				final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+				return null;
 			});
-			ourLog.info("LUKE: past retry next: {}", nextSourceId);
-		} catch (Throwable exception) {
-			// TODO:  LUKE:  clean this up once testing is complete
-			ourLog.error("LUKE OUTSIDE RETRY: " + exception.getMessage(), exception);
-			throw exception;
-		}
+		} catch (ResourceGoneException exception) {
+			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
+			myHapiTransactionService.rollbackToSavepoint(savepoint);
+			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+		} // do not catch Exception, just let it propagate up
 	}
 
 	// TODO:  set this up in a Config class:  somewhere

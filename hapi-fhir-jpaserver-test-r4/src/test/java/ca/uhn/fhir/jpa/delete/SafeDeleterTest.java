@@ -17,6 +17,8 @@ import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Patient;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -151,8 +153,12 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		ourLog.info("retries done");
 	}
 
+	// TODOs:
+	// 1. savepoint/rollback seems to result in UnexpectedRollbackException in both cases
+	//		hibernate savepoints fail to work as well
+	// 2. delete_delete_retryTest is throwing a ResourceVersionConflictException, not a ResourceGoneException as expected so is the other test
 	@Test
-	void delete_retryTest() throws ExecutionException, InterruptedException {
+	void delete_delete_retryTest() throws ExecutionException, InterruptedException {
 		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
 
 		DeleteConflictList conflictList = new DeleteConflictList();
@@ -193,6 +199,58 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
+	}
+
+	@Test
+	void delete_update_retryTest() throws ExecutionException, InterruptedException {
+		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
+
+		DeleteConflictList conflictList = new DeleteConflictList();
+		IIdType orgId = createOrganization();
+		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+
+		conflictList.add(buildDeleteConflict(patient1Id, orgId));
+		conflictList.add(buildDeleteConflict(patient2Id, orgId));
+
+		assertEquals(2, countPatients());
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		final Future<Integer> future = executorService.submit(() ->
+			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
+
+		// We are paused before deleting the first patient.
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		// Unpause and delete the first patient
+		myCascadeDeleteInterceptor.release("first");
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		// The first patient has now been deleted
+
+		// We are paused before deleting the second patient.
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		//   Let's delete the second patient from under its nose.
+		// FIXME LUKE: note this test passes if you comment out this line
+		//   Let's update the second patient from under its nose.
+		final Patient patient2 = myPatientDao.read(patient2Id);
+		final HumanName familyName = new HumanName();
+		familyName.setFamily("Doo");
+		patient2.getName().add(familyName);
+
+		myPatientDao.update(patient2);
+
+		// Unpause and delete the second patient
+		myCascadeDeleteInterceptor.release("second");
+
+		// TODO: LUKE:  we still fail on Transaction silently rolled back because it has been marked as rollback-only
+		assertEquals(1, future.get());
+
+		assertEquals(0, countPatients());
+		assertEquals(1, countOrganizations());
+
 	}
 
 	@Nullable
