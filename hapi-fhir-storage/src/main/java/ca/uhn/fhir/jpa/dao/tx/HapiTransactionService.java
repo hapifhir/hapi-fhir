@@ -149,7 +149,7 @@ public class HapiTransactionService {
 	}
 
 	public TransactionStatus savepoint() {
-		return myTransactionManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+		return myTransactionManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 	}
 
 	public void rollbackToSavepoint(TransactionStatus savepoint) {

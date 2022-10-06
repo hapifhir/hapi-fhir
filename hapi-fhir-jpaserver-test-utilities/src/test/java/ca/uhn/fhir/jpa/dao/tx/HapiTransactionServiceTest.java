@@ -70,7 +70,6 @@ class HapiTransactionServiceTest extends BaseJpaR4Test {
 			myPartitionDao.save(partition2);
 			TransactionStatus savepoint = myHapiTransactionService.savepoint();
 			myPartitionDao.save(partition3);
-			assertEquals(3, partitionCount());
 			myHapiTransactionService.rollbackToSavepoint(savepoint);
 			return null;
 		});
