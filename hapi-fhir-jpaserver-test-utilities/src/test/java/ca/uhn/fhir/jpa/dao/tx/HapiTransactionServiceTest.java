@@ -59,6 +59,37 @@ class HapiTransactionServiceTest extends BaseJpaR4Test {
 		assertEquals(2, partitionCount());
 	}
 
+	@Test
+	void testCreatePartitionSavepointRollbackWithinTransaction() {
+		PartitionEntity partition1 = buildPartition(1);
+		PartitionEntity partition2 = buildPartition(2);
+		PartitionEntity partition3 = buildPartition(3);
+		myHapiTransactionService.doExecuteCallback(status -> myPartitionDao.save(partition1));
+		assertEquals(1, partitionCount());
+		myHapiTransactionService.doExecuteCallback(status -> {
+			myPartitionDao.save(partition2);
+			TransactionStatus savepoint = myHapiTransactionService.savepoint();
+			myPartitionDao.save(partition3);
+			assertEquals(3, partitionCount());
+			myHapiTransactionService.rollbackToSavepoint(savepoint);
+			return null;
+		});
+
+		// TODO:  error happens on commit before we get here:
+
+		/*
+		org.springframework.transaction.UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.processCommit(AbstractPlatformTransactionManager.java:752)
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.commit(AbstractPlatformTransactionManager.java:711)
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:152)
+	at ca.uhn.fhir.jpa.dao.tx.HapiTransactionService.doExecuteCallback(HapiTransactionService.java:162)
+	at ca.uhn.fhir.jpa.dao.tx.HapiTransactionServiceTest.testCreatePartitionSavepointRollbackWithinTransaction(HapiTransactionServiceTest.java:69)
+		 */
+
+		assertEquals(2, partitionCount());
+	}
+
 	@NotNull
 	private static PartitionEntity buildPartition(int theId) {
 		PartitionEntity partition = new PartitionEntity();
