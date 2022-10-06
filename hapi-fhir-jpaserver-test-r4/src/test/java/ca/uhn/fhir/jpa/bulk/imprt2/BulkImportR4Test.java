@@ -179,7 +179,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getErrorCount();
-			}, greaterThan(0));
+			}, greaterThan(0)); // This should hit 3, but concurrency can lead it to only hitting 1-2
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
