@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -49,6 +50,7 @@ import org.springframework.retry.support.RetryTemplate;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
@@ -203,8 +205,8 @@ public class CascadingDeleteInterceptor {
 		fixedBackOffPolicy.setBackOffPeriod(BACKOFF_PERIOD);
 		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-		retryPolicy.setMaxAttempts(MAX_ATTEMPTS);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(MAX_ATTEMPTS, Collections.singletonMap(ResourceVersionConflictException.class, true));
 		retryTemplate.setRetryPolicy(retryPolicy);
 
 		return retryTemplate;

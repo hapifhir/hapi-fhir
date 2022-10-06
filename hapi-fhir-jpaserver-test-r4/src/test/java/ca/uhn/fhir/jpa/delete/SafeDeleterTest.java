@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -90,8 +91,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 	void delete_delete_two() {
 		DeleteConflictList conflictList = new DeleteConflictList();
 		IIdType orgId = createOrganization();
-		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
-		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+		IIdType patient1Id = createPatientWithVersion(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatientWithVersion(withId(PATIENT2_ID));
 
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
@@ -101,6 +102,13 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
+	}
+
+	private IIdType createPatientWithVersion(Consumer<IBaseResource> theWithId) {
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("FAMILY"));
+		theWithId.accept(patient);
+		return myPatientDao.update(patient, mySrd).getId();
 	}
 
 	// FIXME LUKE
@@ -128,8 +136,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		DeleteConflictList conflictList = new DeleteConflictList();
 		IIdType orgId = createOrganization();
-		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
-		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+		IIdType patient1Id = createPatientWithVersion(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatientWithVersion(withId(PATIENT2_ID));
 
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
@@ -153,10 +161,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		// Unpause and delete the first patient
 		myCascadeDeleteInterceptor.release("first");
 
-		myCascadeDeleteInterceptor.setExpectedCount(1);
-		// The first patient has now been deleted
-
-//		future.get();
 		assertEquals(1, future.get());
 
 		assertEquals(0, countPatients());
@@ -169,8 +173,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		DeleteConflictList conflictList = new DeleteConflictList();
 		IIdType orgId = createOrganization();
-		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
-		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+		IIdType patient1Id = createPatientWithVersion(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatientWithVersion(withId(PATIENT2_ID));
 
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
@@ -182,18 +186,36 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		final Future<Integer> future = executorService.submit(() ->
 			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
 
-		// We are paused before deleting the first patient.
+		// Patient 1 We are paused after reading the version but before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
+
 
 		// Unpause and delete the first patient
+		myCascadeDeleteInterceptor.setExpectedCount(1);
 		myCascadeDeleteInterceptor.release("first");
 
-		myCascadeDeleteInterceptor.setExpectedCount(1);
-		// The first patient has now been deleted
-
-		// We are paused before deleting the second patient.
+		// Patient 2 We are paused after reading the version but before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
 
+		updatePatient(patient2Id);
+
+		// Unpause and fail to delete the second patient
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		myCascadeDeleteInterceptor.release("second");
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		// Unpause and succeed in deleting the second patient because we will get the correct version now
+		myCascadeDeleteInterceptor.release("third");
+
+		// TODO: LUKE:  we still fail on Transaction silently rolled back because it has been marked as rollback-only
+//		future.get();
+		assertEquals(2, future.get());
+
+		assertEquals(0, countPatients());
+		assertEquals(1, countOrganizations());
+	}
+
+	private void updatePatient(IIdType patient2Id) {
 		//   Let's delete the second patient from under its nose.
 		// FIXME LUKE: note this test passes if you comment out this line
 		//   Let's update the second patient from under its nose.
@@ -202,17 +224,9 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		familyName.setFamily("Doo");
 		patient2.getName().add(familyName);
 
+		ourLog.info("about to update");
 		myPatientDao.update(patient2);
-
-		// Unpause and delete the second patient
-		myCascadeDeleteInterceptor.release("second");
-
-		// TODO: LUKE:  we still fail on Transaction silently rolled back because it has been marked as rollback-only
-		future.get();
-//		assertEquals(1, future.get());
-
-		assertEquals(0, countPatients());
-		assertEquals(1, countOrganizations());
+		ourLog.info("update complete");
 	}
 
 	@Nullable
@@ -245,12 +259,14 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		@Hook(Pointcut.STORAGE_CASCADE_DELETE)
 		public void cascadeDelete(RequestDetails theRequestDetails, DeleteConflictList theConflictList, IBaseResource theResource) throws InterruptedException {
 			myCalledLatch.call(theResource);
+			ourLog.info("Waiting to proceed with delete");
 			myWaitLatch.awaitExpected();
 			ourLog.info("Cascade Delete proceeding: {}", myWaitLatch.getLatchInvocationParameter());
 			myWaitLatch.setExpectedCount(1);
 		}
 
 		void release(String theMessage) {
+			ourLog.info("Releasing {}", theMessage);
 			myWaitLatch.call(theMessage);
 		}
 
@@ -265,9 +281,15 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 			myCalledLatch.setExpectedCount(count);
 		}
 
+		public void setExpectAtLeast(int theCount) {
+			myCalledLatch.setExpectAtLeast(theCount);
+		}
+
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
 			return myCalledLatch.awaitExpected();
 		}
+
+
 	}
 }

@@ -13,7 +13,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,6 +37,7 @@ public class SafeDeleter {
 
 	private final RetryTemplate myRetryTemplate;
 
+	// FIXME LUKE please move retry template down here
 	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager, RetryTemplate theRetryTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -57,39 +57,38 @@ public class SafeDeleter {
 
 			if (!cascadeDeleteIdCache.contains(nextSourceId)) {
 				cascadeDeleteIdCache.add(nextSourceId);
-				retVal = handleNextSource(theRequest, theConflictList, theTransactionDetails, retVal, next, nextSource, nextSourceId);
+				retVal += handleNextSource(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId);
 			}
 		}
 
 		return retVal;
 	}
 
-	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, Integer retVal, DeleteConflict next, IdDt nextSource, String nextSourceId) {
+	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
-		try {
-			myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
-			++retVal;
-		} catch (ResourceVersionConflictException exception) {
-			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
+		return myRetryTemplate.execute(retryContext -> {
+			try {
+				ourLog.info("LUKE: retry count: {}", retryContext.getRetryCount());
+				myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+				return 1;
+			} catch (ResourceGoneException exception) {
+				ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
 //			myHapiTransactionService.rollbackToSavepoint(savepoint);
-//			- read the latest version, retry with latest version (max 3 retries then rethrow ResourceVersionConflictException)
-			myRetryTemplate.execute(retryContext -> {
-				ourLog.info("LUKE: ResourceVersionConflictException retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
-				// TODO:  try this first and
-				return dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-			});
-		} catch (ResourceGoneException exception) {
-			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
-//			myHapiTransactionService.rollbackToSavepoint(savepoint);
-			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
-		}
-		return retVal;
+				ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+			}
+			return 0;
+		});
 	}
 
-	private DaoMethodOutcome doDelete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, IdDt nextSource, IFhirResourceDao<?> dao) {
+	private DaoMethodOutcome doDelete(RequestDetails theRequest, DeleteConflictList
+		theConflictList, TransactionDetails theTransactionDetails, IdDt nextSource, IFhirResourceDao<?> dao) {
 		// Interceptor call: STORAGE_CASCADE_DELETE
-		IBaseResource resource = dao.read(nextSource, theRequest);
+
+		ourLog.info("LUKE: read: {}", nextSource);
+		// Remove the version so we grab the latest version to delete
+		IBaseResource resource = dao.read(nextSource.toVersionless(), theRequest);
+		ourLog.info("LUKE: call hook: {}", nextSource);
 		HookParams params = new HookParams()
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -97,7 +96,10 @@ public class SafeDeleter {
 			.add(IBaseResource.class, resource);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
 
-		return dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+		ourLog.info("LUKE: delete: {}", resource.getIdElement());
+		DaoMethodOutcome result = dao.delete(resource.getIdElement(), theConflictList, theRequest, theTransactionDetails);
+		ourLog.info("LUKE: done delete: {}", resource.getIdElement());
+		return result;
 	}
 
 	// TODO:  set this up in a Config class:  somewhere
