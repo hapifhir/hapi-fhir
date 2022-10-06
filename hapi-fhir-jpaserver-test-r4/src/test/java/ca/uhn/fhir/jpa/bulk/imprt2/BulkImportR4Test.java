@@ -184,7 +184,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-				assertEquals(3, instance.getErrorCount(), storageDescription);
+				assertThat(storageDescription, instance.getErrorCount(), greaterThan(0));
 				assertNotNull(instance.getCreateTime());
 				assertNotNull(instance.getStartTime());
 				assertNull(instance.getEndTime());
