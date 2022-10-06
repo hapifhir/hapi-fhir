@@ -178,27 +178,23 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
+		ourLog.info("Start background delete");
 		final Future<Integer> future = executorService.submit(() ->
 			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
 
+		//   Let's delete the second patient from under its nose.
+		// FIXME LUKE: note this test passes if you comment out this line
+		ourLog.info("delete patient 2");
+		myPatientDao.delete(patient2Id);
+
 		// Unpause and delete the first patient
 		myCascadeDeleteInterceptor.release("first");
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		// The first patient has now been deleted
-
-		// We are paused before deleting the second patient.
-		myCascadeDeleteInterceptor.awaitExpected();
-
-		//   Let's delete the second patient from under its nose.
-		// FIXME LUKE: note this test passes if you comment out this line
-		myPatientDao.delete(patient2Id);
-
-		// Unpause and delete the second patient
-		myCascadeDeleteInterceptor.release("second");
 
 //		future.get();
 		assertEquals(1, future.get());
