@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,7 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -33,14 +33,17 @@ public class SafeDeleter {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	// TODO: LUKE:  get rid of this if this is no longer needed as part of the final solution
-	private final HapiTransactionService myHapiTransactionService;
+	private final PlatformTransactionManager myPlatformTransactionManager;
+	private final TransactionTemplate myTxTemplate;
 
 	private final RetryTemplate myRetryTemplate;
 
-	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService theHapiTransactionService, RetryTemplate theRetryTemplate) {
+	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager, RetryTemplate theRetryTemplate) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myHapiTransactionService = theHapiTransactionService;
+		myPlatformTransactionManager = thePlatformTransactionManager;
+		myTxTemplate = new TransactionTemplate(thePlatformTransactionManager);
+		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		myRetryTemplate = theRetryTemplate;
 	}
 
@@ -81,15 +84,14 @@ public class SafeDeleter {
 	private void deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
 		ourLog.info("Have delete conflict {} - Cascading delete", next);
 		// TODO:  add a transaction checkpoint here and then try-catch to handle this
-		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
+//		final TransactionStatus savepoint = myHapiTransactionService.savepoint();
 //		final Savepoint savepoint = myHapiTransactionService.savepointHibernate();
 
 		try {
-			final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-			dao.flush();
+			final DaoMethodOutcome outcome = myTxTemplate.execute(s -> dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails));
 		} catch (ResourceVersionConflictException exception) {
 			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
-			myHapiTransactionService.rollbackToSavepoint(savepoint);
+//			myHapiTransactionService.rollbackToSavepoint(savepoint);
 //			- read the latest version, retry with latest version (max 3 retries then rethrow ResourceVersionConflictException)
 			myRetryTemplate.execute(retryContext -> {
 				ourLog.info("LUKE: ResourceVersionConflictException retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
@@ -99,9 +101,12 @@ public class SafeDeleter {
 			});
 		} catch (ResourceGoneException exception) {
 			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
-			myHapiTransactionService.rollbackToSavepoint(savepoint);
+//			myHapiTransactionService.rollbackToSavepoint(savepoint);
 			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
-		} // do not catch Exception, just let it propagate up
+		} catch (Exception e) {
+			ourLog.error(e.getMessage(), e);
+			throw e;// do not catch Exception, just let it propagate up
+		}
 	}
 
 	// TODO:  set this up in a Config class:  somewhere

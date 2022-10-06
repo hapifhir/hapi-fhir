@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +54,8 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	@Autowired
 	HapiTransactionService myHapiTransactionService;
+	@Autowired
+	PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
 	private IInterceptorService myInterceptorService;
@@ -65,7 +68,7 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	void beforeEach() {
-		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myHapiTransactionService, myRetryTemplate);
+		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager, myRetryTemplate);
 
 //		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_CASCADE_DELETE, myPointcutLatch);
 	}
@@ -101,6 +104,7 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
+	// FIXME LUKE this would need latches to ensure they happen simultaneously
 	@Test
 	void delete_delete_two_thread_blocked_conflict() throws ExecutionException, InterruptedException {
 		// TODO:  LUKE:  code reuse in unit test
@@ -275,6 +279,9 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		MyCascadeDeleteInterceptor() {
 			myWaitLatch.setExpectedCount(1);
+			// FIXME LUKE remove later
+			myCalledLatch.setDefaultTimeoutSeconds(9999);
+			myWaitLatch.setDefaultTimeoutSeconds(9999);
 		}
 
 		@Hook(Pointcut.STORAGE_CASCADE_DELETE)

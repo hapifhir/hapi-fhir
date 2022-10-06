@@ -124,7 +124,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -505,18 +504,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			});
 		} catch (Exception exception) {
 			ourLog.info("LUKE: rolling back to savepoint: {}", transactionDetails.getSavepointIfExists());
-			final Optional<TransactionStatus> savepointIfExists = transactionDetails.getSavepointIfExists();
-
-			transactionDetails.getSavepointIfExists().ifPresent(transactionStatus -> myTransactionService.rollbackToSavepoint(transactionStatus));
 
 			// TODO:  this is totally wrong:  fix this:
 			throw exception;
 		}
-	}
-
-	@Override
-	public void flush() {
-		myEntityManager.flush();
 	}
 
 	/**

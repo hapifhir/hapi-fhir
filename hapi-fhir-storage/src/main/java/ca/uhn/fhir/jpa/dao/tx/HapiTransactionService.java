@@ -40,9 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -148,14 +145,6 @@ public class HapiTransactionService {
 
 	}
 
-	public TransactionStatus savepoint() {
-		return myTransactionManager.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
-	}
-
-	public void rollbackToSavepoint(TransactionStatus savepoint) {
-		myTransactionManager.rollback(savepoint);
-	}
-
 	@Nullable
 	protected <T> T doExecuteCallback(TransactionCallback<T> theCallback) {
 		try {
@@ -168,6 +157,10 @@ public class HapiTransactionService {
 				throw new InternalErrorException(Msg.code(551) + e);
 			}
 		}
+	}
+
+	public PlatformTransactionManager getTransactionManager() {
+		return myTransactionManager;
 	}
 
 	/**

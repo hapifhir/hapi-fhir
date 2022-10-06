@@ -125,7 +125,7 @@ public class CascadingDeleteInterceptor {
 			return null;
 		}
 
-		SafeDeleter deleter = new SafeDeleter(myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService, getRetryTemplate());
+		SafeDeleter deleter = new SafeDeleter(myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService.getTransactionManager(), getRetryTemplate());
 		deleter.delete(theRequest, theConflictList, theTransactionDetails);
 
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
