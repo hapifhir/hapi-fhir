@@ -67,6 +67,27 @@ public class SafeDeleter {
 	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, Integer retVal, DeleteConflict next, IdDt nextSource, String nextSourceId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
+		try {
+			myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+			++retVal;
+		} catch (ResourceVersionConflictException exception) {
+			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
+//			myHapiTransactionService.rollbackToSavepoint(savepoint);
+//			- read the latest version, retry with latest version (max 3 retries then rethrow ResourceVersionConflictException)
+			myRetryTemplate.execute(retryContext -> {
+				ourLog.info("LUKE: ResourceVersionConflictException retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
+				// TODO:  try this first and
+				return dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
+			});
+		} catch (ResourceGoneException exception) {
+			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
+//			myHapiTransactionService.rollbackToSavepoint(savepoint);
+			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+		}
+		return retVal;
+	}
+
+	private DaoMethodOutcome doDelete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, IdDt nextSource, IFhirResourceDao<?> dao) {
 		// Interceptor call: STORAGE_CASCADE_DELETE
 		IBaseResource resource = dao.read(nextSource, theRequest);
 		HookParams params = new HookParams()
@@ -76,36 +97,7 @@ public class SafeDeleter {
 			.add(IBaseResource.class, resource);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
 
-		int count = deleteWithRetry(theRequest, theConflictList, theTransactionDetails, next, nextSource, nextSourceId, dao);
-		retVal = retVal + count;
-		return retVal;
-	}
-
-	private int deleteWithRetry(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId, IFhirResourceDao<?> dao) {
-		ourLog.info("Have delete conflict {} - Cascading delete", next);
-		int retVal = 0;
-
-		try {
-			final DaoMethodOutcome outcome = myTxTemplate.execute(s -> dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails));
-//			final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-			retVal++;
-		} catch (ResourceVersionConflictException exception) {
-			ourLog.info("LUKE: ResourceVersionConflictException: {}", nextSourceId);
-//			myHapiTransactionService.rollbackToSavepoint(savepoint);
-//			- read the latest version, retry with latest version (max 3 retries then rethrow ResourceVersionConflictException)
-			myRetryTemplate.execute(retryContext -> {
-				ourLog.info("LUKE: ResourceVersionConflictException retry next: {}, retryCount: {} ", nextSourceId, retryContext.getRetryCount());
-				// TODO:  try this first and
-				final DaoMethodOutcome outcome = dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-				return null;
-			});
-		} catch (ResourceGoneException exception) {
-			ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
-//			myHapiTransactionService.rollbackToSavepoint(savepoint);
-			ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
-		}
-
-		return retVal;
+		return dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
 	}
 
 	// TODO:  set this up in a Config class:  somewhere

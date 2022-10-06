@@ -35,7 +35,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class SafeDeleterTest extends BaseJpaR4Test {
 	private static final String PATIENT1_ID = "a1";
@@ -102,45 +101,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
-	}
-
-	// FIXME LUKE this would need latches to ensure they happen simultaneously
-	@Test
-//	@Disabled
-	void delete_delete_two_thread_blocked_conflict() throws ExecutionException, InterruptedException {
-		// TODO:  LUKE:  code reuse in unit test
-		DeleteConflictList conflictList = new DeleteConflictList();
-		IIdType orgId = createOrganization();
-		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
-		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
-
-		conflictList.add(buildDeleteConflict(patient1Id, orgId));
-		conflictList.add(buildDeleteConflict(patient2Id, orgId));
-
-		assertEquals(2, countPatients());
-
-		final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-		final Future<Integer> future1 = executorService.submit(() -> {
-			try {
-				myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
-			} catch (Throwable exception) {
-				ourLog.error("LUKE: Exception on commit: " + exception.getMessage(), exception);
-				fail();
-			}
-			return 1;
-		});
-
-		try {
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
-		} catch (Throwable exception) {
-			ourLog.error("LUKE: Exception on commit: " + exception.getMessage(), exception);
-			fail();
-		}
-
-		assertEquals(2,future1.get());
-
-		fail("not implenmented");
 	}
 
 	// FIXME LUKE
