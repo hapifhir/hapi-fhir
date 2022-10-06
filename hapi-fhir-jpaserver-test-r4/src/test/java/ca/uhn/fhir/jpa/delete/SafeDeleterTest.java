@@ -13,6 +13,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -106,7 +108,7 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	// FIXME LUKE this would need latches to ensure they happen simultaneously
 	@Test
-//	@Disabled
+	@Disabled
 	void delete_delete_two_thread_blocked_conflict() throws ExecutionException, InterruptedException {
 		// TODO:  LUKE:  code reuse in unit test
 		DeleteConflictList conflictList = new DeleteConflictList();
@@ -158,10 +160,10 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		ourLog.info("retries done");
 	}
 
-	// TODOs:
-	// 1. savepoint/rollback seems to result in UnexpectedRollbackException in both cases
-	//		hibernate savepoints fail to work as well
-	// 2. delete_delete_retryTest is throwing a ResourceVersionConflictException, not a ResourceGoneException as expected so is the other test
+	// TODO: figure out how to solve these
+	// 1. delete_delete_retryTest:
+	// * catch (ResourceGoneException) will cause UnexpectedRollbackException: Transaction silently rolled back because it has been marked as rollback-only
+	// >>> this happens even if I push up the call to myTexTemplate.execute to within the handleNextSource() method
 	@Test
 	void delete_delete_retryTest() throws ExecutionException, InterruptedException {
 		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
@@ -179,14 +181,19 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		ourLog.info("Start background delete");
-		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
+		final Future<Integer> future = executorService.submit(() -> {
+				try {
+					return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
+				} catch (UnexpectedRollbackException exception) {
+					fail("outer transaction threw UnexpectedRollbackException, triggered by the catch for ResourceVersionConflictException, which was not expected!");
+				}
+				return -1;
+			});
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
 
 		//   Let's delete the second patient from under its nose.
-		// FIXME LUKE: note this test passes if you comment out this line
 		ourLog.info("delete patient 2");
 		myPatientDao.delete(patient2Id);
 
@@ -203,6 +210,12 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
+	// TODO: figure out how to solve these
+	// 2. delete_update_retryTest:
+	// * without the inner transaction:   // ResourceVersionConflictException is getting throw on the outer commit() call, not on the inner transaction (see failure assertion)
+	// * with the inner transaction:      // test passes and we never throw ResourceVersionConflictException anywhere
+	// *  >>> if the inner transaction is in handleNextSource() not handleRetry(), then ResourceVersionConflictException is caught in the outer commit() call as well (see failure assertion)
+	// * attempt at changing the order of the patient update  and interceptor calls:      // countdownlatch hangs forever
 	@Test
 	void delete_update_retryTest() throws ExecutionException, InterruptedException {
 		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
@@ -220,7 +233,14 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails)));
+			{
+				try {
+					return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
+				} catch (ResourceVersionConflictException exception) {
+					fail("outer transaction threw ResourceVersionConflictException, which was not expected!");
+				}
+				return -1;
+			});
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
