@@ -389,7 +389,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
 			return null;
 		} else {
-			return mySearchCoordinatorSvc.getSearchTotal(myUuid).orElse(null);
+			return mySearchCoordinatorSvc.getSearchTotal(myUuid, myRequest).orElse(null);
 		}
 
 	}

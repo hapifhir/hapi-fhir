@@ -432,7 +432,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public Optional<Integer> getSearchTotal(String theUuid) {
+	public Optional<Integer> getSearchTotal(String theUuid, @Nullable RequestDetails theRequestDetails) {
 		SearchTask task = myIdToSearchTask.get(theUuid);
 		if (task != null) {
 			return Optional.ofNullable(task.awaitInitialSync());
@@ -442,8 +442,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		// FIXME: use tx svc
-		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
+		Optional<Search> search = myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, ()->mySearchCacheSvc.fetchByUuid(theUuid));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
@@ -525,7 +524,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		// createdCutoff is in recent past
 		final Instant createdCutoff = Instant.now().minus(myDaoConfig.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
 
-		// FIXME: use tx svc
 		Optional<Search> candidate = mySearchCacheSvc.findCandidatesForReuse(theResourceType, theQueryString, createdCutoff, theRequestPartitionId);
 		return candidate.orElse(null);
 	}
