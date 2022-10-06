@@ -241,6 +241,59 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
+	@Test
+	void delete_update_retryTest_redo_latches() throws ExecutionException, InterruptedException {
+		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
+
+		DeleteConflictList conflictList = new DeleteConflictList();
+		IIdType orgId = createOrganization();
+		IIdType patient1Id = createPatient(withId(PATIENT1_ID));
+		IIdType patient2Id = createPatient(withId(PATIENT2_ID));
+
+		conflictList.add(buildDeleteConflict(patient1Id, orgId));
+		conflictList.add(buildDeleteConflict(patient2Id, orgId));
+
+		assertEquals(2, countPatients());
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		ourLog.info("Start background delete");
+		final Future<Integer> future = executorService.submit(() -> {
+			try {
+				return myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleter.delete(mySrd, conflictList, myTransactionDetails));
+			} catch (UnexpectedRollbackException exception) {
+				fail("outer transaction threw UnexpectedRollbackException, triggered by the catch for ResourceVersionConflictException, which was not expected!");
+			} catch (ResourceVersionConflictException exception) {
+				fail("outer transaction threw ResourceVersionConflictException, which was not expected!");
+			}
+			return -1;
+		});
+
+		// We are paused before deleting the first patient.
+		myCascadeDeleteInterceptor.awaitExpected();
+
+		//   Let's delete the second patient from under its nose.
+		ourLog.info("update patient 2");
+		final Patient patient2 = myPatientDao.read(patient2Id);
+		final HumanName familyName = new HumanName();
+		familyName.setFamily("Doo");
+		patient2.getName().add(familyName);
+
+		myPatientDao.update(patient2);
+
+		// Unpause and delete the first patient
+		myCascadeDeleteInterceptor.release("first");
+
+		myCascadeDeleteInterceptor.setExpectedCount(1);
+		// The first patient has now been deleted
+
+//		future.get();
+		assertEquals(1, future.get());
+
+		assertEquals(0, countPatients());
+		assertEquals(1, countOrganizations());
+	}
+
 	// TODO: figure out how to solve these
 	// 2. delete_update_retryTest:
 	// * without the inner transaction:   // ResourceVersionConflictException is getting throw on the outer commit() call, not on the inner transaction (see failure assertion)
