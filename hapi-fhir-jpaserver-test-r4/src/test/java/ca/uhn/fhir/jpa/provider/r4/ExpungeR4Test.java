@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -77,7 +78,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
-	private RetryTemplate myRetryTemplate;
+	private HapiTransactionService myHapiTransactionService;
 
 	@AfterEach
 	public void afterDisableExpunge() {
@@ -212,7 +213,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, null, myRetryTemplate));
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myHapiTransactionService));
 
 		// setup
 		Organization organization = new Organization();

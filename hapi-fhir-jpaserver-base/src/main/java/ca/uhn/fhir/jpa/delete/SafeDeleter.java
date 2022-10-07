@@ -13,6 +13,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,27 +25,25 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Collections;
 import java.util.List;
 
-// TODO LUKE should this be a service bean?
 public class SafeDeleter {
+	public static final long RETRY_BACKOFF_PERIOD = 100L;
+	public static final int RETRY_MAX_ATTEMPTS = 4;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SafeDeleter.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	// TODO: LUKE:  get rid of this if this is no longer needed as part of the final solution
-	private final PlatformTransactionManager myPlatformTransactionManager;
 	private final TransactionTemplate myTxTemplate;
 
-	private final RetryTemplate myRetryTemplate;
+	private final RetryTemplate myRetryTemplate = getRetryTemplate();
 
-	// FIXME LUKE please move retry template down here
-	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager, RetryTemplate theRetryTemplate) {
+	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myPlatformTransactionManager = thePlatformTransactionManager;
 		myTxTemplate = new TransactionTemplate(thePlatformTransactionManager);
 		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
-		myRetryTemplate = theRetryTemplate;
 	}
 
 	public Integer delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
@@ -75,8 +74,6 @@ public class SafeDeleter {
 				myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
 				return 1;
 			} catch (ResourceGoneException exception) {
-				ourLog.info("LUKE: ResourceGoneException: {}", nextSourceId);
-//			myHapiTransactionService.rollbackToSavepoint(savepoint);
 				ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
 			}
 			return 0;
@@ -87,10 +84,8 @@ public class SafeDeleter {
 		theConflictList, TransactionDetails theTransactionDetails, IdDt nextSource, IFhirResourceDao<?> dao) {
 		// Interceptor call: STORAGE_CASCADE_DELETE
 
-		ourLog.info("LUKE: read: {}", nextSource);
 		// Remove the version so we grab the latest version to delete
 		IBaseResource resource = dao.read(nextSource.toVersionless(), theRequest);
-		ourLog.info("LUKE: call hook: {}", nextSource);
 		HookParams params = new HookParams()
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
@@ -98,25 +93,17 @@ public class SafeDeleter {
 			.add(IBaseResource.class, resource);
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
 
-		ourLog.info("LUKE: delete: {}", resource.getIdElement());
-		DaoMethodOutcome result = dao.delete(resource.getIdElement(), theConflictList, theRequest, theTransactionDetails);
-		ourLog.info("LUKE: done delete: {}", resource.getIdElement());
-		return result;
+		return dao.delete(resource.getIdElement(), theConflictList, theRequest, theTransactionDetails);
 	}
 
-	// TODO:  set this up in a Config class:  somewhere
-	private RetryTemplate getRetryTemplate() {
-		final long BACKOFF_PERIOD = 100L;
-		final int MAX_ATTEMPTS = 4;
+	private static RetryTemplate getRetryTemplate() {
+		final RetryTemplate retryTemplate = new RetryTemplate();
 
-		RetryTemplate retryTemplate = new RetryTemplate();
-
-		FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-		fixedBackOffPolicy.setBackOffPeriod(BACKOFF_PERIOD);
+		final FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+		fixedBackOffPolicy.setBackOffPeriod(RETRY_BACKOFF_PERIOD);
 		retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-		retryPolicy.setMaxAttempts(MAX_ATTEMPTS);
+		final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(RETRY_MAX_ATTEMPTS, Collections.singletonMap(ResourceVersionConflictException.class, true));
 		retryTemplate.setRetryPolicy(retryPolicy);
 
 		return retryTemplate;

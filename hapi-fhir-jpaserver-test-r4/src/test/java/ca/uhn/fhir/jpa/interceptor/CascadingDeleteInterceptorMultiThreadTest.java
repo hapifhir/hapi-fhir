@@ -290,7 +290,6 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	@Test
 	public void testDeleteCascadingConcurrentThreads() {
-//		myCaptureQueriesListener.clear();
 		myModelConfig.setRespectVersionsForSearchIncludes(false);
 		createResources();
 
@@ -299,26 +298,20 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		Callable<Boolean> job1 = () -> {
 			try {
-				final boolean b = deleteOrganization(myHttpClient1);
-				ourLog.info("LUKE: callable1 DONE!");
-				return b;
-			} catch (Exception exception) {
-				ourLog.error("LUKE: Exception from Callable 1: " + exception.getMessage(), exception);
+				return deleteOrganization(myHttpClient1);
+			} catch (IOException theE) {
+				theE.printStackTrace();
 			}
 			return false;
 		};
-//		myCaptureQueriesListener.clear();
 		Callable<Boolean> job2 = () -> {
 			try {
-				final boolean b = deletePractitioner(myHttpClient2);
-				ourLog.info("LUKE: callable2 DONE!");
-				return b;
-			} catch (Exception exception) {
-				ourLog.error("LUKE: Exception from Callable 2: " + exception.getMessage(), exception);
+				return deletePractitioner(myHttpClient2);
+			} catch (IOException theE) {
+				theE.printStackTrace();
 			}
 			return false;
 		};
-
 
 		try {
 			List<Future<Boolean>> futures = new ArrayList<>();
@@ -328,7 +321,6 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 			for (Future<Boolean> next : futures) {
 				results.add(next.get());
 			}
-//			myCaptureQueriesListener.logAllQueries();
 			for (Boolean next : results) {
 				assert(next);
 			}

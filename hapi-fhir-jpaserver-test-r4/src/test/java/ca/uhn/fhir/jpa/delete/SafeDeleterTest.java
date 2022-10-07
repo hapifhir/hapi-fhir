@@ -19,10 +19,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.support.RetryTemplate;
@@ -40,11 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SafeDeleterTest extends BaseJpaR4Test {
 	private static final String PATIENT1_ID = "a1";
 	private static final String PATIENT2_ID = "a2";
-	private static final String PATIENT3_ID = "a3";
-	private static final String PATIENT4_ID = "a4";
 
 	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_CASCADE_DELETE);
-//	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED);
 
 	private final MyCascadeDeleteInterceptor myCascadeDeleteInterceptor = new MyCascadeDeleteInterceptor();
 
@@ -60,17 +56,12 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
-	@Autowired
-	private RetryTemplate myRetryTemplate;
-
-	private TransactionDetails myTransactionDetails = new TransactionDetails();
+	private final TransactionDetails myTransactionDetails = new TransactionDetails();
 
 
 	@BeforeEach
 	void beforeEach() {
-		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager, myRetryTemplate);
-
-//		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_CASCADE_DELETE, myPointcutLatch);
+		mySafeDeleter = new SafeDeleter(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager);
 	}
 
 	@AfterEach
@@ -104,32 +95,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		assertEquals(1, countOrganizations());
 	}
 
-	private IIdType createPatientWithVersion(Consumer<IBaseResource> theWithId) {
-		Patient patient = new Patient();
-		patient.addName(new HumanName().setFamily("FAMILY"));
-		theWithId.accept(patient);
-		return myPatientDao.update(patient, mySrd).getId();
-	}
-
-	// FIXME LUKE
-	// Create a PointCutLatch on STORAGE_CASCADE_DELETE and call safedeleter delete while one thread is blocked to force the concurrent error that was initially reported
-	// Block the first two times it is called, release the third time so we retry the wait 100ms then retry works
-	// Use Spring RetryTemplate for the retry mechanism
-	@Test
-	@Disabled
-	void retryRetryTest() throws ExecutionException, InterruptedException {
-		myRetryTemplate.execute(retryContext -> {
-			ourLog.info("retry # {}", retryContext.getRetryCount());
-			throw new RuntimeException("retrying");
-		});
-
-		ourLog.info("retries done");
-	}
-
-	// TODOs:
-	// 1. savepoint/rollback seems to result in UnexpectedRollbackException in both cases
-	//		hibernate savepoints fail to work as well
-	// 2. delete_delete_retryTest is throwing a ResourceVersionConflictException, not a ResourceGoneException as expected so is the other test
 	@Test
 	void delete_delete_retryTest() throws ExecutionException, InterruptedException {
 		myInterceptorService.registerInterceptor(myCascadeDeleteInterceptor);
@@ -154,7 +119,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		myCascadeDeleteInterceptor.awaitExpected();
 
 		//   Let's delete the second patient from under its nose.
-		// FIXME LUKE: note this test passes if you comment out this line
 		ourLog.info("delete patient 2");
 		myPatientDao.delete(patient2Id);
 
@@ -209,8 +173,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		// Unpause and succeed in deleting the second patient because we will get the correct version now
 		myCascadeDeleteInterceptor.release("third");
 
-		// TODO: LUKE:  we still fail on Transaction silently rolled back because it has been marked as rollback-only
-//		future.get();
 		assertEquals(2, future.get());
 
 		assertEquals(0, countPatients());
@@ -219,8 +181,6 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 
 	private void updatePatient(IIdType patient2Id) {
 		//   Let's delete the second patient from under its nose.
-		// FIXME LUKE: note this test passes if you comment out this line
-		//   Let's update the second patient from under its nose.
 		final Patient patient2 = myPatientDao.read(patient2Id);
 		final HumanName familyName = new HumanName();
 		familyName.setFamily("Doo");
@@ -243,19 +203,23 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 		return myOrganizationDao.search(map).size();
 	}
 
+	private IIdType createPatientWithVersion(Consumer<IBaseResource> theWithId) {
+		Patient patient = new Patient();
+		patient.addName(new HumanName().setFamily("FAMILY"));
+		theWithId.accept(patient);
+		return myPatientDao.update(patient, mySrd).getId();
+	}
+
 	private DeleteConflict buildDeleteConflict(IIdType thePatient1Id, IIdType theOrgId) {
 		return new DeleteConflict(new IdDt(thePatient1Id), "managingOrganization", new IdDt(theOrgId));
 	}
 
-	private class MyCascadeDeleteInterceptor implements IPointcutLatch {
+	private static class MyCascadeDeleteInterceptor implements IPointcutLatch {
 		private final PointcutLatch myCalledLatch = new PointcutLatch("Called");
 		private final PointcutLatch myWaitLatch = new PointcutLatch("Wait");
 
 		MyCascadeDeleteInterceptor() {
 			myWaitLatch.setExpectedCount(1);
-			// FIXME LUKE remove later
-			myCalledLatch.setDefaultTimeoutSeconds(9999);
-			myWaitLatch.setDefaultTimeoutSeconds(9999);
 		}
 
 		@Hook(Pointcut.STORAGE_CASCADE_DELETE)
@@ -283,15 +247,9 @@ public class SafeDeleterTest extends BaseJpaR4Test {
 			myCalledLatch.setExpectedCount(count);
 		}
 
-		public void setExpectAtLeast(int theCount) {
-			myCalledLatch.setExpectAtLeast(theCount);
-		}
-
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
 			return myCalledLatch.awaitExpected();
 		}
-
-
 	}
 }

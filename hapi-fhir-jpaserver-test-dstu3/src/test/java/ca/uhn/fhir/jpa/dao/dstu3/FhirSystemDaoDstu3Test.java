@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -112,7 +113,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
-	private RetryTemplate myRetryTemplate;
+	private HapiTransactionService myHapiTransactionService;
 
 	@AfterEach
 	public void after() {
@@ -1762,7 +1763,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE});
 		mySrd.setParameters(params);
 
-		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, null, myRetryTemplate);
+		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
 		myInterceptorBroadcaster.registerInterceptor(deleteInterceptor);
 
 

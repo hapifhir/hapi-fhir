@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.config.JpaConfig;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
@@ -49,7 +50,6 @@ import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -180,8 +180,8 @@ public class JpaServerDemo extends RestfulServer {
 
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
-		RetryTemplate retryTemplate = myAppCtx.getBean(RetryTemplate.class);
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, null, retryTemplate);
+		HapiTransactionService hapiTransactionService = myAppCtx.getBean(HapiTransactionService.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, hapiTransactionService);
 		getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 
 		getInterceptorService().registerInterceptor(new ResponseHighlighterInterceptor());

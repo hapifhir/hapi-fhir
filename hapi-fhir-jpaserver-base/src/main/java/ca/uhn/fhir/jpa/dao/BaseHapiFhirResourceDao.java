@@ -486,30 +486,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateIdPresentForDelete(theId);
 		validateDeleteEnabled();
 
-		ourLog.info("LUKE: OUTSIDE transaction: id: {} requestDetails: {}", theId, theRequestDetails);
-		try {
-			return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
-				ourLog.info("LUKE: INSIDE transaction: id: {} requestDetails: {}", theId, theRequestDetails);
-				DeleteConflictList deleteConflicts = new DeleteConflictList();
-				if (isNotBlank(theId.getValue())) {
-					deleteConflicts.setResourceIdMarkedForDeletion(theId);
-				}
+		return myTransactionService.execute(theRequestDetails, transactionDetails, tx -> {
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
+			if (isNotBlank(theId.getValue())) {
+				deleteConflicts.setResourceIdMarkedForDeletion(theId);
+			}
 
-				StopWatch w = new StopWatch();
+			StopWatch w = new StopWatch();
 
-				DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
+			DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails, transactionDetails);
 
-				DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
 
-				ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
-				return retVal;
-			});
-		} catch (Exception exception) {
-			ourLog.info("LUKE: rolling back to savepoint: {}", transactionDetails.getSavepointIfExists());
-
-			// TODO:  this is totally wrong:  fix this:
-			throw exception;
-		}
+			ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
+			return retVal;
+		});
 	}
 
 	/**
@@ -541,19 +532,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 											 DeleteConflictList theDeleteConflicts,
 											 RequestDetails theRequestDetails,
 											 @Nonnull TransactionDetails theTransactionDetails) {
-		ourLog.info("LUKE: BaseHapiFhirResourceDao DELETE: {}", theId.getValue());
 		validateIdPresentForDelete(theId);
-		ourLog.info("LUKE: BaseHapiFhirResourceDao AFTER validateIdPresentForDelete(): {}", theId.getValue());
 		validateDeleteEnabled();
-		ourLog.info("LUKE: BaseHapiFhirResourceDao AFTER validateDeleteEnabled(): {}", theId.getValue());
 
 		final ResourceTable entity;
 		try {
-			ourLog.info("LUKE: BaseHapiFhirResourceDao BEFORE readEntityLatestVersion(): {}", theId.getValue());
 			entity = readEntityLatestVersion(theId, theRequestDetails, theTransactionDetails);
-			ourLog.info("LUKE: BaseHapiFhirResourceDao AFTER readEntityLatestVersion(): {}", theId.getValue());
 		} catch (ResourceNotFoundException ex) {
-			ourLog.info("LUKE: BaseHapiFhirResourceDao ResourceNotFoundException");
 			// we don't want to throw 404s.
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
@@ -561,8 +546,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "deleteResourceNotExisting");
 			return outcome;
 		}
-
-		ourLog.info("LUKE: READ entity latest version type: {}, ID: {}, version: {}", entity.getResourceType(), entity.getId(), entity.getVersion());
 
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException(Msg.code(961) + "Trying to delete " + theId + " but this is not the current version");
@@ -1407,13 +1390,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Nonnull
 	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequestDetails, getResourceName(), theId);
-		ourLog.info("LUKE: BaseHapiFhirResourceDao AFTER determineReadPartitionForRequestForRead(): {}", theId.getValue());
 		return readEntityLatestVersion(theId, requestPartitionId, theTransactionDetails);
 	}
 
 	@Nonnull
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nonnull RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
-		ourLog.info("LUKE: BaseHapiFhirResourceDao readEntityLatestVersion() START: {}", theId.getValue());
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		ResourcePersistentId persistentId = null;
@@ -1426,21 +1407,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		ourLog.info("LUKE: BaseHapiFhirResourceDao readEntityLatestVersion() BEFORE persistentId block: {}", theId.getValue());
-
 		if (persistentId == null) {
 			persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
-
-		ourLog.info("LUKE: BaseHapiFhirResourceDao readEntityLatestVersion() AFTER persistentId block: {}", theId.getValue());
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
 		if (entity == null) {
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
-		ourLog.info("LUKE: BaseHapiFhirResourceDao readEntityLatestVersion() AFTER entity null block: {}", theId.getValue());
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-		ourLog.info("LUKE: BaseHapiFhirResourceDao readEntityLatestVersion() AFTER validateGivenIdIsAppropriateToRetrieveResource(): {}", theId.getValue());
 		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
