@@ -237,6 +237,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -6096,27 +6097,15 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testTransactionWithMissingParamsAndAdvancedHSearchEnabled() throws Exception {
+	public void testCreatePatientWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() throws Exception {
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-		String methodName = "testTransactionWithMissingParamsAndAdvancedHSearchEnabled";
+		String identifierValue = "someValue";
 		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue(methodName);
-		patient.addName().setFamily(methodName).addGiven(methodName);
+		patient.addIdentifier().setSystem("urn:system").setValue(identifierValue);
 
-		String resource = myFhirContext.newXmlParser().encodeResourceToString(patient);
-
-		HttpPost post = new HttpPost(ourServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		IdType id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
-		} finally {
-			response.close();
-		}
+		MethodOutcome outcome = myClient.create().resource(patient).execute();
+		assertTrue(outcome.getCreated());
 	}
 
 	@Test

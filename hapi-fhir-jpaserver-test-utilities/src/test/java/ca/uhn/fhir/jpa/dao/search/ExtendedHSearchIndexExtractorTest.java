@@ -66,7 +66,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 
 	//TODO EP: Write a test which enables both settings, and then: Creates a patient with gender male, creates a patient with no gen0.der. And then searches on patient?gender:missing=true
 	@Test
-	void testExtractWithMissingParams() {
+	void testExtract_withParamMarkedAsMissing_willBeIgnored() {
 		//setup
 		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
 		ResourceIndexedSearchParamDate searchParamDate = new ResourceIndexedSearchParamDate(new PartitionSettings(), "SearchParameter", "Date", null, null, null, null, null);
@@ -78,7 +78,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		searchParams.myQuantityParams.add(searchParamQuantity);
 
 		// run: now translate to HSearch
-		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Observation");
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
 		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
 			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
 		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), searchParams);
