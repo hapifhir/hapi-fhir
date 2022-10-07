@@ -6096,6 +6096,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testTransactionWithMissingParamsAndAdvancedHSearchEnabled() throws Exception {
+		myDaoConfig.setAdvancedHSearchIndexing(true);
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		String methodName = "testTransactionWithMissingParamsAndAdvancedHSearchEnabled";
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue(methodName);
+		patient.addName().setFamily(methodName).addGiven(methodName);
+
+		String resource = myFhirContext.newXmlParser().encodeResourceToString(patient);
+
+		HttpPost post = new HttpPost(ourServerBase + "/Patient");
+		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		CloseableHttpResponse response = ourHttpClient.execute(post);
+		IdType id;
+		try {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Patient/"));
+		} finally {
+			response.close();
+		}
+	}
+
+	@Test
 	public void testTryToCreateResourceWithReferenceThatDoesntExist() {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testTryToCreateResourceWithReferenceThatDoesntExist01");
