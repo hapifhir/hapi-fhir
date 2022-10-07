@@ -124,6 +124,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 		// Unpause and delete the first patient
 		myCascadeDeleteInterceptor.release("first");
 
+		// future.get() returns total number of resources deleted, which in this case is 1
 		assertEquals(1, future.get());
 
 		assertEquals(0, countPatients());
@@ -172,6 +173,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 		// Unpause and succeed in deleting the second patient because we will get the correct version now
 		myCascadeDeleteInterceptor.release("third");
 
+		// future.get() returns total number of resources deleted, which in this case is 2
 		assertEquals(2, future.get());
 
 		assertEquals(0, countPatients());
