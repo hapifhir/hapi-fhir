@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -67,7 +68,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.answers.CallsRealMethods;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -113,7 +113,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private SafeDeleterSvc mySafeDeleterSvc;
 
 	@AfterEach
 	public void after() {
@@ -1763,7 +1763,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		params.put(Constants.PARAMETER_CASCADE_DELETE, new String[]{Constants.CASCADE_DELETE});
 		mySrd.setParameters(params);
 
-		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
+		CascadingDeleteInterceptor deleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorBroadcaster, mySafeDeleterSvc);
 		myInterceptorBroadcaster.registerInterceptor(deleteInterceptor);
 
 

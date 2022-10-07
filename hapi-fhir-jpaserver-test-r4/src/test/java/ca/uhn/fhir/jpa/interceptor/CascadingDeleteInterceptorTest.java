@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.support.RetryTemplate;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,7 +61,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private OverridePathBasedReferentialIntegrityForDeletesInterceptor myOverridePathBasedReferentialIntegrityForDeletesInterceptor;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private SafeDeleterSvc mySafeDeleterSvc;
 
 	@Override
 	@AfterEach
@@ -110,7 +110,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		DaoRegistry mockDaoRegistry = mock(DaoRegistry.class);
 		IFhirResourceDao mockResourceDao = mock (IFhirResourceDao.class);
 		IBaseResource mockResource = mock(IBaseResource.class);
-		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, myHapiTransactionService);
+		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, mySafeDeleterSvc);
 		ourRestServer.getInterceptorService().unregisterInterceptor(myDeleteInterceptor);
 		ourRestServer.getInterceptorService().registerInterceptor(aDeleteInterceptor);
 		when(mockDaoRegistry.getResourceDao(any(String.class))).thenReturn(mockResourceDao);

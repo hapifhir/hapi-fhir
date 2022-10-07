@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -197,8 +198,14 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
-		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, SafeDeleterSvc safeDeleterSvc) {
+		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, safeDeleterSvc);
+	}
+
+	@Lazy
+	@Bean
+	public SafeDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
+		return new SafeDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService.getTransactionManager());
 	}
 
 	@Lazy

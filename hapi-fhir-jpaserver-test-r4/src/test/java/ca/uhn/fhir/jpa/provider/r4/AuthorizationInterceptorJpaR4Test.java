@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
@@ -56,7 +57,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.support.RetryTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +78,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private SafeDeleterSvc mySafeDeleterSvc;
 
 	@BeforeEach
 	@Override
@@ -617,7 +617,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeBlocked() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myHapiTransactionService);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, mySafeDeleterSvc);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -661,7 +661,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeAllowed() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myHapiTransactionService);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, mySafeDeleterSvc);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 
@@ -700,7 +700,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myHapiTransactionService);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, mySafeDeleterSvc);
 		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 		try {
 

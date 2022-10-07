@@ -28,24 +28,27 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Collections;
 import java.util.List;
 
-public class SafeDeleter {
+public class SafeDeleterSvc {
 	public static final long RETRY_BACKOFF_PERIOD = 100L;
 	public static final int RETRY_MAX_ATTEMPTS = 4;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SafeDeleter.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SafeDeleterSvc.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final TransactionTemplate myTxTemplate;
 
 	private final RetryTemplate myRetryTemplate = getRetryTemplate();
 
-	public SafeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
+	public SafeDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myTxTemplate = new TransactionTemplate(thePlatformTransactionManager);
 		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 	}
 
+	/**
+	 * @return number of resources that were successfully deleted
+	 */
 	public Integer delete(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails) {
 		Integer retVal = 0;
 
@@ -63,9 +66,13 @@ public class SafeDeleter {
 		return retVal;
 	}
 
+	/**
+	 * @return number of resources that were successfully deleted
+	 */
 	private Integer handleNextSource(RequestDetails theRequest, DeleteConflictList theConflictList, TransactionDetails theTransactionDetails, DeleteConflict next, IdDt nextSource, String nextSourceId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
+		// We will retry deletes on any occurrence of ResourceVersionConflictException up to RETRY_MAX_ATTEMPTS
 		return myRetryTemplate.execute(retryContext -> {
 			try {
 				if (retryContext.getRetryCount() > 0) {

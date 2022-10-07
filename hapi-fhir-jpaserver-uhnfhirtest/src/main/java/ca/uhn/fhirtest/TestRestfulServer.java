@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
@@ -263,8 +264,8 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
-		HapiTransactionService hapiTransactionService = myAppCtx.getBean(HapiTransactionService.class);
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, hapiTransactionService);
+		SafeDeleterSvc safeDeleterSvc = myAppCtx.getBean(SafeDeleterSvc.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, safeDeleterSvc);
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*

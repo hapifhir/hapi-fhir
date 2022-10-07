@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -48,7 +49,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.retry.support.RetryTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +78,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
-	private HapiTransactionService myHapiTransactionService;
+	private SafeDeleterSvc mySafeDeleterSvc;
 
 	@AfterEach
 	public void afterDisableExpunge() {
@@ -213,7 +213,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myHapiTransactionService));
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, mySafeDeleterSvc));
 
 		// setup
 		Organization organization = new Organization();
