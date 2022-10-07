@@ -15,16 +15,6 @@ public class MockHapiTransactionService extends HapiTransactionService {
 
 
 	@Override
-	public <T> T executeCallable(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Callable<T> theCallback) {
-		try {
-			return theCallback.call();
-		} catch (Exception theE) {
-			throw new RuntimeException(theE);
-		}
-	}
-
-
-	@Override
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
 		return theCallback.doInTransaction(null);
 	}
