@@ -130,7 +130,6 @@ public class TestR4WithDelayConfig extends TestR4Config {
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(level)
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS, level)
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.beforeQuery(getMandatoryTransactionListener())
@@ -143,8 +142,6 @@ public class TestR4WithDelayConfig extends TestR4Config {
 
 		return dataSource;
 	}
-
-//	@Bean
 
 	@Bean
 	DelayListener delayListener() {
