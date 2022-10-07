@@ -557,7 +557,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		String operationCanonicalUrl = theMethodBinding.getCanonicalUrl();
 		if (isNotBlank(operationCanonicalUrl)) {
 			theTerser.addElement(theOperation, "definition", operationCanonicalUrl);
-			operationCanonicalUrlToId.put(operationCanonicalUrl.substring(operationCanonicalUrl.lastIndexOf("/") + 1), theOpName);
+			operationCanonicalUrlToId.put(operationCanonicalUrl, theOpName);
 		}
 		else {
 			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
@@ -654,8 +654,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 	private String getOperationId(IIdType theId) {
-		if (operationCanonicalUrlToId.get(theId.getIdPart()) !=null ) {
-			return operationCanonicalUrlToId.get(theId.getIdPart());
+		if (operationCanonicalUrlToId.get(theId.getValue()) !=null ) {
+			return operationCanonicalUrlToId.get(theId.getValue());
 		}
 		return theId.getIdPart();
 	}
