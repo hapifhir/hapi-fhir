@@ -20,7 +20,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
@@ -101,7 +100,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
 	private boolean myRestResourceRevIncludesEnabled = DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED;
-
+	private HashMap<String, String> operationCanonicalUrlToId = new HashMap<>();
 	/**
 	 * Constructor
 	 */
@@ -555,8 +554,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
-		if (isNotBlank(theMethodBinding.getCanonicalUrl())) {
-			theTerser.addElement(theOperation, "definition", theMethodBinding.getCanonicalUrl());
+		String operationCanonicalUrl = theMethodBinding.getCanonicalUrl();
+		if (isNotBlank(operationCanonicalUrl)) {
+			theTerser.addElement(theOperation, "definition", operationCanonicalUrl);
+			operationCanonicalUrlToId.put(operationCanonicalUrl.substring(operationCanonicalUrl.lastIndexOf("/") + 1), theOpName);
 		}
 		else {
 			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
@@ -639,8 +640,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
-
-		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(theId.getIdPart());
+		String operationId = getOperationId(theId);
+		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(operationId);
 		if (operationBindings != null && !operationBindings.isEmpty()) {
 			return readOperationDefinitionForOperation(theRequestDetails, bindings, operationBindings);
 		}
@@ -650,6 +651,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
 		throw new ResourceNotFoundException(Msg.code(1978) + theId);
+	}
+
+	private String getOperationId(IIdType theId) {
+		if (operationCanonicalUrlToId.get(theId.getIdPart()) !=null ) {
+			return operationCanonicalUrlToId.get(theId.getIdPart());
+		}
+		return theId.getIdPart();
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
