@@ -78,7 +78,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			IParser parser = EncodingEnum.detectEncoding(inputString).newParser(myCtx);
 			IBaseResource input = parser.parseResource(inputString);
 
-			if (input instanceof IResource) {
+		if (input instanceof IResource) {
 				((IResource) input).getText().getDiv().setValueAsString(null);
 				((IResource) input).getText().getStatus().setValueAsString(null);
 				if (input instanceof Bundle) {
@@ -273,7 +273,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		m.myCtx = ctxR5;
 		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/compartment");
 		m.fhirVersion = "R5";
-		m.execute();
+//		m.execute();
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
 
