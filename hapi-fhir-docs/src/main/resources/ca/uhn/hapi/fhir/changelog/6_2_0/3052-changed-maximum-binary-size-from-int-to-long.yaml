@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4127
+jira: SMILE-4232
+title: "Changed Minimum Size (bytes) in FHIR Binary Storage of the persistence module from an integer to a long."
