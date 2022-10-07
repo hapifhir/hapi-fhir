@@ -120,26 +120,7 @@ public class HapiTransactionService {
 	}
 
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
-		TransactionCallback<T> callback = new TransactionCallback<>() {
-			@Override
-			public T doInTransaction(TransactionStatus status) {
-				return theCallback.call();
-			}
-		};
-		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
-	}
-
-	public <T> T executeCallable(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Callable<T> theCallback) {
-		TransactionCallback<T> callback = new TransactionCallback<>() {
-			@Override
-			public T doInTransaction(TransactionStatus status) {
-				try {
-					return theCallback.call();
-				} catch (Exception e) {
-					throw new InternalErrorException(e);
-				}
-			}
-		};
+		TransactionCallback<T> callback = tx -> theCallback.call();
 		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
@@ -256,7 +237,7 @@ public class HapiTransactionService {
 			if (e.getCause() instanceof RuntimeException) {
 				throw (RuntimeException) e.getCause();
 			} else {
-				throw new InternalErrorException(Msg.code(551) + e);
+				throw new InternalErrorException(Msg.code(2145) + e);
 			}
 		}
 	}

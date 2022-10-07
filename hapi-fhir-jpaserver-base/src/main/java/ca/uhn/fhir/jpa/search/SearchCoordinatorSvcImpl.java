@@ -305,7 +305,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@Nonnull
 	private List<ResourcePersistentId> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<ResourcePersistentId> pids = myTxService.executeCallable(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		List<ResourcePersistentId> pids = myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
