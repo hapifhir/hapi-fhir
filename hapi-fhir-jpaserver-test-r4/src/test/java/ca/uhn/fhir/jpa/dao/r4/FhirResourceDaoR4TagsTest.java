@@ -6,11 +6,14 @@ import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,6 +24,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"Duplicates"})
@@ -35,6 +39,88 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myDaoConfig.setTagStorageMode(DaoConfig.DEFAULT_TAG_STORAGE_MODE);
 	}
 
+
+	/**
+	 * Make sure tags are preserved
+	 */
+	@Test
+	public void testDeleteResourceWithTags_NonVersionedTags() {
+		initializeNonVersioned();
+
+		// Delete
+
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		IIdType outcomeId = myPatientDao.delete(new IdType("Patient/A"), mySrd).getId();
+		assertEquals("3", outcomeId.getVersionIdPart());
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+
+		// Make sure $meta-get can fetch the tags of the deleted resource
+
+		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
+		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		assertEquals("3", meta.getVersionId());
+
+		// Revive and verify
+
+		Patient patient = new Patient();
+		patient.setId("A");
+		patient.getMeta().addProfile("http://profile3");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+		patient = (Patient) myPatientDao.update(patient, mySrd).getResource();
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+		myCaptureQueriesListener.logAllQueries();
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+
+		// Read it back
+
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+	}
+
+	/**
+	 * Make sure tags are preserved
+	 */
+	@Test
+	public void testDeleteResourceWithTags_VersionedTags() {
+		initializeVersioned();
+
+		// Delete
+
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		myPatientDao.delete(new IdType("Patient/A"), mySrd);
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+
+		// Make sure $meta-get can fetch the tags of the deleted resource
+
+		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(meta).toString(), toProfiles(meta), contains("http://profile2"));
+		assertThat(toTags(meta).toString(), toTags(meta), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+		// Revive and verify
+
+		Patient patient = new Patient();
+		patient.setId("A");
+		patient.getMeta().addProfile("http://profile3");
+		patient.setActive(true);
+
+		myCaptureQueriesListener.clear();
+		patient = (Patient) myPatientDao.update(patient, mySrd).getResource();
+		myCaptureQueriesListener.logAllQueries();
+		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+
+		// Read it back
+
+		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
+		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
+
+	}
 
 	@Test
 	public void testStoreAndRetrieveNonVersionedTags_Read() {
@@ -350,17 +436,32 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 	@Nonnull
 	private List<String> toTags(Patient patient) {
-		return patient.getMeta().getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+		return toTags(patient.getMeta());
+	}
+
+	@NotNull
+	private static List<String> toTags(Meta meta) {
+		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
 	private List<String> toSecurityLabels(Patient patient) {
-		return patient.getMeta().getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+		return toSecurityLabels(patient.getMeta());
+	}
+
+	@NotNull
+	private static List<String> toSecurityLabels(Meta meta) {
+		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
 	private List<String> toProfiles(Patient patient) {
-		return patient.getMeta().getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
+		return toProfiles(patient.getMeta());
+	}
+
+	@NotNull
+	private static List<String> toProfiles(Meta meta) {
+		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
 
 	@Nonnull
