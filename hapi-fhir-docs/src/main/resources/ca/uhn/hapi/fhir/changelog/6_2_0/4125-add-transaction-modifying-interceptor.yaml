@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4125
+title: "A new interceptor pointcut `STORAGE_TRANSACTION_PROCESSING` has been added. Hooks for this 
+   pointcut can examine and modify FHIR transaction bundles being processed by the JPA server before
+   processing starts."
