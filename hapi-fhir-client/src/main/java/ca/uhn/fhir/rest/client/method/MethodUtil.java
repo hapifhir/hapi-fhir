@@ -222,7 +222,7 @@ public class MethodUtil {
 		retVal.setForceResourceId(theId);
 
 		if (theId.hasVersionIdPart()) {
-			retVal.addHeader(Constants.HEADER_IF_MATCH, '"' + theId.getVersionIdPart() + '"');
+			retVal.addHeader(Constants.HEADER_IF_MATCH, "W/\"" + theId.getVersionIdPart() + '"');
 		}
 
 		return retVal;
