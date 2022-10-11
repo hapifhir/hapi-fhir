@@ -3435,6 +3435,36 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSortByMissingAttributeWithChainedSorting(boolean theIndexMissingData) {
+		myDaoConfig.setIndexMissingFields(theIndexMissingData ? DaoConfig.IndexEnabledEnum.ENABLED : DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Patient p = new Patient();
+		p.setGender(AdministrativeGender.MALE);
+		p.addName().addGiven("MalePatientGivenName").setFamily("MalePatientFamilyName");
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setGender(AdministrativeGender.FEMALE);
+		p.addName().addGiven("FemalePatientGivenName").setFamily("FemalePatientFamilyName");
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap spMap;
+		List<IIdType> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.setSort(new SortSpec(Patient.SP_GENDER).setChain(new SortSpec(Patient.SP_NAME)));
+		myCaptureQueriesListener.clear();
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(spMap));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, actual.size());
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+	}
+
 	@Test
 	public void testSortByLastUpdated() {
 		String methodName = "testSortByLastUpdated";
