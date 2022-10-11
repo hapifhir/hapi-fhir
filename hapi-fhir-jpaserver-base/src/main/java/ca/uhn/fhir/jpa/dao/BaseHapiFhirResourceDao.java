@@ -70,6 +70,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.ListResource;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -89,6 +90,7 @@ import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -112,6 +114,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -936,6 +939,25 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Override
+	@Transactional
+	public IBundleProvider history(final IIdType theId, final HistorySearchDateRangeParam theHistorySearchDateRangeParam,
+											 RequestDetails theRequest) {
+		StopWatch w = new StopWatch();
+
+		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
+		BaseHasResource entity = readEntity(id, theRequest);
+
+		IBundleProvider retVal = super.history(theRequest, myResourceName, entity.getId(),
+			theHistorySearchDateRangeParam.getLowerBoundAsInstant(),
+			theHistorySearchDateRangeParam.getUpperBoundAsInstant(),
+			theHistorySearchDateRangeParam.getOffset(),
+			theHistorySearchDateRangeParam.getHistorySearchType());
+
+		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
+		return retVal;
+	}
+
 	protected boolean isPagingProviderDatabaseBacked(RequestDetails theRequestDetails) {
 		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
 			return false;
@@ -1140,6 +1162,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@SuppressWarnings("unchecked")
 		T destinationCasted = (T) destination;
+		myFhirContext.newJsonParser().setParserErrorHandler(new StrictErrorHandler()).encodeResourceToString(destinationCasted);
 		return update(destinationCasted, null, true, theRequest);
 	}
 

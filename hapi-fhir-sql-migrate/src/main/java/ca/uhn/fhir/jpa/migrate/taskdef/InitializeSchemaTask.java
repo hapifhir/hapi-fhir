@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 public class InitializeSchemaTask extends BaseTask {
-	public static final String DESCRIPTION_PREFIX = "Initialize schema for ";
+	private static final String DESCRIPTION_PREFIX = "Initialize schema for ";
 	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
 	private final ISchemaInitializationProvider mySchemaInitializationProvider;
 	private boolean myInitializedSchema;

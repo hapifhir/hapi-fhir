@@ -1,0 +1,6 @@
+---
+type: remove
+issue: 4125
+title: "The interceptor system has now deprecated the concept of ThreadLocal interceptors. This feature was
+  added for an anticipated use case, but has never seen any real use that we are aware of and removing it
+  should provide a minor performance improvement to the interceptor registry."

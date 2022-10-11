@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
@@ -29,21 +30,19 @@ import org.apache.commons.lang3.Validate;
 import org.flywaydb.core.api.MigrationVersion;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;
 	private Multimap<T, BaseTask> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@SuppressWarnings("unchecked")
-	public List<BaseTask> getTasks(@Nonnull T theFrom, @Nonnull T theTo) {
+	public MigrationTaskList getTaskList(@Nonnull T theFrom, @Nonnull T theTo) {
 		Validate.notNull(theFrom);
 		Validate.notNull(theTo);
 		Validate.isTrue(theFrom.ordinal() < theTo.ordinal(), "From version must be lower than to version");
 
-		List<BaseTask> retVal = new ArrayList<>();
+		MigrationTaskList retVal = new MigrationTaskList();
 		for (Object nextVersion : EnumUtils.getEnumList(theFrom.getClass())) {
 			if (((T) nextVersion).ordinal() <= theFrom.ordinal()) {
 				continue;
@@ -53,9 +52,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			Collection<BaseTask> nextValues = myTasks.get((T) nextVersion);
-			if (nextValues != null) {
-				retVal.addAll(nextValues);
-			}
+			retVal.addAll(nextValues);
 		}
 
 		return retVal;
@@ -74,8 +71,8 @@ public class BaseMigrationTasks<T extends Enum> {
 		return theRelease.name();
 	}
 
-	public List<BaseTask> getAllTasks(T[] theVersionEnumValues) {
-		List<BaseTask> retval = new ArrayList<>();
+	public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
+		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
 			if (nextValues != null) {
@@ -87,9 +84,12 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
-	protected BaseTask getTaskWithVersion(String theFlywayVersion) {
+	protected BaseTask getTaskWithVersion(String theMigrationVersion) {
+		// First normalize the version number
+		String expectedVersion = MigrationVersion.fromVersion(theMigrationVersion).getVersion();
+
 		return myTasks.values().stream()
-			.filter(task -> theFlywayVersion.equals(task.getFlywayVersion()))
+			.filter(task -> expectedVersion.equals(task.getMigrationVersion()))
 			.findFirst()
 			.get();
 	}
@@ -97,7 +97,7 @@ public class BaseMigrationTasks<T extends Enum> {
 	void validate(Collection<BaseTask> theTasks) {
 		for (BaseTask task : theTasks) {
 			task.validateVersion();
-			String version = task.getFlywayVersion();
+			String version = task.getMigrationVersion();
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {
 				if (migrationVersion.compareTo(lastVersion) <= 0) {

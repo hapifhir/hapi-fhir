@@ -24,6 +24,8 @@ import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import javax.annotation.Nullable;
+
 public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperationMessage> {
 
 
@@ -65,5 +67,11 @@ public class ResourceOperationJsonMessage extends BaseJsonMessage<ResourceOperat
 		return new ToStringBuilder(this)
 			.append("myPayload", myPayload)
 			.toString();
+	}
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrNull() {
+		return myPayload.getMessageKeyOrNull();
 	}
 }

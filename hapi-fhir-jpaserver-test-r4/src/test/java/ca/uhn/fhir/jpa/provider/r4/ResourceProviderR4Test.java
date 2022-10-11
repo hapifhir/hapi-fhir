@@ -2,11 +2,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
@@ -71,6 +69,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -82,6 +81,7 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
@@ -147,6 +147,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
@@ -183,6 +184,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1304,6 +1306,73 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void addingExtensionToExtension_shouldThrowException() throws IOException {
+
+		// Add a procedure
+		Extension extension = new Extension();
+		extension.setUrl("planning-datetime");
+		extension.setValue(new DateTimeType(("2022-09-16")));
+		Procedure procedure = new Procedure();
+		procedure.setExtension(List.of(extension));
+		String procedureString = myFhirContext.newXmlParser().encodeResourceToString(procedure);
+		HttpPost procedurePost = new HttpPost(ourServerBase + "/Procedure");
+		procedurePost.setEntity(new StringEntity(procedureString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
+		IdType id;
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedurePost)) {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Procedure/"));
+			id = new IdType(newIdString);
+		}
+
+		// Add an extension to the procedure's extension
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		BundleEntryComponent entry = new BundleEntryComponent();
+		Bundle.BundleEntryRequestComponent requestComponent = new Bundle.BundleEntryRequestComponent();
+		requestComponent.setMethod(HTTPVerb.PATCH);
+		requestComponent.setUrl("Procedure/" + id.getIdPart());
+		entry.setRequest(requestComponent);
+		Parameters parameter = new Parameters();
+		Parameters.ParametersParameterComponent part1 = new Parameters.ParametersParameterComponent();
+		part1.setName("type");
+		part1.setValue(new CodeType("add"));
+		Parameters.ParametersParameterComponent part2 = new Parameters.ParametersParameterComponent();
+		part2.setName("path");
+		part2.setValue(new StringType("Procedure.extension[0]"));
+		Parameters.ParametersParameterComponent part3 = new Parameters.ParametersParameterComponent();
+		part3.setName("name");
+		part3.setValue(new StringType("extension"));
+		Parameters.ParametersParameterComponent nestedPart = new Parameters.ParametersParameterComponent();
+		nestedPart.setName("value");
+		nestedPart.addPart().setName("url").setValue(new UriType("is-preferred"));
+		nestedPart.addPart().setName("valueBoolean").setValue(new BooleanType(false));
+		List<Parameters.ParametersParameterComponent> parts = Arrays.asList(part1, part2, part3, nestedPart);
+		parameter.addParameter()
+			.setName("operation")
+			.setPart(parts);
+		entry.setResource(parameter);
+		bundle.setEntry(List.of(entry));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
+		HttpPost parameterPost = new HttpPost(ourServerBase);
+		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(parameterPost)) {
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
+			assertTrue(responseString.contains("Extension contains both a value and nested extensions"));
+		}
+
+		// Get procedures
+		HttpGet procedureGet = new HttpGet(ourServerBase + "/Procedure");
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedureGet)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
 
@@ -2403,8 +2472,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(allresults, not(hasItem(c5Id)));
 		}
 	}
+
 	@Test
-	public void testContains(){
+	public void testContains() {
 		List<String> test = List.of("a", "b", "c");
 		String testString = "testAString";
 
@@ -3071,10 +3141,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
+
+		IIdType idCreated = myPatientDao.create(patient, mySrd).getId();
+		ids.add(idCreated.toUnqualified().getValue());
+		IIdType id = idCreated.toUnqualifiedVersionless();
+
 		for (int i = 0; i < 10; i++) {
 			sleepOneClick();
 			preDates.add(new Date());
@@ -3088,13 +3162,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> idValues;
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1), ids.get(0)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt2060");
 		assertThat(idValues.toString(), idValues, empty());
@@ -4118,6 +4192,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
+
 	private void assertOneResult(Bundle theResponse) {
 		assertThat(theResponse.getEntry().size(), is(equalTo(1)));
 	}
@@ -4999,7 +5074,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY t0")));
 		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
@@ -5862,7 +5937,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
-	public void testSearchTagWithInvalidTokenParam(String searchParam){
+	public void testSearchTagWithInvalidTokenParam(String searchParam) {
 
 		try {
 			myClient
@@ -5871,7 +5946,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			fail();
-		} catch (InvalidRequestException ex){
+		} catch (InvalidRequestException ex) {
 			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
 		}
 
@@ -7014,7 +7089,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-			System.out.println("pid0 " + pid0);
+			ourLog.info("pid0 " + pid0);
 		}
 
 		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
@@ -7153,7 +7228,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
@@ -7176,7 +7251,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String metaSource = "mySource#123456789012345678901234567890";
@@ -7200,7 +7275,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten() {
 		String sourceURL = "mySource";
 		String requestId = "#345676";
 		String patientId = "1234a";
@@ -7223,7 +7298,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String sourceUri = "mySource";
@@ -7252,7 +7327,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails() {
 		String sourceURI = "mySource";
 		String requestId = "345676";
 
@@ -7271,6 +7346,108 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertEquals(0, results.getEntry().size());
+	}
+
+	@Test
+	public void testSearchHistoryWithAtAndGtParameters() throws Exception {
+
+		// Create Patient
+		Patient patient = new Patient();
+		patient = (Patient) myClient.create().resource(patient).execute().getResource();
+		Long patientId = patient.getIdElement().getIdPartAsLong();
+
+		// Update Patient after delay
+		int delayInMs = 1000;
+		TimeUnit.MILLISECONDS.sleep(delayInMs);
+		patient.getNameFirstRep().addGiven("Bob");
+		myClient.update().resource(patient).execute();
+
+		Patient unrelatedPatient = (Patient) myClient.create().resource(new Patient()).execute().getResource();
+		assertNotEquals(unrelatedPatient.getIdElement().getIdPartAsLong(), patientId);
+
+		// ensure the patient has the expected overall history
+		Bundle result = myClient.history()
+			.onInstance("Patient/"+patientId)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(2, result.getEntry().size());
+
+		Patient patientV1 = (Patient) result.getEntry().get(1).getResource();
+		assertEquals(patientId, patientV1.getIdElement().getIdPartAsLong());
+
+		Patient patientV2 = (Patient) result.getEntry().get(0).getResource();
+		assertEquals(patientId, patientV2.getIdElement().getIdPartAsLong());
+
+		Date dateV1 = patientV1.getMeta().getLastUpdated();
+		Date dateV2 = patientV2.getMeta().getLastUpdated();
+		assertTrue(dateV1.before((dateV2)));
+
+		// Issue 3138 test case, verify behavior of _at
+		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		// verify behavior of _since
+		verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+		verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
+
+	}
+
+	private void verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(1, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(1, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
+	}
+
+	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(0, resultIds.size());
+	}
+
+	private void verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
+		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, - delayInMs);
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
+		List<String> resultIds = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
+		assertEquals(2, resultIds.size());
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/1"));
+		assertTrue(resultIds.contains("Patient/"+ patientId +"/_history/2"));
 	}
 
 	@Test
@@ -7489,8 +7666,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		/**
 		 * Verifies that the returned Bundle contains the resource
 		 * with the id provided.
+		 *
 		 * @param theBundle - returned bundle
-		 * @param theType - provided resource id
+		 * @param theType   - provided resource id
 		 */
 		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
 			ourLog.info(myParser.encodeResourceToString(theBundle));
@@ -7523,8 +7701,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		/**
 		 * Runs the search on the given resource type with the given (missing) criteria
+		 *
 		 * @param theResourceClass - the resource type class
-		 * @param theCriteria - the missing critia to use
+		 * @param theCriteria      - the missing critia to use
 		 * @return - the found bundle
 		 */
 		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {

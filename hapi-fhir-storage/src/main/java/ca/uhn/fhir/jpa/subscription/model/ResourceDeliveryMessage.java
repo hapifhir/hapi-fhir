@@ -32,6 +32,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("WeakerAccess")
@@ -99,7 +101,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		 *    in tests)
 		 */
 		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
-		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
+		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
 	}
 
 	@Override
@@ -146,5 +148,15 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 			}
 		}
 		return retVal;
+	}
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrNull() {
+		if (super.getMessageKeyOrNull() != null) {
+			return super.getMessageKeyOrNull();
+		}
+
+		return myPayloadId;
 	}
 }
