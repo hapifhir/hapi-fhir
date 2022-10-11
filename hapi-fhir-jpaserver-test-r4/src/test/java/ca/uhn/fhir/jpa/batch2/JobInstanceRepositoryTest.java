@@ -33,22 +33,21 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
 	}
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_MultiStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
-		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(2));
 	}
 
 	@Test
 	public void testSearchByJobParamsWithoutStatuses() {
-		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(myJobDefinitionId, myParams, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdAndParams(myJobDefinitionId, myParams, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(4));
-
 	}
 
 	@Test
