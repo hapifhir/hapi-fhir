@@ -101,7 +101,7 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		 *    in tests)
 		 */
 		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
-		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
+		myPayloadId = thePayload.getIdElement().toUnqualifiedVersionless().getValue();
 	}
 
 	@Override
@@ -153,6 +153,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	@Nullable
 	@Override
 	public String getMessageKeyOrNull() {
+		if (super.getMessageKeyOrNull() != null) {
+			return super.getMessageKeyOrNull();
+		}
+
 		return myPayloadId;
 	}
 }

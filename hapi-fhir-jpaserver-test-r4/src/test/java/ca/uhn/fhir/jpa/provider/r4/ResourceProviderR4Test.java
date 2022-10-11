@@ -66,6 +66,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -77,6 +78,7 @@ import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Basic;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
@@ -141,6 +143,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
@@ -1264,6 +1267,73 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void addingExtensionToExtension_shouldThrowException() throws IOException {
+
+		// Add a procedure
+		Extension extension = new Extension();
+		extension.setUrl("planning-datetime");
+		extension.setValue(new DateTimeType(("2022-09-16")));
+		Procedure procedure = new Procedure();
+		procedure.setExtension(List.of(extension));
+		String procedureString = myFhirContext.newXmlParser().encodeResourceToString(procedure);
+		HttpPost procedurePost = new HttpPost(ourServerBase + "/Procedure");
+		procedurePost.setEntity(new StringEntity(procedureString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(procedure));
+		IdType id;
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedurePost)) {
+			assertEquals(201, response.getStatusLine().getStatusCode());
+			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
+			assertThat(newIdString, startsWith(ourServerBase + "/Procedure/"));
+			id = new IdType(newIdString);
+		}
+
+		// Add an extension to the procedure's extension
+		Bundle bundle = new Bundle();
+		bundle.setType(BundleType.TRANSACTION);
+		BundleEntryComponent entry = new BundleEntryComponent();
+		Bundle.BundleEntryRequestComponent requestComponent = new Bundle.BundleEntryRequestComponent();
+		requestComponent.setMethod(HTTPVerb.PATCH);
+		requestComponent.setUrl("Procedure/" + id.getIdPart());
+		entry.setRequest(requestComponent);
+		Parameters parameter = new Parameters();
+		Parameters.ParametersParameterComponent part1 = new Parameters.ParametersParameterComponent();
+		part1.setName("type");
+		part1.setValue(new CodeType("add"));
+		Parameters.ParametersParameterComponent part2 = new Parameters.ParametersParameterComponent();
+		part2.setName("path");
+		part2.setValue(new StringType("Procedure.extension[0]"));
+		Parameters.ParametersParameterComponent part3 = new Parameters.ParametersParameterComponent();
+		part3.setName("name");
+		part3.setValue(new StringType("extension"));
+		Parameters.ParametersParameterComponent nestedPart = new Parameters.ParametersParameterComponent();
+		nestedPart.setName("value");
+		nestedPart.addPart().setName("url").setValue(new UriType("is-preferred"));
+		nestedPart.addPart().setName("valueBoolean").setValue(new BooleanType(false));
+		List<Parameters.ParametersParameterComponent> parts = Arrays.asList(part1, part2, part3, nestedPart);
+		parameter.addParameter()
+			.setName("operation")
+			.setPart(parts);
+		entry.setResource(parameter);
+		bundle.setEntry(List.of(entry));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		String parameterResource = myFhirContext.newXmlParser().encodeResourceToString(bundle);
+		HttpPost parameterPost = new HttpPost(ourServerBase);
+		parameterPost.setEntity(new StringEntity(parameterResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(parameterPost)) {
+			assertEquals(400, response.getStatusLine().getStatusCode());
+			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
+			assertTrue(responseString.contains("Extension contains both a value and nested extensions"));
+		}
+
+		// Get procedures
+		HttpGet procedureGet = new HttpGet(ourServerBase + "/Procedure");
+		try (CloseableHttpResponse response = ourHttpClient.execute(procedureGet)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+		}
+	}
+
+	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
 
@@ -2363,8 +2433,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(allresults, not(hasItem(c5Id)));
 		}
 	}
+
 	@Test
-	public void testContains(){
+	public void testContains() {
 		List<String> test = List.of("a", "b", "c");
 		String testString = "testAString";
 
@@ -4082,6 +4153,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
+
 	private void assertOneResult(Bundle theResponse) {
 		assertThat(theResponse.getEntry().size(), is(equalTo(1)));
 	}
@@ -4963,7 +5035,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
-		assertThat(searchSql, not (containsString("HFJ_SPIDX_QUANTITY t0")));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY t0")));
 		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
@@ -5826,7 +5898,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {Constants.PARAM_TAG, Constants.PARAM_SECURITY})
-	public void testSearchTagWithInvalidTokenParam(String searchParam){
+	public void testSearchTagWithInvalidTokenParam(String searchParam) {
 
 		try {
 			myClient
@@ -5835,7 +5907,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			fail();
-		} catch (InvalidRequestException ex){
+		} catch (InvalidRequestException ex) {
 			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, ex.getStatusCode());
 		}
 
@@ -6978,7 +7050,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			ourLog.info("Patient: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
-			System.out.println("pid0 " + pid0);
+			ourLog.info("pid0 " + pid0);
 		}
 
 		String uri = ourServerBase + "/Patient?_total=accurate&birthdate=gt2072";
@@ -7117,7 +7189,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabled_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String expectedMetaSource = "mySource#345676";
@@ -7140,7 +7212,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved(){
+	public void createResource_withPreserveRequestIdEnabledAndRequestIdLengthGT16_requestIdIsPreserved() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String metaSource = "mySource#123456789012345678901234567890";
@@ -7164,7 +7236,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten(){
+	public void createResource_withPreserveRequestIdDisabled_RequestIdIsOverwritten() {
 		String sourceURL = "mySource";
 		String requestId = "#345676";
 		String patientId = "1234a";
@@ -7187,7 +7259,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdEnabled_isSuccess() {
 		myDaoConfig.setPreserveRequestIdInResourceBody(true);
 
 		String sourceUri = "mySource";
@@ -7216,7 +7288,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails(){
+	public void searchResource_bySourceAndRequestIdWithPreserveRequestIdDisabled_fails() {
 		String sourceURI = "mySource";
 		String requestId = "345676";
 
@@ -7555,8 +7627,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		/**
 		 * Verifies that the returned Bundle contains the resource
 		 * with the id provided.
+		 *
 		 * @param theBundle - returned bundle
-		 * @param theType - provided resource id
+		 * @param theType   - provided resource id
 		 */
 		private void verifyFoundBundle(Bundle theBundle, IIdType theType) {
 			ourLog.info(myParser.encodeResourceToString(theBundle));
@@ -7589,8 +7662,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		/**
 		 * Runs the search on the given resource type with the given (missing) criteria
+		 *
 		 * @param theResourceClass - the resource type class
-		 * @param theCriteria - the missing critia to use
+		 * @param theCriteria      - the missing critia to use
 		 * @return - the found bundle
 		 */
 		private Bundle doSearch(Class<? extends BaseResource> theResourceClass, ICriterion<?> theCriteria) {
