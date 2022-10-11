@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -50,6 +51,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -79,7 +82,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private PlatformTransactionManager myManagedTxManager;
+	private HapiTransactionService myTxService;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -89,6 +92,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 	private int mySyncSize = 250;
 
+	@Override
 	public IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo, RequestPartitionId theRequestPartitionId) {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
@@ -98,10 +102,13 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 		boolean wantCount = theParamWantOnlyCount || theParamOrConfigWantCount;
 
 		// Execute the query and make sure we return distinct results
-		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
-		return txTemplate.execute(t -> {
+
+		// FIXME: add readOnly to txmanager
+//		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+//		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+//		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
+
+		return myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
 
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();

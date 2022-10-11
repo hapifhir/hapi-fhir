@@ -22,13 +22,21 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ICallable;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -59,6 +67,8 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private IInterceptorService myInterceptorService;
 	@Autowired
 	private IPartitionDao myPartitionDao;
 
@@ -119,15 +129,25 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
 	@Override
 	@Transactional
-	public PartitionEntity createPartition(PartitionEntity thePartition) {
+	public PartitionEntity createPartition(PartitionEntity thePartition, RequestDetails theRequestDetails) {
 		validateNotInUnnamedPartitionMode();
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 
 		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
 
-		myPartitionDao.save(thePartition);
-		return thePartition;
+		PartitionEntity retVal = myPartitionDao.save(thePartition);
+
+		// Interceptor call: STORAGE_PARTITION_CREATED
+		if (myInterceptorService.hasHooks(Pointcut.STORAGE_PARTITION_CREATED)) {
+			HookParams params = new HookParams()
+				.add(RequestPartitionId.class, thePartition.toRequestPartitionId())
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			myInterceptorService.callHooks(Pointcut.STORAGE_PARTITION_CREATED, params);
+		}
+
+		return retVal;
 	}
 
 	@Override

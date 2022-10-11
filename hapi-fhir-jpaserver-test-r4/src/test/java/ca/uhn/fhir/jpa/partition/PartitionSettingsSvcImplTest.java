@@ -29,7 +29,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
-		myPartitionConfigSvc.createPartition(partition);
+		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
 		assertEquals("NAME123", partition.getName());
@@ -47,7 +47,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setName("NAME123");
 		partition.setDescription("A description");
 		try {
-			myPartitionConfigSvc.createPartition(partition);
+			myPartitionConfigSvc.createPartition(partition, null);
 		} catch (MethodNotAllowedException e) {
 			assertEquals(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode", e.getMessage());
 		}
@@ -60,7 +60,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
-		myPartitionConfigSvc.createPartition(partition);
+		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
 		assertEquals("NAME123", partition.getName());
@@ -83,13 +83,13 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
-		myPartitionConfigSvc.createPartition(partition);
+		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = new PartitionEntity();
 		partition.setId(111);
 		partition.setName("NAME111");
 		partition.setDescription("A description");
-		myPartitionConfigSvc.createPartition(partition);
+		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = new PartitionEntity();
 		partition.setId(111);
@@ -124,7 +124,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setId(123);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
-		myPartitionConfigSvc.createPartition(partition);
+		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
 		assertEquals("NAME123", partition.getName());
@@ -147,7 +147,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition.setName("NAME 123");
 		partition.setDescription("A description");
 		try {
-			myPartitionConfigSvc.createPartition(partition);
+			myPartitionConfigSvc.createPartition(partition, null);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1312) + "Partition name \"NAME 123\" is not valid", e.getMessage());
@@ -182,8 +182,8 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		partition2.setName("PARTITION-2");
 		partition2.setDescription("a description2");
 
-		myPartitionConfigSvc.createPartition(partition1);
-		myPartitionConfigSvc.createPartition(partition2);
+		myPartitionConfigSvc.createPartition(partition1, null);
+		myPartitionConfigSvc.createPartition(partition2, null);
 
 		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
 

@@ -86,9 +86,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myPartitionInterceptor = new MyWriteInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
 
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"));
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName("PART-1"), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName("PART-2"), null);
+		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName("PART-3"), null);
 
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
