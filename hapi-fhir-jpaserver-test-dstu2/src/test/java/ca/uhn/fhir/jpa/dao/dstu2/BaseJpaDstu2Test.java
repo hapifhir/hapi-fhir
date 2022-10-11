@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -197,6 +198,8 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;

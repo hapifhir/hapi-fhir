@@ -1178,7 +1178,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 5. fill MetaData
-		populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, resourceType, retVal);
+		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, resourceType, retVal);
 
 		// 6. Handle source (provenance)
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {

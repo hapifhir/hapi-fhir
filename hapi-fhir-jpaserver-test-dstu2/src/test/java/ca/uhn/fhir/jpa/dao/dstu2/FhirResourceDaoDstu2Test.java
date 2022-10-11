@@ -1128,6 +1128,17 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		fullSize++;
 		halfSize++;
 
+		runInTransaction(()->{
+			List<Long> versions = myResourceHistoryTableDao
+				.findAll()
+				.stream()
+				.filter(t -> t.getResourceId().equals(id.getIdPartAsLong()))
+				.map(t -> t.getVersion())
+				.sorted()
+				.collect(Collectors.toList());
+			ourLog.info("Versions: {}", versions);
+		});
+
 		// By instance
 		history = myPatientDao.history(id, null, null, null, mySrd);
 		for (int i = 0; i < fullSize; i++) {
