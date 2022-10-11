@@ -24,7 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 /*
  * #%L
@@ -54,7 +54,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	private PlatformTransactionManager myTransactionManager;
 
 	@Override
-	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
+	@Transactional(noRollbackFor = {ExpansionTooCostlyException.class})
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(theExpansionOptions,
