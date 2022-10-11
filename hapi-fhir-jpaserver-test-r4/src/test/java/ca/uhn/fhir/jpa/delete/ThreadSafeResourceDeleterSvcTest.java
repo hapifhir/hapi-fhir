@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SafeDeleterSvcTest extends BaseJpaR4Test {
+public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 	private static final String PATIENT1_ID = "a1";
 	private static final String PATIENT2_ID = "a2";
 
@@ -43,7 +43,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 
 	private final MyCascadeDeleteInterceptor myCascadeDeleteInterceptor = new MyCascadeDeleteInterceptor();
 
-	private SafeDeleterSvc mySafeDeleterSvc;
+	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 	@Autowired
 	IInterceptorBroadcaster myIdInterceptorBroadcaster;
 
@@ -60,7 +60,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	void beforeEach() {
-		mySafeDeleterSvc = new SafeDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager);
+		myThreadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(myDaoRegistry, myIdInterceptorBroadcaster, myPlatformTransactionManager);
 	}
 
 	@AfterEach
@@ -74,7 +74,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 	void delete_nothing() {
 		DeleteConflictList conflictList = new DeleteConflictList();
 
-		mySafeDeleterSvc.delete(mySrd, conflictList, myTransactionDetails);
+		myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails);
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
 
 		assertEquals(2, countPatients());
-		myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
+		myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
 
 		assertEquals(0, countPatients());
 		assertEquals(1, countOrganizations());
@@ -112,7 +112,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		ourLog.info("Start background delete");
 		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// We are paused before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();
@@ -148,7 +148,7 @@ public class SafeDeleterSvcTest extends BaseJpaR4Test {
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
 		final Future<Integer> future = executorService.submit(() ->
-			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> mySafeDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
+			myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails)));
 
 		// Patient 1 We are paused after reading the version but before deleting the first patient.
 		myCascadeDeleteInterceptor.awaitExpected();

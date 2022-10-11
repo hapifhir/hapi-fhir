@@ -28,7 +28,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
-import ca.uhn.fhir.jpa.delete.SafeDeleterSvc;
+import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
@@ -80,23 +80,23 @@ public class CascadingDeleteInterceptor {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final FhirContext myFhirContext;
-	private final SafeDeleterSvc mySafeDeleterSvc;
+	private final ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull SafeDeleterSvc theSafeDeleterSvc) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull ThreadSafeResourceDeleterSvc theThreadSafeResourceDeleterSvc) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
-		Validate.notNull(theSafeDeleterSvc, "theSafeDeleter must not be null");
+		Validate.notNull(theThreadSafeResourceDeleterSvc, "theSafeDeleter must not be null");
 
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myFhirContext = theFhirContext;
-		mySafeDeleterSvc = theSafeDeleterSvc;
+		myThreadSafeResourceDeleterSvc = theThreadSafeResourceDeleterSvc;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
@@ -116,12 +116,11 @@ public class CascadingDeleteInterceptor {
 			return null;
 		}
 
-		mySafeDeleterSvc.delete(theRequest, theConflictList, theTransactionDetails);
+		myThreadSafeResourceDeleterSvc.delete(theRequest, theConflictList, theTransactionDetails);
 
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 
-	// TODO LUKE move this
 	public static List<String> getCascadedDeletesList(RequestDetails theRequest, boolean theCreate) {
 		List<String> retVal = (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
 		if (retVal == null && theCreate) {

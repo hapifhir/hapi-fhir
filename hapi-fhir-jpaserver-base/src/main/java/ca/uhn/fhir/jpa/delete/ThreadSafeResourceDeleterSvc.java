@@ -28,18 +28,23 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.Collections;
 import java.util.List;
 
-public class SafeDeleterSvc {
+/**
+ * Used by {@link CascadingDeleteInterceptor} to handle {@link DeleteConflictList}s in a thead-safe way.
+ *
+ * Specifically, this class spawns an inner transaction for each {@link DeleteConflictList}.  This class is meant to handle any potential delete collisions (ex {@link ResourceGoneException} or {@link ResourceVersionConflictException}.  In the former case, we swallow the Exception in the inner transaction then continue.  In the latter case, we retry according to the RETRY_BACKOFF_PERIOD and RETRY_MAX_ATTEMPTS before giving up.
+ */
+public class ThreadSafeResourceDeleterSvc {
 	public static final long RETRY_BACKOFF_PERIOD = 100L;
 	public static final int RETRY_MAX_ATTEMPTS = 4;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(SafeDeleterSvc.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ThreadSafeResourceDeleterSvc.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final TransactionTemplate myTxTemplate;
 
 	private final RetryTemplate myRetryTemplate = getRetryTemplate();
 
-	public SafeDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
+	public ThreadSafeResourceDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myTxTemplate = new TransactionTemplate(thePlatformTransactionManager);

@@ -1190,7 +1190,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			writeExceptionToResponse(theResponse, e);
 
 		} catch (Throwable e) {
-//			ourLog.error("LUKE: Exception on RestfulServer!", e);
 
 			/*
 			 * We have caught an exception during request processing. This might be because a handling method threw
