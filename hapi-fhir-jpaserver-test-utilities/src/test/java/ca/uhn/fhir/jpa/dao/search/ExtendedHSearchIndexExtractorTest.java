@@ -64,7 +64,6 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		assertThat(spIndexData, hasSize(1));
 	}
 
-	//TODO EP: Write a test which enables both settings, and then: Creates a patient with gender male, creates a patient with no gen0.der. And then searches on patient?gender:missing=true
 	@Test
 	void testExtract_withParamMarkedAsMissing_willBeIgnored() {
 		//setup
