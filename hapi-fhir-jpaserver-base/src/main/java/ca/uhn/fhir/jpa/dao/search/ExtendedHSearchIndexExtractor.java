@@ -101,7 +101,7 @@ public class ExtendedHSearchIndexExtractor {
 			.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
 		theNewParams.myQuantityParams.stream()
-			.filter(nextParam -> nextParam.isMissing())
+			.filter(nextParam -> !nextParam.isMissing())
 			.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theResource.getMeta().getTag().forEach(tag ->
