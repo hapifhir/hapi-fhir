@@ -6169,20 +6169,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testCreatePatientWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() throws Exception {
-		myDaoConfig.setAdvancedHSearchIndexing(true);
+	public void testCreateResourcesWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() throws Exception {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 		String identifierValue = "someValue";
-		String searchPatientURLMissingBirthdate = "Patient?birthdate:missing=true";
+		String searchPatientURIWithMissingBirthdate = "Patient?birthdate:missing=true";
+		String searchObsURIWithMissingValueQuantity = "Observation?value-quantity:missing=true";
 
+		//create patient
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue(identifierValue);
-
 		MethodOutcome outcome = myClient.create().resource(patient).execute();
 		assertTrue(outcome.getCreated());
 
-		Bundle patientsWithMissingBirthdate = myClient.search().byUrl(searchPatientURLMissingBirthdate).returnBundle(Bundle.class).execute();
+		//create observation
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("urn:system").setValue(identifierValue);
+		outcome = myClient.create().resource(obs).execute();
+		assertTrue(outcome.getCreated());
+
+		// search
+		Bundle patientsWithMissingBirthdate = myClient.search().byUrl(searchPatientURIWithMissingBirthdate).returnBundle(Bundle.class).execute();
 		assertEquals(1, patientsWithMissingBirthdate.getTotal());
+		Bundle obsWithMissingValueQuantity = myClient.search().byUrl(searchObsURIWithMissingValueQuantity).returnBundle(Bundle.class).execute();
+		assertEquals(1, obsWithMissingValueQuantity.getTotal());
 
 	}
 
