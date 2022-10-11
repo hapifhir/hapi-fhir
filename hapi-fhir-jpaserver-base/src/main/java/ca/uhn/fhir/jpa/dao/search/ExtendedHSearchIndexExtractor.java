@@ -96,9 +96,13 @@ public class ExtendedHSearchIndexExtractor {
 		theNewParams.myNumberParams.forEach(nextParam ->
 			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
 
-		theNewParams.myDateParams.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
+		theNewParams.myDateParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
-		theNewParams.myQuantityParams.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
+		theNewParams.myQuantityParams.stream()
+			.filter(nextParam -> nextParam.isMissing())
+			.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theResource.getMeta().getTag().forEach(tag ->
 			retVal.addTokenIndexData("_tag", tag));

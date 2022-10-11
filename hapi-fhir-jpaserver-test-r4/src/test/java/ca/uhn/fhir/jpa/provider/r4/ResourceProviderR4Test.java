@@ -6173,11 +6173,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		String identifierValue = "someValue";
+		String searchPatientURLMissingBirthdate = "Patient?birthdate:missing=true";
+
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue(identifierValue);
 
 		MethodOutcome outcome = myClient.create().resource(patient).execute();
 		assertTrue(outcome.getCreated());
+
+		Bundle patientsWithMissingBirthdate = myClient.search().byUrl(searchPatientURLMissingBirthdate).returnBundle(Bundle.class).execute();
+		assertEquals(1, patientsWithMissingBirthdate.getTotal());
+
 	}
 
 	@Test
