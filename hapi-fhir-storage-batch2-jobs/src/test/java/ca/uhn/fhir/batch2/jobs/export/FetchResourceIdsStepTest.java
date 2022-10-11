@@ -118,6 +118,8 @@ public class FetchResourceIdsStepTest {
 			any(ExportPIDIteratorParameters.class)
 		)).thenReturn(patientIds.iterator())
 			.thenReturn(observationIds.iterator());
+		int maxFileCapacity = 1000;
+		//when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
