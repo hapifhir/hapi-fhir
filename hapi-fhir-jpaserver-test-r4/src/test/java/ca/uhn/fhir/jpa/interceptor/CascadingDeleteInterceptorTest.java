@@ -27,6 +27,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,6 +62,8 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 	private OverridePathBasedReferentialIntegrityForDeletesInterceptor myOverridePathBasedReferentialIntegrityForDeletesInterceptor;
 	@Autowired
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
+	@Autowired
+	PlatformTransactionManager myPlatformTransactionManager;
 
 	@Override
 	@AfterEach
@@ -109,7 +112,9 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		DaoRegistry mockDaoRegistry = mock(DaoRegistry.class);
 		IFhirResourceDao mockResourceDao = mock (IFhirResourceDao.class);
 		IBaseResource mockResource = mock(IBaseResource.class);
-		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, myThreadSafeResourceDeleterSvc);
+		// This is done in order to pass the mockDaoRegistry, otherwise this assertion will fail:  verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
+		final ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc = new ThreadSafeResourceDeleterSvc(mockDaoRegistry, myInterceptorBroadcaster, myPlatformTransactionManager);
+		CascadingDeleteInterceptor aDeleteInterceptor = new CascadingDeleteInterceptor(myFhirContext, mockDaoRegistry, myInterceptorBroadcaster, threadSafeResourceDeleterSvc);
 		ourRestServer.getInterceptorService().unregisterInterceptor(myDeleteInterceptor);
 		ourRestServer.getInterceptorService().registerInterceptor(aDeleteInterceptor);
 		when(mockDaoRegistry.getResourceDao(any(String.class))).thenReturn(mockResourceDao);
