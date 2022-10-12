@@ -457,7 +457,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
-	@NotNull
+	@Nonnull
 	private static List<String> toProfiles(Meta meta) {
 		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
