@@ -87,18 +87,25 @@ public class ExtendedHSearchIndexExtractor {
 		// wipmb mb add a flag ot DaoConfig to suppress this
 		extractAutocompleteTokens(theResource, retVal);
 
-		theNewParams.myStringParams.forEach(nextParam ->
-			retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
+		theNewParams.myStringParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addStringIndexData(nextParam.getParamName(), nextParam.getValueExact()));
 
-		theNewParams.myTokenParams.forEach(nextParam ->
-			retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
+		theNewParams.myTokenParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addTokenIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getSystem(), nextParam.getValue()));
 
-		theNewParams.myNumberParams.forEach(nextParam ->
-			retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
+		theNewParams.myNumberParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addNumberIndexDataIfNotPresent(nextParam.getParamName(), nextParam.getValue()));
 
-		theNewParams.myDateParams.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
+		theNewParams.myDateParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addDateIndexData(nextParam.getParamName(), convertDate(nextParam)));
 
-		theNewParams.myQuantityParams.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
+		theNewParams.myQuantityParams.stream()
+			.filter(nextParam -> !nextParam.isMissing())
+			.forEach(nextParam -> retVal.addQuantityIndexData(nextParam.getParamName(), convertQuantity(nextParam)));
 
 		theResource.getMeta().getTag().forEach(tag ->
 			retVal.addTokenIndexData("_tag", tag));

@@ -240,6 +240,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -6165,6 +6166,34 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String output = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
 		}
+	}
+
+	@Test
+	public void testCreateResourcesWithAdvancedHSearchIndexingAndIndexMissingFieldsEnableSucceeds() throws Exception {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+		myDaoConfig.setAdvancedHSearchIndexing(true);
+		String identifierValue = "someValue";
+		String searchPatientURIWithMissingBirthdate = "Patient?birthdate:missing=true";
+		String searchObsURIWithMissingValueQuantity = "Observation?value-quantity:missing=true";
+
+		//create patient
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue(identifierValue);
+		MethodOutcome outcome = myClient.create().resource(patient).execute();
+		assertTrue(outcome.getCreated());
+
+		//create observation
+		Observation obs = new Observation();
+		obs.addIdentifier().setSystem("urn:system").setValue(identifierValue);
+		outcome = myClient.create().resource(obs).execute();
+		assertTrue(outcome.getCreated());
+
+		// search
+		Bundle patientsWithMissingBirthdate = myClient.search().byUrl(searchPatientURIWithMissingBirthdate).returnBundle(Bundle.class).execute();
+		assertEquals(1, patientsWithMissingBirthdate.getTotal());
+		Bundle obsWithMissingValueQuantity = myClient.search().byUrl(searchObsURIWithMissingValueQuantity).returnBundle(Bundle.class).execute();
+		assertEquals(1, obsWithMissingValueQuantity.getTotal());
+
 	}
 
 	@Test

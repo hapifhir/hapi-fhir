@@ -5,9 +5,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.CompositeSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.DateSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
+import ca.uhn.fhir.jpa.model.search.QuantitySearchIndexData;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -17,6 +21,7 @@ import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -57,6 +62,32 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		// validate
 		Set<CompositeSearchIndexData> spIndexData = indexData.getSearchParamComposites().get("component-code-value-concept");
 		assertThat(spIndexData, hasSize(1));
+	}
+
+	@Test
+	void testExtract_withParamMarkedAsMissing_willBeIgnored() {
+		//setup
+		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParamDate searchParamDate = new ResourceIndexedSearchParamDate(new PartitionSettings(), "SearchParameter", "Date", null, null, null, null, null);
+		searchParamDate.setMissing(true);
+		searchParams.myDateParams.add(searchParamDate);
+
+		ResourceIndexedSearchParamQuantity searchParamQuantity = new ResourceIndexedSearchParamQuantity(new PartitionSettings(), "SearchParameter","Quantity", null, null,null);
+		searchParamQuantity.setMissing(true);
+		searchParams.myQuantityParams.add(searchParamQuantity);
+
+		// run: now translate to HSearch
+		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
+		ExtendedHSearchIndexExtractor extractor = new ExtendedHSearchIndexExtractor(
+			myDaoConfig, myFhirContext, activeSearchParams, mySearchParamExtractor, myModelConfig);
+		ExtendedHSearchIndexData indexData = extractor.extract(new SearchParameter(), searchParams);
+
+		// validate
+		Set<DateSearchIndexData> dIndexData = indexData.getDateIndexData().get("Date");
+		assertThat(dIndexData, hasSize(0));
+		Set<QuantitySearchIndexData> qIndexData = indexData.getQuantityIndexData().get("Quantity");
+		assertThat(qIndexData, hasSize(0));
+
 	}
 
 	@Override
