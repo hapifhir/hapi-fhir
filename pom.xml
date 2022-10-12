@@ -820,6 +820,7 @@
         <flyway_version>9.4.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
         <hibernate_search_version>6.1.6.Final</hibernate_search_version>
+		  <logback_version>1.4.4</logback_version>
         <!-- Update lucene version when you update hibernate-search version -->
         <lucene_version>8.11.1</lucene_version>
         <hamcrest_version>2.2</hamcrest_version>
@@ -892,7 +893,12 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.4.4</version>
+				<version>${logback_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${logback_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
