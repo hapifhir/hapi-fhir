@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class MdmLinkExpandSvc implements IMdmLinkExpandSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
