@@ -1035,14 +1035,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myDaoConfig.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		String methodName = "testHistoryOverMultiplePages";
 
-		/*
-		 * for (int i = 0; i < 1000; i++) {
-		 * Patient patient = new Patient();
-		 * patient.addName().addFamily(methodName + "__" + i);
-		 * myPatientDao.create(patient).getId().toUnqualifiedVersionless();
-		 * }
-		 */
-
 		Patient patient = new Patient();
 		patient.addName().addFamily(methodName);
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
@@ -1127,17 +1119,6 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		fullSize++;
 		halfSize++;
-
-		runInTransaction(()->{
-			List<Long> versions = myResourceHistoryTableDao
-				.findAll()
-				.stream()
-				.filter(t -> t.getResourceId().equals(id.getIdPartAsLong()))
-				.map(t -> t.getVersion())
-				.sorted()
-				.collect(Collectors.toList());
-			ourLog.info("Versions: {}", versions);
-		});
 
 		// By instance
 		history = myPatientDao.history(id, null, null, null, mySrd);

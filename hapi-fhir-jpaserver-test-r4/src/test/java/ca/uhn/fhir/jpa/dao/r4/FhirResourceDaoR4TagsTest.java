@@ -13,7 +13,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"Duplicates"})
@@ -49,10 +47,10 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		// Delete
 
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		IIdType outcomeId = myPatientDao.delete(new IdType("Patient/A"), mySrd).getId();
 		assertEquals("3", outcomeId.getVersionIdPart());
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Make sure $meta-get can fetch the tags of the deleted resource
 
@@ -73,7 +71,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toProfiles(patient).toString(), toProfiles(patient), containsInAnyOrder("http://profile3"));
 		assertThat(toTags(patient).toString(), toTags(patient), containsInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2"));
 		myCaptureQueriesListener.logAllQueries();
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Read it back
 
@@ -92,9 +90,9 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		// Delete
 
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		myPatientDao.delete(new IdType("Patient/A"), mySrd);
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Make sure $meta-get can fetch the tags of the deleted resource
 
@@ -112,7 +110,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		patient = (Patient) myPatientDao.update(patient, mySrd).getResource();
 		myCaptureQueriesListener.logAllQueries();
-		runInTransaction(()-> assertEquals(3, myResourceTagDao.count()));
+		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Read it back
 
@@ -249,7 +247,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myPatientDao.update(patient, mySrd);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myResourceTagDao.count());
 			assertEquals(0, myResourceHistoryTagDao.count());
 			assertEquals(0, myTagDefinitionDao.count());
@@ -270,7 +268,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.setActive(true);
 		myPatientDao.update(patient, mySrd);
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			assertEquals(0, myResourceTagDao.count());
 			assertEquals(0, myResourceHistoryTagDao.count());
 			assertEquals(0, myTagDefinitionDao.count());
@@ -439,24 +437,24 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		return toTags(patient.getMeta());
 	}
 
-	@NotNull
-	private static List<String> toTags(Meta meta) {
-		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
-	}
-
 	@Nonnull
 	private List<String> toSecurityLabels(Patient patient) {
 		return toSecurityLabels(patient.getMeta());
 	}
 
-	@NotNull
-	private static List<String> toSecurityLabels(Meta meta) {
-		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
-	}
-
 	@Nonnull
 	private List<String> toProfiles(Patient patient) {
 		return toProfiles(patient.getMeta());
+	}
+
+	@Nonnull
+	private static List<String> toTags(Meta meta) {
+		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
+	}
+
+	@Nonnull
+	private static List<String> toSecurityLabels(Meta meta) {
+		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@NotNull

@@ -199,8 +199,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-	@Autowired
 	@Qualifier("mySystemDaoDstu2")
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	@Autowired
