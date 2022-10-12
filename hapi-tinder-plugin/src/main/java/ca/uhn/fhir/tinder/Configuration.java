@@ -45,6 +45,10 @@ public class Configuration {
 				fhirContext = FhirContext.forR4();
 				packageSuffix = ".r4";
 				break;
+			case "r5":
+				fhirContext = FhirContext.forR5();
+				packageSuffix = ".r5";
+				break;
 			default:
 				throw new IllegalArgumentException(Msg.code(92) + "Unknown version configured: " + version);
 		}
