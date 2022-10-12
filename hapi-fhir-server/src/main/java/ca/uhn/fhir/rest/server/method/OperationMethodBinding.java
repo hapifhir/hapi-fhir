@@ -76,6 +76,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private List<ReturnType> myReturnParams;
 	private boolean myManualRequestMode;
 	private boolean myManualResponseMode;
+	private String myCanonicalUrl;
 
 	/**
 	 * Constructor - This is the constructor that is called when binding a
@@ -85,7 +86,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 											Operation theAnnotation) {
 		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.deleteEnabled(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
 			theAnnotation.bundleType(), theAnnotation.global());
-
+		myCanonicalUrl = theAnnotation.canonicalUrl();
 		myManualRequestMode = theAnnotation.manualRequest();
 		myManualResponseMode = theAnnotation.manualResponse();
 	}
@@ -380,6 +381,10 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	public boolean isManualRequestMode() {
 		return myManualRequestMode;
+	}
+
+	public String getCanonicalUrl() {
+		return myCanonicalUrl;
 	}
 
 	public static class ReturnType {

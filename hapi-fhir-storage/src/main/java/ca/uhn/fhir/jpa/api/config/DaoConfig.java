@@ -325,6 +325,11 @@ public class DaoConfig {
 	private boolean myPreserveRequestIdInResourceBody = false;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private int myBulkExportFileMaximumCapacity = 1_000;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2937,6 +2942,25 @@ public class DaoConfig {
 		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public int getBulkExportFileMaximumCapacity() {
+		return myBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
+		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

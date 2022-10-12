@@ -311,10 +311,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
-
-		if (resource == null || resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(theResourceId.getIdAsLong());
-		}
 	}
 
 	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
