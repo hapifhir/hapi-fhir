@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3394
+jira: SMILE-3585
+title: "Cascading deletes don't work correctly if multiple threads initiate a delete at the same time.  Either the resource won't be found or there will be a collision on inserting the new version.  This changes fixes the problem by better handling these conditions to either ignore an already deleted resource or to keep retrying in a new inner transaction.."

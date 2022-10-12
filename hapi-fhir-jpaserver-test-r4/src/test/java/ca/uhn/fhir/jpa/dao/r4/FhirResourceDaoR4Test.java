@@ -112,6 +112,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -130,7 +132,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -141,6 +143,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -2090,10 +2093,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
+		IIdType idCreated = myPatientDao.create(patient, mySrd).getId();
+		ids.add(idCreated.toUnqualified().getValue());
+		IIdType id = idCreated.toUnqualifiedVersionless();
+
 		for (int i = 0; i < 10; i++) {
 			Thread.sleep(100);
 			preDates.add(new Date());
@@ -2106,13 +2112,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		List<String> idValues;
 
 		idValues = toUnqualifiedIdValues(myPatientDao.history(id, preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = toUnqualifiedIdValues(myPatientDao.history(preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = toUnqualifiedIdValues(mySystemDao.history(preDates.get(0), preDates.get(3), null, mySrd));
-		assertThat(idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 	}
 
 	@Test
@@ -3400,6 +3406,69 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(6, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSortByMissingAttribute(boolean theIndexMissingData) {
+		myDaoConfig.setIndexMissingFields(theIndexMissingData ? DaoConfig.IndexEnabledEnum.ENABLED : DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Patient p = new Patient();
+		p.setGender(AdministrativeGender.MALE);
+		myPatientDao.create(p, mySrd);
+
+		p = new Patient();
+		p.setGender(AdministrativeGender.FEMALE);
+		myPatientDao.create(p, mySrd);
+
+		p = new Patient();
+		myPatientDao.create(p, mySrd);
+
+		SearchParameterMap spMap;
+		List<IIdType> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.setSort(new SortSpec(Patient.SP_GENDER));
+		myCaptureQueriesListener.clear();
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(spMap));
+		myCaptureQueriesListener.logSelectQueries();
+		assertEquals(3, actual.size());
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSortByMissingAttributeWithChainedSorting(boolean theIndexMissingData) {
+		myDaoConfig.setIndexMissingFields(theIndexMissingData ? DaoConfig.IndexEnabledEnum.ENABLED : DaoConfig.IndexEnabledEnum.DISABLED);
+
+		Patient p = new Patient();
+		p.addName().addGiven("MalePatientGivenName").setFamily("Bame");
+		IIdType patient1Id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setGender(AdministrativeGender.FEMALE);
+		p.addName().addGiven("FemalePatientGivenName").setFamily("FemalePatientFamilyName");
+		IIdType patient2Id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.addName().addGiven("MalePatientGivenName").setFamily("Aname");
+		IIdType patient3Id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap spMap;
+		List<IIdType> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.setSort(new SortSpec(Patient.SP_GENDER).setChain(new SortSpec(Patient.SP_NAME)));
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider searchResult = myPatientDao.search(spMap);
+		actual = toUnqualifiedVersionlessIds(searchResult);
+		myCaptureQueriesListener.logSelectQueries();
+
+		// assert the sorting order
+		assertThat(actual, hasItems(patient2Id, patient3Id, patient1Id));
+
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 	}
 
 	@Test

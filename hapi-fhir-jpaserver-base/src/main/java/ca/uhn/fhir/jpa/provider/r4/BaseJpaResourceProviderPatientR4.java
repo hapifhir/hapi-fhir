@@ -66,7 +66,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	/**
 	 * Patient/123/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -129,7 +129,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	/**
 	 * /Patient/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -197,7 +197,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	 * Basic implementation matching by coverage id or by coverage identifier. Not matching by
 	 * Beneficiary (Patient) demographics in this version
 	 */
-	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match", idempotent = false, returnParameters = {
 		@OperationParam(name = "MemberIdentifier", typeName = "string")
 	})
 	public Parameters patientMemberMatch(

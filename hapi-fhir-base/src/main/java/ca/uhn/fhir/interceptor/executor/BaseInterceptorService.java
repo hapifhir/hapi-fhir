@@ -68,7 +68,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	private final Object myRegistryMutex = new Object();
 	private final ThreadLocal<ListMultimap<POINTCUT, BaseInvoker>> myThreadlocalInvokers = new ThreadLocal<>();
 	private String myName;
-	private boolean myThreadlocalInvokersEnabled = true;
+	private boolean myThreadlocalInvokersEnabled = false;
 	private boolean myWarnOnInterceptorWithNoHooks = true;
 
 	/**
@@ -96,15 +96,18 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	}
 
 	/**
-	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 * Are threadlocal interceptors enabled on this registry (defaults to false)
 	 */
 	public boolean isThreadlocalInvokersEnabled() {
 		return myThreadlocalInvokersEnabled;
 	}
 
 	/**
-	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 * Are threadlocal interceptors enabled on this registry (defaults to false)
+	 *
+	 * @deprecated ThreadLocal interceptors are deprecated as of HAPI FHIR 6.2.0 and will be removed in a future release.
 	 */
+	@Deprecated
 	public void setThreadlocalInvokersEnabled(boolean theThreadlocalInvokersEnabled) {
 		myThreadlocalInvokersEnabled = theThreadlocalInvokersEnabled;
 	}
@@ -184,9 +187,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	@Override
 	public boolean registerThreadLocalInterceptor(Object theInterceptor) {
-		if (!myThreadlocalInvokersEnabled) {
-			return false;
-		}
+		Validate.isTrue (myThreadlocalInvokersEnabled, "Thread local interceptors are not enabled on this server");
 		ListMultimap<POINTCUT, BaseInvoker> invokers = getThreadLocalInvokerMultimap();
 		scanInterceptorAndAddToInvokerMultimap(theInterceptor, invokers);
 		return !invokers.isEmpty();
@@ -195,12 +196,11 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	@Override
 	public void unregisterThreadLocalInterceptor(Object theInterceptor) {
-		if (myThreadlocalInvokersEnabled) {
-			ListMultimap<POINTCUT, BaseInvoker> invokers = getThreadLocalInvokerMultimap();
-			invokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
-			if (invokers.isEmpty()) {
-				myThreadlocalInvokers.remove();
-			}
+		Validate.isTrue (myThreadlocalInvokersEnabled, "Thread local interceptors are not enabled on this server");
+		ListMultimap<POINTCUT, BaseInvoker> invokers = getThreadLocalInvokerMultimap();
+		invokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+		if (invokers.isEmpty()) {
+			myThreadlocalInvokers.remove();
 		}
 	}
 

@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
@@ -60,6 +59,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
+
+import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
@@ -285,7 +286,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		jobParameters.setBatchSize(batchSize);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
+		request.setJobDefinitionId(BULK_IMPORT_JOB_NAME);
 		request.setParameters(jobParameters);
 
 		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);

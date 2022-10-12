@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -60,6 +59,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -119,8 +119,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
@@ -577,6 +575,48 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
 		}
+	}
+
+
+	@Test
+	public void testTransactionWithModifyingInterceptor() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient pt = new Patient();
+		pt.setId("A");
+		pt.setActive(true);
+		bb.addTransactionUpdateEntry(pt);
+		Bundle input = (Bundle) bb.getBundle();
+
+		IAnonymousInterceptor interceptor = new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				Bundle transactionBundle = (Bundle) theArgs.get(IBaseBundle.class);
+
+				Patient pt = new Patient();
+				pt.setId("B");
+				pt.setActive(false);
+				transactionBundle
+					.addEntry()
+					.setResource(pt)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Patient/B");
+
+			}
+		};
+
+		Bundle output;
+		try {
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+			output = mySystemDao.transaction(mySrd, input);
+		}finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+
+		assertEquals(2, output.getEntry().size());
+		assertEquals("A", new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart());
+		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
 	}
 
 
