@@ -142,6 +142,7 @@ public class ExtendedHSearchIndexData {
 	}
 
 	public SetMultimap<String, DateSearchIndexData> getDateIndexData() { return mySearchParamDates; }
+
 	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {
 		mySearchParamNumbers.put(theParamName, theValue);
 	}
