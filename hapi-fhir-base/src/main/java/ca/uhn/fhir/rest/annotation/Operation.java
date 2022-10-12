@@ -154,7 +154,7 @@ public @interface Operation {
 	 * The canonical URL of the operation, e.g. "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match|1.0.0"
 	 *
 	 * <p>
-	 * This may be specified with or without a version. e.g. @Operation(name = "$member-match", canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match")
+	 * This may be specified with or without a version. e.g. @Operation(name = "$everything", canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything")
 	 * or @Operation(name = "$member-match", canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match|1.0.0")
 	 * </p>
 	 */
