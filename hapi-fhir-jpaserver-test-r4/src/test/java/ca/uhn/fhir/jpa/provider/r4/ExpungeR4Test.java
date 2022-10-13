@@ -84,6 +84,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
@@ -590,8 +591,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpungeByTypeAndNoId() {
-		// FIXME: restore
+	public void testExpungeByTypeAndNoId_NonVersionedTags() {
 		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
 
 		Patient p = new Patient();
