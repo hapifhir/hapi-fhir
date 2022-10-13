@@ -782,7 +782,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			mySearchParameterDao.create(threadIdSp, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid SearchParameter.expression value \"Communication.payload[1].contentAttachment is not null\""));
+			assertThat(e.getMessage(), startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\""));
 		}
 	}
 
