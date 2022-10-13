@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -587,6 +588,29 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
 	}
+
+	@Test
+	public void testExpungeByTypeAndNoId() {
+		// FIXME: restore
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+
+		Patient p = new Patient();
+		p.setId("PT-DELETED");
+		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		p.setActive(true);
+		myDeletedPatientId = myPatientDao.update(p).getId();
+		myDeletedPatientId = myPatientDao.delete(myDeletedPatientId).getId();
+
+		myCaptureQueriesListener.clear();
+		myExpungeService.expunge("Patient", null, new ExpungeOptions().setExpungeDeletedResources(true), null);
+		myCaptureQueriesListener.logAllQueries();
+
+		assertExpunged(myDeletedPatientId.withVersion("2"));
+	}
+
+
+	@Autowired
+	private ExpungeService myExpungeService;
 
 	@Test
 	public void testExpungeDeletedWhereResourceInSearchResults() {
