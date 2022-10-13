@@ -226,7 +226,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 
 		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink);
 
-		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
+		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch, theMemberPatient);
 		if ( ! coverageOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
@@ -258,8 +258,8 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
 		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+		validateMemberPatient(theMemberPatient);
 	}
-
 
 	private void validateParam(Object theParam, String theParamName) {
 		if (theParam == null) {
@@ -269,6 +269,20 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		}
 	}
 
+	private void validateMemberPatient(Patient theMemberPatient) {
+		String errorMsg = null;
+		if (theMemberPatient.getName().isEmpty() || theMemberPatient.getBirthDate() == null) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.missing.parameter", Constants.PARAM_MEMBER_PATIENT + " " + Constants.PARAM_NAME + " and " + Constants.PARAM_BIRTHDATE);
+			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
+		}
+
+		if (theMemberPatient.getName().get(0).getFamily() == null) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.missing.parameter", Constants.PARAM_MEMBER_PATIENT + " " + Constants.PARAM_NAME);
+			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
+		}
+	}
 
 	/**
 	 * Given a list of string types, return only the ID portions of any parameters passed in.

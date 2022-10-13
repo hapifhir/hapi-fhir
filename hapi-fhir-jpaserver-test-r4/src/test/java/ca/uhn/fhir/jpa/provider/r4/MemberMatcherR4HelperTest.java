@@ -6,8 +6,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -32,6 +34,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,7 +53,8 @@ class MemberMatcherR4HelperTest {
 	@Mock private Patient myPatient;
 	@Mock private IBundleProvider myBundleProvider;
 
-	private final Coverage myMatchedCoverage = new Coverage();
+	private final Coverage myMatchedCoverage = new Coverage()
+		.setBeneficiary(new Reference("Patient/123"));
 	private final Identifier myMatchingIdentifier = new Identifier()
 		.setSystem("identifier-system").setValue("identifier-value");
 
@@ -71,8 +75,12 @@ class MemberMatcherR4HelperTest {
 		when(myCoverageToMatch.getId()).thenReturn("cvg-to-match-id");
 		when(myCoverageDao.search(isA(SearchParameterMap.class))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(Collections.singletonList(myMatchedCoverage));
-
-		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch);
+		when(myPatient.getBirthDateElement()).thenReturn(new DateType());
+		when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+			IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("Patient/123")));
+			return provider;
+		});
+		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch, myPatient);
 
 		assertEquals(Optional.of(myMatchedCoverage), result);
 		verify(myCoverageDao).search(mySearchParameterMapCaptor.capture());
@@ -93,8 +101,13 @@ class MemberMatcherR4HelperTest {
 		when(myCoverageDao.search(isA(SearchParameterMap.class))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(
 			Collections.emptyList(), Collections.singletonList(myMatchedCoverage));
+		when(myPatient.getBirthDateElement()).thenReturn(new DateType());
+		when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+			IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("Patient/123")));
+			return provider;
+		});
 
-		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch);
+		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch, myPatient);
 
 		assertEquals(Optional.of(myMatchedCoverage), result);
 		verify(myCoverageDao, times(2)).search(mySearchParameterMapCaptor.capture());
@@ -109,7 +122,6 @@ class MemberMatcherR4HelperTest {
 			param.getValueAsQueryToken(myFhirContext));
 	}
 
-
 	@Test
 	void findMatchingCoverageNoMatchReturnsEmpty() {
 		when(myCoverageToMatch.getId()).thenReturn("non-matching-id");
@@ -117,7 +129,24 @@ class MemberMatcherR4HelperTest {
 		when(myCoverageDao.search(isA(SearchParameterMap.class))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(Collections.emptyList(), Collections.emptyList());
 
-		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch);
+		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch, myPatient);
+
+		assertFalse(result.isPresent());
+	}
+
+	@Test
+	void findMatchingCoverageNoMatchOnPatientDemographicsReturnsEmpty() {
+		when(myCoverageToMatch.getId()).thenReturn("non-matching-id");
+		when(myCoverageToMatch.getIdentifier()).thenReturn(Collections.singletonList(myMatchingIdentifier));
+		when(myCoverageDao.search(isA(SearchParameterMap.class))).thenReturn(myBundleProvider);
+		when(myBundleProvider.getAllResources()).thenReturn(
+			Collections.emptyList(), Collections.singletonList(myMatchedCoverage));
+		when(myPatient.getBirthDateElement()).thenReturn(new DateType());
+		when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+			return new SimpleBundleProvider();
+		});
+
+		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch, myPatient);
 
 		assertFalse(result.isPresent());
 	}

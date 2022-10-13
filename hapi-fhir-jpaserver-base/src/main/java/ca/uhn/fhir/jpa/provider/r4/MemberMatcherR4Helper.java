@@ -4,15 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -67,19 +71,23 @@ public class MemberMatcherR4Helper {
 
 	/**
 	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier
-	 * Matching by member patient demographics is not supported.
+	 * and matching by member patient demographics - family name and birthdate
 	 */
-	public Optional<Coverage> findMatchingCoverage(Coverage theCoverageToMatch) {
+	public Optional<Coverage> findMatchingCoverage(Coverage theCoverageToMatch, Patient thePatientToMatch) {
 		// search by received old coverage id
 		List<IBaseResource> foundCoverages = findCoverageByCoverageId(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			if (validPatientMember((Coverage) foundCoverages.get(0), thePatientToMatch)) {
+				return Optional.of( (Coverage) foundCoverages.get(0) );
+			}
 		}
 
 		// search by received old coverage identifier
 		foundCoverages = findCoverageByCoverageIdentifier(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			return Optional.of( (Coverage) foundCoverages.get(0) );
+			if (validPatientMember((Coverage) foundCoverages.get(0), thePatientToMatch)) {
+				return Optional.of( (Coverage) foundCoverages.get(0) );
+			}
 		}
 
 		return Optional.empty();
@@ -168,5 +176,23 @@ public class MemberMatcherR4Helper {
 
 		Patient beneficiary = myPatientDao.read(new IdDt(beneficiaryRef.getReference()));
 		return Optional.ofNullable(beneficiary);
+	}
+
+	private boolean validPatientMember(Coverage theCoverageToMatch, Patient thePatientToMatch) {
+		StringOrListParam familyName = new StringOrListParam();
+		for (HumanName name: thePatientToMatch.getName()) {
+			familyName.addOr(new StringParam(name.getFamily()));
+		}
+		SearchParameterMap map = new SearchParameterMap()
+			.add("family", familyName)
+			.add("birthdate", new DateParam(thePatientToMatch.getBirthDateElement().getValueAsString()));
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundle = myPatientDao.search(map);
+		for (IBaseResource patientResource: bundle.getAllResources()) {
+			IIdType patientId = patientResource.getIdElement().toUnqualifiedVersionless();
+			if (patientId.getValue().equals(theCoverageToMatch.getBeneficiary().getReference())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
