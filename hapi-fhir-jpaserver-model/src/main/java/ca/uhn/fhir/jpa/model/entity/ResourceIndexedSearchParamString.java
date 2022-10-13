@@ -239,6 +239,12 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		b.append(getResourceType());
 		b.append(getParamName());
 		b.append(getValueExact());
+		// TODO:  3113:  START FIX
+		b.append(getHashIdentity());
+		b.append(getHashExact());
+		b.append(getHashNormalizedPrefix());
+		// TODO:  3113:  END FIX
+		final int hashCode = b.toHashCode();
 		return b.toHashCode();
 	}
 
