@@ -1620,6 +1620,42 @@ public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a FHIR transaction bundle is about to begin processing. Hooks may choose to
+	 * modify the bundle, and may affect processing by doing so.
+	 * <p>
+	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the
+	 * processing of the transaction bundle
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource being deleted</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 *
+	 * @see #STORAGE_TRANSACTION_PROCESSED
+	 * @since 6.2.0
+	 */
+	STORAGE_TRANSACTION_PROCESSING(void.class,
+		"org.hl7.fhir.instance.model.api.IBaseBundle",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked after all entries in a transaction bundle have been executed
 	 * <p>
 	 * Hooks will have access to the original bundle, as well as all the deferred interceptor broadcasts related to the
@@ -1631,9 +1667,7 @@ public enum Pointcut implements IPointcut {
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
-	 * pulled out of the servlet request. Note that the bean
-	 * properties are not all guaranteed to be populated, depending on how early during processing the
-	 * exception occurred.
+	 * pulled out of the servlet request.
 	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
@@ -1651,6 +1685,8 @@ public enum Pointcut implements IPointcut {
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
+	 *
+	 * @see #STORAGE_TRANSACTION_PROCESSING
 	 */
 	STORAGE_TRANSACTION_PROCESSED(void.class,
 		"org.hl7.fhir.instance.model.api.IBaseBundle",

@@ -7,6 +7,8 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -75,11 +77,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
 		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof CascadingDeleteInterceptor);
@@ -209,7 +214,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDeleteCascade() throws IOException {
-		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry));
+		ourRestServer.registerInterceptor(new CascadingDeleteInterceptor(myFhirContext, myDaoRegistry, myInterceptorRegistry, myThreadSafeResourceDeleterSvc));
 
 		// setup
 		Organization organization = new Organization();
@@ -584,6 +589,28 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
 	}
+
+	@Test
+	public void testExpungeByTypeAndNoId_NonVersionedTags() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+
+		Patient p = new Patient();
+		p.setId("PT-DELETED");
+		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		p.setActive(true);
+		myDeletedPatientId = myPatientDao.update(p).getId();
+		myDeletedPatientId = myPatientDao.delete(myDeletedPatientId).getId();
+
+		myCaptureQueriesListener.clear();
+		myExpungeService.expunge("Patient", null, new ExpungeOptions().setExpungeDeletedResources(true), null);
+		myCaptureQueriesListener.logAllQueries();
+
+		assertExpunged(myDeletedPatientId.withVersion("2"));
+	}
+
+
+	@Autowired
+	private ExpungeService myExpungeService;
 
 	@Test
 	public void testExpungeDeletedWhereResourceInSearchResults() {

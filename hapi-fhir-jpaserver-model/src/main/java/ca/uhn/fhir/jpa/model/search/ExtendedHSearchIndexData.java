@@ -141,6 +141,8 @@ public class ExtendedHSearchIndexData {
 		mySearchParamDates.put(theSpName, value);
 	}
 
+	public SetMultimap<String, DateSearchIndexData> getDateIndexData() { return mySearchParamDates; }
+
 	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {
 		mySearchParamNumbers.put(theParamName, theValue);
 	}
@@ -148,6 +150,8 @@ public class ExtendedHSearchIndexData {
 	public void addQuantityIndexData(String theSpName, QuantitySearchIndexData value) {
 		mySearchParamQuantities.put(theSpName, value);
 	}
+
+	public SetMultimap<String,QuantitySearchIndexData> getQuantityIndexData () {return mySearchParamQuantities;}
 
 	public void setForcedId(String theForcedId) {
 		myForcedId = theForcedId;

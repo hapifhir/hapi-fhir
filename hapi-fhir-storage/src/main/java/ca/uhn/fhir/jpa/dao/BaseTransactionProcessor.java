@@ -325,6 +325,16 @@ public abstract class BaseTransactionProcessor {
 	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
+
+			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, myInterceptorBroadcaster, theRequestDetails)) {
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(IBaseBundle.class, theRequest);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+			}
+
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseStorageDao.clearRequestAsProcessingSubRequest(theRequestDetails);
