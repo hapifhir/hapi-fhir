@@ -1828,7 +1828,7 @@ public class QueryStack {
 				.filter(t -> t instanceof ReferenceParam)
 				.map(t -> ((ReferenceParam) t).getChain())
 				.filter(StringUtils::isNotBlank)
-				// Chains on _has can't be indexed for contained searches yet
+				// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
 				.anyMatch(t->!t.startsWith(PARAM_HAS + ":"));
 	}
 
