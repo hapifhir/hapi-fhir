@@ -70,24 +70,19 @@ public class MemberMatcherR4Helper {
 	}
 
 	/**
-	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier
-	 * and matching by member patient demographics - family name and birthdate
+	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier only
 	 */
-	public Optional<Coverage> findMatchingCoverage(Coverage theCoverageToMatch, Patient thePatientToMatch) {
+	public Optional<Coverage> findMatchingCoverage(Coverage theCoverageToMatch) {
 		// search by received old coverage id
 		List<IBaseResource> foundCoverages = findCoverageByCoverageId(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			if (validPatientMember((Coverage) foundCoverages.get(0), thePatientToMatch)) {
-				return Optional.of( (Coverage) foundCoverages.get(0) );
-			}
+			return Optional.of( (Coverage) foundCoverages.get(0) );
 		}
 
 		// search by received old coverage identifier
 		foundCoverages = findCoverageByCoverageIdentifier(theCoverageToMatch);
 		if (foundCoverages.size() == 1 && isCoverage(foundCoverages.get(0))) {
-			if (validPatientMember((Coverage) foundCoverages.get(0), thePatientToMatch)) {
-				return Optional.of( (Coverage) foundCoverages.get(0) );
-			}
+			return Optional.of( (Coverage) foundCoverages.get(0) );
 		}
 
 		return Optional.empty();
@@ -178,7 +173,13 @@ public class MemberMatcherR4Helper {
 		return Optional.ofNullable(beneficiary);
 	}
 
-	private boolean validPatientMember(Coverage theCoverageToMatch, Patient thePatientToMatch) {
+	/**
+	  * Matching by member patient demographics - family name and birthdate only
+	 */
+	public boolean validPatientMember(Patient thePatientFromContract, Patient thePatientToMatch) {
+		if (thePatientFromContract == null || thePatientFromContract.getIdElement() == null) {
+			return false;
+		}
 		StringOrListParam familyName = new StringOrListParam();
 		for (HumanName name: thePatientToMatch.getName()) {
 			familyName.addOr(new StringParam(name.getFamily()));
@@ -189,7 +190,7 @@ public class MemberMatcherR4Helper {
 		ca.uhn.fhir.rest.api.server.IBundleProvider bundle = myPatientDao.search(map);
 		for (IBaseResource patientResource: bundle.getAllResources()) {
 			IIdType patientId = patientResource.getIdElement().toUnqualifiedVersionless();
-			if (patientId.getValue().equals(theCoverageToMatch.getBeneficiary().getReference())) {
+			if ( patientId.getValue().equals(thePatientFromContract.getIdElement().toUnqualifiedVersionless().getValue())) {
 				return true;
 			}
 		}
