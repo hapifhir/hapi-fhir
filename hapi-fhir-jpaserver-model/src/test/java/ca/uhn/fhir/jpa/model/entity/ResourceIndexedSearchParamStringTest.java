@@ -45,7 +45,8 @@ public class ResourceIndexedSearchParamStringTest {
 		token2.calculateHashes();
 
 		assertAll(
-			() -> assertNotEquals(token1.getHashNormalizedPrefix(), token2.getHashNormalizedPrefix()),
+			// We only hash on the first letter for performance reasons
+			() -> assertEquals(token1.getHashNormalizedPrefix(), token2.getHashNormalizedPrefix()),
 			() -> assertEquals(token1.getHashExact(), token2.getHashExact()),
 			() -> assertNotEquals(token1.hashCode(), token2.hashCode())
 		);
