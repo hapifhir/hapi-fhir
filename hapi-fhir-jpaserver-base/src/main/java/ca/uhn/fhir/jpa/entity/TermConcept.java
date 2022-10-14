@@ -30,14 +30,14 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.engine.backend.types.ObjectStructure;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
@@ -114,12 +114,8 @@ public class TermConcept implements Serializable {
 	@FullTextField(name = "myDisplayPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	private String myDisplay;
 
-	/**
-	 * IndexedEmbedded uses ObjectStructure.NESTED to be able to use hibernate search nested predicate queries.
-	 * @see "https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#search-dsl-predicate-nested"
-	 */
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-	@IndexedEmbedded(structure = ObjectStructure.NESTED)
+	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
@@ -458,7 +454,7 @@ public class TermConcept implements Serializable {
 	 * Returns a view of {@link #getChildren()} but containing the actual child codes
 	 */
 	public List<TermConcept> getChildCodes() {
-		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
+		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
 	}
 
 }
