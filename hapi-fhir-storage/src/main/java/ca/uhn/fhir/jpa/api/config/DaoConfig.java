@@ -320,6 +320,16 @@ public class DaoConfig {
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private boolean myPreserveRequestIdInResourceBody = false;
+
+	/**
+	 * Since 6.2.0
+	 */
+	private int myBulkExportFileMaximumCapacity = 1_000;
+
+	/**
 	 * Constructor
 	 */
 	public DaoConfig() {
@@ -2807,7 +2817,7 @@ public class DaoConfig {
 	 * @see ModelConfig#setCrossPartitionSubscription(boolean)
 	 * @since 7.5.0
 	 */
-	public boolean isCrossPartitionSubscription() {
+	public boolean isCrossPartitionSubscriptionEnabled() {
 		return this.myModelConfig.isCrossPartitionSubscription();
 	}
 
@@ -2911,6 +2921,46 @@ public class DaoConfig {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
 	}
 
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public boolean isPreserveRequestIdInResourceBody() {
+		return myPreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 * Default is false. This means that a client provided requestId will be overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
+		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public int getBulkExportFileMaximumCapacity() {
+		return myBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
+		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

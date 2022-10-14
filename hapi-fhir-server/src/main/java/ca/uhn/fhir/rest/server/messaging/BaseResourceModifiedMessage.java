@@ -20,8 +20,8 @@ package ca.uhn.fhir.rest.server.messaging;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -33,6 +33,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -78,7 +79,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	public void setPayloadId(IIdType thePayloadId) {
 		myPayloadId = null;
 		if (thePayloadId != null) {
-			myPayloadId = thePayloadId.getValue();
+			myPayloadId = thePayloadId.toUnqualifiedVersionless().getValue();
 		}
 	}
 
@@ -201,5 +202,16 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 		}
 		return true;
 	}
+
+
+	@Nullable
+	@Override
+	public String getMessageKeyOrNull() {
+		if (super.getMessageKeyOrNull() != null) {
+			return super.getMessageKeyOrNull();
+		}
+		return myPayloadId;
+	}
+
 }
 

@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ch.qos.logback.classic.Level;
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class ReductionStepDataSinkTest {
 
 
 	@BeforeEach
-	private void init() {
+	public void init() {
 		when(myJobDefinition.getJobDefinitionId())
 			.thenReturn("jobDefinition");
 		when(myWorkCursor.getJobDefinition())
@@ -78,7 +78,7 @@ public class ReductionStepDataSinkTest {
 			myJobDefinition,
 			myJobPersistence
 		);
-		ourLogger = (Logger) LoggerFactory.getLogger(ReductionStepDataSink.class);
+		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();
 		ourLogger.addAppender(myListAppender);
 	}
 

@@ -1,10 +1,10 @@
 package org.hl7.fhir.r5.hapi.ctx;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -157,7 +157,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public Map<String, NamingSystem> getNSUrlMap() {
-		return null;
+		throw new UnsupportedOperationException(Msg.code(2107));
 	}
 
 	@Override
@@ -283,7 +283,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandVS(ValueSet theSource, boolean theCacheOk, boolean theHierarchical) {
-		throw new UnsupportedOperationException(Msg.code(212));
+		throw new UnsupportedOperationException(Msg.code(2128));
 	}
 
 	@Override
@@ -437,7 +437,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public void cachePackage(PackageDetails packageDetails, List<PackageVersion> list) {
-		throw new UnsupportedOperationException();
+
 	}
 
 	@Override
@@ -447,7 +447,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public List<String> getCanonicalResourceNames() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2113));
 	}
 
 	@Override
@@ -462,8 +462,18 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public Map<String, byte[]> getBinaries() {
-		throw new UnsupportedOperationException(Msg.code(232));
+	public Set<String> getBinaryKeysAsSet() {
+		throw new UnsupportedOperationException(Msg.code(2115));
+	}
+
+	@Override
+	public boolean hasBinaryKey(String s) {
+		throw new UnsupportedOperationException(Msg.code(2129));
+	}
+
+	@Override
+	public byte[] getBinaryForKey(String s) {
+		throw new UnsupportedOperationException(Msg.code(2125));
 	}
 
 	@Override
@@ -513,12 +523,13 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
 	@Override
 	public IPackageLoadingTracker getPackageTracker() {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2112));
 	}
 
 	@Override
-	public IWorkerContext setPackageTracker(IPackageLoadingTracker packageTracker) {
-		throw new UnsupportedOperationException();
+	public IWorkerContext setPackageTracker(
+		IPackageLoadingTracker packageTracker) {
+		return null;
 	}
 
 	@Override

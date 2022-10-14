@@ -350,8 +350,8 @@
 			"lon": -122.3983786,
 			"added": "2020-05-06"
 		},{
-			"title": "MedPlat",
-			"description": "A Comprehensive Health Platform",
+			"title": "MEDplat",
+			"description": "A comprehensive public health platform",
 			"link": "https://argusoft.com",
 			"contactName": "Kunjan Patel",
 			"contactEmail": "kunjanp@argusoft.com",
@@ -425,6 +425,18 @@
 			"lat": 38.313733,
 			"lon": 26.634074,
 			"added": "2022-06-20"
+		},
+			{
+			"title": "SOLUTEMA, SRL",
+			"description": "Infrastructure based on HAPI FHIR + GNU Health to simplify data exchange between medical professionals, patients and EHRs systems Making technology work as service throught standards.",
+			"company": "SOLUTEMA, SRL",
+			"contactName": "José Arturo García",
+			"contactEmail": "jgarcia@solutema.com",
+			"link": "https://www.solutema.com",
+			"city": "Santo Domingo, Dominican Repúblic",
+			"lat": 18.483402,
+			"lon": -69.929611,
+			"added": "2022-08-15"
 		}
 	]
 }

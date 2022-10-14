@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -38,12 +39,17 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -56,24 +62,29 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-@Transactional(Transactional.TxType.REQUIRES_NEW)
 public class JpaJobPersistenceImpl implements IJobPersistence {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaJobPersistenceImpl.class);
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
+	private final TransactionTemplate myTxTemplate;
 
 	/**
 	 * Constructor
 	 */
-	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository) {
+	public JpaJobPersistenceImpl(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
 		Validate.notNull(theJobInstanceRepository);
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+
+		// TODO: JA replace with HapiTransactionManager in megascale ticket
+		myTxTemplate = new TransactionTemplate(theTransactionManager);
+		myTxTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public String storeWorkChunk(BatchWorkChunk theBatchWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity();
 		entity.setId(UUID.randomUUID().toString());
@@ -91,6 +102,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Optional<WorkChunk> fetchWorkChunkSetStartTimeAndMarkInProgress(String theChunkId) {
 		myWorkChunkRepository.updateChunkStatusForStart(theChunkId, new Date(), StatusEnum.IN_PROGRESS);
 		Optional<Batch2WorkChunkEntity> chunk = myWorkChunkRepository.findById(theChunkId);
@@ -98,6 +110,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public String storeNewInstance(JobInstance theInstance) {
 		Validate.isTrue(isBlank(theInstance.getInstanceId()));
 
@@ -108,6 +121,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setStatus(theInstance.getStatus());
 		entity.setParams(theInstance.getParameters());
 		entity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		entity.setFastTracking(theInstance.isFastTracking());
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
 		entity.setReport(theInstance.getReport());
@@ -117,20 +131,31 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
-		myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.IN_PROGRESS);
-		return fetchInstance(theInstanceId);
-	}
-
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
 		return toInstanceList(myJobInstanceRepository.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, pageRequest));
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
 		return toInstanceList(myJobInstanceRepository.findInstancesByJobDefinitionId(theJobDefinitionId, pageRequest));
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		PageRequest pageRequest = PageRequest.of(
+			theRequest.getPageStart(),
+			theRequest.getBatchSize(),
+			theRequest.getSort()
+		);
+
+		Page<Batch2JobInstanceEntity> pageOfEntities = myJobInstanceRepository.findAll(pageRequest);
+
+		return pageOfEntities.map(this::toInstance);
 	}
 
 	private List<JobInstance> toInstanceList(List<Batch2JobInstanceEntity> theInstancesByJobDefinitionId) {
@@ -139,28 +164,41 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Nonnull
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Optional<JobInstance> fetchInstance(String theInstanceId) {
-		return myJobInstanceRepository.findById(theInstanceId).map(t -> toInstance(t));
+		return myJobInstanceRepository.findById(theInstanceId).map(this::toInstance);
 	}
 
 	@Override
-	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int theStart, int theBatchSize) {
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public List<JobInstance> fetchInstances(FetchJobInstancesRequest theRequest, int thePage, int theBatchSize) {
 		String definitionId = theRequest.getJobDefinition();
 		String params = theRequest.getParameters();
+		Set<StatusEnum> statuses = theRequest.getStatuses();
 
-		Pageable pageable = Pageable.ofSize(theBatchSize).withPage(theStart);
+		Pageable pageable = PageRequest.of(thePage, theBatchSize);
 
-		// TODO - consider adding a new index... on the JobDefinitionId (and possibly Status)
-		List<JobInstance> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(
-			definitionId,
-			params,
-			pageable
-		);
+		List<Batch2JobInstanceEntity> instanceEntities;
 
-		return instances == null ? new ArrayList<>() : instances;
+		if (statuses != null && !statuses.isEmpty()) {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(
+				definitionId,
+				params,
+				statuses,
+				pageable
+			);
+		} else {
+			instanceEntities = myJobInstanceRepository.findInstancesByJobIdAndParams(
+				definitionId,
+				params,
+				pageable
+			);
+		}
+		return toInstanceList(instanceEntities);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchInstances(int thePageSize, int thePageIndex) {
 		// default sort is myCreateTime Asc
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.ASC, "myCreateTime");
@@ -168,6 +206,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, "myCreateTime");
 		return myJobInstanceRepository.findAll(pageRequest).stream().map(this::toInstance).collect(Collectors.toList());
@@ -182,11 +221,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsErroredAndIncrementErrorCount(String theChunkId, String theErrorMessage) {
 		myWorkChunkRepository.updateChunkStatusAndIncrementErrorCountForEndError(theChunkId, new Date(), theErrorMessage, StatusEnum.ERRORED);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Optional<WorkChunk> markWorkChunkAsErroredAndIncrementErrorCount(MarkWorkChunkAsErrorRequest theParameters) {
 		markWorkChunkAsErroredAndIncrementErrorCount(theParameters.getChunkId(), theParameters.getErrorMsg());
 		Optional<Batch2WorkChunkEntity> op = myWorkChunkRepository.findById(theParameters.getChunkId());
@@ -195,6 +236,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsFailed(String theChunkId, String theErrorMessage) {
 		String errorMessage;
 		if (theErrorMessage.length() > Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH) {
@@ -207,11 +249,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunkAsCompletedAndClearData(String theChunkId, int theRecordsProcessed) {
 		myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(theChunkId, new Date(), theRecordsProcessed, StatusEnum.COMPLETED);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void markWorkChunksWithStatusAndWipeData(String theInstanceId, List<String> theChunkIds, StatusEnum theStatus, String theErrorMsg) {
 		List<List<String>> listOfListOfIds = ListUtils.partition(theChunkIds, 100);
 		for (List<String> idList : listOfListOfIds) {
@@ -220,10 +264,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void incrementWorkChunkErrorCount(String theChunkId, int theIncrementBy) {
 		myWorkChunkRepository.incrementWorkChunkErrorCount(theChunkId, theIncrementBy);
 	}
 
+	/**
+	 * Note: Not @Transactional because {@link #fetchChunks(String, boolean, int, int, Consumer)} starts a transaction
+	 */
 	@Override
 	public List<WorkChunk> fetchWorkChunksWithoutData(String theInstanceId, int thePageSize, int thePageIndex) {
 		ArrayList<WorkChunk> chunks = new ArrayList<>();
@@ -232,25 +280,35 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	private void fetchChunks(String theInstanceId, boolean theIncludeData, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-		for (Batch2WorkChunkEntity chunk : chunks) {
-			theConsumer.accept(toChunk(chunk, theIncludeData));
-		}
+		myTxTemplate.executeWithoutResult(tx -> {
+			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+			for (Batch2WorkChunkEntity chunk : chunks) {
+				theConsumer.accept(toChunk(chunk, theIncludeData));
+			}
+		});
 	}
 
 	private void fetchChunksForStep(String theInstanceId, String theStepId, int thePageSize, int thePageIndex, Consumer<WorkChunk> theConsumer) {
-		List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
-		for (Batch2WorkChunkEntity chunk : chunks) {
-			theConsumer.accept(toChunk(chunk, true));
-		}
+		myTxTemplate.executeWithoutResult(tx -> {
+			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunksForStep(PageRequest.of(thePageIndex, thePageSize), theInstanceId, theStepId);
+			for (Batch2WorkChunkEntity chunk : chunks) {
+				theConsumer.accept(toChunk(chunk, true));
+			}
+		});
 	}
 
 
+	/**
+	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
+	 */
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksIterator(String theInstanceId, boolean theWithData) {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunks(theInstanceId, theWithData, theBatchSize, thePageIndex, theConsumer));
 	}
 
+	/**
+	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
+	 */
 	@Override
 	public Iterator<WorkChunk> fetchAllWorkChunksForStepIterator(String theInstanceId, String theStepId) {
 		return new PagingIterator<>((thePageIndex, theBatchSize, theConsumer) -> fetchChunksForStep(theInstanceId, theStepId, theBatchSize, thePageIndex, theConsumer));
@@ -263,50 +321,56 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	 * @return true if the status changed
 	 */
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean updateInstance(JobInstance theInstance) {
 		// Separate updating the status so we have atomic information about whether the status is changing
 		int recordsChangedByStatusUpdate = myJobInstanceRepository.updateInstanceStatus(theInstance.getInstanceId(), theInstance.getStatus());
 
 		Optional<Batch2JobInstanceEntity> instanceOpt = myJobInstanceRepository.findById(theInstance.getInstanceId());
-		Batch2JobInstanceEntity instance = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
+		Batch2JobInstanceEntity instanceEntity = instanceOpt.orElseThrow(() -> new IllegalArgumentException("Unknown instance ID: " + theInstance.getInstanceId()));
 
-		instance.setStartTime(theInstance.getStartTime());
-		instance.setEndTime(theInstance.getEndTime());
-		instance.setStatus(theInstance.getStatus());
-		instance.setCancelled(theInstance.isCancelled());
-		instance.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
-		instance.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
-		instance.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
-		instance.setWorkChunksPurged(theInstance.isWorkChunksPurged());
-		instance.setProgress(theInstance.getProgress());
-		instance.setErrorMessage(theInstance.getErrorMessage());
-		instance.setErrorCount(theInstance.getErrorCount());
-		instance.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
-		instance.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
-		instance.setReport(theInstance.getReport());
+		instanceEntity.setStartTime(theInstance.getStartTime());
+		instanceEntity.setEndTime(theInstance.getEndTime());
+		instanceEntity.setStatus(theInstance.getStatus());
+		instanceEntity.setCancelled(theInstance.isCancelled());
+		instanceEntity.setFastTracking(theInstance.isFastTracking());
+		instanceEntity.setCombinedRecordsProcessed(theInstance.getCombinedRecordsProcessed());
+		instanceEntity.setCombinedRecordsProcessedPerSecond(theInstance.getCombinedRecordsProcessedPerSecond());
+		instanceEntity.setTotalElapsedMillis(theInstance.getTotalElapsedMillis());
+		instanceEntity.setWorkChunksPurged(theInstance.isWorkChunksPurged());
+		instanceEntity.setProgress(theInstance.getProgress());
+		instanceEntity.setErrorMessage(theInstance.getErrorMessage());
+		instanceEntity.setErrorCount(theInstance.getErrorCount());
+		instanceEntity.setEstimatedTimeRemaining(theInstance.getEstimatedTimeRemaining());
+		instanceEntity.setCurrentGatedStepId(theInstance.getCurrentGatedStepId());
+		instanceEntity.setReport(theInstance.getReport());
 
-		myJobInstanceRepository.save(instance);
+		myJobInstanceRepository.save(instanceEntity);
 		return recordsChangedByStatusUpdate > 0;
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteInstanceAndChunks(String theInstanceId) {
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 		myJobInstanceRepository.deleteById(theInstanceId);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void deleteChunks(String theInstanceId) {
 		myWorkChunkRepository.deleteAllForInstance(theInstanceId);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean markInstanceAsCompleted(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceStatus(theInstanceId, StatusEnum.COMPLETED);
 		return recordsChanged > 0;
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public JobOperationResultJson cancelInstance(String theInstanceId) {
 		int recordsChanged = myJobInstanceRepository.updateInstanceCancelled(theInstanceId, true);
 		String operationString = "Cancel job instance " + theInstanceId;

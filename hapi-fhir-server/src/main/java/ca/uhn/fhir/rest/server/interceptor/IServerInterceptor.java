@@ -119,7 +119,6 @@ public interface IServerInterceptor {
 	 * Invoked before an incoming request is processed. Note that this method is called
 	 * after the server has begin preparing the response to the incoming client request.
 	 * As such, it is not able to supply a response to the incoming request in the way that
-	 * {@link #incomingRequestPreHandled(RestOperationTypeEnum, ActionRequestDetails)} and
 	 * {@link #incomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse)}
 	 * are.
 	 * <p>
@@ -132,7 +131,7 @@ public interface IServerInterceptor {
 	 *                            server, e.g. the FHIR operation type and the parsed resource body (if any).
 	 */
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest);
+	void incomingRequestPreHandled(RestOperationTypeEnum theOperation, RequestDetails theProcessedRequest);
 
 	/**
 	 * This method is called before any other processing takes place for each incoming request. It may be used to provide
@@ -290,169 +289,5 @@ public interface IServerInterceptor {
 	 */
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
-
-	/**
-	 * @deprecated This class doesn't bring anything that can't be done with {@link RequestDetails}. That
-	 * class should be used instead. Deprecated in 4.0.0
-	 */
-	@Deprecated
-	class ActionRequestDetails {
-		private final FhirContext myContext;
-		private final IIdType myId;
-		private final String myResourceType;
-		private RequestDetails myRequestDetails;
-		private IBaseResource myResource;
-
-		public ActionRequestDetails(RequestDetails theRequestDetails) {
-			myId = theRequestDetails.getId();
-			myResourceType = theRequestDetails.getResourceName();
-			myContext = theRequestDetails.getServer().getFhirContext();
-			myRequestDetails = theRequestDetails;
-		}
-
-		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, IBaseResource theResource) {
-			this(theRequestDetails, theContext, theContext.getResourceType(theResource), theResource.getIdElement());
-			myResource = theResource;
-		}
-
-		public ActionRequestDetails(RequestDetails theRequestDetails, FhirContext theContext, String theResourceType, IIdType theId) {
-			if (theId != null && isBlank(theId.getValue())) {
-				myId = null;
-			} else {
-				myId = theId;
-			}
-			myResourceType = theResourceType;
-			myContext = theContext;
-			myRequestDetails = theRequestDetails;
-		}
-
-		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource) {
-			this(theRequestDetails, theRequestDetails.getServer().getFhirContext().getResourceType(theResource), theResource.getIdElement());
-			myResource = theResource;
-		}
-
-		public ActionRequestDetails(RequestDetails theRequestDetails, IBaseResource theResource, String theResourceType, IIdType theId) {
-			this(theRequestDetails, theResourceType, theId);
-			myResource = theResource;
-		}
-
-		/**
-		 * Constructor
-		 *
-		 * @param theRequestDetails The request details to wrap
-		 * @param theId             The ID of the resource being created (note that the ID should have the resource type populated)
-		 */
-		public ActionRequestDetails(RequestDetails theRequestDetails, IIdType theId) {
-			this(theRequestDetails, theId.getResourceType(), theId);
-		}
-
-		public ActionRequestDetails(RequestDetails theRequestDetails, String theResourceType, IIdType theId) {
-			this(theRequestDetails, theRequestDetails.getServer().getFhirContext(), theResourceType, theId);
-		}
-
-		public FhirContext getContext() {
-			return myContext;
-		}
-
-		/**
-		 * Returns the ID of the incoming request (typically this is from the request URL)
-		 */
-		public IIdType getId() {
-			return myId;
-		}
-
-		/**
-		 * Returns the request details associated with this request
-		 */
-		public RequestDetails getRequestDetails() {
-			return myRequestDetails;
-		}
-
-		/**
-		 * For requests where a resource is passed from the client to the server (e.g. create, update, etc.) this method
-		 * will return the resource which was provided by the client. Otherwise, this method will return <code>null</code>
-		 * .
-		 * <p>
-		 * Note that this method is currently only populated if the handling method has a parameter annotated with the
-		 * {@link ResourceParam} annotation.
-		 * </p>
-		 */
-		public IBaseResource getResource() {
-			return myResource;
-		}
-
-		/**
-		 * This method should not be called by client code
-		 */
-		public void setResource(IBaseResource theObject) {
-			myResource = theObject;
-		}
-
-		/**
-		 * Returns the resource type this request pertains to, or <code>null</code> if this request is not type specific
-		 * (e.g. server-history)
-		 */
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		@Override
-		public String toString() {
-			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("id", myId)
-				.append("resourceType", myResourceType)
-				.append("resource", myResource)
-				.toString();
-		}
-
-		/**
-		 * Returns the same map which was
-		 */
-		public Map<Object, Object> getUserData() {
-			if (myRequestDetails == null) {
-				/*
-				 * Technically this shouldn't happen.. But some of the unit tests use old IXXXDao methods that don't
-				 * take in a RequestDetails object. Eventually I guess we should clean that up.
-				 */
-				return Collections.emptyMap();
-			}
-			return myRequestDetails.getUserData();
-		}
-
-		/**
-		 * This method may be invoked by user code to notify interceptors that a nested
-		 * operation is being invoked which is denoted by this request details.
-		 */
-		public void notifyIncomingRequestPreHandled(RestOperationTypeEnum theOperationType) {
-			RequestDetails requestDetails = getRequestDetails();
-			if (requestDetails == null) {
-				return;
-			}
-			IRestfulServerDefaults server = requestDetails.getServer();
-			if (server == null) {
-				return;
-			}
-
-			IIdType previousRequestId = requestDetails.getId();
-			requestDetails.setId(getId());
-
-			IInterceptorService interceptorService = server.getInterceptorService();
-			if (interceptorService == null) {
-				return;
-			}
-
-			HookParams params = new HookParams();
-			params.add(RestOperationTypeEnum.class, theOperationType);
-			params.add(this);
-			params.add(RequestDetails.class, this.getRequestDetails());
-			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
-			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
-
-			// Reset the request ID
-			requestDetails.setId(previousRequestId);
-
-		}
-
-	}
 
 }

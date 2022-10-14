@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -76,7 +77,7 @@ public interface IJpaIdHelperService extends IIdHelperService {
 	Long getPidOrThrowException(IIdType theId);
 
 	@Nonnull
-	Long getPidOrThrowException(@Nonnull IAnyResource theResource);
+	ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource);
 
 	IIdType resourceIdFromPidOrThrowException(Long thePid);
 
@@ -91,6 +92,6 @@ public interface IJpaIdHelperService extends IIdHelperService {
 	 * @param thePids The Set of pids you would like to resolve to external FHIR Resource IDs.
 	 * @return A Set of strings representing the FHIR IDs of the pids.
 	 */
-	Set<String> translatePidsToFhirResourceIds(Set<Long> thePids);
+	Set<String> translatePidsToFhirResourceIds(Set<ResourcePersistentId> thePids);
 
 }

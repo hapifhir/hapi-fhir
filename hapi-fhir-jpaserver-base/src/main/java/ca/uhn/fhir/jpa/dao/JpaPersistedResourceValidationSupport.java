@@ -55,7 +55,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +72,7 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
  * validation resources (StructureDefinition, ValueSet, CodeSystem, etc.) from the resources
  * persisted in the JPA server.
  */
-@Transactional(value = Transactional.TxType.REQUIRED)
+@Transactional(propagation = Propagation.REQUIRED)
 public class JpaPersistedResourceValidationSupport implements IValidationSupport {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaPersistedResourceValidationSupport.class);
@@ -282,7 +284,11 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 				break;
 			}
 			default:
-				throw new IllegalArgumentException(Msg.code(952) + "Can't fetch resource type: " + resourceName);
+				// N.B.: this code assumes that we are searching by canonical URL and that the CanonicalType in question has a URL
+				SearchParameterMap params = new SearchParameterMap();
+				params.setLoadSynchronousUpTo(1);
+				params.add("url", new UriParam(theUri));
+				search = myDaoRegistry.getResourceDao(resourceName).search(params);
 		}
 
 		Integer size = search.size();

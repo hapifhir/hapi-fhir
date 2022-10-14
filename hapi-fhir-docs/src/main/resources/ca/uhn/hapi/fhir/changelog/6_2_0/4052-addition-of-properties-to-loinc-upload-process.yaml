@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4052
+title: "LOINC terminology upload process was enhanced to consider 24 additional properties which were defined in
+   loinc.csv file but not uploaded."

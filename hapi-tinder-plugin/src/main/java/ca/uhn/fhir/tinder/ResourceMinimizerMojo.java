@@ -80,7 +80,7 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			IParser parser = EncodingEnum.detectEncoding(inputString).newParser(myCtx);
 			IBaseResource input = parser.parseResource(inputString);
 
-			if (input instanceof IResource) {
+		if (input instanceof IResource) {
 				((IResource) input).getText().getDiv().setValueAsString(null);
 				((IResource) input).getText().getStatus().setValueAsString(null);
 				if (input instanceof Bundle) {

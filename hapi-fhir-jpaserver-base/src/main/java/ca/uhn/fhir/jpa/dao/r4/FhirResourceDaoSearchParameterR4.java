@@ -1,22 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -123,7 +120,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			throw new UnprocessableEntityException(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 
-		boolean isUnique = theResource.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE).stream().anyMatch(t-> "true".equals(t.getValueAsPrimitive().getValueAsString()));
+		boolean isUnique = hasAnyExtensionUniqueSetTo(theResource, true);
 
 		if (theResource.getType() != null && theResource.getType().name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(theResource.getExpression())) {
 
@@ -134,8 +131,6 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
 
 		} else {
-
-			String expression = theResource.getExpression().trim();
 
 			if (isUnique) {
 				if (theResource.getComponent().size() == 0) {
@@ -148,52 +143,55 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 				}
 			}
 
-			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-
-				// DSTU3 and below
-				String[] expressionSplit = theSearchParamExtractor.split(expression);
-				for (String nextPath : expressionSplit) {
-					nextPath = nextPath.trim();
-
-					int dotIdx = nextPath.indexOf('.');
-					if (dotIdx == -1) {
-						throw new UnprocessableEntityException(Msg.code(1117) + "Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name.");
-					}
-
-					String resourceName = nextPath.substring(0, dotIdx);
-					try {
-						theContext.getResourceDefinition(resourceName);
-					} catch (DataFormatException e) {
-						throw new UnprocessableEntityException(Msg.code(1118) + "Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
-					}
-
-					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-						if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
-							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
-							try {
-								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
-							} catch (Exception e) {
-								String msg = theContext.getLocalizer().getMessageSanitized(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-								throw new UnprocessableEntityException(Msg.code(1119) + msg, e);
-							}
-						}
-					}
-				}
-			} else {
-				if (!isUnique && theResource.getType() != Enumerations.SearchParamType.COMPOSITE && theResource.getType() != Enumerations.SearchParamType.SPECIAL && !REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches()) {
-					throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid");
-				}
-
-				// R4 and above
-				try {
-					theContext.newFluentPath().parse(expression);
-				} catch (Exception e) {
-					throw new UnprocessableEntityException(Msg.code(1121) + "Invalid SearchParameter.expression value \"" + expression + "\": " + e.getMessage());
-				}
-
+			FhirVersionEnum fhirVersion = theContext.getVersion().getVersion();
+			if (fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+				// omitting validation for DSTU2_HL7ORG, DSTU2_1 and DSTU2
 			}
-		} // if have expression
+			else {
 
+				if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
+
+					validateExpressionPath(theResource);
+
+					String expression = getExpression(theResource);
+
+					try {
+						theContext.newFhirPath().parse(expression);
+					} catch (Exception exception) {
+						throw new UnprocessableEntityException(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"" + expression + "\": " + exception.getMessage());
+					}
+				}
+			}
+		}
+
+	}
+
+	private static void validateExpressionPath(SearchParameter theSearchParameter){
+		String expression = getExpression(theSearchParameter);
+
+		boolean isResourceOfTypeComposite = theSearchParameter.getType() == Enumerations.SearchParamType.COMPOSITE;
+		boolean isResourceOfTypeSpecial = theSearchParameter.getType() == Enumerations.SearchParamType.SPECIAL;
+		boolean expressionHasPath = REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches();
+
+		boolean isUnique = hasAnyExtensionUniqueSetTo(theSearchParameter, true);
+
+		if ( !isUnique && !isResourceOfTypeComposite && !isResourceOfTypeSpecial && !expressionHasPath ) {
+			throw new UnprocessableEntityException(Msg.code(1120) + "SearchParameter.expression value \"" + expression + "\" is invalid due to missing/incorrect path");
+		}
+
+	}
+
+	private static String getExpression(SearchParameter theSearchParameter){
+		return theSearchParameter.getExpression().trim();
+	}
+
+	private static boolean hasAnyExtensionUniqueSetTo(SearchParameter theSearchParameter, boolean theValue){
+		String theValueAsString = Boolean.toString(theValue);
+
+		return theSearchParameter
+			.getExtensionsByUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.stream()
+			.anyMatch(t-> theValueAsString.equals(t.getValueAsPrimitive().getValueAsString()));
 	}
 
 }

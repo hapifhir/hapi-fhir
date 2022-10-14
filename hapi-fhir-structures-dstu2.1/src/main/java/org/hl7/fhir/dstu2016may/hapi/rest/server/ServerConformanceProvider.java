@@ -89,7 +89,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		super(theServerConfiguration);
 	}
 
-	private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
+	private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding nextMethodBinding) {
 		if (nextMethodBinding.getRestOperationType() != null) {
 			String sysOpCode = nextMethodBinding.getRestOperationType().getCode();
 			if (sysOpCode != null) {
@@ -110,18 +110,18 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		}
 	}
 
-	private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings(RequestDetails theRequestDetails) {
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
+	private Map<String, List<BaseMethodBinding>> collectMethodBindings(RequestDetails theRequestDetails) {
+		Map<String, List<BaseMethodBinding>> resourceToMethods = new TreeMap<>();
 		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
 			String resourceName = next.getResourceName();
-			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
+			for (BaseMethodBinding nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
 					resourceToMethods.put(resourceName, new ArrayList<>());
 				}
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration(theRequestDetails).getServerBindings()) {
+		for (BaseMethodBinding nextMethodBinding : getServerConfiguration(theRequestDetails).getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
 				resourceToMethods.put(resourceName, new ArrayList<>());
@@ -208,8 +208,8 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
 		Set<String> operationNames = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings(theRequestDetails);
-		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		Map<String, List<BaseMethodBinding>> resourceToMethods = collectMethodBindings(theRequestDetails);
+		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
@@ -223,7 +223,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 
 				// Map<String, Conformance.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
 				// Conformance.RestResourceSearchParam>();
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					if (nextMethodBinding.getRestOperationType() != null) {
 						String resOpCode = nextMethodBinding.getRestOperationType().getCode();
 						if (resOpCode != null) {
@@ -307,7 +307,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					resource.addSearchInclude(nextInclude);
 				}
 			} else {
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;

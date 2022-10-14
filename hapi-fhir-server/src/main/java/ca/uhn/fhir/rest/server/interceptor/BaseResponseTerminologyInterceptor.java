@@ -32,7 +32,7 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
-public class BaseResponseTerminologyInterceptor {
+public abstract class BaseResponseTerminologyInterceptor {
 	protected final IValidationSupport myValidationSupport;
 	protected final FhirContext myContext;
 

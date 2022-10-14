@@ -27,14 +27,16 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.model.api.BasePrimitive;
+import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -42,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,25 +102,36 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadString(subscription.getChannel().getPayload());
 			retVal.setTags(extractTags(subscription));
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
 		}
 		return retVal;
 	}
 
+	private boolean extractDeleteExtensionDstu2(ca.uhn.fhir.model.dstu2.resource.Subscription theSubscription) {
+		return theSubscription.getChannel().getUndeclaredExtensionsByUrl(EX_SEND_DELETE_MESSAGES)
+			.stream()
+			.map(ExtensionDt::getValue)
+			.map(value -> (BooleanDt) value)
+			.map(BasePrimitive::getValue)
+			.findFirst()
+			.orElse(false);
+	}
+
 	/**
 	 * Extract the meta tags from the subscription and convert them to a simple string map.
+	 *
 	 * @param theSubscription The subscription to extract the tags from
 	 * @return A map of tags System:Code
 	 */
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
-		return theSubscription.getMeta().getTag()
+		Map<String, String> retVal = new HashMap<>();
+		theSubscription.getMeta().getTag()
 			.stream()
 			.filter(t -> t.getSystem() != null && t.getCode() != null)
-			.collect(Collectors.toMap(
-				IBaseCoding::getSystem,
-				IBaseCoding::getCode
-			));
+			.forEach(t -> retVal.put(t.getSystem(), t.getCode()));
+		return retVal;
 	}
 
 	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {
@@ -167,11 +182,22 @@ public class SubscriptionCanonicalizer {
 				retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
 				retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
 			}
+			retVal.setSendDeleteMessages(extractSendDeletesDstu3(subscription));
 
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(560) + theE);
 		}
 		return retVal;
+	}
+
+	private Boolean extractSendDeletesDstu3(org.hl7.fhir.dstu3.model.Subscription subscription) {
+		return subscription.getChannel().getExtensionsByUrl(EX_SEND_DELETE_MESSAGES).stream()
+			.map(org.hl7.fhir.dstu3.model.Extension::getValue)
+			.filter(val -> val instanceof org.hl7.fhir.dstu3.model.BooleanType)
+			.map(val -> (org.hl7.fhir.dstu3.model.BooleanType) val)
+			.map(org.hl7.fhir.dstu3.model.BooleanType::booleanValue)
+			.findFirst()
+			.orElse(false);
 	}
 
 	private @Nonnull
@@ -286,7 +312,7 @@ public class SubscriptionCanonicalizer {
 		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
 
 		CanonicalSubscription retVal = new CanonicalSubscription();
-		org.hl7.fhir.r5.model.Enumerations.SubscriptionState status = subscription.getStatus();
+		Enumerations.SubscriptionStatusCodes status = subscription.getStatus();
 		if (status != null) {
 			retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(status.toCode()));
 		}

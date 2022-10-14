@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4094
+title: "A previous fix resulted in Bulk Export files containing duplicate resources, which is
+   not allowed in the bulk data access IG. This has been corrected."

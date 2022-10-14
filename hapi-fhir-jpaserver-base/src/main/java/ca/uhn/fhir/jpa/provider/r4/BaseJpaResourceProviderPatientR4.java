@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
+public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Patient> {
 
 	@Autowired
 	private MemberMatcherR4Helper myMemberMatcherR4Helper;
@@ -66,7 +66,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 	/**
 	 * Patient/123/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -98,6 +98,10 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<StringType> theTypes,
+
 		@Sort
 			SortSpec theSortSpec,
 
@@ -106,7 +110,17 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -115,7 +129,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 	/**
 	 * /Patient/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -144,6 +158,10 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<StringType> theFilter,
 
+		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
+			List<StringType> theTypes,
+
 		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
 		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
 			List<IdType> theId,
@@ -156,7 +174,17 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails, toFlattenedPatientIdTokenParamList(theId));
+			PatientEverythingParameters everythingParams = new PatientEverythingParameters();
+			everythingParams.setCount(theCount);
+			everythingParams.setOffset(theOffset);
+			everythingParams.setLastUpdated(theLastUpdated);
+			everythingParams.setSort(theSortSpec);
+			everythingParams.setContent(toStringAndList(theContent));
+			everythingParams.setNarrative(toStringAndList(theNarrative));
+			everythingParams.setFilter(toStringAndList(theFilter));
+			everythingParams.setTypes(toStringAndList(theTypes));
+
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, everythingParams, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -169,7 +197,7 @@ public class BaseJpaResourceProviderPatientR4 extends JpaResourceProviderR4<Pati
 	 * Basic implementation matching by coverage id or by coverage identifier. Not matching by
 	 * Beneficiary (Patient) demographics in this version
 	 */
-	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match", idempotent = false, returnParameters = {
 		@OperationParam(name = "MemberIdentifier", typeName = "string")
 	})
 	public Parameters patientMemberMatch(

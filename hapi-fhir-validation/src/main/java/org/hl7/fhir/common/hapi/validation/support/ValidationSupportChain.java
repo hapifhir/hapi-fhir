@@ -258,6 +258,17 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public byte[] fetchBinary(String key) {
+		for (IValidationSupport next : myChain) {
+			byte[] retVal = next.fetchBinary(key);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
 		for (IValidationSupport next : myChain) {
 			IBaseResource retVal = next.fetchStructureDefinition(theUrl);

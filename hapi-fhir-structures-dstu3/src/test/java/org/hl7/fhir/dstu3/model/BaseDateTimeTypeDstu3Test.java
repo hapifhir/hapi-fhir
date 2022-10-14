@@ -68,6 +68,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
 	}
 
+	@Disabled
 	@Test
 	@Disabled
 	public void testParseMinuteShouldFail() throws DataFormatException {
@@ -80,6 +81,7 @@ public class BaseDateTimeTypeDstu3Test {
 		}
 	}
 
+	@Disabled
 	@Test
 	@Disabled
 	public void testParseMinuteZuluShouldFail() throws DataFormatException {
@@ -145,13 +147,13 @@ public class BaseDateTimeTypeDstu3Test {
 		try {
 			new DateType("2001-01-02T11:13:33");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 		try {
 			new InstantType("2001-01-02");
 			fail();
-		} catch (DataFormatException e) {
+		} catch (IllegalArgumentException e) {
 			assertThat(e.getMessage(), containsString("precision"));
 		}
 	}

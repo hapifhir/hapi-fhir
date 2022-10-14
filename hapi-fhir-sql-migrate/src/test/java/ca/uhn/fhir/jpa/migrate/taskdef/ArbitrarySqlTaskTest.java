@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -98,7 +98,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			.addTableRawSql("1", "A")
 			.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
 
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().addTasks(migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");
@@ -126,9 +126,9 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			.executeRawSql("1", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
 			.executeRawSql("2", getDriverType(), "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
-		List<BaseTask> tasks = migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0);
-		ourLog.info("Have tasks: {}", tasks);
-		getMigrator().addTasks(tasks);
+		MigrationTaskList taskList = migrator.getTaskList(VersionEnum.V3_3_0, VersionEnum.V3_6_0);
+		ourLog.info("Have tasks: {}", taskList);
+		getMigrator().addTasks(taskList);
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");

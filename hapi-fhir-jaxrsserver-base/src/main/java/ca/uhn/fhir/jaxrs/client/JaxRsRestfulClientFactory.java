@@ -1,12 +1,5 @@
 package ca.uhn.fhir.jaxrs.client;
 
-import ca.uhn.fhir.i18n.Msg;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-
 /*
  * #%L
  * HAPI FHIR JAX-RS Server
@@ -28,10 +21,20 @@ import javax.ws.rs.client.ClientBuilder;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
+import ca.uhn.fhir.rest.client.tls.TlsAuthenticationSvc;
+import ca.uhn.fhir.tls.TlsAuthentication;
+
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * A Restful Client Factory, based on Jax Rs
@@ -67,11 +70,11 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 			myNativeClient = builder.build();
 		}
 
-    if (registeredComponents != null && !registeredComponents.isEmpty()) {
-      for (Class<?> c : registeredComponents) {
-        myNativeClient = myNativeClient.register(c);
-      }
-    }
+		if (registeredComponents != null && !registeredComponents.isEmpty()) {
+			for (Class<?> c : registeredComponents) {
+			  myNativeClient = myNativeClient.register(c);
+			}
+		}
 
 		return myNativeClient;
 	}
@@ -116,8 +119,8 @@ public class JaxRsRestfulClientFactory extends RestfulClientFactory {
 	protected synchronized JaxRsHttpClient getHttpClient(String theServerBase) {
 		return new JaxRsHttpClient(getNativeClientClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
-  
-  @Override
+
+	@Override
   protected void resetHttpClient() {
     if (myNativeClient != null) 
       myNativeClient.close(); // close client to avoid memory leak

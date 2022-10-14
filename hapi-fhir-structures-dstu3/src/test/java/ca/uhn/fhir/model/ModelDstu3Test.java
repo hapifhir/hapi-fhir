@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Appointment;
@@ -159,12 +158,12 @@ public class ModelDstu3Test {
 		new InstantType("2019-01-01T00:00:00Z");
 		new InstantType("2019-01-01T00:00:00.0Z");
 		new InstantType("2019-01-01T00:00:00.000Z");
-//		try {
-//			new InstantType("2019-01-01T00:00Z");
-//			fail();
-//		} catch (DataFormatException e) {
-//			// good
-//		}
+		try {
+			new InstantType("2019-01-01T00:00Z");
+			fail();
+		} catch (IllegalArgumentException e) {
+			// good
+		}
 	}
 
 

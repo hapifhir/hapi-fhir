@@ -27,6 +27,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
 import java.util.List;
@@ -80,11 +82,6 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	}
 
 	@Override
-	public synchronized Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId) {
-		return myWrap.fetchInstanceAndMarkInProgress(theInstanceId);
-	}
-
-	@Override
 	public List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex) {
 		return myWrap.fetchInstancesByJobDefinitionIdAndStatus(theJobDefinitionId, theRequestedStatuses, thePageSize, thePageIndex);
 	}
@@ -92,6 +89,11 @@ public class SynchronizedJobPersistenceWrapper implements IJobPersistence {
 	@Override
 	public List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
 		return myWrap.fetchInstancesByJobDefinitionId(theJobDefinitionId, theCount, theStart);
+	}
+
+	@Override
+	public Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		return myWrap.fetchJobInstances(theRequest);
 	}
 
 	@Override

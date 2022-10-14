@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4051
+jira: SMILE-5169
+title: "Fixed the `$poll-export-status` endpoint so that when a job is complete, this endpoint now correctly includes the `request` and `requiresAccessToken` attributes."

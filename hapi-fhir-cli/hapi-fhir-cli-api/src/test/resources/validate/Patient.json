@@ -1,0 +1,24 @@
+{
+    "resourceType": "Patient",
+    "id": "ExamplePatientPatientFull",
+    "meta": {
+        "profile":  [
+            "https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient"
+        ]
+    },
+    "identifier":  [
+        {
+            "use": "usual",
+            "type": {
+                "coding":  [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "MR"
+                    }
+                ]
+            },
+            "system": "https://www.example.org/fhir/sid/patienten",
+            "value": "42285243"
+        }
+    ]
+}

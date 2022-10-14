@@ -7,10 +7,28 @@
 	<property name="charset" value="UTF-8"/>
 	<property name="cacheFile" value="target/cache_non_main_files"/>
 
+	<module name="SuppressionFilter">
+		<property name="file" value="src/checkstyle/checkstyle_suppressions.xml" />
+	</module>
 	<module name="TreeWalker">
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="System\.out\.println"/>
 			<property name="ignoreComments" value="true"/>
+		</module>
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="org\.jetbrains\.annotations\.NotNull"/>
+		</module>
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="org\.jetbrains\.annotations\.Nullable"/>
+		</module>
+		<!-- Should always use the Spring transactional interface, per: https://stackoverflow.com/questions/26387399/javax-transaction-transactional-vs-org-springframework-transaction-annotation-tr -->
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="javax\.transaction\.Transactional"/>
+			<property name="message"
+				value="Wrong @Transactional annotation used, use instead: org.springframework.transaction.annotation.Transactional"/>
+		</module>
+		<module name="AbstractClassName">
+			<property name="format" value="^(Base|Abstract).+$"/>
 		</module>
 	</module>
 

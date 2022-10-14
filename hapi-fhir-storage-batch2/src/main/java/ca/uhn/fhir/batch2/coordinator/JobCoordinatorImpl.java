@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
@@ -30,27 +31,32 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class JobCoordinatorImpl implements IJobCoordinator {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -67,8 +73,8 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 									  @Nonnull IChannelReceiver theWorkChannelReceiver,
 									  @Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-									  @Nonnull StepExecutionSvc theExecutorSvc
-	) {
+									  @Nonnull WorkChunkProcessor theExecutorSvc,
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		Validate.notNull(theJobPersistence);
 
 		myJobPersistence = theJobPersistence;
@@ -76,7 +82,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		myWorkChannelReceiver = theWorkChannelReceiver;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 
-		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc);
+		myReceiverHandler = new WorkChannelMessageHandler(theJobPersistence, theJobDefinitionRegistry, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
 		myJobQuerySvc = new JobQuerySvc(theJobPersistence, theJobDefinitionRegistry);
 		myJobParameterJsonValidator = new JobParameterJsonValidator();
 	}
@@ -93,28 +99,24 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
-			FetchJobInstancesRequest request = new FetchJobInstancesRequest(
-				theStartRequest.getJobDefinitionId(), theStartRequest.getParameters()
+			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(),
+				StatusEnum.QUEUED,
+				StatusEnum.IN_PROGRESS,
+				StatusEnum.COMPLETED
 			);
-			request.addStatus(StatusEnum.QUEUED);
-			request.addStatus(StatusEnum.IN_PROGRESS);
-			request.addStatus(StatusEnum.COMPLETED);
 
-			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 1, 1000);
+			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
 				// we'll look for completed ones first... otherwise, take any of the others
-				Collections.sort(existing, new Comparator<JobInstance>() {
-					@Override
-					public int compare(JobInstance o1, JobInstance o2) {
-						return -(o1.getStatus().ordinal() - o2.getStatus().ordinal());
-					}
-				});
+				Collections.sort(existing, (o1, o2) -> -(o1.getStatus().ordinal() - o2.getStatus().ordinal()));
 
 				JobInstance first = existing.stream().findFirst().get();
 
 				Batch2JobStartResponse response = new Batch2JobStartResponse();
 				response.setJobId(first.getInstanceId());
 				response.setUsesCachedResult(true);
+
+				ourLog.info("Reusing cached {} job with status {} and id {}", first.getJobDefinitionId(), first.getStatus(), first.getInstanceId());
 
 				return response;
 			}
@@ -127,6 +129,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		instance.setStatus(StatusEnum.QUEUED);
 
 		String instanceId = myJobPersistence.storeNewInstance(instance);
+		ourLog.info("Stored new {} job {} with status {} and parameters {}", jobDefinition.getJobDefinitionId(), instanceId, instance.getStatus(), instance.getParameters());
 
 		BatchWorkChunk batchWorkChunk = BatchWorkChunk.firstChunk(jobDefinition, instanceId);
 		String chunkId = myJobPersistence.storeWorkChunk(batchWorkChunk);
@@ -157,6 +160,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public List<JobInstance> getInstancesbyJobDefinitionIdAndEndedStatus(String theJobDefinitionId, @Nullable Boolean theEnded, int theCount, int theStart) {
 		return myJobQuerySvc.getInstancesByJobDefinitionIdAndEndedStatus(theJobDefinitionId, theEnded, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionIdAndStatuses(String theJobDefinitionId, Set<StatusEnum> theStatuses, int theCount, int theStart) {
+		return myJobQuerySvc.getInstancesByJobDefinitionAndStatuses(theJobDefinitionId, theStatuses, theCount, theStart);
+	}
+
+	@Override
+	public List<JobInstance> getJobInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart) {
+		return getJobInstancesByJobDefinitionIdAndStatuses(theJobDefinitionId, new HashSet<>(Arrays.asList(StatusEnum.values())), theCount, theStart);
+	}
+
+	@Override
+	public Page<JobInstance> fetchAllJobInstances(JobInstanceFetchRequest theFetchRequest) {
+		return myJobQuerySvc.fetchAllInstances(theFetchRequest);
 	}
 
 	@Override

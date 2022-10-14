@@ -303,7 +303,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -537,7 +537,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -595,7 +595,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -627,7 +627,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -1292,6 +1292,23 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertThat(toOperationNames(groupResource.getOperation()),containsInAnyOrder("export", "export-poll-status"));
 	}
 
+	@Test
+	public void testOperationReturningCanonicalUrl() throws Exception {
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setProviders(new ProviderWithOperationReturningCanonicalUrl());
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs) {};
+		rs.setServerConformanceProvider(sc);
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		List<CapabilityStatementRestResourceOperationComponent> res = conformance.getRest().get(0).getResource().get(1).getOperation();
+		assertEquals(1, res.size());
+		CapabilityStatementRestResourceOperationComponent operationComponent = res.get(0);
+		assertEquals("everything", operationComponent.getName());
+		assertEquals("http://hl7.org/fhir/OperationDefinition/Patient-everything", operationComponent.getDefinition());
+	}
+
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (CapabilityStatementRestResourceOperationComponent next : theOperation) {
@@ -1532,6 +1549,19 @@ public class ServerCapabilityStatementProviderR4Test {
 			return null;
 		}
 
+	}
+
+	public static class ProviderWithOperationReturningCanonicalUrl implements IResourceProvider {
+		@Operation(name = "everything", canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true)
+		public IBundleProvider everything(HttpServletRequest theServletRequest, @IdParam IdType theId,
+													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
 	}
 
 	@SuppressWarnings("unused")

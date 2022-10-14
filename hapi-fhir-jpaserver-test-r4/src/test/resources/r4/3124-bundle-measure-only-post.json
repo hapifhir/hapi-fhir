@@ -1,0 +1,131 @@
+{
+  "resourceType": "Bundle",
+  "id": "EXM104-8.2.000-bundle",
+  "type": "transaction",
+  "entry": [ {
+    "resource": {
+      "resourceType": "Measure",
+      "id": "measure-EXM104-8.2.000",
+      "meta": {
+        "profile": [ "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm" ]
+      },
+      "extension": [ {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-populationBasis",
+        "valueCode": "boolean"
+      }, {
+        "url": "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-softwaresystem",
+        "valueReference": {
+          "reference": "#cqf-tooling"
+        }
+      } ],
+      "url": "http://hl7.org/fhir/us/cqfmeasures/Measure/EXM104",
+      "identifier": [ {
+        "use": "official",
+        "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+        "value": "104"
+      } ],
+      "version": "8.2.000",
+      "name": "EXM104",
+      "title": "Discharged on Antithrombotic Therapy",
+      "status": "active",
+      "experimental": true,
+      "date": "2018-09-17",
+      "publisher": "The Joint Commission",
+      "contact": [ {
+        "telecom": [ {
+          "system": "url",
+          "value": "https://www.jointcommission.org/en/"
+        } ]
+      } ],
+      "description": "Ischemic stroke patients prescribed or continuing to take antithrombotic therapy at hospital discharge",
+      "useContext": [ {
+        "code": {
+          "code": "program"
+        },
+        "valueCodeableConcept": {
+          "text": "eligible-provider"
+        }
+      } ],
+      "jurisdiction": [ {
+        "coding": [ {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        } ]
+      } ],
+      "relatedArtifact": [ {
+        "type": "citation",
+        "citation": "Adams HP, del Zoppo G, Alberts MJ, Bhatt DL, Brass L, Furlan A, Grubb RL, Higashida RT, Jauch EC, Kidwell C, Lyden PD, Morgenstern LB, Qureshi AI, Rosenwasser RH, Scott PA, Wijdicks E. Guidelines for the Early Management of Adults with Ischemic Stroke: A Guideline From the American Heart Association/American Stroke Association Stroke Council, Clinical CardiologyCouncil, Cardiovascular Radiology and Intervention Council, and the Atherosclerotic Peripheral Vascular Disease and Quality of Care Outcomes in Research Interdisciplinary Working Groups. Stroke. 2007;38:1655-1711."
+      }, {
+        "type": "depends-on",
+        "resource": "Library/library-FHIRHelpers-4.0.1"
+      }, {
+        "type": "depends-on",
+        "resource": "Library/library-MATGlobalCommonFunctions-5.0.000"
+      }, {
+        "type": "depends-on",
+        "resource": "Library/library-SupplementalDataElements-2.0.0"
+      }, {
+        "type": "depends-on",
+        "resource": "Library/library-TJCOverall-5.0.000"
+      } ],
+      "library": [ "Library/library-EXM104-8.2.000" ],
+      "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
+      "scoring": {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/measure-scoring",
+          "code": "proportion"
+        } ]
+      },
+      "type": [ {
+        "coding": [ {
+          "system": "http://hl7.org/fhir/measure-type",
+          "code": "process"
+        } ]
+      } ],
+      "rationale": "The effectiveness of antithrombotic agents in reducing stroke.",
+      "clinicalRecommendationStatement": "Clinical trial results suggest that antithrombotic therapy should be prescribed at discharge following acute ischemic stroke to reduce stroke mortality and morbidity as long as no contraindications exist",
+      "improvementNotation": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+          "code": "increase"
+        } ]
+      },
+      "guidance": "The \"Non-elective Inpatient Encounter\" value set intends to capture all non-scheduled hospitalizations. This value set is a subset of the \"Inpatient encounter\" value set, excluding concepts that specifically refer to elective hospital admissions. Non-elective admissions include emergency, urgent and unplanned admissions.\n\nThe \"Medication, Discharge\" datatype refers to the discharge medication list and is intended to express medications ordered for post-discharge use.",
+      "group": [ {
+        "id": "group-1",
+        "population": [ {
+          "code": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+              "code": "initial-population",
+              "display": "Initial Population"
+            } ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Initial Population"
+          }
+        } ]
+      } ],
+      "supplementalData": [ {
+        "code": {
+          "text": "sde-ethnicity"
+        },
+        "usage": [ {
+          "coding": [ {
+            "system": "http://hl7.org/fhir/measure-data-usage",
+            "code": "supplemental-data"
+          } ]
+        } ],
+        "criteria": {
+          "language": "text/cql",
+          "expression": "SDE Ethnicity"
+        }
+      } ]
+    },
+    "request": {
+      "method": "PUT",
+      "url": "Measure/measure-EXM104-8.2.000"
+    }
+  } ]
+}

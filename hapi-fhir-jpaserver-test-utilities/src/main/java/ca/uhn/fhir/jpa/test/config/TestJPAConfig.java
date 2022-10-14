@@ -20,11 +20,16 @@ package ca.uhn.fhir.jpa.test.config;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.submit.config.SearchParamSubmitterConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
@@ -32,8 +37,6 @@ import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -47,7 +50,9 @@ import javax.persistence.EntityManagerFactory;
 @Import({
 	SubscriptionSubmitterConfig.class,
 	SubscriptionProcessorConfig.class,
-	SubscriptionChannelConfig.class
+	SubscriptionChannelConfig.class,
+	SearchParamSubmitterConfig.class,
+	ThreadPoolFactoryConfig.class
 })
 public class TestJPAConfig {
 	@Bean
@@ -72,13 +77,9 @@ public class TestJPAConfig {
 		return config;
 	}
 
-	/*
-	Please do not rename this bean to "transactionManager()" as this will conflict with the transactionManager
-	provided by Spring Batch.
-	 */
 	@Bean
 	@Primary
-	public JpaTransactionManager hapiTransactionManager(EntityManagerFactory entityManagerFactory) {
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
@@ -97,13 +98,8 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public BatchJobHelper batchJobHelper(JobExplorer theJobExplorer) {
-		return new BatchJobHelper(theJobExplorer);
-	}
-
-	@Bean
-	public Batch2JobHelper batch2JobHelper() {
-		return new Batch2JobHelper();
+	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
+		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
 	}
 
 	@Bean

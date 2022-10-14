@@ -1,0 +1,6 @@
+---
+type: add
+issue: 3243
+backport: 6.0.4
+title: "Previously, the `http://hapifhir.io/fhir/StructureDefinition/subscription-send-delete-messages` extension on REST-HOOK subscription channel element was only valid for R4. This has been expanded to support DSTU3 and DSTU2."
+

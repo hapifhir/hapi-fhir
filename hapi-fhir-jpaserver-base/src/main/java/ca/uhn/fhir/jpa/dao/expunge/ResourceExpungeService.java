@@ -41,7 +41,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
@@ -116,7 +116,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
+	private IResourceHistoryProvenanceDao myResourceHistoryProvenanceTableDao;
 	@Autowired
 	private ISearchParamPresentDao mySearchParamPresentDao;
 	@Autowired
@@ -258,7 +258,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
 		deleteAllSearchParams(new ResourcePersistentId(resource.getResourceId()));
-		resource.getTags().clear();
+
+		myResourceTagDao.deleteByResourceId(resource.getId());
 
 		if (resource.getForcedId() != null) {
 			ForcedId forcedId = resource.getForcedId();
@@ -310,10 +311,6 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		}
 		if (resource == null || resource.isHasLinks()) {
 			myResourceLinkDao.deleteByResourceId(theResourceId.getIdAsLong());
-		}
-
-		if (resource == null || resource.isHasTags()) {
-			myResourceTagDao.deleteByResourceId(theResourceId.getIdAsLong());
 		}
 	}
 

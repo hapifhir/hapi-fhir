@@ -100,7 +100,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
 	private boolean myRestResourceRevIncludesEnabled = DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED;
-
+	private HashMap<String, String> operationCanonicalUrlToId = new HashMap<>();
 	/**
 	 * Constructor
 	 */
@@ -134,7 +134,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		myValidationSupport = theValidationSupport;
 	}
 
-	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding<?> theMethodBinding) {
+	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding theMethodBinding) {
 		RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
 		if (restOperationType.isSystemLevel()) {
 			String sysOp = restOperationType.getCode();
@@ -236,15 +236,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		Set<String> systemOps = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
+		Map<String, List<BaseMethodBinding>> resourceToMethods = configuration.collectMethodBindings();
 		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
-		List<BaseMethodBinding<?>> globalMethodBindings = configuration.getGlobalBindings();
+		List<BaseMethodBinding> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
 		TreeMultimap<String, String> resourceNameToRevIncludes = TreeMultimap.create();
-		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 			String resourceName = nextEntry.getKey();
-			for (BaseMethodBinding<?> nextMethod : nextEntry.getValue()) {
+			for (BaseMethodBinding nextMethod : nextEntry.getValue()) {
 				if (nextMethod instanceof SearchMethodBinding) {
 					resourceNameToIncludes.putAll(resourceName, nextMethod.getIncludes());
 					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
@@ -253,7 +253,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		}
 
-		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
 
 			Set<String> operationNames = new HashSet<>();
 			String resourceName = nextEntry.getKey();
@@ -273,7 +273,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				terser.addElement(resource, "type", def.getName());
 				terser.addElement(resource, "profile", def.getResourceProfile(serverBase));
 
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					RestOperationTypeEnum resOpCode = nextMethodBinding.getRestOperationType();
 					if (resOpCode.isTypeLevel() || resOpCode.isInstanceLevel()) {
 						String resOp;
@@ -358,7 +358,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// global flag set to true, meaning they apply to all resource types)
 				if (globalMethodBindings != null) {
 					Set<String> globalOperationNames = new HashSet<>();
-					for (BaseMethodBinding<?> next : globalMethodBindings) {
+					for (BaseMethodBinding next : globalMethodBindings) {
 						if (next instanceof OperationMethodBinding) {
 							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 							if (methodBinding.isGlobalMethod()) {
@@ -415,7 +415,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					
+
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}
@@ -482,7 +482,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				}
 
 			} else {
-				for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
+				for (BaseMethodBinding nextMethodBinding : nextEntry.getValue()) {
 					checkBindingForSystemOps(terser, rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
@@ -507,7 +507,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		// global flag set to true, meaning they apply to all resource types)
 		if (globalMethodBindings != null) {
 			Set<String> globalOperationNames = new HashSet<>();
-			for (BaseMethodBinding<?> next : globalMethodBindings) {
+			for (BaseMethodBinding next : globalMethodBindings) {
 				if (next instanceof OperationMethodBinding) {
 					OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 					if (methodBinding.isGlobalMethod()) {
@@ -554,7 +554,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
-		theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		String operationCanonicalUrl = theMethodBinding.getCanonicalUrl();
+		if (isNotBlank(operationCanonicalUrl)) {
+			theTerser.addElement(theOperation, "definition", operationCanonicalUrl);
+			operationCanonicalUrlToId.put(operationCanonicalUrl, theOpName);
+		}
+		else {
+			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		}
 		if (isNotBlank(theMethodBinding.getDescription())) {
 			theTerser.addElement(theOperation, "documentation", theMethodBinding.getDescription());
 		}
@@ -633,8 +640,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
-
-		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(theId.getIdPart());
+		String operationId = getOperationId(theId);
+		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(operationId);
 		if (operationBindings != null && !operationBindings.isEmpty()) {
 			return readOperationDefinitionForOperation(theRequestDetails, bindings, operationBindings);
 		}
@@ -644,6 +651,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
 		throw new ResourceNotFoundException(Msg.code(1978) + theId);
+	}
+
+	private String getOperationId(IIdType theId) {
+		if (operationCanonicalUrlToId.get(theId.getValue()) !=null ) {
+			return operationCanonicalUrlToId.get(theId.getValue());
+		}
+		return theId.getIdPart();
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {

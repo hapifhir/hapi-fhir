@@ -20,13 +20,11 @@ package ca.uhn.fhir.jpa.mdm.broker;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.svc.IMdmModelConverterSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmResourceFilteringSvc;
@@ -56,8 +54,6 @@ public class MdmMessageHandler implements MessageHandler {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
-	private MdmLinkDaoSvc myMdmLinkDaoSvc;
-	@Autowired
 	private MdmMatchLinkSvc myMdmMatchLinkSvc;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -81,8 +77,11 @@ public class MdmMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			if (myMdmResourceFilteringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
-				matchMdmAndUpdateLinks(msg);
+
+			IBaseResource sourceResource = msg.getNewPayload(myFhirContext);
+
+			if (myMdmResourceFilteringSvc.shouldBeProcessed((IAnyResource) sourceResource)) {
+				matchMdmAndUpdateLinks(sourceResource, msg);
 			}
 		} catch (TooManyCandidatesException e) {
 			ourLog.error(e.getMessage(), e);
@@ -93,18 +92,27 @@ public class MdmMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void matchMdmAndUpdateLinks(ResourceModifiedMessage theMsg) {
-		String resourceType = theMsg.getPayloadId(myFhirContext).getResourceType();
+	private void matchMdmAndUpdateLinks(IBaseResource theSourceResource, ResourceModifiedMessage theMsg) {
+
+		String resourceType = theSourceResource.getIdElement().getResourceType();
 		validateResourceType(resourceType);
+
+		if (myInterceptorBroadcaster.hasHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED)){
+			HookParams params = new HookParams().add(IBaseResource.class, theSourceResource);
+			myInterceptorBroadcaster.callHooks(Pointcut.MDM_BEFORE_PERSISTED_RESOURCE_CHECKED, params);
+		}
+
+		theSourceResource.setUserData(Constants.RESOURCE_PARTITION_ID, theMsg.getPartitionId());
+
 		MdmTransactionContext mdmContext = createMdmContext(theMsg, resourceType);
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
-					handleCreateResource(theMsg, mdmContext);
+					handleCreateResource(theSourceResource, mdmContext);
 					break;
 				case UPDATE:
 				case MANUALLY_TRIGGERED:
-					handleUpdateResource(theMsg, mdmContext);
+					handleUpdateResource(theSourceResource, mdmContext);
 					break;
 				case DELETE:
 				default:
@@ -115,21 +123,10 @@ public class MdmMessageHandler implements MessageHandler {
 			mdmContext.addTransactionLogMessage(e.getMessage());
 		} finally {
 			// Interceptor call: MDM_AFTER_PERSISTED_RESOURCE_CHECKED
-			IBaseResource targetResource = theMsg.getPayload(myFhirContext);
-			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
-			outgoingMsg.setTransactionId(theMsg.getTransactionId());
-
-			MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
-			mdmContext.getMdmLinks()
-				.stream()
-				.forEach(l -> {
-					linkChangeEvent.addMdmLink(myModelConverter.toJson((MdmLink) l));
-				});
-
 			HookParams params = new HookParams()
-				.add(ResourceOperationMessage.class, outgoingMsg)
+				.add(ResourceOperationMessage.class, getOutgoingMessage(theMsg))
 				.add(TransactionLogMessages.class, mdmContext.getTransactionLogMessages())
-				.add(MdmLinkEvent.class, linkChangeEvent);
+				.add(MdmLinkEvent.class, buildLinkChangeEvent(mdmContext));
 
 			myInterceptorBroadcaster.callHooks(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
@@ -162,27 +159,36 @@ public class MdmMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleCreateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
+	private void handleCreateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
 	}
 
-	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
-		IBaseResource newPayload = theMsg.getNewPayload(myFhirContext);
-		newPayload.setUserData(Constants.RESOURCE_PARTITION_ID, theMsg.getPartitionId());
-		return (IAnyResource) newPayload;
-	}
-
-	private void handleUpdateResource(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
-	}
-
-	private void log(MdmTransactionContext theMdmContext, String theMessage) {
-		theMdmContext.addTransactionLogMessage(theMessage);
-		ourLog.debug(theMessage);
+	private void handleUpdateResource(IBaseResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource((IAnyResource)theResource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmContext, String theMessage, Exception theException) {
 		theMdmContext.addTransactionLogMessage(theMessage);
 		ourLog.error(theMessage, theException);
 	}
+
+	private MdmLinkEvent buildLinkChangeEvent(MdmTransactionContext theMdmContext) {
+		MdmLinkEvent linkChangeEvent = new MdmLinkEvent();
+		theMdmContext.getMdmLinks()
+			.stream()
+			.forEach(l -> {
+				linkChangeEvent.addMdmLink(myModelConverter.toJson(l));
+			});
+
+		return linkChangeEvent;
+	}
+
+	private ResourceOperationMessage getOutgoingMessage(ResourceModifiedMessage theMsg) {
+		IBaseResource targetResource = theMsg.getPayload(myFhirContext);
+		ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, targetResource, theMsg.getOperationType());
+		outgoingMsg.setTransactionId(theMsg.getTransactionId());
+
+		return outgoingMsg;
+	}
+
 }

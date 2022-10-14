@@ -192,6 +192,10 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_PATIENT = "patient";
 
 	/**
 	 * Parameter for the $import operation
@@ -266,6 +270,8 @@ public class JpaConstants {
 	 * Parameters for the rewrite history operation
 	 */
 	public static final String HEADER_REWRITE_HISTORY = "X-Rewrite-History";
+
+	public static final String SKIP_REINDEX_ON_UPDATE = "SKIP-REINDEX-ON-UPDATE";
 
 	/**
 	 * Non-instantiable

@@ -26,8 +26,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -43,6 +46,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -106,8 +110,6 @@ public class BulkImportCommand extends BaseCommand {
 
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException, ExecutionException {
-		ourEndNow = false;
-
 		parseFhirContext(theCommandLine);
 
 		String baseDirectory = theCommandLine.getOptionValue(SOURCE_DIRECTORY);
@@ -129,7 +131,7 @@ public class BulkImportCommand extends BaseCommand {
 
 		String targetBaseUrl = theCommandLine.getOptionValue(TARGET_BASE);
 		ourLog.info("Initiating bulk import against server: {}", targetBaseUrl);
-		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT);
+		IGenericClient client = newClient(theCommandLine, TARGET_BASE, BASIC_AUTH_PARAM, BEARER_TOKEN_PARAM_LONGOPT, TLS_AUTH_PARAM_LONGOPT);
 		client.registerInterceptor(new LoggingInterceptor(false));
 
 		IBaseParameters request = createRequest(sourceBaseUrl, indexes, resourceTypes);
@@ -143,14 +145,46 @@ public class BulkImportCommand extends BaseCommand {
 			.execute();
 
 		ourLog.info("Got response: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been downloaded.");
+		ourLog.info("Bulk import is now running. Do not terminate this command until all files have been uploaded.");
+
+		checkJobComplete(outcome.getIdElement().toString(), client);
+	}
+
+	private void checkJobComplete(String url, IGenericClient client) {
+		String jobId = url.substring(url.indexOf("=") + 1);
 
 		while (true) {
-			if (ourEndNow) {
+			MethodOutcome response;
+			// handle NullPointerException
+			if (jobId == null) {
+				ourLog.error("The jobId cannot be null.");
 				break;
 			}
-		}
 
+			try {
+				response = client
+					.operation()
+					.onServer()
+					.named(JpaConstants.OPERATION_IMPORT_POLL_STATUS)
+					.withSearchParameter(Parameters.class, "_jobId", new StringParam(jobId))
+					.returnMethodOutcome()
+					.execute();
+			} catch (InternalErrorException e){
+				// handle ERRORED status
+				ourLog.error(e.getMessage());
+				break;
+			}
+
+			if (response.getResponseStatusCode() == 200) {
+				break;
+			} else if (response.getResponseStatusCode() == 202){
+				// still in progress
+				continue;
+			}
+			else {
+				throw new InternalErrorException(Msg.code(2138) + "Unexpected response status code: " + response.getResponseStatusCode() + ".");
+			}
+		}
 	}
 
 	@Nonnull
@@ -250,10 +284,6 @@ public class BulkImportCommand extends BaseCommand {
 		} catch (IOException e) {
 			throw new CommandFailureException(Msg.code(2059) + e.getMessage(), e);
 		}
-	}
-
-	public static void setEndNowForUnitTest(boolean theEndNow) {
-		ourEndNow = theEndNow;
 	}
 
 }

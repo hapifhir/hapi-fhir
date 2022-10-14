@@ -24,9 +24,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
@@ -41,16 +44,19 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.SearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toPredicateArray;
 
 
 /**
@@ -90,19 +96,20 @@ public class HistoryBuilder {
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
 		criteriaQuery.select(cb.count(from));
 
-		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from);
+		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, null);
 
 		TypedQuery<Long> query = myEntityManager.createQuery(criteriaQuery);
 		return query.getSingleResult();
 	}
 
 	@SuppressWarnings("OptionalIsPresent")
-	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, Integer theOffset, int theFromIndex, int theToIndex) {
+	public List<ResourceHistoryTable> fetchEntities(RequestPartitionId thePartitionId, Integer theOffset, int theFromIndex,
+																	int theToIndex, HistorySearchStyleEnum theHistorySearchStyle) {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<ResourceHistoryTable> criteriaQuery = cb.createQuery(ResourceHistoryTable.class);
 		Root<ResourceHistoryTable> from = criteriaQuery.from(ResourceHistoryTable.class);
 
-		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from);
+		addPredicatesToQuery(cb, thePartitionId, criteriaQuery, from, theHistorySearchStyle);
 
 		from.fetch("myProvenance", JoinType.LEFT);
 
@@ -121,15 +128,16 @@ public class HistoryBuilder {
 		List<ResourceHistoryTable> tables = query.getResultList();
 		if (tables.size() > 0) {
 			ImmutableListMultimap<Long, ResourceHistoryTable> resourceIdToHistoryEntries = Multimaps.index(tables, ResourceHistoryTable::getResourceId);
-
-			Map<Long, Optional<String>> pidToForcedId = myIdHelperService.translatePidsToForcedIds(resourceIdToHistoryEntries.keySet());
-			ourLog.trace("Translated IDs: {}", pidToForcedId);
+			Set<ResourcePersistentId> pids  = resourceIdToHistoryEntries.keySet().stream().map(t-> new ResourcePersistentId(t)).collect(Collectors.toSet());
+			PersistentIdToForcedIdMap pidToForcedId = myIdHelperService.translatePidsToForcedIds(pids);
+			ourLog.trace("Translated IDs: {}", pidToForcedId.getResourcePersistentIdOptionalMap());
 
 			for (Long nextResourceId : resourceIdToHistoryEntries.keySet()) {
 				List<ResourceHistoryTable> historyTables = resourceIdToHistoryEntries.get(nextResourceId);
 
 				String resourceId;
-				Optional<String> forcedId = pidToForcedId.get(nextResourceId);
+
+				Optional<String> forcedId = pidToForcedId.get(new ResourcePersistentId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
 				} else {
@@ -145,7 +153,8 @@ public class HistoryBuilder {
 		return tables;
 	}
 
-	private void addPredicatesToQuery(CriteriaBuilder theCriteriaBuilder, RequestPartitionId thePartitionId, CriteriaQuery<?> theQuery, Root<ResourceHistoryTable> theFrom) {
+	private void addPredicatesToQuery(CriteriaBuilder theCriteriaBuilder, RequestPartitionId thePartitionId, CriteriaQuery<?> theQuery,
+												 Root<ResourceHistoryTable> theFrom, HistorySearchStyleEnum theHistorySearchStyle) {
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (!thePartitionId.isAllPartitions()) {
@@ -171,7 +180,11 @@ public class HistoryBuilder {
 		}
 
 		if (myRangeStartInclusive != null) {
-			predicates.add(theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeStartInclusive));
+			if(HistorySearchStyleEnum.AT == theHistorySearchStyle && myResourceId != null) {
+				addPredicateForAtQueryParameter(theCriteriaBuilder, theQuery, theFrom, predicates);
+			} else {
+				predicates.add(theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeStartInclusive));
+			}
 		}
 		if (myRangeEndInclusive != null) {
 			predicates.add(theCriteriaBuilder.lessThanOrEqualTo(theFrom.get("myUpdated").as(Date.class), myRangeEndInclusive));
@@ -180,6 +193,23 @@ public class HistoryBuilder {
 		if (predicates.size() > 0) {
 			theQuery.where(toPredicateArray(predicates));
 		}
+	}
+
+	private void addPredicateForAtQueryParameter(CriteriaBuilder theCriteriaBuilder, CriteriaQuery<?> theQuery,
+															  Root<ResourceHistoryTable> theFrom, List<Predicate> thePredicates) {
+		Subquery<Date> pastDateSubQuery = theQuery.subquery(Date.class);
+		Root<ResourceHistoryTable> subQueryResourceHistory = pastDateSubQuery.from(ResourceHistoryTable.class);
+		Expression<Date> myUpdatedMostRecent = theCriteriaBuilder.max(subQueryResourceHistory.get("myUpdated")).as(Date.class);
+		Expression<Date> myUpdatedMostRecentOrDefault = theCriteriaBuilder.coalesce(myUpdatedMostRecent,
+			theCriteriaBuilder.literal(myRangeStartInclusive));
+
+		pastDateSubQuery.select(myUpdatedMostRecentOrDefault)
+			.where(theCriteriaBuilder.lessThanOrEqualTo(subQueryResourceHistory.get("myUpdated").as(Date.class), myRangeStartInclusive)
+			, theCriteriaBuilder.equal(subQueryResourceHistory.get("myResourceId"), myResourceId));
+
+		Predicate updatedDatePredicate = theCriteriaBuilder.greaterThanOrEqualTo(theFrom.get("myUpdated").as(Date.class),
+			pastDateSubQuery);
+		thePredicates.add(updatedDatePredicate);
 	}
 
 	private void validateNotSearchingAllPartitions(RequestPartitionId thePartitionId) {

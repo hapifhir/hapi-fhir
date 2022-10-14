@@ -26,7 +26,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nullable;
 
-public class ReadPartitionIdRequestDetails {
+public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 
 	private final String myResourceType;
 	private final RestOperationTypeEnum myRestOperationType;
@@ -66,6 +66,8 @@ public class ReadPartitionIdRequestDetails {
 	public IBaseResource getConditionalTargetOrNull() {
 		return myConditionalTargetOrNull;
 	}
+
+
 
 	public static ReadPartitionIdRequestDetails forSearchType(String theResourceType, Object theParams, IBaseResource theConditionalOperationTargetOrNull) {
 		return new ReadPartitionIdRequestDetails(theResourceType, RestOperationTypeEnum.SEARCH_TYPE, null, theParams, theConditionalOperationTargetOrNull);

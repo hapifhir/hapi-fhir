@@ -26,6 +26,8 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.MarkWorkChunkAsErrorRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import org.springframework.data.domain.Page;
 
 import java.util.Iterator;
 import java.util.List;
@@ -84,14 +86,6 @@ public interface IJobPersistence {
 	 */
 	List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex);
 
-	/**
-	 * Fetch a given instance and update the stored status
-	 * * to {@link ca.uhn.fhir.batch2.model.StatusEnum#IN_PROGRESS}
-	 *
-	 * @param theInstanceId The ID
-	 */
-	Optional<JobInstance> fetchInstanceAndMarkInProgress(String theInstanceId);
-
 	List<JobInstance> fetchInstancesByJobDefinitionIdAndStatus(String theJobDefinitionId, Set<StatusEnum> theRequestedStatuses, int thePageSize, int thePageIndex);
 
 	/**
@@ -102,6 +96,15 @@ public interface IJobPersistence {
 	 * @return
 	 */
 	List<JobInstance> fetchInstancesByJobDefinitionId(String theJobDefinitionId, int theCount, int theStart);
+
+	/**
+	 * Fetches all job instances based on the JobFetchRequest
+	 * @param theRequest - the job fetch request
+	 * @return - a page of job instances
+	 */
+	default Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest) {
+		return Page.empty();
+	}
 
 	/**
 	 * Marks a given chunk as having errored (i.e. may be recoverable)

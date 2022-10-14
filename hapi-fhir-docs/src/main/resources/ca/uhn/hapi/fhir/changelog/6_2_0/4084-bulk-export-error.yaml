@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4084
+jira: SMILE-5220
+title: "Previously, the `error` segment of the `$poll-export-status` operation was missing. This has now been added."
