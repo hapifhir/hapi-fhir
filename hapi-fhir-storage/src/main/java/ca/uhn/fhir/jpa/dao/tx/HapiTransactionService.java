@@ -46,17 +46,16 @@ import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import java.util.concurrent.Callable;
 
 public class HapiTransactionService {
 
@@ -82,26 +81,10 @@ public class HapiTransactionService {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
-	@VisibleForTesting
-	public void setTransactionManager(PlatformTransactionManager theTransactionManager) {
-		myTransactionManager = theTransactionManager;
-	}
-
 	@PostConstruct
 	public void start() {
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
 		myCustomIsolationSupported = isCustomIsolationSupported();
-	}
-
-
-	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
-		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
-		ourRequestPartition.set(RequestPartitionId.defaultPartition());
-		try {
-				return theCallback.call();
-		} finally {
-			ourRequestPartition.set(previousRequestPartitionId);
-		}
 	}
 
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
@@ -149,75 +132,75 @@ public class HapiTransactionService {
 		}
 
 		try {
-		for (int i = 0; ; i++) {
-			try {
+			for (int i = 0; ; i++) {
+				try {
 
 					if (thePropagation == Propagation.REQUIRED && theIsolation == Isolation.DEFAULT) {
-				return doExecuteCallback(theCallback);
+						return doExecuteCallback(theCallback);
 					} else {
 						return doExecuteCallbackReqNew(theCallback, thePropagation, theIsolation);
 					}
 
-			} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
-				ourLog.debug("Version conflict detected", e);
+				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+					ourLog.debug("Version conflict detected", e);
 
-				if (theOnRollback != null) {
-					theOnRollback.run();
-				}
-
-				int maxRetries = 0;
-
-				/*
-				 * If two client threads both concurrently try to add the same tag that isn't
-				 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-				 * which is the tag definition table. In that case, a constraint error will be
-				 * thrown by one of the client threads, so we auto-retry in order to avoid
-				 * annoying spurious failures for the client.
-				 */
-				if (DaoFailureUtil.isTagStorageFailure(e)) {
-					maxRetries = 3;
-				}
-
-				if (maxRetries == 0) {
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
-					if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-						maxRetries = conflictResolutionStrategy.getMaxRetries();
+					if (theOnRollback != null) {
+						theOnRollback.run();
 					}
-				}
 
-				if (i < maxRetries) {
-						if (theTransactionDetails != null) {
-					theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
-					theTransactionDetails.clearRollbackUndoActions();
-					theTransactionDetails.clearResolvedItems();
-					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-					theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+					int maxRetries = 0;
+
+					/*
+					 * If two client threads both concurrently try to add the same tag that isn't
+					 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+					 * which is the tag definition table. In that case, a constraint error will be
+					 * thrown by one of the client threads, so we auto-retry in order to avoid
+					 * annoying spurious failures for the client.
+					 */
+					if (DaoFailureUtil.isTagStorageFailure(e)) {
+						maxRetries = 3;
+					}
+
+					if (maxRetries == 0) {
+						HookParams params = new HookParams()
+							.add(RequestDetails.class, theRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+							maxRetries = conflictResolutionStrategy.getMaxRetries();
 						}
-					double sleepAmount = (250.0d * i) * Math.random();
-					long sleepAmountLong = (long) sleepAmount;
-					TestUtil.sleepAtLeast(sleepAmountLong, false);
+					}
 
-					ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-					continue;
+					if (i < maxRetries) {
+						if (theTransactionDetails != null) {
+							theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+							theTransactionDetails.clearRollbackUndoActions();
+							theTransactionDetails.clearResolvedItems();
+							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						}
+						double sleepAmount = (250.0d * i) * Math.random();
+						long sleepAmountLong = (long) sleepAmount;
+						TestUtil.sleepAtLeast(sleepAmountLong, false);
+
+						ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+						continue;
+					}
+
+					IBaseOperationOutcome oo = null;
+					if (e instanceof ResourceVersionConflictException) {
+						oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+					}
+
+					if (maxRetries > 0) {
+						String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+						ourLog.info(msg, maxRetries);
+						throw new ResourceVersionConflictException(Msg.code(549) + msg);
+					}
+
+					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 				}
-
-				IBaseOperationOutcome oo = null;
-				if (e instanceof ResourceVersionConflictException) {
-					oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-				}
-
-				if (maxRetries > 0) {
-					String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-					ourLog.info(msg, maxRetries);
-					throw new ResourceVersionConflictException(Msg.code(549) + msg);
-				}
-
-				throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
 			}
-		}
 		} finally {
 			if (theRequestPartitionId != null) {
 				ourRequestPartition.set(previousRequestPartitionId);
@@ -279,6 +262,25 @@ public class HapiTransactionService {
 		return myTransactionManager;
 	}
 
+	@VisibleForTesting
+	public void setTransactionManager(PlatformTransactionManager theTransactionManager) {
+		myTransactionManager = theTransactionManager;
+	}
+
+	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
+		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
+		ourRequestPartition.set(RequestPartitionId.defaultPartition());
+		try {
+			return theCallback.call();
+		} finally {
+			ourRequestPartition.set(previousRequestPartitionId);
+		}
+	}
+
+	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
+		return ourRequestPartition.get();
+	}
+
 	/**
 	 * This is just an unchecked exception so that we can catch checked exceptions inside TransactionTemplate
 	 * and rethrow them outside of it
@@ -288,9 +290,5 @@ public class HapiTransactionService {
 		public MyException(Throwable theThrowable) {
 			super(theThrowable);
 		}
-	}
-
-	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
-		return ourRequestPartition.get();
 	}
 }
