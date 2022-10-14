@@ -94,7 +94,7 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 				return;
 			}
 
-			throw new MessagingException(theMessage, Msg.code(2) + errorMsg, e);
+			throw new MessagingException(Msg.code(2) + errorMsg, e);
 		}
 	}
 
