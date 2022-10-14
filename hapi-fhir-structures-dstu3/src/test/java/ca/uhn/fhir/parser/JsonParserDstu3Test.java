@@ -1971,9 +1971,7 @@ public class JsonParserDstu3Test {
 	@Test
 	public void testParseCommunicationWithThreeTypes() throws IOException {
 		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"), StandardCharsets.UTF_8);
-		LenientErrorHandler errorHandler = new LenientErrorHandler();
-		errorHandler.setErrorOnInvalidValue(false);
-		Communication comm = ourCtx.newJsonParser().setParserErrorHandler(errorHandler).parseResource(Communication.class, content);
+		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
 
 		assertEquals(3, comm.getPayload().size());
 		assertEquals(Attachment.class, comm.getPayload().get(0).getContent().getClass());

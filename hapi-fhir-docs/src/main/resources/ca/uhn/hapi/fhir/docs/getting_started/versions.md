@@ -27,7 +27,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
     </thead>
     <tbody>
     <tr>
-        <td>HAPI FHIR 6.1.0</td>
+        <td>HAPI FHIR 6.2.0</td>
         <td>JDK11</td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-draft">1.0.2</td>
@@ -35,6 +35,17 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
         <td class="versions-table-cell-draft">4.3.0</td>
+        <td class="versions-table-cell-release">5.0.0-ballot<span class="download-version-hash"><br/>9a044604c1</span></td>
+    </tr>
+    <tr>
+        <td>HAPI FHIR 6.1.0</td>
+        <td>JDK11</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-draft">1.0.2</td>
+        <td class="versions-table-cell-release">1.4.0</td>
+        <td class="versions-table-cell-draft">3.0.2</td>
+        <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.6.0<span class="download-version-hash"><br/>ba4c12bc30</span></td>
     </tr>
     <tr>
