@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.eclipse.jetty.server.Request;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -89,9 +90,12 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	public List<Bundle> getTransactions() {
-		return myRestServer
-			.getPlainProvider()
-			.getTransactions()
+		List<IBaseBundle> transactions = myRestServer.getPlainProvider().getTransactions();
+
+		// Make a copy to avoid synchronization issues
+		transactions = new ArrayList<>(transactions);
+
+		return transactions
 			.stream()
 			.map(t -> (Bundle) t)
 			.collect(Collectors.toList());
