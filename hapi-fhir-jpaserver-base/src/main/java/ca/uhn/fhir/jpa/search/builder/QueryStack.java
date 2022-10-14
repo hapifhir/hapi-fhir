@@ -129,6 +129,7 @@ import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
@@ -732,7 +733,7 @@ public class QueryStack {
 					orValues.add(nextHasParam);
 				}
 
-			} else if (paramName.equals("_id")) {
+			} else if (paramName.equals(PARAM_ID)) {
 
 				for (IQueryParameterType next : nextOrList) {
 					orValues.add(new TokenParam(next.getValueAsQueryToken(myFhirContext)));
