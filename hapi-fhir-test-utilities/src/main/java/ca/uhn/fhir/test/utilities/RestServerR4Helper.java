@@ -90,10 +90,11 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 	}
 
 	public List<Bundle> getTransactions() {
-		// Make a copy to avoid syncronization issues
-		List<IBaseBundle> transactions = new ArrayList<>(myRestServer
-			.getPlainProvider()
-			.getTransactions());
+		List<IBaseBundle> transactions = myRestServer.getPlainProvider().getTransactions();
+
+		// Make a copy to avoid synchronization issues
+		transactions = new ArrayList<>(transactions);
+
 		return transactions
 			.stream()
 			.map(t -> (Bundle) t)
