@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

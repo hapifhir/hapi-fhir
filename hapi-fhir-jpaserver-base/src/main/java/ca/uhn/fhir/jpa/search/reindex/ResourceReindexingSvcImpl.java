@@ -52,6 +52,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -61,7 +62,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.Query;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -153,13 +154,13 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Long markAllResourcesForReindexing() {
 		return markAllResourcesForReindexing(null);
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Long markAllResourcesForReindexing(String theType) {
 
 		String typeDesc;
@@ -201,7 +202,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	public Integer runReindexingPass() {
 		if (myDaoConfig.isSchedulingDisabled() || !myDaoConfig.isEnableTaskPreExpandValueSets()) {
 			return null;

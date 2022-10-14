@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4117
+title: "Previously, the number of resources per binary file in bulk export was a static 1000. This is now configurable by a new DaoConfig property called
+'setBulkExportFileMaximumCapacity()', and the default value is 1000 resources per file."

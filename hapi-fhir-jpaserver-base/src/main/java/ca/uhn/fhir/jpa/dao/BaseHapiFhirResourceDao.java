@@ -1808,6 +1808,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * Otherwise, we're not in a transaction
 		 */
 		ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
+
+		if (thePerformIndexing) {
+			Collection<? extends BaseTag> tagList = Collections.emptyList();
+			if (entity.isHasTags()) {
+				tagList = entity.getTags();
+			}
+			long version = entity.getVersion();
+			populateResourceMetadata(entity, false, tagList, version, getResourceType(), resource);
+		}
+
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
 
 		if (!thePerformIndexing) {

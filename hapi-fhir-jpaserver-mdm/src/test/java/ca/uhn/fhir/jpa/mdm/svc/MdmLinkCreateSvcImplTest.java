@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MdmLinkCreateSvcImplTest {
+	@SuppressWarnings("unused")
 	@Spy
 	FhirContext myFhirContext = FhirContext.forR4();
 	@Mock
@@ -71,7 +72,7 @@ class MdmLinkCreateSvcImplTest {
 	}
 
 	@BeforeEach
-	private void setup() {
+	public void setup() {
 		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
 		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))

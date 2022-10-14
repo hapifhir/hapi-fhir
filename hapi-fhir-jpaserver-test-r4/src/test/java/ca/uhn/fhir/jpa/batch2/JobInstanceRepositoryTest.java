@@ -26,34 +26,33 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IJobPersistence myJobPersistenceSvc;
-	private String myParams = "{\"param1\":\"value1\"}";
-	private String myJobDefinitionId = "my-job-def-id";
-	private String myInstanceId = "abc-123";
+	private static final String PARAMS = "{\"param1\":\"value1\"}";
+	private static final String JOB_DEFINITION_ID = "my-job-def-id";
+	private static final String INSTANCE_ID = "abc-123";
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_SingleStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS);
-		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus, hasSize(1));
 	}
 
 	@Test
 	public void testSearchByJobParamsAndStatuses_MultiStatus() {
 		Set<StatusEnum> statuses = Set.of(StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
-		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(myJobDefinitionId, myParams, statuses, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(2));
 	}
 
 	@Test
 	public void testSearchByJobParamsWithoutStatuses() {
-		List<Batch2JobInstanceEntity> instances = myJobInstanceRepository.findInstancesByJobIdAndParams(myJobDefinitionId, myParams, PageRequest.of(0, 10));
+		List<Batch2JobInstanceEntity> instances = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdAndParams(JOB_DEFINITION_ID, PARAMS, PageRequest.of(0, 10)));
 		assertThat(instances, hasSize(4));
-
 	}
 
 	@Test
 	public void testServiceLogicIsCorrectWhenNoStatusesAreUsed() {
-		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams);
+		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS);
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
 		assertThat(jobInstances, hasSize(4));
 	}
@@ -61,7 +60,7 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	@Test
 	public void testServiceLogicIsCorrectWithStatuses() {
 		//Given
-		FetchJobInstancesRequest request = new FetchJobInstancesRequest(myJobDefinitionId, myParams, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
+		FetchJobInstancesRequest request = new FetchJobInstancesRequest(JOB_DEFINITION_ID, PARAMS, StatusEnum.IN_PROGRESS, StatusEnum.COMPLETED);
 
 		//When
 		List<JobInstance> jobInstances = myJobPersistenceSvc.fetchInstances(request, 0, 1000);
@@ -71,38 +70,38 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 	}
 
 	@BeforeEach
-	private void beforeEach() {
+	public void beforeEach() {
 		//Create in-progress job.
 		Batch2JobInstanceEntity instance= new Batch2JobInstanceEntity();
-		instance.setId(myInstanceId);
+		instance.setId(INSTANCE_ID);
 		instance.setStatus(StatusEnum.IN_PROGRESS);
 		instance.setCreateTime(new Date());
-		instance.setDefinitionId(myJobDefinitionId);
-		instance.setParams(myParams);
+		instance.setDefinitionId(JOB_DEFINITION_ID);
+		instance.setParams(PARAMS);
 		myJobInstanceRepository.save(instance);
 
 		Batch2JobInstanceEntity completedInstance = new Batch2JobInstanceEntity();
-		completedInstance.setId(myInstanceId + "-2");
+		completedInstance.setId(INSTANCE_ID + "-2");
 		completedInstance.setStatus(StatusEnum.COMPLETED);
 		completedInstance.setCreateTime(new Date());
-		completedInstance.setDefinitionId(myJobDefinitionId);
-		completedInstance.setParams(myParams);
+		completedInstance.setDefinitionId(JOB_DEFINITION_ID);
+		completedInstance.setParams(PARAMS);
 		myJobInstanceRepository.save(completedInstance);
 
 		Batch2JobInstanceEntity cancelledInstance = new Batch2JobInstanceEntity();
-		cancelledInstance.setId(myInstanceId + "-3");
+		cancelledInstance.setId(INSTANCE_ID + "-3");
 		cancelledInstance.setStatus(StatusEnum.CANCELLED);
 		cancelledInstance.setCreateTime(new Date());
-		cancelledInstance.setDefinitionId(myJobDefinitionId);
-		cancelledInstance.setParams(myParams);
+		cancelledInstance.setDefinitionId(JOB_DEFINITION_ID);
+		cancelledInstance.setParams(PARAMS);
 		myJobInstanceRepository.save(cancelledInstance);
 
 		Batch2JobInstanceEntity failedInstance = new Batch2JobInstanceEntity();
-		failedInstance.setId(myInstanceId + "-4");
+		failedInstance.setId(INSTANCE_ID + "-4");
 		failedInstance.setStatus(StatusEnum.FAILED);
 		failedInstance.setCreateTime(new Date());
-		failedInstance.setDefinitionId(myJobDefinitionId);
-		failedInstance.setParams(myParams);
+		failedInstance.setDefinitionId(JOB_DEFINITION_ID);
+		failedInstance.setParams(PARAMS);
 		myJobInstanceRepository.save(failedInstance);
 	}
 
