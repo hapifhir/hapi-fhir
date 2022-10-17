@@ -338,7 +338,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		//	 * ]
 		Coding coding = theType.getCoding().get(0);
 		assertEquals("http://terminology.hl7.org/CodeSystem/v2-0203", coding.getSystem());
-		assertEquals("UMB", coding.getCode());
+		assertEquals("MB", coding.getCode());
 		assertEquals("Member Number", coding.getDisplay());
 		assertFalse(coding.getUserSelected());
 	}
