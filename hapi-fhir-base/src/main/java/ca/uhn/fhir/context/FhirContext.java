@@ -241,6 +241,14 @@ public class FhirContext {
 	}
 
 	/**
+	 * @since 6.2.0
+	 */
+	public static FhirContext forDstu2Hl7OrgCached() {
+		return forCached(FhirVersionEnum.DSTU2_HL7ORG);
+	}
+
+
+	/**
 	 * @since 5.5.0
 	 */
 	public static FhirContext forDstu3Cached() {
@@ -1235,4 +1243,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

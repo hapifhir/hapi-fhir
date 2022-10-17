@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r5;
+package ca.uhn.fhir.jpa.dao;
 
 /*
  * #%L
@@ -22,40 +22,53 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r5.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> implements IFhirResourceDaoPatient<Patient> {
+public class JpaResourceDaoPatient<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoPatient<T> {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
-	private IBundleProvider doEverythingOperation(TokenOrListParam theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theTypes, RequestDetails theRequest) {
+	private IBundleProvider doEverythingOperation(TokenOrListParam theIds,
+																 IPrimitiveType<Integer> theCount,
+																 IPrimitiveType<Integer> theOffset,
+																 DateRangeParam theLastUpdated,
+																 SortSpec theSort,
+																 StringAndListParam theContent,
+																 StringAndListParam theNarrative,
+																 StringAndListParam theFilter,
+																 StringAndListParam theTypes,
+																 RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(Msg.code(1122) + "Everything operation does not support offset searching");
+			throw new IllegalArgumentException(Msg.code(1106) + "Everything operation does not support offset searching");
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);
@@ -65,19 +78,21 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 		}
 		if (theTypes != null) {
 			paramMap.add(Constants.PARAM_TYPE, theTypes);
+		} else {
+			paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
 		}
-		paramMap.setIncludes(Collections.singleton(IBaseResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
+
+		paramMap.setEverythingMode(theIds != null && theIds.getValuesAsQueryTokens().size() == 1 ? EverythingModeEnum.PATIENT_INSTANCE : EverythingModeEnum.PATIENT_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);
-		if (theId != null) {
+		if (theIds != null) {
 			if (theRequest.getParameters().containsKey("_mdm")) {
 				String[] paramVal = theRequest.getParameters().get("_mdm");
 				if (Arrays.asList(paramVal).contains("true")) {
-					theId.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
+					theIds.getValuesAsQueryTokens().stream().forEach(param -> param.setMdmExpand(true));
 				}
 			}
-			paramMap.add("_id", theId);
+			paramMap.add("_id", theIds);
 		}
 
 		if (!isPagingProviderDatabaseBacked(theRequest)) {
@@ -85,17 +100,25 @@ public class FhirResourceDaoPatientR5 extends BaseHapiFhirResourceDao<Patient> i
 		}
 
 		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), paramMap, null);
-		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequest, requestPartitionId);
+		return mySearchCoordinatorSvc.registerSearch(this,
+			paramMap,
+			getResourceName(),
+			new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL)),
+			theRequest,
+			requestPartitionId);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, IIdType theId) {
 		TokenOrListParam id = new TokenOrListParam().add(new TokenParam(theId.getIdPart()));
-		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getTypes(), theRequestDetails);
+		return doEverythingOperation(id, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
 	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, RequestDetails theRequestDetails, PatientEverythingParameters theQueryParams, TokenOrListParam theId) {
-		return doEverythingOperation(theId, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getTypes(), theRequestDetails);
+		return doEverythingOperation(theId, theQueryParams.getCount(), theQueryParams.getOffset(), theQueryParams.getLastUpdated(), theQueryParams.getSort(), theQueryParams.getContent(), theQueryParams.getNarrative(), theQueryParams.getFilter(), theQueryParams.getTypes(), theRequestDetails);
 	}
+
 }
