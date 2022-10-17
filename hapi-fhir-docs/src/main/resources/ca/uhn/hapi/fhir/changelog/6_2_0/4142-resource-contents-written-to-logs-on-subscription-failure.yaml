@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4142
+jira: SMILE-5312
+title: "Upon hitting a subscription delivery failure, we currently log the failing payload which could be considered PHI. Resource content is no longer written to logs on subscription failure."
