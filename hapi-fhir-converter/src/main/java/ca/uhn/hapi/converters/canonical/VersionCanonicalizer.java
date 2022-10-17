@@ -111,6 +111,13 @@ public class VersionCanonicalizer {
 		return myStrategy.codeSystemToCanonical(theCodeSystem);
 	}
 
+	/**
+	 * Canonical version: R4
+	 */
+	public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+		return myStrategy.valueSetFromCanonical(theValueSet);
+	}
+
 	private interface IStrategy<T extends IBaseResource> {
 
 		CapabilityStatement capabilityStatementToCanonical(T theCapabilityStatement);
@@ -122,6 +129,8 @@ public class VersionCanonicalizer {
 		ValueSet valueSetToCanonical(IBaseResource theValueSet);
 
 		CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem);
+
+		IBaseResource valueSetFromCanonical(ValueSet theValueSet);
 	}
 
 	private class Dstu2Strategy implements IStrategy<ca.uhn.fhir.model.dstu2.resource.BaseResource> {
@@ -132,7 +141,7 @@ public class VersionCanonicalizer {
 
 		@Override
 		public CapabilityStatement capabilityStatementToCanonical(ca.uhn.fhir.model.dstu2.resource.BaseResource theCapabilityStatement) {
-			org.hl7.fhir.dstu2.model.Resource reencoded = reencode(theCapabilityStatement);
+			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theCapabilityStatement);
 			return (CapabilityStatement) VersionConvertorFactory_10_50.convertResource(reencoded, ADVISOR_10_50);
 		}
 
@@ -165,7 +174,7 @@ public class VersionCanonicalizer {
 
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
-			org.hl7.fhir.dstu2.model.Resource reencoded = reencode(theValueSet);
+			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theValueSet);
 			return (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
 		}
 
@@ -174,8 +183,18 @@ public class VersionCanonicalizer {
 			throw new UnsupportedOperationException();
 		}
 
-		private Resource reencode(IBaseResource theInput) {
+		@Override
+		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+			Resource valueSetDstu2Hl7Org = VersionConvertorFactory_10_40.convertResource(theValueSet, ADVISOR_10_40);
+			return reencodeFromHl7Org(valueSetDstu2Hl7Org);
+		}
+
+		private Resource reencodeToHl7Org(IBaseResource theInput) {
 			return (Resource) myDstu2Hl7OrgContext.newJsonParser().parseResource(myDstu2Context.newJsonParser().encodeResourceToString(theInput));
+		}
+
+		private IBaseResource reencodeFromHl7Org(Resource theInput) {
+			return myDstu2Context.newJsonParser().parseResource(myDstu2Hl7OrgContext.newJsonParser().encodeResourceToString(theInput));
 		}
 
 	}
@@ -206,6 +225,11 @@ public class VersionCanonicalizer {
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
 			return (CodeSystem) VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theCodeSystem, ADVISOR_30_40);
 		}
+
+		@Override
+		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+			return VersionConvertorFactory_30_40.convertResource(theValueSet, ADVISOR_30_40);
+		}
 	}
 
 	private class R4Strategy implements IStrategy<org.hl7.fhir.r4.model.Resource> {
@@ -232,6 +256,11 @@ public class VersionCanonicalizer {
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
 			return (CodeSystem) theCodeSystem;
+		}
+
+		@Override
+		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+			return theValueSet;
 		}
 
 	}
@@ -267,6 +296,12 @@ public class VersionCanonicalizer {
 			return (org.hl7.fhir.r4.model.CodeSystem) VersionConvertorFactory_40_50.convertResource(codeSystemR5, ADVISOR_40_50);
 		}
 
+		@Override
+		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+			org.hl7.fhir.r5.model.ValueSet valueSetR5 = (org.hl7.fhir.r5.model.ValueSet) VersionConvertorFactory_40_50.convertResource(theValueSet, ADVISOR_40_50);
+			return VersionConvertorFactory_43_50.convertResource(valueSetR5, ADVISOR_43_50);
+		}
+
 	}
 
 
@@ -295,6 +330,11 @@ public class VersionCanonicalizer {
 		@Override
 		public CodeSystem codeSystemToCanonical(IBaseResource theCodeSystem) {
 			return (CodeSystem) VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem, ADVISOR_40_50);
+		}
+
+		@Override
+		public IBaseResource valueSetFromCanonical(ValueSet theValueSet) {
+			return VersionConvertorFactory_40_50.convertResource(theValueSet, ADVISOR_40_50);
 		}
 
 	}

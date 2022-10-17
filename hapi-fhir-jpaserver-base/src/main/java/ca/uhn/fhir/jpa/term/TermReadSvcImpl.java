@@ -2916,17 +2916,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
-		org.hl7.fhir.r5.model.ValueSet valueSetToExpand = (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand;
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = expandValueSet(theExpansionOptions,
-			(org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetToExpand, new BaseAdvisor_40_50(false)));
-		return new ValueSetExpansionOutcome(VersionConvertorFactory_40_50.convertResource(expandedR4, new BaseAdvisor_40_50(false)));
+		ValueSet canonicalInput = myVersionCanonicalizer.valueSetToCanonical(theValueSetToExpand);
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = expandValueSet(theExpansionOptions, canonicalInput);
+		return new ValueSetExpansionOutcome(myVersionCanonicalizer.valueSetFromCanonical(expandedR4));
 	}
 
 	@Override
 	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = myVersionCanonicalizer.valueSetToCanonical(theInput);
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = expandValueSet(theExpansionOptions, valueSetToExpand);
-		return VersionConvertorFactory_40_50.convertResource(valueSetR4, new BaseAdvisor_40_50(false));
+		return myVersionCanonicalizer.valueSetFromCanonical(valueSetR4);
 	}
 
 	@Override
@@ -2936,8 +2935,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		org.hl7.fhir.r5.model.ValueSet valueSetR5 = myDaoRegistry.getResourceDao("ValueSet").toResource(org.hl7.fhir.r5.model.ValueSet.class, theResourceTable, null, false);
-		return (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetR5, new BaseAdvisor_40_50(false));
+		Class<? extends IBaseResource> type = getFhirContext().getResourceDefinition("ValueSet").getImplementingClass();
+		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").toResource(type, theResourceTable, null, false);
+		return myVersionCanonicalizer.valueSetToCanonical(valueSet);
 	}
 
 	@Override

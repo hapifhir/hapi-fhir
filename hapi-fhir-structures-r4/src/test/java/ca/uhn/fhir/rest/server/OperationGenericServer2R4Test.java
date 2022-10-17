@@ -129,6 +129,60 @@ public class OperationGenericServer2R4Test {
 
 	}
 
+	@Test
+	public void testDeclarativeTypedListParameters() throws Exception {
+
+		@SuppressWarnings("unused")
+		class PatientProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Operation(name = "$OP_INSTANCE")
+			public Parameters opInstance(
+				@ResourceParam() IBaseResource theResourceParam,
+				@IdParam IdType theId,
+				@OperationParam(name = "PARAM1", typeName = "code", max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theParam1
+			) {
+
+				ourLastId = theId;
+				ourLastParam1 = theParam1;
+				ourLastResourceParam = (Parameters) theResourceParam;
+
+				Parameters retVal = new Parameters();
+				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
+				return retVal;
+			}
+
+		}
+
+		PatientProvider provider = new PatientProvider();
+		startServer(provider);
+
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new CodeType("PARAM1val"));
+		p.addParameter().setName("PARAM1").setValue(new CodeType("PARAM1val2"));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + myPort + "/Patient/123/$OP_INSTANCE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(response);
+			status.getEntity().getContent().close();
+
+			List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
+			assertEquals(2, param1.size());
+			assertEquals(CodeType.class, param1.get(0).getClass());
+			assertEquals("PARAM1val", param1.get(0).getValue());
+			assertEquals("PARAM1val2", param1.get(1).getValue());
+		}
+
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testDeclarativeStringTypedParameters() throws Exception {

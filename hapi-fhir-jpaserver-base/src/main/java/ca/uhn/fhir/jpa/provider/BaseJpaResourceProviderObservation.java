@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.dstu3;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -13,8 +13,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.UnsignedIntType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
@@ -40,7 +39,7 @@ import java.util.Map;
  * #L%
  */
 
-public abstract class BaseJpaResourceProviderObservationDstu3 extends JpaResourceProviderDstu3<Observation> {
+public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	/**
 	 * Observation/$lastn
@@ -54,8 +53,8 @@ public abstract class BaseJpaResourceProviderObservationDstu3 extends JpaResourc
 		ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
 
 		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT)
-			UnsignedIntType theCount,
+		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+			IPrimitiveType<Integer> theCount,
 
 		@Description(shortDefinition="The classification of the type of observation")
 		@OperationParam(name="category")
@@ -87,14 +86,14 @@ public abstract class BaseJpaResourceProviderObservationDstu3 extends JpaResourc
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
-			paramMap.add(Observation.SP_CATEGORY, theCategory);
-			paramMap.add(Observation.SP_CODE, theCode);
-			paramMap.add(Observation.SP_DATE, theDate);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CATEGORY, theCategory);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_CODE, theCode);
+			paramMap.add(org.hl7.fhir.r4.model.Observation.SP_DATE, theDate);
 			if (thePatient != null) {
-				paramMap.add(Observation.SP_PATIENT, thePatient);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_PATIENT, thePatient);
 			}
 			if (theSubject != null) {
-				paramMap.add(Observation.SP_SUBJECT, theSubject);
+				paramMap.add(org.hl7.fhir.r4.model.Observation.SP_SUBJECT, theSubject);
 			}
 			if (theMax != null) {
 				paramMap.setLastNMax(theMax.getValue());
@@ -105,7 +104,7 @@ public abstract class BaseJpaResourceProviderObservationDstu3 extends JpaResourc
 
 			getDao().translateRawParameters(theAdditionalRawParams, paramMap);
 
-			return ((IFhirResourceDaoObservation<Observation>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
+			return ((IFhirResourceDaoObservation<?>) getDao()).observationsLastN(paramMap, theRequestDetails, theServletResponse);
 		} finally {
 			endRequest(theServletRequest);
 		}

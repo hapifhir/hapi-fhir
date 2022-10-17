@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.provider.r4b;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import org.hl7.fhir.r4b.model.ConceptMap;
 
-public abstract class BaseJpaResourceProviderConceptMapR4B extends JpaResourceProviderR4B<ConceptMap> {
+public abstract class BaseJpaResourceProviderConceptMapR4B extends BaseJpaResourceProvider<ConceptMap> {
 }

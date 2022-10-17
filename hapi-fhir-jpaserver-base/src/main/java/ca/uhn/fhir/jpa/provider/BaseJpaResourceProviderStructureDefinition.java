@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4b;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoStructureDefinition;
@@ -12,9 +12,9 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.r4b.model.IdType;
-import org.hl7.fhir.r4b.model.StringType;
-import org.hl7.fhir.r4b.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /*
  * #%L
@@ -36,16 +36,16 @@ import org.hl7.fhir.r4b.model.StructureDefinition;
  * #L%
  */
 
-public abstract class BaseJpaResourceProviderStructureDefinitionR4B extends JpaResourceProviderR4B<StructureDefinition> {
+public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	/**
 	 * <code>$snapshot</code> operation
 	 */
 	@Operation(name=JpaConstants.OPERATION_SNAPSHOT, idempotent = true)
-	public StructureDefinition snapshot(
-		@IdParam(optional = true) IdType theId,
-		@OperationParam(name = "definition") StructureDefinition theStructureDefinition,
-		@OperationParam(name = "url") StringType theUrl,
+	public IBaseResource snapshot(
+		@IdParam(optional = true) IIdType theId,
+		@OperationParam(name = "definition", typeName = "StructureDefinition") IBaseResource theStructureDefinition,
+		@OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> theUrl,
 		RequestDetails theRequestDetails) {
 
 		ValidateUtil.exactlyOneNotNullOrThrowInvalidRequestException(
@@ -53,30 +53,31 @@ public abstract class BaseJpaResourceProviderStructureDefinitionR4B extends JpaR
 			"Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)"
 		);
 
-		StructureDefinition sd;
+		IBaseResource sd;
+		IFhirResourceDaoStructureDefinition dao = getDao();
 		if (theId == null && theStructureDefinition != null && theUrl == null) {
 			sd = theStructureDefinition;
 		} else if (theId != null && theStructureDefinition == null) {
-			sd = getDao().read(theId, theRequestDetails);
+			sd = dao.read(theId, theRequestDetails);
 		} else {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronousUpTo(2);
-			map.add(StructureDefinition.SP_URL, new UriParam(theUrl.getValue()));
-			IBundleProvider outcome = getDao().search(map, theRequestDetails);
+			map.add(org.hl7.fhir.r4.model.StructureDefinition.SP_URL, new UriParam(theUrl.getValue()));
+			IBundleProvider outcome = dao.search(map, theRequestDetails);
 			Integer numResults = outcome.size();
 			assert numResults != null;
 			if (numResults == 0) {
-				throw new ResourceNotFoundException(Msg.code(1159) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
+				throw new ResourceNotFoundException(Msg.code(1162) + "No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
-			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
+			sd = outcome.getResources(0, 1).get(0);
 		}
 
-		return getDao().generateSnapshot(sd, null, null, null);
+		return dao.generateSnapshot(sd, null, null, null);
 	}
 
 	@Override
-	public IFhirResourceDaoStructureDefinition<StructureDefinition> getDao() {
-		return (IFhirResourceDaoStructureDefinition<StructureDefinition>) super.getDao();
+	public IFhirResourceDaoStructureDefinition<T> getDao() {
+		return (IFhirResourceDaoStructureDefinition<T>) super.getDao();
 	}
 
 }

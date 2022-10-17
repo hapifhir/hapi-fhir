@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.provider.r4b;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import org.hl7.fhir.r4b.model.ValueSet;
 
-public abstract class BaseJpaResourceProviderValueSetR4B extends JpaResourceProviderR4B<ValueSet> {
+public abstract class BaseJpaResourceProviderValueSetR4B extends BaseJpaResourceProvider<ValueSet> {
 
 }

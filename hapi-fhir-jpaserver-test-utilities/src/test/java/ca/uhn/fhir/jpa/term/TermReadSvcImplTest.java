@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TermReadSvcImplTest {
 
-	private final TermReadSvcR5 mySvc = new TermReadSvcR5();
+	private final TermReadSvcImpl mySvc = new TermReadSvcImpl();
 
 	@Test
 	void applyFilterMatchWords() {

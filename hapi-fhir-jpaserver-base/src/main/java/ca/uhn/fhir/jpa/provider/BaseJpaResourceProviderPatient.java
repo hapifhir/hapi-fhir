@@ -1,10 +1,10 @@
-package ca.uhn.fhir.jpa.provider.r4b;
+package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -20,20 +20,12 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.r4b.model.Coverage;
-import org.hl7.fhir.r4b.model.IdType;
-import org.hl7.fhir.r4b.model.Parameters;
-import org.hl7.fhir.r4b.model.Patient;
-import org.hl7.fhir.r4b.model.StringType;
-import org.hl7.fhir.r4b.model.UnsignedIntType;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -57,49 +49,49 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public abstract class BaseJpaResourceProviderPatientR4B extends JpaResourceProviderR4B<Patient> {
+public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
 	/**
 	 * Patient/123/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
 
-		HttpServletRequest theServletRequest,
+		javax.servlet.http.HttpServletRequest theServletRequest,
 
 		@IdParam
-			IdType theId,
+		IIdType theId,
 
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT)
-			UnsignedIntType theCount,
+		@Description(shortDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+		IPrimitiveType<Integer> theCount,
 
-		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET)
-			UnsignedIntType theOffset,
+		@Description(shortDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+		IPrimitiveType<Integer> theOffset,
 
 		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
 		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-			DateRangeParam theLastUpdated,
+		DateRangeParam theLastUpdated,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_CONTENT, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theContent,
+		@OperationParam(name = Constants.PARAM_CONTENT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theContent,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_TEXT, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theNarrative,
+		@OperationParam(name = Constants.PARAM_TEXT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theNarrative,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theFilter,
+		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theFilter,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theTypes,
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theTypes,
 
 		@Sort
-			SortSpec theSortSpec,
+		SortSpec theSortSpec,
 
 		RequestDetails theRequestDetails
 	) {
@@ -116,7 +108,7 @@ public abstract class BaseJpaResourceProviderPatientR4B extends JpaResourceProvi
 			everythingParams.setFilter(toStringAndList(theFilter));
 			everythingParams.setTypes(toStringAndList(theTypes));
 
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
+			return ((IFhirResourceDaoPatient<?>) getDao()).patientInstanceEverything(theServletRequest, theRequestDetails, everythingParams, theId);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -125,45 +117,46 @@ public abstract class BaseJpaResourceProviderPatientR4B extends JpaResourceProvi
 	/**
 	 * /Patient/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
 
-		HttpServletRequest theServletRequest,
+		javax.servlet.http.HttpServletRequest theServletRequest,
 
-		@Description(formalDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
-		@OperationParam(name = Constants.PARAM_COUNT)
-			UnsignedIntType theCount,
+		@Description(shortDefinition = "Results from this method are returned across multiple pages. This parameter controls the size of those pages.")
+		@OperationParam(name = Constants.PARAM_COUNT, typeName = "unsignedInt")
+		IPrimitiveType<Integer> theCount,
 
-		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
-		@OperationParam(name = Constants.PARAM_OFFSET)
-			UnsignedIntType theOffset,
+		@Description(shortDefinition = "Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+		@OperationParam(name = Constants.PARAM_OFFSET, typeName = "unsignedInt")
+		IPrimitiveType<Integer> theOffset,
 
 		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
 		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
-			DateRangeParam theLastUpdated,
+		DateRangeParam theLastUpdated,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _content filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_CONTENT, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theContent,
+		@OperationParam(name = Constants.PARAM_CONTENT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theContent,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _text filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_TEXT, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theNarrative,
+		@OperationParam(name = Constants.PARAM_TEXT, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theNarrative,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _filter filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theFilter,
+		@OperationParam(name = Constants.PARAM_FILTER, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theFilter,
 
 		@Description(shortDefinition = "Filter the resources to return only resources matching the given _type filter (note that this filter is applied only to results which link to the given patient, not to the patient itself or to supporting resources linked to by the matched resources)")
-		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<StringType> theTypes,
+		@OperationParam(name = Constants.PARAM_TYPE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string")
+		List<IPrimitiveType<String>> theTypes,
+
 
 		@Description(shortDefinition = "Filter the resources to return based on the patient ids provided.")
-		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED)
-			List<IdType> theId,
+		@OperationParam(name = Constants.PARAM_ID, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "id")
+		List<IIdType> theId,
 
 		@Sort
-			SortSpec theSortSpec,
+		SortSpec theSortSpec,
 
 		RequestDetails theRequestDetails
 	) {
@@ -180,45 +173,36 @@ public abstract class BaseJpaResourceProviderPatientR4B extends JpaResourceProvi
 			everythingParams.setFilter(toStringAndList(theFilter));
 			everythingParams.setTypes(toStringAndList(theTypes));
 
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, everythingParams, toFlattenedPatientIdTokenParamList(theId));
+			return ((IFhirResourceDaoPatient<?>) getDao()).patientTypeEverything(theServletRequest, theRequestDetails, everythingParams, toFlattenedPatientIdTokenParamList(theId));
 		} finally {
 			endRequest(theServletRequest);
 		}
 
 	}
 
-
-	private void validateParam(Object theParam, String theParamName) {
-		if (theParam == null) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
-				"operation.member.match.error.missing.parameter", theParamName);
-			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
-		}
-	}
-
-
 	/**
 	 * Given a list of string types, return only the ID portions of any parameters passed in.
 	 */
-	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IdType> theId) {
+	private TokenOrListParam toFlattenedPatientIdTokenParamList(List<IIdType> theId) {
 		TokenOrListParam retVal = new TokenOrListParam();
 		if (theId != null) {
-			for (IdType next: theId) {
+			for (IIdType next : theId) {
 				if (isNotBlank(next.getValue())) {
 					String[] split = next.getValueAsString().split(",");
-					Arrays.stream(split).map(IdType::new).forEach(id -> {
+					Arrays.stream(split).map(IdDt::new).forEach(id -> {
 						retVal.addOr(new TokenParam(id.getIdPart()));
 					});
 				}
 			}
 		}
-		return retVal.getValuesAsQueryTokens().isEmpty() ? null: retVal;
+
+		return retVal.getValuesAsQueryTokens().isEmpty() ? null : retVal;
 	}
 
-	private StringAndListParam toStringAndList(List<StringType> theNarrative) {
+	private StringAndListParam toStringAndList(List<IPrimitiveType<String>> theNarrative) {
 		StringAndListParam retVal = new StringAndListParam();
 		if (theNarrative != null) {
-			for (StringType next : theNarrative) {
+			for (IPrimitiveType<String> next : theNarrative) {
 				if (isNotBlank(next.getValue())) {
 					retVal.addAnd(new StringOrListParam().addOr(new StringParam(next.getValue())));
 				}
