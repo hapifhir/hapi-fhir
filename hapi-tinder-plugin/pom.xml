@@ -80,7 +80,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4b</artifactId>
-			<version>6.1.0-PRE3-SNAPSHOT</version>
+			<version>6.2.0-PRE15-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -101,11 +101,6 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 			<version>6.2.0-PRE15-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-validation-resources-r4b</artifactId>
-			<version>6.1.0-PRE3-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>

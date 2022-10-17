@@ -93,6 +93,8 @@ public abstract class BaseStructureParser {
 			myCtx = FhirContext.forDstu2();
 		} else if (myVersion.equals("r5")) {
 			myCtx = FhirContext.forR5();
+		} else if (myVersion.equals("r4b")) {
+			myCtx = FhirContext.forR4B();
 		} else {
 			throw new MojoFailureException(Msg.code(151) + "Unknown version: " + myVersion);
 		}
@@ -547,8 +549,8 @@ public abstract class BaseStructureParser {
 		ctx.put("isRi", determineVersionEnum().isRi());
 
 		String capitalize = WordUtils.capitalize(myVersion);
-		if ("Dstu".equals(capitalize)) {
-			capitalize = "Dstu1";
+		if ("R4b".equals(capitalize)) {
+			capitalize = "R4B";
 		}
 		ctx.put("versionCapitalized", capitalize);
 		ctx.put("this", theResource);
@@ -692,8 +694,8 @@ public abstract class BaseStructureParser {
 				ctx.put("isRi", determineVersionEnum().isRi());
 				ctx.put("package_suffix", packageSuffix);
 				String capitalize = WordUtils.capitalize(myVersion);
-				if ("Dstu".equals(capitalize)) {
-					capitalize = "Dstu1";
+				if ("R4b".equals(capitalize)) {
+					capitalize = "R4B";
 				}
 				ctx.put("versionCapitalized", capitalize);
 
@@ -748,6 +750,8 @@ public abstract class BaseStructureParser {
 			versionEnum = FhirVersionEnum.DSTU3;
 		} else if ("r4".equals(version)) {
 			versionEnum = FhirVersionEnum.R4;
+		} else if ("r4b".equals(version)) {
+			versionEnum = FhirVersionEnum.R4B;
 		} else if ("r5".equals(version)) {
 			versionEnum = FhirVersionEnum.R5;
 		} else {

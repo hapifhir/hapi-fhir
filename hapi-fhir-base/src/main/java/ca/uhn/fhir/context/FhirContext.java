@@ -194,6 +194,8 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU3.getVersionImplementation();
 		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.R4.getVersionImplementation();
+		} else if (FhirVersionEnum.R4B.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.R4B.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(Msg.code(1681) + getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
@@ -1190,7 +1192,7 @@ public class FhirContext {
 	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R4B R4B}
 	 *
-	 * @since 6.1.0
+	 * @since 6.2.0
 	 */
 	public static FhirContext forR4B() {
 		return new FhirContext(FhirVersionEnum.R4B);

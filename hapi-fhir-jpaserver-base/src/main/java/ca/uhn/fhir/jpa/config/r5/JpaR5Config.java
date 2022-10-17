@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcR5;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
@@ -83,8 +84,8 @@ public class JpaR5Config {
 	}
 
 	@Bean(name = "mySystemProviderR5")
-	public ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 systemProviderR5(FhirContext theFhirContext) {
-		ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 retVal = new ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5();
+	public JpaSystemProvider<Bundle, Meta> systemProviderR5(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
 		retVal.setContext(theFhirContext);
 		retVal.setDao(systemDaoR5());
 		return retVal;
