@@ -66,7 +66,7 @@ public class ReductionStepDataSinkTest {
 
 
 	@BeforeEach
-	private void init() {
+	public void init() {
 		when(myJobDefinition.getJobDefinitionId())
 			.thenReturn("jobDefinition");
 		when(myWorkCursor.getJobDefinition())

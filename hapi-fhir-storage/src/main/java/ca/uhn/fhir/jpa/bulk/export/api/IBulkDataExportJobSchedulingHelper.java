@@ -20,19 +20,20 @@ package ca.uhn.fhir.jpa.bulk.export.api;
  * #L%
  */
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface IBulkDataExportJobSchedulingHelper {
 
 	/**
 	 * invoked via scheduled task, purges any tasks which are past their cutoff point.
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	void purgeExpiredFiles();
 
 	/**
 	 * Stops all invoked jobs, and then purges them.
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	void cancelAndPurgeAllJobs();
 }

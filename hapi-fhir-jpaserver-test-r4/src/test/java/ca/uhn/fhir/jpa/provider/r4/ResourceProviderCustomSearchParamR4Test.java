@@ -141,7 +141,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid", e.getMessage());
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path", e.getMessage());
 		}
 	}
 

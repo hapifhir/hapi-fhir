@@ -4,11 +4,13 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -23,6 +25,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -38,6 +41,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -67,6 +71,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.jena.rdf.model.ModelCon;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -127,6 +132,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Quantity;
@@ -242,6 +248,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
 
+		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
+
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
@@ -285,6 +293,41 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString("Invalid parameter chain: focalAccess.a ne e"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
+
+	}
+
+	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("resource-security");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setName("Security");
+		searchParameter.setCode("_security");
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		IIdType id = myClient.update().resource(searchParameter).execute().getId().toUnqualifiedVersionless();
+
+		assertNotNull(id);
+		assertEquals("resource-security", id.getIdPart());
+
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+
+		SearchParameter searchParameter = new SearchParameter();
+
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode("myGender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender|Person.gender");
+
+		MethodOutcome result= myClient.create().resource(searchParameter).execute();
+
+		assertEquals(true, result.getCreated());
 
 	}
 
@@ -3095,6 +3138,84 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(resp, containsString("Invalid _has parameter syntax: _has"));
 		}
 
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHasParameterOnChain(boolean theWithIndexOnContainedResources) throws Exception {
+		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+
+		IIdType pid0;
+		IIdType pid1;
+		IIdType groupId;
+		IIdType obsId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Group group = new Group();
+			group.addMember().setEntity(new Reference(pid0.getValue()));
+			group.addMember().setEntity(new Reference(pid1.getValue()));
+			groupId = myGroupDao.create(group, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setSystem("urn:system").setCode("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String uri;
+		List<String> ids;
+
+		logAllTokenIndexes();
+
+		uri = ourServerBase + "/Observation?code=urn:system%7CFOO&subject._has:Group:member:_id=" + groupId.getValue();
+		myCaptureQueriesListener.clear();
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		myCaptureQueriesListener.logAllQueries();
+		assertThat(ids, contains(obsId.getValue()));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHasParameterWithIdTarget(boolean theWithIndexOnContainedResources) throws Exception {
+		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+
+		IIdType pid0;
+		IIdType obsId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String uri;
+		List<String> ids;
+
+		logAllResourceLinks();
+
+		uri = ourServerBase + "/Patient?_has:Observation:subject:_id=" + obsId.getValue();
+		myCaptureQueriesListener.clear();
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		myCaptureQueriesListener.logAllQueries();
+		assertThat(ids, contains(pid0.getValue()));
 	}
 
 	@Test
