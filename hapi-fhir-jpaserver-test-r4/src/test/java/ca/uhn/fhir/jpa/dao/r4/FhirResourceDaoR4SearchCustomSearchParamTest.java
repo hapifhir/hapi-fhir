@@ -64,7 +64,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.internal.util.collections.ListUtil;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -690,12 +689,12 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		runInTransaction(() -> {
 			assertThat(myResourceLinkDao.findAll(), empty());
-			assertThat(ListUtil.filter(myResourceIndexedSearchParamTokenDao.findAll(), new ListUtil.Filter<ResourceIndexedSearchParamToken>() {
-				@Override
-				public boolean isOut(ResourceIndexedSearchParamToken object) {
-					return !object.getResourceType().equals("Group") || object.isMissing();
-				}
-			}), empty());
+			List<ResourceIndexedSearchParamToken> tokens = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(object -> !(!object.getResourceType().equals("Group") || object.isMissing()))
+				.collect(Collectors.toList());
+			assertThat(tokens, empty());
 		});
 	}
 

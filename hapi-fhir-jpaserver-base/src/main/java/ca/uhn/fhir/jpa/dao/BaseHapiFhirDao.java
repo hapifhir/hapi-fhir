@@ -785,6 +785,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (!allDefs.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
 					theEntity.getTags().remove(tag);
+				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(tag.getTag().getSystem())) {
+					theEntity.getTags().remove(tag);
 				}
 			}
 

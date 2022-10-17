@@ -23,6 +23,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -115,12 +116,25 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	}
 
 	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension) {
+		String id = null;
+
+		return createSubscription(theCriteria, thePayload, theExtension, id);
+	}
+
+	@NotNull
+	protected Subscription createSubscription(String theCriteria, String thePayload, Extension theExtension, String id) {
 		Subscription subscription = newSubscription(theCriteria, thePayload);
 		if (theExtension != null) {
 			subscription.getChannel().addExtension(theExtension);
 		}
 
-		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
+		MethodOutcome methodOutcome;
+		if (id != null) {
+			subscription.setId(id);
+			methodOutcome = myClient.update().resource(subscription).execute();
+		} else {
+			methodOutcome = myClient.create().resource(subscription).execute();
+		}
 		subscription.setId(methodOutcome.getId().getIdPart());
 		mySubscriptionIds.add(methodOutcome.getId());
 

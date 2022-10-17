@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4130
+title: "A transaction scoping bug in Batch2 has been resolved, preventing a crash on Postgres. We have also
+   standardized on the Spring @Transactional annotation, and removed use of the equivalent javax.transaction 
+   annotation."

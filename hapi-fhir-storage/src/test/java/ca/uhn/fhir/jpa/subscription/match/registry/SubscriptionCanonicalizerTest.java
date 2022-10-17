@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -28,6 +29,16 @@ class SubscriptionCanonicalizerTest {
 		assertFalse(canonicalSubscription.getSendDeleteMessages());
 	}
 
+	@Test
+	void testCanonicalizeR4SubscriptionWithMultipleTagsHavingSameSystem() {
+		Subscription subscription = new Subscription();
+		subscription.getMeta().addTag("http://foo", "blah", "blah");
+		subscription.getMeta().addTag("http://foo", "baz", "baz");
+
+		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
+
+		assertEquals("baz", canonicalSubscription.getTags().get("http://foo"));
+	}
 
 	@Test
 	void testCanonicalizeR4SendDeleteMessagesSetsExtensionValue() {
