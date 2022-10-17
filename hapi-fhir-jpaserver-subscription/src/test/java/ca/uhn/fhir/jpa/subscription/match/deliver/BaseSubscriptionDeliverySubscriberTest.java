@@ -322,8 +322,10 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	public void testRestHookDeliveryFails_raisedExceptionShouldNotIncludeSubmittedResource() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
+		String familyName = "FAMILY";
+
 		Patient patient = generatePatient();
-		patient.setBirthDate(new Date());
+		patient.addName().setFamily(familyName);
 		CanonicalSubscription subscription = generateSubscription();
 
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
@@ -337,9 +339,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail();
 		} catch (MessagingException e) {
-			String patientAsString = myCtx.newJsonParser().encodeResourceToString(patient);
 			String messageExceptionAsString = e.toString();
-			assertFalse(messageExceptionAsString.contains(patientAsString));
+			assertFalse(messageExceptionAsString.contains(familyName));
 		}
 	}
 
