@@ -52,7 +52,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
-	private long myMaximumBinarySize = Long.MAX_VALUE;
+	private long myMaximumBinarySize = Long.MAX_VALUE -1;
 	private int myMinimumBinarySize;
 
 	@Autowired
@@ -107,11 +107,12 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	protected CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
+
+		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);  // EHP: Have to figure out why the original implementation added +1.
 		return new CountingInputStream(is) {
 			@Override
-			public int getCount() {
-				int retVal = super.getCount();
+			public long getByteCount() {
+				long retVal = super.getByteCount();
 				if (retVal > getMaximumBinarySize()) {
 					throw new PayloadTooLargeException(Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
