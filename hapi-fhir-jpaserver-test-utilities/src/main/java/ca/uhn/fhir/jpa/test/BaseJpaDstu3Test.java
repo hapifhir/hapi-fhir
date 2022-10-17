@@ -48,7 +48,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -309,7 +309,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu3")
-	protected JpaSystemProviderDstu3 mySystemProvider;
+	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
 	@Autowired

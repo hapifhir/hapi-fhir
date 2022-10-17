@@ -549,8 +549,8 @@ public abstract class BaseStructureParser {
 		ctx.put("isRi", determineVersionEnum().isRi());
 
 		String capitalize = WordUtils.capitalize(myVersion);
-		if ("Dstu".equals(capitalize)) {
-			capitalize = "Dstu1";
+		if ("R4b".equals(capitalize)) {
+			capitalize = "R4B";
 		}
 		ctx.put("versionCapitalized", capitalize);
 		ctx.put("this", theResource);
@@ -694,8 +694,8 @@ public abstract class BaseStructureParser {
 				ctx.put("isRi", determineVersionEnum().isRi());
 				ctx.put("package_suffix", packageSuffix);
 				String capitalize = WordUtils.capitalize(myVersion);
-				if ("Dstu".equals(capitalize)) {
-					capitalize = "Dstu1";
+				if ("R4b".equals(capitalize)) {
+					capitalize = "R4B";
 				}
 				ctx.put("versionCapitalized", capitalize);
 

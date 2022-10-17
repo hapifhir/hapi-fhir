@@ -96,6 +96,13 @@ public class GraphQLProvider {
 				myEngineFactory = () -> new org.hl7.fhir.r4.utils.GraphQLEngine(workerContext);
 				break;
 			}
+			case R4B: {
+				IValidationSupport validationSupport = theValidationSupport;
+				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));
+				org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext workerContext = new org.hl7.fhir.r4b.hapi.ctx.HapiWorkerContext(theFhirContext, validationSupport);
+				myEngineFactory = () -> new org.hl7.fhir.r4b.utils.GraphQLEngine(workerContext);
+				break;
+			}
 			case R5: {
 				IValidationSupport validationSupport = theValidationSupport;
 				validationSupport = ObjectUtils.defaultIfNull(validationSupport, new DefaultProfileValidationSupport(theFhirContext));

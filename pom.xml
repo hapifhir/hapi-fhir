@@ -7,7 +7,10 @@
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
 	<version>6.2.0-PRE15-SNAPSHOT</version>
-	<name>HAPI-FHIR</name>
+    <modules>
+        <module>hapi-fhir-jpaserver-test-r4b</module>
+    </modules>
+    <name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
 
@@ -2747,6 +2750,7 @@
 				<module>hapi-fhir-jpaserver-test-dstu2</module>
 				<module>hapi-fhir-jpaserver-test-dstu3</module>
 				<module>hapi-fhir-jpaserver-test-r4</module>
+				<module>hapi-fhir-jpaserver-test-r4b</module>
 				<module>hapi-fhir-jpaserver-test-r5</module>
 				<module>hapi-fhir-jpaserver-elastic-test-utilities</module>
 				<module>hapi-tinder-plugin</module>

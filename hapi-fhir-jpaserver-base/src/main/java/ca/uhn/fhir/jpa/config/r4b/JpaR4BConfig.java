@@ -1,28 +1,29 @@
-package ca.uhn.fhir.jpa.config.dstu3;
+package ca.uhn.fhir.jpa.config.r4b;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigDstu3;
+import ca.uhn.fhir.jpa.config.GeneratedDaoAndResourceProviderConfigR4B;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.config.SharedConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
-import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
+import ca.uhn.fhir.jpa.dao.r4b.TransactionProcessorVersionAdapterR4B;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcDstu3;
-import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu3;
+import ca.uhn.fhir.jpa.term.TermReadSvcR4;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4B;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.r4b.model.Bundle;
+import org.hl7.fhir.r4b.model.Meta;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,15 +54,21 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @Import({
-	FhirContextDstu3Config.class,
-	GeneratedDaoAndResourceProviderConfigDstu3.class,
+	FhirContextR4BConfig.class,
+	GeneratedDaoAndResourceProviderConfigR4B.class,
 	SharedConfigDstu3Plus.class,
 	JpaConfig.class
 })
-public class JpaDstu3Config {
+public class JpaR4BConfig {
+
 	@Bean
 	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
-		return new TermVersionAdapterSvcDstu3();
+		return new TermVersionAdapterSvcR4B();
+	}
+
+	@Bean
+	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
+		return new TransactionProcessorVersionAdapterR4B();
 	}
 
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
@@ -70,21 +77,17 @@ public class JpaDstu3Config {
 		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
-	@Bean
-	public ITransactionProcessorVersionAdapter transactionProcessorVersionFacade() {
-		return new TransactionProcessorVersionAdapterDstu3();
+	@Bean(name = "mySystemDaoR4B")
+	public IFhirSystemDao<Bundle, Meta> systemDaoR4() {
+		ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B retVal = new ca.uhn.fhir.jpa.dao.r4b.FhirSystemDaoR4B();
+		return retVal;
 	}
 
-	@Bean(name = "mySystemDaoDstu3")
-	public IFhirSystemDao<Bundle, Meta> systemDaoDstu3() {
-		return new ca.uhn.fhir.jpa.dao.dstu3.FhirSystemDaoDstu3();
-	}
-
-	@Bean(name = "mySystemProviderDstu3")
-	public JpaSystemProvider<Bundle, Meta> systemProviderDstu3(FhirContext theFhirContext) {
+	@Bean(name = "mySystemProviderR4B")
+	public JpaSystemProvider<Bundle, Meta> systemProviderR4(FhirContext theFhirContext) {
 		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
 		retVal.setContext(theFhirContext);
-		retVal.setDao(systemDaoDstu3());
+		retVal.setDao(systemDaoR4());
 		return retVal;
 	}
 
@@ -93,9 +96,9 @@ public class JpaDstu3Config {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
 
-   @Bean
-	public ITermReadSvcDstu3 terminologyService() {
-		return new TermReadSvcDstu3();
+	@Bean
+	public ITermReadSvcR4 terminologyService() {
+		return new TermReadSvcR4();
 	}
 
 }
