@@ -97,14 +97,12 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	}
 
 	@Test
-	public void testLoadSnowmedCtWithAnotherAcceptedDescriptionFileName() throws Exception {
+	public void testLoadSnowmedCtWithCanadianEditionFileNamingConvention() throws Exception {
 		myFiles.addFileZip("/sct/", "sct2_Concept_Full_INT_20160131.txt");
-		myFiles.addFileZip("/sct/", "sct2_Concept_Full-en_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_Description_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_Identifier_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_Relationship_Full_INT_20160131.txt");
 		myFiles.addFileZip("/sct/", "sct2_StatedRelationship_Full_INT_20160131.txt");
-		myFiles.addFileZip("/sct/", "sct2_TextDefinition_Full-en_INT_20160131.txt");
 		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
 		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyList());
