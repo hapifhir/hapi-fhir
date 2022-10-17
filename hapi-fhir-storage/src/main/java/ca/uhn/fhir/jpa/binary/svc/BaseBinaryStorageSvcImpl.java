@@ -107,7 +107,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	protected CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize());
+		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
 			public int getCount() {
