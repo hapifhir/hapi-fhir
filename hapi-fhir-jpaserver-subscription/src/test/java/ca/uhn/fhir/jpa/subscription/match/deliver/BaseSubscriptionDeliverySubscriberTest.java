@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,6 +49,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -314,6 +316,32 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
 		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
+	}
+
+	@Test
+	public void testRestHookDeliveryFails_raisedExceptionShouldNotIncludeSubmittedResource() {
+		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
+
+		String familyName = "FAMILY";
+
+		Patient patient = generatePatient();
+		patient.addName().setFamily(familyName);
+		CanonicalSubscription subscription = generateSubscription();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		when(myGenericClient.update()).thenThrow(new InternalErrorException("FOO"));
+
+		try {
+			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
+			fail();
+		} catch (MessagingException e) {
+			String messageExceptionAsString = e.toString();
+			assertFalse(messageExceptionAsString.contains(familyName));
+		}
 	}
 
 	@Nonnull
