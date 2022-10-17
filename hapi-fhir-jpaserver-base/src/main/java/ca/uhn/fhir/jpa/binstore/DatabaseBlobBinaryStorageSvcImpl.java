@@ -92,7 +92,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		entity.setBlob(dataBlob);
 
 		// Update the entity with the final byte count and hash
-		long bytes = countingInputStream.getCount();
+		long bytes = countingInputStream.getByteCount();
 		String hash = hashingInputStream.hash().toString();
 		entity.setSize((int) bytes);
 		entity.setHash(hash);

@@ -62,7 +62,7 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		byte[] bytes = IOUtils.toByteArray(countingIs);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
-		StoredDetails storedDetails = new StoredDetails(id, countingIs.getCount(), theContentType, hashingIs, new Date());
+		StoredDetails storedDetails = new StoredDetails(id, countingIs.getByteCount(), theContentType, hashingIs, new Date());
 		myDetailsMap.put(key, storedDetails);
 		return storedDetails;
 	}
