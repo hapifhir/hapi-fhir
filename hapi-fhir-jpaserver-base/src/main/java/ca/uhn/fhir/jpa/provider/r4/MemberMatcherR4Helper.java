@@ -52,7 +52,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 public class MemberMatcherR4Helper {
 
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
-	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "UMB";
+	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "MB";
 	private static final String OUT_COVERAGE_IDENTIFIER_TEXT = "Member Number";
 	private static final String COVERAGE_TYPE = "Coverage";
 

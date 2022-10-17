@@ -276,13 +276,12 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	}
 
 	private void validateMemberPatient(Patient theMemberPatient) {
-		if (theMemberPatient.getName().isEmpty() || theMemberPatient.getName().get(0).getFamily() == null) {
+		if (theMemberPatient.getName().isEmpty()) {
 			validateParam(null, Constants.PARAM_MEMBER_PATIENT_NAME);
 		}
 
-		if (theMemberPatient.getBirthDate() == null) {
-			validateParam(null, Constants.PARAM_MEMBER_PATIENT_BIRTHDATE);
-		}
+		validateParam(theMemberPatient.getName().get(0).getFamily(), Constants.PARAM_MEMBER_PATIENT_NAME);
+		validateParam(theMemberPatient.getBirthDate(), Constants.PARAM_MEMBER_PATIENT_BIRTHDATE);
 	}
 
 	/**
