@@ -61,6 +61,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -927,6 +928,9 @@ public class OpenApiInterceptor {
 			canonical = VersionConvertorFactory_30_40.convertResource((org.hl7.fhir.dstu3.model.Resource) theNonCanonical);
 		} else if (theNonCanonical instanceof org.hl7.fhir.r5.model.Resource) {
 			canonical = VersionConvertorFactory_40_50.convertResource((org.hl7.fhir.r5.model.Resource) theNonCanonical);
+		} else if (theNonCanonical instanceof org.hl7.fhir.r4b.model.Resource) {
+			org.hl7.fhir.r5.model.Resource r5 = VersionConvertorFactory_43_50.convertResource((org.hl7.fhir.r4b.model.Resource) theNonCanonical);
+			canonical = VersionConvertorFactory_40_50.convertResource(r5);
 		} else {
 			canonical = theNonCanonical;
 		}

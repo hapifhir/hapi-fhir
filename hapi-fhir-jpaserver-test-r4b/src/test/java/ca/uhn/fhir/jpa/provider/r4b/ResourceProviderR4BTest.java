@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -67,6 +68,8 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
+
+		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t->t instanceof OpenApiInterceptor);
 	}
 
 	@BeforeEach
@@ -404,6 +407,21 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		assertThat(ids, Matchers.not(hasItem(o1Id)));
 		assertThat(ids, Matchers.not(hasItem(m1Id)));
 	}
+
+	@Test
+	public void testOpenApiFetchSwaggerUi() throws IOException {
+		ourRestServer.getInterceptorService().registerInterceptor(new OpenApiInterceptor());
+
+		String uri = ourServerBase + "/swagger-ui/";
+
+		HttpGet get = new HttpGet(uri);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Fetch output: {}", output);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
+	}
+
 
 	@Test
 	public void testEverythingPatientTypeWithTypeAndIdParameter() {
