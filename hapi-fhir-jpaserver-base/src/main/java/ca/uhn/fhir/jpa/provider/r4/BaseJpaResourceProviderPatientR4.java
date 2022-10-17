@@ -264,7 +264,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
 		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
-		validateMemberPatient(theMemberPatient);
+		validateMemberPatientParam(theMemberPatient);
 	}
 
 	private void validateParam(Object theParam, String theParamName) {
@@ -275,7 +275,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		}
 	}
 
-	private void validateMemberPatient(Patient theMemberPatient) {
+	private void validateMemberPatientParam(Patient theMemberPatient) {
 		if (theMemberPatient.getName().isEmpty()) {
 			validateParam(null, Constants.PARAM_MEMBER_PATIENT_NAME);
 		}
