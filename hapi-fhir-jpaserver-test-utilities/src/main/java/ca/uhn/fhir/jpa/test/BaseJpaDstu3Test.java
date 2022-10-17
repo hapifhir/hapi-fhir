@@ -53,7 +53,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -367,7 +367,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();

@@ -5,9 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.TransactionProcessorVersionAdapterDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
-import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -68,8 +66,4 @@ public class JpaDstu2Config {
 		return retVal;
 	}
 
-	@Bean
-	public ITermReadSvc terminologyService() {
-		return new TermReadSvcDstu2();
-	}
 }

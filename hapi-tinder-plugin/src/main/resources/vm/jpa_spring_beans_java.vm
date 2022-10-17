@@ -76,13 +76,13 @@ FhirContext myFhirContext;
 #end
 		dao${res.declaringClassNameComplete}${versionCapitalized}() {
 
-#if (${res.name} == 'Patient')
+#if ( ${res.name} == 'Bundle' || ${res.name} == 'Patient' )
 	ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}> retVal;
 	retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<>();
 #elseif ( (${versionCapitalized.startsWith('R')} || ${versionCapitalized} == 'Dstu3') && (${res.name} == 'ConceptMap') )
 		ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<org.hl7.fhir.${version}.model.${res.name}> retVal;
 		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<>();
-#elseif ( ${res.name} == 'Bundle' || ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
+#elseif ( ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'QuestionnaireResponse' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
     	ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
 		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #elseif ( ${versionCapitalized} != 'Dstu1' && ${versionCapitalized} != 'Dstu2' && ${res.name} == 'Observation')

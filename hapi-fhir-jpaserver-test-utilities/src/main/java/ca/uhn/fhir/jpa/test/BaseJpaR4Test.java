@@ -87,15 +87,14 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -482,7 +481,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -548,7 +547,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();

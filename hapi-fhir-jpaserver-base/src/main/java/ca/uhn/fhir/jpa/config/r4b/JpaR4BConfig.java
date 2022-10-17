@@ -13,12 +13,10 @@ import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcR4;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4B;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4b.model.Bundle;
@@ -93,11 +91,6 @@ public class JpaR4BConfig {
 	@Bean
 	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
-	}
-
-	@Bean
-	public ITermReadSvcR4 terminologyService() {
-		return new TermReadSvcR4();
 	}
 
 }

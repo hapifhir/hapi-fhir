@@ -46,19 +46,19 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -360,14 +360,14 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
 	@Qualifier("mySystemProviderR5")
-	protected JpaSystemProviderR5 mySystemProvider;
+	protected JpaSystemProvider mySystemProvider;
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
 	@Autowired
 	@Qualifier("myTaskDaoR5")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected ITermReadSvcR5 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -441,7 +441,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();

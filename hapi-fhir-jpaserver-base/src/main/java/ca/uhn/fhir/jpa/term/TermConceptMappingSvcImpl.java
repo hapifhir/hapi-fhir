@@ -47,11 +47,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.IdType;
@@ -81,7 +78,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.isPlaceholder;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -90,7 +87,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptMappingSvcImpl.class);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
-	private final int myFetchSize = BaseTermReadSvcImpl.DEFAULT_FETCH_SIZE;
+	private final int myFetchSize = TermReadSvcImpl.DEFAULT_FETCH_SIZE;
 	@Autowired
 	protected ITermConceptMapDao myConceptMapDao;
 	@Autowired
@@ -266,7 +263,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 			if (isBlank(conceptMapVersion)) {
 				String msg = myContext.getLocalizer().getMessage(
-					BaseTermReadSvcImpl.class,
+					TermReadSvcImpl.class,
 					"cannotCreateDuplicateConceptMapUrl",
 					conceptMapUrl,
 					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -274,7 +271,7 @@ public class TermConceptMappingSvcImpl implements ITermConceptMappingSvc {
 
 			} else {
 				String msg = myContext.getLocalizer().getMessage(
-					BaseTermReadSvcImpl.class,
+					TermReadSvcImpl.class,
 					"cannotCreateDuplicateConceptMapUrlAndVersion",
 					conceptMapUrl, conceptMapVersion,
 					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());

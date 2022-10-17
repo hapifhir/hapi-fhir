@@ -85,6 +85,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
@@ -120,6 +121,7 @@ import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.convertors.conv40_50.resources40_50.ValueSet40_50;
+import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -206,10 +208,10 @@ import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
-public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
+public class TermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final int SINGLE_FETCH_SIZE = 1;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
 	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
 	private static Runnable myInvokeOnNextCallForUnitTest;
@@ -365,7 +367,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
-				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
 				throw new ExpansionTooCostlyException(Msg.code(885) + msg);
 			}
 		}
@@ -504,7 +506,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 */
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.debug("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
-			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingInMemoryExpansion", getValueSetInfo(theValueSetToExpand));
+			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingInMemoryExpansion", getValueSetInfo(theValueSetToExpand));
 			theAccumulator.addMessage(msg);
 			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
@@ -515,7 +517,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 */
 		TermValueSet termValueSet = optionalTermValueSet.get();
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
-			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotYetExpanded", getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
+			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetNotYetExpanded", getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			theAccumulator.addMessage(msg);
 			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
@@ -525,7 +527,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * ValueSet is pre-expanded in database so let's use that
 		 */
 		String expansionTimestamp = toHumanReadableExpansionTimestamp(termValueSet);
-		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
+		String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion", expansionTimestamp);
 		theAccumulator.addMessage(msg);
 		expandConcepts(theExpansionOptions, theAccumulator, termValueSet, theFilter, theAdd, isOracleDialect());
 	}
@@ -754,7 +756,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		Integer skipCountRemaining = theValueSetCodeAccumulator.getSkipCountRemaining();
 		if (skipCountRemaining != null && skipCountRemaining > 0) {
 			if (theValueSetToExpand.getCompose().getExclude().size() > 0) {
-				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotYetExpanded_OffsetNotAllowed", valueSetInfo);
+				String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetNotYetExpanded_OffsetNotAllowed", valueSetInfo);
 				throw new InvalidRequestException(Msg.code(887) + msg);
 			}
 		}
@@ -1631,17 +1633,17 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Transactional
 	public String invalidatePreCalculatedExpansion(IIdType theValueSetId, RequestDetails theRequestDetails) {
 		IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId, theRequestDetails);
-		ValueSet canonicalValueSet = toCanonicalValueSet(valueSet);
+		ValueSet canonicalValueSet = myVersionCanonicalizer.valueSetToCanonical(valueSet);
 		Optional<TermValueSet> optionalTermValueSet = fetchValueSetEntity(canonicalValueSet);
 		if (!optionalTermValueSet.isPresent()) {
-			return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotFoundInTerminologyDatabase", theValueSetId);
+			return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetNotFoundInTerminologyDatabase", theValueSetId);
 		}
 
 		ourLog.info("Invalidating pre-calculated expansion on ValueSet {} / {}", theValueSetId, canonicalValueSet.getUrl());
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
 		if (termValueSet.getExpansionStatus() == TermValueSetPreExpansionStatusEnum.NOT_EXPANDED) {
-			return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetCantInvalidateNotYetPrecalculated", termValueSet.getUrl(), termValueSet.getExpansionStatus());
+			return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetCantInvalidateNotYetPrecalculated", termValueSet.getUrl(), termValueSet.getExpansionStatus());
 		}
 
 		Long totalConcepts = termValueSet.getTotalConcepts();
@@ -1651,7 +1653,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
 		myTermValueSetDao.save(termValueSet);
-		return myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
+		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
 	}
 
 	@Override
@@ -1721,7 +1723,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(() -> new IllegalStateException());
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
-		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
+		String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
 		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
 			String systemVersion = null;
@@ -1839,6 +1841,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
+	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
 		TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
@@ -2059,10 +2062,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Transactional
 	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
 
-		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConceptToValidate);
+		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConceptToValidate);
 		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
 
-		Coding canonicalCodingToValidate = toCanonicalCoding(theCodingToValidate);
+		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCodingToValidate);
 		boolean haveCoding = canonicalCodingToValidate != null && canonicalCodingToValidate.isEmpty() == false;
 
 		boolean haveCode = theCodeToValidate != null && theCodeToValidate.isEmpty() == false;
@@ -2128,8 +2131,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty();
 	}
 
-	protected abstract ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable);
-
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
 		Optional<TermValueSet> retVal = Optional.empty();
 		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
@@ -2186,12 +2187,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			String msg;
 			if (version != null) {
 				msg = myContext.getLocalizer().getMessage(
-					BaseTermReadSvcImpl.class,
+					TermReadSvcImpl.class,
 					"cannotCreateDuplicateValueSetUrlAndVersion",
 					url, version, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			} else {
 				msg = myContext.getLocalizer().getMessage(
-					BaseTermReadSvcImpl.class,
+					TermReadSvcImpl.class,
 					"cannotCreateDuplicateValueSetUrl",
 					url, existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			}
@@ -2245,8 +2246,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return new IFhirResourceDaoCodeSystem.SubsumesResult(subsumes);
 	}
-
-	protected abstract ValueSet toCanonicalValueSet(IBaseResource theValueSet);
 
 	protected IValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode, String theDisplayLanguage) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -2415,7 +2414,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		IValidationSupport validationSupport = provideValidationSupport();
 		IBaseResource codeSystem = validationSupport.fetchCodeSystem(theSystem);
 		if (codeSystem != null) {
-			codeSystem = toCanonicalCodeSystem(codeSystem);
+			codeSystem = myVersionCanonicalizer.codeSystemToCanonical(codeSystem);
 		}
 		return (CodeSystem) codeSystem;
 	}
@@ -2444,12 +2443,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		IValidationSupport validationSupport = provideValidationSupport();
 		IBaseResource valueSet = validationSupport.fetchValueSet(theSystem);
 		if (valueSet != null) {
-			valueSet = toCanonicalValueSet(valueSet);
+			valueSet = myVersionCanonicalizer.valueSetToCanonical(valueSet);
 		}
 		return (ValueSet) valueSet;
 	}
-
-	protected abstract CodeSystem toCanonicalCodeSystem(IBaseResource theCodeSystem);
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
@@ -2526,14 +2523,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return false;
 	}
 
-	@Nullable
-	protected abstract Coding toCanonicalCoding(@Nullable IBaseDatatype theCoding);
-
-	@Nullable
-	protected abstract Coding toCanonicalCoding(@Nullable IBaseCoding theCoding);
-
-	@Nullable
-	protected abstract CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept);
 
 	@Nonnull
 	private FhirVersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
@@ -2541,7 +2530,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		String system = theCodeSystemIdentifierType != null ? getUrlFromIdentifier(theCodeSystemIdentifierType.getValueAsString()) : null;
 		String systemVersion = theCodeSystemIdentifierType != null ? getVersionFromIdentifier(theCodeSystemIdentifierType.getValueAsString()) : null;
 		if (theCodingType != null) {
-			Coding canonicalizedCoding = toCanonicalCoding(theCodingType);
+			Coding canonicalizedCoding = myVersionCanonicalizer.codingToCanonical(theCodingType);
 			assert canonicalizedCoding != null; // Shouldn't be null, since theCodingType isn't
 			code = canonicalizedCoding.getCode();
 			system = canonicalizedCoding.getSystem();
@@ -2554,10 +2543,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Transactional
 	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 
-		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
 
-		Coding coding = toCanonicalCoding(theCoding);
+		Coding coding = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
 		boolean haveCoding = coding != null && coding.isEmpty() == false;
 
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
@@ -2924,4 +2913,69 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			myIncludeOrExcludeCodes = theIncludeOrExcludeCodes;
 		}
 	}
+
+	@Override
+	public ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+		org.hl7.fhir.r5.model.ValueSet valueSetToExpand = (org.hl7.fhir.r5.model.ValueSet) theValueSetToExpand;
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = expandValueSet(theExpansionOptions,
+			(org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetToExpand, new BaseAdvisor_40_50(false)));
+		return new ValueSetExpansionOutcome(VersionConvertorFactory_40_50.convertResource(expandedR4, new BaseAdvisor_40_50(false)));
+	}
+
+	@Override
+	public IBaseResource expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theInput) {
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = myVersionCanonicalizer.valueSetToCanonical(theInput);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = expandValueSet(theExpansionOptions, valueSetToExpand);
+		return VersionConvertorFactory_40_50.convertResource(valueSetR4, new BaseAdvisor_40_50(false));
+	}
+
+	@Override
+	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = myVersionCanonicalizer.valueSetToCanonical(theValueSetToExpand);
+		expandValueSet(theExpansionOptions, valueSetToExpand, theValueSetCodeAccumulator);
+	}
+
+	private org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		org.hl7.fhir.r5.model.ValueSet valueSetR5 = myDaoRegistry.getResourceDao("ValueSet").toResource(org.hl7.fhir.r5.model.ValueSet.class, theResourceTable, null, false);
+		return (org.hl7.fhir.r4.model.ValueSet) VersionConvertorFactory_40_50.convertResource(valueSetR5, new BaseAdvisor_40_50(false));
+	}
+
+	@Override
+	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
+		org.hl7.fhir.r5.model.ValueSet valueSet = (org.hl7.fhir.r5.model.ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(valueSet);
+
+		org.hl7.fhir.r4.model.Coding codingR4 = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
+
+		org.hl7.fhir.r5.model.CodeableConcept codeableConcept = (org.hl7.fhir.r5.model.CodeableConcept) theCodeableConcept;
+		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = null;
+		if (codeableConcept != null) {
+			codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+			for (org.hl7.fhir.r5.model.Coding nestedCoding : codeableConcept.getCoding()) {
+				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
+			}
+		}
+
+		return validateCodeIsInPreExpandedValueSet(theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
+	}
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
+
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
+		return isValueSetPreExpandedForCodeValidation(valueSetR4);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+		return lookupCode(theSystem, theCode, theDisplayLanguage);
+	}
+
+
+
 }

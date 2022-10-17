@@ -188,13 +188,13 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	private void incrementConceptsCount() {
 		Integer capacityRemaining = getCapacityRemaining();
 		if (capacityRemaining == 0) {
-			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myMaxCapacity);
+			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myMaxCapacity);
 			msg = appendAccumulatorMessages(msg);
 			throw new ExpansionTooCostlyException(Msg.code(831) + msg);
 		}
 
 		if (myHardExpansionMaximumSize > 0 && myAddedConcepts > myHardExpansionMaximumSize) {
-			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myHardExpansionMaximumSize);
+			String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "expansionTooLarge", myHardExpansionMaximumSize);
 			msg = appendAccumulatorMessages(msg);
 			throw new ExpansionTooCostlyException(Msg.code(832) + msg);
 		}

@@ -20,27 +20,29 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class FhirResourceDaoBundleDstu2 extends BaseHapiFhirResourceDao<Bundle> {
+public class JpaResourceDaoBundle<T extends IBaseBundle> extends BaseHapiFhirResourceDao<T> {
 
 	@Override
 	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
 		super.preProcessResourceForStorage(theResource, theRequestDetails, theTransactionDetails, thePerformIndexing);
 
-		for (Entry next : ((Bundle)theResource).getEntry()) {
-			next.setFullUrl((String) null);
+		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+			for (Entry next : ((Bundle) theResource).getEntry()) {
+				next.setFullUrl((String) null);
+			}
 		}
 	}
+
 
 
 }

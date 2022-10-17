@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -121,7 +121,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.IGNORE);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
@@ -1193,7 +1193,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	@Disabled
 	public void testValidate_TermSvcHasDatabaseRollback() {
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			try {
 				myResourceTableDao.save(new ResourceTable());
 				myResourceTableDao.flush();
@@ -1232,7 +1232,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs);
 
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			throw new NullPointerException("MY ERROR");
 		});
 

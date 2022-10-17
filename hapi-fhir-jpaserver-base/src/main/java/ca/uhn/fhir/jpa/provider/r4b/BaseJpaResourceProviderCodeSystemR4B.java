@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -53,32 +53,31 @@ import java.util.List;
 public abstract class BaseJpaResourceProviderCodeSystemR4B extends JpaResourceProviderR4B<CodeSystem> {
 
 	@Autowired
+	protected ITermReadSvc myTermSvc;
+	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
-
-	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
 
 	/**
 	 * $lookup operation
 	 */
 	@SuppressWarnings("unchecked")
-	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
-		@OperationParam(name="name", type=StringType.class, min=1),
-		@OperationParam(name="version", type=StringType.class, min=0),
-		@OperationParam(name="display", type=StringType.class, min=1),
-		@OperationParam(name="abstract", type=BooleanType.class, min=1),
+	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {
+		@OperationParam(name = "name", type = StringType.class, min = 1),
+		@OperationParam(name = "version", type = StringType.class, min = 0),
+		@OperationParam(name = "display", type = StringType.class, min = 1),
+		@OperationParam(name = "abstract", type = BooleanType.class, min = 1),
 	})
 	public Parameters lookup(
-			HttpServletRequest theServletRequest,
-			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
-			@OperationParam(name="system", min=0, max=1) UriType theSystem,
-			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
-			@OperationParam(name="version", min=0, max=1) StringType theVersion,
-			@OperationParam(name="displayLanguage", min=0, max=1) CodeType theDisplayLanguage,
-			@OperationParam(name="property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
-			RequestDetails theRequestDetails
-			) {
+		HttpServletRequest theServletRequest,
+		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
+		@OperationParam(name = "displayLanguage", min = 0, max = 1) CodeType theDisplayLanguage,
+		@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
+		RequestDetails theRequestDetails
+	) {
 
 		startRequest(theServletRequest);
 		try {
@@ -100,17 +99,17 @@ public abstract class BaseJpaResourceProviderCodeSystemR4B extends JpaResourcePr
 	/**
 	 * $subsumes operation
 	 */
-	@Operation(name = JpaConstants.OPERATION_SUBSUMES, idempotent = true, returnParameters= {
-		@OperationParam(name="outcome", type=CodeType.class, min=1),
+	@Operation(name = JpaConstants.OPERATION_SUBSUMES, idempotent = true, returnParameters = {
+		@OperationParam(name = "outcome", type = CodeType.class, min = 1),
 	})
 	public Parameters subsumes(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name="codeA", min=0, max=1) CodeType theCodeA,
-		@OperationParam(name="codeB", min=0, max=1) CodeType theCodeB,
-		@OperationParam(name="system", min=0, max=1) UriType theSystem,
-		@OperationParam(name="codingA", min=0, max=1) Coding theCodingA,
-		@OperationParam(name="codingB", min=0, max=1) Coding theCodingB,
-		@OperationParam(name="version", min=0, max=1) StringType theVersion,
+		@OperationParam(name = "codeA", min = 0, max = 1) CodeType theCodeA,
+		@OperationParam(name = "codeB", min = 0, max = 1) CodeType theCodeB,
+		@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+		@OperationParam(name = "codingA", min = 0, max = 1) Coding theCodingA,
+		@OperationParam(name = "codingB", min = 0, max = 1) Coding theCodingB,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
 		RequestDetails theRequestDetails
 	) {
 
@@ -127,7 +126,7 @@ public abstract class BaseJpaResourceProviderCodeSystemR4B extends JpaResourcePr
 			endRequest(theServletRequest);
 		}
 	}
-	
+
 	/**
 	 * $validate-code operation
 	 */

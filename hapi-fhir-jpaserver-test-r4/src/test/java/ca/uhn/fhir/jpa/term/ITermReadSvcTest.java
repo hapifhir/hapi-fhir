@@ -56,8 +56,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -316,7 +316,7 @@ class ITermReadSvcTest {
 		@Mock private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 		@InjectMocks
-		@Spy private BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+		@Spy private TermReadSvcImpl myTermReadSvc = (TermReadSvcImpl) spy(testedClass);
 
 
 		@Test
