@@ -88,7 +88,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 
 		ResourceOperationMessage resourceOperationMessage = myMdmHelper.getAfterMdmLatch().getLatchInvocationParameterOfType(ResourceOperationMessage.class);
 		assertNotNull(resourceOperationMessage);
-		assertEquals(pr.getId(), resourceOperationMessage.getId());
+		assertEquals(pr.getIdElement().toUnqualifiedVersionless().getValue(), resourceOperationMessage.getId());
 
 		MdmLink link = getLinkByTargetId(pr);
 
