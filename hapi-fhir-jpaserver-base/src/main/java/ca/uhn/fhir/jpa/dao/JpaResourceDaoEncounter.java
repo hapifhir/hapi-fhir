@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.dao;
 
 /*
  * #%L
@@ -22,22 +22,20 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoEncounter;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Encounter;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 
-public class FhirResourceDaoEncounterR4 extends BaseHapiFhirResourceDao<Encounter> implements IFhirResourceDaoEncounter<Encounter> {
+public class JpaResourceDaoEncounter<T extends IBaseResource> extends BaseHapiFhirResourceDao<T> implements IFhirResourceDaoEncounter<T> {
 
 	@Override
 	public IBundleProvider encounterInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort) {
@@ -46,11 +44,11 @@ public class FhirResourceDaoEncounterR4 extends BaseHapiFhirResourceDao<Encounte
 			paramMap.setCount(theCount.getValue());
 		}
 		if (theOffset != null) {
-			throw new IllegalArgumentException(Msg.code(1107) + "Everything operation does not support offset searching");
+			throw new IllegalArgumentException(Msg.code(1128) + "Everything operation does not support offset searching");
 		}
 
 //		paramMap.setRevIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
-		paramMap.setIncludes(Collections.singleton(IResource.INCLUDE_ALL.asRecursive()));
+		paramMap.setIncludes(Collections.singleton(IBaseResource.INCLUDE_ALL.asRecursive()));
 		paramMap.setEverythingMode(theId != null ? EverythingModeEnum.ENCOUNTER_INSTANCE : EverythingModeEnum.ENCOUNTER_TYPE);
 		paramMap.setSort(theSort);
 		paramMap.setLastUpdated(theLastUpdated);

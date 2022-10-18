@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
 	@Autowired
 	private IValidationSupport myValidationSupport;
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	@Override
 	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
@@ -54,7 +57,7 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 
 		if (!retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
-				ConceptMap conceptMap = (ConceptMap) theResource;
+				ConceptMap conceptMap = myVersionCanonicalizer.conceptMapToCanonical(theResource);
 				myTermConceptMappingSvc.storeTermConceptMapAndChildren(retVal, conceptMap);
 			} else {
 				myTermConceptMappingSvc.deleteConceptMapAndChildren(retVal);
