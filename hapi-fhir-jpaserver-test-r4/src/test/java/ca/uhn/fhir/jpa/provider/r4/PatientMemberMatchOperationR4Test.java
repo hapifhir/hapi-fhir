@@ -331,7 +331,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		//	 "coding": [
 		//	  	{
 		//	  		"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-		//	  		"code": "UMB",
+		//	  		"code": "MB",
 		//	  		"display": "Member Number",
 		//	  		"userSelected": false
 		//		}
