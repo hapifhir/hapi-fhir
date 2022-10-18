@@ -99,7 +99,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(ColumnTypeEnum.BOOLEAN);
 
 		version
-			.onTable("FJ_BINARY_STORAGE_BLOB")
+			.onTable("HFJ_BINARY_STORAGE_BLOB")
 			.modifyColumn("20221017.1", "BLOB_SIZE")
 			.nullable()
 			.withType(ColumnTypeEnum.LONG);
