@@ -34,11 +34,9 @@ import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -103,17 +101,15 @@ public class JpaServerDemo extends RestfulServer {
 		 */
 		List<Object> systemProvider = new ArrayList<Object>();
 		if (fhirVersion == FhirVersionEnum.DSTU2) {
-			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 		} else if (fhirVersion == FhirVersionEnum.DSTU3) {
-			systemProvider.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 		} else if (fhirVersion == FhirVersionEnum.R4) {
-			systemProvider.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			systemProvider.add(myAppCtx.getBean(JpaConfig.GRAPHQL_PROVIDER_NAME));
 		} else {
 			throw new IllegalStateException(Msg.code(1533));
 		}
+		systemProvider.add(myAppCtx.getBean(JpaSystemProvider.class));
 		registerProviders(systemProvider);
 
 		/*

@@ -27,10 +27,9 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.util.TestHSearchEventDispatcher;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -129,7 +128,6 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
@@ -145,13 +143,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestExecutionListeners(listeners = {
 	DependencyInjectionTestExecutionListener.class
-	,FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
-	})
+	, FhirResourceDaoR4SearchWithElasticSearchIT.TestDirtiesContextTestExecutionListener.class
+})
 public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest implements ITestDataBuilder {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
-
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithElasticSearchIT.class);
 	private static final String SPACE = "%20";
 
 	@Autowired
@@ -170,9 +167,18 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
+	@Autowired
+	@Qualifier("myRiskAssessmentDaoR4")
+	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
+	@Autowired
+	ITestDataBuilder.WithSupport myTestDataBuilder;
+	@Autowired
+	TestDaoSearch myTestDaoSearch;
+	@RegisterExtension
+	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
@@ -187,11 +193,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	@Qualifier("myEncounterDaoR4")
 	private IFhirResourceDao<Encounter> myEncounterDao;
-
-	@Autowired
-	@Qualifier("myRiskAssessmentDaoR4")
-	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-
 	@Autowired
 	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
@@ -204,33 +205,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	ITestDataBuilder.WithSupport myTestDataBuilder;
-	@Autowired
-	TestDaoSearch myTestDaoSearch;
-	@Autowired
 	@Qualifier("myQuestionnaireDaoR4")
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-
 	@Autowired
 	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-
 	@Autowired
 	@Qualifier("myQuestionnaireResponseDaoR4")
 	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-	@RegisterExtension
-	LogbackLevelOverrideExtension myLogbackLevelOverrideExtension = new LogbackLevelOverrideExtension();
-
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
 
 
-	@Mock private IHSearchEventListener mySearchEventListener;
+	@Mock
+	private IHSearchEventListener mySearchEventListener;
 
 
 	@BeforeEach
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 	}
+
 	@Override
 	public IIdType doCreateResource(IBaseResource theResource) {
 		return myTestDataBuilder.doCreateResource(theResource);
@@ -419,185 +413,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
-	@Nested
-	public class StringTextSearch {
-
-		@Test
-		void secondWordFound() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Cloudy, yellow") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=yellow");
-			assertThat(resourceIds, hasItem(id1));
-		}
-
-		@Test
-		void stringMatchesPrefixAndWhole() {
-			// smit - matches "smit" and "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=smit");
-			assertThat(resourceIds, hasItems(id1, id2));
-		}
-
-
-		@Test
-		void stringPlusStarMatchesPrefixAndWhole() {
-			// smit* - matches "smit" and "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?_elements=valueString&value-string:text=smit*");
-			assertThat(resourceIds, hasItems(id1, id2));
-		}
-
-
-		@Test
-		void quotedStringMatchesIdenticalButNotAsPrefix() {
-			// "smit"- matches "smit", but not "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=\"smit\"");
-			assertThat(resourceIds, contains(id2));
-		}
-
-
-		@Test
-		void stringTokensAreAnded() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=car%20smit");
-			assertThat(resourceIds, hasItems(id2));
-		}
-
-		@Nested
-		public class DocumentationSamplesTests {
-
-			@Test
-			void line1() {
-				// | Fhir Query String | Executed Query  | Matches     | No Match
-				// | Smit             | Smit*            | John Smith  | John Smi
-				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smi") )).getIdPart();
-
-				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Smit");
-				assertThat(resourceIds, hasItems(id1));
-			}
-
-			@Test
-			void line2() {
-				// | Fhir Query String | Executed Query  | Matches     | No Match      | Note
-				// | Jo Smit           | Jo* Smit*       | John Smith  | John Frank    | Multiple bare terms are `AND`
-				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith") )).getIdPart();
-				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Frank") )).getIdPart();
-
-				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Jo%20Smit");
-				assertThat(resourceIds, hasItems(id1));
-			}
-
-			@Test
-			void line3() {
-				// | Fhir Query String | Executed Query    | Matches     | No Match       | Note
-				// | frank &vert; john | frank &vert; john | Frank Smith | Franklin Smith | SQS characters disable prefix wildcard
-				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith") )).getIdPart();
-				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith") )).getIdPart();
-
-				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=frank|john");
-				assertThat(resourceIds, hasItems(id1));
-			}
-
-			@Test
-			void line4() {
-				// | Fhir Query String | Executed Query  | Matches     | No Match       | Note
-				// | 'frank'           | 'frank'         | Frank Smith | Franklin Smith | Quoted terms are exact match
-				String id1 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith") )).getIdPart();
-				String id2 = myTestDataBuilder.createObservation(List.of(
-					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith") )).getIdPart();
-
-				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text='frank'");
-				assertThat(resourceIds, hasItems(id1));
-			}
-		}
-	}
-
-	@Nested
-	public class TokenTextSearch {
-
-		@Test
-		void secondWordFound() {
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Cloudy, yellow") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=yellow");
-			assertThat(resourceIds, hasItem(id1));
-		}
-
-		@Test
-		void stringMatchesPrefixAndWhole() {
-			// smit - matches "smit" and "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Carl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit");
-			assertThat(resourceIds, hasItems(id1, id2));
-		}
-
-
-		@Test
-		void stringPlusStarMatchesPrefixAndWhole() {
-			// smit* - matches "smit" and "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Adam Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "John Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit*");
-			assertThat(resourceIds, hasItems(id1, id2));
-		}
-
-
-		@Test
-		void quotedStringMatchesIdenticalButNotAsPrefix() {
-			// "smit"- matches "smit", but not "smith"
-
-			String id1 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith") )).getIdPart();
-			String id2 = myTestDataBuilder.createObservation(List.of(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Karl Smit") )).getIdPart();
-
-			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=\"Smit\"");
-			assertThat(resourceIds, contains(id2));
-		}
-
-	}
-
-
-
 	@Test
 	public void testResourceCodeTextSearch() {
 		IIdType id1, id2, id3, id4;
@@ -717,7 +532,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertObservationSearchMatches("empty params finds everything", "Observation?", id1, id2, id3, id4);
 		}
 	}
-
 
 	@Test
 	public void testResourceReferenceSearchForCanonicalReferences() {
@@ -865,7 +679,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 
-	/** Our url parser requires all chars to be single-byte, and in utf8, that means ascii. */
+	/**
+	 * Our url parser requires all chars to be single-byte, and in utf8, that means ascii.
+	 */
 	private String urlencode(String theParam) {
 		return URLEncoder.encode(theParam, CHARSET_UTF8);
 	}
@@ -881,47 +697,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 	private void assertObservationSearchMatches(String theMessage, String theSearch, IIdType... theIds) {
 		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theSearch);
 		assertObservationSearchMatches(theMessage, map, theIds);
-	}
-
-	@Nested
-	public class WithContainedIndexingIT {
-		@BeforeEach
-		public void enableContains() {
-			// we don't support chained or contained yet, but turn it on to test we don't blow up.
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
-		}
-
-		@AfterEach
-		public void restoreContains() {
-			ModelConfig defaultModelConfig = new ModelConfig();
-			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
-			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
-		}
-		/**
-		 * We were throwing when indexing contained.
-		 * https://github.com/hapifhir/hapi-fhir/issues/3371
-		 */
-		@Test
-		public void ignoreContainedResources_noError() {
-			// given
-			String json =
-				"{" +
-					"\"resourceType\": \"Observation\"," +
-					"\"contained\": [{" +
-					"\"resourceType\": \"Patient\"," +
-					"\"id\": \"contained-patient\"," +
-					"\"name\": [{ \"family\": \"Smith\"}]" +
-					"}]," +
-					"\"subject\": { \"reference\": \"#contained-patient\" }" +
-					"}";
-			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
-
-			IIdType id = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
-
-			// no error.
-			assertThat(id, notNullValue());
-		}
 	}
 
 	/**
@@ -943,14 +718,13 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertThat(result, hasSize(1));
-		assertEquals( ((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
+		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
 		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "JPA search for IDs and for resources");
 
 		// restore changed property
 		DaoConfig defaultConfig = new DaoConfig();
 		myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 	}
-
 
 	@Test
 	public void testExpandWithIsAInExternalValueSet() {
@@ -1042,7 +816,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			.collect(Collectors.toList());
 		assertThat(codes.toString(), codes, Matchers.contains("advice", "message", "note", "notification"));
 	}
-
 
 	@Test
 	public void testExpandVsWithMultiInclude_Some() throws IOException {
@@ -1147,6 +920,308 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 
+	private IIdType createRiskAssessment() {
+		return (createRiskAssessmentWithPredictionProbability(null));
+	}
+
+	private IIdType createRiskAssessmentWithPredictionProbability(Number theProbability) {
+		RiskAssessment ra1 = new RiskAssessment();
+		if (theProbability != null) {
+			RiskAssessment.RiskAssessmentPredictionComponent component = ra1.addPrediction();
+			component.setProbability(new DecimalType(theProbability.doubleValue()));
+		}
+		return myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless();
+	}
+
+	@Disabled("keeping to debug search scrolling")
+	@Test
+	public void withoutCount() {
+		createObservations(600);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add("code", new TokenParam().setSystem("http://example.com"));
+		List<ResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
+		assertNotNull(bp);
+		assertEquals(600, bp.size());
+
+	}
+
+	private void createObservations(int theCount) {
+		for (int i = 0; i < theCount; i++) {
+			myTestDataBuilder.createObservation(asArray(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-" + i)));
+		}
+	}
+
+	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
+		@SuppressWarnings("unchecked")
+		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
+		return array;
+	}
+
+	private List<String> getResultIds(IBundleProvider theResult) {
+		return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
+	}
+
+	private void assertFindId(String theMessage, IIdType theResourceId, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, hasItem(equalTo(theResourceId.getIdPart())));
+	}
+
+	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
+	}
+
+	private void assertNotFindId(String theMessage, IIdType theResourceId, String theUrl) {
+		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
+		assertThat(theMessage, resourceIds, not(hasItem(equalTo(theResourceId.getIdPart()))));
+	}
+
+	/**
+	 * Search for resources in the first query, instead of searching for IDs first
+	 */
+	public List<IBaseResource> searchForFastResources(String theQueryUrl) {
+		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theQueryUrl);
+		map.setLoadSynchronous(true);
+
+		SortSpec sort = (SortSpec) new ca.uhn.fhir.rest.server.method.SortParameter(myFhirCtx)
+			.translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
+		if (sort != null) {
+			map.setSort(sort);
+		}
+
+		return myTestDaoSearch.searchForResources(theQueryUrl);
+	}
+
+	@Nonnull
+	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
+		SystemRequestDetails request = new SystemRequestDetails();
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
+		uriComponents.getQueryParams()
+			.forEach((key, value) -> request.addParameter(key, value.toArray(new String[0])));
+		return request;
+	}
+
+	@Nested
+	public class StringTextSearch {
+
+		@Test
+		void secondWordFound() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Cloudy, yellow"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=yellow");
+			assertThat(resourceIds, hasItem(id1));
+		}
+
+		@Test
+		void stringMatchesPrefixAndWhole() {
+			// smit - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=smit");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void stringPlusStarMatchesPrefixAndWhole() {
+			// smit* - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?_elements=valueString&value-string:text=smit*");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void quotedStringMatchesIdenticalButNotAsPrefix() {
+			// "smit"- matches "smit", but not "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=\"smit\"");
+			assertThat(resourceIds, contains(id2));
+		}
+
+
+		@Test
+		void stringTokensAreAnded() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withPrimitiveAttribute("valueString", "Carl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=car%20smit");
+			assertThat(resourceIds, hasItems(id2));
+		}
+
+		@Nested
+		public class DocumentationSamplesTests {
+
+			@Test
+			void line1() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match
+				// | Smit             | Smit*            | John Smith  | John Smi
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smi"))).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Smit");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line2() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match      | Note
+				// | Jo Smit           | Jo* Smit*       | John Smith  | John Frank    | Multiple bare terms are `AND`
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Smith"))).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "John Frank"))).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=Jo%20Smit");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line3() {
+				// | Fhir Query String | Executed Query    | Matches     | No Match       | Note
+				// | frank &vert; john | frank &vert; john | Frank Smith | Franklin Smith | SQS characters disable prefix wildcard
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text=frank|john");
+				assertThat(resourceIds, hasItems(id1));
+			}
+
+			@Test
+			void line4() {
+				// | Fhir Query String | Executed Query  | Matches     | No Match       | Note
+				// | 'frank'           | 'frank'         | Frank Smith | Franklin Smith | Quoted terms are exact match
+				String id1 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Frank Smith"))).getIdPart();
+				String id2 = myTestDataBuilder.createObservation(List.of(
+					myTestDataBuilder.withPrimitiveAttribute("valueString", "Franklin Smith"))).getIdPart();
+
+				List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?value-string:text='frank'");
+				assertThat(resourceIds, hasItems(id1));
+			}
+		}
+	}
+
+	@Nested
+	public class TokenTextSearch {
+
+		@Test
+		void secondWordFound() {
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Cloudy, yellow"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=yellow");
+			assertThat(resourceIds, hasItem(id1));
+		}
+
+		@Test
+		void stringMatchesPrefixAndWhole() {
+			// smit - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Carl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void stringPlusStarMatchesPrefixAndWhole() {
+			// smit* - matches "smit" and "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "Adam Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "John Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=smit*");
+			assertThat(resourceIds, hasItems(id1, id2));
+		}
+
+
+		@Test
+		void quotedStringMatchesIdenticalButNotAsPrefix() {
+			// "smit"- matches "smit", but not "smith"
+
+			String id1 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-AA", "John Smith"))).getIdPart();
+			String id2 = myTestDataBuilder.createObservation(List.of(
+				myTestDataBuilder.withObservationCode("http://example.com", "code-BB", "Karl Smit"))).getIdPart();
+
+			List<String> resourceIds = myTestDaoSearch.searchForIds("/Observation?code:text=\"Smit\"");
+			assertThat(resourceIds, contains(id2));
+		}
+
+	}
+
+	@Nested
+	public class WithContainedIndexingIT {
+		@BeforeEach
+		public void enableContains() {
+			// we don't support chained or contained yet, but turn it on to test we don't blow up.
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(true);
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(true);
+		}
+
+		@AfterEach
+		public void restoreContains() {
+			ModelConfig defaultModelConfig = new ModelConfig();
+			myDaoConfig.getModelConfig().setIndexOnContainedResources(defaultModelConfig.isIndexOnContainedResources());
+			myDaoConfig.getModelConfig().setIndexOnContainedResourcesRecursively(defaultModelConfig.isIndexOnContainedResourcesRecursively());
+		}
+
+		/**
+		 * We were throwing when indexing contained.
+		 * https://github.com/hapifhir/hapi-fhir/issues/3371
+		 */
+		@Test
+		public void ignoreContainedResources_noError() {
+			// given
+			String json =
+				"{" +
+					"\"resourceType\": \"Observation\"," +
+					"\"contained\": [{" +
+					"\"resourceType\": \"Patient\"," +
+					"\"id\": \"contained-patient\"," +
+					"\"name\": [{ \"family\": \"Smith\"}]" +
+					"}]," +
+					"\"subject\": { \"reference\": \"#contained-patient\" }" +
+					"}";
+			Observation o = myFhirCtx.newJsonParser().parseResource(Observation.class, json);
+
+			IIdType id = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
+
+			// no error.
+			assertThat(id, notNullValue());
+		}
+	}
+
 	@Nested
 	public class DateSearchIT extends BaseDateSearchDaoTests {
 
@@ -1185,7 +1260,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			assertThat(result, hasSize(1));
-			assertEquals( ((Observation) result.get(0)).getId(), id.getIdPart() );
+			assertEquals(((Observation) result.get(0)).getId(), id.getIdPart());
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
 
 			// only one hibernate search took place
@@ -1242,7 +1317,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		/**
 		 * A paranoid test to make sure tags stay with the resource.
-		 *
+		 * <p>
 		 * Tags live outside the resource, and can be modified by
 		 * Since we lost the id, also check tags in case someone changes metadata processing during ingestion.
 		 */
@@ -1456,9 +1531,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 
-
-
-
 	@Nested
 	public class LastUpdatedTests {
 
@@ -1471,11 +1543,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			myOldObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeOld"),
-				myTestDataBuilder.withLastUpdated(myOldLastUpdatedDateTime) )).getIdPart();
+				myTestDataBuilder.withLastUpdated(myOldLastUpdatedDateTime))).getIdPart();
 
 			myNewObsId = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCodeNew"),
-				myTestDataBuilder.withLastUpdated(new Date()) )).getIdPart();
+				myTestDataBuilder.withLastUpdated(new Date()))).getIdPart();
 		}
 
 		@AfterEach
@@ -1549,7 +1621,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	}
 
-
 	@Nested
 	public class TotalParameter {
 
@@ -1576,7 +1647,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 
 	}
-
 
 	@Nested
 	public class OffsetParameter {
@@ -1659,7 +1729,25 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
+				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
+		}
+
+		@Test
+		public void directResourceLoadWhenSorting() {
+			String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
+			String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
+			String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
+			myCaptureQueriesListener.clear();
+			myHSearchEventDispatcher.register(mySearchEventListener);
+
+			List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			assertThat(result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA));
+			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+
+			// only one hibernate search took place
+			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
 		}
 
 		@Nested
@@ -2046,26 +2134,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		}
 
-		@Test
-		public void directResourceLoadWhenSorting() {
-			String idA = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-a"))).getIdPart();
-			String idC = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-c"))).getIdPart();
-			String idB = myTestDataBuilder.createObservation(List.of(myTestDataBuilder.withObservationCode("http://example.com/", "code-b"))).getIdPart();
-			myCaptureQueriesListener.clear();
-			myHSearchEventDispatcher.register(mySearchEventListener);
-
-			List<IBaseResource> result = searchForFastResources("Observation?_sort=-code");
-			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-
-			assertThat( result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList()), contains(idC, idB, idA) );
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-
-			// only one hibernate search took place
-			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
-		}
-
 	}
-
 
 	@Nested
 	public class NumberParameter {
@@ -2086,7 +2155,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 			myDaoConfig.setStoreResourceInHSearchIndex(defaultConfig.isStoreResourceInHSearchIndex());
 			myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(
-				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel() );
+				defaultConfig.getModelConfig().getNormalizedQuantitySearchLevel());
 		}
 
 		@Test
@@ -2096,6 +2165,28 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			assertFindId("when exact", raId1, "/RiskAssessment?probability=0.25");
 			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+		}
+
+		@Test
+		void andClauses() {
+			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
+			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
+			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
+			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
+			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
+			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
+			assertFindIds("when le", Set.of(raId2, raId3, raId4), "/RiskAssessment?probability=ge0.2&probability=lt0.45");
+		}
+
+		@Test
+		void orClauses() {
+			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
+			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
+			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
+			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
+			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
+			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
+			assertFindIds("when le", Set.of(raId1, raId2, raId3, raId6), "/RiskAssessment?probability=le0.25,gt0.50");
 		}
 
 		/**
@@ -2181,72 +2272,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			}
 
 		}
-
-		@Test
-		void andClauses() {
-			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
-			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
-			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
-			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
-			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
-			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
-			assertFindIds("when le", Set.of(raId2, raId3, raId4), "/RiskAssessment?probability=ge0.2&probability=lt0.45");
-		}
-
-		@Test
-		void orClauses() {
-			String raId1 = createRiskAssessmentWithPredictionProbability(0.15).getIdPart();
-			String raId2 = createRiskAssessmentWithPredictionProbability(0.20).getIdPart();
-			String raId3 = createRiskAssessmentWithPredictionProbability(0.25).getIdPart();
-			String raId4 = createRiskAssessmentWithPredictionProbability(0.35).getIdPart();
-			String raId5 = createRiskAssessmentWithPredictionProbability(0.45).getIdPart();
-			String raId6 = createRiskAssessmentWithPredictionProbability(0.55).getIdPart();
-			assertFindIds("when le", Set.of(raId1, raId2, raId3, raId6), "/RiskAssessment?probability=le0.25,gt0.50");
-		}
 	}
-
-	private IIdType createRiskAssessment() {
-		return (createRiskAssessmentWithPredictionProbability(null));
-	}
-
-	private IIdType createRiskAssessmentWithPredictionProbability(Number theProbability) {
-		RiskAssessment ra1 = new RiskAssessment();
-		if (theProbability != null) {
-			RiskAssessment.RiskAssessmentPredictionComponent component = ra1.addPrediction();
-			component.setProbability(new DecimalType(theProbability.doubleValue()));
-		}
-		return myRiskAssessmentDao.create(ra1).getId().toUnqualifiedVersionless();
-	}
-
-
-	@Disabled("keeping to debug search scrolling")
-	@Test
-	public void withoutCount() {
-		createObservations(600);
-
-		SearchParameterMap map = new SearchParameterMap();
-		map.add("code", new TokenParam().setSystem("http://example.com"));
-		List<ResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
-		assertNotNull(bp);
-		assertEquals(600, bp.size());
-
-	}
-
-
-	private void createObservations(int theCount) {
-		for (int i = 0; i < theCount; i++) {
-			myTestDataBuilder.createObservation(asArray(
-				myTestDataBuilder.withObservationCode("http://example.com", "code-" + i)));
-		}
-	}
-
-
-	private Consumer<IBaseResource>[] asArray(Consumer<IBaseResource> theIBaseResourceConsumer) {
-		@SuppressWarnings("unchecked")
-		Consumer<IBaseResource>[] array = (Consumer<IBaseResource>[]) new Consumer[]{theIBaseResourceConsumer};
-		return array;
-	}
-
 
 	@Nested
 	class CompositeSearch extends CompositeSearchParameterTestCases {
@@ -2254,7 +2280,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			super(myTestDataBuilder.getTestDataBuilderSupport(), myTestDaoSearch);
 		}
 
-		/** HSearch supports it! */
+		/**
+		 * HSearch supports it!
+		 */
 		@Override
 		protected boolean isCorrelatedSupported() {
 			return true;
@@ -2268,59 +2296,11 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		@Override
 		protected void beforeOrAfterTestClass(TestContext testContext, DirtiesContext.ClassMode requiredClassMode) throws Exception {
-			if ( ! testContext.getTestClass().getName().contains("$")) {
+			if (!testContext.getTestClass().getName().contains("$")) {
 				super.beforeOrAfterTestClass(testContext, requiredClassMode);
 			}
 		}
 	}
-
-	private List<String> getResultIds(IBundleProvider theResult) {
-		return theResult.getAllResources().stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
-	}
-
-	private void assertFindId(String theMessage, IIdType theResourceId, String theUrl) {
-		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, hasItem(equalTo(theResourceId.getIdPart())));
-	}
-
-	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
-		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
-	}
-
-	private void assertNotFindId(String theMessage, IIdType theResourceId, String theUrl) {
-		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, not(hasItem(equalTo(theResourceId.getIdPart()))));
-	}
-
-
-
-	/**
-	 * Search for resources in the first query, instead of searching for IDs first
-	 */
-	public List<IBaseResource> searchForFastResources(String theQueryUrl) {
-		SearchParameterMap map = myTestDaoSearch.toSearchParameters(theQueryUrl);
-		map.setLoadSynchronous(true);
-
-		SortSpec sort = (SortSpec) new ca.uhn.fhir.rest.server.method.SortParameter(myFhirCtx)
-			.translateQueryParametersIntoServerArgument(fakeRequestDetailsFromUrl(theQueryUrl), null);
-		if (sort != null) {
-			map.setSort(sort);
-		}
-
-		return myTestDaoSearch.searchForResources(theQueryUrl);
-	}
-
-
-	@Nonnull
-	private SystemRequestDetails fakeRequestDetailsFromUrl(String theQueryUrl) {
-		SystemRequestDetails request = new SystemRequestDetails();
-		UriComponents uriComponents = UriComponentsBuilder.fromUriString(theQueryUrl).build();
-		uriComponents.getQueryParams()
-			.forEach((key, value) -> request.addParameter(key, value.toArray(new String[0])));
-		return request;
-	}
-
 
 
 }
