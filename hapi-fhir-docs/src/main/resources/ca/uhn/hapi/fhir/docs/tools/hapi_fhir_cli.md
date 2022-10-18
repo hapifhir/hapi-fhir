@@ -100,3 +100,13 @@ Note that the path and exact filename of the terminology files will likely need 
 The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
 
 See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.
+
+# Reindex Terminology
+
+The `reindex-terminology` command may be used to recreate freetext indexes for terminology resources.
+
+To execute this command to reindex terminology resources to a local CLI server, issue the following: 
+```
+reindex-terminology -v r4 -t "http://localhost:8000"
+```
+
