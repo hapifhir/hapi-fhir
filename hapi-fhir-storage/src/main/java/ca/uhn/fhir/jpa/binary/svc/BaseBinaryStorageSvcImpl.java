@@ -52,7 +52,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
-	private long myMaximumBinarySize = Long.MAX_VALUE -1;
+	private long myMaximumBinarySize = Long.MAX_VALUE - 1;
 	private int myMinimumBinarySize;
 
 	@Autowired
@@ -108,7 +108,7 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Nonnull
 	protected CountingInputStream createCountingInputStream(InputStream theInputStream) {
 
-		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);  // EHP: Have to figure out why the original implementation added +1.
+		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
 			public long getByteCount() {
