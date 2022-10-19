@@ -26,8 +26,7 @@ public abstract class BaseMigrationTest {
 		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-		// TODO KHS why do we need more than 5 connections now?
-		retVal.setMaxTotal(10);
+		retVal.setMaxTotal(5);
 
 		return retVal;
 	}

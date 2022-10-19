@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.migrate;
 
+/*-
+ * #%L
+ * HAPI FHIR Server - SQL Migration
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.internal.database.base.Table;
 import org.flywaydb.core.internal.database.cockroachdb.CockroachDBDatabase;
@@ -24,7 +44,6 @@ public class HapiMigrationLockSvc {
 	private final DriverTypeEnum myDriverType;
 	private final Table myLockTable;
 	private final String myMigrationTablename;
-	private Connection myConnection;
 
 	public HapiMigrationLockSvc(DataSource theDataSource, DriverTypeEnum theDriverType, String myMigrationTablename) {
 		this.myDataSource = theDataSource;
@@ -35,12 +54,15 @@ public class HapiMigrationLockSvc {
 
 	private Table buildTable() {
 		try {
-			// WIP KHS this is required, but I don't understand why
-			myConnection = myDataSource.getConnection();
 			FluentConfiguration configuration = new FluentConfiguration().dataSource(myDataSource);
 			JdbcConnectionFactory connectionFactory = new JdbcConnectionFactory(myDataSource, configuration, null);
 
-			String schemaName = myDataSource.getConnection().getSchema();
+			String schemaName;
+
+			try (Connection connection = myDataSource.getConnection()) {
+				schemaName = connection.getSchema();
+			}
+
 			switch (myDriverType) {
 				case H2_EMBEDDED: {
 					H2Database database = new H2Database(configuration, connectionFactory, null);
@@ -90,11 +112,6 @@ public class HapiMigrationLockSvc {
 
 	public void unlock() {
 		myLockTable.unlock();
-		try {
-			myConnection.close();
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
 		ourLog.info("Migration Table Unlocked");
 	}
 }
