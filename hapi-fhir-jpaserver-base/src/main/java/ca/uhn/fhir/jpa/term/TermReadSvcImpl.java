@@ -2943,8 +2943,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	@Override
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
-		org.hl7.fhir.r5.model.ValueSet valueSet = (org.hl7.fhir.r5.model.ValueSet) theValueSet;
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
 
 		org.hl7.fhir.r4.model.Coding codingR4 = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
 

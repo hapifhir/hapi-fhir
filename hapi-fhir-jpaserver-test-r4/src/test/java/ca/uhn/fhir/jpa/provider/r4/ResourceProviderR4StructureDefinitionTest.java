@@ -108,7 +108,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1159) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 

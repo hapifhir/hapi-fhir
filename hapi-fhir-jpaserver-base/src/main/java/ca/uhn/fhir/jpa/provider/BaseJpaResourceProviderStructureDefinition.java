@@ -45,7 +45,7 @@ public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBase
 	public IBaseResource snapshot(
 		@IdParam(optional = true) IIdType theId,
 		@OperationParam(name = "definition", typeName = "StructureDefinition") IBaseResource theStructureDefinition,
-		@OperationParam(name = "url", typeName = "uri") IPrimitiveType<String> theUrl,
+		@OperationParam(name = "url", typeName = "string") IPrimitiveType<String> theUrl,
 		RequestDetails theRequestDetails) {
 
 		ValidateUtil.exactlyOneNotNullOrThrowInvalidRequestException(
