@@ -10,11 +10,13 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -55,8 +57,11 @@ public class MemberMatcherR4Helper {
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "MB";
 	private static final String OUT_COVERAGE_IDENTIFIER_TEXT = "Member Number";
 	private static final String COVERAGE_TYPE = "Coverage";
+	private static final String CONSENT_POLICY_REGULAR_TYPE = "regular";
+	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
 
 	private final FhirContext myFhirContext;
+	private boolean myRegularFilterSupported = false;
 
 	@Autowired
 	private IFhirResourceDao<Coverage> myCoverageDao;
@@ -195,5 +200,32 @@ public class MemberMatcherR4Helper {
 			}
 		}
 		return false;
+	}
+
+	public boolean validConsentDataAccess(Consent theConsent) {
+		if (theConsent.getPolicy().isEmpty())  {
+			return false;
+		}
+		for (Consent.ConsentPolicyComponent policyComponent: theConsent.getPolicy()) {
+			if (policyComponent.getUri() == null || !validConsentPolicy(policyComponent.getUri())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean validConsentPolicy(String thePolicyUri) {
+		String policyTypes = StringUtils.substringAfterLast(thePolicyUri, "#");
+		if (!policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
+			return false;
+		}
+		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !myRegularFilterSupported) {
+			return false;
+		}
+		return true;
+	}
+
+	public void setRgularFilterSupported(boolean theRegularFilterSupported) {
+		myRegularFilterSupported = theRegularFilterSupported;
 	}
 }

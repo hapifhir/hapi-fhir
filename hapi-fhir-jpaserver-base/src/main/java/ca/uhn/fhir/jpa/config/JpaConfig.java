@@ -707,8 +707,8 @@ public class JpaConfig {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 	}
 
+	@Bean(name = "myMemberMatchHelper")
 	@Lazy
-	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
 	}

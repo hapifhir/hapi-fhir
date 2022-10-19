@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -215,16 +216,20 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		@OperationParam(name = Constants.PARAM_NEW_COVERAGE, min = 1, max = 1)
 		Coverage newCoverage,
 
+		@Description(shortDefinition = "Consent information. Consent held by the system seeking the match that grants permission to access the patient information.")
+		@OperationParam(name = Constants.PARAM_CONSENT, min = 1, max = 1)
+		Consent theConsent,
+
 		RequestDetails theRequestDetails
 	) {
-		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theRequestDetails);
+		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theConsent, theRequestDetails);
 	}
 
 
 	private Parameters doMemberMatchOperation(HttpServletRequest theServletRequest, Patient theMemberPatient,
-				Coverage theCoverageToMatch, Coverage theCoverageToLink, RequestDetails theRequestDetails) {
+				Coverage theCoverageToMatch, Coverage theCoverageToLink, Consent theConsent, RequestDetails theRequestDetails) {
 
-		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink);
+		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
 		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
 		if ( ! coverageOpt.isPresent()) {
@@ -254,16 +259,23 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
 		}
 
+		if (!myMemberMatcherR4Helper.validConsentDataAccess(theConsent)) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.consent.release.data.mismatch");
+			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
+		}
+
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
 
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
 	}
 
 
-	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage) {
+	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
 		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+		validateParam(theConsent, Constants.PARAM_CONSENT);
 		validateMemberPatientParam(theMemberPatient);
 	}
 

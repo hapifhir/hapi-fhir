@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.HumanName;
@@ -320,6 +321,103 @@ class MemberMatcherR4HelperTest {
 			Patient patient = getPatientWithNoIDParm(familyName, birthdate);
 			patient.setId(id);
 			return patient;
+		}
+
+	}
+
+	@Nested
+	public class TestValidvalidConsentDataAccess {
+
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		private Coverage coverage;
+		private Patient patient;
+		private Consent consent;
+
+		@Test
+		void noConsentProfileFoundReturnsFalse() {
+			consent = new Consent();
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertFalse(result);
+		}
+
+		@Test
+		void noDataAccessValueProvidedReturnsFalse() {
+			consent = getConsent("");
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertFalse(result);
+		}
+
+		@Test
+		void wrongDataAccessValueProvidedReturnsFalse() {
+			consent = getConsent("#access_data");
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertFalse(result);
+		}
+
+		@Test
+		void regularDataAccessWithRegularNotAllowedReturnsFalse() {
+			consent = getConsent("#regular");
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertFalse(result);
+		}
+
+		@Test
+		void regularDataAccessWithRegularAllowedReturnsTrue() {
+			myTestedHelper.setRgularFilterSupported(true);
+			consent = getConsent("#regular");
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertTrue(result);
+		}
+
+		@Test
+		void sensitiveDataAccessAllowedReturnsTrue() {
+			consent = getConsent("#sensitive");
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertTrue(result);
+		}
+
+		@Test
+		void multipleSensitivePolicyDataAccessAllowedReturnsTrue() {
+			consent = getConsent("#sensitive");
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertTrue(result);
+		}
+
+		@Test
+		void multipleRegularPolicyDataAccessWithRegularAllowedReturnsTrue() {
+			myTestedHelper.setRgularFilterSupported(true);
+			consent = getConsent("#regular");
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertTrue(result);
+		}
+
+		@Test
+		void multipleMixedPolicyDataAccessWithRegularNotAllowedReturnsFalse() {
+			consent = getConsent("#regular");
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertFalse(result);
+		}
+
+		@Test
+		void multipleMixedPolicyDataAccessWithRegularAllowedReturnsTrue() {
+			myTestedHelper.setRgularFilterSupported(true);
+			consent = getConsent("#regular");
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
+			boolean result = myTestedHelper.validConsentDataAccess(consent);
+			assertTrue(result);
+		}
+
+		private Consent getConsent(String uriAccess) {
+			Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
+			return consent;
+		}
+
+		private Consent.ConsentPolicyComponent constructConsentPolicyComponent(String uriAccess) {
+			String uri = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html";
+			return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
 		}
 
 	}
