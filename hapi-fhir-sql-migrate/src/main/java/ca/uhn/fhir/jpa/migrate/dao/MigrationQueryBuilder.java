@@ -25,13 +25,16 @@ import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
 import com.healthmarketscience.common.util.AppendableExt;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
+import com.healthmarketscience.sqlbuilder.JdbcEscape;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.SqlObject;
+import com.healthmarketscience.sqlbuilder.UpdateQuery;
 import com.healthmarketscience.sqlbuilder.ValidationContext;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
@@ -42,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Types;
+import java.util.Date;
 
 public class MigrationQueryBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(MigrationQueryBuilder.class);
@@ -133,6 +137,14 @@ public class MigrationQueryBuilder {
 				myInstalledOnCol,
 				myExecutionTimeCol,
 				mySuccessCol)
+			.validate()
+			.toString();
+	}
+
+	public String updateLockRecordStatement() {
+		return new UpdateQuery(myTable)
+			.addSetClause(myInstalledOnCol, JdbcEscape.date(new Date()))
+			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, HapiMigrationEntity.CREATE_TABLE_PID))
 			.validate()
 			.toString();
 	}

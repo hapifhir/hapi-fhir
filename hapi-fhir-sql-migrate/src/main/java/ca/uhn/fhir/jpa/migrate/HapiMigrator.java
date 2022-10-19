@@ -29,6 +29,9 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -42,18 +45,22 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
+	private final PlatformTransactionManager myTransactionManager;
 	private MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
+	private final HapiMigrationLockSvc myHapiMigrationLockSvc;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
+		myHapiMigrationLockSvc = new HapiMigrationLockSvc(theDataSource, theDriverType, theMigrationTableName);
+		myTransactionManager = new org.springframework.jdbc.datasource.DataSourceTransactionManager(theDataSource);
 	}
 
 	public DataSource getDataSource() {
@@ -101,54 +108,81 @@ public class HapiMigrator {
 
 	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
-		MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
-		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
-
 		MigrationResult retval = new MigrationResult();
 
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
+		TransactionStatus transaction = null;
 
-			newTaskList.forEach(next -> {
+		try {
+			if (!isDryRun()) {
+				transaction = myTransactionManager.getTransaction(TransactionDefinition.withDefaults());
+				myHapiMigrationLockSvc.lock();
+				// FIXME needed?
+				myHapiMigrationStorageSvc.updateLockRecord();
+			}
 
-				next.setDriverType(getDriverType());
-				next.setDryRun(isDryRun());
-				next.setNoColumnShrink(isNoColumnShrink());
-				next.setConnectionProperties(connectionProperties);
+			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
+			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
-				StopWatch sw = new StopWatch();
-				try {
-					if (isDryRun()) {
-						ourLog.info("Dry run {} {}", next.getMigrationVersion(), next.getDescription());
-					} else {
-						ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
-					}
-					preExecute(next);
-					next.execute();
-					postExecute(next, sw, true);
-					retval.changes += next.getChangesCount();
-					retval.executedStatements.addAll(next.getExecutedStatements());
-					retval.succeededTasks.add(next);
-				} catch (SQLException|HapiMigrationException e) {
-					retval.failedTasks.add(next);
-					postExecute(next, sw, false);
-					String description = next.getDescription();
-					if (isBlank(description)) {
-						description = next.getClass().getSimpleName();
-					}
-					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-					throw new HapiMigrationException(Msg.code(47) + prefix + e, retval, e);
-				}
-			});
+
+			try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
+
+				newTaskList.forEach(next -> {
+
+					next.setDriverType(getDriverType());
+					next.setDryRun(isDryRun());
+					next.setNoColumnShrink(isNoColumnShrink());
+					next.setConnectionProperties(connectionProperties);
+
+					executeTask(next, retval);
+				});
+			}
+
+			if (transaction != null) {
+				myTransactionManager.commit(transaction);
+			}
+		} finally {
+			if (transaction != null && !transaction.isCompleted()) {
+				myTransactionManager.rollback(transaction);
+			}
+			myHapiMigrationLockSvc.unlock();
 		}
 
 		ourLog.info(retval.summary());
 
-		if (isDryRun()) {
+		if (
+
+			isDryRun()) {
 			StringBuilder statementBuilder = buildExecutedStatementsString(retval);
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
 
 		return retval;
+	}
+
+	private void executeTask(BaseTask theTask, MigrationResult theMigrationResult) {
+		StopWatch sw = new StopWatch();
+		try {
+			if (isDryRun()) {
+				ourLog.info("Dry run {} {}", theTask.getMigrationVersion(), theTask.getDescription());
+			} else {
+				ourLog.info("Executing {} {}", theTask.getMigrationVersion(), theTask.getDescription());
+			}
+			preExecute(theTask);
+			theTask.execute();
+			postExecute(theTask, sw, true);
+			theMigrationResult.changes += theTask.getChangesCount();
+			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
+			theMigrationResult.succeededTasks.add(theTask);
+		} catch (SQLException | HapiMigrationException e) {
+			theMigrationResult.failedTasks.add(theTask);
+			postExecute(theTask, sw, false);
+			String description = theTask.getDescription();
+			if (isBlank(description)) {
+				description = theTask.getClass().getSimpleName();
+			}
+			String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
+			throw new HapiMigrationException(Msg.code(47) + prefix + e, theMigrationResult, e);
+		}
 	}
 
 	private void preExecute(BaseTask theTask) {

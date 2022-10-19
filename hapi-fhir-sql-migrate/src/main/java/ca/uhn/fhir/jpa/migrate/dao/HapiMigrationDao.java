@@ -106,6 +106,15 @@ public class HapiMigrationDao {
 		String createIndexStatement = myMigrationQueryBuilder.createIndexStatement();
 		ourLog.info(createIndexStatement);
 		myJdbcTemplate.execute(createIndexStatement);
+
+		HapiMigrationEntity entity = HapiMigrationEntity.tableCreatedRecord();
+		myJdbcTemplate.update(myMigrationQueryBuilder.insertPreparedStatement(), entity.asPreparedStatementSetter());
+	}
+
+	public void updateLockRecord() {
+		String updateLockRecordStatement = myMigrationQueryBuilder.updateLockRecordStatement();
+		ourLog.info(updateLockRecordStatement);
+		myJdbcTemplate.execute(updateLockRecordStatement);
 	}
 
 	private boolean migrationTableExists() {

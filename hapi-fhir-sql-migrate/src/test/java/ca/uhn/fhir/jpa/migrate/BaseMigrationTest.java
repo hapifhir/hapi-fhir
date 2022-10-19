@@ -19,14 +19,15 @@ public abstract class BaseMigrationTest {
 		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
 	}
 
-	private static DataSource getDataSource() {
+	 static DataSource getDataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:test_migration");
 		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-		retVal.setMaxTotal(5);
+		// TODO KHS why do we need more than 5 connections now?
+		retVal.setMaxTotal(10);
 
 		return retVal;
 	}
