@@ -97,6 +97,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addColumn("20220830.1", "FAST_TRACKING")
 			.nullable()
 			.type(ColumnTypeEnum.BOOLEAN);
+
+		version
+			.onTable("HFJ_BINARY_STORAGE_BLOB")
+			.modifyColumn("20221017.1", "BLOB_SIZE")
+			.nullable()
+			.withType(ColumnTypeEnum.LONG);
 	}
 
 	private void init610() {
