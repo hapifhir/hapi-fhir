@@ -110,6 +110,9 @@ public class VersionCanonicalizer {
 	 * Canonical version: R4
 	 */
 	public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
+		if (theValueSet == null) {
+			return null;
+		}
 		return myStrategy.valueSetToCanonical(theValueSet);
 	}
 

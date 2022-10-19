@@ -2944,19 +2944,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	public CodeValidationResult validateCodeIsInPreExpandedValueSet(ConceptValidationOptions theOptions, IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = myVersionCanonicalizer.valueSetToCanonical(theValueSet);
-
 		org.hl7.fhir.r4.model.Coding codingR4 = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
+		org.hl7.fhir.r4.model.CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 
-		org.hl7.fhir.r5.model.CodeableConcept codeableConcept = (org.hl7.fhir.r5.model.CodeableConcept) theCodeableConcept;
-		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = null;
-		if (codeableConcept != null) {
-			codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
-			for (org.hl7.fhir.r5.model.Coding nestedCoding : codeableConcept.getCoding()) {
-				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
-			}
-		}
-
-		return validateCodeIsInPreExpandedValueSet(theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
+		return validateCodeIsInPreExpandedValueSet(theOptions, valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConcept);
 	}
 
 	@Autowired
