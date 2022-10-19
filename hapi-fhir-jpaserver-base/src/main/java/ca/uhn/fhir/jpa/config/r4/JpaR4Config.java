@@ -12,12 +12,15 @@ import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatchR4ResourceProvider;
+import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Meta;
@@ -92,5 +95,29 @@ public class JpaR4Config {
 	public ITermLoaderSvc termLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
 	}
+
+	@Bean
+	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
+		return new MemberMatcherR4Helper(theFhirContext);
+	}
+
+	@Bean
+	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
+		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
+	}
+
+	@Bean
+	public ProviderLoader r4ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
+		return new ProviderLoader(theResourceProviderFactory, theMemberMatchR4ResourceProvider);
+	}
+
+	public static class ProviderLoader {
+
+		public ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
+			theResourceProviderFactory.addSupplier(()->theMemberMatchR4ResourceProvider);
+		}
+
+	}
+
 
 }

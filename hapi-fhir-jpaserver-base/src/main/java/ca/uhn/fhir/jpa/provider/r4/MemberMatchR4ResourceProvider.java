@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -17,12 +18,20 @@ import java.util.Optional;
 
 public class MemberMatchR4ResourceProvider {
 
+	private final MemberMatcherR4Helper myMemberMatcherR4Helper;
+	private final FhirContext myFhirContext;
+
+	public MemberMatchR4ResourceProvider(FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatcherR4Helper) {
+		myFhirContext = theFhirContext;
+		myMemberMatcherR4Helper = theMemberMatcherR4Helper;
+	}
+	
 	/**
 	 * /Patient/$member-match operation
 	 * Basic implementation matching by coverage id or by coverage identifier. Matching by
 	 * Beneficiary (Patient) demographics on family name and birthdate in this version
 	 */
-	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match", idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, typeName = "Patient", canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match", idempotent = false, returnParameters = {
 		@OperationParam(name = "MemberIdentifier", typeName = "string")
 	})
 	public Parameters patientMemberMatch(
@@ -53,7 +62,7 @@ public class MemberMatchR4ResourceProvider {
 
 		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
 		if ( ! coverageOpt.isPresent()) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
 			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
 		}
@@ -61,20 +70,20 @@ public class MemberMatchR4ResourceProvider {
 
 		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage);
 		if (! patientOpt.isPresent()) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.not.found");
 			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
 		}
 
 		Patient patient = patientOpt.get();
 		if (!myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient)) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.patient.not.found");
 			throw new UnprocessableEntityException(Msg.code(2146) + i18nMessage);
 		}
 
 		if (patient.getIdentifier().isEmpty()) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.without.identifier");
 			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
 		}
@@ -93,7 +102,7 @@ public class MemberMatchR4ResourceProvider {
 
 	private void validateParam(Object theParam, String theParamName) {
 		if (theParam == null) {
-			String i18nMessage = getContext().getLocalizer().getMessage(
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
 				"operation.member.match.error.missing.parameter", theParamName);
 			throw new UnprocessableEntityException(Msg.code(1158) + i18nMessage);
 		}

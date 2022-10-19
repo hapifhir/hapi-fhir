@@ -712,12 +712,6 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
-		return new MemberMatcherR4Helper(theFhirContext);
-	}
-
-	@Lazy
-	@Bean
 	public NicknameInterceptor nicknameInterceptor() throws IOException {
 		return new NicknameInterceptor();
 	}
