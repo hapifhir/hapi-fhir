@@ -96,6 +96,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/v2-0247"));
 		createNextCodeSystemReturnParameters(true, DISPLAY, null);
 
+		logAllConcepts();
+
 		Parameters respParam = myClient
 			.operation()
 			.onType(CodeSystem.class)

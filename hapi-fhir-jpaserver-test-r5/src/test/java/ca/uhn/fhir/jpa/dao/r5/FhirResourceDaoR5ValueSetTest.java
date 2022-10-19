@@ -1,13 +1,18 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -28,15 +33,19 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR5ValueSetTest.class);
+
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R5);
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
@@ -262,6 +271,45 @@ public class FhirResourceDaoR5ValueSetTest extends BaseJpaR5Test {
 		}
 	}
 
+	@Test
+	public void testPrecalculatedValueSet() {
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 10; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://cs", codesToAdd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myValueSetDao.create(vs);
+
+		// Precalculate
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		logAllValueSets();
+		myCachingValidationSupport.invalidateCaches();
+
+		// Validate code
+
+		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options= new ConceptValidationOptions();
+		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "CODE4", null, "http://vs");
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertThat(outcome.getMessage(), startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+
+		// Expand valueset
+
+		ValueSet outcomeVs = myValueSetDao.expand(vs, null);
+		String expansionMessage = myValueSetTestUtil.extractExpansionMessage(outcomeVs);
+		assertThat(expansionMessage, startsWith("ValueSet was expanded using an expansion that was pre-calculated"));
+	}
+
+	@Autowired
+	protected CachingValidationSupport myCachingValidationSupport;
 
 	@Test
 	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
