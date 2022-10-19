@@ -80,7 +80,7 @@ public class TransactionProcessorVersionAdapterR4B implements ITransactionProces
 		try {
 			resp.setType(Bundle.BundleType.fromCode(theBundleType));
 		} catch (FHIRException theE) {
-			throw new InternalErrorException(Msg.code(1125) + "Unknown bundle type: " + theBundleType);
+			throw new InternalErrorException(Msg.code(2151) + "Unknown bundle type: " + theBundleType);
 		}
 		return resp;
 	}

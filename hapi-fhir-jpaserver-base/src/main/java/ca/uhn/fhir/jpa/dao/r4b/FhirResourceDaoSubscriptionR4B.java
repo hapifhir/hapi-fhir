@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -31,7 +32,7 @@ public class FhirResourceDaoSubscriptionR4B extends BaseHapiFhirResourceDao<Subs
 
 	@Override
 	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(Msg.code(2150));
 	}
 
 }
