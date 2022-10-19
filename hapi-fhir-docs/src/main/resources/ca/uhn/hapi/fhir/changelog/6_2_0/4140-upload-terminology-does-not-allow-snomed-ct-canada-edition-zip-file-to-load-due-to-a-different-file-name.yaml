@@ -1,0 +1,5 @@
+---
+type: add
+issue: 4140
+jira: SMILE-673
+title: "For SNOMED CT, upload-terminology now supports both Canadian and International edition's file names for the SCT Description File"
