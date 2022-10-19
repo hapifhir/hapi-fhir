@@ -168,7 +168,10 @@ class HapiMigratorTest {
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
+			// WIP KHS
+
 			return myLatch.awaitExpected();
+//			return myLatch.awaitExpectedWithTimeout(9999);
 		}
 
 		public void release(String theLatchInvocationParameter) {

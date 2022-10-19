@@ -2,16 +2,16 @@ package ca.uhn.fhir.jpa.migrate;
 
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.flywaydb.core.internal.database.base.Table;
-import org.flywaydb.core.internal.database.derby.DerbyConnection;
+import org.flywaydb.core.internal.database.cockroachdb.CockroachDBDatabase;
 import org.flywaydb.core.internal.database.derby.DerbyDatabase;
-import org.flywaydb.core.internal.database.derby.DerbySchema;
-import org.flywaydb.core.internal.database.derby.DerbyTable;
-import org.flywaydb.core.internal.database.h2.H2Connection;
 import org.flywaydb.core.internal.database.h2.H2Database;
-import org.flywaydb.core.internal.database.h2.H2Schema;
-import org.flywaydb.core.internal.database.h2.H2Table;
+import org.flywaydb.core.internal.database.oracle.OracleDatabase;
+import org.flywaydb.core.internal.database.postgresql.PostgreSQLDatabase;
 import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
 import org.flywaydb.core.internal.jdbc.JdbcTemplate;
+import org.flywaydb.database.mysql.MySQLDatabase;
+import org.flywaydb.database.mysql.mariadb.MariaDBDatabase;
+import org.flywaydb.database.sqlserver.SQLServerDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +42,35 @@ public class HapiMigrationLockSvc {
 			switch (theDriverType) {
 				case H2_EMBEDDED: {
 					H2Database database = new H2Database(configuration, connectionFactory, null);
-					H2Connection connection = database.getMainConnection();
-					H2Schema schema = (H2Schema) connection.getSchema(schemaName);
-					return new H2Table(jdbcTemplate, database, schema, myMigrationTablename);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
 				}
 				case DERBY_EMBEDDED: {
 					DerbyDatabase database = new DerbyDatabase(configuration, connectionFactory, null);
-					DerbyConnection connection = database.getMainConnection();
-					DerbySchema schema = (DerbySchema) connection.getSchema(schemaName);
-					return new DerbyTable(jdbcTemplate, database, schema, myMigrationTablename);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case ORACLE_12C: {
+					OracleDatabase database = new OracleDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case POSTGRES_9_4: {
+					PostgreSQLDatabase database = new PostgreSQLDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case COCKROACHDB_21_1: {
+					CockroachDBDatabase database = new CockroachDBDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case MARIADB_10_1: {
+					MariaDBDatabase database = new MariaDBDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case MYSQL_5_7: {
+					MySQLDatabase database = new MySQLDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
+				}
+				case MSSQL_2012: {
+					SQLServerDatabase database = new SQLServerDatabase(configuration, connectionFactory, null);
+					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
 				}
 				default:
 					throw new UnsupportedOperationException("Driver type not supported: " + theDriverType);
