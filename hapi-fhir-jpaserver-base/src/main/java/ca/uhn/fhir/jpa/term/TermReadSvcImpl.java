@@ -2329,7 +2329,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 		invokeRunnableForUnitTest();
 
-		IPrimitiveType<?> urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+		IPrimitiveType<?> urlPrimitive;
+		if (theValueSet instanceof org.hl7.fhir.dstu2.model.ValueSet) {
+			urlPrimitive = FhirContext.forDstu2Hl7OrgCached().newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+		} else {
+			urlPrimitive = myContext.newTerser().getSingleValueOrNull(theValueSet, "url", IPrimitiveType.class);
+		}
 		String url = urlPrimitive.getValueAsString();
 		if (isNotBlank(url)) {
 			return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
