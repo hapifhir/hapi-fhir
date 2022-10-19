@@ -18,16 +18,20 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 
@@ -59,6 +63,7 @@ public class MemberMatcherR4Helper {
 	private static final String COVERAGE_TYPE = "Coverage";
 	private static final String CONSENT_POLICY_REGULAR_TYPE = "regular";
 	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
+	private static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
 	private final FhirContext myFhirContext;
 	private boolean myRegularFilterSupported = false;
@@ -122,10 +127,11 @@ public class MemberMatcherR4Helper {
 	}
 
 
-	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage) {
+	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage, Consent theConsent) {
 		IBaseParameters parameters = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_MEMBER_PATIENT, theMemberPatient);
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_NEW_COVERAGE, theCoverage);
+		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_CONSENT, theConsent);
 		return (Parameters) parameters;
 	}
 
@@ -225,7 +231,13 @@ public class MemberMatcherR4Helper {
 		return true;
 	}
 
-	public void setRgularFilterSupported(boolean theRegularFilterSupported) {
+	public void addIdentifierToConsent(Consent theConsent) {
+		String consentId = UUID.randomUUID().toString();
+		Identifier consentIdentifier = new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
+		theConsent.addIdentifier(consentIdentifier);
+	}
+
+	public void setRegularFilterSupported(boolean theRegularFilterSupported) {
 		myRegularFilterSupported = theRegularFilterSupported;
 	}
 }

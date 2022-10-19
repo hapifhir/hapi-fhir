@@ -98,8 +98,11 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 			.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")))
 			.setId("AA87654");
 
-		myConsent = new Consent().addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI));
-		myMemberMatcherR4Helper.setRgularFilterSupported(false);
+		myConsent = new Consent()
+			.setStatus(Consent.ConsentState.ACTIVE)
+			.setScope(new CodeableConcept().addCoding(new Coding("http://terminology.hl7.org/CodeSystem/consentscope", "patient-privacy", null)))
+			.addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI));
+		myMemberMatcherR4Helper.setRegularFilterSupported(false);
 	}
 
 	private void createCoverageWithBeneficiary(
@@ -204,18 +207,34 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 			EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
+		validateNewCoverage(parametersResponse, newCoverage);
 	}
 
 	@Test
 	public void testRegularContentProfileAccessWithRegularAllowed() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 		myConsent = new Consent().addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_REGULAR_DATA_URI));
-		myMemberMatcherR4Helper.setRgularFilterSupported(true);
+		myMemberMatcherR4Helper.setRegularFilterSupported(true);
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
 		Parameters parametersResponse = performOperation(ourServerBase + ourQuery,
 			EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
+		validateNewCoverage(parametersResponse, newCoverage);
+	}
+
+	@Test
+	public void testConsentReturns() throws Exception {
+		createCoverageWithBeneficiary(true, true);
+		myConsent = new Consent().addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_REGULAR_DATA_URI));
+		myMemberMatcherR4Helper.setRegularFilterSupported(true);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
+		Parameters parametersResponse = performOperation(ourServerBase + ourQuery,
+			EncodingEnum.JSON, inputParameters);
+
+		validateMemberPatient(parametersResponse);
+		validateNewCoverage(parametersResponse, newCoverage);
+		validateResponseConsent(parametersResponse, myConsent);
 	}
 
 	@Nested
@@ -385,6 +404,18 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		assertFalse(coding.getUserSelected());
 	}
 
+	/**
+	 * Validates that consent from the response is same as the received consent with additional identifier and extension
+	 */
+	private void validateResponseConsent(Parameters theResponse, Consent theOriginalConsent) {
+		List<IBase> consentList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_CONSENT);
+		assertEquals(1, consentList.size());
+		Consent respConsent= (Consent) theResponse.getParameter().get(2).getResource();
 
+		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getSystem(), respConsent.getScope().getCodingFirstRep().getSystem());
+		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getCode(), respConsent.getScope().getCodingFirstRep().getCode());
+		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", respConsent.getIdentifier().get(0).getSystem());
+		assertNotNull(respConsent.getIdentifier().get(0).getValue());
+	}
 
 }

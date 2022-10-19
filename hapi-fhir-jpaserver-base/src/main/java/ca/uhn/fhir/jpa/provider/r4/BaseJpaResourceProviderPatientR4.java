@@ -266,8 +266,8 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
-
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
+		myMemberMatcherR4Helper.addIdentifierToConsent(theConsent);
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 
 
