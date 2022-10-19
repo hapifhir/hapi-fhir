@@ -315,6 +315,11 @@ public class DaoConfig {
 	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private boolean myEnableBulkExportJobReuse = true;
+
+	/**
 	 * Since 6.1.0
 	 */
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
@@ -2899,6 +2904,22 @@ public class DaoConfig {
 	 */
 	public void setBulkExportFileRetentionPeriodHours(int theBulkExportFileRetentionPeriodHours) {
 		myBulkExportFileRetentionPeriodHours = theBulkExportFileRetentionPeriodHours;
+	}
+
+	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public boolean getEnableBulkExportJobReuse() {
+		return myEnableBulkExportJobReuse;
+	}
+
+	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public void setEnableBulkExportJobReuse(boolean theEnableBulkExportJobReuse) {
+		myEnableBulkExportJobReuse = theEnableBulkExportJobReuse;
 	}
 
 	/**
