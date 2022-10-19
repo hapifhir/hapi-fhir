@@ -84,8 +84,4 @@ public class HapiMigrationStorageSvc {
 	public void createMigrationTableIfRequired() {
 		myHapiMigrationDao.createMigrationTableIfRequired();
 	}
-
-	public void updateLockRecord() {
-		myHapiMigrationDao.updateLockRecord();
-	}
 }

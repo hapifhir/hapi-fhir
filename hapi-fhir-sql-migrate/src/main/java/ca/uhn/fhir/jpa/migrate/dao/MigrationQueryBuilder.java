@@ -24,18 +24,12 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
-import com.healthmarketscience.common.util.AppendableExt;
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
-import com.healthmarketscience.sqlbuilder.JdbcEscape;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
-import com.healthmarketscience.sqlbuilder.SqlObject;
-import com.healthmarketscience.sqlbuilder.UpdateQuery;
-import com.healthmarketscience.sqlbuilder.ValidationContext;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSchema;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbSpec;
@@ -43,9 +37,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.sql.Types;
-import java.util.Date;
 
 public class MigrationQueryBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(MigrationQueryBuilder.class);
@@ -139,38 +131,6 @@ public class MigrationQueryBuilder {
 				mySuccessCol)
 			.validate()
 			.toString();
-	}
-
-	public String updateLockRecordStatement() {
-		return new UpdateQuery(myTable)
-			.addSetClause(myInstalledOnCol, JdbcEscape.date(new Date()))
-			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, HapiMigrationEntity.CREATE_TABLE_PID))
-			.validate()
-			.toString();
-	}
-
-	/**
-	 sqlbuilder doesn't know about different database types, so we have to manually map boolean columns ourselves :-(
-	 I'm gaining a new appreciation for Hibernate.  I tried using hibernate for maintaining this table, but it added
-	 a lot of overhead for managing just one table.  Seeing this sort of nonsense though makes me wonder if we should
-	 just use it instead of sqlbuilder.  Disappointed that sqlbuilder doesn't handle boolean well out of the box.
-	 (It does support a static option via System.setProperty("com.healthmarketscience.sqlbuilder.useBooleanLiterals", "true");
-	 but that only works at classloading time which isn't much help to us.
-	 */
-
-	private SqlObject getBooleanValue(Boolean theBoolean) {
-		SqlObject retval = new SqlObject() {
-			@Override
-			protected void collectSchemaObjects(ValidationContext vContext) {}
-
-			@Override
-			public void appendTo(AppendableExt app) throws IOException {
-				String stringValue = ColumnTypeToDriverTypeToSqlType.toBooleanValue(myDriverType, theBoolean);
-				app.append(stringValue);
-			}
-		};
-
-		return retval;
 	}
 
 	public String createTableStatement() {

@@ -111,12 +111,6 @@ public class HapiMigrationDao {
 		myJdbcTemplate.update(myMigrationQueryBuilder.insertPreparedStatement(), entity.asPreparedStatementSetter());
 	}
 
-	public void updateLockRecord() {
-		String updateLockRecordStatement = myMigrationQueryBuilder.updateLockRecordStatement();
-		ourLog.info(updateLockRecordStatement);
-		myJdbcTemplate.execute(updateLockRecordStatement);
-	}
-
 	private boolean migrationTableExists() {
 		try {
 			try (Connection connection = myDataSource.getConnection()) {

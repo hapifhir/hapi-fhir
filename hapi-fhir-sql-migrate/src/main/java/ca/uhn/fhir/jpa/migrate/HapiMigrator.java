@@ -116,8 +116,6 @@ public class HapiMigrator {
 			if (!isDryRun()) {
 				transaction = myTransactionManager.getTransaction(TransactionDefinition.withDefaults());
 				myHapiMigrationLockSvc.lock();
-				// FIXME needed?
-				myHapiMigrationStorageSvc.updateLockRecord();
 			}
 
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);

@@ -75,28 +75,33 @@ class HapiMigratorTest {
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 
-		LatchMigrationTask latchMigrationTask1 = new LatchMigrationTask("first");
+		// Create two migrators to simulate two servers running at the same time
 
+		LatchMigrationTask latchMigrationTask1 = new LatchMigrationTask("first");
 		HapiMigrator migrator1 = buildMigrator(latchMigrationTask1);
 
 		LatchMigrationTask latchMigrationTask2 = new LatchMigrationTask("second");
-
 		HapiMigrator migrator2 = buildMigrator(latchMigrationTask2);
 
+		// We only expect the first migration to run because the second one will block on the lock and by the time the lock
+		// is released, the first one will have already run so there will be nothing to do
 
 		latchMigrationTask1.setExpectedCount(1);
-
 		Future<MigrationResult> future1 = executor.submit(() -> migrator1.migrate());
-
 		latchMigrationTask1.awaitExpected();
+
+		// We wait until the first migration is in the middle of executing the migration task before we start the second one
 
 		Future<MigrationResult> future2 = executor.submit(() -> migrator2.migrate());
 
+		// Release the first migration task so it can complete and unblock to allow the second one to start
+
 		latchMigrationTask1.release("1");
-		latchMigrationTask2.release("2");
 
 		MigrationResult result1 = future1.get();
 		MigrationResult result2 = future2.get();
+
+		// Tasks were only run on the first migration
 		assertThat(result1.succeededTasks, hasSize(1));
 		assertThat(result2.succeededTasks, hasSize(0));
 	}
