@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.delete;
 
+Use hapi tx service
+
 /*-
  * #%L
  * HAPI FHIR JPA Server
