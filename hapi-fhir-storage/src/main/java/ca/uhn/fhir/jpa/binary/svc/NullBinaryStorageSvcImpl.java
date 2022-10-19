@@ -33,12 +33,12 @@ import java.io.OutputStream;
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
-	public int getMaximumBinarySize() {
+	public long getMaximumBinarySize() {
 		return 0;
 	}
 
 	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
+	public void setMaximumBinarySize(long theMaximumBinarySize) {
 		// ignore
 	}
 

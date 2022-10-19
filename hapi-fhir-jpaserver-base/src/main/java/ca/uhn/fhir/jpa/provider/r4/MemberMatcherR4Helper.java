@@ -4,15 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -48,7 +52,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 public class MemberMatcherR4Helper {
 
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
-	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "UMB";
+	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "MB";
 	private static final String OUT_COVERAGE_IDENTIFIER_TEXT = "Member Number";
 	private static final String COVERAGE_TYPE = "Coverage";
 
@@ -66,8 +70,7 @@ public class MemberMatcherR4Helper {
 	}
 
 	/**
-	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier
-	 * Matching by member patient demographics is not supported.
+	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier only
 	 */
 	public Optional<Coverage> findMatchingCoverage(Coverage theCoverageToMatch) {
 		// search by received old coverage id
@@ -168,5 +171,29 @@ public class MemberMatcherR4Helper {
 
 		Patient beneficiary = myPatientDao.read(new IdDt(beneficiaryRef.getReference()));
 		return Optional.ofNullable(beneficiary);
+	}
+
+	/**
+	  * Matching by member patient demographics - family name and birthdate only
+	 */
+	public boolean validPatientMember(Patient thePatientFromContract, Patient thePatientToMatch) {
+		if (thePatientFromContract == null || thePatientFromContract.getIdElement() == null) {
+			return false;
+		}
+		StringOrListParam familyName = new StringOrListParam();
+		for (HumanName name: thePatientToMatch.getName()) {
+			familyName.addOr(new StringParam(name.getFamily()));
+		}
+		SearchParameterMap map = new SearchParameterMap()
+			.add("family", familyName)
+			.add("birthdate", new DateParam(thePatientToMatch.getBirthDateElement().getValueAsString()));
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundle = myPatientDao.search(map);
+		for (IBaseResource patientResource: bundle.getAllResources()) {
+			IIdType patientId = patientResource.getIdElement().toUnqualifiedVersionless();
+			if ( patientId.getValue().equals(thePatientFromContract.getIdElement().toUnqualifiedVersionless().getValue())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

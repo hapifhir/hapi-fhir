@@ -32,17 +32,17 @@ public interface IBinaryStorageSvc {
 
 	/**
 	 * Gets the maximum number of bytes that can be stored in a single binary
-	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 * file by this service. The default is {@link Long#MAX_VALUE}
 	 */
-	int getMaximumBinarySize();
+	long getMaximumBinarySize();
 
 	/**
 	 * Sets the maximum number of bytes that can be stored in a single binary
-	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 * file by this service. The default is {@link Long#MAX_VALUE}
 	 *
 	 * @param theMaximumBinarySize The maximum size
 	 */
-	void setMaximumBinarySize(int theMaximumBinarySize);
+	void setMaximumBinarySize(long theMaximumBinarySize);
 
 	/**
 	 * Gets the minimum number of bytes that will be stored. Binary content smaller
