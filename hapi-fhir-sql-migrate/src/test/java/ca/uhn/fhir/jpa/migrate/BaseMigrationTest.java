@@ -26,7 +26,8 @@ public abstract class BaseMigrationTest {
 		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-		retVal.setMaxTotal(5);
+		// FIXME KHS
+		retVal.setMaxTotal(50);
 
 		return retVal;
 	}

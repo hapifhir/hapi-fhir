@@ -29,9 +29,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 
 import javax.annotation.Nonnull;
 import javax.sql.DataSource;
@@ -45,22 +42,20 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
-	private final PlatformTransactionManager myTransactionManager;
+	private final String myMigrationTableName;
 	private MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
-	private final HapiMigrationLockSvc myHapiMigrationLockSvc;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
+		myMigrationTableName = theMigrationTableName;
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
-		myHapiMigrationLockSvc = new HapiMigrationLockSvc(theDataSource, theDriverType, theMigrationTableName);
-		myTransactionManager = new org.springframework.jdbc.datasource.DataSourceTransactionManager(theDataSource);
 	}
 
 	public DataSource getDataSource() {
@@ -110,14 +105,7 @@ public class HapiMigrator {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
 		MigrationResult retval = new MigrationResult();
 
-		TransactionStatus transaction = null;
-
-		try {
-			if (!isDryRun()) {
-				transaction = myTransactionManager.getTransaction(TransactionDefinition.withDefaults());
-				myHapiMigrationLockSvc.lock();
-			}
-
+		try (HapiMigrationLock hapiMigrationLock = new HapiMigrationLock(myDataSource,myDriverType,myMigrationTableName)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
 			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
@@ -134,22 +122,11 @@ public class HapiMigrator {
 					executeTask(next, retval);
 				});
 			}
-
-			if (transaction != null) {
-				myTransactionManager.commit(transaction);
-			}
-		} finally {
-			if (transaction != null && !transaction.isCompleted()) {
-				myTransactionManager.rollback(transaction);
-			}
-			myHapiMigrationLockSvc.unlock();
 		}
 
 		ourLog.info(retval.summary());
 
-		if (
-
-			isDryRun()) {
+		if (isDryRun()) {
 			StringBuilder statementBuilder = buildExecutedStatementsString(retval);
 			ourLog.info("SQL that would be executed:\n\n***********************************\n{}***********************************", statementBuilder);
 		}
