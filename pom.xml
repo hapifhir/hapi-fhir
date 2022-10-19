@@ -795,7 +795,7 @@
         <caffeine_version>3.1.1</caffeine_version>
         <commons_codec_version>1.15</commons_codec_version>
         <commons_compress_version>1.21</commons_compress_version>
-        <commons_text_version>1.9</commons_text_version>
+        <commons_text_version>1.10.0</commons_text_version>
         <commons_io_version>2.11.0</commons_io_version>
         <commons_lang3_version>3.12.0</commons_lang3_version>
         <com_jamesmurty_utils_version>1.2</com_jamesmurty_utils_version>
