@@ -180,6 +180,10 @@ public abstract class BaseJpaResourceProviderPatient<T extends IBaseResource> ex
 
 	}
 
+
+
+
+
 	/**
 	 * Given a list of string types, return only the ID portions of any parameters passed in.
 	 */
