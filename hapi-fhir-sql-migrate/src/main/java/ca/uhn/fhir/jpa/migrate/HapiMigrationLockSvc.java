@@ -8,7 +8,6 @@ import org.flywaydb.core.internal.database.h2.H2Database;
 import org.flywaydb.core.internal.database.oracle.OracleDatabase;
 import org.flywaydb.core.internal.database.postgresql.PostgreSQLDatabase;
 import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
-import org.flywaydb.core.internal.jdbc.JdbcTemplate;
 import org.flywaydb.database.mysql.MySQLDatabase;
 import org.flywaydb.database.mysql.mariadb.MariaDBDatabase;
 import org.flywaydb.database.sqlserver.SQLServerDatabase;
@@ -16,30 +15,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 public class HapiMigrationLockSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLockSvc.class);
-	private final DataSource theDataSource;
-	private final DriverTypeEnum theDriverType;
+	private final DataSource myDataSource;
+	private final DriverTypeEnum myDriverType;
 	private final Table myLockTable;
 	private final String myMigrationTablename;
+	private Connection myConnection;
 
 	public HapiMigrationLockSvc(DataSource theDataSource, DriverTypeEnum theDriverType, String myMigrationTablename) {
-		this.theDataSource = theDataSource;
-		this.theDriverType = theDriverType;
+		this.myDataSource = theDataSource;
+		this.myDriverType = theDriverType;
 		this.myMigrationTablename = myMigrationTablename;
-		myLockTable = buildTable(theDataSource, theDriverType);
+		myLockTable = buildTable();
 	}
 
-	private Table buildTable(DataSource theDataSource, DriverTypeEnum theDriverType) {
+	private Table buildTable() {
 		try {
-			JdbcTemplate jdbcTemplate = new JdbcTemplate(theDataSource.getConnection());
-			FluentConfiguration configuration = new FluentConfiguration().dataSource(theDataSource);
-			JdbcConnectionFactory connectionFactory = new JdbcConnectionFactory(theDataSource, configuration, null);
+			// WIP KHS this is required, but I don't understand why
+			myConnection = myDataSource.getConnection();
+			FluentConfiguration configuration = new FluentConfiguration().dataSource(myDataSource);
+			JdbcConnectionFactory connectionFactory = new JdbcConnectionFactory(myDataSource, configuration, null);
 
-			String schemaName = theDataSource.getConnection().getSchema();
-			switch (theDriverType) {
+			String schemaName = myDataSource.getConnection().getSchema();
+			switch (myDriverType) {
 				case H2_EMBEDDED: {
 					H2Database database = new H2Database(configuration, connectionFactory, null);
 					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
@@ -73,7 +75,7 @@ public class HapiMigrationLockSvc {
 					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
 				}
 				default:
-					throw new UnsupportedOperationException("Driver type not supported: " + theDriverType);
+					throw new UnsupportedOperationException("Driver type not supported: " + myDriverType);
 			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -88,6 +90,11 @@ public class HapiMigrationLockSvc {
 
 	public void unlock() {
 		myLockTable.unlock();
+		try {
+			myConnection.close();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 		ourLog.info("Migration Table Unlocked");
 	}
 }
