@@ -100,10 +100,10 @@ public class FhirResourceDaoCodeSystemR4B extends BaseHapiFhirResourceDao<CodeSy
 		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException(Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
+			throw new InvalidRequestException(Msg.code(2148) + "No code, coding, or codeableConcept provided to validate");
 		}
 		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException(Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			throw new InvalidRequestException(Msg.code(2149) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 
 		String code;
