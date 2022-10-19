@@ -79,6 +79,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>6.2.0-PRE17-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
 			<version>6.2.0-PRE17-SNAPSHOT</version>
 		</dependency>
