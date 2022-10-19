@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.IndexedSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -131,4 +132,11 @@ public class SearchParamConfig {
 	ResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
 		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
+
+	@Bean
+	@Lazy
+	SearchParameterHelper searchParameterHelper(FhirContext theFhirContext) {
+		return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
+	}
+
 }
