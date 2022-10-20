@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import org.flywaydb.core.api.configuration.FluentConfiguration;
+import org.flywaydb.core.internal.database.base.Database;
 import org.flywaydb.core.internal.database.base.Table;
 import org.flywaydb.core.internal.database.cockroachdb.CockroachDBDatabase;
 import org.flywaydb.core.internal.database.derby.DerbyDatabase;
@@ -50,18 +51,13 @@ public class HapiMigrationLock implements AutoCloseable {
 
 		myLockTableConnection = openLockTableConnection(theDataSource);
 
-		ourLog.info("Locking Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
 		lock();
-		ourLog.info("Locked Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
 	}
 
 	private void lock() {
-		try {
-			myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection().setAutoCommit(false);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
+		ourLog.debug("Locking Migration Table");
 		myLockTableConnection.lock();
+		ourLog.debug("Locked Migration Table");
 	}
 
 	@Override
@@ -71,9 +67,7 @@ public class HapiMigrationLock implements AutoCloseable {
 		}
 
 		myLockTableConnection.unlock();
-
-		ourLog.info("Unlocked Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
-
+		ourLog.debug("Unlocked Migration Table");
 		myLockTableConnection.getDatabase().close();
 	}
 
@@ -86,44 +80,39 @@ public class HapiMigrationLock implements AutoCloseable {
 				schemaName = connection.getSchema();
 			}
 
+			Database database;
 			switch (myDriverType) {
-				case H2_EMBEDDED: {
-					H2Database database = new H2Database(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case DERBY_EMBEDDED: {
-					DerbyDatabase database = new DerbyDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case ORACLE_12C: {
-					OracleDatabase database = new OracleDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case POSTGRES_9_4: {
-					PostgreSQLDatabase database = new PostgreSQLDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case COCKROACHDB_21_1: {
-					CockroachDBDatabase database = new CockroachDBDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case MARIADB_10_1: {
-					MariaDBDatabase database = new MariaDBDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case MYSQL_5_7: {
-					MySQLDatabase database = new MySQLDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
-				case MSSQL_2012: {
-					SQLServerDatabase database = new SQLServerDatabase(configuration, connectionFactory, null);
-					return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-				}
+				case H2_EMBEDDED:
+					database = new H2Database(configuration, connectionFactory, null);
+					break;
+				case DERBY_EMBEDDED:
+					database = new DerbyDatabase(configuration, connectionFactory, null);
+					break;
+				case ORACLE_12C:
+					database = new OracleDatabase(configuration, connectionFactory, null);
+					break;
+				case POSTGRES_9_4:
+					database = new PostgreSQLDatabase(configuration, connectionFactory, null);
+					break;
+				case COCKROACHDB_21_1:
+					database = new CockroachDBDatabase(configuration, connectionFactory, null);
+					break;
+				case MARIADB_10_1:
+					database = new MariaDBDatabase(configuration, connectionFactory, null);
+					break;
+				case MYSQL_5_7:
+					database = new MySQLDatabase(configuration, connectionFactory, null);
+					break;
+				case MSSQL_2012:
+					database = new SQLServerDatabase(configuration, connectionFactory, null);
+					break;
 				default:
 					throw new UnsupportedOperationException("Driver type not supported: " + myDriverType);
 			}
+			database.getMainConnection().getJdbcConnection().setAutoCommit(false);
+			return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("Failed to open connection to database migration table " + myMigrationTablename, e);
 		}
 	}
 
