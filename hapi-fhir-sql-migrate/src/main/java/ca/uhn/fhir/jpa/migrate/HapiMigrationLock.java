@@ -51,10 +51,6 @@ public class HapiMigrationLock implements AutoCloseable {
 
 		myLockTableConnection = openLockTableConnection(theDataSource);
 
-		lock();
-	}
-
-	private void lock() {
 		ourLog.debug("Locking Migration Table");
 		myLockTableConnection.lock();
 		ourLog.debug("Locked Migration Table");
@@ -68,6 +64,8 @@ public class HapiMigrationLock implements AutoCloseable {
 
 		myLockTableConnection.unlock();
 		ourLog.debug("Unlocked Migration Table");
+
+		// Close the connection we opened in openLockTableConnection()
 		myLockTableConnection.getDatabase().close();
 	}
 
@@ -109,6 +107,7 @@ public class HapiMigrationLock implements AutoCloseable {
 				default:
 					throw new UnsupportedOperationException("Driver type not supported: " + myDriverType);
 			}
+			// The Flyway table lock mechanism requires auto-commit to be disabled on the connection
 			database.getMainConnection().getJdbcConnection().setAutoCommit(false);
 			return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
 		} catch (SQLException e) {
