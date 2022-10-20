@@ -215,6 +215,10 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		setSupportedResourceTypes(toCollection(theResourceTypes));
 	}
 
+	public Set<String> getSupportedResourceTypes(){
+		return mySupportedResourceTypes;
+	}
+
 	private List<String> toCollection(String[] theResourceTypes) {
 		List<String> retVal = null;
 		if (theResourceTypes != null && theResourceTypes.length > 0) {

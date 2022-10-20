@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -96,6 +97,8 @@ public class BulkDataExportProviderTest {
 
 	private DaoConfig myDaoConfig;
 
+	private DaoRegistry myDaoRegistry;
+
 	private CloseableHttpClient myClient;
 
 	@InjectMocks
@@ -135,9 +138,11 @@ public class BulkDataExportProviderTest {
 	}
 
 	@BeforeEach
-	public void injectDaoConfig() {
+	public void injectDaoConfigAndDaoRegistry() {
 		myDaoConfig = new DaoConfig();
 		myProvider.setDaoConfig(myDaoConfig);
+		myDaoRegistry = new DaoRegistry();
+		myProvider.setDaoRegistry(myDaoRegistry);
 	}
 
 	public void startWithFixedBaseUrl() {

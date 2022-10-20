@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -99,6 +100,9 @@ public class BulkDataExportProvider {
 
 	@Autowired
 	private DaoConfig myDaoConfig;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	/**
 	 * $export
@@ -418,12 +422,12 @@ public class BulkDataExportProvider {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : Constants.CT_FHIR_NDJSON;
 		outputFormat = outputFormat.replace(" ", "+");
 
-		Set<String> resourceTypes = null;
+		Set<String> resourceTypes = new HashSet<>();
+		resourceTypes.addAll(myDaoRegistry.getSupportedResourceTypes());
+
 		if (theType != null) {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
 		}
-
-		resourceTypes.add(new StringDt("Patient").getValueAsString());
 
 		Date since = null;
 		if (theSince != null) {
@@ -488,5 +492,10 @@ public class BulkDataExportProvider {
 	@VisibleForTesting
 	public void setDaoConfig(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
+	}
+
+	@VisibleForTesting
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
 	}
 }
