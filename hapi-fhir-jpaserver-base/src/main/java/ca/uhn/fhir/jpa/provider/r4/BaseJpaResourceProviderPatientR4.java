@@ -231,7 +231,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
 		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
-		if ( ! coverageOpt.isPresent()) {
+		if (!coverageOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.coverage.not.found");
 			throw new UnprocessableEntityException(Msg.code(1155) + i18nMessage);
@@ -239,7 +239,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		Coverage coverage = coverageOpt.get();
 
 		Optional<Patient> patientOpt = myMemberMatcherR4Helper.getBeneficiaryPatient(coverage);
-		if (! patientOpt.isPresent()) {
+		if (!patientOpt.isPresent()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
 				"operation.member.match.error.beneficiary.not.found");
 			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
@@ -268,7 +268,8 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 
 		myMemberMatcherR4Helper.addClientIdAsExtensionToConsentIfAvailable(theConsent);
 
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
+		myMemberMatcherR4Helper.addIdentifierToConsent(theConsent);
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 
 

@@ -165,7 +165,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
 	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
 	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 

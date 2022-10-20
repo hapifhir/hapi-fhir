@@ -31,10 +31,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
@@ -132,14 +134,18 @@ class MemberMatcherR4HelperTest {
 	void buildSuccessReturnParameters() {
 		Patient patient = new Patient();
 		Coverage coverage = new Coverage();
+		Consent consent = new Consent();
 
-		Parameters result = myTestedHelper.buildSuccessReturnParameters(patient, coverage);
+		Parameters result = myTestedHelper.buildSuccessReturnParameters(patient, coverage, consent);
 
 		assertEquals(PARAM_MEMBER_PATIENT, result.getParameter().get(0).getName());
 		assertEquals(patient, result.getParameter().get(0).getResource());
 
 		assertEquals(PARAM_NEW_COVERAGE, result.getParameter().get(1).getName());
 		assertEquals(coverage, result.getParameter().get(1).getResource());
+
+		assertEquals(PARAM_CONSENT, result.getParameter().get(2).getName());
+		assertEquals(consent, result.getParameter().get(2).getResource());
 	}
 
 
@@ -162,6 +168,15 @@ class MemberMatcherR4HelperTest {
 
 		assertEquals("new-identifier-system", patient.getIdentifier().get(1).getSystem());
 		assertEquals("new-identifier-value", patient.getIdentifier().get(1).getValue());
+	}
+
+	@Test
+	void TestAddIdentifierToConsent() {
+		Consent consent = new Consent();
+		myTestedHelper.addIdentifierToConsent(consent);
+		assertEquals(1, consent.getIdentifier().size());
+		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", consent.getIdentifier().get(0).getSystem());
+		assertNotNull(consent.getIdentifier().get(0).getValue());
 	}
 
 	@Nested
@@ -363,7 +378,7 @@ class MemberMatcherR4HelperTest {
 
 		@Test
 		void regularDataAccessWithRegularAllowedReturnsTrue() {
-			myTestedHelper.setRgularFilterSupported(true);
+			myTestedHelper.setRegularFilterSupported(true);
 			consent = getConsent("#regular");
 			boolean result = myTestedHelper.validConsentDataAccess(consent);
 			assertTrue(result);
@@ -386,7 +401,7 @@ class MemberMatcherR4HelperTest {
 
 		@Test
 		void multipleRegularPolicyDataAccessWithRegularAllowedReturnsTrue() {
-			myTestedHelper.setRgularFilterSupported(true);
+			myTestedHelper.setRegularFilterSupported(true);
 			consent = getConsent("#regular");
 			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			boolean result = myTestedHelper.validConsentDataAccess(consent);
@@ -403,7 +418,7 @@ class MemberMatcherR4HelperTest {
 
 		@Test
 		void multipleMixedPolicyDataAccessWithRegularAllowedReturnsTrue() {
-			myTestedHelper.setRgularFilterSupported(true);
+			myTestedHelper.setRegularFilterSupported(true);
 			consent = getConsent("#regular");
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			boolean result = myTestedHelper.validConsentDataAccess(consent);
