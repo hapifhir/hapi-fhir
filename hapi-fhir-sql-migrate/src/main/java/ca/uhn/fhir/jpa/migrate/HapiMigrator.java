@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.util.StopWatch;
@@ -48,14 +47,14 @@ public class HapiMigrator {
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
-	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
+	private final SimpleFlywayExecutor mySimpleFlywayExecutor;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
-		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
+		mySimpleFlywayExecutor = new SimpleFlywayExecutor(theDataSource, theDriverType, theMigrationTableName);
 	}
 
 	public DataSource getDataSource() {
@@ -105,26 +104,7 @@ public class HapiMigrator {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
 		MigrationResult retval = new MigrationResult();
 
-		try (HapiMigrationLock hapiMigrationLock = new HapiMigrationLock(myDataSource, myDriverType, myMigrationTableName)) {
-			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
-			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
-
-
-			try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
-
-				newTaskList.forEach(next -> {
-
-					next.setDriverType(getDriverType());
-					next.setDryRun(isDryRun());
-					next.setNoColumnShrink(isNoColumnShrink());
-					next.setConnectionProperties(connectionProperties);
-
-					executeTask(next, retval);
-				});
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException("Unable to acquire lock on migration table " + myMigrationTableName, e);
-		}
+		mySimpleFlywayExecutor.migrate(myTaskList);
 
 		ourLog.info(retval.summary());
 
@@ -136,6 +116,7 @@ public class HapiMigrator {
 		return retval;
 	}
 
+	// FIXME KHS move
 	private void executeTask(BaseTask theTask, MigrationResult theMigrationResult) {
 		StopWatch sw = new StopWatch();
 		try {
@@ -146,13 +127,11 @@ public class HapiMigrator {
 			}
 			preExecute(theTask);
 			theTask.execute();
-			postExecute(theTask, sw, true);
 			theMigrationResult.changes += theTask.getChangesCount();
 			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
 			theMigrationResult.succeededTasks.add(theTask);
 		} catch (SQLException | HapiMigrationException e) {
 			theMigrationResult.failedTasks.add(theTask);
-			postExecute(theTask, sw, false);
 			String description = theTask.getDescription();
 			if (isBlank(description)) {
 				description = theTask.getClass().getSimpleName();
@@ -167,9 +146,6 @@ public class HapiMigrator {
 
 	}
 
-	private void postExecute(BaseTask theNext, StopWatch theStopWatch, boolean theSuccess) {
-		myHapiMigrationStorageSvc.saveTask(theNext, Math.toIntExact(theStopWatch.getMillis()), theSuccess);
-	}
 
 	public void addTasks(Iterable<BaseTask> theMigrationTasks) {
 		if ("true".equals(System.getProperty("unit_test_mode"))) {
@@ -204,6 +180,6 @@ public class HapiMigrator {
 	}
 
 	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		mySimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 }

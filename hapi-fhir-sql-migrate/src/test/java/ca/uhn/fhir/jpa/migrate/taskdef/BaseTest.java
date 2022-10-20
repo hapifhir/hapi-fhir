@@ -1,11 +1,10 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
-import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
+import ca.uhn.fhir.jpa.migrate.SimpleFlywayExecutor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -31,8 +30,7 @@ public abstract class BaseTest {
 	private String myUrl;
 	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
-	protected HapiMigrationDao myHapiMigrationDao;
-	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;
+	protected SimpleFlywayExecutor mySimpleFlywayExecutor;
 
 	public static Stream<Supplier<TestDatabaseDetails>> data() {
 
@@ -92,10 +90,9 @@ public abstract class BaseTest {
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
-		myHapiMigrationDao = new HapiMigrationDao(testDatabaseDetails.myDataSource, testDatabaseDetails.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
+		mySimpleFlywayExecutor = new SimpleFlywayExecutor(testDatabaseDetails.myDataSource, testDatabaseDetails.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
 
-		myHapiMigrationDao.createMigrationTableIfRequired();
-		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(myHapiMigrationDao);
+		mySimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 
 	public String getUrl() {

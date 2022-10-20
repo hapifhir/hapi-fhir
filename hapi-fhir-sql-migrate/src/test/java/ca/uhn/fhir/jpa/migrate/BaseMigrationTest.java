@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.migrate;
 
-import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,14 +8,11 @@ import javax.sql.DataSource;
 
 public abstract class BaseMigrationTest {
 	private static final String TABLE_NAME = "TEST_MIGRATION_TABLE";
-	protected static HapiMigrationDao ourHapiMigrationDao;
-	protected static HapiMigrationStorageSvc ourHapiMigrationStorageSvc;
-
+	protected static SimpleFlywayExecutor ourSimpleFlywayExecutor;
 	@BeforeAll
 	public static void beforeAll() {
-		ourHapiMigrationDao = new HapiMigrationDao(getDataSource(), DriverTypeEnum.H2_EMBEDDED, TABLE_NAME);
-		ourHapiMigrationDao.createMigrationTableIfRequired();
-		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
+		ourSimpleFlywayExecutor = new SimpleFlywayExecutor(getDataSource(), DriverTypeEnum.H2_EMBEDDED, TABLE_NAME);
+		ourSimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 
 	static DataSource getDataSource() {
@@ -33,7 +29,7 @@ public abstract class BaseMigrationTest {
 
 	@AfterEach
 	void after() {
-		ourHapiMigrationDao.deleteAll();
+		ourSimpleFlywayExecutor.dropTable();
 	}
 
 }

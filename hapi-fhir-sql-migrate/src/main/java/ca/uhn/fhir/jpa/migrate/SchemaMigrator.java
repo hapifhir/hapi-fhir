@@ -20,15 +20,11 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.i18n.Msg;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -39,23 +35,23 @@ public class SchemaMigrator {
 	private final String mySchemaName;
 	private final DataSource myDataSource;
 	private final boolean mySkipValidation;
+	private final SimpleFlywayExecutor mySimpleFlywayExecutor;
 	private final String myMigrationTableName;
 	private final MigrationTaskList myMigrationTasks;
 	private DriverTypeEnum myDriverType;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
-	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 
 	/**
 	 * Constructor
 	 */
-	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, MigrationTaskList theMigrationTasks, HapiMigrationStorageSvc theHapiMigrationStorageSvc) {
+	public SchemaMigrator(String theSchemaName, String theMigrationTableName, DataSource theDataSource, Properties jpaProperties, MigrationTaskList theMigrationTasks, SimpleFlywayExecutor theSimpleFlywayExecutor) {
 		mySchemaName = theSchemaName;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
 		myMigrationTasks = theMigrationTasks;
 
 		mySkipValidation = jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO));
-		myHapiMigrationStorageSvc = theHapiMigrationStorageSvc;
+		mySimpleFlywayExecutor = theSimpleFlywayExecutor;
 	}
 
 	public void validate() {
@@ -63,21 +59,7 @@ public class SchemaMigrator {
 			ourLog.warn("Database running in hibernate auto-update mode.  Skipping schema validation.");
 			return;
 		}
-		try (Connection connection = myDataSource.getConnection()) {
-			MigrationTaskList unappliedMigrations = myHapiMigrationStorageSvc.diff(myMigrationTasks);
-
-			if (unappliedMigrations.size() > 0) {
-
-				String url = connection.getMetaData().getURL();
-				throw new ConfigurationException(Msg.code(27) + "The database schema for " + url + " is out of date.  " +
-					"Current database schema version is " + myHapiMigrationStorageSvc.getLatestAppliedVersion() + ".  Schema version required by application is " +
-					unappliedMigrations.getLastVersion() + ".  Please run the database migrator.");
-			}
-			ourLog.info("Database schema confirmed at expected version " + myHapiMigrationStorageSvc.getLatestAppliedVersion());
-		} catch (SQLException e) {
-			throw new ConfigurationException(Msg.code(28) + "Unable to connect to " + myDataSource, e);
-		}
-
+		mySimpleFlywayExecutor.validate();
 	}
 
 	public MigrationResult migrate() {
@@ -113,6 +95,6 @@ public class SchemaMigrator {
 	}
 
 	public void createMigrationTableIfRequired() {
-		myHapiMigrationStorageSvc.createMigrationTableIfRequired();
+		mySimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 }
