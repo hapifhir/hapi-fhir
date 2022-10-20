@@ -12,7 +12,6 @@ public abstract class BaseMigrationTest {
 	@BeforeAll
 	public static void beforeAll() {
 		ourSimpleFlywayExecutor = new SimpleFlywayExecutor(getDataSource(), DriverTypeEnum.H2_EMBEDDED, TABLE_NAME);
-		ourSimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 
 	static DataSource getDataSource() {

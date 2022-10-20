@@ -91,8 +91,6 @@ public abstract class BaseTest {
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
 		mySimpleFlywayExecutor = new SimpleFlywayExecutor(testDatabaseDetails.myDataSource, testDatabaseDetails.getDriverType(), SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
-
-		mySimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 
 	public String getUrl() {

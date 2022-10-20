@@ -34,7 +34,6 @@ class HapiMigratorTest {
 	void before() throws SQLException {
 		HapiMigrator migrator = buildMigrator();
 		// FIXME KHS
-//		migrator.createMigrationTableIfRequired();
 //		try (Connection connection = myDataSource.getConnection()) {
 //			ResultSet rs = connection.createStatement().executeQuery("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME);
 //			assertEquals("COUNT(*)", rs.getMetaData().getColumnName(1));

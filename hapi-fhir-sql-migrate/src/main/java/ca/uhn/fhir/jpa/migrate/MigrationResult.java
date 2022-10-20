@@ -41,10 +41,6 @@ public class MigrationResult {
 	}
 
 	public String summary() {
-		return String.format("Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
-			succeededTasks.size() + failedTasks.size(),
-			succeededTasks.size(),
-			failedTasks.size(),
-			executedStatements.size());
+		return String.format("Completed executing %s migration tasks.", migrationsExecuted);
 	}
 }

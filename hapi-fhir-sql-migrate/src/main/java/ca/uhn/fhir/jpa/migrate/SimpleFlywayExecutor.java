@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,19 +55,24 @@ public class SimpleFlywayExecutor {
 	private final DataSource myDataSource;
 	private final DriverTypeEnum myH2Embedded;
 	private final String myTableName;
+	private OutputStream myOutputStream;
 	private FluentConfiguration myConfiguration;
 
-	public SimpleFlywayExecutor(DataSource theDataSource, DriverTypeEnum theH2Embedded, String theTableName) {
+	public SimpleFlywayExecutor(DataSource theDataSource, DriverTypeEnum theDriverType, String theTableName) {
+		this(theDataSource, theDriverType, theTableName, false);
+	}
+
+	public SimpleFlywayExecutor(DataSource theDataSource, DriverTypeEnum theDriverType, String theTableName, boolean theDryRun) {
 		myDataSource = theDataSource;
-		myH2Embedded = theH2Embedded;
+		myH2Embedded = theDriverType;
 		myTableName = theTableName;
 		myConfiguration = new FluentConfiguration()
 			.dataSource(myDataSource)
 			.table(theTableName);
-	}
-
-	public void createMigrationTableIfRequired() {
-		// FIXME KHS
+		if (theDryRun) {
+			myOutputStream = new ByteArrayOutputStream();
+			myConfiguration.dryRunOutput(myOutputStream);
+		}
 	}
 
 	public MigrationResult migrate(MigrationTaskList theTaskList) {

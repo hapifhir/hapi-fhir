@@ -93,8 +93,4 @@ public class SchemaMigrator {
 	public void setCallbacks(List<IHapiMigrationCallback> theCallbacks) {
 		myCallbacks = theCallbacks;
 	}
-
-	public void createMigrationTableIfRequired() {
-		mySimpleFlywayExecutor.createMigrationTableIfRequired();
-	}
 }

@@ -86,7 +86,6 @@ public abstract class BaseTest {
 		myConnectionProperties = testDatabaseDetails.myConnectionProperties;
 		myDataSource = testDatabaseDetails.myDataSource;
 		myMigrator = testDatabaseDetails.myMigrator;
-		myMigrator.createMigrationTableIfRequired();
 	}
 
 	public String getUrl() {

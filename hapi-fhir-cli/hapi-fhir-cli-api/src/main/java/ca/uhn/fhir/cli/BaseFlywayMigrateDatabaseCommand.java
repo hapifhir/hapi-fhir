@@ -114,7 +114,6 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 		DriverTypeEnum.ConnectionProperties connectionProperties = driverType.newConnectionProperties(url, username, password);
 		HapiMigrator migrator = new HapiMigrator(myMigrationTableName, connectionProperties.getDataSource(), driverType);
 
-		migrator.createMigrationTableIfRequired();
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
 		String skipVersions = theCommandLine.getOptionValue(BaseFlywayMigrateDatabaseCommand.SKIP_VERSIONS);

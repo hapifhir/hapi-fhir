@@ -47,14 +47,12 @@ public class HapiMigrator {
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
 	private final DataSource myDataSource;
-	private final SimpleFlywayExecutor mySimpleFlywayExecutor;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
 		myMigrationTableName = theMigrationTableName;
-		mySimpleFlywayExecutor = new SimpleFlywayExecutor(theDataSource, theDriverType, theMigrationTableName);
 	}
 
 	public DataSource getDataSource() {
@@ -102,8 +100,10 @@ public class HapiMigrator {
 
 	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
+		SimpleFlywayExecutor simpleFlywayExecutor = new SimpleFlywayExecutor(myDataSource, myDriverType, myMigrationTableName, isDryRun());
 
-		MigrationResult retval = mySimpleFlywayExecutor.migrate(myTaskList);
+
+		MigrationResult retval = simpleFlywayExecutor.migrate(myTaskList);
 
 		ourLog.info(retval.summary());
 
@@ -176,9 +176,5 @@ public class HapiMigrator {
 	@VisibleForTesting
 	public void removeAllTasksForUnitTest() {
 		myTaskList.clear();
-	}
-
-	public void createMigrationTableIfRequired() {
-		mySimpleFlywayExecutor.createMigrationTableIfRequired();
 	}
 }
