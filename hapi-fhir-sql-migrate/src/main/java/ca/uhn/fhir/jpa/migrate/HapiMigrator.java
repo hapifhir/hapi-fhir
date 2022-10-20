@@ -102,9 +102,8 @@ public class HapiMigrator {
 
 	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
-		MigrationResult retval = new MigrationResult();
 
-		mySimpleFlywayExecutor.migrate(myTaskList);
+		MigrationResult retval = mySimpleFlywayExecutor.migrate(myTaskList);
 
 		ourLog.info(retval.summary());
 

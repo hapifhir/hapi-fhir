@@ -22,8 +22,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HapiMigratorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorTest.class);
@@ -65,7 +64,7 @@ class HapiMigratorTest {
 		latchMigrationTask.release("1");
 
 		MigrationResult result = future.get();
-		assertThat(result.succeededTasks, hasSize(1));
+		assertEquals(result.migrationsExecuted, 1);
 	}
 
 	@Test
@@ -100,8 +99,8 @@ class HapiMigratorTest {
 		MigrationResult result2 = future2.get();
 
 		// Tasks were only run on the first migration
-		assertThat(result1.succeededTasks, hasSize(1));
-		assertThat(result2.succeededTasks, hasSize(0));
+		assertEquals(result1.migrationsExecuted, 1);
+		assertEquals(result2.migrationsExecuted, 0);
 	}
 
 	@Nonnull

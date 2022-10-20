@@ -31,11 +31,12 @@ public class MigrationResult {
 	public final List<BaseTask.ExecutedStatement> executedStatements = new ArrayList<>();
 	public final List<BaseTask> succeededTasks = new ArrayList<>();
 	public final List<BaseTask> failedTasks = new ArrayList<>();
+	public int migrationsExecuted = 0;
 
 	public static MigrationResult fromFlywayResult(MigrateResult theResult) {
 		// FIXME KHS
 		MigrationResult retVal = new MigrationResult();
-		retVal.changes = theResult.migrationsExecuted;
+		retVal.migrationsExecuted = theResult.migrationsExecuted;
 		return retVal;
 	}
 
