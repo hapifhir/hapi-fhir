@@ -416,6 +416,7 @@ public class BulkDataExportProvider {
 
 	private BulkDataExportOptions buildBulkDataExportOptions(IPrimitiveType<String> theOutputFormat, IPrimitiveType<String> theType, IPrimitiveType<Date> theSince, List<IPrimitiveType<String>> theTypeFilter, BulkDataExportOptions.ExportStyle theExportStyle) {
 		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : Constants.CT_FHIR_NDJSON;
+		outputFormat = outputFormat.replace(" ", "+");
 
 		Set<String> resourceTypes = null;
 		if (theType != null) {
