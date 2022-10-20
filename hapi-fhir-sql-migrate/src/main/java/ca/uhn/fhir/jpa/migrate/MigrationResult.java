@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import org.flywaydb.core.api.output.MigrateResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,13 @@ public class MigrationResult {
 	public final List<BaseTask.ExecutedStatement> executedStatements = new ArrayList<>();
 	public final List<BaseTask> succeededTasks = new ArrayList<>();
 	public final List<BaseTask> failedTasks = new ArrayList<>();
+
+	public static MigrationResult fromFlywayResult(MigrateResult theResult) {
+		// FIXME KHS
+		MigrationResult retVal = new MigrationResult();
+		retVal.changes = theResult.migrationsExecuted;
+		return retVal;
+	}
 
 	public String summary() {
 		return String.format("Completed executing %s migration tasks: %s succeeded, %s failed.  %s SQL statements were executed.",
