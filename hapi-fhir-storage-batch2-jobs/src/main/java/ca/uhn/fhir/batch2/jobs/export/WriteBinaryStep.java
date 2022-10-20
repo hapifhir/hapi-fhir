@@ -64,9 +64,10 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 								 @Nonnull IJobDataSink<BulkExportBinaryFileId> theDataSink) throws JobExecutionFailedException {
 
 		BulkExportExpandedResources expandedResources = theStepExecutionDetails.getData();
+		final int numResourcesProcessed = expandedResources.getStringifiedResources().size();
 
 		ourLog.info("Write binary step of Job Export");
-		ourLog.info("Writing {} resources to binary file", expandedResources.getStringifiedResources().size());
+		ourLog.info("Writing {} resources to binary file", numResourcesProcessed);
 
 		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
@@ -113,7 +114,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			processedRecordsCount,
 			expandedResources.getResourceType());
 
-		return RunOutcome.SUCCESS;
+		return new RunOutcome(numResourcesProcessed);
 	}
 
 	/**
