@@ -19,6 +19,7 @@ import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,16 +29,17 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	@Autowired
-	private Batch2JobHelper myBatchJobHelper;
-
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	public static FhirContext ourCtx = FhirContext.forDstu3Cached();
+	@Autowired
+	private Batch2JobHelper myBatchJobHelper;
 
 	@BeforeEach
 	@Transactional
@@ -53,8 +55,8 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	public void testLookupOnExternalCode() {
 		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
 
-		runInTransaction(()->{
-			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		Parameters respParam = ourClient
@@ -352,17 +354,22 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testValidateCodeOperation() {
-		
+
 		Parameters inParams = new Parameters();
 		inParams.addParameter().setName("url").setValue(new UriType("https://url"));
 		inParams.addParameter().setName("code").setValue(new CodeType("1"));
 
-		try {
-			ourClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[CodeSystem/$validate-code] with parameters [[]]", e.getMessage());
-		}
+		Parameters outcome = ourClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+
+		String message = outcome
+			.getParameter()
+			.stream()
+			.filter(t -> t.getName().equals("message"))
+			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
+			.findFirst()
+			.orElseThrow(IllegalArgumentException::new);
+		assertThat(message, containsString("Code is not found in CodeSystem: https://url"));
 	}
 
 }

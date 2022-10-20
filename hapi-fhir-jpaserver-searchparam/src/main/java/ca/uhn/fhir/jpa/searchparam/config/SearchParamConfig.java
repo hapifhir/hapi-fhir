@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4B;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -66,6 +67,8 @@ public class SearchParamConfig {
 				return new SearchParamExtractorDstu3();
 			case R4:
 				return new SearchParamExtractorR4();
+			case R4B:
+				return new SearchParamExtractorR4B();
 			case R5:
 				return new SearchParamExtractorR5();
 			case DSTU2_HL7ORG:

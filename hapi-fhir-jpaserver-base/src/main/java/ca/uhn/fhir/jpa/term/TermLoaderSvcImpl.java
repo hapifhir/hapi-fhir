@@ -495,7 +495,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		CodeSystem imgthlaCs;
 		try {
-			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
+			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
