@@ -43,28 +43,13 @@ public class HapiMigrationLock implements AutoCloseable {
 	private final DriverTypeEnum myDriverType;
 	private final Table myLockTableConnection;
 	private final String myMigrationTablename;
-	//	private final PlatformTransactionManager myTransactionManager;
-//	private final DefaultTransactionStatus myActiveTransaction;
-//	private final Connection myConnection;
-//	private final JdbcTemplate myJdbcTemplate;
 	private JdbcConnectionFactory myConnectionFactory;
 
 	public HapiMigrationLock(DataSource theDataSource, DriverTypeEnum theDriverType, String myMigrationTablename) {
 		this.myDriverType = theDriverType;
 		this.myMigrationTablename = myMigrationTablename;
-//		myTransactionManager = new org.springframework.jdbc.datasource.DataSourceTransactionManager(theDataSource);
 
-
-//		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-//		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-//		definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-//		myActiveTransaction = (DefaultTransactionStatus) myTransactionManager.getTransaction(definition);
-
-//		JdbcTransactionObjectSupport jdbcTransactionObjectSupport = (JdbcTransactionObjectSupport) myActiveTransaction.getTransaction();
-//		myConnection = jdbcTransactionObjectSupport.getConnectionHolder().getConnection();
 		myLockTableConnection = openLockTableConnection(theDataSource);
-//		myConnection = myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection();
-//		myJdbcTemplate = new JdbcTemplate(myConnection);
 
 		ourLog.info("Locking Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
 		lock();
@@ -90,8 +75,6 @@ public class HapiMigrationLock implements AutoCloseable {
 
 		ourLog.info("Unlocked Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
 
-		// This will commit our transaction and release the lock
-//		myActiveTransaction.flush();
 		myLockTableConnection.getDatabase().close();
 		myConnectionFactory.close();
 	}

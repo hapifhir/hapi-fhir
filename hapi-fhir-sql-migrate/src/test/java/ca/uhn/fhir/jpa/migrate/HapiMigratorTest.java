@@ -144,12 +144,12 @@ class HapiMigratorTest {
 		}
 
 		@Override
-		protected void doExecute() throws SQLException {
+		protected void doExecute() {
 			try {
 				myLatch.call(this);
 				myWaitLatch.awaitExpected();
 				ourLog.info("Latch released with parameter {}", myWaitLatch.getLatchInvocationParameter());
-				// This race condition should be replaced with a latch
+				// We sleep a bit to ensure the other thread has a chance to try to get the lock.  We don't have a hook there, so sleep instead
 				Thread.sleep(200);
 				ourLog.info("Completing execution of {}", myWaitLatch.getLatchInvocationParameter());
 			} catch (InterruptedException e) {
