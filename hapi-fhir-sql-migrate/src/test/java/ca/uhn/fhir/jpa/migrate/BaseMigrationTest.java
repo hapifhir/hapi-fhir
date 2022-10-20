@@ -19,15 +19,14 @@ public abstract class BaseMigrationTest {
 		ourHapiMigrationStorageSvc = new HapiMigrationStorageSvc(ourHapiMigrationDao);
 	}
 
-	 static DataSource getDataSource() {
+	static DataSource getDataSource() {
 		BasicDataSource retVal = new BasicDataSource();
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:test_migration");
 		retVal.setMaxWaitMillis(30000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-		// FIXME KHS
-		retVal.setMaxTotal(50);
+		retVal.setMaxTotal(5);
 
 		return retVal;
 	}

@@ -57,7 +57,7 @@ class HapiMigratorTest {
 	void test_onecall_noblock() throws InterruptedException, ExecutionException {
 
 		ExecutorService executor = Executors.newSingleThreadExecutor();
-		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("only", "1");
+		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("only");
 
 		HapiMigrator migrator = buildMigrator(latchMigrationTask);
 
@@ -77,13 +77,11 @@ class HapiMigratorTest {
 
 		// Create two migrators to simulate two servers running at the same time
 
-		LatchMigrationTask latchMigrationTask1 = new LatchMigrationTask("first", "1");
+		LatchMigrationTask latchMigrationTask1 = new LatchMigrationTask("first");
 		HapiMigrator migrator1 = buildMigrator(latchMigrationTask1);
 
-		LatchMigrationTask latchMigrationTask2 = new LatchMigrationTask("second new", "2");
-		LatchMigrationTask latchMigrationTask3 = new LatchMigrationTask("third repeat", "1");
+		LatchMigrationTask latchMigrationTask2 = new LatchMigrationTask("second");
 		HapiMigrator migrator2 = buildMigrator(latchMigrationTask2);
-		migrator2.addTask(latchMigrationTask3);
 
 		// We only expect the first migration to run because the second one will block on the lock and by the time the lock
 		// is released, the first one will have already run so there will be nothing to do
@@ -94,24 +92,18 @@ class HapiMigratorTest {
 
 		// We wait until the first migration is in the middle of executing the migration task before we start the second one
 
+		Future<MigrationResult> future2 = executor.submit(() -> migrator2.migrate());
+
 		// Release the first migration task so it can complete and unblock to allow the second one to start
 
 		latchMigrationTask1.release("1");
-
-		latchMigrationTask2.setExpectedCount(1);
-		Future<MigrationResult> future2 = executor.submit(() -> migrator2.migrate());
-		latchMigrationTask2.awaitExpected();
-
-		// This second call shouldn't be necessary, but it will help the test fail faster with a clearer error
-		latchMigrationTask2.release("2");
-		latchMigrationTask3.release("3");
 
 		MigrationResult result1 = future1.get();
 		MigrationResult result2 = future2.get();
 
 		// Tasks were only run on the first migration
 		assertThat(result1.succeededTasks, hasSize(1));
-		assertThat(result2.succeededTasks, hasSize(1));
+		assertThat(result2.succeededTasks, hasSize(0));
 	}
 
 	@Nonnull
@@ -131,8 +123,8 @@ class HapiMigratorTest {
 		private final PointcutLatch myLatch;
 		private final PointcutLatch myWaitLatch;
 
-		protected LatchMigrationTask(String name, String theSchemaVersion) {
-			super(theSchemaVersion, theSchemaVersion);
+		protected LatchMigrationTask(String name) {
+			super("1", "1");
 			myLatch = new PointcutLatch("MigrationTask " + name + " called");
 			myWaitLatch = new PointcutLatch("MigrationTask " + name + " wait");
 			myWaitLatch.setExpectedCount(1);
@@ -176,10 +168,10 @@ class HapiMigratorTest {
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
-			// FIXME KHS
+			// WIP KHS
 
-//			return myLatch.awaitExpected();
-			return myLatch.awaitExpectedWithTimeout(9999);
+			return myLatch.awaitExpected();
+//			return myLatch.awaitExpectedWithTimeout(9999);
 		}
 
 		public void release(String theLatchInvocationParameter) {

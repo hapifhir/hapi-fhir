@@ -105,7 +105,7 @@ public class HapiMigrator {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
 		MigrationResult retval = new MigrationResult();
 
-		try (HapiMigrationLock hapiMigrationLock = new HapiMigrationLock(myDataSource,myDriverType,myMigrationTableName)) {
+		try (HapiMigrationLock hapiMigrationLock = new HapiMigrationLock(myDataSource, myDriverType, myMigrationTableName)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
 			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
@@ -122,6 +122,8 @@ public class HapiMigrator {
 					executeTask(next, retval);
 				});
 			}
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to acquire lock on migration table " + myMigrationTableName, e);
 		}
 
 		ourLog.info(retval.summary());
