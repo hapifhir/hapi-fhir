@@ -423,6 +423,8 @@ public class BulkDataExportProvider {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
 		}
 
+		resourceTypes.add(new StringDt("Patient").getValueAsString());
+
 		Date since = null;
 		if (theSince != null) {
 			since = theSince.getValue();
