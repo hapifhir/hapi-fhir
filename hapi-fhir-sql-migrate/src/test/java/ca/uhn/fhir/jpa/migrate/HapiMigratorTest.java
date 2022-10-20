@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ class HapiMigratorTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorTest.class);
 	private static final String MIGRATION_TABLENAME = "TEST_MIGRATION_TABLE";
 
-	private final DataSource myDataSource = BaseMigrationTest.getDataSource();
+	private final BasicDataSource myDataSource = BaseMigrationTest.getDataSource();
 
 	@BeforeEach
 	void before() throws SQLException {
@@ -51,6 +51,8 @@ class HapiMigratorTest {
 		try (Connection connection = myDataSource.getConnection()) {
 			connection.createStatement().execute("DROP TABLE " + MIGRATION_TABLENAME);
 		}
+		// Ensure we closed all the connections we opened
+		assertEquals(0, myDataSource.getNumActive());
 	}
 
 	@Test
