@@ -64,7 +64,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -675,6 +677,66 @@ public class BulkDataExportProviderTest {
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
 		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient"));
 	}
+
+	@Test
+	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport_UseGet() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+
+		// call
+		String url = "http://localhost:" + myPort +
+			"/Patient/" + JpaConstants.OPERATION_EXPORT +
+			"?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON;
+		HttpGet post = new HttpGet(url);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		BulkExportParameters bp = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getResourceTypes(), containsInAnyOrder("Patient"));
+	}
+
+	@Test
+	public void testInitiateSystem_noTypeParam_addsTypeBeforeBulkExport_UseGet() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		Parameters input = new Parameters();
+		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
+
+		// call
+		String url = "http://localhost:" + myPort +
+			"/" + JpaConstants.OPERATION_EXPORT +
+			"?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON;
+		HttpGet post = new HttpGet(url);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", post);
+		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		BulkExportParameters bp = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getResourceTypes(), hasItem("Patient"));
+		assertThat(bp.getResourceTypes(), hasItem("Observation"));
+		assertThat(bp.getResourceTypes(), not(hasItem("Binary")));
+	}
+
+
 
 	@Test
 	public void testInitiatePatientExportRequest() throws IOException {
