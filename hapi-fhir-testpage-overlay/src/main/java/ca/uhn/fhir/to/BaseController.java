@@ -24,6 +24,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.ITemplateEngine;
@@ -55,7 +56,7 @@ public class BaseController {
 		super();
 	}
 
-	protected IBaseResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	protected CapabilityStatement addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
 		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);
@@ -288,7 +289,7 @@ public class BaseController {
 		return returnsResource;
 	}
 
-	private IBaseResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private CapabilityStatement loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
