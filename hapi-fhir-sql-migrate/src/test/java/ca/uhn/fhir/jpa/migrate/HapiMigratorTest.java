@@ -150,6 +150,7 @@ class HapiMigratorTest {
 				myWaitLatch.awaitExpected();
 				ourLog.info("Latch released with parameter {}", myWaitLatch.getLatchInvocationParameter());
 				// We sleep a bit to ensure the other thread has a chance to try to get the lock.  We don't have a hook there, so sleep instead
+				// Maybe we can await on a log message?
 				Thread.sleep(200);
 				ourLog.info("Completing execution of {}", myWaitLatch.getLatchInvocationParameter());
 			} catch (InterruptedException e) {
@@ -179,10 +180,7 @@ class HapiMigratorTest {
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
-			// FIXME KHS
-
-//			return myLatch.awaitExpected();
-			return myLatch.awaitExpectedWithTimeout(9999);
+			return myLatch.awaitExpected();
 		}
 
 		public void release(String theLatchInvocationParameter) {
