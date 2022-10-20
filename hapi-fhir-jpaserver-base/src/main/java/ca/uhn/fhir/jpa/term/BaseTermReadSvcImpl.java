@@ -1306,18 +1306,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			terms.add(getPropertyTerm(theFilter.getProperty(), value));
 		}
 
-		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
-		//Far as I'm aware, this is a single element of a MUST portion of a bool, which itself should contain a list of OR'ed options, e.g.
-		// shape == round && color == (green || blue)
 		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
 	}
 
 	private void addLoincFilterParentChildEqual(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
 		logFilteringValueOnProperty(theValue, theProperty);
-		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
-		//b.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
-		//According to the DSL migration reference (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#queries-reference),
-
 		b.must(f.match().field(CONCEPT_PROPERTY_PREFIX_NAME + theProperty).matching(theValue));
 	}
 
