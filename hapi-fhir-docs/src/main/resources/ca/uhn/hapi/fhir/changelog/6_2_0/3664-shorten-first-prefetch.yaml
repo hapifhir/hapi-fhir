@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3664
+title: "The first JPA prefetch window was shortened to avoid slow first bundles."

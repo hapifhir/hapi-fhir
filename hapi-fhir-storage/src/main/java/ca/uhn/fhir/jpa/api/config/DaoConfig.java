@@ -183,7 +183,10 @@ public class DaoConfig {
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	// start with 1 so our first page loads quickly.
+	// If they fetch the second page, fetch more.
+	// Use prime sizes to avoid empty next links.
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(1, 503, 2003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
