@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -62,7 +62,6 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 
 	@Autowired
 	private MemberMatcherR4Helper myMemberMatcherR4Helper;
-
 
 	/**
 	 * Patient/123/$everything
@@ -266,6 +265,8 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+
+		myMemberMatcherR4Helper.addClientIdAsExtensionToConsentIfAvailable(theConsent);
 
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
 	}

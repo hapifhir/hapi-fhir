@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -18,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
@@ -25,6 +27,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,6 +71,12 @@ public class MemberMatcherR4Helper {
 
 	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
+
+	@Autowired(required = false)
+	private IConsentExtensionProvider myIConsentExtensionProvider;
+
+	@Autowired
+	private IFhirResourceDao<Consent> myConsentDao;
 
 
 	public MemberMatcherR4Helper(FhirContext theContext) {
@@ -150,6 +159,28 @@ public class MemberMatcherR4Helper {
 		theMemberPatient.addIdentifier(newIdentifier);
 	}
 
+	/**
+	 * If there is a client id
+	 * @param theConsent - the consent to modify
+	 */
+	public void addClientIdAsExtensionToConsentIfAvailable(Consent theConsent) {
+		if (myIConsentExtensionProvider != null) {
+			Collection<IBaseExtension> extensions = myIConsentExtensionProvider.getConsentExtension(theConsent);
+
+			for (IBaseExtension ext : extensions) {
+				if (ext instanceof Extension) {
+					theConsent.addExtension((Extension) ext);
+				} else {
+					Extension extR4 = new Extension();
+					extR4.setUrl(ext.getUrl());
+					extR4.setValue(ext.getValue());
+					theConsent.addExtension(extR4);
+				}
+			}
+
+			myConsentDao.update(theConsent);
+		}
+	}
 
 	public Optional<Patient> getBeneficiaryPatient(Coverage theCoverage) {
 		if (theCoverage.getBeneficiaryTarget() == null && theCoverage.getBeneficiary() == null) {
