@@ -149,6 +149,9 @@ class HapiMigratorTest {
 				myLatch.call(this);
 				myWaitLatch.awaitExpected();
 				ourLog.info("Latch released with parameter {}", myWaitLatch.getLatchInvocationParameter());
+				// This race condition should be replaced with a latch
+				Thread.sleep(200);
+				ourLog.info("Completing execution of {}", myWaitLatch.getLatchInvocationParameter());
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}

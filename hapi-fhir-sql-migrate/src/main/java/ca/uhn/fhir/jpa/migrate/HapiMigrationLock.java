@@ -28,17 +28,11 @@ import org.flywaydb.core.internal.database.h2.H2Database;
 import org.flywaydb.core.internal.database.oracle.OracleDatabase;
 import org.flywaydb.core.internal.database.postgresql.PostgreSQLDatabase;
 import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
-import org.flywaydb.core.internal.jdbc.JdbcTemplate;
 import org.flywaydb.database.mysql.MySQLDatabase;
 import org.flywaydb.database.mysql.mariadb.MariaDBDatabase;
 import org.flywaydb.database.sqlserver.SQLServerDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -49,36 +43,46 @@ public class HapiMigrationLock implements AutoCloseable {
 	private final DriverTypeEnum myDriverType;
 	private final Table myLockTableConnection;
 	private final String myMigrationTablename;
-	private final PlatformTransactionManager myTransactionManager;
-	private final DefaultTransactionStatus myActiveTransaction;
-	private final Connection myConnection;
-	private final JdbcTemplate myJdbcTemplate;
+	//	private final PlatformTransactionManager myTransactionManager;
+//	private final DefaultTransactionStatus myActiveTransaction;
+//	private final Connection myConnection;
+//	private final JdbcTemplate myJdbcTemplate;
 	private JdbcConnectionFactory myConnectionFactory;
 
 	public HapiMigrationLock(DataSource theDataSource, DriverTypeEnum theDriverType, String myMigrationTablename) {
 		this.myDriverType = theDriverType;
 		this.myMigrationTablename = myMigrationTablename;
-		myTransactionManager = new org.springframework.jdbc.datasource.DataSourceTransactionManager(theDataSource);
+//		myTransactionManager = new org.springframework.jdbc.datasource.DataSourceTransactionManager(theDataSource);
 
 
-		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-		myActiveTransaction = (DefaultTransactionStatus) myTransactionManager.getTransaction(definition);
+//		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+//		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+//		definition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+//		myActiveTransaction = (DefaultTransactionStatus) myTransactionManager.getTransaction(definition);
 
-		JdbcTransactionObjectSupport jdbcTransactionObjectSupport = (JdbcTransactionObjectSupport) myActiveTransaction.getTransaction();
-		myConnection = jdbcTransactionObjectSupport.getConnectionHolder().getConnection();
-		myJdbcTemplate = new JdbcTemplate(myConnection);
+//		JdbcTransactionObjectSupport jdbcTransactionObjectSupport = (JdbcTransactionObjectSupport) myActiveTransaction.getTransaction();
+//		myConnection = jdbcTransactionObjectSupport.getConnectionHolder().getConnection();
 		myLockTableConnection = openLockTableConnection(theDataSource);
+//		myConnection = myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection();
+//		myJdbcTemplate = new JdbcTemplate(myConnection);
 
 		ourLog.info("Locking Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
-		myLockTableConnection.lock();
+		lock();
 		ourLog.info("Locked Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
+	}
+
+	private void lock() {
+		try {
+			myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection().setAutoCommit(false);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		myLockTableConnection.lock();
 	}
 
 	@Override
 	public void close() {
-		if (myLockTableConnection == null || myActiveTransaction == null) {
+		if (myLockTableConnection == null) {
 			return;
 		}
 
@@ -87,7 +91,7 @@ public class HapiMigrationLock implements AutoCloseable {
 		ourLog.info("Unlocked Migration Table {}", myLockTableConnection.getDatabase().getMainConnection().getJdbcConnection());
 
 		// This will commit our transaction and release the lock
-		myActiveTransaction.flush();
+//		myActiveTransaction.flush();
 		myLockTableConnection.getDatabase().close();
 		myConnectionFactory.close();
 	}
@@ -95,8 +99,11 @@ public class HapiMigrationLock implements AutoCloseable {
 	private Table openLockTableConnection(DataSource theDataSource) {
 		try {
 			FluentConfiguration configuration = new FluentConfiguration().dataSource(theDataSource);
-			myConnectionFactory = new HapiMigrationJdbcConnectionFactory(theDataSource, configuration, myConnection);
-			String schemaName = myConnection.getSchema();
+			myConnectionFactory = new JdbcConnectionFactory(theDataSource, configuration, null);
+			String schemaName;
+			try (Connection connection = theDataSource.getConnection()) {
+				schemaName = connection.getSchema();
+			}
 
 			switch (myDriverType) {
 				case H2_EMBEDDED: {
