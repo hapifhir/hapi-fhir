@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -33,6 +34,40 @@ public class ResourceIndexedSearchParamStringTest {
 		assertEquals(7045214018927566109L, token.getHashExact().longValue());
 	}
 
+	@Test
+	public void testHashFunctionsPrefixOnly_John_JN_vs_JAN() {
+		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "query-1-param", "JN", "John");
+		token1.setResource(new ResourceTable().setResourceType("Patient"));
+		token1.calculateHashes();
+
+		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "query-1-param", "JAN", "John");
+		token2.setResource(new ResourceTable().setResourceType("Patient"));
+		token2.calculateHashes();
+
+		assertAll(
+			// We only hash on the first letter for performance reasons
+			() -> assertEquals(token1.getHashNormalizedPrefix(), token2.getHashNormalizedPrefix()),
+			() -> assertEquals(token1.getHashExact(), token2.getHashExact()),
+			() -> assertNotEquals(token1.hashCode(), token2.hashCode())
+		);
+	}
+
+	@Test
+	public void testHashFunctionsPrefixOnly_Doe_T_vs_D() {
+		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "query-1-param", "T", "Doe");
+		token1.setResource(new ResourceTable().setResourceType("Patient"));
+		token1.calculateHashes();
+
+		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString(new PartitionSettings(), new ModelConfig(), "Patient", "query-1-param", "D", "Doe");
+		token2.setResource(new ResourceTable().setResourceType("Patient"));
+		token2.calculateHashes();
+
+		assertAll(
+			() -> assertNotEquals(token1.getHashNormalizedPrefix(), token2.getHashNormalizedPrefix()),
+			() -> assertEquals(token1.getHashExact(), token2.getHashExact()),
+			() -> assertNotEquals(token1.hashCode(), token2.hashCode())
+		);
+	}
 
 	@Test
 	public void testEquals() {
