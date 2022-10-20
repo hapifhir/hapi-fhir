@@ -29,7 +29,7 @@ public abstract class BaseTest {
 	private static int ourDatabaseUrl = 0;
 	private BasicDataSource myDataSource;
 	private String myUrl;
-	protected HapiMigrator myMigrator;
+	private HapiMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	protected HapiMigrationDao myHapiMigrationDao;
 	protected HapiMigrationStorageSvc myHapiMigrationStorageSvc;

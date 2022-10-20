@@ -43,7 +43,7 @@ public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
 	private final String myMigrationTableName;
-	private MigrationTaskList myTaskList = new MigrationTaskList();
+	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
@@ -105,7 +105,8 @@ public class HapiMigrator {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
 		MigrationResult retval = new MigrationResult();
 
-		try (HapiMigrationLock hapiMigrationLock = new HapiMigrationLock(myDataSource,myDriverType,myMigrationTableName)) {
+		// Lock the migration table so only one server migrates the database at once
+		try (HapiMigrationLock ignored = new HapiMigrationLock(myDataSource,myDriverType,myMigrationTableName)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
 			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
@@ -184,11 +185,6 @@ public class HapiMigrator {
 
 	public void addTask(BaseTask theTask) {
 		myTaskList.add(theTask);
-	}
-
-	@Nonnull
-	public List<IHapiMigrationCallback> getCallbacks() {
-		return myCallbacks;
 	}
 
 	public void setCallbacks(@Nonnull List<IHapiMigrationCallback> theCallbacks) {
