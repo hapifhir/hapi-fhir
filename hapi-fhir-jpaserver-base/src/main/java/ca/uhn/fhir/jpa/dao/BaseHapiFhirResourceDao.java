@@ -123,6 +123,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -136,6 +138,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
+import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -2007,7 +2010,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@Override
 		public void validateResource(IValidationContext<IBaseResource> theCtx) {
-			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			IBaseResource resource = theCtx.getResource();
+			if (resource instanceof Parameters) {
+				List<ParametersParameterComponent> params = ((Parameters) resource).getParameter();
+				params.stream().filter(param -> param.getName().equalsIgnoreCase("resource"));
+				resource = params.get(0).getResource();
+			}
+			boolean hasId = resource.getIdElement().hasIdPart();
 			if (myMode == ValidationModeEnum.CREATE) {
 				if (hasId) {
 					throw new UnprocessableEntityException(Msg.code(997) + "Resource has an ID - ID must not be populated for a FHIR create");

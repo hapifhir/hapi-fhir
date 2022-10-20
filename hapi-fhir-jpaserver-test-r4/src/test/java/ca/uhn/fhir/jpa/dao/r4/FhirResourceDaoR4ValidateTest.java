@@ -57,6 +57,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
@@ -1626,6 +1627,34 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("ID must be populated"));
+		}
+
+	}
+
+	@Test
+	public void testValidateResourceForUpdateWithIdRaw() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+	}
+	@Test
+	public void testValidateResourceForUpdateWithNoIdRaw() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		try {
+			myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("ID must be populated"));
