@@ -40,6 +40,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -124,7 +125,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated Just use history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails) instead;
+	 */
+	@Deprecated(since = "6.2")
 	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
+
+	IBundleProvider history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!

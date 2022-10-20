@@ -81,10 +81,4 @@ public class Id implements IModelJson {
 		id.setResourceType(theResourceType);
 		return id;
 	}
-
-	public ResourcePersistentId toPID() {
-		ResourcePersistentId pid = new ResourcePersistentId(myId);
-		pid.setAssociatedResourceId(new IdType(myId));
-		return pid;
-	}
 }

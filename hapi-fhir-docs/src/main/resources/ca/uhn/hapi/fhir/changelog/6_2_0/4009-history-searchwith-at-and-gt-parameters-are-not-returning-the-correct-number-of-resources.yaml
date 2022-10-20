@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4008
+jira: SMILE-4296
+title: "Previously, when executing a '[base]/_history' search, '_since' and '_at' shared the same behaviour. When a user searched for the date between the records' updated date with '_at', the record of '_at' time was not returned.
+This has been corrected. '_since' query parameter works as it previously did, and the '_at' query parameter returns the record of '_at' time."

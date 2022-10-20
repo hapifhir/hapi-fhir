@@ -40,6 +40,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(StringParam.class);
 
+	private boolean myText;
 	private boolean myContains;
 	private boolean myExact;
 	private String myValue;
@@ -74,6 +75,8 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 			return Constants.PARAMQUALIFIER_STRING_EXACT;
 		} else if (isContains()) {
 			return Constants.PARAMQUALIFIER_STRING_CONTAINS;
+		} else if (isText()) {
+			return Constants.PARAMQUALIFIER_STRING_TEXT;
 		} else {
 			return null;
 		}
@@ -97,6 +100,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 			.append(myExact)
+			.append(myText)
 			.append(myContains)
 			.append(myValue)
 			.append(getMissing())
@@ -124,6 +128,9 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		} else {
 			setContains(false);
 		}
+
+		setText( Constants.PARAMQUALIFIER_STRING_TEXT.equals(theQualifier) );
+
 		myValue = ParameterUtil.unescape(theValue);
 	}
 
@@ -143,6 +150,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 
 		EqualsBuilder eb = new EqualsBuilder();
 		eb.append(myExact, other.myExact);
+		eb.append(myText, other.myText);
 		eb.append(myContains, other.myContains);
 		eb.append(myValue, other.myValue);
 		eb.append(getMissing(), other.getMissing());
@@ -167,6 +175,18 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 		return defaultString(myValue);
 	}
 
+	public boolean isText() { return myText; }
+
+	public void setText(boolean theText) {
+		myText = theText;
+		if (myText) {
+			setContains(false);
+			setExact(false);
+			setMissing(null);
+
+		}
+	}
+
 	/**
 	 * String parameter modifier <code>:contains</code>
 	 */
@@ -180,6 +200,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	public StringParam setContains(boolean theContains) {
 		myContains = theContains;
 		if (myContains) {
+			setText(false);
 			setExact(false);
 			setMissing(null);
 		}
@@ -197,6 +218,7 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	public StringParam setExact(boolean theExact) {
 		myExact = theExact;
 		if (myExact) {
+			setText(false);
 			setContains(false);
 			setMissing(null);
 		}
@@ -207,6 +229,9 @@ public class StringParam extends BaseParam implements IQueryParameterType {
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		builder.append("value", getValue());
+		if (myText) {
+			builder.append("text", myText);
+		}
 		if (myExact) {
 			builder.append("exact", myExact);
 		}

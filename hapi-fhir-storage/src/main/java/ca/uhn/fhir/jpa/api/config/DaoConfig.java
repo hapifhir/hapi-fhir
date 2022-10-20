@@ -315,9 +315,24 @@ public class DaoConfig {
 	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private boolean myEnableBulkExportJobReuse = true;
+
+	/**
 	 * Since 6.1.0
 	 */
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
+
+	/**
+	 * Since 6.2.0
+	 */
+	private boolean myPreserveRequestIdInResourceBody = false;
+
+	/**
+	 * Since 6.2.0
+	 */
+	private int myBulkExportFileMaximumCapacity = 1_000;
 
 	/**
 	 * Constructor
@@ -2892,6 +2907,22 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public boolean getEnableBulkExportJobReuse() {
+		return myEnableBulkExportJobReuse;
+	}
+
+	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public void setEnableBulkExportJobReuse(boolean theEnableBulkExportJobReuse) {
+		myEnableBulkExportJobReuse = theEnableBulkExportJobReuse;
+	}
+
+	/**
 	 * This setting indicates whether updating the history of a resource is allowed.
 	 * Default is false.
 	 *
@@ -2911,6 +2942,46 @@ public class DaoConfig {
 		myUpdateWithHistoryRewriteEnabled = theUpdateWithHistoryRewriteEnabled;
 	}
 
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public boolean isPreserveRequestIdInResourceBody() {
+		return myPreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting indicate whether a providedResource.meta.source requestID (source#requestID)
+	 * should be preserved or overwritten.
+	 * Default is false. This means that a client provided requestId will be overwritten.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setPreserveRequestIdInResourceBody(boolean thePreserveRequestIdInResourceBody) {
+		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public int getBulkExportFileMaximumCapacity() {
+		return myBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
+		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

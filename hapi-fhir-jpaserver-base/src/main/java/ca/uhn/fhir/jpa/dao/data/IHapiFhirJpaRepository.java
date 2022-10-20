@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-@Transactional(Transactional.TxType.MANDATORY)
+@Transactional(propagation = Propagation.MANDATORY)
 public interface IHapiFhirJpaRepository {
 }

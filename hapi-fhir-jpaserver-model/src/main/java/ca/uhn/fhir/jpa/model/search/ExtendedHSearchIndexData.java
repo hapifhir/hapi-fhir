@@ -28,6 +28,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +54,15 @@ public class ExtendedHSearchIndexData {
 	final SetMultimap<String, String> mySearchParamUri = HashMultimap.create();
 	final SetMultimap<String, DateSearchIndexData> mySearchParamDates = HashMultimap.create();
 	final SetMultimap<String, QuantitySearchIndexData> mySearchParamQuantities = HashMultimap.create();
+	final SetMultimap<String, CompositeSearchIndexData> mySearchParamComposites = HashMultimap.create();
 	private String myForcedId;
 	private String myResourceJSON;
+	private IBaseResource myResource;
 
-	public ExtendedHSearchIndexData(FhirContext theFhirContext, ModelConfig theModelConfig) {
+	public ExtendedHSearchIndexData(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
 		this.myFhirContext = theFhirContext;
 		this.myModelConfig = theModelConfig;
+		myResource = theResource;
 	}
 
 	private <V> BiConsumer<String, V> ifNotContained(BiConsumer<String, V> theIndexWriter) {
@@ -79,7 +83,7 @@ public class ExtendedHSearchIndexData {
 	 * @param theDocument the Hibernate Search document for ResourceTable
 	 */
 	public void writeIndexElements(DocumentElement theDocument) {
-		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myFhirContext, myModelConfig, theDocument);
+		HSearchIndexWriter indexWriter = HSearchIndexWriter.forRoot(myModelConfig, theDocument);
 
 		ourLog.debug("Writing JPA index to Hibernate Search");
 
@@ -94,11 +98,11 @@ public class ExtendedHSearchIndexData {
 		mySearchParamTokens.forEach(ifNotContained(indexWriter::writeTokenIndex));
 		mySearchParamLinks.forEach(ifNotContained(indexWriter::writeReferenceIndex));
 		// we want to receive the whole entry collection for each invocation
-		Multimaps.asMap(mySearchParamQuantities).forEach(ifNotContained(indexWriter::writeQuantityIndex));
+		mySearchParamQuantities.forEach(ifNotContained(indexWriter::writeQuantityIndex));
 		Multimaps.asMap(mySearchParamNumbers).forEach(ifNotContained(indexWriter::writeNumberIndex));
-		// TODO MB Use RestSearchParameterTypeEnum to define templates.
 		mySearchParamDates.forEach(ifNotContained(indexWriter::writeDateIndex));
 		Multimaps.asMap(mySearchParamUri).forEach(ifNotContained(indexWriter::writeUriIndex));
+		Multimaps.asMap(mySearchParamComposites).forEach(indexWriter::writeCompositeIndex);
 	}
 
 	public void addStringIndexData(String theSpName, String theText) {
@@ -109,6 +113,7 @@ public class ExtendedHSearchIndexData {
 	 * Add if not already present.
 	 */
 	public void addTokenIndexDataIfNotPresent(String theSpName, String theSystem,  String theValue) {
+		// todo MB create a BaseCodingDt that respects equals
 		boolean isPresent = mySearchParamTokens.get(theSpName).stream()
 			.anyMatch(c -> Objects.equals(c.getSystem(), theSystem) && Objects.equals(c.getCode(), theValue));
 		if (!isPresent) {
@@ -129,16 +134,24 @@ public class ExtendedHSearchIndexData {
 	}
 
 	public void addDateIndexData(String theSpName, Date theLowerBound, int theLowerBoundOrdinal, Date theUpperBound, int theUpperBoundOrdinal) {
-		mySearchParamDates.put(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
+		addDateIndexData(theSpName, new DateSearchIndexData(theLowerBound, theLowerBoundOrdinal, theUpperBound, theUpperBoundOrdinal));
 	}
+
+	public void addDateIndexData(String theSpName, DateSearchIndexData value) {
+		mySearchParamDates.put(theSpName, value);
+	}
+
+	public SetMultimap<String, DateSearchIndexData> getDateIndexData() { return mySearchParamDates; }
 
 	public void addNumberIndexDataIfNotPresent(String theParamName, BigDecimal theValue) {
 		mySearchParamNumbers.put(theParamName, theValue);
 	}
 
-	public void addQuantityIndexData(String theSpName, String theUnits, String theSystem, double theValue) {
-		mySearchParamQuantities.put(theSpName, new QuantitySearchIndexData(theUnits, theSystem, theValue));
+	public void addQuantityIndexData(String theSpName, QuantitySearchIndexData value) {
+		mySearchParamQuantities.put(theSpName, value);
 	}
+
+	public SetMultimap<String,QuantitySearchIndexData> getQuantityIndexData () {return mySearchParamQuantities;}
 
 	public void setForcedId(String theForcedId) {
 		myForcedId = theForcedId;
@@ -148,7 +161,15 @@ public class ExtendedHSearchIndexData {
 		return myForcedId;
 	}
 
-    public void setRawResourceData(String theResourceJSON) {
+	public void setRawResourceData(String theResourceJSON) {
 		 myResourceJSON = theResourceJSON;
     }
+
+	public SetMultimap<String, CompositeSearchIndexData> getSearchParamComposites() {
+		return mySearchParamComposites;
+	}
+
+	public void addCompositeIndexData(String theSearchParamName, CompositeSearchIndexData theBuildCompositeIndexData) {
+		mySearchParamComposites.put(theSearchParamName, theBuildCompositeIndexData);
+	}
 }

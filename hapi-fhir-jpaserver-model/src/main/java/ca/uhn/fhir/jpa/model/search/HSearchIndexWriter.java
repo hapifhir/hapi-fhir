@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -32,20 +31,30 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Set;
 
 public class HSearchIndexWriter {
 	private static final Logger ourLog = LoggerFactory.getLogger(HSearchIndexWriter.class);
+
+	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
+	public static final String SEARCH_PARAM_ROOT = "sp";
+	public static final String INDEX_TYPE_STRING = "string";
 	public static final String IDX_STRING_NORMALIZED = "norm";
 	public static final String IDX_STRING_EXACT = "exact";
 	public static final String IDX_STRING_TEXT = "text";
 	public static final String IDX_STRING_LOWER = "lower";
-	public static final String NESTED_SEARCH_PARAM_ROOT = "nsp";
-	public static final String SEARCH_PARAM_ROOT = "sp";
 
-	public static final String QTY_PARAM_NAME = "quantity";
-	public static final String QTY_CODE = "code";
-	public static final String QTY_SYSTEM = "system";
-	public static final String QTY_VALUE = "value";
+	public static final String INDEX_TYPE_TOKEN = "token";
+	public static final String TOKEN_CODE = "code";
+	public static final String TOKEN_SYSTEM = "system";
+	public static final String TOKEN_SYSTEM_CODE = "code-system";
+	public static final String INDEX_TYPE_QUANTITY = "quantity";
+
+	// numeric
+	public static final String VALUE_FIELD = "value";
+	public static final String QTY_CODE = TOKEN_CODE;
+	public static final String QTY_SYSTEM = TOKEN_SYSTEM;
+	public static final String QTY_VALUE = VALUE_FIELD;
 	public static final String QTY_CODE_NORM = "code-norm";
 	public static final String QTY_VALUE_NORM = "value-norm";
 
@@ -54,13 +63,16 @@ public class HSearchIndexWriter {
 	public static final String NUMBER_VALUE = "number-value";
 
 
+	public static final String DATE_LOWER_ORD = "lower-ord";
+	public static final String DATE_LOWER = "lower";
+	public static final String DATE_UPPER_ORD = "upper-ord";
+	public static final String DATE_UPPER = "upper";
+
 
 	final HSearchElementCache myNodeCache;
-	final FhirContext myFhirContext;
 	final ModelConfig myModelConfig;
 
-	HSearchIndexWriter(FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theRoot) {
-		myFhirContext = theFhirContext;
+	HSearchIndexWriter(ModelConfig theModelConfig, DocumentElement theRoot) {
 		myModelConfig = theModelConfig;
 		myNodeCache = new HSearchElementCache(theRoot);
 	}
@@ -69,94 +81,112 @@ public class HSearchIndexWriter {
 		return myNodeCache.getObjectElement(SEARCH_PARAM_ROOT, theSearchParamName, theIndexType);
 	}
 
-	public static HSearchIndexWriter forRoot(
-			FhirContext theFhirContext, ModelConfig theModelConfig, DocumentElement theDocument) {
-		return new HSearchIndexWriter(theFhirContext, theModelConfig, theDocument);
+	public static HSearchIndexWriter forRoot(ModelConfig theModelConfig, DocumentElement theDocument) {
+		return new HSearchIndexWriter(theModelConfig, theDocument);
 	}
 
 	public void writeStringIndex(String theSearchParam, String theValue) {
-		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, "string");
+		DocumentElement stringIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_STRING);
 
 		// we are assuming that our analyzer matches  StringUtil.normalizeStringForSearchIndexing(theValue).toLowerCase(Locale.ROOT))
-		stringIndexNode.addValue(IDX_STRING_NORMALIZED, theValue);// for default search
-		stringIndexNode.addValue(IDX_STRING_EXACT, theValue);
-		stringIndexNode.addValue(IDX_STRING_TEXT, theValue);
-		stringIndexNode.addValue(IDX_STRING_LOWER, theValue);
+		writeBasicStringFields(stringIndexNode, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_EXACT, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_TEXT, theValue);
+		addDocumentValue(stringIndexNode, IDX_STRING_LOWER, theValue);
 
 		ourLog.debug("Adding Search Param Text: {} -- {}", theSearchParam, theValue);
+	}
+
+	public void writeBasicStringFields(DocumentElement theIndexNode, String theValue) {
+		addDocumentValue(theIndexNode, IDX_STRING_NORMALIZED, theValue);
 	}
 
 	public void writeTokenIndex(String theSearchParam, IBaseCoding theValue) {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-		DocumentElement nestedTokenNode = nestedSpNode.addObject("token");
+		DocumentElement nestedTokenNode = nestedSpNode.addObject(INDEX_TYPE_TOKEN);
 
-		nestedTokenNode.addValue("code", theValue.getCode());
-		nestedTokenNode.addValue("system", theValue.getSystem());
-		nestedTokenNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		writeTokenFields(nestedTokenNode, theValue);
 
 		if (StringUtils.isNotEmpty(theValue.getDisplay())) {
-			DocumentElement nestedStringNode = nestedSpNode.addObject("string");
-			nestedStringNode.addValue(IDX_STRING_TEXT, theValue.getDisplay());
+			DocumentElement nestedStringNode = nestedSpNode.addObject(INDEX_TYPE_STRING);
+			addDocumentValue(nestedStringNode, IDX_STRING_TEXT, theValue.getDisplay());
 		}
 
-		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, "token");
+		DocumentElement tokenIndexNode = getSearchParamIndexNode(theSearchParam, INDEX_TYPE_TOKEN);
 		// TODO mb we can use a token_filter with pattern_capture to generate all three off a single value.  Do this next, after merge.
-		tokenIndexNode.addValue("code", theValue.getCode());
-		tokenIndexNode.addValue("system", theValue.getSystem());
-		tokenIndexNode.addValue("code-system", theValue.getSystem() + "|" + theValue.getCode());
+		writeTokenFields(tokenIndexNode, theValue);
 		ourLog.debug("Adding Search Param Token: {} -- {}", theSearchParam, theValue);
 		// TODO mb should we write the strings here too?  Or leave it to the old spidx indexing?
 	}
 
+	public void writeTokenFields(DocumentElement theDocumentElement, IBaseCoding theValue) {
+		addDocumentValue(theDocumentElement, TOKEN_CODE, theValue.getCode());
+		addDocumentValue(theDocumentElement, TOKEN_SYSTEM, theValue.getSystem());
+		addDocumentValue(theDocumentElement, TOKEN_SYSTEM_CODE, theValue.getSystem() + "|" + theValue.getCode());
+	}
+
+	private void addDocumentValue(DocumentElement theDocumentElement, String theKey, Object theValue) {
+		if (theValue != null) {
+			theDocumentElement.addValue(theKey, theValue);
+		}
+	}
+
 	public void writeReferenceIndex(String theSearchParam, String theValue) {
 		DocumentElement referenceIndexNode = getSearchParamIndexNode(theSearchParam, "reference");
-		referenceIndexNode.addValue("value", theValue);
+		addDocumentValue(referenceIndexNode, VALUE_FIELD, theValue);
 		ourLog.trace("Adding Search Param Reference: {} -- {}", theSearchParam, theValue);
 	}
 
 	public void writeDateIndex(String theSearchParam, DateSearchIndexData theValue) {
 		DocumentElement dateIndexNode = getSearchParamIndexNode(theSearchParam, "dt");
-		// Lower bound
-		dateIndexNode.addValue("lower-ord", theValue.getLowerBoundOrdinal());
-		dateIndexNode.addValue("lower", theValue.getLowerBoundDate().toInstant());
-		// Upper bound
-		dateIndexNode.addValue("upper-ord", theValue.getUpperBoundOrdinal());
-		dateIndexNode.addValue("upper", theValue.getUpperBoundDate().toInstant());
+		writeDateFields(dateIndexNode, theValue);
 
 		ourLog.trace("Adding Search Param Date. param: {} -- {}", theSearchParam, theValue);
 	}
 
+	public void writeDateFields(DocumentElement dateIndexNode, DateSearchIndexData theValue) {
+		// Lower bound
+		addDocumentValue(dateIndexNode, DATE_LOWER_ORD, theValue.getLowerBoundOrdinal());
+		addDocumentValue(dateIndexNode, DATE_LOWER, theValue.getLowerBoundDate().toInstant());
+		// Upper bound
+		addDocumentValue(dateIndexNode, DATE_UPPER_ORD, theValue.getUpperBoundOrdinal());
+		addDocumentValue(dateIndexNode, DATE_UPPER, theValue.getUpperBoundDate().toInstant());
+	}
 
 
-	public void writeQuantityIndex(String theSearchParam, Collection<QuantitySearchIndexData> theValueCollection) {
+	public void writeQuantityIndex(String theSearchParam, QuantitySearchIndexData theValue) {
 		DocumentElement nestedRoot = myNodeCache.getObjectElement(NESTED_SEARCH_PARAM_ROOT);
 
-		for (QuantitySearchIndexData theValue : theValueCollection) {
-			DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
-			DocumentElement nestedQtyNode = nestedSpNode.addObject(QTY_PARAM_NAME);
+		DocumentElement nestedSpNode = nestedRoot.addObject(theSearchParam);
+		DocumentElement nestedQtyNode = nestedSpNode.addObject(INDEX_TYPE_QUANTITY);
 
-			ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
-			nestedQtyNode.addValue(QTY_CODE, theValue.getCode());
-			nestedQtyNode.addValue(QTY_SYSTEM, theValue.getSystem());
-			nestedQtyNode.addValue(QTY_VALUE, theValue.getValue());
+		ourLog.trace("Adding Search Param Quantity: {} -- {}", theSearchParam, theValue);
+		writeQuantityFields(nestedQtyNode, theValue);
 
-			if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) { continue; }
+	}
 
-			//-- convert the value/unit to the canonical form if any
-			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
-				BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
-			if (canonicalForm == null) { continue; }
+	public void writeQuantityFields(DocumentElement nestedQtyNode, QuantitySearchIndexData theValue) {
+		addDocumentValue(nestedQtyNode, QTY_CODE, theValue.getCode());
+		addDocumentValue(nestedQtyNode, QTY_SYSTEM, theValue.getSystem());
+		addDocumentValue(nestedQtyNode, QTY_VALUE, theValue.getValue());
 
-			double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
-			String canonicalUnits = canonicalForm.getCode();
-			ourLog.trace("Adding search param normalized code and value: {} -- code:{}, value:{}",
-				theSearchParam, canonicalUnits, canonicalValue);
-
-			nestedQtyNode.addValue(QTY_CODE_NORM, canonicalUnits);
-			nestedQtyNode.addValue(QTY_VALUE_NORM, canonicalValue);
+		if ( ! myModelConfig.getNormalizedQuantitySearchLevel().storageOrSearchSupported()) {
+			return;
 		}
 
+		//-- convert the value/unit to the canonical form if any
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theValue.getSystem(),
+			BigDecimal.valueOf(theValue.getValue()), theValue.getCode());
+		if (canonicalForm == null) {
+			return;
+		}
+
+		double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
+		String canonicalUnits = canonicalForm.getCode();
+
+		addDocumentValue(nestedQtyNode, QTY_CODE_NORM, canonicalUnits);
+		addDocumentValue(nestedQtyNode, QTY_VALUE_NORM, canonicalValue);
 	}
 
 
@@ -164,17 +194,35 @@ public class HSearchIndexWriter {
 		DocumentElement uriNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (String uriSearchIndexValue : theUriValueCollection) {
 			ourLog.trace("Adding Search Param Uri: {} -- {}", theParamName, uriSearchIndexValue);
-			uriNode.addValue(URI_VALUE, uriSearchIndexValue);
+			writeUriFields(uriNode, uriSearchIndexValue);
 		}
 	}
 
+	public void writeUriFields(DocumentElement uriNode, String uriSearchIndexValue) {
+		addDocumentValue(uriNode, URI_VALUE, uriSearchIndexValue);
+	}
 
 	public void writeNumberIndex(String theParamName, Collection<BigDecimal> theNumberValueCollection) {
 		DocumentElement numberNode = myNodeCache.getObjectElement(SEARCH_PARAM_ROOT).addObject(theParamName);
 		for (BigDecimal numberSearchIndexValue : theNumberValueCollection) {
 			ourLog.trace("Adding Search Param Number: {} -- {}", theParamName, numberSearchIndexValue);
-			numberNode.addValue(NUMBER_VALUE, numberSearchIndexValue.doubleValue());
+			writeNumberFields(numberNode, numberSearchIndexValue);
 		}
 	}
 
+	public void writeNumberFields(DocumentElement numberNode, BigDecimal numberSearchIndexValue) {
+		addDocumentValue(numberNode, NUMBER_VALUE, numberSearchIndexValue.doubleValue());
+	}
+
+	/**
+	 * @param ignoredParamName unused - for consistent api
+	 * @param theCompositeSearchIndexData extracted index data for this sp
+	 */
+	public void writeCompositeIndex(String ignoredParamName, Set<CompositeSearchIndexData> theCompositeSearchIndexData) {
+		// must be nested.
+		for (CompositeSearchIndexData compositeSearchIndexDatum : theCompositeSearchIndexData) {
+			compositeSearchIndexDatum.writeIndexEntry(this, myNodeCache);
+		}
+
+	}
 }

@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.term.icd10.Icd10Loader;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincGroupFileHandler;
@@ -164,7 +165,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
 	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
 	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
@@ -634,7 +635,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		Map<PartTypeAndPartName, String> partTypeAndPartNameToPartNumber = ((LoincPartHandler) handler).getPartTypeAndPartNameToPartNumber();
 
-		// LOINC codes
+		// LOINC string properties
 		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
@@ -706,6 +707,10 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Consumer Name
 		handler = new LoincConsumerNameHandler(code2concept);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// LOINC coding properties (must run after all TermConcepts were created)
+		handler = new LoincCodingPropertiesHandler(code2concept, propertyNamesToTypes);
+		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Linguistic Variants
 		handler = new LoincLinguisticVariantsHandler(linguisticVariants);

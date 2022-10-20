@@ -57,11 +57,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -181,6 +184,56 @@ public class OpenApiInterceptorTest {
 		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 		String resp = fetchSwaggerUi(url);
 		assertThat(resp, resp, containsString("<p>This server is copyright <strong>Example Org</strong> 2021</p>"));
+		assertThat(resp, resp, not(containsString("swagger-ui-custom.css")));
+	}
+
+	@Test
+	public void testSwaggerUiWithNoBannerUrl() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+		myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor().setBannerImage(""));
+
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		assertThat(resp, resp, not(containsString("img id=\"banner_img\"")));
+	}
+
+	@Test
+	public void testSwaggerUiWithCustomStylesheet() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		interceptor.setCssText("BODY {\nfont-size: 1.1em;\n}");
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		// Fetch Swagger UI HTML
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		assertThat(resp, resp, containsString("<link rel=\"stylesheet\" type=\"text/css\" href=\"./swagger-ui-custom.css\"/>"));
+
+		// Fetch Custom CSS
+		url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/swagger-ui-custom.css";
+		resp = fetchSwaggerUi(url);
+		String expected = """
+			BODY {
+			font-size: 1.1em;
+			}
+			""";
+		assertEquals(expected, resp);
+	}
+
+	@Test
+	public void testSwaggerUiNotPaged() throws IOException {
+		myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
+
+		OpenApiInterceptor interceptor = new OpenApiInterceptor();
+		interceptor.setUseResourcePages(false);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
+
+		// Fetch Swagger UI HTML
+		String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
+		String resp = fetchSwaggerUi(url);
+		List<String> buttonTexts = parsePageButtonTexts(resp, url);
+		assertThat(buttonTexts.toString(), buttonTexts, empty());
 	}
 
 	@Test
@@ -238,6 +291,10 @@ public class OpenApiInterceptorTest {
 	private List<String> parsePageButtonTexts(String resp, String url) throws IOException {
 		HtmlPage html = HtmlUtil.parseAsHtml(resp, new URL(url));
 		HtmlDivision pageButtons = (HtmlDivision) html.getElementById("pageButtons");
+		if (pageButtons == null) {
+			return Collections.emptyList();
+		}
+
 		List<String> buttonTexts = new ArrayList<>();
 		for (DomElement next : pageButtons.getChildElements()) {
 			buttonTexts.add(next.asNormalizedText());

@@ -35,6 +35,9 @@ public class BulkExportJobResults implements IModelJson {
 	@JsonProperty("reportMessage")
 	private String myReportMsg;
 
+	@JsonProperty("originalRequestUrl")
+	private String myOriginalRequestUrl;
+
 	public BulkExportJobResults() {
 	}
 
@@ -43,6 +46,14 @@ public class BulkExportJobResults implements IModelJson {
 			myResourceTypeToBinaryIds = new HashMap<>();
 		}
 		return myResourceTypeToBinaryIds;
+	}
+
+	public String getOriginalRequestUrl() {
+		return myOriginalRequestUrl;
+	}
+
+	public void setOriginalRequestUrl(String theOriginalRequestUrl) {
+		myOriginalRequestUrl = theOriginalRequestUrl;
 	}
 
 	public void setResourceTypeToBinaryIds(Map<String, List<String>> theResourceTypeToBinaryIds) {

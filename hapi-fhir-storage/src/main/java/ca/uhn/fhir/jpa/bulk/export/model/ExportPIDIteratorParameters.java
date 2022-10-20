@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 import java.util.List;
@@ -66,6 +67,11 @@ public class ExportPIDIteratorParameters {
 	 * For group export - whether or not to expand mdm
 	 */
 	private boolean myExpandMdm;
+
+	/**
+	 * The patient id
+	 */
+	private List<String> myPatientIds;
 
 	public String getResourceType() {
 		return myResourceType;
@@ -123,16 +129,17 @@ public class ExportPIDIteratorParameters {
 		myExpandMdm = theExpandMdm;
 	}
 
+	public List<String> getPatientIds() {
+		return myPatientIds;
+	}
+
+	public void setPatientIds(List<String> thePatientIds) {
+		myPatientIds = thePatientIds;
+	}
+
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myResourceType", myResourceType)
-			.append("myStartDate", myStartDate)
-			.append("myFilters", myFilters)
-			.append("myJobId", myJobId)
-			.append("myExportStyle", myExportStyle)
-			.append("myGroupId", myGroupId)
-			.append("myExpandMdm", myExpandMdm)
-			.toString();
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
+
 }

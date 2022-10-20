@@ -61,7 +61,6 @@ public class TransactionDetails {
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
 	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
-	private boolean myIsPointcutDeferred;
 
 	/**
 	 * Constructor
@@ -273,7 +272,6 @@ public class TransactionDetails {
 	 */
 	public void addDeferredInterceptorBroadcast(Pointcut thePointcut, HookParams theHookParams) {
 		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts(thePointcut));
-		myIsPointcutDeferred = true;
 		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
 	}
 
@@ -286,7 +284,6 @@ public class TransactionDetails {
 	}
 
 	public void deferredBroadcastProcessingFinished() {
-		myIsPointcutDeferred = false;
 	}
 
 	public void clearResolvedItems() {

@@ -276,25 +276,56 @@ public class RuntimeSearchParam {
 		return retVal;
 	}
 
-	private boolean pathMatchesResourceType(String theResourceName, String thePath) {
-		if (thePath.startsWith(theResourceName + ".")) {
-			return true;
-		}
-		if (thePath.startsWith("Resouce.") || thePath.startsWith("DomainResource.")) {
-			return true;
-		}
-		if (Character.isLowerCase(thePath.charAt(0))) {
-			return true;
-		}
-
-		return false;
-	}
-
 	public enum RuntimeSearchParamStatusEnum {
 		ACTIVE,
 		DRAFT,
 		RETIRED,
 		UNKNOWN
+	}
+
+	/**
+	 * This method tests whether a given FHIRPath expression <i>could</i>
+	 * possibly apply to the given resource type.
+	 *
+	 * @param theResourceName
+	 * @param thePath
+	 * @return
+	 */
+	static boolean pathMatchesResourceType(String theResourceName, String thePath) {
+		for (int i = 0; i < thePath.length() - 1; i++) {
+			char nextChar = thePath.charAt(i);
+			if (Character.isLowerCase(nextChar)) {
+				return true;
+			}
+			if (Character.isLetter(nextChar)) {
+				if (fhirPathExpressionStartsWith(theResourceName, thePath, i)) {
+					return true;
+				}
+				if (fhirPathExpressionStartsWith("Resource", thePath, i)) {
+					return true;
+				}
+				if (fhirPathExpressionStartsWith("DomainResource", thePath, i)) {
+					return true;
+				}
+				return false;
+			}
+		}
+
+		return false;
+	}
+
+	private static boolean fhirPathExpressionStartsWith(String theResourceName, String thePath, int theStartingIndex) {
+		if (thePath.startsWith(theResourceName, theStartingIndex) && thePath.length() > theResourceName.length()) {
+			for (int i = theResourceName.length() + theStartingIndex; i < thePath.length(); i++) {
+				char nextChar = thePath.charAt(i);
+				if (nextChar == '.') {
+					return true;
+				} else if (nextChar != ' ') {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
 	public static class Component {

@@ -66,6 +66,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 		BulkExportExpandedResources expandedResources = theStepExecutionDetails.getData();
 
 		ourLog.info("Write binary step of Job Export");
+		ourLog.info("Writing {} resources to binary file", expandedResources.getStringifiedResources().size());
 
 		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");

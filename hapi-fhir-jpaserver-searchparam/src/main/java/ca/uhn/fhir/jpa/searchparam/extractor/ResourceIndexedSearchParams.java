@@ -73,6 +73,7 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedComboTokenNonUnique> myComboTokenNonUnique = new HashSet<>();
 	final public Collection<ResourceLink> myLinks = new HashSet<>();
 	final public Set<String> myPopulatedResourceLinkParameters = new HashSet<>();
+	final public Collection<ResourceIndexedSearchParamComposite>  myCompositeParams = new HashSet<>();
 
 	public ResourceIndexedSearchParams() {
 	}

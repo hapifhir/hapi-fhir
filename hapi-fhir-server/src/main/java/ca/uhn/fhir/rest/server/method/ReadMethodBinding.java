@@ -97,7 +97,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 
 	@Override
 	public List<Class<?>> getAllowableParamAnnotations() {
-		ArrayList<Class<?>> retVal = new ArrayList<Class<?>>();
+		ArrayList<Class<?>> retVal = new ArrayList<>();
 		retVal.add(IdParam.class);
 		retVal.add(Elements.class);
 		return retVal;

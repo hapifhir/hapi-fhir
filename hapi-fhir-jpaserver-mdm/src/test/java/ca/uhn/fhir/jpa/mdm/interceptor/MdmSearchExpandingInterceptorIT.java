@@ -176,13 +176,10 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// test
 		myDaoConfig.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
-		IBundleProvider outcome = runInTransaction(() -> {
-			IBundleProvider res =  dao.patientInstanceEverything(
+		IBundleProvider outcome = dao.patientInstanceEverything(
 				req,
                     theDetails, new PatientEverythingParameters(), new IdDt(id)
             );
-			return res;
-		});
 
 		// verify return results
 		// we expect all the linked ids to be returned too

@@ -48,7 +48,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.NESTED_SEARCH_PARAM_ROOT;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_CODE;
-import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_PARAM_NAME;
+import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.INDEX_TYPE_QUANTITY;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_SYSTEM;
 import static ca.uhn.fhir.jpa.model.search.HSearchIndexWriter.QTY_VALUE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -472,7 +472,7 @@ public class HSearchSandboxTest extends BaseJpaTest {
 		private void addQuantityOrClauses(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
 				String theSearchParamName, IQueryParameterType theParamType) {
 
-			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + QTY_PARAM_NAME;
+			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + INDEX_TYPE_QUANTITY;
 
 			QuantityParam qtyParam = QuantityParam.toQuantityParam(theParamType);
 			ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();

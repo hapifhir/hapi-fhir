@@ -74,7 +74,6 @@ import org.junit.jupiter.api.Test;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -153,7 +152,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -304,7 +303,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
 				assertEquals("The patient's identifier", param.getDescription());
@@ -521,7 +520,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				for (IParameter next : binding.getParameters()) {
 					SearchParameter param = (SearchParameter) next;
@@ -561,7 +560,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
 				assertEquals("The organization at which this person is a patient", param.getDescription());
@@ -594,7 +593,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
 		for (ResourceBinding resourceBinding : resourceBindings) {
 			if (resourceBinding.getResourceName().equals("Patient")) {
-				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
 				assertEquals("The organization at which this person is a patient", param.getDescription());

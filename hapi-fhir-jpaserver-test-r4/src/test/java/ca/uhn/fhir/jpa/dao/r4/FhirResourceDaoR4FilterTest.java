@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IResourceProvenanceDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -38,7 +38,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
 	@Autowired
-	private IResourceProvenanceDao myResourceProvenanceDao;
+	private IResourceHistoryProvenanceDao myResourceProvenanceDao;
 
 	@AfterEach
 	public void after() {

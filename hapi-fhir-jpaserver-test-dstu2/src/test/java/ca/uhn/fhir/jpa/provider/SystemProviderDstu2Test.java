@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.rp.dstu2.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu2.PractitionerResourceProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +53,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,6 +106,9 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
+			JpaConformanceProviderDstu2 myConformanceProvider = new JpaConformanceProviderDstu2(restServer, mySystemDao, myDaoConfig);
+			restServer.setServerConformanceProvider(myConformanceProvider);
+
 			ourServer = new Server(0);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -117,8 +123,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			ourServer.setHandler(proxyHandler);
 			JettyUtil.startServer(ourServer);
-            int myPort = JettyUtil.getPortForStartedServer(ourServer);
-            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			int myPort = JettyUtil.getPortForStartedServer(ourServer);
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -159,6 +165,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
+
+	@Test
+	public void testConformanceImplementationDescriptionGetsPopulated() {
+		Conformance conf = ourClient.capabilities().ofType(Conformance.class).execute();
+		assertThat(conf.getImplementation().getDescription(), not(emptyOrNullString()));
+	}
+
 
 	@Test
 	public void testEverythingReturnsCorrectBundleType() throws Exception {

@@ -13,9 +13,9 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.MedicationRequest;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.function.Predicate;
 
@@ -63,12 +63,12 @@ public class XverExtensionsValidationTest {
 		assertEquals("Extension_EXT_Type", errorMessage.getMessageId());
 	}
 
-	@NotNull
+	@Nonnull
 	private static Predicate<SingleValidationMessage> errorMessagePredicate() {
 		return message -> message.getSeverity() == ResultSeverityEnum.ERROR;
 	}
 
-	@NotNull
+	@Nonnull
 	private static FhirValidator getFhirValidator() {
 		FhirValidator validator;
 		final FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ourCtx);
@@ -79,14 +79,14 @@ public class XverExtensionsValidationTest {
 		return validator;
 	}
 
-	@NotNull
+	@Nonnull
 	private static MedicationRequest getMedicationRequest() {
 		MedicationRequest med_req;
 		med_req = ourCtx.newJsonParser().parseResource(MedicationRequest.class, loadResource("/r4/amz/medication-request-amz.json"));
 		return med_req;
 	}
 
-	@NotNull
+	@Nonnull
 	private IValidationSupport getValidationSupport() throws IOException {
 		NpmPackageValidationSupport npmPackageSupport = new NpmPackageValidationSupport(ourCtx);
 		npmPackageSupport.loadPackageFromClasspath("classpath:package/hl7.fhir.xver-extensions-0.0.11.tgz");

@@ -72,6 +72,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.CustomMatchersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -93,6 +94,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -852,14 +854,14 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.setLastUpdated(new DateRangeParam(beforeR2, null));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, containsInAnyOrder(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
+			CustomMatchersUtil.assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronous(true);
 			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, not(hasItem(id2)));
 			assertThat(patients.toString(), patients, (containsInAnyOrder(id1a, id1b)));
 		}
 		{
@@ -868,7 +870,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.setLastUpdated(new DateRangeParam(null, beforeR2));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, (containsInAnyOrder(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
+			assertThat(patients, not(hasItem(id2)));
 		}
 	}
 
@@ -1088,7 +1090,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.setLoadSynchronous(true);
 		params.add(Patient.SP_FAMILY, new StringDt(name));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-		assertThat(patients, not(contains(id)));
+		assertThat(patients, not(hasItem(id)));
 
 	}
 
@@ -1438,7 +1440,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IBundleProvider found = myPatientDao.search(params);
 		assertEquals(1, toList(found).size());
 		assertThat(toUnqualifiedVersionlessIds(found), contains(longId));
-		assertThat(toUnqualifiedVersionlessIds(found), not(contains(shortId)));
+		assertThat(toUnqualifiedVersionlessIds(found), not(hasItem(shortId)));
 
 	}
 

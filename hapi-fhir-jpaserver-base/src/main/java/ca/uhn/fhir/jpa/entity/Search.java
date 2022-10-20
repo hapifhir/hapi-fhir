@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -99,7 +101,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
 	@Column(name = "PID")
 	private Long myId;
-	@OneToMany(mappedBy = "mySearch")
+	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
@@ -156,6 +158,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	@Transient
 	private Integer mySizeModeSize;
+
+	/**
+	 * This isn't currently persisted in the DB. When there is search criteria defined in the
+	 * search parameter, this is used to keep the search criteria type.
+	 */
+	@Transient
+	private HistorySearchStyleEnum myHistorySearchStyle;
 
 	/**
 	 * Constructor
@@ -412,6 +421,14 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setOffset(Integer theOffset) {
 		myOffset = theOffset;
+	}
+
+	public HistorySearchStyleEnum getHistorySearchStyle() {
+		return myHistorySearchStyle;
+	}
+
+	public void setHistorySearchStyle(HistorySearchStyleEnum theHistorySearchStyle) {
+		this.myHistorySearchStyle = theHistorySearchStyle;
 	}
 
 	@Nonnull

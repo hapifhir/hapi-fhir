@@ -5,21 +5,16 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 	private TermLoaderSvcImpl mySvc;
 	private ZipCollectionBuilder myFiles;
 
@@ -64,7 +59,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		// WIP KHS find equivalent of this in batch2
+//		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
@@ -90,7 +86,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		TermTestUtil.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		// WIP KHS find equivalent of this in batch2
+//		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());

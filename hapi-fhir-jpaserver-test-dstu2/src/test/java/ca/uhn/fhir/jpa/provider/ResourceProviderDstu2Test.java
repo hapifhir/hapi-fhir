@@ -110,6 +110,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -119,6 +120,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -2040,7 +2042,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, hasItems(id2));
-			assertThat(patients, not(hasItems(id1a, id1b)));
+			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
 		{
 			Bundle found = ourClient.search()
@@ -2051,7 +2053,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients.toString(), patients, not(hasItems(id2)));
+			assertThat(patients.toString(), patients, not(hasItem(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
@@ -2064,7 +2066,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItems(id2)));
+			assertThat(patients, not(hasItem(id2)));
 		}
 	}
 

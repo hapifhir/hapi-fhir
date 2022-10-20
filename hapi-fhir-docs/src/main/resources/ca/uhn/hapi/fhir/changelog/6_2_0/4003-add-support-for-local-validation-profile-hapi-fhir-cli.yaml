@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4003
+jira: SMILE-3459
+title: "Added support for -l parameter for providing a local validation profile in the HAPI FHIR CLI."

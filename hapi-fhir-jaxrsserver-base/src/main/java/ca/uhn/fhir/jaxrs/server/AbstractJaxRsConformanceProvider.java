@@ -25,12 +25,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -58,24 +56,15 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This is the conformance provider for the jax rs servers. It requires all providers to be registered during startup because the conformance profile is generated during the postconstruct phase.
@@ -156,7 +145,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		for (Entry<Class<? extends IResourceProvider>, IResourceProvider> provider : providers.entrySet()) {
 			addProvider(provider.getValue(), provider.getKey());
 		}
-		List<BaseMethodBinding<?>> serverBindings = new ArrayList<BaseMethodBinding<?>>();
+		List<BaseMethodBinding> serverBindings = new ArrayList<BaseMethodBinding>();
 		for (ResourceBinding baseMethodBinding : myResourceNameToBinding.values()) {
 			serverBindings.addAll(baseMethodBinding.getMethodBindings());
 		}
@@ -269,7 +258,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		int count = 0;
 
 		for (Method m : ReflectionUtil.getDeclaredMethods(theProviderInterface)) {
-			BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
+			BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, getFhirContext(), theProvider);
 			if (foundMethodBinding == null) {
 				continue;
 			}

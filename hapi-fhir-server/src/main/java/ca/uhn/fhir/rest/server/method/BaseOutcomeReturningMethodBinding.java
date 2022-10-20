@@ -44,7 +44,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
+abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
 	private boolean myReturnVoid;

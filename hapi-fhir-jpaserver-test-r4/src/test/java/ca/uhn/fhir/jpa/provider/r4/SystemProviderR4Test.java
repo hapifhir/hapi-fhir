@@ -4,6 +4,9 @@ import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.IPointcut;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.rp.r4.BinaryResourceProvider;
@@ -13,6 +16,7 @@ import ca.uhn.fhir.jpa.rp.r4.ObservationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.OrganizationResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.PractitionerResourceProvider;
+import ca.uhn.fhir.jpa.rp.r4.PractitionerRoleResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ServiceRequestResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -21,6 +25,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
@@ -31,8 +36,9 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizedList;
+import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
@@ -53,11 +59,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
@@ -69,12 +77,15 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -83,6 +94,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -107,8 +119,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Autowired
 	private DeleteExpungeProvider myDeleteExpungeProvider;
-	@Autowired
-	private BatchJobHelper myBatchJobHelper;
 
 	@SuppressWarnings("deprecation")
 	@AfterEach
@@ -117,6 +127,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 		myDaoConfig.setDeleteExpungeEnabled(new DaoConfig().isDeleteExpungeEnabled());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
+		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 	}
 
 	@BeforeEach
@@ -144,11 +156,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			diagnosticReportRp.setDao(myDiagnosticReportDao);
 			ServiceRequestResourceProvider diagnosticOrderRp = new ServiceRequestResourceProvider();
 			diagnosticOrderRp.setDao(myServiceRequestDao);
+
 			PractitionerResourceProvider practitionerRp = new PractitionerResourceProvider();
 			practitionerRp.setDao(myPractitionerDao);
 
+			PractitionerRoleResourceProvider practitionerRoleRp = new PractitionerRoleResourceProvider();
+			practitionerRoleRp.setDao(myPractitionerRoleDao);
+
 			RestfulServer restServer = new RestfulServer(ourCtx);
-			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp);
+			restServer.setResourceProviders(patientRp, questionnaireRp, observationRp, organizationRp, locationRp, binaryRp, diagnosticReportRp, diagnosticOrderRp, practitionerRp, practitionerRoleRp);
 
 			restServer.registerProviders(mySystemProvider, myDeleteExpungeProvider);
 
@@ -489,6 +505,120 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 	}
+
+	/**
+	 * Ensure that the interceptor is called an appropriate number of times
+	 */
+	@Test
+	public void testBatchWithMultipleConditionalCreates() {
+
+		AtomicInteger counter0 = new AtomicInteger(0);
+		AtomicInteger counter1 = new AtomicInteger(0);
+		AtomicInteger counter2 = new AtomicInteger(0);
+
+		class MyAnonymousInterceptor0 implements IAnonymousInterceptor {
+
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				int count = counter0.incrementAndGet();
+				ourLog.info("counter0 have been called {} times", count);
+			}
+		}
+
+		class MyAnonymousInterceptor1 implements IAnonymousInterceptor {
+
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				int count = counter1.incrementAndGet();
+				ourLog.info("counter1 have been called {} times", count);
+			}
+		}
+
+		class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
+			private static final Logger ourLog = LoggerFactory.getLogger(MySearchNarrowingInterceptor.class);
+
+
+			@Override
+			protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+				int count = counter2.incrementAndGet();
+				ourLog.info("Have been called {} times", count);
+				return super.buildAuthorizedList(theRequestDetails);
+			}
+		}
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.setType("batch");
+
+		for (int i = 0; i < 5; i++) {
+			Practitioner p0 = new Practitioner();
+			p0.addIdentifier().setSystem("sys").setValue("p" + i);
+			bb.addTransactionCreateEntry(p0).conditional("Practitioner?identifier=sys|p" + i);
+		}
+
+		// Avoid the auto-CS fetching affecting counts
+		myClient.capabilities().ofType(CapabilityStatement.class).execute();
+
+		Bundle input = (Bundle) bb.getBundle();
+
+		MyAnonymousInterceptor0 interceptor0 = new MyAnonymousInterceptor0();
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor0);
+		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
+		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
+		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
+		try {
+			myClient.transaction().withBundle(input).execute();
+			assertEquals(1, counter0.get());
+			assertEquals(1, counter1.get());
+			assertEquals(5, counter2.get());
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
+		}
+	}
+
+
+	@Test
+	public void testTransactionWithModifyingInterceptor() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient pt = new Patient();
+		pt.setId("A");
+		pt.setActive(true);
+		bb.addTransactionUpdateEntry(pt);
+		Bundle input = (Bundle) bb.getBundle();
+
+		IAnonymousInterceptor interceptor = new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				Bundle transactionBundle = (Bundle) theArgs.get(IBaseBundle.class);
+
+				Patient pt = new Patient();
+				pt.setId("B");
+				pt.setActive(false);
+				transactionBundle
+					.addEntry()
+					.setResource(pt)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Patient/B");
+
+			}
+		};
+
+		Bundle output;
+		try {
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+			output = mySystemDao.transaction(mySrd, input);
+		}finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+
+		assertEquals(2, output.getEntry().size());
+		assertEquals("A", new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart());
+		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
+	}
+
 
 	@Test
 	public void testTransactionFromBundle() throws Exception {

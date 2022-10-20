@@ -30,7 +30,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.Offset;
-import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -42,7 +41,7 @@ public class OffsetParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String[] sinceParams = theRequest.getParameters().get(Constants.PARAM_OFFSET);
 		if (sinceParams != null) {
 			if (sinceParams.length > 0) {

@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -20,10 +21,12 @@ import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CareTeam;
@@ -89,6 +92,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
+		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 
 		BaseTermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
@@ -142,6 +146,40 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		});
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+	@Test
+	public void testUpdateWithChangesAndTags() {
+		myDaoConfig.setTagStorageMode(DaoConfig.TagStorageModeEnum.NON_VERSIONED);
+
+		IIdType id = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.getMeta().addTag("http://system", "foo", "display");
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		runInTransaction(()->{
+			assertEquals(1, myResourceTagDao.count());
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId(id.getIdPart());
+			p.addIdentifier().setSystem("urn:system").setValue("3");
+			IBaseResource newRes = myPatientDao.update(p).getResource();
+			assertEquals(1, newRes.getMeta().getTag().size());
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
@@ -917,6 +955,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPatientDao.search(map);
+		assertEquals(SimpleBundleProvider.class, outcome.getClass());
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(
 			"Patient/P1", "CareTeam/CT1-0", "CareTeam/CT1-1", "CareTeam/CT1-2",
 			"Patient/P2", "CareTeam/CT2-0", "CareTeam/CT2-1", "CareTeam/CT2-2"
@@ -924,6 +963,115 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+
+	@Test
+	public void testSearchWithMultipleIncludes_Async() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_ENCOUNTER);
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		map.addInclude(Observation.INCLUDE_SUBJECT);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
+		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, results.getClass());
+		ids = toUnqualifiedVersionlessIdValues(results);
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+		runInTransaction(()->{
+			assertEquals(1, mySearchEntityDao.count());
+			assertEquals(3, mySearchIncludeEntityDao.count());
+		});
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludesRecurse_Async() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(Observation.INCLUDE_ENCOUNTER.asRecursive());
+		map.addInclude(Observation.INCLUDE_PATIENT.asRecursive());
+		map.addInclude(Observation.INCLUDE_SUBJECT.asRecursive());
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(3, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludes_Sync() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.addInclude(Observation.INCLUDE_ENCOUNTER);
+		map.addInclude(Observation.INCLUDE_PATIENT);
+		map.addInclude(Observation.INCLUDE_SUBJECT);
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+	}
+
+	@Test
+	public void testSearchWithMultipleIncludesRecurse_Sync() {
+		// Setup
+		createPatient(withId("A"), withFamily("Hello"));
+		createEncounter(withId("E"), withIdentifier("http://foo", "bar"));
+		createObservation(withId("O"), withSubject("Patient/A"), withEncounter("Encounter/E"));
+		List<String> ids;
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.addInclude(Observation.INCLUDE_ENCOUNTER.asRecursive());
+		map.addInclude(Observation.INCLUDE_PATIENT.asRecursive());
+		map.addInclude(Observation.INCLUDE_SUBJECT.asRecursive());
+		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+		assertThat(ids, containsInAnyOrder("Patient/A", "Encounter/E", "Observation/O"));
+
+		// Verify
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());

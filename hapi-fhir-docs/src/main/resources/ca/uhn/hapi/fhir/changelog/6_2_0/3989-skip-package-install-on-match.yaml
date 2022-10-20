@@ -1,0 +1,5 @@
+---
+type: add
+issue: 3989
+title: "Provided the ability to have the NPM package installer skip installing a package if it is already installed and matches the version requested. This can be controlled by
+the `reloadExisting` attribute in PackageInstallationSpec. It defaults to `true`, which is the existing behaviour. Thanks to  Craig McClendon (@XcrigX) for the contribution!"

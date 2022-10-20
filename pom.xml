@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.2.0-PRE5-SNAPSHOT</version>
+	<version>6.2.0-PRE16-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -757,6 +757,10 @@
 			<name>Gjergj Sheldija</name>
 		</developer>
 		<developer>
+			<id>XcrigX</id>
+			<name>Craig McClendon</name>
+		</developer>
+    <developer>
 			<id>dyoung-work</id>
 		</developer>
 	</developers>
@@ -770,7 +774,7 @@
 
     <properties>
 
-        <fhir_core_version>5.6.55</fhir_core_version>
+        <fhir_core_version>5.6.68</fhir_core_version>
         <ucum_version>1.0.3</ucum_version>
 
         <surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -788,7 +792,7 @@
         <activation_api_version>1.2.0</activation_api_version>
         <apache_karaf_version>4.2.5</apache_karaf_version>
         <aries_spifly_version>1.2</aries_spifly_version>
-        <caffeine_version>2.9.1</caffeine_version>
+        <caffeine_version>3.1.1</caffeine_version>
         <commons_codec_version>1.15</commons_codec_version>
         <commons_compress_version>1.21</commons_compress_version>
         <commons_text_version>1.9</commons_text_version>
@@ -811,9 +815,9 @@
         <jersey_version>3.0.3</jersey_version>
         <jetty_version>9.4.48.v20220622</jetty_version>
         <jsr305_version>3.0.2</jsr305_version>
-        <junit_version>5.8.2</junit_version>
+        <junit_version>5.9.1</junit_version>
         <flexmark_version>0.50.40</flexmark_version>
-        <flyway_version>8.5.0</flyway_version>
+        <flyway_version>9.4.0</flyway_version>
         <hibernate_version>5.6.2.Final</hibernate_version>
         <hibernate_search_version>6.1.6.Final</hibernate_search_version>
         <!-- Update lucene version when you update hibernate-search version -->
@@ -838,10 +842,10 @@
         <swagger_version>2.1.12</swagger_version>
         <slf4j_version>1.7.33</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
-        <spring_version>5.3.20</spring_version>
+        <spring_version>5.3.23</spring_version>
 		  <spring_data_bom_version>2021.2.2</spring_data_bom_version>
 		  <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.6.7</spring_boot_version>
+        <spring_boot_version>2.7.4</spring_boot_version>
         <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
         <stax2_api_version>3.1.4</stax2_api_version>
@@ -992,7 +996,7 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.1.212</version>
+				<version>2.1.214</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -1218,7 +1222,7 @@
 			<dependency>
 				 <groupId>net.sourceforge.htmlunit</groupId>
 				 <artifactId>htmlunit</artifactId>
-				 <version>2.58.0</version>
+				 <version>2.65.1</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1432,7 +1436,7 @@
 			<dependency>
 				<groupId>com.fasterxml.woodstox</groupId>
 				<artifactId>woodstox-core</artifactId>
-				<version>6.2.5</version>
+				<version>6.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ebaysf.web</groupId>
@@ -1722,7 +1726,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.4.1</version>
+				<version>42.5.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1746,7 +1750,7 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
-				<version>${slf4j_version}</version>
+				<version>1.7.36</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1964,16 +1968,6 @@
 				<version>${flyway_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-sqlserver</artifactId>
-				<version>${flyway_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-mysql</artifactId>
-				<version>${flyway_version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework.batch</groupId>
 				<artifactId>spring-batch-test</artifactId>
 				<version>${spring_batch_version}</version>
@@ -2009,7 +2003,7 @@
                 <plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.1.2</version>
+					<version>3.2.0</version>
 					<dependencies>
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
@@ -2020,7 +2014,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.2.0-PRE5-SNAPSHOT</version>
+                            <version>6.2.0-PRE16-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4046
+title: "Search for strings with `:text` qualifier was not performing advanced search. This has been corrected."

@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.importpull.models.Batch2BulkImportPullJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.imprt.api.IBulkDataImportSvc;
 import ca.uhn.fhir.jpa.bulk.imprt.model.ActivateJobResult;
@@ -50,16 +49,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
+
+import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 
 public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataImportSvcImpl.class);
@@ -155,7 +157,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	/**
 	 * To be called by the job scheduler
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public ActivateJobResult activateNextReadyJob() {
 		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {
@@ -285,7 +287,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 		jobParameters.setBatchSize(batchSize);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
-		request.setJobDefinitionId(BatchConstants.BULK_IMPORT_JOB_NAME);
+		request.setJobDefinitionId(BULK_IMPORT_JOB_NAME);
 		request.setParameters(jobParameters);
 
 		ourLog.info("Submitting bulk import with bijob id {} to job scheduler", biJobId);

@@ -91,7 +91,8 @@ public class DaoSearchParamSynchronizer {
 			myEntityManager.merge(next);
 		}
 
-		theAddRemoveCount.addToAddCount(paramsToRemove.size());
+		// TODO:  are there any unintended consequences to fixing this bug?
+		theAddRemoveCount.addToAddCount(paramsToAdd.size());
 		theAddRemoveCount.addToRemoveCount(paramsToRemove.size());
 	}
 

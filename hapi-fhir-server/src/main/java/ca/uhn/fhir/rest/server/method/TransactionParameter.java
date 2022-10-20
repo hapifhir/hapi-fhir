@@ -88,7 +88,7 @@ public class TransactionParameter implements IParameter {
 	}
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		IBaseResource parsedBundle = ResourceParameter.parseResourceFromRequest(theRequest, theMethodBinding, myResourceBundleType);
 
 		switch (myParamStyle) {

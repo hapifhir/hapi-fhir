@@ -422,7 +422,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	@Transactional
 	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl) {
 		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSetCanonicalUrl);
 		if (valueSet == null) {
@@ -433,16 +432,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand) {
 		String filter = null;
 		if (theExpansionOptions != null) {
 			filter = theExpansionOptions.getFilter();
 		}
-		return expandValueSet(theExpansionOptions, theValueSetToExpand, ExpansionFilter.fromFilterString(filter));
+		return doExpandValueSet(theExpansionOptions, theValueSetToExpand, ExpansionFilter.fromFilterString(filter));
 	}
 
-	private ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, ExpansionFilter theFilter) {
+	private ValueSet doExpandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, ExpansionFilter theFilter) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
@@ -461,7 +459,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
-		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true);
+		myTxTemplate.executeWithoutResult(tx-> {
+			expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true);
+		});
 
 		if (accumulator.getTotalConcepts() != null) {
 			accumulator.setTotal(accumulator.getTotalConcepts());
@@ -506,7 +506,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			ourLog.debug("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingInMemoryExpansion", getValueSetInfo(theValueSetToExpand));
 			theAccumulator.addMessage(msg);
-			expandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
 		}
 
@@ -517,7 +517,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotYetExpanded", getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			theAccumulator.addMessage(msg);
-			expandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
+			doExpandValueSet(theExpansionOptions, theValueSetToExpand, theAccumulator, theFilter);
 			return;
 		}
 
@@ -734,13 +734,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		expandValueSet(theExpansionOptions, theValueSetToExpand, theValueSetCodeAccumulator, ExpansionFilter.NO_FILTER);
+		doExpandValueSet(theExpansionOptions, theValueSetToExpand, theValueSetCodeAccumulator, ExpansionFilter.NO_FILTER);
 	}
 
+	/**
+	 * Note: Not transactional because specific calls within this method
+	 * get executed in a transaction
+	 */
 	@SuppressWarnings("ConstantConditions")
-	private void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, @Nonnull ExpansionFilter theExpansionFilter) {
+	private void doExpandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, @Nonnull ExpansionFilter theExpansionFilter) {
 		Set<String> addedCodes = new HashSet<>();
 
 		StopWatch sw = new StopWatch();

@@ -92,17 +92,18 @@ public class Builder {
 		return task;
 	}
 
-	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
-		mySink.addTask(new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider));
-		return this;
+	public InitializeSchemaTask initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
+		mySink.addTask(task);
+		return task;
 	}
 
 	@SuppressWarnings("unused")
-	public Builder initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
+	public InitializeSchemaTask initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
 		task.setDescription("Initialize " + theSchemaName + " schema");
 		mySink.addTask(task);
-		return this;
+		return task;
 	}
 
 	public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {

@@ -229,7 +229,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
 			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
 			.setExtensionDomains(getExtensionDomains())
-			.setValidatorResourceFetcher(validatorResourceFetcher)
 			.setValidationPolicyAdvisor(validatorPolicyAdvisor)
 			.setNoTerminologyChecks(isNoTerminologyChecks())
 			.setNoExtensibleWarnings(isNoExtensibleWarnings())

@@ -63,7 +63,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -129,6 +128,8 @@ import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.split;
 
@@ -175,11 +176,13 @@ public class QueryStack {
 
 	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = mySqlBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending);
+		Condition hashIdentityPredicate = datePredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, datePredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending);
 	}
 
 	public void addSortOnLastUpdated(boolean theAscending) {
@@ -195,22 +198,25 @@ public class QueryStack {
 
 	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		NumberPredicateBuilder sortPredicateBuilder = mySqlBuilder.addNumberPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		NumberPredicateBuilder numberPredicateBuilder = mySqlBuilder.createNumberPredicateBuilder();
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnValue(), theAscending);
+		Condition hashIdentityPredicate = numberPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, numberPredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortNumeric(numberPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
-		BaseQuantityPredicateBuilder sortPredicateBuilder;
-		sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		BaseQuantityPredicateBuilder quantityPredicateBuilder = mySqlBuilder.createQuantityPredicateBuilder();
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnValue(), theAscending);
+		Condition hashIdentityPredicate = quantityPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, quantityPredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortNumeric(quantityPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 	public void addSortOnResourceId(boolean theAscending) {
@@ -227,39 +233,63 @@ public class QueryStack {
 
 	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		ResourceLinkPredicateBuilder sortPredicateBuilder = mySqlBuilder.addReferencePredicateBuilder(this, firstPredicateBuilder.getResourceIdColumn());
+		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
-		Condition pathPredicate = sortPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName, new ArrayList<>());
-		mySqlBuilder.addPredicate(pathPredicate);
-		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnTargetResourceId(), theAscending);
+		Condition pathPredicate = resourceLinkPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName, new ArrayList<>());
+
+		addSortCustomJoin(firstPredicateBuilder, resourceLinkPredicateBuilder, pathPredicate);
+
+		mySqlBuilder.addSortNumeric(resourceLinkPredicateBuilder.getColumnTargetResourceId(), theAscending);
 	}
 
 	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		StringPredicateBuilder sortPredicateBuilder = mySqlBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending);
+		StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
+		Condition hashIdentityPredicate = stringPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, stringPredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortString(stringPredicateBuilder.getColumnValueNormalized(), theAscending);
 	}
 
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		TokenPredicateBuilder sortPredicateBuilder = mySqlBuilder.addTokenPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnSystem(), theAscending);
-		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValue(), theAscending);
+		TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
+		Condition hashIdentityPredicate = tokenPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, tokenPredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending);
+		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending);
+
 	}
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		UriPredicateBuilder sortPredicateBuilder = mySqlBuilder.addUriPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
-		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
-		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValue(), theAscending);
+		UriPredicateBuilder uriPredicateBuilder = mySqlBuilder.createUriPredicateBuilder();
+		Condition hashIdentityPredicate = uriPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
+
+		addSortCustomJoin(firstPredicateBuilder, uriPredicateBuilder, hashIdentityPredicate);
+
+		mySqlBuilder.addSortString(uriPredicateBuilder.getColumnValue(), theAscending);
+	}
+
+	private void addSortCustomJoin(BaseJoiningPredicateBuilder theFromJoiningPredicateBuilder, BaseJoiningPredicateBuilder theToJoiningPredicateBuilder, Condition theCondition){
+		ComboCondition onCondition = mySqlBuilder.createOnCondition(
+			theFromJoiningPredicateBuilder.getResourceIdColumn(),
+			theToJoiningPredicateBuilder.getResourceIdColumn()
+		);
+
+		onCondition.addCondition(theCondition);
+
+		mySqlBuilder.addCustomJoin(
+			SelectQuery.JoinType.LEFT_OUTER,
+			theFromJoiningPredicateBuilder.getTable(),
+			theToJoiningPredicateBuilder.getTable(),
+			onCondition);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -345,7 +375,6 @@ public class QueryStack {
 		}
 
 	}
-
 
 	private Condition createMissingParameterQuery(
 		MissingParameterQueryParams theParams
@@ -700,8 +729,14 @@ public class QueryStack {
 				String qualifier = paramName.substring(4);
 				for (IQueryParameterType next : nextOrList) {
 					HasParam nextHasParam = new HasParam();
-					nextHasParam.setValueAsQueryToken(myFhirContext, Constants.PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
+					nextHasParam.setValueAsQueryToken(myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
 					orValues.add(nextHasParam);
+				}
+
+			} else if (paramName.equals(PARAM_ID)) {
+
+				for (IQueryParameterType next : nextOrList) {
+					orValues.add(new TokenParam(next.getValueAsQueryToken(myFhirContext)));
 				}
 
 			} else {
@@ -932,7 +967,7 @@ public class QueryStack {
 		}
 
 		public String getPath() { return myPath; }
-		
+
 		public String getSearchParameterName() { return mySearchParameterName; }
 
 		@Override
@@ -979,7 +1014,6 @@ public class QueryStack {
 					String targetValue = nextOr.getValueAsQueryToken(myFhirContext);
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam referenceParam = (ReferenceParam) nextOr;
-
 						if (!isReferenceParamValid(referenceParam)) {
 							throw new InvalidRequestException(Msg.code(2007) +
 								"The search chain " + theSearchParam.getName() + "." + referenceParam.getChain() +
@@ -1511,11 +1545,11 @@ public class QueryStack {
 													  String theSpnamePrefix, RuntimeSearchParam theSearchParam, List<? extends IQueryParameterType> theList,
 													  SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId, SearchQueryBuilder theSqlBuilder) {
 
-		List<IQueryParameterType> tokens = new ArrayList<>(); 
-		
+		List<IQueryParameterType> tokens = new ArrayList<>();
+
 		boolean paramInverted = false;
 		TokenParamModifier modifier;
-		
+
 		for (IQueryParameterType nextOr : theList) {
 			if (nextOr instanceof TokenParam) {
 				if (!((TokenParam) nextOr).isEmpty()) {
@@ -1534,8 +1568,8 @@ public class QueryStack {
 							throw new MethodNotAllowedException(Msg.code(1219) + msg);
 						}
 						return createPredicateString(theSourceJoinColumn, theResourceName, theSpnamePrefix, theSearchParam, theList, null, theRequestPartitionId, theSqlBuilder);
-					} 
-					
+					}
+
 					modifier = id.getModifier();
 					// for :not modifier, create a token and remove the :not modifier
 					if (modifier == TokenParamModifier.NOT) {
@@ -1557,23 +1591,23 @@ public class QueryStack {
 		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		Condition predicate;
 		BaseJoiningPredicateBuilder join;
-		
+
 		if (paramInverted) {
 			SearchQueryBuilder sqlBuilder = theSqlBuilder.newChildSqlBuilder();
 			TokenPredicateBuilder tokenSelector = sqlBuilder.addTokenPredicateBuilder(null);
 			sqlBuilder.addPredicate(tokenSelector.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theRequestPartitionId));
 			SelectQuery sql = sqlBuilder.getSelect();
 			Expression subSelect = new Subquery(sql);
-			
+
 			join = theSqlBuilder.getOrCreateFirstPredicateBuilder();
-			
+
 			if (theSourceJoinColumn == null) {
 				predicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
 			} else {
 				//-- for the resource link, need join with target_resource_id
 			    predicate = new InCondition(theSourceJoinColumn, subSelect).setNegate(true);
 			}
-						
+
 		} else {
 			Boolean isMissing = theList.get(0).getMissing();
 			if (isMissing != null) {
@@ -1593,9 +1627,9 @@ public class QueryStack {
 			TokenPredicateBuilder tokenJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, paramName, () -> theSqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
 			predicate = tokenJoin.createPredicateToken(tokens, theResourceName, theSpnamePrefix, theSearchParam, theOperation, theRequestPartitionId);
-			join = tokenJoin; 
-		} 
-		
+			join = tokenJoin;
+		}
+
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 
@@ -1649,7 +1683,7 @@ public class QueryStack {
 			case IAnyResource.SP_RES_ID:
 				return createPredicateResourceId(theSourceJoinColumn, theAndOrParams, theResourceName, null, theRequestPartitionId);
 
-			case Constants.PARAM_HAS:
+			case PARAM_HAS:
 				return createPredicateHas(theSourceJoinColumn, theResourceName, theAndOrParams, theRequest, theRequestPartitionId);
 
 			case Constants.PARAM_TAG:
@@ -1793,7 +1827,9 @@ public class QueryStack {
 			nextAnd.stream()
 				.filter(t -> t instanceof ReferenceParam)
 				.map(t -> ((ReferenceParam) t).getChain())
-				.anyMatch(StringUtils::isNotBlank);
+				.filter(StringUtils::isNotBlank)
+				// Chains on _has can't be indexed for contained searches - At least not yet. It's not clear to me if we ever want to support this, it would be really hard to do.
+				.anyMatch(t->!t.startsWith(PARAM_HAS + ":"));
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {

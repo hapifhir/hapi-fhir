@@ -210,10 +210,13 @@ public class Constants {
 	public static final String PARAM_MEMBER_PATIENT = "MemberPatient";
 	public static final String PARAM_OLD_COVERAGE = "OldCoverage";
 	public static final String PARAM_NEW_COVERAGE = "NewCoverage";
+	public static final String PARAM_MEMBER_PATIENT_NAME = PARAM_MEMBER_PATIENT + " Name";
+	public static final String PARAM_MEMBER_PATIENT_BIRTHDATE = PARAM_MEMBER_PATIENT + " Birthdate";
 
 	public static final String PARAMQUALIFIER_MISSING = ":missing";
 	public static final String PARAMQUALIFIER_MISSING_FALSE = "false";
 	public static final String PARAMQUALIFIER_MISSING_TRUE = "true";
+	public static final String PARAMQUALIFIER_STRING_TEXT = ":text";
 	public static final String PARAMQUALIFIER_STRING_CONTAINS = ":contains";
 	public static final String PARAMQUALIFIER_STRING_EXACT = ":exact";
 	public static final String PARAMQUALIFIER_TOKEN_TEXT = ":text";

@@ -154,6 +154,9 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	}
 
 	public Map<String, String> getTags() {
+		if (myTags == null) {
+			myTags = new HashMap<>();
+		}
 		return myTags;
 	}
 

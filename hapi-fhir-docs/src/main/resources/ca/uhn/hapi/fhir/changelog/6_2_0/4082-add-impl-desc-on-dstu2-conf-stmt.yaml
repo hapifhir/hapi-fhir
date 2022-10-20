@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4082
+title: "A bug prevented the DSTU2 JPA server Conformance.implementation.description
+   field from being populated in some cases. This has been corrected."

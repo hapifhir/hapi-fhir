@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -15,6 +16,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -27,6 +29,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -103,6 +106,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -112,6 +116,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -258,6 +263,49 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Assert
 		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
+	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		String spCallingName = "securitySP";
+		String secCode = "secCode";
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode(spCallingName);
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		ourClient.create().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		IIdType expectedPatientId = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode(secCode)));
+		IIdType dontCare = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode("L")));
+
+		Bundle searchResultBundle = ourClient.search().forResource(Patient.class).where(new StringClientParam(spCallingName).matches().value(secCode)).returnBundle(Bundle.class).execute();
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(searchResultBundle);
+
+		assertEquals(1, foundPatients.size());
+
+		assertEquals(foundPatients.get(0), expectedPatientId.getValue());
+
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode("myGender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender|Person.gender");
+
+		MethodOutcome result= ourClient.create().resource(searchParameter).execute();
+
+		assertEquals(true, result.getCreated());
+
 	}
 
 	@Test
@@ -2245,10 +2293,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Patient patient = new Patient();
 		patient.addName().setFamily(methodName);
-		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
+
+		IIdType idCreated = myPatientDao.create(patient, mySrd).getId();
+		ids.add(idCreated.toUnqualified().getValue());
+		IIdType id = idCreated.toUnqualifiedVersionless();
+
 		for (int i = 0; i < 10; i++) {
 			Thread.sleep(100);
 			preDates.add(new Date());
@@ -2261,13 +2313,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<String> idValues;
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/" + id.getIdPart() + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1), ids.get(0)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/Patient/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt" + toStr(preDates.get(0)) + "&_at=lt" + toStr(preDates.get(3)));
-		assertThat(idValues.toString(), idValues, contains(ids.get(2), ids.get(1), ids.get(0)));
+		assertThat(idValues.toString(), idValues, contains(ids.get(3), ids.get(2), ids.get(1)));
 
 		idValues = searchAndReturnUnqualifiedIdValues(ourServerBase + "/_history?_at=gt2060");
 		assertThat(idValues.toString(), idValues, empty());
@@ -4776,5 +4828,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
+	private IIdType createPatientWithMeta(Meta theMeta){
+
+		Patient patient = new Patient();
+		patient.setMeta(theMeta);
+		return ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	}
 
 }

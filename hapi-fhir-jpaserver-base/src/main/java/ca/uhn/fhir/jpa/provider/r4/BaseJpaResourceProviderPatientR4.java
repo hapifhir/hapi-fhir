@@ -66,7 +66,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	/**
 	 * Patient/123/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientInstanceEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -129,7 +129,7 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 	/**
 	 * /Patient/$everything
 	 */
-	@Operation(name = JpaConstants.OPERATION_EVERYTHING, idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
+	@Operation(name = JpaConstants.OPERATION_EVERYTHING, canonicalUrl = "http://hl7.org/fhir/OperationDefinition/Patient-everything", idempotent = true, bundleType = BundleTypeEnum.SEARCHSET)
 	public IBundleProvider patientTypeEverything(
 
 		javax.servlet.http.HttpServletRequest theServletRequest,
@@ -194,10 +194,10 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 
 	/**
 	 * /Patient/$member-match operation
-	 * Basic implementation matching by coverage id or by coverage identifier. Not matching by
-	 * Beneficiary (Patient) demographics in this version
+	 * Basic implementation matching by coverage id or by coverage identifier. Matching by
+	 * Beneficiary (Patient) demographics on family name and birthdate in this version
 	 */
-	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MEMBER_MATCH, canonicalUrl = "http://hl7.org/fhir/us/davinci-hrex/OperationDefinition/member-match", idempotent = false, returnParameters = {
 		@OperationParam(name = "MemberIdentifier", typeName = "string")
 	})
 	public Parameters patientMemberMatch(
@@ -240,7 +240,13 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 				"operation.member.match.error.beneficiary.not.found");
 			throw new UnprocessableEntityException(Msg.code(1156) + i18nMessage);
 		}
+
 		Patient patient = patientOpt.get();
+		if (!myMemberMatcherR4Helper.validPatientMember(patient, theMemberPatient)) {
+			String i18nMessage = getContext().getLocalizer().getMessage(
+				"operation.member.match.error.patient.not.found");
+			throw new UnprocessableEntityException(Msg.code(2146) + i18nMessage);
+		}
 
 		if (patient.getIdentifier().isEmpty()) {
 			String i18nMessage = getContext().getLocalizer().getMessage(
@@ -258,8 +264,8 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
 		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+		validateMemberPatientParam(theMemberPatient);
 	}
-
 
 	private void validateParam(Object theParam, String theParamName) {
 		if (theParam == null) {
@@ -269,6 +275,14 @@ public abstract class BaseJpaResourceProviderPatientR4 extends JpaResourceProvid
 		}
 	}
 
+	private void validateMemberPatientParam(Patient theMemberPatient) {
+		if (theMemberPatient.getName().isEmpty()) {
+			validateParam(null, Constants.PARAM_MEMBER_PATIENT_NAME);
+		}
+
+		validateParam(theMemberPatient.getName().get(0).getFamily(), Constants.PARAM_MEMBER_PATIENT_NAME);
+		validateParam(theMemberPatient.getBirthDate(), Constants.PARAM_MEMBER_PATIENT_BIRTHDATE);
+	}
 
 	/**
 	 * Given a list of string types, return only the ID portions of any parameters passed in.

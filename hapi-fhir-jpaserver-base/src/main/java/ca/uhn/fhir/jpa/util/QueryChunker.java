@@ -53,5 +53,4 @@ public class QueryChunker<T> {
 			theBatchConsumer.accept(batch);
 		}
 	}
-
 }

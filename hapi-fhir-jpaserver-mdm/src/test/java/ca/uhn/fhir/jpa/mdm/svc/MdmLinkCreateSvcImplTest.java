@@ -14,7 +14,6 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MdmLinkCreateSvcImplTest {
+	@SuppressWarnings("unused")
 	@Spy
 	FhirContext myFhirContext = FhirContext.forR4();
 	@Mock
@@ -52,7 +50,7 @@ class MdmLinkCreateSvcImplTest {
 	MdmLinkCreateSvcImpl myMdmLinkCreateSvc = new MdmLinkCreateSvcImpl();
 
 	@Test
-	public void testCreateLink(){
+	public void testCreateLink() {
 		ArgumentCaptor<IMdmLink> mdmLinkCaptor = ArgumentCaptor.forClass(IMdmLink.class);
 
 		when(myMdmLinkDaoSvc.save(mdmLinkCaptor.capture())).thenReturn(new MdmLink());
@@ -74,7 +72,7 @@ class MdmLinkCreateSvcImplTest {
 	}
 
 	@BeforeEach
-	private void setup() {
+	public void setup() {
 		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
 		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))

@@ -163,12 +163,7 @@ public class TestR4Config {
 
 		};
 
-		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
-		retVal.setMaxWaitMillis(30000);
-		retVal.setUsername("");
-		retVal.setPassword("");
-		retVal.setMaxTotal(ourMaxThreads);
+		setConnectionProperties(retVal);
 
 		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
@@ -185,6 +180,17 @@ public class TestR4Config {
 
 		return dataSource;
 	}
+
+
+	public void setConnectionProperties(BasicDataSource theDataSource) {
+		theDataSource.setDriver(new org.h2.Driver());
+		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		theDataSource.setMaxWaitMillis(30000);
+		theDataSource.setUsername("");
+		theDataSource.setPassword("");
+		theDataSource.setMaxTotal(ourMaxThreads);
+	}
+
 
 	@Bean
 	public SingleQueryCountHolder singleQueryCountHolder() {
@@ -211,13 +217,17 @@ public class TestR4Config {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", HapiFhirH2Dialect.class.getName());
+		extraProperties.put("hibernate.dialect", getHibernateDialect());
 
 		hibernateSearchConfigurer.apply(extraProperties);
 
 		ourLog.info("jpaProperties: {}", extraProperties);
 
 		return extraProperties;
+	}
+
+	public String getHibernateDialect() {
+		return HapiFhirH2Dialect.class.getName();
 	}
 
 	/**

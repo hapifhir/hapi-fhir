@@ -91,7 +91,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		}
 
 		// Write descriptor file
-		long count = countingInputStream.getCount();
+		long count = countingInputStream.getByteCount();
 		StoredDetails details = new StoredDetails(id, count, theContentType, hashingInputStream, new Date());
 		File descriptorFilename = getDescriptorFilename(storagePath, theResourceId, id);
 		ourLog.info("Writing to file: {}", descriptorFilename.getAbsolutePath());

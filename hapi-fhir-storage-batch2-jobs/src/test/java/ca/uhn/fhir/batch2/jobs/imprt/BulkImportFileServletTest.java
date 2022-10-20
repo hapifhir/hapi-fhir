@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BulkImportFileServletTest {
 
 	private BulkImportFileServlet mySvc = new BulkImportFileServlet();
+
+	static final String ourInput = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
+		"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
 
 	@RegisterExtension
 	private HttpServletExtension myServletExtension = new HttpServletExtension()
@@ -34,20 +34,29 @@ public class BulkImportFileServletTest {
 
 	@Test
 	public void testDownloadFile() throws IOException {
-		String input = "{\"resourceType\":\"Patient\", \"id\": \"A\", \"active\": true}\n" +
-			"{\"resourceType\":\"Patient\", \"id\": \"B\", \"active\": false}";
-		String index = mySvc.registerFileByContents(input);
 
-		CloseableHttpClient client = myServletExtension.getHttpClient();
+		String index = mySvc.registerFileByContents(ourInput);
 
 		String url = myServletExtension.getBaseUrl() + "/download?index=" + index;
-		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
 
+		executeBulkImportAndCheckReturnedContentType(url);
+
+	}
+
+
+	private void executeBulkImportAndCheckReturnedContentType(String theUrl)  throws IOException{
+		CloseableHttpClient client = myServletExtension.getHttpClient();
+
+		try (CloseableHttpResponse response = client.execute(new HttpGet(theUrl))) {
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(input, responseBody);
+			String responseHeaderContentType = response.getFirstHeader("content-type").getValue();
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE, responseHeaderContentType);
+			assertEquals(ourInput, responseBody);
 		}
 	}
+
 
 	@Test
 	public void testInvalidRequests() throws IOException {

@@ -43,6 +43,8 @@ public class PackageInstallOutcomeJson {
 	@JsonProperty("resourcesInstalled")
 	private Map<String, Integer> myResourcesInstalled;
 
+
+
 	public List<String> getMessage() {
 		if (myMessage == null) {
 			myMessage = new ArrayList<>();

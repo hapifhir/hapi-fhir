@@ -690,7 +690,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		}
 
 		@BeforeEach
-		private void setBulkDataExportProvider() {
+		public void setBulkDataExportProvider() {
 			ourRestServer.registerProvider(myProvider);
 		}
 

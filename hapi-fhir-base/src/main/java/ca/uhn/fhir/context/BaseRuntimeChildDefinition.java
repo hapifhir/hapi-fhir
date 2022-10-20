@@ -89,6 +89,15 @@ public abstract class BaseRuntimeChildDefinition {
 		void addValue(IBase theTarget, IBase theValue);
 
 		void setValue(IBase theTarget, IBase theValue);
+
+		/**
+		 * Remove an item from a list of values
+		 * @param theTarget field to remove the item from (e.g. patient.name)
+		 * @param theIndex the index of the item to be removed (e.g. 1 for patient.name[1])
+		 */
+		default void remove(IBase theTarget, int theIndex) {
+			// implemented in subclasses
+		}
 	}
 
 	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {

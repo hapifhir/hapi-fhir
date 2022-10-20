@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.flywaydb.core.internal.command.DbMigrate;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -300,7 +300,7 @@ public class ModifyColumnTest extends BaseTest {
 		try {
 			getMigrator().migrate();
 			fail();
-		} catch (DbMigrate.FlywayMigrateException e) {
+		} catch (HapiMigrationException e) {
 			// expected
 		}
 
