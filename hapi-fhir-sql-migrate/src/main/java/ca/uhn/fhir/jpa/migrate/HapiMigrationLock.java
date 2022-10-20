@@ -62,11 +62,12 @@ public class HapiMigrationLock implements AutoCloseable {
 			return;
 		}
 
+		// This is a noop for all databases except CockroachDB
 		myLockTableConnection.unlock();
-		ourLog.debug("Unlocked Migration Table");
 
-		// Close the connection we opened in openLockTableConnection()
+		// Close the connection we opened in openLockTableConnection().  This is what actually releases the lock.
 		myLockTableConnection.getDatabase().close();
+		ourLog.debug("Unlocked Migration Table");
 	}
 
 	private Table openLockTableConnection(DataSource theDataSource) {
