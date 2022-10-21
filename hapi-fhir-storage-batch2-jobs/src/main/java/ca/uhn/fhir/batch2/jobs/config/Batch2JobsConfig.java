@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx;
 import ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportAppCtx;
+import ca.uhn.fhir.batch2.jobs.mdm.MdmSubmitJobConfig;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +39,8 @@ import org.springframework.context.annotation.Import;
 	DeleteExpungeAppCtx.class,
 	BulkExportAppCtx.class,
 	TermCodeSystemJobConfig.class,
-	BulkImportPullConfig.class
+	BulkImportPullConfig.class,
+	MdmSubmitJobConfig.class
 })
 public class Batch2JobsConfig {
 }

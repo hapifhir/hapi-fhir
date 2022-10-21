@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.export;
+package ca.uhn.fhir.batch2.jobs.mdm;
 
 /*-
  * #%L
@@ -20,14 +20,10 @@ package ca.uhn.fhir.batch2.jobs.export;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IFirstJobStepWorker;
-import ca.uhn.fhir.batch2.api.IJobDataSink;
-import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
-import ca.uhn.fhir.batch2.api.RunOutcome;
-import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
+import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -39,13 +35,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
+public class FetchResourceIdsStep implements IFirstJobStepWorker<MdmSubmitJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
 	public static final int MAX_IDS_TO_BATCH = 900;
@@ -58,9 +50,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmSubmitJobParameters, VoidModel> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
-		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
+		MdmSubmitJobParameters params = theStepExecutionDetails.getParameters();
 		ourLog.info("Starting BatchExport job");
 
 		ExportPIDIteratorParameters providerParams = new ExportPIDIteratorParameters();
@@ -130,7 +122,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 	private void submitWorkChunk(List<Id> theIds,
 										  String theResourceType,
-										  BulkExportJobParameters theParams,
+										  MdmSubmitJobParameters theParams,
 										  IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 
