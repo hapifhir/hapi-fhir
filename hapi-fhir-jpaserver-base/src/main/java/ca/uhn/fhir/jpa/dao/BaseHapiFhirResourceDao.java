@@ -2013,7 +2013,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			IBaseResource resource = theCtx.getResource();
 			if (resource instanceof Parameters) {
 				List<ParametersParameterComponent> params = ((Parameters) resource).getParameter();
-				params.stream().filter(param -> param.getName().equalsIgnoreCase("resource"));
+				params = params.stream().filter(param -> param.getName().contains("resource")).collect(Collectors.toList());
 				resource = params.get(0).getResource();
 			}
 			boolean hasId = resource.getIdElement().hasIdPart();
