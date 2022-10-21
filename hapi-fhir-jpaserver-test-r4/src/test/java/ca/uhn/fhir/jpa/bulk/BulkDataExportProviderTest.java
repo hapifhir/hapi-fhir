@@ -23,6 +23,7 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -97,6 +98,7 @@ public class BulkDataExportProviderTest {
 
 	private DaoConfig myDaoConfig;
 
+	@Mock
 	private DaoRegistry myDaoRegistry;
 
 	private CloseableHttpClient myClient;
@@ -141,8 +143,6 @@ public class BulkDataExportProviderTest {
 	public void injectDaoConfigAndDaoRegistry() {
 		myDaoConfig = new DaoConfig();
 		myProvider.setDaoConfig(myDaoConfig);
-		myDaoRegistry = new DaoRegistry();
-		myProvider.setDaoRegistry(myDaoRegistry);
 	}
 
 	public void startWithFixedBaseUrl() {
@@ -713,6 +713,9 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testInitiateSystem_noTypeParam_addsTypeBeforeBulkExport_UseGet() throws IOException {
+		when(myDaoRegistry.getSupportedResourceTypes()).thenReturn(Sets.newHashSet("Patient", "Observation", "Binary"));
+
+
 		// when
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
