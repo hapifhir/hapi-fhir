@@ -69,14 +69,14 @@ public class MemberMatcherR4Helper {
 	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
 	private static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
-	private FhirContext myFhirContext;
-	private IFhirResourceDao<Coverage> myCoverageDao;
-	private IFhirResourceDao<Patient> myPatientDao;
-	private IFhirResourceDao<Consent> myConsentDao;
+	private final FhirContext myFhirContext;
+	private final IFhirResourceDao<Coverage> myCoverageDao;
+	private final IFhirResourceDao<Patient> myPatientDao;
+	private final IFhirResourceDao<Consent> myConsentDao;
 	// by default, not provided
 	// but if it is, extensions can be added to Consent on $member-match
 	@Nullable
-	private IConsentExtensionProvider myIConsentExtensionProvider;
+	private final IConsentExtensionProvider myIConsentExtensionProvider;
 
 	private boolean myRegularFilterSupported = false;
 
