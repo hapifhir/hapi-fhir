@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.hash.HashingInputStream;
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hibernate.LobHelper;
@@ -92,9 +93,9 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		entity.setBlob(dataBlob);
 
 		// Update the entity with the final byte count and hash
-		long bytes = countingInputStream.getCount();
+		long bytes = countingInputStream.getByteCount();
 		String hash = hashingInputStream.hash().toString();
-		entity.setSize((int) bytes);
+		entity.setSize(bytes);
 		entity.setHash(hash);
 
 		// Save the entity
@@ -161,9 +162,8 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
-		int size = theEntity.getSize();
 		try {
-			return IOUtils.toByteArray(theEntity.getBlob().getBinaryStream(), size);
+			return ByteStreams.toByteArray(theEntity.getBlob().getBinaryStream());
 		} catch (SQLException e) {
 			throw new IOException(Msg.code(1342) + e);
 		}

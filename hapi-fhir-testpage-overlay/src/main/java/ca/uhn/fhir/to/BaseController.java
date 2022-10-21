@@ -4,10 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.Conformance;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -16,20 +13,18 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.to.model.HomeRequest;
 import ca.uhn.fhir.util.ExtensionConstants;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicHeader;
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestComponent;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
-import org.hl7.fhir.dstu3.model.DecimalType;
-import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.ModelMap;
 import org.thymeleaf.ITemplateEngine;
@@ -51,7 +46,8 @@ public class BaseController {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseController.class);
 	@Autowired
 	protected TesterConfig myConfig;
-	private final Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<FhirVersionEnum, FhirContext>();
+	private final Map<FhirVersionEnum, FhirContext> myContexts = new HashMap<>();
+	private final Map<FhirVersionEnum, VersionCanonicalizer> myCanonicalizers = new HashMap<>();
 	private List<String> myFilterHeaders;
 	@Autowired
 	private ITemplateEngine myTemplateEngine;
@@ -60,7 +56,7 @@ public class BaseController {
 		super();
 	}
 
-	protected IBaseResource addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	protected CapabilityStatement addCommonParams(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		final String serverId = theRequest.getServerIdWithDefault(myConfig);
 		final String serverBase = theRequest.getServerBase(theServletRequest, myConfig);
 		final String serverName = theRequest.getServerName(myConfig);
@@ -262,6 +258,16 @@ public class BaseController {
 		return retVal;
 	}
 
+	protected VersionCanonicalizer getVersionCanonicalizer(HomeRequest theRequest) {
+		FhirVersionEnum version = theRequest.getFhirVersion(myConfig);
+		VersionCanonicalizer retVal = myCanonicalizers.get(version);
+		if (retVal == null) {
+			retVal = new VersionCanonicalizer(version);
+			myCanonicalizers.put(version, retVal);
+		}
+		return retVal;
+	}
+
 	protected RuntimeResourceDefinition getResourceType(HomeRequest theRequest, HttpServletRequest theReq) throws ServletException {
 		String resourceName = sanitizeUrlPart(defaultString(theReq.getParameter(PARAM_RESOURCE)));
 		RuntimeResourceDefinition def = getContext(theRequest).getResourceDefinition(resourceName);
@@ -283,218 +289,28 @@ public class BaseController {
 		return returnsResource;
 	}
 
-	private IBaseResource loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		switch (theRequest.getFhirVersion(myConfig)) {
-			case DSTU2:
-				return loadAndAddConfDstu2(theServletRequest, theRequest, theModel);
-			case DSTU3:
-				return loadAndAddConfDstu3(theServletRequest, theRequest, theModel);
-			case R4:
-				return loadAndAddConfR4(theServletRequest, theRequest, theModel);
-			case R5:
-				return loadAndAddConfR5(theServletRequest, theRequest, theModel);
-			case DSTU2_1:
-			case DSTU2_HL7ORG:
-				break;
-		}
-		throw new IllegalStateException(Msg.code(193) + "Unknown version: " + theRequest.getFhirVersion(myConfig));
-	}
-
-	private IResource loadAndAddConfDstu2(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
+	private CapabilityStatement loadAndAddConf(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
 		CaptureInterceptor interceptor = new CaptureInterceptor();
 		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
 
-		ca.uhn.fhir.model.dstu2.resource.Conformance conformance;
+		IBaseResource fetchedCapabilityStatement;
+		FhirContext ctx = getContext(theRequest);
+		String name = "CapabilityStatement";
+		if (ctx.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			name = "Conformance";
+		}
 		try {
-			conformance = client.fetchConformance().ofType(Conformance.class).execute();
-		} catch (Exception e) {
-			ourLog.warn("Failed to load conformance statement, error was: {}", e.toString());
-			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + e.toString(), e));
-			conformance = new ca.uhn.fhir.model.dstu2.resource.Conformance();
-		}
-
-		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(conformance));
-
-		Map<String, Number> resourceCounts = new HashMap<>();
-		long total = 0;
-		for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
-			for (ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource nextResource : nextRest.getResource()) {
-				List<ExtensionDt> exts = nextResource.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-				if (exts != null && exts.size() > 0) {
-					Number nextCount = ((DecimalDt) (exts.get(0).getValue())).getValueAsNumber();
-					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
-					total += nextCount.longValue();
-				}
-			}
-		}
-		theModel.put("resourceCounts", resourceCounts);
-
-		if (total > 0) {
-			for (ca.uhn.fhir.model.dstu2.resource.Conformance.Rest nextRest : conformance.getRest()) {
-				Collections.sort(nextRest.getResource(), new Comparator<ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource>() {
-					@Override
-					public int compare(ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO1, ca.uhn.fhir.model.dstu2.resource.Conformance.RestResource theO2) {
-						DecimalDt count1 = new DecimalDt();
-						List<ExtensionDt> count1exts = theO1.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count1exts != null && count1exts.size() > 0) {
-							count1 = (DecimalDt) count1exts.get(0).getValue();
-						}
-						DecimalDt count2 = new DecimalDt();
-						List<ExtensionDt> count2exts = theO2.getUndeclaredExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count2exts != null && count2exts.size() > 0) {
-							count2 = (DecimalDt) count2exts.get(0).getValue();
-						}
-						int retVal = count2.compareTo(count1);
-						if (retVal == 0) {
-							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
-						}
-						return retVal;
-					}
-				});
-			}
-		}
-
-		theModel.put("conf", conformance);
-		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-
-		return conformance;
-	}
-
-	private IBaseResource loadAndAddConfDstu3(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-
-		org.hl7.fhir.dstu3.model.CapabilityStatement capabilityStatement = new CapabilityStatement();
-		try {
-			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.dstu3.model.CapabilityStatement.class).execute();
+			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>) ctx.getResourceDefinition(name).getImplementingClass();
+			fetchedCapabilityStatement = client.fetchConformance().ofType(type).execute();
 		} catch (Exception ex) {
 			ourLog.warn("Failed to load conformance statement, error was: {}", ex.toString());
-			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex.toString(), ex));
+			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex, ex));
+			fetchedCapabilityStatement = ctx.getResourceDefinition(name).newInstance();
 		}
 
-		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
+		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(fetchedCapabilityStatement));
 
-		Map<String, Number> resourceCounts = new HashMap<>();
-		long total = 0;
-
-		for (CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
-			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
-				List<Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-				if (exts != null && exts.size() > 0) {
-					Number nextCount = ((DecimalType) (exts.get(0).getValue())).getValueAsNumber();
-					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
-					total += nextCount.longValue();
-				}
-			}
-		}
-
-		theModel.put("resourceCounts", resourceCounts);
-
-		if (total > 0) {
-			for (CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
-				Collections.sort(nextRest.getResource(), new Comparator<CapabilityStatementRestResourceComponent>() {
-					@Override
-					public int compare(CapabilityStatementRestResourceComponent theO1, CapabilityStatementRestResourceComponent theO2) {
-						DecimalType count1 = new DecimalType();
-						List<Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count1exts != null && count1exts.size() > 0) {
-							count1 = (DecimalType) count1exts.get(0).getValue();
-						}
-						DecimalType count2 = new DecimalType();
-						List<Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count2exts != null && count2exts.size() > 0) {
-							count2 = (DecimalType) count2exts.get(0).getValue();
-						}
-						int retVal = count2.compareTo(count1);
-						if (retVal == 0) {
-							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
-						}
-						return retVal;
-					}
-				});
-			}
-		}
-
-		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-
-		theModel.put("conf", capabilityStatement);
-		return capabilityStatement;
-	}
-
-	private IBaseResource loadAndAddConfR4(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-
-		org.hl7.fhir.r4.model.CapabilityStatement capabilityStatement = new org.hl7.fhir.r4.model.CapabilityStatement();
-		try {
-			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.r4.model.CapabilityStatement.class).execute();
-		} catch (Exception ex) {
-			ourLog.warn("Failed to load conformance statement, error was: {}", ex.toString());
-			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex.toString(), ex));
-		}
-
-		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
-
-		Map<String, Number> resourceCounts = new HashMap<>();
-		long total = 0;
-
-		for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
-			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
-				List<org.hl7.fhir.r4.model.Extension> exts = nextResource.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-				if (exts != null && exts.size() > 0) {
-					Number nextCount = ((org.hl7.fhir.r4.model.DecimalType) (exts.get(0).getValue())).getValueAsNumber();
-					resourceCounts.put(nextResource.getTypeElement().getValue(), nextCount);
-					total += nextCount.longValue();
-				}
-			}
-		}
-
-		theModel.put("resourceCounts", resourceCounts);
-
-		if (total > 0) {
-			for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
-				Collections.sort(nextRest.getResource(), new Comparator<org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent>() {
-					@Override
-					public int compare(org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent theO1, org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent theO2) {
-						org.hl7.fhir.r4.model.DecimalType count1 = new org.hl7.fhir.r4.model.DecimalType();
-						List<org.hl7.fhir.r4.model.Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count1exts != null && count1exts.size() > 0) {
-							count1 = (org.hl7.fhir.r4.model.DecimalType) count1exts.get(0).getValue();
-						}
-						org.hl7.fhir.r4.model.DecimalType count2 = new org.hl7.fhir.r4.model.DecimalType();
-						List<org.hl7.fhir.r4.model.Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count2exts != null && count2exts.size() > 0) {
-							count2 = (org.hl7.fhir.r4.model.DecimalType) count2exts.get(0).getValue();
-						}
-						int retVal = count2.compareTo(count1);
-						if (retVal == 0) {
-							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
-						}
-						return retVal;
-					}
-				});
-			}
-		}
-
-		theModel.put("requiredParamExtension", ExtensionConstants.PARAM_IS_REQUIRED);
-
-		theModel.put("conf", capabilityStatement);
-		return capabilityStatement;
-	}
-
-	private IBaseResource loadAndAddConfR5(HttpServletRequest theServletRequest, final HomeRequest theRequest, final ModelMap theModel) {
-		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
-
-		org.hl7.fhir.r5.model.CapabilityStatement capabilityStatement = new org.hl7.fhir.r5.model.CapabilityStatement();
-		try {
-			capabilityStatement = client.fetchConformance().ofType(org.hl7.fhir.r5.model.CapabilityStatement.class).execute();
-		} catch (Exception ex) {
-			ourLog.warn("Failed to load conformance statement, error was: {}", ex.toString());
-			theModel.put("errorMsg", toDisplayError("Failed to load conformance statement, error was: " + ex.toString(), ex));
-		}
-
-		theModel.put("jsonEncodedConf", getContext(theRequest).newJsonParser().encodeResourceToString(capabilityStatement));
+		org.hl7.fhir.r5.model.CapabilityStatement capabilityStatement = getVersionCanonicalizer(theRequest).capabilityStatementToCanonical(fetchedCapabilityStatement);
 
 		Map<String, Number> resourceCounts = new HashMap<>();
 		long total = 0;
@@ -514,25 +330,22 @@ public class BaseController {
 
 		if (total > 0) {
 			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : capabilityStatement.getRest()) {
-				Collections.sort(nextRest.getResource(), new Comparator<org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent>() {
-					@Override
-					public int compare(org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent theO1, org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent theO2) {
-						org.hl7.fhir.r5.model.DecimalType count1 = new org.hl7.fhir.r5.model.DecimalType();
-						List<org.hl7.fhir.r5.model.Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count1exts != null && count1exts.size() > 0) {
-							count1 = (org.hl7.fhir.r5.model.DecimalType) count1exts.get(0).getValue();
-						}
-						org.hl7.fhir.r5.model.DecimalType count2 = new org.hl7.fhir.r5.model.DecimalType();
-						List<org.hl7.fhir.r5.model.Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
-						if (count2exts != null && count2exts.size() > 0) {
-							count2 = (org.hl7.fhir.r5.model.DecimalType) count2exts.get(0).getValue();
-						}
-						int retVal = count2.compareTo(count1);
-						if (retVal == 0) {
-							retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
-						}
-						return retVal;
+				Collections.sort(nextRest.getResource(), (theO1, theO2) -> {
+					org.hl7.fhir.r5.model.DecimalType count1 = new org.hl7.fhir.r5.model.DecimalType();
+					List<org.hl7.fhir.r5.model.Extension> count1exts = theO1.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+					if (count1exts != null && count1exts.size() > 0) {
+						count1 = (org.hl7.fhir.r5.model.DecimalType) count1exts.get(0).getValue();
 					}
+					org.hl7.fhir.r5.model.DecimalType count2 = new org.hl7.fhir.r5.model.DecimalType();
+					List<org.hl7.fhir.r5.model.Extension> count2exts = theO2.getExtensionsByUrl(RESOURCE_COUNT_EXT_URL);
+					if (count2exts != null && count2exts.size() > 0) {
+						count2 = (org.hl7.fhir.r5.model.DecimalType) count2exts.get(0).getValue();
+					}
+					int retVal = count2.compareTo(count1);
+					if (retVal == 0) {
+						retVal = theO1.getTypeElement().getValue().compareTo(theO2.getTypeElement().getValue());
+					}
+					return retVal;
 				});
 			}
 		}
@@ -542,6 +355,7 @@ public class BaseController {
 		theModel.put("conf", capabilityStatement);
 		return capabilityStatement;
 	}
+
 
 	protected String logPrefix(ModelMap theModel) {
 		return "[server=" + theModel.get("serverId") + "] - ";

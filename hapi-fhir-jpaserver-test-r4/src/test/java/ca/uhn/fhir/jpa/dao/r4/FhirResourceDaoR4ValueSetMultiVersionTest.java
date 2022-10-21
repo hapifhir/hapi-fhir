@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -31,6 +32,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
 	@Autowired
 	protected ITermValueSetConceptDao myTermValueSetConceptDao;
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 
 	private DaoMethodOutcome createLocalCsAndVs(String theVersion, Set<String> theCodeSystemCodes) {
 		CodeSystem codeSystem = new CodeSystem();
@@ -247,7 +249,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		include.addConcept().setCode("A");
 
 		ValueSet expansion = myValueSetDao.expand(vs, null);
-		MatcherAssert.assertThat(ValueSetTestUtil.toCodes(expansion), Matchers.contains("A"));
+		MatcherAssert.assertThat(myValueSetTestUtil.toCodes(expansion), Matchers.contains("A"));
 
 	}
 

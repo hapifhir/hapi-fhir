@@ -5,6 +5,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -14,6 +15,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -51,7 +53,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	private static final String EXISTING_COVERAGE_PATIENT_IDENT_VALUE = "DHU-55678";
 
 	private Identifier ourExistingCoverageIdentifier;
-
+	private Patient myPatient;
+	private Coverage oldCoverage; // Old Coverage (must match field)
+	private Coverage newCoverage; // New Coverage (must return unchanged)
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -68,41 +72,52 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
 
-
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-	}
+		myPatient = (Patient) new Patient().setName(Lists.newArrayList(new HumanName()
+				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+			.setBirthDateElement(new DateType("2020-01-01"))
+			.setId("Patient/A123");
 
+		// Old Coverage (must match field)
+		oldCoverage = (Coverage) new Coverage()
+			.setId(EXISTING_COVERAGE_ID);
+
+		// New Coverage (must return unchanged)
+		newCoverage = (Coverage) new Coverage()
+			.setIdentifier(Lists.newArrayList(new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")))
+			.setId("AA87654");
+	}
 
 	private void createCoverageWithBeneficiary(
 		boolean theAssociateBeneficiaryPatient, boolean includeBeneficiaryIdentifier) {
 
-		Patient member = null;
+		Patient member = new Patient();
 		if (theAssociateBeneficiaryPatient) {
 			// Patient
-			member = new Patient().setName(Lists.newArrayList(new HumanName()
-					.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person").addGiven("Patricia").addGiven("Ann")));
+			member.setName(Lists.newArrayList(new HumanName()
+				.setUse(HumanName.NameUse.OFFICIAL).setFamily("Person")))
+				.setBirthDateElement(new DateType("2020-01-01"))
+				.setId("Patient/A123");
 			if (includeBeneficiaryIdentifier) {
 				member.setIdentifier(Collections.singletonList(new Identifier()
 						.setSystem(EXISTING_COVERAGE_PATIENT_IDENT_SYSTEM).setValue(EXISTING_COVERAGE_PATIENT_IDENT_VALUE)));
 			}
-
-			myClient.create().resource(member).execute().getId().toUnqualifiedVersionless().getValue();
+			member.setActive(true);
+			myClient.update().resource(member).execute();
 		}
 
 		// Coverage
 		ourExistingCoverageIdentifier = new Identifier()
 			.setSystem(EXISTING_COVERAGE_IDENT_SYSTEM).setValue(EXISTING_COVERAGE_IDENT_VALUE);
-		Coverage ourExistingCoverage = new Coverage()
+		Coverage ourExistingCoverage = (Coverage) new Coverage()
 			.setStatus(Coverage.CoverageStatus.ACTIVE)
 			.setIdentifier(Collections.singletonList(ourExistingCoverageIdentifier));
 
 		if (theAssociateBeneficiaryPatient) {
-			// this doesn't work
-			//	myOldCoverage.setBeneficiaryTarget(patient)
 			ourExistingCoverage.setBeneficiary(new Reference(member))
 				.setId(EXISTING_COVERAGE_ID);
 		}
@@ -115,20 +130,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	public void testMemberMatchByCoverageId() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 
-		// patient doesn't participate in match
-		Patient patient = new Patient().setGender(Enumerations.AdministrativeGender.FEMALE);
-
-		// Old Coverage
-		Coverage oldCoverage = new Coverage();
-		oldCoverage.setId(EXISTING_COVERAGE_ID);  // must match field
-
-		// New Coverage (must return unchanged)
-		Coverage newCoverage = new Coverage();
-		newCoverage.setId("AA87654");
-		newCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
-
-		Parameters inputParameters = buildInputParameters(patient, oldCoverage, newCoverage);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
 		Parameters parametersResponse = performOperation(ourServerBase + ourQuery,
 			EncodingEnum.JSON, inputParameters);
 
@@ -141,47 +143,39 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	public void testCoverageNoBeneficiaryReturns422() throws Exception {
 		createCoverageWithBeneficiary(false, false);
 
-		// patient doesn't participate in match
-		Patient patient = new Patient().setGender(Enumerations.AdministrativeGender.FEMALE);
-
-		// Old Coverage
-		Coverage oldCoverage = new Coverage();
-		oldCoverage.setId(EXISTING_COVERAGE_ID);  // must match field
-
-		// New Coverage (must return unchanged)
-		Coverage newCoverage = new Coverage();
-		newCoverage.setId("AA87654");
-		newCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
-
-		Parameters inputParameters = buildInputParameters(patient, oldCoverage, newCoverage);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
 		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
 			"Could not find beneficiary for coverage.");
 	}
-
 
 	@Test
 	public void testCoverageBeneficiaryNoIdentifierReturns422() throws Exception {
 		createCoverageWithBeneficiary(true, false);
 
-		// patient doesn't participate in match
-		Patient patient = new Patient().setGender(Enumerations.AdministrativeGender.FEMALE);
-
-		// Old Coverage
-		Coverage oldCoverage = new Coverage();
-		oldCoverage.setId(EXISTING_COVERAGE_ID);  // must match field
-
-		// New Coverage (must return unchanged)
-		Coverage newCoverage = new Coverage();
-		newCoverage.setId("AA87654");
-		newCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
-
-		Parameters inputParameters = buildInputParameters(patient, oldCoverage, newCoverage);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
 		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
 			"Coverage beneficiary does not have an identifier.");
 	}
 
+	@Test
+	public void testCoverageNoMatchingPatientFamilyNameReturns422() throws Exception {
+		createCoverageWithBeneficiary(true, true);
+
+		myPatient.setName(Lists.newArrayList(new HumanName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Smith")));
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
+		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
+			"Could not find matching patient for coverage.");
+	}
+
+	@Test
+	public void testCoverageNoMatchingPatientBirthdateReturns422() throws Exception {
+		createCoverageWithBeneficiary(true, false);
+
+		myPatient.setBirthDateElement(new DateType("2000-01-01"));
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
+		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
+			"Could not find matching patient for coverage.");
+	}
 
 	@Nested
 	public class ValidateParameterErrors {
@@ -229,21 +223,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	public void testMemberMatchByCoverageIdentifier() throws Exception {
 		createCoverageWithBeneficiary(true, true);
 
-		// patient doesn't participate in match
-		Patient patient = new Patient().setGender(Enumerations.AdministrativeGender.FEMALE);
-
-		// Old Coverage
-		Coverage oldCoverage = new Coverage();
-		oldCoverage.setId("9876B1");
-		oldCoverage.setIdentifier(Lists.newArrayList(ourExistingCoverageIdentifier)); // must match field
-
-		// New Coverage (must return unchanged)
-		Coverage newCoverage = new Coverage();
-		newCoverage.setId("AA87654");
-		newCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
-
-		Parameters inputParameters = buildInputParameters(patient, oldCoverage, newCoverage);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
 		Parameters parametersResponse = performOperation(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters);
 
 		validateMemberPatient(parametersResponse);
@@ -299,27 +279,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testNoCoverageMatchFound() throws Exception {
-		// Patient doesn't participate in match
-		Patient patient = new Patient().setGender(Enumerations.AdministrativeGender.FEMALE);
-
-		// Old Coverage
-		Coverage oldCoverage = new Coverage();
-		oldCoverage.setId("9876B1");
-		oldCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://oldhealthplan.example.com").setValue("DH10001235")));
-
-		// New Coverage
-		Organization newOrg = new Organization();
-		newOrg.setId("Organization/ProviderOrg1");
-		newOrg.setName("New Health Plan");
-
-		Coverage newCoverage = new Coverage();
-		newCoverage.setId("AA87654");
-		newCoverage.getContained().add(newOrg);
-		newCoverage.setIdentifier(Lists.newArrayList(
-			new Identifier().setSystem("http://newealthplan.example.com").setValue("234567")));
-
-		Parameters inputParameters = buildInputParameters(patient, oldCoverage, newCoverage);
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage);
 		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
 			"Could not find coverage for member");
 	}
@@ -342,10 +302,12 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		post.setEntity(new ResourceEntity(this.getFhirContext(), theInputParameters));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			return theEncoding.newParser(myFhirContext).parseResource(Parameters.class,
-				IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+				responseString);
 		}
 	}
 
@@ -371,14 +333,14 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		//	 "coding": [
 		//	  	{
 		//	  		"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-		//	  		"code": "UMB",
+		//	  		"code": "MB",
 		//	  		"display": "Member Number",
 		//	  		"userSelected": false
 		//		}
 		//	 * ]
 		Coding coding = theType.getCoding().get(0);
 		assertEquals("http://terminology.hl7.org/CodeSystem/v2-0203", coding.getSystem());
-		assertEquals("UMB", coding.getCode());
+		assertEquals("MB", coding.getCode());
 		assertEquals("Member Number", coding.getDisplay());
 		assertFalse(coding.getUserSelected());
 	}

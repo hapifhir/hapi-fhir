@@ -45,6 +45,7 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collections;
@@ -56,21 +57,29 @@ import java.util.List;
  * Specifically, this class spawns an inner transaction for each {@link DeleteConflictList}.  This class is meant to handle any potential delete collisions (ex {@link ResourceGoneException} or {@link ResourceVersionConflictException}.  In the former case, we swallow the Exception in the inner transaction then continue.  In the latter case, we retry according to the RETRY_BACKOFF_PERIOD and RETRY_MAX_ATTEMPTS before giving up.
  */
 public class ThreadSafeResourceDeleterSvc {
+
+	private static final String REQ_DET_KEY_IN_NEW_TRANSACTION = ThreadSafeResourceDeleterSvc.class.getName() + "REQ_DET_KEY_IN_NEW_TRANSACTION";
+
 	public static final long RETRY_BACKOFF_PERIOD = 100L;
 	public static final int RETRY_MAX_ATTEMPTS = 4;
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ThreadSafeResourceDeleterSvc.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
-	private final TransactionTemplate myTxTemplate;
+	private final TransactionTemplate myTxTemplateRequired;
+	private final TransactionTemplate myTxTemplateRequiresNew;
 
 	private final RetryTemplate myRetryTemplate = getRetryTemplate();
 
 	public ThreadSafeResourceDeleterSvc(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, PlatformTransactionManager thePlatformTransactionManager) {
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
-		myTxTemplate = new TransactionTemplate(thePlatformTransactionManager);
-		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+
+		myTxTemplateRequired = new TransactionTemplate(thePlatformTransactionManager);
+		myTxTemplateRequired.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+
+		myTxTemplateRequiresNew = new TransactionTemplate(thePlatformTransactionManager);
+		myTxTemplateRequiresNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 	}
 
 	/**
@@ -101,15 +110,36 @@ public class ThreadSafeResourceDeleterSvc {
 
 		// We will retry deletes on any occurrence of ResourceVersionConflictException up to RETRY_MAX_ATTEMPTS
 		return myRetryTemplate.execute(retryContext -> {
+
+			String previousNewTransactionValue = null;
+			if (theRequest != null) {
+				previousNewTransactionValue = (String) theRequest.getUserData().get(REQ_DET_KEY_IN_NEW_TRANSACTION);
+			}
+
 			try {
 				if (retryContext.getRetryCount() > 0) {
 					ourLog.info("Retrying delete of {} - Attempt #{}", nextSourceId, retryContext.getRetryCount());
 				}
-				myTxTemplate.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+
+				// Avoid nesting multiple new transactions deep. This can easily cause
+				// thread pools to get exhausted.
+				if (theRequest == null || previousNewTransactionValue != null) {
+					myTxTemplateRequired.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+				} else {
+					theRequest.getUserData().put(REQ_DET_KEY_IN_NEW_TRANSACTION, REQ_DET_KEY_IN_NEW_TRANSACTION);
+					myTxTemplateRequiresNew.execute(s -> doDelete(theRequest, theConflictList, theTransactionDetails, nextSource, dao));
+				}
+
 				return 1;
 			} catch (ResourceGoneException exception) {
 				ourLog.info("{} is already deleted.  Skipping cascade delete of this resource", nextSourceId);
+			} finally {
+				if (theRequest != null) {
+					theRequest.getUserData().put(REQ_DET_KEY_IN_NEW_TRANSACTION, previousNewTransactionValue);
+				}
+
 			}
+
 			return 0;
 		});
 	}

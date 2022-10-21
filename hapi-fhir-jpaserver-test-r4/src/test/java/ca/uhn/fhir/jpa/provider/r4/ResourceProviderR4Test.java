@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -70,6 +71,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.jena.rdf.model.ModelCon;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -245,6 +247,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 		myDaoConfig.setAdvancedHSearchIndexing(new DaoConfig().isAdvancedHSearchIndexing());
+
+		myModelConfig.setIndexOnContainedResources(new ModelConfig().isIndexOnContainedResources());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(QueryParameterUtils.DEFAULT_SYNC_SIZE);
@@ -3134,6 +3138,84 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(resp, containsString("Invalid _has parameter syntax: _has"));
 		}
 
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHasParameterOnChain(boolean theWithIndexOnContainedResources) throws Exception {
+		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+
+		IIdType pid0;
+		IIdType pid1;
+		IIdType groupId;
+		IIdType obsId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Group group = new Group();
+			group.addMember().setEntity(new Reference(pid0.getValue()));
+			group.addMember().setEntity(new Reference(pid1.getValue()));
+			groupId = myGroupDao.create(group, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.getCode().addCoding().setSystem("urn:system").setCode("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String uri;
+		List<String> ids;
+
+		logAllTokenIndexes();
+
+		uri = ourServerBase + "/Observation?code=urn:system%7CFOO&subject._has:Group:member:_id=" + groupId.getValue();
+		myCaptureQueriesListener.clear();
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		myCaptureQueriesListener.logAllQueries();
+		assertThat(ids, contains(obsId.getValue()));
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHasParameterWithIdTarget(boolean theWithIndexOnContainedResources) throws Exception {
+		myModelConfig.setIndexOnContainedResources(theWithIndexOnContainedResources);
+
+		IIdType pid0;
+		IIdType obsId;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String uri;
+		List<String> ids;
+
+		logAllResourceLinks();
+
+		uri = ourServerBase + "/Patient?_has:Observation:subject:_id=" + obsId.getValue();
+		myCaptureQueriesListener.clear();
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		myCaptureQueriesListener.logAllQueries();
+		assertThat(ids, contains(pid0.getValue()));
 	}
 
 	@Test

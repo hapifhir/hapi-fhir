@@ -56,6 +56,8 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 			myCtx = FhirContext.forDstu3();
 		} else if ("R4".equals(fhirVersion)) {
 			myCtx = FhirContext.forR4();
+		} else if ("R4B".equals(fhirVersion)) {
+			myCtx = FhirContext.forR4B();
 		} else if ("R5".equals(fhirVersion)) {
 			myCtx = FhirContext.forR5();
 		} else {
@@ -141,11 +143,13 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		FhirContext ctxDstu2_1;
 		FhirContext ctxDstu3;
 		FhirContext ctxR4;
+		FhirContext ctxR4B;
 		FhirContext ctxR5;
 		ctxDstu2 = FhirContext.forDstu2();
 //		ctxDstu2_1 = FhirContext.forDstu2_1();
 		ctxDstu3 = FhirContext.forDstu3();
 		ctxR4 = FhirContext.forR4();
+		ctxR4B = FhirContext.forR4B();
 		ctxR5 = FhirContext.forR5();
 
 		LoggerContext loggerContext = ((ch.qos.logback.classic.Logger) ourLog).getLoggerContext();
@@ -238,6 +242,42 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 //		fileCount += m.getFileCount();
 
 		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxR4B;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4b/src/main/resources/org/hl7/fhir/r4b/model/profile");
+		m.fhirVersion = "R4B";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxR4B;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4b/src/main/resources/org/hl7/fhir/r4b/model/valueset");
+		m.fhirVersion = "R4B";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxR4B;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4b/src/main/resources/org/hl7/fhir/r4b/model/extension");
+		m.fhirVersion = "R4B";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+		m = new ResourceMinimizerMojo();
+		m.myCtx = ctxR4B;
+		m.targetDirectory = new File("./hapi-fhir-validation-resources-r4b/src/main/resources/org/hl7/fhir/r4b/model/sp");
+		m.fhirVersion = "R4B";
+		m.execute();
+		byteCount += m.getByteCount();
+		fileCount += m.getFileCount();
+
+
+
+
+
+		m = new ResourceMinimizerMojo();
 		m.myCtx = ctxR5;
 		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/profile");
 		m.fhirVersion = "R5";
@@ -269,13 +309,13 @@ public class ResourceMinimizerMojo extends AbstractMojo {
 		byteCount += m.getByteCount();
 		fileCount += m.getFileCount();
 
-		m = new ResourceMinimizerMojo();
-		m.myCtx = ctxR5;
-		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/compartment");
-		m.fhirVersion = "R5";
+//		m = new ResourceMinimizerMojo();
+//		m.myCtx = ctxR5;
+//		m.targetDirectory = new File("./hapi-fhir-validation-resources-r5/src/main/resources/org/hl7/fhir/r5/model/compartment");
+//		m.fhirVersion = "R5";
 //		m.execute();
-		byteCount += m.getByteCount();
-		fileCount += m.getFileCount();
+//		byteCount += m.getByteCount();
+//		fileCount += m.getFileCount();
 
 		ourLog.info("Trimmed {} files", fileCount);
 		ourLog.info("Trimmed {} bytes", FileUtils.byteCountToDisplaySize(byteCount));

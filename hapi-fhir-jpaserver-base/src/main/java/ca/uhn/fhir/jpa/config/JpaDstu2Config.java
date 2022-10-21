@@ -4,9 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.TransactionProcessorVersionAdapterDstu2;
-import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -59,15 +58,11 @@ public class JpaDstu2Config {
 	}
 
 	@Bean(name = "mySystemProviderDstu2")
-	public ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 systemProviderDstu2(FhirContext theFhirContext) {
-		ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2 retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2();
+	public JpaSystemProvider<Bundle, MetaDt> systemProviderDstu2(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, MetaDt> retVal = new ca.uhn.fhir.jpa.provider.JpaSystemProvider<>();
 		retVal.setDao(systemDaoDstu2());
 		retVal.setContext(theFhirContext);
 		return retVal;
 	}
 
-	@Bean
-	public ITermReadSvc terminologyService() {
-		return new TermReadSvcDstu2();
-	}
 }

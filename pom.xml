@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>6.2.0-PRE15-SNAPSHOT</version>
+	<version>6.2.0-PRE17-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -2014,7 +2014,7 @@
                             <groupId>ca.uhn.hapi.fhir</groupId>
                             <artifactId>hapi-fhir-checkstyle</artifactId>
 									<!-- Remember to bump this when you upgrade the version -->
-                            <version>6.2.0-PRE15-SNAPSHOT</version>
+                            <version>6.2.0-PRE17-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
 				</plugin>
@@ -2190,12 +2190,13 @@
 				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
-					<version>0.8.7</version>
+					<version>0.8.8</version>
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
 							<exclude>ca/uhn/fhir/jpa/rp/r5/*.class</exclude>
 							<exclude>ca/uhn/fhir/jpa/rp/r4/*.class</exclude>
+							<exclude>ca/uhn/fhir/jpa/rp/r4b/*.class</exclude>
 							<exclude>ca/uhn/fhir/jpa/rp/dstu3/*.class</exclude>
 							<exclude>ca/uhn/fhir/jpa/rp/dstu2/*.class</exclude>
 						</excludes>
@@ -2750,6 +2751,7 @@
 				<module>hapi-fhir-jpaserver-test-dstu2</module>
 				<module>hapi-fhir-jpaserver-test-dstu3</module>
 				<module>hapi-fhir-jpaserver-test-r4</module>
+				<module>hapi-fhir-jpaserver-test-r4b</module>
 				<module>hapi-fhir-jpaserver-test-r5</module>
 				<module>hapi-fhir-jpaserver-elastic-test-utilities</module>
 				<module>hapi-tinder-plugin</module>
@@ -2769,6 +2771,7 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-structures-r4b</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-jpa</module>
