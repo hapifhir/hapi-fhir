@@ -76,7 +76,7 @@ class TimeoutManagerTest {
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
 		assertEquals(Level.WARN, event.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 2.0 days", event.getFormattedMessage());
+		assertEquals(TEST_SERVICE_NAME + " has run for 2.0 days", event.getFormattedMessage().replace("2,0", "2.0"));
 	}
 
 	@Test

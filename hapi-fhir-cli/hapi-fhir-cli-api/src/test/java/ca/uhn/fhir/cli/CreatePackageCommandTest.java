@@ -15,6 +15,8 @@ import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@DisabledOnOs(OS.WINDOWS) //fails on Windows in @AfterEach stop method with C:\Users\xxx\AppData\Local\Temp\1666355399961-0\foo2.json: The process cannot access the file because it is being used by another process
 public class CreatePackageCommandTest extends BaseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommandTest.class);

@@ -47,6 +47,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -933,6 +935,7 @@ public class NpmR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	@DisabledOnOs(OS.WINDOWS) //fails on Windows with "ca.uhn.fhir.rest.server.exceptions.InternalErrorException: HAPI-2031: Error loading "file:C:\dev\hapi-fhir\hapi-fhir-jpaserver-test-r4/src/test/resources/packages/de.basisprofil.r4-1.2.0.tgz": Illegal character in opaque part at index 7"
 	public void testInstallR4PackageFromFile() {
 
 		Path currentRelativePath = Paths.get("");
