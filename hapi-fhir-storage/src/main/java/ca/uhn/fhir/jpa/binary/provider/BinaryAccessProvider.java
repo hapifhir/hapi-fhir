@@ -43,7 +43,6 @@ import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -63,8 +62,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
 import java.util.Optional;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
