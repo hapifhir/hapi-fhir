@@ -38,7 +38,9 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -185,11 +187,18 @@ public class MemoryCacheService {
 			for (Object nextKey : theKeys) {
 				keys.add(new DecoratedCacheKey(nextKey, decoration));
 			}
-			return theCache
+
+			Set<Map.Entry<Object, Object>> cacheEntries = theCache
 				.getAllPresent(keys)
-				.entrySet()
-				.stream()
-				.collect(Collectors.toMap(t -> ((DecoratedCacheKey) t.getKey()).myKey, t -> t.getValue()));
+				.entrySet();
+			HashMap<Object, Object> retVal = new HashMap<>(keys.size());
+			for (Map.Entry<Object, Object> nextEntry : cacheEntries) {
+				DecoratedCacheKey nextKey = (DecoratedCacheKey) nextEntry.getKey();
+				retVal.put(nextKey.myKey, nextEntry.getValue());
+			}
+
+			return retVal;
+
 		} else {
 			return theCache.getAllPresent(theKeys);
 		}
