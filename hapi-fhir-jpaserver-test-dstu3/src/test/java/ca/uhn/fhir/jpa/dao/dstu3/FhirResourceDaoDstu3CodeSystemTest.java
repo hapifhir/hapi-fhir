@@ -103,17 +103,4 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testValidateCodeForCodeSystemOperationNotSupported() {
-		try {
-			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			assertNotNull(theE);
-		}
-
-	}
-
-
-
 }

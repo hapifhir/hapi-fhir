@@ -24,6 +24,8 @@ stages:
                      module: hapi-fhir-jpaserver-test-dstu3
                   -  name: hapi_fhir_jpaserver_test_r4
                      module: hapi-fhir-jpaserver-test-r4
+                  -  name: hapi_fhir_jpaserver_test_r4b
+                     module: hapi-fhir-jpaserver-test-r4b
                   -  name: hapi_fhir_jpaserver_test_r5
                      module: hapi-fhir-jpaserver-test-r5
                   -  name: hapi_fhir_jpaserver_test_utilities

@@ -20,7 +20,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -86,7 +86,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -244,13 +244,13 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		// need to be more than elastic [index.max_result_window] index level setting (default = 10_000)
 		addTermConcepts(codeSystemVersion, 11_000);
 
-		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts( codeSystemVersion.getCodeSystemVersionId() );
+		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until( myTerminologyDeferredStorageSvc::isStorageQueueEmpty );
+		await().atMost(10, SECONDS).until(myTerminologyDeferredStorageSvc::isStorageQueueEmpty);
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -259,7 +259,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(1, page.getContent().size());
 	}
-
 
 
 	private ValueSet getValueSetWithAllCodeSystemConcepts(String theCodeSystemVersionId) {
@@ -319,8 +318,8 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		valueSet.setDescription("A value set that includes all LOINC codes");
 		valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		assertDoesNotThrow( () -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-				new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList() ));
+		assertDoesNotThrow(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
+			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList()));
 
 	}
 

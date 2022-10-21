@@ -697,6 +697,12 @@ public class RestfulServerUtils {
 	}
 
 	private static FhirContext getContextForVersion(FhirContext theContext, FhirVersionEnum theForVersion) {
+
+		// TODO: remove once we've bumped the core lib version
+		if (theContext.getVersion().getVersion() == FhirVersionEnum.R4B && theForVersion == FhirVersionEnum.R5) {
+			return theContext;
+		}
+
 		FhirContext context = theContext;
 		if (context.getVersion().getVersion() != theForVersion) {
 			context = myFhirContextMap.get(theForVersion);
