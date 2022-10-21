@@ -20,15 +20,15 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -52,14 +52,14 @@ import java.util.List;
 @Component
 public class JpaTerminologyProvider implements TerminologyProvider {
 
-	private final ITermReadSvcDstu3 myTerminologySvc;
+	private final ITermReadSvc myTerminologySvc;
 	private final DaoRegistry myDaoRegistry;
 	private final IValidationSupport myValidationSupport;
 
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 
 	@Autowired
-	public JpaTerminologyProvider(ITermReadSvcDstu3 theTerminologySvc, DaoRegistry theDaoRegistry, IValidationSupport theValidationSupport) {
+	public JpaTerminologyProvider(ITermReadSvc theTerminologySvc, DaoRegistry theDaoRegistry, IValidationSupport theValidationSupport) {
 		myTerminologySvc = theTerminologySvc;
 		myDaoRegistry = theDaoRegistry;
 		myValidationSupport = theValidationSupport;

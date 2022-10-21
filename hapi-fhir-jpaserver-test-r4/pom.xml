@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.2.0-PRE16-SNAPSHOT</version>
+		<version>6.2.0-PRE17-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -31,6 +31,7 @@
 				<configuration>
 					<!--<useManifestOnlyJar>false</useManifestOnlyJar>-->
 					<forkCount>1</forkCount>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 					<reuseForks>false</reuseForks>
 					<runOrder>alphabetical</runOrder>
 					<includes>

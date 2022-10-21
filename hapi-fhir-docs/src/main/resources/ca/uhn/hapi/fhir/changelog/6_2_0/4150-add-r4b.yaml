@@ -1,0 +1,4 @@
+---
+issue: 4150
+type: add
+title: "Support has been added for FHIR R4B (4.3.0). See the [R4B Documentation](/hapi-fhir/docs/getting_started/r4b.html) for more information on what this means."

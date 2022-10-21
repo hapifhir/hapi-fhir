@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2JobRunner;
@@ -44,6 +46,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -56,12 +60,16 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
 	@Autowired
 	private IBatch2JobRunner myJobRunner;
+
+	@Autowired
+	private IJobPersistence myJobPersistence;
 
 	@Nested
 	public class SpecConformanceTests {
@@ -169,6 +177,40 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 					assertThat(binary.getIdElement().getValue(), is(equalTo(patientBinaryId)));
 				}
 			}
+		}
+
+		@Test
+		public void testResourceCountIsCorrect() {
+			int patientCount = 5;
+			for (int i = 0; i < patientCount; i++) {
+				Patient patient = new Patient();
+				patient.setId("pat-" + i);
+				myPatientDao.update(patient);
+			}
+
+			BulkDataExportOptions options = new BulkDataExportOptions();
+			options.setResourceTypes(Collections.singleton("Patient"));
+			options.setFilters(Collections.emptySet());
+			options.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+			Batch2JobStartResponse startResponse = myJobRunner.startNewJob(BulkExportUtils.createBulkExportJobParametersFromExportOptions(options));
+
+			assertNotNull(startResponse);
+
+			final String jobId = startResponse.getJobId();
+
+			// Run a scheduled pass to build the export
+			myBatch2JobHelper.awaitJobCompletion(startResponse.getJobId());
+
+			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
+
+			assertNotNull(optJobInstance);
+			assertTrue(optJobInstance.isPresent());
+
+			final JobInstance jobInstance = optJobInstance.get();
+
+			assertEquals(patientCount, jobInstance.getCombinedRecordsProcessed());
 		}
 
 		private void logContentTypeAndResponse(Header[] headers, String response) {
@@ -705,11 +747,11 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.GROUP, theResourceTypes, theFilters, theGroupId);
 	}
 
-	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(HashSet<String> theResourceTypes, HashSet<String> theFilters) {
+	BulkExportJobResults startSystemBulkExportJobAndAwaitCompletion(Set<String> theResourceTypes, Set<String> theFilters) {
 		return startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle.SYSTEM, theResourceTypes, theFilters, null);
 	}
 
-	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, HashSet<String> theResourceTypes, HashSet<String> theFilters, String theGroupOrPatientId) {
+	BulkExportJobResults startBulkExportJobAndAwaitCompletion(BulkDataExportOptions.ExportStyle theExportStyle, Set<String> theResourceTypes, Set<String> theFilters, String theGroupOrPatientId) {
 		BulkDataExportOptions options = new BulkDataExportOptions();
 		options.setResourceTypes(theResourceTypes);
 		options.setFilters(theFilters);

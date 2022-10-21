@@ -56,8 +56,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
+import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -77,11 +77,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ITermReadSvcTest {
 
-	private final ITermReadSvc testedClass = new TermReadSvcR4();
+	private final ITermReadSvc testedClass = new TermReadSvcImpl();
 
-	@Mock private ITermValueSetDao myTermValueSetDao;
-	@Mock private DaoRegistry myDaoRegistry;
-	@Mock private IFhirResourceDao<CodeSystem> myFhirResourceDao;
+	@Mock
+	private ITermValueSetDao myTermValueSetDao;
+	@Mock
+	private DaoRegistry myDaoRegistry;
+	@Mock
+	private IFhirResourceDao<CodeSystem> myFhirResourceDao;
 
 
 	@Nested
@@ -200,9 +203,12 @@ class ITermReadSvcTest {
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private EntityManager myEntityManager;
 
-		@Mock private ResourceTable resource1;
-		@Mock private ResourceTable resource2;
-		@Mock private IBaseResource myCodeSystemResource;
+		@Mock
+		private ResourceTable resource1;
+		@Mock
+		private ResourceTable resource2;
+		@Mock
+		private IBaseResource myCodeSystemResource;
 
 
 		@BeforeEach
@@ -260,9 +266,12 @@ class ITermReadSvcTest {
 		public static final String CODE_4 = "code-4";
 		public static final String CODE_5 = "code-5";
 
-		@Mock TermConcept termConceptCode1;
-		@Mock TermConcept termConceptCode3;
-		@Mock TermConcept termConceptCode4;
+		@Mock
+		TermConcept termConceptCode1;
+		@Mock
+		TermConcept termConceptCode3;
+		@Mock
+		TermConcept termConceptCode4;
 
 		@Test
 		public void morePropertiesThanValues() {
@@ -306,17 +315,22 @@ class ITermReadSvcTest {
 
 	@Nested
 	public class TestReindexTerminology {
-		@Mock private SearchSession mySearchSession;
+		@Mock
+		private SearchSession mySearchSession;
 
 		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 		private MassIndexer myMassIndexer;
 
-		@Mock private IFulltextSearchSvc myFulltextSearchSvc;
-		@Mock private ITermDeferredStorageSvc myDeferredStorageSvc;
-		@Mock private HibernatePropertiesProvider myHibernatePropertiesProvider;
+		@Mock
+		private IFulltextSearchSvc myFulltextSearchSvc;
+		@Mock
+		private ITermDeferredStorageSvc myDeferredStorageSvc;
+		@Mock
+		private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 		@InjectMocks
-		@Spy private BaseTermReadSvcImpl myTermReadSvc = (BaseTermReadSvcImpl) spy(testedClass);
+		@Spy
+		private TermReadSvcImpl myTermReadSvc = (TermReadSvcImpl) spy(testedClass);
 
 
 		@Test
@@ -334,7 +348,7 @@ class ITermReadSvcTest {
 		public class TestCalculateObjectLoadingThreadNumber {
 
 			private final BasicDataSource myBasicDataSource = new BasicDataSource();
-			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource) ;
+			private final ProxyDataSource myProxyDataSource = new ProxyDataSource(myBasicDataSource);
 
 			@BeforeEach
 			void setUp() {
@@ -373,7 +387,8 @@ class ITermReadSvcTest {
 		@Nested
 		public class TestCalculateObjectLoadingThreadNumberDefault {
 
-			@Mock private DataSource myDataSource = new BasicDataSource();
+			@Mock
+			private DataSource myDataSource = new BasicDataSource();
 
 			@BeforeEach
 			void setUp() {

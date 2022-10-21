@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
@@ -38,6 +43,7 @@ import org.hl7.fhir.r4.model.ServiceRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -65,6 +71,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ComboUniqueParamIT.class);
+
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	@AfterEach
 	public void purgeUniqueIndexes() {
@@ -661,14 +670,16 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 	}
 
-	@Tag("intermittent")
-//	@Test
-	public void testDuplicateUniqueValuesAreReIndexed() throws Exception {
+	/**
+	 * Note: This test was tagged as @Intermittent - I have removed that tag as I've
+	 * refactored the whole class to use Batch2 reindexing instead of the resource
+	 * reindexing service. It seems like the old service was the cause of intermittents
+	 * as far as i can see, but who knows...
+	 */
+	@Test
+	public void testDuplicateUniqueValuesAreReIndexed() {
 		myDaoConfig.setSchedulingDisabled(true);
 		myDaoConfig.setReindexThreadCount(1);
-
-		ResourceReindexingSvcImpl svc = SpringObjectCaster.getTargetObject(myResourceReindexingSvc, ResourceReindexingSvcImpl.class);
-		svc.initExecutor();
 
 		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
 		assertEquals(0, uniqueSearchParams.size());
@@ -703,10 +714,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		assertEquals(1, uniqueSearchParams.size());
 		assertEquals(3, uniqueSearchParams.get(0).getComponents().size());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		assertEquals(6, myResourceReindexingSvc.forceReindexingPass());
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
+		executeReindex();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
@@ -719,11 +727,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		assertEquals(1, mySearchParamRegistry.getActiveComboSearchParams("Observation").size());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing("Observation");
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
-		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
+		executeReindex();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
@@ -853,13 +857,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
-		myResourceReindexingSvc.markAllResourcesForReindexing("Coverage");
-		// The first pass as a low of EPOCH
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		// The second pass has a low of Coverage.lastUpdated
-		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
-		// The third pass has a low of (Coverage.lastUpdated + 1ms)
-		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
+		executeReindex("Coverage?");
 
 		runInTransaction(() -> {
 			List<ResourceTable> tables = myResourceTableDao.findAll();
@@ -880,6 +878,18 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		});
 
 
+	}
+
+	private void executeReindex(String... theUrls) {
+		ReindexJobParameters parameters = new ReindexJobParameters();
+		for (String url : theUrls) {
+			parameters.addUrl(url);
+		}
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+		startRequest.setParameters(parameters);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		myBatch2JobHelper.awaitJobCompletion(res);
 	}
 
 
@@ -1478,9 +1488,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt2.setActive(false);
 		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		executeReindex();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
@@ -1493,9 +1501,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			myResourceIndexedCompositeStringUniqueDao.deleteAll();
 		});
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		executeReindex();
 
 		runInTransaction(() -> {
 			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();

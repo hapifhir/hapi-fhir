@@ -137,7 +137,7 @@ public class WriteBinaryStepTest {
 		RunOutcome outcome = myFinalStep.run(input, sink);
 
 		// verify
-		assertEquals(RunOutcome.SUCCESS, outcome);
+		assertEquals(new RunOutcome(stringified.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		verify(binaryDao)

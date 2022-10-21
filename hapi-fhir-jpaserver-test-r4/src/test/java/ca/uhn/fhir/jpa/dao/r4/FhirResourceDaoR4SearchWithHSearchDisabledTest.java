@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -81,21 +82,6 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	@Qualifier("myAllergyIntoleranceDaoR4")
-	private IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-	@Autowired
-	@Qualifier("myAppointmentDaoR4")
-	private IFhirResourceDao<Appointment> myAppointmentDao;
-	@Autowired
-	@Qualifier("myAuditEventDaoR4")
-	private IFhirResourceDao<AuditEvent> myAuditEventDao;
-	@Autowired
-	@Qualifier("myBundleDaoR4")
-	private IFhirResourceDao<Bundle> myBundleDao;
-	@Autowired
-	@Qualifier("myCarePlanDaoR4")
-	private IFhirResourceDao<CarePlan> myCarePlanDao;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
@@ -105,34 +91,10 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
-	@Qualifier("myCompartmentDefinitionDaoR4")
-	private IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoR4")
-	private IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	@Qualifier("myConditionDaoR4")
-	private IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	@Qualifier("myDeviceDaoR4")
-	private IFhirResourceDao<Device> myDeviceDao;
-	@Autowired
-	@Qualifier("myDiagnosticReportDaoR4")
-	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-	@Autowired
-	@Qualifier("myEncounterDaoR4")
-	private IFhirResourceDao<Encounter> myEncounterDao;
-	// @PersistenceContext()
-	@Autowired
-	private EntityManager myEntityManager;
-	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
 	@Qualifier("myOrganizationDaoR4")
 	private IFhirResourceDao<Organization> myOrganizationDao;
-	@Autowired
-	@Qualifier("myJpaValidationSupportChain")
-	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
@@ -141,6 +103,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
 	@Autowired
 	private ITermReadSvc myTermSvc;
+	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 
 	@BeforeEach
 	@Transactional()
@@ -296,7 +259,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
-		assertThat(ValueSetTestUtil.toCodes(outcome).toString(), ValueSetTestUtil.toCodes(outcome), contains(
+		assertThat(myValueSetTestUtil.toCodes(outcome).toString(), myValueSetTestUtil.toCodes(outcome), contains(
 			"code5", "code4", "code3", "code2", "code1"
 		));
 
