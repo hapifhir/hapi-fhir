@@ -790,6 +790,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				break;
 			}
 
+			case R4B: {
+				converter = new VersionTypeConverterR4B();
+				break;
+			}
+
 			case R5: {
 				converter = IDENTITY_VERSION_TYPE_CONVERTER;
 				break;

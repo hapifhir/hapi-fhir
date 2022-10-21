@@ -432,8 +432,8 @@ public class TinderGeneratorTask extends Task {
 				}
 
 				String capitalize = WordUtils.capitalize(version);
-				if ("Dstu".equals(capitalize)) {
-					capitalize="Dstu1";
+				if ("R4b".equals(capitalize)) {
+					capitalize="R4B";
 				}
 				ctx.put("versionCapitalized", capitalize);
 

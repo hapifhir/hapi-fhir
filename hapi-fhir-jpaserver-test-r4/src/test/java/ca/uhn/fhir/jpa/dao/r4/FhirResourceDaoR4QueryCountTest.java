@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -94,7 +94,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
 
-		BaseTermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
 
 	@Override
@@ -2557,7 +2557,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	@Test
 	public void testValueSetExpand_NotPreExpanded_DontUseHibernateSearch() {
-		BaseTermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 
 		createLocalCsAndVs();
 
