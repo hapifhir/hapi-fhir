@@ -12,11 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Nonnull;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,28 +28,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
-	private static final String MIGRATION_TABLENAME = "TEST_MIGRATION_TABLE";
+	private static final String MIGRATION_TABLENAME = "TEST_MIGRATOR_TABLE";
 
 	private final BasicDataSource myDataSource = BaseMigrationTest.getDataSource();
+	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
 
 	@BeforeEach
-	void before() throws SQLException {
+	void before() {
 		HapiMigrator migrator = buildMigrator();
 		migrator.createMigrationTableIfRequired();
-		try (Connection connection = myDataSource.getConnection()) {
-			ResultSet rs = connection.createStatement().executeQuery("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME);
-			assertEquals("COUNT(*)", rs.getMetaData().getColumnName(1));
-			assertTrue(rs.next());
-			assertTrue(rs.getInt(1) > 0);
-		}
+		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
+		assertTrue(count > 0);
 	}
 
 	@AfterEach
-	void after() throws SQLException {
-		try (Connection connection = myDataSource.getConnection()) {
-			connection.createStatement().execute("DROP TABLE " + MIGRATION_TABLENAME);
-		}
-		// Ensure we closed all the connections we opened
+	void after() {
+		myJdbcTemplate.execute("DROP TABLE " + MIGRATION_TABLENAME);
 		assertEquals(0, myDataSource.getNumActive());
 	}
 
