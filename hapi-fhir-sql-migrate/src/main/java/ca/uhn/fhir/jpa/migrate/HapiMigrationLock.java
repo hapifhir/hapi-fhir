@@ -72,6 +72,9 @@ public class HapiMigrationLock implements AutoCloseable {
 
 	@Override
 	public void close() {
-		myMigrationStorageSvc.deleteLockRecord(myLockDescription);
+		boolean result = myMigrationStorageSvc.deleteLockRecord(myLockDescription);
+		if (!result) {
+			ourLog.error("Failed to delete migration lock record for description = [{}]", myLockDescription);
+		}
 	}
 }

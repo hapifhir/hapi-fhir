@@ -71,7 +71,7 @@ public class HapiMigrationDao {
 
 	/**
 	 *
-	 * @param theEntity to save
+	 * @param theEntity to save.  If the pid is null, the next available pid will be set
 	 * @return true if any database records were changed
 	 */
 	public boolean save(HapiMigrationEntity theEntity) {
@@ -144,8 +144,12 @@ public class HapiMigrationDao {
 		return myJdbcTemplate.query(allQuery, HapiMigrationEntity.rowMapper());
 	}
 
-	public void deleteLockRecord(Integer theLockPid, String theLockDescription) {
-		myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
+	/**
+	 * @return true if the record was deleted
+	 */
+	public boolean deleteLockRecord(Integer theLockPid, String theLockDescription) {
+		int recordsChanged = myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
+		return recordsChanged > 0;
 	}
 
 	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {

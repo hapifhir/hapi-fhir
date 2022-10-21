@@ -91,12 +91,16 @@ public class HapiMigrationStorageSvc {
 	}
 
 
-	public void deleteLockRecord(String theLockDescription) {
+	/**
+	 *
+	 * @param  theLockDescription value of the Description for the lock record
+	 * @return true if the record was successfully deleted
+	 */
+	public boolean deleteLockRecord(String theLockDescription) {
 		verifyNoOtherLocksPresent(theLockDescription);
 
 		// Remove the locking row
-		myHapiMigrationDao.deleteLockRecord(LOCK_PID, theLockDescription);
-
+		return myHapiMigrationDao.deleteLockRecord(LOCK_PID, theLockDescription);
 	}
 
 	void verifyNoOtherLocksPresent(String theLockDescription) {
