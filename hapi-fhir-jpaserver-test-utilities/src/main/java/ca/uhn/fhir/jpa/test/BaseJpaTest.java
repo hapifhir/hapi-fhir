@@ -535,32 +535,11 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
 
 		List<IIdType> retVal = new ArrayList<>();
-		Integer size = theProvider.size();
-		StopWatch sw = new StopWatch();
-		while (size == null) {
-			int timeout = 20000;
-			if (sw.getMillis() > timeout) {
-				String message = "Waited over " + timeout + "ms for search " + theProvider.getUuid();
-				ourLog.info(message);
-				fail(message);
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException theE) {
-				//ignore
-			}
 
-			if (theProvider instanceof PersistedJpaBundleProvider) {
-				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theProvider;
-				provider.clearCachedDataForUnitTest();
-			}
-			size = theProvider.size();
-		}
+		Integer size = theProvider.size();
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider instanceof PersistedJpaBundleProvider ?
-			theProvider.getResources(0, size) :
-			theProvider.getResources(0, Integer.MAX_VALUE);
+		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
