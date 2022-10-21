@@ -21,10 +21,44 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td><b>DSTU2.1</b></td>
         <td><b>DSTU3</b></td>
         <td><b>R4</b></td>
+        <td><b>R4B</b></td>
         <td><b>R5</b></td>
     </tr>
     </thead>
     <tbody>
+    <tr>
+        <td>HAPI FHIR 6.2.0</td>
+        <td>JDK11</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-draft">1.0.2</td>
+        <td class="versions-table-cell-release">1.4.0</td>
+        <td class="versions-table-cell-draft">3.0.2</td>
+        <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-draft">4.3.0</td>
+        <td class="versions-table-cell-release">5.0.0-ballot<span class="download-version-hash"><br/>9a044604c1</span></td>
+    </tr>
+    <tr>
+        <td>HAPI FHIR 6.1.0</td>
+        <td>JDK11</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-draft">1.0.2</td>
+        <td class="versions-table-cell-release">1.4.0</td>
+        <td class="versions-table-cell-draft">3.0.2</td>
+        <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-release">4.6.0<span class="download-version-hash"><br/>ba4c12bc30</span></td>
+    </tr>
+    <tr>
+        <td>HAPI FHIR 6.0.0</td>
+        <td>JDK11</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-draft">1.0.2</td>
+        <td class="versions-table-cell-release">1.4.0</td>
+        <td class="versions-table-cell-draft">3.0.2</td>
+        <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-release">5.0.0-snapshot1<span class="download-version-hash"><br/>0394b96b14</span></td>
+    </tr>
     <tr>
         <td>HAPI FHIR 5.7.0</td>
         <td>JDK8</td>
@@ -33,6 +67,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">5.0.0-snapshot1<span class="download-version-hash"><br/>0394b96b14</span></td>
     </tr>
     <tr>
@@ -43,6 +78,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.6.0<span class="download-version-hash"><br/>9b829d9714</span></td>
     </tr>
     <tr>
@@ -53,6 +89,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.6.0<span class="download-version-hash"><br/>9b829d9714</span></td>
     </tr>
     <tr>
@@ -63,6 +100,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.6.0<span class="download-version-hash"><br/>9b829d9714</span></td>
     </tr>
     <tr>
@@ -73,6 +111,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.5.0<span class="download-version-hash"><br/>6cd0af3b8c</span></td>
     </tr>
     <tr>
@@ -83,6 +122,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.5.0<span class="download-version-hash"><br/>6cd0af3b8c</span></td>
     </tr>
     <tr>
@@ -93,6 +133,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.4.0<span class="download-version-hash"><br/>56b0acf73f</span></td>
     </tr>
     <tr>
@@ -103,6 +144,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.4.0<span class="download-version-hash"><br/>56b0acf73f</span></td>
     </tr>
     <tr>
@@ -113,6 +155,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.2.0<span class="download-version-hash"><br/>e0f3f5cc2c</span></td>
     </tr>
     <tr>
@@ -123,6 +166,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.2</td>
         <td class="versions-table-cell-draft">4.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.1.0<span class="download-version-hash"><br/>1a7623d866</span></td>
     </tr>
     <tr>
@@ -133,6 +177,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-draft">4.0.0</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">4.1.0<span class="download-version-hash"><br/>e0e3caf9ba</span></td>
     </tr>
     <tr>
@@ -144,6 +189,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-draft">4.0.0</td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 3.7.0</td>
@@ -153,6 +199,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-draft">4.0.0</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
@@ -164,6 +211,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.6.0<span class="download-version-hash"><br/>1202b2eed0f</span></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 3.5.0</td>
@@ -173,6 +221,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.4.0<span class="download-version-hash"><br/>13732</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
@@ -184,6 +233,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.4.0<span class="download-version-hash"><br/>13732</span></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 3.3.0</td>
@@ -193,6 +243,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.2.0<span class="download-version-hash"><br/>13271</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
@@ -204,6 +255,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.2.0<span class="download-version-hash"><br/>12917</span></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 3.1.0</td>
@@ -213,6 +265,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.1.0<span class="download-version-hash"><br/>12370</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
@@ -224,6 +277,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-release">3.1.0<span class="download-version-hash"><br/>12370</span></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 2.5</td>
@@ -232,6 +286,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">1.0.2</td>
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-draft">3.0.1</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
@@ -244,6 +299,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">3.0.1</td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 2.3</td>
@@ -252,6 +308,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">1.0.2</td>
         <td class="versions-table-cell-release">1.4.0</td>
         <td class="versions-table-cell-release">1.9.0<span class="download-version-hash"><br/>11501</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
@@ -264,6 +321,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.8.0<span class="download-version-hash"><br/>10528</span></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 2.1</td>
@@ -272,6 +330,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">1.0.2</td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">1.7.0<span class="download-version-hash"><br/>10129</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
@@ -284,6 +343,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.6.0<span class="download-version-hash"><br/>9663</span></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 1.6</td>
@@ -292,6 +352,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-draft">1.0.2</td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-release">1.4.0<span class="download-version-hash"><br/>8636</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
     </tr>
@@ -304,6 +365,7 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.4.0<span class="download-version-hash"><br/>8138</span></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 1.4</td>
@@ -314,12 +376,14 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-release">1.3.0<span class="download-version-hash"><br/>7602</span></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 1.3</td>
         <td>JDK6</td>
         <td class="versions-table-cell-draft">0.0.82</td>
         <td class="versions-table-cell-draft">1.0.2</td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
@@ -334,12 +398,14 @@ Note also that after the release of the FHIR DSTU2 specification, the FHIR
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
+        <td class="versions-table-cell-empty"></td>
     </tr>
     <tr>
         <td>HAPI FHIR 1.1</td>
         <td>JDK6</td>
         <td class="versions-table-cell-draft">0.0.82</td>
         <td class="versions-table-cell-release">0.5.0<span class="download-version-hash"><br/>5843</span></td>
+        <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>
         <td class="versions-table-cell-empty"></td>

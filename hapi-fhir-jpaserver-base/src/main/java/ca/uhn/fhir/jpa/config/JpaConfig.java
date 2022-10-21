@@ -111,8 +111,10 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
@@ -125,6 +127,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
@@ -707,8 +710,8 @@ public class JpaConfig {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 	}
 
-	@Bean(name = "myMemberMatchHelper")
 	@Lazy
+	@Bean
 	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
 		return new MemberMatcherR4Helper(theFhirContext);
 	}
@@ -723,4 +726,17 @@ public class JpaConfig {
 	public ISynchronousSearchSvc synchronousSearchSvc(){
 		return new SynchronousSearchSvcImpl();
 	}
+
+
+	@Bean
+	public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
+		return new VersionCanonicalizer(theFhirContext);
+	}
+
+	@Bean
+	public ITermReadSvc terminologyService() {
+		return new TermReadSvcImpl();
+	}
+
+
 }

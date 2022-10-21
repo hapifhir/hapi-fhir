@@ -194,6 +194,8 @@ public class FhirContext {
 			myVersion = FhirVersionEnum.DSTU3.getVersionImplementation();
 		} else if (FhirVersionEnum.R4.isPresentOnClasspath()) {
 			myVersion = FhirVersionEnum.R4.getVersionImplementation();
+		} else if (FhirVersionEnum.R4B.isPresentOnClasspath()) {
+			myVersion = FhirVersionEnum.R4B.getVersionImplementation();
 		} else {
 			throw new IllegalStateException(Msg.code(1681) + getLocalizer().getMessage(FhirContext.class, "noStructures"));
 		}
@@ -239,6 +241,14 @@ public class FhirContext {
 	}
 
 	/**
+	 * @since 6.2.0
+	 */
+	public static FhirContext forDstu2Hl7OrgCached() {
+		return forCached(FhirVersionEnum.DSTU2_HL7ORG);
+	}
+
+
+	/**
 	 * @since 5.5.0
 	 */
 	public static FhirContext forDstu3Cached() {
@@ -250,6 +260,13 @@ public class FhirContext {
 	 */
 	public static FhirContext forR4Cached() {
 		return forCached(FhirVersionEnum.R4);
+	}
+
+	/**
+	 * @since 6.1.0
+	 */
+	public static FhirContext forR4BCached() {
+		return forCached(FhirVersionEnum.R4B);
 	}
 
 	/**
@@ -1181,6 +1198,15 @@ public class FhirContext {
 	}
 
 	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R4B R4B}
+	 *
+	 * @since 6.2.0
+	 */
+	public static FhirContext forR4B() {
+		return new FhirContext(FhirVersionEnum.R4B);
+	}
+
+	/**
 	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R5 R5}
 	 *
 	 * @since 4.0.0
@@ -1217,4 +1243,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

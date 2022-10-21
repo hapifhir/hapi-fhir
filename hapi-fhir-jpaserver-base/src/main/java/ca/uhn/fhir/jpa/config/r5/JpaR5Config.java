@@ -11,13 +11,12 @@ import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProviderWithIntrospection;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcR5;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.r5.model.Bundle;
@@ -73,7 +72,7 @@ public class JpaR5Config {
 	@Bean(name = JpaConfig.GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider(FhirContext theFhirContext, IGraphQLStorageServices theGraphqlStorageServices, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry, IDaoRegistry theDaoRegistry) {
-        return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
+		return new GraphQLProviderWithIntrospection(theFhirContext, theValidationSupport, theGraphqlStorageServices, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Bean(name = "mySystemDaoR5")
@@ -83,8 +82,8 @@ public class JpaR5Config {
 	}
 
 	@Bean(name = "mySystemProviderR5")
-	public ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 systemProviderR5(FhirContext theFhirContext) {
-		ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5 retVal = new ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5();
+	public JpaSystemProvider<Bundle, Meta> systemProviderR5(FhirContext theFhirContext) {
+		JpaSystemProvider<Bundle, Meta> retVal = new JpaSystemProvider<>();
 		retVal.setContext(theFhirContext);
 		retVal.setDao(systemDaoR5());
 		return retVal;
@@ -93,11 +92,6 @@ public class JpaR5Config {
 	@Bean
 	public ITermLoaderSvc terminologyLoaderService(ITermDeferredStorageSvc theDeferredStorageSvc, ITermCodeSystemStorageSvc theCodeSystemStorageSvc) {
 		return new TermLoaderSvcImpl(theDeferredStorageSvc, theCodeSystemStorageSvc);
-	}
-
-	@Bean
-	public ITermReadSvcR5 terminologyService() {
-		return new TermReadSvcR5();
 	}
 
 }

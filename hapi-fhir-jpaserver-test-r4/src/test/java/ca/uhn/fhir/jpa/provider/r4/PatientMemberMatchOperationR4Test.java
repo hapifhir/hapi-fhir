@@ -363,10 +363,12 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		post.setEntity(new ResourceEntity(this.getFhirContext(), theInputParameters));
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			return theEncoding.newParser(myFhirContext).parseResource(Parameters.class,
-				IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8));
+				responseString);
 		}
 	}
 

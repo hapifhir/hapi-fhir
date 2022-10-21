@@ -289,9 +289,14 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 			Observation obs = new Observation();
 			obs.getContained().add(p);
-			obs.getCode().setText("Observation 1");
-			obs.setValue(new StringType("Test"));
+
+			obs.getCode().addCoding().setCode("29463-7").setSystem("http://loinc.org").setDisplay("Body Weight");
+			obs.setStatus(Observation.ObservationStatus.FINAL);
+			obs.setSubject(new Reference(p.getId()));
+			obs.setValue(new Quantity(null, 67.1, "http://unitsofmeasure.org", "kg", "kg"));
 			obs.getSubject().setReference("#pat");
+
+			ourLog.info("Resource: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 

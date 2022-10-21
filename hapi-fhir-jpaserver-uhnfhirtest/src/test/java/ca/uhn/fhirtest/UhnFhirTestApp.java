@@ -31,6 +31,8 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.lucene.location.dstu3", "./target/testlucene_dstu3");
 		System.setProperty("fhir.db.location.r4", "./target/fhirtest_r4");
 		System.setProperty("fhir.lucene.location.r4", "./target/testlucene_r4");
+		System.setProperty("fhir.db.location.r4b", "./target/fhirtest_r4b");
+		System.setProperty("fhir.lucene.location.r4b", "./target/testlucene_r4b");
 		System.setProperty("fhir.db.location.r5", "./target/fhirtest_r5");
 		System.setProperty("fhir.lucene.location.r5", "./target/testlucene_r5");
 		System.setProperty("fhir.db.location.tdl2", "./target/testdb_tdl2");
@@ -41,6 +43,7 @@ public class UhnFhirTestApp {
 		System.setProperty("fhir.baseurl.dstu1", base.replace("Dstu2", "Dstu1"));
 		System.setProperty("fhir.baseurl.dstu3", base.replace("Dstu2", "Dstu3"));
 		System.setProperty("fhir.baseurl.r4", base.replace("Dstu2", "R4"));
+		System.setProperty("fhir.baseurl.r4b", base.replace("Dstu2", "R4B"));
 		System.setProperty("fhir.baseurl.r5", base.replace("Dstu2", "R5"));
 		System.setProperty("fhir.baseurl.tdl2", base.replace("baseDstu2", "testDataLibraryDstu2"));
 		System.setProperty("fhir.baseurl.tdl3", base.replace("baseDstu2", "testDataLibraryStu3"));
