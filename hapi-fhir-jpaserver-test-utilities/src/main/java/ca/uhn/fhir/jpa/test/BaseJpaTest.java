@@ -539,7 +539,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Integer size = theProvider.size();
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE);
+		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE/4);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
