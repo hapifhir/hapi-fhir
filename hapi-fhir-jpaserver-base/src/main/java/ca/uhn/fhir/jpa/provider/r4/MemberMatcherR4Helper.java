@@ -68,23 +68,41 @@ public class MemberMatcherR4Helper {
 	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
 	private static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
-	private final FhirContext myFhirContext;
+	private FhirContext myFhirContext;
 	private boolean myRegularFilterSupported = false;
 
-	@Autowired
 	private IFhirResourceDao<Coverage> myCoverageDao;
 
-	@Autowired
 	private IFhirResourceDao<Patient> myPatientDao;
 
-	@Autowired(required = false)
-	private IConsentExtensionProvider myIConsentExtensionProvider;
-
-	@Autowired
 	private IFhirResourceDao<Consent> myConsentDao;
 
+	// by default, not provided
+	// but if it is, extensions can be added to Consent on $member-match
+	private IConsentExtensionProvider myIConsentExtensionProvider;
 
-	public MemberMatcherR4Helper(FhirContext theContext) {
+	@Autowired(required = false)
+	public void setConsentExtensionProvider(IConsentExtensionProvider theExtensionProvider) {
+		myIConsentExtensionProvider = theExtensionProvider;
+	}
+
+	@Autowired
+	public void setCoverageDao(IFhirResourceDao<Coverage> theCoverageDao) {
+		myCoverageDao = theCoverageDao;
+	}
+
+	@Autowired
+	public void setConsentDao(IFhirResourceDao<Consent> theConsentDao) {
+		myConsentDao = theConsentDao;
+	}
+
+	@Autowired
+	public void setPatientDao(IFhirResourceDao<Patient> thePatientDao) {
+		myPatientDao = thePatientDao;
+	}
+
+	@Autowired
+	public void setContext(FhirContext theContext) {
 		myFhirContext = theContext;
 	}
 

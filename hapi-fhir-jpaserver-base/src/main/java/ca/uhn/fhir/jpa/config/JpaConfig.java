@@ -712,8 +712,8 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
-		return new MemberMatcherR4Helper(theFhirContext);
+	public MemberMatcherR4Helper memberMatcherR4Helper() {
+		return new MemberMatcherR4Helper();
 	}
 
 	@Lazy

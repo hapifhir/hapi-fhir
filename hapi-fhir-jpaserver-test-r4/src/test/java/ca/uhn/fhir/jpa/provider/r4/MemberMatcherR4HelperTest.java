@@ -16,16 +16,16 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -47,10 +47,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MemberMatcherR4HelperTest {
 
+	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4();
 	@Mock private IFhirResourceDao<Coverage> myCoverageDao;
 	@Mock private IFhirResourceDao<Patient> myPatientDao;
+	@Mock private IFhirResourceDao<Consent> myConsentDao;
 
+	@InjectMocks
 	private MemberMatcherR4Helper myTestedHelper;
 
 	@Mock private Coverage myCoverageToMatch;
@@ -62,15 +65,6 @@ class MemberMatcherR4HelperTest {
 		.setSystem("identifier-system").setValue("identifier-value");
 
 	@Captor ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
-
-	@BeforeEach
-	public void beforeEach() {
-		myTestedHelper = new MemberMatcherR4Helper(myFhirContext);
-
-		// @InjectMocks didn't work
-		ReflectionTestUtils.setField(myTestedHelper, "myCoverageDao", myCoverageDao);
-		ReflectionTestUtils.setField(myTestedHelper, "myPatientDao", myPatientDao);
-	}
 
 
 	@Test
