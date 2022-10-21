@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -69,17 +70,29 @@ public class MemberMatcherR4Helper {
 	private static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
 	private FhirContext myFhirContext;
-	private boolean myRegularFilterSupported = false;
-
 	private IFhirResourceDao<Coverage> myCoverageDao;
-
 	private IFhirResourceDao<Patient> myPatientDao;
-
 	private IFhirResourceDao<Consent> myConsentDao;
-
 	// by default, not provided
 	// but if it is, extensions can be added to Consent on $member-match
+	@Nullable
 	private IConsentExtensionProvider myIConsentExtensionProvider;
+
+	private boolean myRegularFilterSupported = false;
+
+	public MemberMatcherR4Helper(
+		FhirContext theContext,
+		IFhirResourceDao<Coverage> theCoverageDao,
+		IFhirResourceDao<Patient> thePatientDao,
+		IFhirResourceDao<Consent> theConsentDao,
+		IConsentExtensionProvider theExtensionProvider
+	) {
+		myFhirContext = theContext;
+		myConsentDao = theConsentDao;
+		myPatientDao = thePatientDao;
+		myCoverageDao = theCoverageDao;
+		myIConsentExtensionProvider = theExtensionProvider;
+	}
 
 	@Autowired(required = false)
 	public void setConsentExtensionProvider(IConsentExtensionProvider theExtensionProvider) {

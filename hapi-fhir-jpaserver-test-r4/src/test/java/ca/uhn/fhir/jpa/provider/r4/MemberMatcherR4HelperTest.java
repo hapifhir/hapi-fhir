@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +26,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -49,12 +52,25 @@ class MemberMatcherR4HelperTest {
 
 	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	@Mock private IFhirResourceDao<Coverage> myCoverageDao;
-	@Mock private IFhirResourceDao<Patient> myPatientDao;
-	@Mock private IFhirResourceDao<Consent> myConsentDao;
+	@Mock
+	private IFhirResourceDao<Coverage> myCoverageDao;
+	@Mock
+	private IFhirResourceDao<Patient> myPatientDao;
+	@Mock
+	private IFhirResourceDao<Consent> myConsentDao;
 
-	@InjectMocks
 	private MemberMatcherR4Helper myTestedHelper;
+
+	@BeforeEach
+	public void before() {
+		myTestedHelper = new MemberMatcherR4Helper(
+			myFhirContext,
+			myCoverageDao,
+			myPatientDao,
+			myConsentDao,
+			null // extension provider
+		);
+	}
 
 	@Mock private Coverage myCoverageToMatch;
 	@Mock private IBundleProvider myBundleProvider;
@@ -65,7 +81,6 @@ class MemberMatcherR4HelperTest {
 		.setSystem("identifier-system").setValue("identifier-value");
 
 	@Captor ArgumentCaptor<SearchParameterMap> mySearchParameterMapCaptor;
-
 
 	@Test
 	void findMatchingCoverageMatchByIdReturnsMatched() {
@@ -115,7 +130,7 @@ class MemberMatcherR4HelperTest {
 	void findMatchingCoverageNoMatchReturnsEmpty() {
 		when(myCoverageToMatch.getId()).thenReturn("non-matching-id");
 		when(myCoverageToMatch.getIdentifier()).thenReturn(Collections.singletonList(myMatchingIdentifier));
-		when(myCoverageDao.search(isA(SearchParameterMap.class))).thenReturn(myBundleProvider);
+		when(myCoverageDao.search(any(SearchParameterMap.class))).thenReturn(myBundleProvider);
 		when(myBundleProvider.getAllResources()).thenReturn(Collections.emptyList(), Collections.emptyList());
 
 		Optional<Coverage> result = myTestedHelper.findMatchingCoverage(myCoverageToMatch);

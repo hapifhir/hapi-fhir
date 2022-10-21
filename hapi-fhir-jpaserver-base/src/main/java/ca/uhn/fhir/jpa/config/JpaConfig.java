@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
@@ -63,6 +64,7 @@ import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
+import ca.uhn.fhir.jpa.provider.r4.IConsentExtensionProvider;
 import ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
@@ -129,6 +131,9 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,6 +198,15 @@ public class JpaConfig {
 
 	@Autowired
 	public DaoConfig myDaoConfig;
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
+	private IFhirResourceDao<Coverage> myCoverageDao;
+	@Autowired
+	private IFhirResourceDao<Patient> myPatientDao;
+	@Autowired
+	private IFhirResourceDao<Consent> myConsentDao;
+
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -712,8 +726,16 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper() {
-		return new MemberMatcherR4Helper();
+	public MemberMatcherR4Helper memberMatcherR4Helper(
+		@Autowired FhirContext theContext,
+		@Autowired IFhirResourceDao<Coverage> theCoverageDao,
+		@Autowired IFhirResourceDao<Patient> thePatientDao,
+		@Autowired IFhirResourceDao<Consent> theConsentDao,
+		@Autowired(required = false) IConsentExtensionProvider theExtensionProvider
+	) {
+		return new MemberMatcherR4Helper(
+			theContext, theCoverageDao, thePatientDao, theConsentDao, theExtensionProvider
+		);
 	}
 
 	@Lazy
