@@ -85,7 +85,7 @@ public class MemberMatcherR4Helper {
 		IFhirResourceDao<Coverage> theCoverageDao,
 		IFhirResourceDao<Patient> thePatientDao,
 		IFhirResourceDao<Consent> theConsentDao,
-		IConsentExtensionProvider theExtensionProvider
+		@Nullable IConsentExtensionProvider theExtensionProvider
 	) {
 		myFhirContext = theContext;
 		myConsentDao = theConsentDao;
