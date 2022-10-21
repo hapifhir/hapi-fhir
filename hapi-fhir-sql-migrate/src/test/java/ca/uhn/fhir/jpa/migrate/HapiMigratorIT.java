@@ -28,8 +28,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class HapiMigratorTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorTest.class);
+class HapiMigratorIT {
+	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
 	private static final String MIGRATION_TABLENAME = "TEST_MIGRATION_TABLE";
 
 	private final BasicDataSource myDataSource = BaseMigrationTest.getDataSource();
@@ -42,7 +42,7 @@ class HapiMigratorTest {
 			ResultSet rs = connection.createStatement().executeQuery("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME);
 			assertEquals("COUNT(*)", rs.getMetaData().getColumnName(1));
 			assertTrue(rs.next());
-			assertEquals(1, rs.getInt(1));
+			assertTrue(rs.getInt(1) > 0);
 		}
 	}
 

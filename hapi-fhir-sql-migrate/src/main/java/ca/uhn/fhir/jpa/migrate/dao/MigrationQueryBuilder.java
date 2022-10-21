@@ -151,6 +151,7 @@ public class MigrationQueryBuilder {
 	public String findAllQuery() {
 		return new SelectQuery()
 			.addFromTable(myTable)
+			.addCondition(BinaryCondition.notEqualTo(myInstalledRankCol, HapiMigrationEntity.CREATE_TABLE_PID))
 			.addAllColumns()
 			.validate()
 			.toString();

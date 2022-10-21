@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class HapiMigrationDaoTest extends BaseMigrationTest {
+class HapiMigrationDaoIT extends BaseMigrationTest {
 
 	@Test
 	public void findAll_empty_returnsNothing() {
