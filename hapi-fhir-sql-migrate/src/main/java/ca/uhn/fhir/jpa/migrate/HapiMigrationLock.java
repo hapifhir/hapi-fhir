@@ -63,7 +63,7 @@ public class HapiMigrationLock implements AutoCloseable {
 		} while (retryCount < MAX_RETRY_ATTEMPTS);
 
 		throw new HapiMigrationException(Msg.code(2153) + "Unable to obtain table lock - another database migration may be running.  If no " +
-			"other database migration is running, then the previous migration did not shut down properly and the" +
+			"other database migration is running, then the previous migration did not shut down properly and the " +
 			"lock record needs to be deleted manually.  The lock record is located in the " + myMigrationStorageSvc.getMigrationTablename() + " table with " +
 			"INSTALLED_RANK = " + HapiMigrationStorageSvc.LOCK_PID);
 	}
