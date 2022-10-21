@@ -713,7 +713,7 @@ public class BulkDataExportProviderTest {
 
 	@Test
 	public void testInitiateSystem_noTypeParam_addsTypeBeforeBulkExport_UseGet() throws IOException {
-		when(myDaoRegistry.getSupportedResourceTypes()).thenReturn(Sets.newHashSet("Patient", "Observation", "Binary"));
+		when(myDaoRegistry.getSupportedResourceTypes()).thenReturn(Sets.newHashSet("Patient", "Observation"));
 
 
 		// when
