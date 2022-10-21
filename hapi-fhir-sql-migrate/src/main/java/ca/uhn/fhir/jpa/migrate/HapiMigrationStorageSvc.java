@@ -32,12 +32,16 @@ import java.util.Set;
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
 	private static final String LOCK_TYPE = "hapi-fhir-lock";
-	private static final Integer LOCK_PID = -100;
+	static final Integer LOCK_PID = -100;
 
 	private final HapiMigrationDao myHapiMigrationDao;
 
 	public HapiMigrationStorageSvc(HapiMigrationDao theHapiMigrationDao) {
 		myHapiMigrationDao = theHapiMigrationDao;
+	}
+
+	public String getMigrationTablename() {
+		return myHapiMigrationDao.getMigrationTablename();
 	}
 
 	/**

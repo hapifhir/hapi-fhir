@@ -165,7 +165,7 @@ public class MigrationQueryBuilder {
 				.toString();
     }
 
-	public String findByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+	public String findByPidAndNotDescriptionQuery(Integer theLockPid, String theLockDescription) {
 		return new SelectQuery()
 			.addFromTable(myTable)
 			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))

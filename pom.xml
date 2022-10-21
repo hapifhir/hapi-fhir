@@ -1968,17 +1968,6 @@
 				<version>${flyway_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-sqlserver</artifactId>
-				<version>${flyway_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.flywaydb</groupId>
-				<artifactId>flyway-mysql</artifactId>
-				<version>${flyway_version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.springframework.batch</groupId>
 				<artifactId>spring-batch-test</artifactId>
 				<version>${spring_batch_version}</version>

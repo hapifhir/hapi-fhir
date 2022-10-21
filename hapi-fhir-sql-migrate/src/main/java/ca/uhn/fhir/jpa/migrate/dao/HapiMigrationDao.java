@@ -56,6 +56,10 @@ public class HapiMigrationDao {
 		myMigrationQueryBuilder = new MigrationQueryBuilder(theDriverType, theMigrationTablename);
 	}
 
+	public String getMigrationTablename() {
+		return myMigrationTablename;
+	}
+
 	public Set<MigrationVersion> fetchSuccessfulMigrationVersions() {
 		List<HapiMigrationEntity> allEntries = findAll();
 		return allEntries.stream()
@@ -145,7 +149,7 @@ public class HapiMigrationDao {
 	}
 
 	/**
-	 * @return true if the record was deleted
+	 * @return true if the record was successfully deleted
 	 */
 	public boolean deleteLockRecord(Integer theLockPid, String theLockDescription) {
 		int recordsChanged = myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
@@ -153,7 +157,7 @@ public class HapiMigrationDao {
 	}
 
 	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
-		String query = myMigrationQueryBuilder.findByPidAndNotDescription(theLockPid, theLockDescription);
+		String query = myMigrationQueryBuilder.findByPidAndNotDescriptionQuery(theLockPid, theLockDescription);
 
 		return myJdbcTemplate.query(query, HapiMigrationEntity.rowMapper()).stream().findFirst();
 	}

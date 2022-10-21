@@ -42,7 +42,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
-	private final String myMigrationTableName;
 	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
@@ -54,7 +53,6 @@ public class HapiMigrator {
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
 		myDataSource = theDataSource;
-		myMigrationTableName = theMigrationTableName;
 		myHapiMigrationStorageSvc = new HapiMigrationStorageSvc(new HapiMigrationDao(theDataSource, theDriverType, theMigrationTableName));
 	}
 
@@ -109,7 +107,6 @@ public class HapiMigrator {
 		try (HapiMigrationLock ignored = new HapiMigrationLock(myHapiMigrationStorageSvc)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
 			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
-
 
 			try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 

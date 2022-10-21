@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,13 +38,15 @@ public class HapiMigrationLock implements AutoCloseable {
 
 	private final HapiMigrationStorageSvc myMigrationStorageSvc;
 
-
+	/**
+	 * This constructor should only ever be called from within a try-with-resources so the lock is released when the block is exited
+	 */
 	public HapiMigrationLock(HapiMigrationStorageSvc theMigrationStorageSvc) {
 		myMigrationStorageSvc = theMigrationStorageSvc;
 		lock();
 	}
 
-	protected void lock() {
+	private void lock() {
 
 		int retryCount = 0;
 		do {
@@ -59,7 +62,10 @@ public class HapiMigrationLock implements AutoCloseable {
 			}
 		} while (retryCount < MAX_RETRY_ATTEMPTS);
 
-		throw new HapiMigrationException("Unable to obtain table lock - another Database Migration may be running");
+		throw new HapiMigrationException(Msg.code(2153) + "Unable to obtain table lock - another database migration may be running.  If no " +
+			"other database migration is running, then the previous migration did not shut down properly and the" +
+			"lock record needs to be deleted manually.  The lock record is located in the " + myMigrationStorageSvc.getMigrationTablename() + " table with " +
+			"INSTALLED_RANK = " + HapiMigrationStorageSvc.LOCK_PID);
 	}
 
 	private boolean insertLockingRow() {
