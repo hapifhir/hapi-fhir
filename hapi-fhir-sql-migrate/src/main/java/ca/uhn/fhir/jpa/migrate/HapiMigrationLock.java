@@ -37,13 +37,13 @@ public class HapiMigrationLock implements AutoCloseable {
 
 	private final HapiMigrationStorageSvc myMigrationStorageSvc;
 
+
 	public HapiMigrationLock(HapiMigrationStorageSvc theMigrationStorageSvc) {
 		myMigrationStorageSvc = theMigrationStorageSvc;
 		lock();
 	}
 
 	protected void lock() {
-		// FIXME KHS replace with retry template
 
 		int retryCount = 0;
 		do {

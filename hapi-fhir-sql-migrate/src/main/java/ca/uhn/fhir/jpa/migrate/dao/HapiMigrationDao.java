@@ -37,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -145,5 +146,11 @@ public class HapiMigrationDao {
 
 	public void deleteLockRecord(Integer theLockPid, String theLockDescription) {
 		myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
+	}
+
+	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+		String query = myMigrationQueryBuilder.findByPidAndNotDescription(theLockPid, theLockDescription);
+
+		return myJdbcTemplate.query(query, HapiMigrationEntity.rowMapper()).stream().findFirst();
 	}
 }

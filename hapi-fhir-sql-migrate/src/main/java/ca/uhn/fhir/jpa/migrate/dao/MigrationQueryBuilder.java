@@ -164,4 +164,14 @@ public class MigrationQueryBuilder {
 				.validate()
 				.toString();
     }
+
+	public String findByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+		return new SelectQuery()
+			.addFromTable(myTable)
+			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
+			.addCondition(BinaryCondition.notEqualTo(myDescriptionCol, theLockDescription))
+			.addAllColumns()
+			.validate()
+			.toString();
+	}
 }

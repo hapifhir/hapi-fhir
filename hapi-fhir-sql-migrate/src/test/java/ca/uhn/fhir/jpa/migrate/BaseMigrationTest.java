@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 
 public abstract class BaseMigrationTest {
-	private static final String TABLE_NAME = "TEST_MIGRATION_TABLE";
+	static final String TABLE_NAME = "TEST_MIGRATION_TABLE";
 	protected static HapiMigrationDao ourHapiMigrationDao;
 	protected static HapiMigrationStorageSvc ourHapiMigrationStorageSvc;
 

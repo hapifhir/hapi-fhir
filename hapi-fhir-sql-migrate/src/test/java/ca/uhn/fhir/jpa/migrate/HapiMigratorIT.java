@@ -182,9 +182,7 @@ class HapiMigratorIT {
 
 		@Override
 		public List<HookParams> awaitExpected() throws InterruptedException {
-			// FIXME KHS
-			return myLatch.awaitExpectedWithTimeout(99999);
-//			return myLatch.awaitExpected();
+			return myLatch.awaitExpected();
 		}
 
 		public void release(String theLatchInvocationParameter) {

@@ -90,7 +90,7 @@ public class HapiMigrationStorageSvc {
 		myHapiMigrationDao.createMigrationTableIfRequired();
 	}
 
-	// FIXME KHS test
+
 	public void deleteLockRecord(String theLockDescription) {
 		verifyNoOtherLocksPresent(theLockDescription);
 
@@ -99,13 +99,8 @@ public class HapiMigrationStorageSvc {
 
 	}
 
-	// FIXME KHS test
 	void verifyNoOtherLocksPresent(String theLockDescription) {
-		// FIXME KHS replace with query
-		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findAll().stream()
-			.filter(t -> t.getPid().equals(LOCK_PID))
-			.filter(t -> !t.getDescription().equals(theLockDescription))
-			.findAny();
+		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(LOCK_PID, theLockDescription);
 
 		// Check that there are no other locks in place. This should not happen!
 		if (otherLockFound.isPresent()) {
