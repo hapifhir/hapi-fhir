@@ -1635,7 +1635,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateResourceForUpdateWithIdRaw() {
+	public void testValidateRawResourceForUpdateWithId() {
 		String methodName = "testValidateForUpdate";
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
@@ -1646,7 +1646,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 	}
 	@Test
-	public void testValidateResourceForUpdateWithNoIdRaw() {
+	public void testValidateRawResourceForUpdateWithNoId() {
 		String methodName = "testValidateForUpdate";
 		Patient pat = new Patient();
 		pat.addName().setFamily(methodName);
