@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MemberMatcherR4HelperTest {
+public class MemberMatcherR4HelperTest {
 
 	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4();
@@ -475,7 +475,13 @@ class MemberMatcherR4HelperTest {
 
 		@BeforeEach
 		public void before() {
-			myHelper.setConsentExtensionProvider(myExtensionProvider);
+			myHelper = new MemberMatcherR4Helper(
+				myFhirContext,
+				myCoverageDao,
+				myPatientDao,
+				myConsentDao,
+				myExtensionProvider
+			);
 		}
 
 		@Test

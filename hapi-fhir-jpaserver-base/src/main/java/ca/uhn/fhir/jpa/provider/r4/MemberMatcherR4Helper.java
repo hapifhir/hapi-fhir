@@ -94,31 +94,6 @@ public class MemberMatcherR4Helper {
 		myIConsentExtensionProvider = theExtensionProvider;
 	}
 
-	@Autowired(required = false)
-	public void setConsentExtensionProvider(IConsentExtensionProvider theExtensionProvider) {
-		myIConsentExtensionProvider = theExtensionProvider;
-	}
-
-	@Autowired
-	public void setCoverageDao(IFhirResourceDao<Coverage> theCoverageDao) {
-		myCoverageDao = theCoverageDao;
-	}
-
-	@Autowired
-	public void setConsentDao(IFhirResourceDao<Consent> theConsentDao) {
-		myConsentDao = theConsentDao;
-	}
-
-	@Autowired
-	public void setPatientDao(IFhirResourceDao<Patient> thePatientDao) {
-		myPatientDao = thePatientDao;
-	}
-
-	@Autowired
-	public void setContext(FhirContext theContext) {
-		myFhirContext = theContext;
-	}
-
 	/**
 	 * Find Coverage matching the received member (Patient) by coverage id or by coverage identifier only
 	 */
