@@ -113,8 +113,8 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
-import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
@@ -198,15 +198,6 @@ public class JpaConfig {
 
 	@Autowired
 	public DaoConfig myDaoConfig;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private IFhirResourceDao<Coverage> myCoverageDao;
-	@Autowired
-	private IFhirResourceDao<Patient> myPatientDao;
-	@Autowired
-	private IFhirResourceDao<Consent> myConsentDao;
-
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -759,6 +750,5 @@ public class JpaConfig {
 	public ITermReadSvc terminologyService() {
 		return new TermReadSvcImpl();
 	}
-
 
 }

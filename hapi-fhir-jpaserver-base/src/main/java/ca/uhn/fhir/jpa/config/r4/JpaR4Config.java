@@ -137,5 +137,4 @@ public class JpaR4Config {
 
 	}
 
-
 }
