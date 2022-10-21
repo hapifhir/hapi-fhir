@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HapiMigrationDaoTest extends BaseMigrationTest {
 
@@ -23,16 +23,16 @@ class HapiMigrationDaoTest extends BaseMigrationTest {
 	public void findAll_2records_returnsBoth() {
 		HapiMigrationEntity record1 = buildEntity("DESC1", "1.1");
 
-		HapiMigrationEntity result1 = ourHapiMigrationDao.save(record1);
-		assertEquals(1, result1.getPid());
+		boolean result1 = ourHapiMigrationDao.save(record1);
+		assertTrue(result1);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all, hasSize(1));
 		}
 		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
 
-		HapiMigrationEntity result2 = ourHapiMigrationDao.save(record2);
-		assertEquals(2, result2.getPid());
+		boolean result2 = ourHapiMigrationDao.save(record2);
+		assertTrue(result2);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all, hasSize(2));

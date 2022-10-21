@@ -106,7 +106,7 @@ public class HapiMigrator {
 		MigrationResult retval = new MigrationResult();
 
 		// Lock the migration table so only one server migrates the database at once
-		try (HapiMigrationLock ignored = new HapiMigrationLock(myDataSource,myDriverType,myMigrationTableName)) {
+		try (HapiMigrationLock ignored = new HapiMigrationLock(myHapiMigrationStorageSvc)) {
 			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
 			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
@@ -123,6 +123,9 @@ public class HapiMigrator {
 					executeTask(next, retval);
 				});
 			}
+		} catch (Exception e) {
+			ourLog.error("Migration failed", e);
+			throw e;
 		}
 
 		ourLog.info(retval.summary());

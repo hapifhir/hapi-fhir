@@ -20,105 +20,58 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
-import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.flywaydb.core.internal.database.base.Database;
-import org.flywaydb.core.internal.database.base.Table;
-import org.flywaydb.core.internal.database.cockroachdb.CockroachDBDatabase;
-import org.flywaydb.core.internal.database.derby.DerbyDatabase;
-import org.flywaydb.core.internal.database.h2.H2Database;
-import org.flywaydb.core.internal.database.oracle.OracleDatabase;
-import org.flywaydb.core.internal.database.postgresql.PostgreSQLDatabase;
-import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
-import org.flywaydb.database.mysql.MySQLDatabase;
-import org.flywaydb.database.mysql.mariadb.MariaDBDatabase;
-import org.flywaydb.database.sqlserver.SQLServerDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.UUID;
 
+/**
+ * The approach used in this class is borrowed from org.flywaydb.community.database.ignite.thin.IgniteThinDatabase
+ */
 public class HapiMigrationLock implements AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLock.class);
-	private final DriverTypeEnum myDriverType;
-	private final Table myLockTableConnection;
-	private final String myMigrationTablename;
+	public static final int SLEEP_MILLIS_BETWEEN_LOCK_RETRIES = 1000;
+	public static final int MAX_RETRY_ATTEMPTS = 50;
 
-	/**
-	 * This should only be instantiated within a try-with-resources since it opens a connection to the database
-	 */
-	public HapiMigrationLock(DataSource theDataSource, DriverTypeEnum theDriverType, String myMigrationTablename) {
-		this.myDriverType = theDriverType;
-		this.myMigrationTablename = myMigrationTablename;
+	private final String myLockDescription = UUID.randomUUID().toString();
 
-		myLockTableConnection = openLockTableConnection(theDataSource);
+	private final HapiMigrationStorageSvc myMigrationStorageSvc;
 
-		ourLog.debug("Locking Migration Table");
-		myLockTableConnection.lock();
-		ourLog.debug("Locked Migration Table");
+	public HapiMigrationLock(HapiMigrationStorageSvc theMigrationStorageSvc) {
+		myMigrationStorageSvc = theMigrationStorageSvc;
+		lock();
+	}
+
+	protected void lock() {
+		// FIXME KHS replace with retry template
+
+		int retryCount = 0;
+		do {
+			try {
+				if (insertLockingRow()) {
+					return;
+				}
+				retryCount++;
+				ourLog.info("Waiting for lock on " + this);
+				Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
+			} catch (InterruptedException ex) {
+				// Ignore - if interrupted, we still need to wait for lock to become available
+			}
+		} while (retryCount < MAX_RETRY_ATTEMPTS);
+
+		throw new HapiMigrationException("Unable to obtain table lock - another Database Migration may be running");
+	}
+
+	private boolean insertLockingRow() {
+		try {
+			return myMigrationStorageSvc.insertLockRecord(myLockDescription);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	@Override
 	public void close() {
-		// Pretty sure this is impossible...
-		if (myLockTableConnection == null) {
-			return;
-		}
-
-		// This is a noop for all databases except CockroachDB
-		myLockTableConnection.unlock();
-
-		// Close the connection we opened in openLockTableConnection().  This is what actually releases the lock.
-		myLockTableConnection.getDatabase().close();
-		ourLog.debug("Unlocked Migration Table");
+		myMigrationStorageSvc.deleteLockRecord(myLockDescription);
 	}
-
-	private Table openLockTableConnection(DataSource theDataSource) {
-		try {
-			FluentConfiguration configuration = new FluentConfiguration().dataSource(theDataSource);
-			JdbcConnectionFactory connectionFactory = new JdbcConnectionFactory(theDataSource, configuration, null);
-			String schemaName;
-			try (Connection connection = theDataSource.getConnection()) {
-				schemaName = connection.getSchema();
-			}
-
-			Database database;
-			switch (myDriverType) {
-				case H2_EMBEDDED:
-					database = new H2Database(configuration, connectionFactory, null);
-					break;
-				case DERBY_EMBEDDED:
-					database = new DerbyDatabase(configuration, connectionFactory, null);
-					break;
-				case ORACLE_12C:
-					database = new OracleDatabase(configuration, connectionFactory, null);
-					break;
-				case POSTGRES_9_4:
-					database = new PostgreSQLDatabase(configuration, connectionFactory, null);
-					break;
-				case COCKROACHDB_21_1:
-					database = new CockroachDBDatabase(configuration, connectionFactory, null);
-					break;
-				case MARIADB_10_1:
-					database = new MariaDBDatabase(configuration, connectionFactory, null);
-					break;
-				case MYSQL_5_7:
-					database = new MySQLDatabase(configuration, connectionFactory, null);
-					break;
-				case MSSQL_2012:
-					database = new SQLServerDatabase(configuration, connectionFactory, null);
-					break;
-				default:
-					throw new UnsupportedOperationException("Driver type not supported: " + myDriverType);
-			}
-
-			// The Flyway table lock mechanism requires auto-commit to be disabled on the connection
-			database.getMainConnection().getJdbcConnection().setAutoCommit(false);
-			return database.getMainConnection().getSchema(schemaName).getTable(myMigrationTablename);
-		} catch (SQLException e) {
-			throw new RuntimeException("Failed to open connection to database migration table " + myMigrationTablename, e);
-		}
-	}
-
 }

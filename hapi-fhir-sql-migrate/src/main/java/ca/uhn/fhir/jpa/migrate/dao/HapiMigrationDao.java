@@ -68,24 +68,31 @@ public class HapiMigrationDao {
 		myJdbcTemplate.execute(myMigrationQueryBuilder.deleteAll());
 	}
 
-	public HapiMigrationEntity save(HapiMigrationEntity theEntity) {
+	/**
+	 *
+	 * @param theEntity to save
+	 * @return true if any database records were changed
+	 */
+	public boolean save(HapiMigrationEntity theEntity) {
 		Validate.notNull(theEntity.getDescription(), "Description may not be null");
 		Validate.notNull(theEntity.getExecutionTime(), "Execution time may not be null");
 		Validate.notNull(theEntity.getSuccess(), "Success may not be null");
 
-		Integer highestKey = getHighestKey();
-		if (highestKey == null || highestKey < 0) {
-			highestKey = 0;
+		if (theEntity.getPid() == null) {
+			Integer highestKey = getHighestKey();
+			if (highestKey == null || highestKey < 0) {
+				highestKey = 0;
+			}
+			Integer nextAvailableKey = highestKey + 1;
+			theEntity.setPid(nextAvailableKey);
 		}
-		Integer nextAvailableKey = highestKey + 1;
-		theEntity.setPid(nextAvailableKey);
 		theEntity.setType("JDBC");
 		theEntity.setScript("HAPI FHIR");
 		theEntity.setInstalledBy(VersionEnum.latestVersion().name());
 		theEntity.setInstalledOn(new Date());
 		String insertRecordStatement = myMigrationQueryBuilder.insertPreparedStatement();
-		int result = myJdbcTemplate.update(insertRecordStatement, theEntity.asPreparedStatementSetter());
-		return theEntity;
+		int changedRecordCount = myJdbcTemplate.update(insertRecordStatement, theEntity.asPreparedStatementSetter());
+		return changedRecordCount > 0;
 	}
 
 	private Integer getHighestKey() {
@@ -134,5 +141,9 @@ public class HapiMigrationDao {
 		String allQuery = myMigrationQueryBuilder.findAllQuery();
 		ourLog.debug("Executing query: [{}]", allQuery);
 		return myJdbcTemplate.query(allQuery, HapiMigrationEntity.rowMapper());
+	}
+
+	public void deleteLockRecord(Integer theLockPid, String theLockDescription) {
+		myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
 	}
 }

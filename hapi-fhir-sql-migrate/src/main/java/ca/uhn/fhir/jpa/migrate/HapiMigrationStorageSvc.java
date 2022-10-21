@@ -20,15 +20,20 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
+	private static final String LOCK_TYPE = "hapi-fhir-lock";
+	private static final Integer LOCK_PID = -100;
+
 	private final HapiMigrationDao myHapiMigrationDao;
 
 	public HapiMigrationStorageSvc(HapiMigrationDao theHapiMigrationDao) {
@@ -83,5 +88,39 @@ public class HapiMigrationStorageSvc {
 
 	public void createMigrationTableIfRequired() {
 		myHapiMigrationDao.createMigrationTableIfRequired();
+	}
+
+	// FIXME KHS test
+	public void deleteLockRecord(String theLockDescription) {
+		verifyNoOtherLocksPresent(theLockDescription);
+
+		// Remove the locking row
+		myHapiMigrationDao.deleteLockRecord(LOCK_PID, theLockDescription);
+
+	}
+
+	// FIXME KHS test
+	void verifyNoOtherLocksPresent(String theLockDescription) {
+		// FIXME KHS replace with query
+		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findAll().stream()
+			.filter(t -> t.getPid().equals(LOCK_PID))
+			.filter(t -> !t.getDescription().equals(theLockDescription))
+			.findAny();
+
+		// Check that there are no other locks in place. This should not happen!
+		if (otherLockFound.isPresent()) {
+			throw new HapiMigrationException(Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
+		}
+	}
+
+	public boolean insertLockRecord(String theLockDescription) {
+		HapiMigrationEntity entity = new HapiMigrationEntity();
+		entity.setPid(LOCK_PID);
+		entity.setType(LOCK_TYPE);
+		entity.setDescription(theLockDescription);
+		entity.setExecutionTime(0);
+		entity.setSuccess(true);
+
+		return myHapiMigrationDao.save(entity);
 	}
 }

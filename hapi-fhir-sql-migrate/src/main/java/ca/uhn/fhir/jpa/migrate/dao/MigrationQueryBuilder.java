@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeToDriverTypeToSqlType;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.CreateIndexQuery;
 import com.healthmarketscience.sqlbuilder.CreateTableQuery;
 import com.healthmarketscience.sqlbuilder.DeleteQuery;
@@ -154,4 +155,12 @@ public class MigrationQueryBuilder {
 			.validate()
 			.toString();
 	}
+
+    public String deleteLockRecordStatement(Integer theLockPid, String theLockDescription) {
+		 return new DeleteQuery(myTable)
+			.addCondition(BinaryCondition.equalTo(myInstalledRankCol, theLockPid))
+				.addCondition(BinaryCondition.equalTo(myDescriptionCol, theLockDescription))
+				.validate()
+				.toString();
+    }
 }
