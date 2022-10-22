@@ -20,6 +20,10 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -64,6 +68,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
 	private final MdmControllerHelper myMdmControllerHelper;
+	private final IJobCoordinator myJobCoordinator;
+	private boolean myNewStyle = true;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -78,12 +84,14 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 										 IMdmControllerSvc theMdmControllerSvc,
 										 MdmControllerHelper theMdmHelper,
 										 IMdmSubmitSvc theMdmSubmitSvc,
-										 IMdmSettings theIMdmSettings) {
+										 IMdmSettings theIMdmSettings,
+										 IJobCoordinator theJobCoordinator) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myMdmSettings = theIMdmSettings;
+		myJobCoordinator = theJobCoordinator;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
@@ -238,12 +246,22 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
-		if (resourceType != null) {
-			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
+		if (myNewStyle) {
+			MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
+			parameters.addUrl(resourceType + "?" + criteria);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(request);
+			return buildMdmOutParametersWithCount(0);
 		} else {
-			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
+			if (resourceType != null) {
+				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
+			} else {
+				submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
+			}
+			return buildMdmOutParametersWithCount(submittedCount);
 		}
-		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	private String convertStringTypeToString(IPrimitiveType<String> theCriteria) {

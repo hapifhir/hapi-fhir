@@ -59,7 +59,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() throws Exception {
-		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmHelper, myMdmSubmitSvc, myMdmSettings, myJobCoordinator);
 // FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc
 		defaultScript = myMdmSettings.getScriptText();
 	}

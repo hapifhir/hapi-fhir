@@ -20,6 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -46,6 +47,8 @@ public class MdmProviderLoader {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
+	@Autowired
+	private IJobCoordinator myJobCoordinator;
 
 	private BaseMdmProvider myMdmProvider;
 
@@ -57,7 +60,8 @@ public class MdmProviderLoader {
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
-						myMdmSettings));
+						myMdmSettings,
+						myJobCoordinator));
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
