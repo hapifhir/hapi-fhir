@@ -398,7 +398,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			return theDao.update(theResource, requestDetails);
 		} else {
-			return theDao.update(theResource);
+			return theDao.update(theResource, new SystemRequestDetails());
 		}
 	}
 
