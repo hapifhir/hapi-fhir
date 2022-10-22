@@ -393,7 +393,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
+	DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			return theDao.update(theResource, requestDetails);
