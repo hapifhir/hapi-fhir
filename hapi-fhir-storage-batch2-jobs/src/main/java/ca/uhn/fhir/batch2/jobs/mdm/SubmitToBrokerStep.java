@@ -24,7 +24,7 @@ public class SubmitToBrokerStep implements IJobStepWorker<MdmSubmitJobParameters
 	private FhirContext myFhirContext;
 
 	@Override
-	public RunOutcome run(@NotNull StepExecutionDetails<MdmSubmitJobParameters, ExpandedResourcesList> theStepExecutionDetails, @NotNull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
+	public RunOutcome run(StepExecutionDetails<MdmSubmitJobParameters, ExpandedResourcesList> theStepExecutionDetails, IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 
 		ExpandedResourcesList data = theStepExecutionDetails.getData();
 		List<String> stringifiedResources = data.getStringifiedResources();
