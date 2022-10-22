@@ -21,7 +21,7 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
+import ca.uhn.fhir.mdm.batch2.submit.models.MdmSubmitJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;

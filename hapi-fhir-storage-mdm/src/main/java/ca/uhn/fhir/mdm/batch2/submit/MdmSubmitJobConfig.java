@@ -1,21 +1,13 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.submit;
 
-import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
-import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportCreateReportStep;
 import ca.uhn.fhir.batch2.jobs.export.WriteBinaryStep;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
-import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

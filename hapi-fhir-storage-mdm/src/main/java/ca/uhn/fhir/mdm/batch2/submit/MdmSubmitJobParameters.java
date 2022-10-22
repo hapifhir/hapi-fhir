@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm.models;
+package ca.uhn.fhir.mdm.batch2.submit;
 
 /*-
  * #%L

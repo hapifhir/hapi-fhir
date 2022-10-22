@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -7,7 +7,6 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
-import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.parser.IParser;

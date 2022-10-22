@@ -1,7 +1,6 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
-import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,4 +17,4 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 		//FIXME GGG - validate the parameters. How to get MDM settings here?
 		return errorMsgs;
 	}
-}ubmi
+}

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.batch2.jobs.mdm;
+package ca.uhn.fhir.mdm.batch2.submit;
 
 /*-
  * #%L
@@ -23,7 +23,6 @@ package ca.uhn.fhir.batch2.jobs.mdm;
 import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.mdm.models.MdmSubmitJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -31,8 +30,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
