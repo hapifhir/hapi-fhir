@@ -21,7 +21,6 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.mdm.batch2.submit.models.MdmSubmitJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
@@ -55,6 +54,7 @@ import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -247,13 +247,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
 		if (myNewStyle) {
-			MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
-			parameters.addUrl(resourceType + "?" + criteria);
-			JobInstanceStartRequest request = new JobInstanceStartRequest();
-			request.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
-			request.setParameters(parameters);
-			myJobCoordinator.startInstance(request);
-			return buildMdmOutParametersWithCount(0);
+
+			String theUrl = resourceType + "?" + criteria;
+			myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl),  theRequestDetails);
 		} else {
 			if (resourceType != null) {
 				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);

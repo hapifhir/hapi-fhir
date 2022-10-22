@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -38,6 +39,8 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobConfig;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
@@ -190,6 +193,30 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		request.setParameters(params);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		String id = response.getJobId();
+
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		return retVal;
+	}
+
+
+	@Override
+	public IBaseParameters submitMdmSubmitJob(List<String> theUrls, ServletRequestDetails theRequestDetails) {
+		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
+
+		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
+		params.setRequestPartitionId(requestPartition);
+
+		theUrls.forEach(params::addUrl);
+
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setParameters(params);
+		request.setJobDefinitionId(MdmSubmitJobConfig.MDM_SUBMIT_JOB);
+
+		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(request);
+		String id = batch2JobStartResponse.getJobId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);

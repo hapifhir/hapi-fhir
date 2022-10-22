@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 @Configuration
 public class MdmSubmitJobConfig {
 
+	public static String MDM_SUBMIT_JOB= "MDM_SUBMIT";
 
 	@Bean
 	public GenerateRangeChunksStep submitGenerateRangeChunksStep() {
@@ -25,7 +26,7 @@ public class MdmSubmitJobConfig {
 	@Bean
 	public JobDefinition mdmSubmitJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
 		return JobDefinition.newBuilder()
-		.setJobDefinitionId(Batch2JobDefinitionConstants.MDM_SUBMIT)
+		.setJobDefinitionId(MDM_SUBMIT_JOB)
 		.setJobDescription("MDM Batch Submission")
 		.setJobDefinitionVersion(1)
 		.setParametersType(MdmSubmitJobParameters.class)
