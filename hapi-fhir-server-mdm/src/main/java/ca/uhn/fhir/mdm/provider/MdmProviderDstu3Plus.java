@@ -83,7 +83,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 										 IMdmControllerSvc theMdmControllerSvc,
 										 MdmControllerHelper theMdmHelper,
 										 IMdmSubmitSvc theMdmSubmitSvc,
-										 IMdmSettings theIMdmSettings,
+										 IMdmSettings theIMdmSettings
 										 ) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;

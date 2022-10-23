@@ -60,8 +60,8 @@ public class MdmProviderLoader {
 						myMdmControllerSvc,
 						myMdmControllerHelper,
 						myMdmSubmitSvc,
-						myMdmSettings,
-						myJobCoordinator));
+						myMdmSettings
+						));
 				break;
 			default:
 				throw new ConfigurationException(Msg.code(1497) + "MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
