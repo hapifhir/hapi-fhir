@@ -240,4 +240,15 @@ public class MemberMatcherR4Helper {
 	public void setRegularFilterSupported(boolean theRegularFilterSupported) {
 		myRegularFilterSupported = theRegularFilterSupported;
 	}
+
+	public void updateConsentPatientAndPerformer(Consent theConsent, Patient thePatient) {
+		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
+		theConsent.getPatient().setReference(patientRef);
+		if (theConsent.getPerformer().size() <= 0) {
+			theConsent.getPerformer().add(new Reference(patientRef));
+		}
+		else {
+			theConsent.getPerformer().set(0, new Reference(patientRef));
+		}
+	}
 }

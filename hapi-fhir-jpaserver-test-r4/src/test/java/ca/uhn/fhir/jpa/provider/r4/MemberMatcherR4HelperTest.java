@@ -340,6 +340,16 @@ class MemberMatcherR4HelperTest {
 
 	}
 
+	@Test
+	void TestUpdateConsentPatientAndPerformer() {
+		Consent consent = getConsent("#sensitive");
+		Patient patient = (Patient)new Patient().setId("Patient/123");
+		myTestedHelper.updateConsentPatientAndPerformer(consent, patient);
+		String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals(patientRef, consent.getPatient().getReference());
+		assertEquals(patientRef, consent.getPerformer().get(0).getReference());
+	}
+
 	@Nested
 	public class TestValidvalidConsentDataAccess {
 
@@ -424,17 +434,16 @@ class MemberMatcherR4HelperTest {
 			boolean result = myTestedHelper.validConsentDataAccess(consent);
 			assertTrue(result);
 		}
+	}
 
-		private Consent getConsent(String uriAccess) {
-			Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
-			return consent;
-		}
+	private Consent getConsent(String uriAccess) {
+		Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
+		return consent;
+	}
 
-		private Consent.ConsentPolicyComponent constructConsentPolicyComponent(String uriAccess) {
-			String uri = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html";
-			return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
-		}
-
+	private Consent.ConsentPolicyComponent constructConsentPolicyComponent(String uriAccess) {
+		String uri = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html";
+		return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
 	}
 
 }
