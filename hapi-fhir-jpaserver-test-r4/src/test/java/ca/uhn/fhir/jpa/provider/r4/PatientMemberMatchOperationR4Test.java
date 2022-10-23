@@ -434,7 +434,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 
 		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getSystem(), respConsent.getScope().getCodingFirstRep().getSystem());
 		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getCode(), respConsent.getScope().getCodingFirstRep().getCode());
-		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", respConsent.getIdentifier().get(0).getSystem());
+		assertEquals(myMemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM, respConsent.getIdentifier().get(0).getSystem());
 		assertNotNull(respConsent.getIdentifier().get(0).getValue());
 		return respConsent;
 	}

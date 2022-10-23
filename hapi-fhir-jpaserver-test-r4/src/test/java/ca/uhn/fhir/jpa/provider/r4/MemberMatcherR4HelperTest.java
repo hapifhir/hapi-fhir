@@ -175,7 +175,7 @@ class MemberMatcherR4HelperTest {
 		Consent consent = new Consent();
 		myTestedHelper.addIdentifierToConsent(consent);
 		assertEquals(1, consent.getIdentifier().size());
-		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", consent.getIdentifier().get(0).getSystem());
+		assertEquals(myTestedHelper.CONSENT_IDENTIFIER_CODE_SYSTEM, consent.getIdentifier().get(0).getSystem());
 		assertNotNull(consent.getIdentifier().get(0).getValue());
 	}
 
