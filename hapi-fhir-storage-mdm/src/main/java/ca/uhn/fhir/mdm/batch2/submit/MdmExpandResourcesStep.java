@@ -21,9 +21,8 @@ package ca.uhn.fhir.mdm.batch2.submit;
  */
 
 import ca.uhn.fhir.batch2.api.*;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
-import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
-import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -41,8 +40,8 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ExpandResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdList, ExpandedResourcesList> {
-	private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
+public class MdmExpandResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, ExpandedResourcesList> {
+	private static final Logger ourLog = getLogger(MdmExpandResourcesStep.class);
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -55,16 +54,15 @@ public class ExpandResourcesStep implements IJobStepWorker<MdmSubmitJobParameter
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<MdmSubmitJobParameters, ResourceIdList> theStepExecutionDetails,
+	public RunOutcome run(@Nonnull StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<ExpandedResourcesList> theDataSink) throws JobExecutionFailedException {
-		ResourceIdList idList = theStepExecutionDetails.getData();
-		MdmSubmitJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
 		ourLog.info("Step 2 for $mdm-submit - Expand resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
+		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds().size());
 
 		// search the resources
-		List<IBaseResource> allResources = fetchAllResources(idList);
+		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds());
 
 		if (myResponseTerminologyTranslationSvc != null) {
 			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
@@ -73,25 +71,22 @@ public class ExpandResourcesStep implements IJobStepWorker<MdmSubmitJobParameter
 		// encode them
 		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(false);
 		List<String> stringified = allResources.stream().map(parser::encodeResourceToString).collect(Collectors.toList());;
-
 		ExpandedResourcesList output = new ExpandedResourcesList();
 		output.setStringifiedResources(stringified);
-		output.setResourceType(idList.getResourceType());
 		theDataSink.accept(output);
-
-		ourLog.info("Expanding of {} resources of type {} completed", idList.getIds().size(), idList.getResourceType());
+		ourLog.info("Expanding of {} resources of type {} completed", idList.size(), idList.getResourceType(0));//FIXME GGG
 
 		// and return
 		return RunOutcome.SUCCESS;
 	}
 
-	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
+	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId> theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
-		for (Id id : theIds.getIds()) {
-			String value = id.getId();
+		for (ResourcePersistentId id : theIds) {
+			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
-			resources.add(dao.readByPid(new ResourcePersistentId(value)));
+			resources.add(dao.readByPid(id));
 		}
 		return resources;
 	}

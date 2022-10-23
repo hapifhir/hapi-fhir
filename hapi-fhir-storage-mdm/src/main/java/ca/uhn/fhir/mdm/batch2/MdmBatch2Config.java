@@ -23,7 +23,7 @@ package ca.uhn.fhir.mdm.batch2;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
-import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobConfig;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +36,7 @@ import static ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx.MDM_CLEAR_JOB_BEAN_NAM
 @Configuration
 @Import({
 	MdmClearAppCtx.class,
-	MdmSubmitJobConfig.class
+	MdmSubmitAppCtx.class
 })
 public class MdmBatch2Config {
 	@Autowired

@@ -21,8 +21,6 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
-import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -37,7 +35,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -49,6 +49,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
@@ -68,8 +69,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	private final IMdmSubmitSvc myMdmSubmitSvc;
 	private final IMdmSettings myMdmSettings;
 	private final MdmControllerHelper myMdmControllerHelper;
-	private final IJobCoordinator myJobCoordinator;
-	private boolean myNewStyle = true;
 
 	public static final int DEFAULT_PAGE_SIZE = 20;
 	public static final int MAX_PAGE_SIZE = 100;
@@ -85,13 +84,12 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 										 MdmControllerHelper theMdmHelper,
 										 IMdmSubmitSvc theMdmSubmitSvc,
 										 IMdmSettings theIMdmSettings,
-										 IJobCoordinator theJobCoordinator) {
+										 ) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmControllerHelper = theMdmHelper;
 		myMdmSubmitSvc = theMdmSubmitSvc;
 		myMdmSettings = theIMdmSettings;
-		myJobCoordinator = theJobCoordinator;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, typeName = "Patient")
@@ -246,10 +244,10 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
-		if (myNewStyle) {
-
-			String theUrl = resourceType + "?" + criteria;
-			myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl),  theRequestDetails);
+		boolean doAsync = shouldPerformAsBatch2Job(theRequestDetails);
+		if (doAsync) {
+			List<String> urls = buildUrlsForJob(criteria, resourceType);
+			return myMdmControllerSvc.submitMdmSubmitJob(urls, theRequestDetails);
 		} else {
 			if (resourceType != null) {
 				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
@@ -258,10 +256,32 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			}
 			return buildMdmOutParametersWithCount(submittedCount);
 		}
+
+	}
+
+	@NotNull
+	private List<String> buildUrlsForJob(String criteria, String resourceType) {
+		List<String> urls = new ArrayList<>();
+		if (StringUtils.isNotBlank(resourceType)) {
+			String theUrl = resourceType + "?" + criteria;
+			urls.add(theUrl);
+		} else {
+			myMdmSettings.getMdmRules().getMdmTypes()
+				.stream()
+				.map(type -> type + "?" + criteria)
+				.forEach(urls::add);
+		}
+		return urls;
+	}
+
+	private boolean shouldPerformAsBatch2Job(ServletRequestDetails theRequestDetails) {
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		return prefer.getRespondAsync();
 	}
 
 	private String convertStringTypeToString(IPrimitiveType<String> theCriteria) {
-		return theCriteria == null ? null : theCriteria.getValueAsString();
+		return theCriteria == null ? "" : theCriteria.getValueAsString();
 	}
 
 
@@ -280,10 +300,17 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	})
 	public IBaseParameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
-		return buildMdmOutParametersWithCount(submittedCount);
+		ServletRequestDetails theRequest) {
+		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
+		if (doAsync) {
+			String theUrl = "Patient?";
+			IBaseParameters iBaseParameters = myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
+			return iBaseParameters;
+		} else {
+			String criteria = convertStringTypeToString(theCriteria);
+			long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
+			return buildMdmOutParametersWithCount(submittedCount);
+		}
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Practitioner", returnParameters = {
@@ -301,10 +328,18 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	})
 	public IBaseParameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
-		return buildMdmOutParametersWithCount(submittedCount);
+		ServletRequestDetails theRequest) {
+
+		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
+		if (doAsync) {
+			String theUrl = "Practitioner?";
+			IBaseParameters iBaseParameters = myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
+			return iBaseParameters;
+		} else {
+			String criteria = convertStringTypeToString(theCriteria);
+			long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
+			return buildMdmOutParametersWithCount(submittedCount);
+		}
 	}
 
 	/**

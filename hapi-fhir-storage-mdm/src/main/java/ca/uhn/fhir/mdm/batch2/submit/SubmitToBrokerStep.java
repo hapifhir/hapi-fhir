@@ -29,12 +29,14 @@ public class SubmitToBrokerStep implements IJobStepWorker<MdmSubmitJobParameters
 		List<String> stringifiedResources = data.getStringifiedResources();
 
 		IParser iParser = myFhirContext.newJsonParser();
+		int processedCount = 0;
 		for (String stringifiedResource : stringifiedResources) {
 			IBaseResource iBaseResource = iParser.parseResource(stringifiedResource);
 			myMdmChannelSubmitterSvc.submitResourceToMdmChannel(iBaseResource);
+			processedCount += 1 ;
 		}
 
-		return new RunOutcome(stringifiedResources.size());
+		return new RunOutcome(processedCount);
 
 	}
 }

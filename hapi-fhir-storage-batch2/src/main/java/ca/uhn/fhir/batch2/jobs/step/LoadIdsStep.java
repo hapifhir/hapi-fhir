@@ -33,13 +33,10 @@ import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import javax.annotation.Nonnull;
 
 public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
-	private final IBatch2DaoSvc myBatch2DaoSvc;
 
 	private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
 	public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		myBatch2DaoSvc = theBatch2DaoSvc;
-
 		IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer = new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
 		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
 	}

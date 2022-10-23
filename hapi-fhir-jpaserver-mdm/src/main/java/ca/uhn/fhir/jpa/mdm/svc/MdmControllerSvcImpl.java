@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -39,7 +38,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
-import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobConfig;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
 import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
@@ -210,10 +209,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 		theUrls.forEach(params::addUrl);
 
-
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(params);
-		request.setJobDefinitionId(MdmSubmitJobConfig.MDM_SUBMIT_JOB);
+		request.setJobDefinitionId(MdmSubmitAppCtx.MDM_SUBMIT_JOB);
 
 		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(request);
 		String id = batch2JobStartResponse.getJobId();

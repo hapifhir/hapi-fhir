@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -155,10 +156,12 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 
 		try {
-			myMdmProvider.mdmBatchPractitionerType(criteria, null);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo(Msg.code(488) + "Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));
+			assertThat(e.getMessage(), is(containsString(Msg.code(2039) + "Failed to validate parameters for job")));
+			assertThat(e.getMessage(), is(containsString("Search parameter death-date is not recognized for resource type Practitioner.")));
+			assertThat(e.getMessage(), is(containsString("Search parameter death-date is not recognized for resource type Medication")));
 		}
 	}
 }
