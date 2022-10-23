@@ -15,6 +15,7 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -649,12 +650,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
+		Bundle found = ourClient.search().forResource(Organization.class)
+			.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.count(10).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
 		assertEquals(10, found.getEntry().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		assertEquals(100, found.getTotal());
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(50).returnBundle(Bundle.class).execute();
 		assertEquals(50, found.getEntry().size());
 
 	}

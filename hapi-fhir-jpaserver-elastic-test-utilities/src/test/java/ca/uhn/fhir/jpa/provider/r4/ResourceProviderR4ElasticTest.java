@@ -166,7 +166,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			Coding blood_count = new Coding("http://loinc.org", "789-8", "Erythrocytes in Blood by Automated count for code: " + (index + 1));
 			createObservationWithCode(blood_count);
 		});
-		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5");
+		HttpGet countQuery = new HttpGet(BaseResourceProviderR4Test.ourServerBase + "/Observation?code=789-8&_count=5&_total=accurate");
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();

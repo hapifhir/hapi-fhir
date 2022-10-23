@@ -26,12 +26,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -247,43 +247,17 @@ public class BinaryAccessProviderTest {
 
 		DaoMethodOutcome daoOutcome = new DaoMethodOutcome();
 		daoOutcome.setResource(docRef);
-		ServletInputStream sis = new ServletInputStream() {
-			@Override
-			public boolean isFinished() {
-				return false;
-			}
-
-			@Override
-			public boolean isReady() {
-				return false;
-			}
-
-			@Override
-			public void setReadListener(ReadListener readListener) {
-
-			}
-
-			@Override
-			public int read() throws IOException {
-				return 0;
-			}
-
-			@Override
-			public int available() throws IOException {
-				return 15;
-			}
-		};
 		StoredDetails sd = spy(StoredDetails.class);
 		sd.setBlobId("123");
+		sd.setBytes(15);
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
 		when(myResourceDao.update(docRef, myRequestDetails)).thenReturn(daoOutcome);
 		when(theServletRequest.getContentType()).thenReturn("Integer");
 		when(theServletRequest.getContentLength()).thenReturn(15);
 		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
-		when(theServletRequest.getInputStream()).thenReturn(sis);
 		myRequestDetails.setServletRequest(theServletRequest);
-		when(myBinaryStorageSvc.storeBlob(docRef.getIdElement(), null, "Integer", myRequestDetails.getInputStream())).thenReturn(sd);
+		when(myBinaryStorageSvc.storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class))).thenReturn(sd);
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {

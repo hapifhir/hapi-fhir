@@ -338,7 +338,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
-		myParams = theParams;
+		// we mutate the params.  Make a private copy.
+		myParams = theParams.clone();
 		mySearchUuid = theSearchUuid;
 		myRequestPartitionId = theRequestPartitionId;
 	}
