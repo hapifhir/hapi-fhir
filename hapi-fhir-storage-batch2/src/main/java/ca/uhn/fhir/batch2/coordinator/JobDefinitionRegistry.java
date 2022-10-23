@@ -30,7 +30,6 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSortedMap;
 import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
@@ -109,7 +108,7 @@ public class JobDefinitionRegistry {
 		myJobs = newJobsMap;
 	}
 
-	@NotNull
+	@Nonnull
 	private Map<String, NavigableMap<Integer, JobDefinition<?>>> cloneJobsMap() {
 		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = new HashMap<>();
 		for (Map.Entry<String, NavigableMap<Integer, JobDefinition<?>>> nextEntry : myJobs.entrySet()) {
