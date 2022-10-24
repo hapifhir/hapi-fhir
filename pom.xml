@@ -763,6 +763,11 @@
     <developer>
 			<id>dyoung-work</id>
 		</developer>
+		<developer>
+			<id>vitorpamplona</id>
+			<name>Vitor Pamplona</name>
+			<organization>PathCheck Foundation / EyeNetra Inc</organization>
+		</developer>
 	</developers>
 
 	<licenses>
