@@ -719,7 +719,7 @@ After the operation is complete, all resources that matched the criteria will no
 This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
 Note that this operation can take a long time on large data sets. In order to support large data sets, the operation can be run asynchronously. This can be done by
-via sending the `Prefer: respond-async` header with the request. This will cause HAPI-FHIR to execute the request as a batch job. The response will contain a `jobId` header that can be used to poll the status of the operation. Note that completion of the job indicates completion of loading all the resources onto the broker,
+via sending the `Prefer: respond-async` header with the request. This will cause HAPI-FHIR to execute the request as a batch job. The response will contain a `jobId` parameter that can be used to poll the status of the operation. Note that completion of the job indicates completion of loading all the resources onto the broker,
 not necessarily the completion of the actual underlying MDM process. 
 
 <table class="table table-striped table-condensed">

@@ -20,7 +20,6 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;

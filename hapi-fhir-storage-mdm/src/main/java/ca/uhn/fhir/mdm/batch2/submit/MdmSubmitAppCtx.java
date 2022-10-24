@@ -27,7 +27,10 @@ import ca.uhn.fhir.batch2.jobs.export.WriteBinaryStep;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -45,13 +48,13 @@ public class MdmSubmitAppCtx {
 
 
 	@Bean(name = MDM_SUBMIT_JOB_BEAN_NAME)
-	public JobDefinition mdmSubmitJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
+	public JobDefinition mdmSubmitJobDefinition(IBatch2DaoSvc theBatch2DaoSvc, MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
 		return JobDefinition.newBuilder()
 		.setJobDefinitionId(MDM_SUBMIT_JOB)
 		.setJobDescription("MDM Batch Submission")
 		.setJobDefinitionVersion(1)
 		.setParametersType(MdmSubmitJobParameters.class)
-		.setParametersValidator(mdmSubmitJobParametersValidator())
+		.setParametersValidator(mdmSubmitJobParametersValidator(theMatchUrlService, theFhirContext, theMdmSettings))
 		.addFirstStep(
 			"generate-ranges",
 			"generate data ranges to submit to mdm",
@@ -70,8 +73,8 @@ public class MdmSubmitAppCtx {
 	}
 
 	@Bean
-	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator() {
-		return new MdmSubmitJobParametersValidator();
+	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator(MatchUrlService theMatchUrlService, FhirContext theFhirContext, IMdmSettings theMdmSettings) {
+		return new MdmSubmitJobParametersValidator(theMdmSettings, theMatchUrlService, theFhirContext);
 	}
 
 	@Bean

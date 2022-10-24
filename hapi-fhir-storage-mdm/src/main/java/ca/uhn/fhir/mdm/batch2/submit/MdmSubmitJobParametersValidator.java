@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,12 +37,15 @@ import java.util.List;
 
 public class MdmSubmitJobParametersValidator implements IJobParametersValidator<MdmSubmitJobParameters> {
 
-	@Autowired
 	private IMdmSettings myMdmSettings;
-	@Autowired
 	private MatchUrlService myMatchUrlService;
-	@Autowired
 	private FhirContext myFhirContext;
+
+	public MdmSubmitJobParametersValidator(IMdmSettings theMdmSettings, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+		myMdmSettings = theMdmSettings;
+		myMatchUrlService = theMatchUrlService;
+		myFhirContext = theFhirContext;
+	}
 
 	@Nonnull
 	@Override

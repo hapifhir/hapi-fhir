@@ -49,7 +49,6 @@ public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParamete
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
-		ourLog.info("Beginning Load Ids Step");
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
 	}
 

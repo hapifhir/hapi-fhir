@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -85,7 +86,11 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 			assert id.getResourceType() != null;
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
-			resources.add(dao.readByPid(id));
+			try {
+				resources.add(dao.readByPid(id));
+			} catch (ResourceNotFoundException e) {
+				ourLog.warn("While attempging to send [{}] to the MDM queue, the resource was not found.", id);
+			}
 		}
 		return resources;
 	}
