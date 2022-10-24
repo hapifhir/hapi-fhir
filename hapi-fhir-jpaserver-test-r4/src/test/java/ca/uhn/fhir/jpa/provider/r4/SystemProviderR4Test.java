@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -1001,7 +1002,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
-		return myClient.search().forResource(theResourceName).cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
+		return myClient.search().forResource(theResourceName)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.cacheControl(new CacheControlDirective().setNoCache(true))
+			.returnBundle(Bundle.class).execute();
 	}
 
 	@AfterAll

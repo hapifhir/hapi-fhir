@@ -104,9 +104,6 @@ public class HapiHSearchAnalysisConfigurers {
 			theLuceneCtx.analyzer("conceptParentPidsAnalyzer").custom()
 				.tokenizer(WhitespaceTokenizerFactory.class);
 
-			theLuceneCtx.analyzer("termConceptPropertyAnalyzer").custom()
-				.tokenizer(WhitespaceTokenizerFactory.class);
-
 			theLuceneCtx.normalizer(LOWERCASE_ASCIIFOLDING_NORMALIZER).custom()
 				.tokenFilter(LowerCaseFilterFactory.class)
 				.tokenFilter(ASCIIFoldingFilterFactory.class);
@@ -176,9 +173,6 @@ public class HapiHSearchAnalysisConfigurers {
 				.tokenFilters("unique");
 
 			theConfigCtx.analyzer("conceptParentPidsAnalyzer").custom()
-				.tokenizer("whitespace");
-
-			theConfigCtx.analyzer("termConceptPropertyAnalyzer").custom()
 				.tokenizer("whitespace");
 
 			theConfigCtx.normalizer( LOWERCASE_ASCIIFOLDING_NORMALIZER ).custom()
