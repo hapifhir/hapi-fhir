@@ -240,7 +240,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> myExceptionSvc.newUnknownSearchException(theUuid));
 			if (theRequestDetails != null) {
-				search = myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, searchCallback);
+				search = myTxService.execute(theRequestDetails).task(searchCallback);
 			} else {
 				search = searchCallback.call();
 			}
@@ -305,7 +305,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@Nonnull
 	private List<ResourcePersistentId> fetchResultPids(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails, Search theSearch) {
-		List<ResourcePersistentId> pids = myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
+		List<ResourcePersistentId> pids = myTxService.execute(theRequestDetails).task(() -> mySearchResultCacheSvc.fetchResultPids(theSearch, theFrom, theTo));
 		if (pids == null) {
 			throw myExceptionSvc.newUnknownSearchException(theUuid);
 		}
@@ -442,7 +442,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		 * In case there is no running search, if the total is listed as accurate we know one is coming
 		 * so let's wait a bit for it to show up
 		 */
-		Optional<Search> search = myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, ()->mySearchCacheSvc.fetchByUuid(theUuid));
+		Optional<Search> search = myTxService.execute(theRequestDetails).task(()->mySearchCacheSvc.fetchByUuid(theUuid));
 		if (search.isPresent()) {
 			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
 			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
@@ -489,7 +489,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Nullable
 	private PersistedJpaBundleProvider findCachedQuery(SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theQueryString, RequestPartitionId theRequestPartitionId) {
 		// May be null
-		return myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+		return myTxService.execute(theRequestDetails).task(() -> {
 
 			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
 			HookParams params = new HookParams()

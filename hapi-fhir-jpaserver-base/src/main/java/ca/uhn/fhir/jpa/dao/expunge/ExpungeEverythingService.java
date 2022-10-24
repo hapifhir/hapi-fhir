@@ -119,8 +119,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
-
-		myTxService.execute(theRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()-> {
+		myTxService.execute(theRequest).withPropagation(Propagation.REQUIRES_NEW).task(()-> {
 			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
 			return null;
 		});
@@ -157,7 +156,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptProperty.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConceptDesignation.class));
 		counter.addAndGet(expungeEverythingByTypeWithoutPurging(theRequest, TermConcept.class));
-		myTxService.execute(theRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()-> {
+		myTxService.execute(theRequest).withPropagation(Propagation.REQUIRES_NEW).task(()-> {
 			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
 				next.setCurrentVersion(null);
 				myEntityManager.merge(next);
@@ -178,7 +177,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 		deletedResourceEntityCount = counter.get() - counterBefore;
 
-		myTxService.execute(theRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()-> {
+		myTxService.execute(theRequest).withPropagation(Propagation.REQUIRES_NEW).task(()-> {
 			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 			return null;
 		});
@@ -202,7 +201,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
                 while (true) {
                         StopWatch sw = new StopWatch();
 
-                        int count = myTxService.execute(theRequest, null, Propagation.REQUIRES_NEW, Isolation.DEFAULT, ()-> {
+                        int count = myTxService.execute(theRequest).withPropagation(Propagation.REQUIRES_NEW).task(()-> {
                                 CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
                                 CriteriaQuery<?> cq = cb.createQuery(theEntityType);
                                 cq.from(theEntityType);

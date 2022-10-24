@@ -79,7 +79,7 @@ public class SearchContinuationTask extends SearchTask {
 	@Override
 	public Void call() {
 		try {
-			myTxService.execute(myRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+			myTxService.execute(myRequestDetails).task(() -> {
 				List<ResourcePersistentId> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 				if (previouslyAddedResourcePids == null) {
 					throw myExceptionSvc.newUnknownSearchException(getSearch().getUuid());

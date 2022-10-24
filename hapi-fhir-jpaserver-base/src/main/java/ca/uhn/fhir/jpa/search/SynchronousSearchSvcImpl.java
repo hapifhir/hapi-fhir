@@ -103,12 +103,7 @@ public class SynchronousSearchSvcImpl implements ISynchronousSearchSvc {
 
 		// Execute the query and make sure we return distinct results
 
-		// FIXME: add readOnly to txmanager
-//		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-//		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-//		txTemplate.setReadOnly(theParams.isLoadSynchronous() || theParams.isOffsetQuery());
-
-		return myTxService.execute(theRequestDetails, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+		return myTxService.execute(theRequestDetails).readOnly().task(() -> {
 
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();

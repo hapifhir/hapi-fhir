@@ -70,7 +70,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		final List<ResourcePersistentId> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");
 
-		List<IBaseResource> retVal = myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> toResourceList(mySearchBuilder, pids));
+		List<IBaseResource> retVal = myTxService.execute(myRequest).task(() -> toResourceList(mySearchBuilder, pids));
 
 		long totalCountWanted = theToIndex - theFromIndex;
 		long totalCountMatch = (int) retVal

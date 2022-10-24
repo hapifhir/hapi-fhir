@@ -87,10 +87,24 @@ public class HapiTransactionService implements IHapiTransactionService {
 		myCustomIsolationSupported = isCustomIsolationSupported();
 	}
 
+	@Override
+	public IExecutionBuilder execute(@Nullable RequestDetails theRequestDetails) {
+		return new ExecutionBuilder(theRequestDetails);
+	}
+
+
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback) {
 		return execute(theRequestDetails, theTransactionDetails, theCallback, null);
 	}
 
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
 	public void execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull Runnable theCallback) {
 		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
 			@Override
@@ -101,112 +115,51 @@ public class HapiTransactionService implements IHapiTransactionService {
 		execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
 	@Override
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback) {
+
 		TransactionCallback<T> callback = tx -> theCallback.call();
 		return execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}
 
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback) {
-		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, Propagation.REQUIRED, Isolation.DEFAULT);
+		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, null, null);
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
-		assert theCallback != null;
-
-		final RequestPartitionId requestPartitionId;
-		if (theRequestDetails != null) {
-			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theRequestDetails);
-		} else {
-			requestPartitionId = null;
-		}
-		return execute(theRequestDetails, theTransactionDetails, theCallback, theOnRollback, thePropagation, theIsolation, requestPartitionId);
-
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
+	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nullable Propagation thePropagation, @Nullable Isolation theIsolation) {
+		return execute(theRequestDetails)
+			.withTransactionDetails(theTransactionDetails)
+			.withPropagation(thePropagation)
+			.withIsolation(theIsolation)
+			.onRollback(theOnRollback)
+			.task(theCallback);
 	}
 
+	/**
+	 * @deprecated Use {@link #execute(RequestDetails)} with fluent call instead
+	 */
+	@Deprecated
 	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, RequestPartitionId theRequestPartitionId) {
-		RequestPartitionId previousRequestPartitionId = null;
-		if (theRequestPartitionId != null) {
-			previousRequestPartitionId = ourRequestPartition.get();
-			ourRequestPartition.set(theRequestPartitionId);
-		}
-
-		try {
-			for (int i = 0; ; i++) {
-				try {
-
-					if (thePropagation == Propagation.REQUIRED && theIsolation == Isolation.DEFAULT) {
-						return doExecuteCallback(theCallback);
-					} else {
-						return doExecuteCallbackReqNew(theCallback, thePropagation, theIsolation);
-					}
-
-				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
-					ourLog.debug("Version conflict detected", e);
-
-					if (theOnRollback != null) {
-						theOnRollback.run();
-					}
-
-					int maxRetries = 0;
-
-					/*
-					 * If two client threads both concurrently try to add the same tag that isn't
-					 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-					 * which is the tag definition table. In that case, a constraint error will be
-					 * thrown by one of the client threads, so we auto-retry in order to avoid
-					 * annoying spurious failures for the client.
-					 */
-					if (DaoFailureUtil.isTagStorageFailure(e)) {
-						maxRetries = 3;
-					}
-
-					if (maxRetries == 0) {
-						HookParams params = new HookParams()
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
-						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-							maxRetries = conflictResolutionStrategy.getMaxRetries();
-						}
-					}
-
-					if (i < maxRetries) {
-						if (theTransactionDetails != null) {
-							theTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
-							theTransactionDetails.clearRollbackUndoActions();
-							theTransactionDetails.clearResolvedItems();
-							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-							theTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-						}
-						double sleepAmount = (250.0d * i) * Math.random();
-						long sleepAmountLong = (long) sleepAmount;
-						TestUtil.sleepAtLeast(sleepAmountLong, false);
-
-						ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-						continue;
-					}
-
-					IBaseOperationOutcome oo = null;
-					if (e instanceof ResourceVersionConflictException) {
-						oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-					}
-
-					if (maxRetries > 0) {
-						String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-						ourLog.info(msg, maxRetries);
-						throw new ResourceVersionConflictException(Msg.code(549) + msg);
-					}
-
-					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
-				}
-			}
-		} finally {
-			if (theRequestPartitionId != null) {
-				ourRequestPartition.set(previousRequestPartitionId);
-			}
-		}
+		return execute(theRequestDetails)
+			.withTransactionDetails(theTransactionDetails)
+			.withPropagation(thePropagation)
+			.withIsolation(theIsolation)
+			.withRequestPartitionId(theRequestPartitionId)
+			.onRollback(theOnRollback)
+			.task(theCallback);
 	}
 
 	/**
@@ -280,6 +233,191 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	public static RequestPartitionId getRequestPartitionAssociatedWithThread() {
 		return ourRequestPartition.get();
+	}
+
+	public class ExecutionBuilder implements IExecutionBuilder {
+
+		private final RequestDetails myRequestDetails;
+		private Isolation myIsolation;
+		private Propagation myPropagation;
+		private boolean myReadOnly;
+		private TransactionDetails myTransactionDetails;
+		private Runnable myOnRollback;
+		private RequestPartitionId myRequestPartitionId;
+
+		public ExecutionBuilder(RequestDetails theRequestDetails) {
+			myRequestDetails = theRequestDetails;
+		}
+
+		@Override
+		public ExecutionBuilder withIsolation(Isolation theIsolation) {
+			assert myIsolation == null;
+			myIsolation = theIsolation;
+			return this;
+		}
+
+		@Override
+		public ExecutionBuilder withTransactionDetails(TransactionDetails theTransactionDetails) {
+			assert myTransactionDetails == null;
+			myTransactionDetails = theTransactionDetails;
+			return this;
+		}
+
+		@Override
+		public ExecutionBuilder withPropagation(Propagation thePropagation) {
+			assert myPropagation == null;
+			myPropagation = thePropagation;
+			return this;
+		}
+
+		@Override
+		public ExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId) {
+			assert myRequestPartitionId == null;
+			myRequestPartitionId = theRequestPartitionId;
+			return this;
+		}
+
+		@Override
+		public ExecutionBuilder readOnly() {
+			myReadOnly = true;
+			return this;
+		}
+
+		@Override
+		public ExecutionBuilder onRollback(Runnable theOnRollback) {
+			assert myOnRollback == null;
+			myOnRollback = theOnRollback;
+			return this;
+		}
+
+		@Override
+		public void task(Runnable theTask) {
+			ICallable<Void> task = () -> {
+				theTask.run();
+				return null;
+			};
+			task(task);
+		}
+
+		@Override
+		public <T> T task(ICallable<T> theTask) {
+			TransactionCallback<T> callback = tx -> theTask.call();
+			return task(callback);
+		}
+
+		@Override
+		public <T> T task(TransactionCallback<T> callback) {
+			assert callback != null;
+
+			final RequestPartitionId requestPartitionId;
+			if (myRequestPartitionId != null) {
+				requestPartitionId = myRequestPartitionId;
+			} else if (myRequestDetails != null) {
+				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails);
+			} else {
+				requestPartitionId = null;
+			}
+			RequestPartitionId previousRequestPartitionId = null;
+			if (requestPartitionId != null) {
+				previousRequestPartitionId = ourRequestPartition.get();
+				ourRequestPartition.set(requestPartitionId);
+			}
+
+			try {
+				for (int i = 0; ; i++) {
+					try {
+
+						try {
+							TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+
+							if (myPropagation != null) {
+								txTemplate.setPropagationBehavior(myPropagation.value());
+							}
+
+							if (myCustomIsolationSupported && myIsolation != null && myIsolation != Isolation.DEFAULT) {
+								txTemplate.setIsolationLevel(myIsolation.value());
+							}
+
+							if (myReadOnly) {
+								txTemplate.setReadOnly(true);
+							}
+
+							return txTemplate.execute(callback);
+						} catch (MyException e) {
+							if (e.getCause() instanceof RuntimeException) {
+								throw (RuntimeException) e.getCause();
+							} else {
+								throw new InternalErrorException(Msg.code(551) + e);
+							}
+						}
+
+					} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+						ourLog.debug("Version conflict detected", e);
+
+						if (myOnRollback != null) {
+							myOnRollback.run();
+						}
+
+						int maxRetries = 0;
+
+						/*
+						 * If two client threads both concurrently try to add the same tag that isn't
+						 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+						 * which is the tag definition table. In that case, a constraint error will be
+						 * thrown by one of the client threads, so we auto-retry in order to avoid
+						 * annoying spurious failures for the client.
+						 */
+						if (DaoFailureUtil.isTagStorageFailure(e)) {
+							maxRetries = 3;
+						}
+
+						if (maxRetries == 0) {
+							HookParams params = new HookParams()
+								.add(RequestDetails.class, myRequestDetails)
+								.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, myRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+								maxRetries = conflictResolutionStrategy.getMaxRetries();
+							}
+						}
+
+						if (i < maxRetries) {
+							if (myTransactionDetails != null) {
+								myTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+								myTransactionDetails.clearRollbackUndoActions();
+								myTransactionDetails.clearResolvedItems();
+								myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+								myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+							}
+							double sleepAmount = (250.0d * i) * Math.random();
+							long sleepAmountLong = (long) sleepAmount;
+							TestUtil.sleepAtLeast(sleepAmountLong, false);
+
+							ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+							continue;
+						}
+
+						IBaseOperationOutcome oo = null;
+						if (e instanceof ResourceVersionConflictException) {
+							oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+						}
+
+						if (maxRetries > 0) {
+							String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+							ourLog.info(msg, maxRetries);
+							throw new ResourceVersionConflictException(Msg.code(549) + msg);
+						}
+
+						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+					}
+				}
+			} finally {
+				if (requestPartitionId != null) {
+					ourRequestPartition.set(previousRequestPartitionId);
+				}
+			}
+		}
+
 	}
 
 	/**

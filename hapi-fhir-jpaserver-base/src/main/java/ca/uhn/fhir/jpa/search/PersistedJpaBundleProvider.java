@@ -220,9 +220,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		final ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, resourceName, resourceType);
 
 		final List<ResourcePersistentId> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
-		return myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () ->{
-			return toResourceList(sb, pidsSubList);
-		});
+		return myTxService.execute(myRequest).task(() -> toResourceList(sb, pidsSubList));
 	}
 
 
@@ -231,7 +229,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	public boolean ensureSearchEntityLoaded() {
 		if (mySearchEntity == null) {
-			Optional<Search> searchOpt = myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> mySearchCacheSvc.fetchByUuid(myUuid));
+			Optional<Search> searchOpt = myTxService.execute(myRequest).task(() -> mySearchCacheSvc.fetchByUuid(myUuid));
 			if (!searchOpt.isPresent()) {
 				return false;
 			}
@@ -268,7 +266,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			key = MemoryCacheService.HistoryCountKey.forSystem();
 		}
 
-		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+		Function<MemoryCacheService.HistoryCountKey, Integer> supplier = k -> myTxService.execute(myRequest).task(() -> {
 			HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 			Long count = historyBuilder.fetchCount(getRequestPartitionIdForHistory());
 			return count.intValue();
@@ -305,7 +303,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
-		myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> {
+		myTxService.execute(myRequest).task(() -> {
 			boolean entityLoaded = ensureSearchEntityLoaded();
 			assert entityLoaded;
 		});
@@ -315,7 +313,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return myTxService.execute(myRequest, null, Propagation.REQUIRED, Isolation.DEFAULT, () -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
+				return myTxService.execute(myRequest).task(() -> doHistoryInTransaction(mySearchEntity.getOffset(), theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
