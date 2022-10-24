@@ -351,7 +351,7 @@ public class IdHelperService implements IIdHelperService {
 				andPredicates.add(typeCriteria);
 			}
 
-			Predicate idCriteria = cb.equal(from.get("myForcedId").as(String.class), next.getIdPart());
+			Predicate idCriteria = cb.equal(from.get("myResourcePid").as(String.class), next.getIdPart());
 			andPredicates.add(idCriteria);
 			getOptionalPartitionPredicate(theRequestPartitionId, cb, from).ifPresent(andPredicates::add);
 			predicates.add(cb.and(andPredicates.toArray(EMPTY_PREDICATE_ARRAY)));

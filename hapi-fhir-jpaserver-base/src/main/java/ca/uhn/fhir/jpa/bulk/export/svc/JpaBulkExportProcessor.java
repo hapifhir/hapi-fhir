@@ -215,6 +215,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
 			pids = getExpandedPatientList(theParams);
+			ourLog.info("Obtained {} PIDs", pids.size());
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
 		} else {
