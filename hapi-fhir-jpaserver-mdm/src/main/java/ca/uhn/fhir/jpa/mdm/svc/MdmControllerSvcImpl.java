@@ -200,9 +200,12 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 
 
 	@Override
-	public IBaseParameters submitMdmSubmitJob(List<String> theUrls, ServletRequestDetails theRequestDetails) {
+	public IBaseParameters submitMdmSubmitJob(List<String> theUrls,  IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
 		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
 
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+			params.setBatchSize(theBatchSize.getValue().intValue());
+		}
 		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
 		params.setRequestPartitionId(RequestPartitionId.allPartitions());
 

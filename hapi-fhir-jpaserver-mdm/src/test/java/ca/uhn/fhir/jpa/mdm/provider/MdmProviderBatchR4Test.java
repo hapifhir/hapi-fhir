@@ -104,7 +104,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
@@ -114,7 +114,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 	@Test
@@ -140,7 +140,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 		StringType criteria = null;
 		clearMdmLinks();
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, theSyncOrAsyncRequest));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, null, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
@@ -170,7 +170,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = new StringType("");
 		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(3, () -> {
-			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, theSyncOrAsyncRequest);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null, theSyncOrAsyncRequest);
 		});
 		assertLinkCount(3);
 	}
@@ -183,7 +183,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		clearMdmLinks();
 
 		try {
-			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , theSyncOrAsyncRequest);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
 			fail();
 		} catch (InvalidRequestException e) {
 
