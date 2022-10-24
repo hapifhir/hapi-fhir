@@ -1163,7 +1163,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 
 		ourLog.info("** About to perform search");
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(false));
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setCount(50).setLoadSynchronous(false));
 		ourLog.info("** About to retrieve resources");
 		search.getResources(0, 20);
 		ourLog.info("** Done retrieving resources");
@@ -1172,13 +1172,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
-		// Batches of 30 are written for each query - so 9 inserts total
-		assertEquals(221, myCaptureQueriesListener.logInsertQueries());
+		// first prefetch is 50+1
+		assertEquals(51, myCaptureQueriesListener.logInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(9, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
