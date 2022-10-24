@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,12 +56,12 @@ class MdmSubmitJobParametersValidatorTest {
 	@Test
 	public void testMissingSearchParameter() {
 		when(myMdmSettings.isSupportedMdmType(anyString())).thenReturn(true);
-		when(myMatchUrlService.translateMatchUrl(anyString(), any())).thenThrow();
+		when(myMatchUrlService.translateMatchUrl(anyString(), any())).thenThrow(new InvalidRequestException("Can't find death-date!"));
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?death-date=foo");
 		List<String> errors = myValidator.validate(parameters);
 		assertThat(errors, hasSize(1));
-		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
+		assertThat(errors.get(0), is(equalTo("Invalid request detected: Can't find death-date!")));
 	}
 
 }

@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -67,6 +68,8 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
 			String errorMsg = String.format("Search parameter %s is not recognized for resource type %s. Source error is %s", e.getParamName(), resourceType, e.getMessage());
 			errorMsgs.add(errorMsg);
+		} catch (InvalidRequestException e) {
+			errorMsgs.add("Invalid request detected: " + e.getMessage());
 		}
 	}
 
