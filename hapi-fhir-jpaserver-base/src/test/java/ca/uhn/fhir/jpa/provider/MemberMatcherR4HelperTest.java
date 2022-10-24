@@ -451,6 +451,7 @@ public class MemberMatcherR4HelperTest {
 
 	private Consent getConsent(String uriAccess) {
 		Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
+		consent.getPerformer().add(new Reference("Patient/1"));
 		return consent;
 	}
 

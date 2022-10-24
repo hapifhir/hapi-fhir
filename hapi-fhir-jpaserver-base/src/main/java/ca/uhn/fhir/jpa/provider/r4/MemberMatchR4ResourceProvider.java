@@ -130,6 +130,7 @@ public class MemberMatchR4ResourceProvider {
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
 		validateParam(theConsent, Constants.PARAM_CONSENT);
 		validateMemberPatientParam(theMemberPatient);
+		validateConsentParam(theConsent);
 	}
 
 	private void validateParam(Object theParam, String theParamName) {
@@ -147,5 +148,14 @@ public class MemberMatchR4ResourceProvider {
 
 		validateParam(theMemberPatient.getName().get(0).getFamily(), Constants.PARAM_MEMBER_PATIENT_NAME);
 		validateParam(theMemberPatient.getBirthDate(), Constants.PARAM_MEMBER_PATIENT_BIRTHDATE);
+	}
+
+	private void validateConsentParam(Consent theConsent) {
+		if (theConsent.getPatient().isEmpty()) {
+			validateParam(null, Constants.PARAM_CONSENT_PATIENT_REFERENCE);
+		}
+		if (theConsent.getPerformer().isEmpty()) {
+			validateParam(null, Constants.PARAM_CONSENT_PERFORMER_REFERENCE);
+		}
 	}
 }
