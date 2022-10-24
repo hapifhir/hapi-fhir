@@ -14,6 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 
@@ -37,15 +43,24 @@ class MdmSubmitJobParametersValidatorTest {
 
 	@Test
 	public void testUnusedMdmResourceTypesAreNotAccepted() {
-		MdmRulesJson rules = new MdmRulesJson();
-		rules.setMdmTypes(List.of("Patient"));
-		when(myMdmSettings.getMdmRules()).thenReturn(rules);
-
+		when(myMdmSettings.isSupportedMdmType(anyString())).thenReturn(false);
 
 		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
 		parameters.addUrl("Practitioner?name=foo");
-		myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(parameters);
+		assertThat(errors, hasSize(1));
+		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
+	}
 
+	@Test
+	public void testMissingSearchParameter() {
+		when(myMdmSettings.isSupportedMdmType(anyString())).thenReturn(true);
+		when(myMatchUrlService.translateMatchUrl(anyString(), any())).thenThrow();
+		MdmSubmitJobParameters parameters = new MdmSubmitJobParameters();
+		parameters.addUrl("Practitioner?death-date=foo");
+		List<String> errors = myValidator.validate(parameters);
+		assertThat(errors, hasSize(1));
+		assertThat(errors.get(0), is(equalTo("Resource type Practitioner is not supported by MDM. Check your MDM settings")));
 	}
 
 }

@@ -204,8 +204,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
 
 		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null, details);
-		params.setRequestPartitionId(requestPartition);
+		params.setRequestPartitionId(RequestPartitionId.allPartitions());
 
 		theUrls.forEach(params::addUrl);
 

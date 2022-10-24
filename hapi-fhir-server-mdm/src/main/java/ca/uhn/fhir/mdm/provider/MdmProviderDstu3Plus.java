@@ -243,8 +243,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
-		boolean doAsync = shouldPerformAsBatch2Job(theRequestDetails);
-		if (doAsync) {
+		if (theRequestDetails.isPreferRespondAsync()) {
 			List<String> urls = buildUrlsForJob(criteria, resourceType);
 			return myMdmControllerSvc.submitMdmSubmitJob(urls, theRequestDetails);
 		} else {
@@ -273,11 +272,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		return urls;
 	}
 
-	private boolean shouldPerformAsBatch2Job(ServletRequestDetails theRequestDetails) {
-		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
-		return prefer.getRespondAsync();
-	}
 
 	private String convertStringTypeToString(IPrimitiveType<String> theCriteria) {
 		return theCriteria == null ? "" : theCriteria.getValueAsString();
@@ -300,8 +294,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		ServletRequestDetails theRequest) {
-		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
-		if (doAsync) {
+		if (theRequest.isPreferRespondAsync()) {
 			String theUrl = "Patient?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
 		} else {
@@ -327,9 +320,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
 		ServletRequestDetails theRequest) {
-
-		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
-		if (doAsync) {
+		if (theRequest.isPreferRespondAsync()) {
 			String theUrl = "Practitioner?";
 			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
 		} else {

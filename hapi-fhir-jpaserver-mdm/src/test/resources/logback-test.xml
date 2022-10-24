@@ -72,9 +72,9 @@
 		<appender-ref ref="MDM_TROUBLESHOOTING"/>
 	</logger>
 
-	<logger name="ca.uhn.fhir.log.batch_troubleshooting" level="DEBUG" additivity="false">
-		<appender-ref ref="STDOUT"/>
-	</logger>
+<!--	<logger name="ca.uhn.fhir.log.batch_troubleshooting" level="DEBUG" additivity="false">-->
+<!--		<appender-ref ref="STDOUT"/>-->
+<!--	</logger>-->
 
 
 	<root level="info">
