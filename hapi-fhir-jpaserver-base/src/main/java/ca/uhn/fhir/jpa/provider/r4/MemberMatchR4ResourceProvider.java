@@ -121,6 +121,7 @@ public class MemberMatchR4ResourceProvider {
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
 		updateConsentForMemberMatch(theConsent);
+		myMemberMatcherR4Helper.updateConsentPatientAndPerformer(theConsent, patient);
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 

@@ -67,7 +67,7 @@ public class MemberMatcherR4Helper {
 	private static final String COVERAGE_TYPE = "Coverage";
 	private static final String CONSENT_POLICY_REGULAR_TYPE = "regular";
 	private static final String CONSENT_POLICY_SENSITIVE_TYPE = "sensitive";
-	private static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
+	public static final String CONSENT_IDENTIFIER_CODE_SYSTEM = "https://smilecdr.com/fhir/ns/member-match-fixme";
 
 	private final FhirContext myFhirContext;
 	private final IFhirResourceDao<Coverage> myCoverageDao;
@@ -259,13 +259,20 @@ public class MemberMatcherR4Helper {
 
 	private boolean validConsentPolicy(String thePolicyUri) {
 		String policyTypes = StringUtils.substringAfterLast(thePolicyUri, "#");
-		if (!policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
-			return false;
+		if (policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
+			return true;
 		}
-		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !myRegularFilterSupported) {
-			return false;
+		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && myRegularFilterSupported) {
+			return true;
 		}
-		return true;
+		return false;
+//		if (!policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
+//			return false;
+//		}
+//		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !myRegularFilterSupported) {
+//			return false;
+//		}
+//		return true;
 	}
 
 	public void addIdentifierToConsent(Consent theConsent) {
@@ -276,5 +283,16 @@ public class MemberMatcherR4Helper {
 
 	public void setRegularFilterSupported(boolean theRegularFilterSupported) {
 		myRegularFilterSupported = theRegularFilterSupported;
+	}
+
+	public void updateConsentPatientAndPerformer(Consent theConsent, Patient thePatient) {
+		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
+		theConsent.getPatient().setReference(patientRef);
+		if (theConsent.getPerformer().size() <= 0) {
+			theConsent.getPerformer().add(new Reference(patientRef));
+		}
+		else {
+			theConsent.getPerformer().set(0, new Reference(patientRef));
+		}
 	}
 }

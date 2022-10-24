@@ -195,7 +195,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		myConsent = new Consent().addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_REGULAR_DATA_URI));
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
 		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
-			"Consent policy does not match the data release segmentation capabilities");
+			"Consent policy does not match the data release segmentation capabilities.");
 	}
 
 	@Test
@@ -304,6 +304,12 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		assertEquals(theOriginalCoverage.getIdentifierFirstRep().getValue(), respCoverage.getIdentifierFirstRep().getValue());
 	}
 
+	private void validateConsentPatientAndPerformerRef(Patient thePatient, Consent theConsent) {
+		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals(patientRef, theConsent.getPatient().getReference());
+		assertEquals(patientRef, theConsent.getPerformer().get(0).getReference());
+	}
+
 
 	private void validateMemberPatient(Parameters response) {
 //		parameter MemberPatient must have a new identifier with:
@@ -342,6 +348,18 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
 		performOperationExpecting422(ourServerBase + ourQuery, EncodingEnum.JSON, inputParameters,
 			"Could not find coverage for member");
+	}
+
+	@Test
+	public void testConsentUpdatePatientAndPerformer() throws Exception {
+		createCoverageWithBeneficiary(true, true);
+		myConsent = new Consent().addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI));
+		Parameters inputParameters = buildInputParameters(myPatient, oldCoverage, newCoverage, myConsent);
+		Parameters parametersResponse = performOperation(ourServerBase + ourQuery,
+			EncodingEnum.JSON, inputParameters);
+
+		Consent respConsent = validateResponseConsent(parametersResponse, myConsent);
+		validateConsentPatientAndPerformerRef(myPatient, respConsent);
 	}
 
 
@@ -409,15 +427,16 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	/**
 	 * Validates that consent from the response is same as the received consent with additional identifier and extension
 	 */
-	private void validateResponseConsent(Parameters theResponse, Consent theOriginalConsent) {
+	private Consent validateResponseConsent(Parameters theResponse, Consent theOriginalConsent) {
 		List<IBase> consentList = ParametersUtil.getNamedParameters(this.getFhirContext(), theResponse, PARAM_CONSENT);
 		assertEquals(1, consentList.size());
 		Consent respConsent= (Consent) theResponse.getParameter().get(2).getResource();
 
 		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getSystem(), respConsent.getScope().getCodingFirstRep().getSystem());
 		assertEquals(theOriginalConsent.getScope().getCodingFirstRep().getCode(), respConsent.getScope().getCodingFirstRep().getCode());
-		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", respConsent.getIdentifier().get(0).getSystem());
+		assertEquals(myMemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM, respConsent.getIdentifier().get(0).getSystem());
 		assertNotNull(respConsent.getIdentifier().get(0).getValue());
+		return respConsent;
 	}
 
 }

@@ -188,7 +188,7 @@ public class MemberMatcherR4HelperTest {
 		Consent consent = new Consent();
 		myHelper.addIdentifierToConsent(consent);
 		assertEquals(1, consent.getIdentifier().size());
-		assertEquals("https://smilecdr.com/fhir/ns/member-match-fixme", consent.getIdentifier().get(0).getSystem());
+		assertEquals(myTestedHelper.CONSENT_IDENTIFIER_CODE_SYSTEM, consent.getIdentifier().get(0).getSystem());
 		assertNotNull(consent.getIdentifier().get(0).getValue());
 	}
 
@@ -353,6 +353,16 @@ public class MemberMatcherR4HelperTest {
 
 	}
 
+	@Test
+	void TestUpdateConsentPatientAndPerformer() {
+		Consent consent = getConsent("#sensitive");
+		Patient patient = (Patient)new Patient().setId("Patient/123");
+		myTestedHelper.updateConsentPatientAndPerformer(consent, patient);
+		String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals(patientRef, consent.getPatient().getReference());
+		assertEquals(patientRef, consent.getPerformer().get(0).getReference());
+	}
+
 	@Nested
 	public class TestValidvalidConsentDataAccess {
 
@@ -437,17 +447,16 @@ public class MemberMatcherR4HelperTest {
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
 		}
+	}
 
-		private Consent getConsent(String uriAccess) {
-			Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
-			return consent;
-		}
+	private Consent getConsent(String uriAccess) {
+		Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
+		return consent;
+	}
 
-		private Consent.ConsentPolicyComponent constructConsentPolicyComponent(String uriAccess) {
-			String uri = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html";
-			return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
-		}
-
+	private Consent.ConsentPolicyComponent constructConsentPolicyComponent(String uriAccess) {
+		String uri = "http://hl7.org/fhir/us/davinci-hrex/StructureDefinition-hrex-consent.html";
+		return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
 	}
 
 
