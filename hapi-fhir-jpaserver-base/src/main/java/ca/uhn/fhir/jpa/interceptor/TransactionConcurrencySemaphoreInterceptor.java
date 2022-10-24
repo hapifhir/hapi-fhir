@@ -27,8 +27,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.TransactionWriteOperationsDetails;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import org.hl7.fhir.cache.Cache;
+import org.hl7.fhir.cache.CacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,10 +61,7 @@ public class TransactionConcurrencySemaphoreInterceptor {
 	 */
 	public TransactionConcurrencySemaphoreInterceptor(MemoryCacheService theMemoryCacheService) {
 		myMemoryCacheService = theMemoryCacheService;
-		mySemaphoreCache = Caffeine
-			.newBuilder()
-			.expireAfterAccess(1, TimeUnit.MINUTES)
-			.build();
+		mySemaphoreCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1));
 	}
 
 	/**

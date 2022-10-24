@@ -127,6 +127,11 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-cache</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
@@ -197,15 +202,14 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Used by the validator -->
+		<!-- Testing -->
 		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-			<optional>true</optional>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-cache-testing</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 
-
-		<!-- Testing -->
 		<dependency>
 			<groupId>org.xmlunit</groupId>
 			<artifactId>xmlunit-core</artifactId>

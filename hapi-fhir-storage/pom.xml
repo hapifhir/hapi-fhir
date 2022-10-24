@@ -64,6 +64,11 @@
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-cache</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<!-- TODO KHS remove jpa stuff from here -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
