@@ -47,8 +47,6 @@ public class MdmProviderLoader {
 	private IMdmSubmitSvc myMdmSubmitSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
-	@Autowired
-	private IJobCoordinator myJobCoordinator;
 
 	private BaseMdmProvider myMdmProvider;
 

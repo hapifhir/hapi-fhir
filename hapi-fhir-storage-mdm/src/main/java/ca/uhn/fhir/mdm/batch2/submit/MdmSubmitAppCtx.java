@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkExportCreateReportStep;
 import ca.uhn.fhir.batch2.jobs.export.WriteBinaryStep;
-import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -33,7 +32,6 @@ public class MdmSubmitAppCtx {
 		.setJobDefinitionVersion(1)
 		.setParametersType(MdmSubmitJobParameters.class)
 		.setParametersValidator(mdmSubmitJobParametersValidator())
-		.gatedExecution()
 		.addFirstStep(
 			"generate-ranges",
 			"generate data ranges to submit to mdm",
@@ -44,27 +42,21 @@ public class MdmSubmitAppCtx {
 			"Load the IDs",
 			ResourceIdListWorkChunkJson.class,
 			new LoadIdsStep(theBatch2DaoSvc))
-		.addIntermediateStep(
-			"expand-resources",
-			"Expand out resources",
-			ExpandedResourcesList.class,
-			mdmExpandResourcesStep())
 		.addLastStep(
-			"write-to-broker",
-			"Writes the expanded resources to the broker topic",
-			submitToBrokerStep())
+			"inflate-and-submit-resources",
+			"Inflate and Submit resources",
+			mdmInflateAndSubmitResourcesStep())
 		.build();
 	}
 
-@Bean
+	@Bean
 	public MdmSubmitJobParametersValidator mdmSubmitJobParametersValidator() {
 		return new MdmSubmitJobParametersValidator();
 	}
 
-
 	@Bean
-	public MdmExpandResourcesStep mdmExpandResourcesStep() {
-		return new MdmExpandResourcesStep();
+	public MdmInflateAndSubmitResourcesStep mdmInflateAndSubmitResourcesStep() {
+		return new MdmInflateAndSubmitResourcesStep();
 	}
 
 	@Bean
@@ -72,14 +64,4 @@ public class MdmSubmitAppCtx {
 		return new WriteBinaryStep();
 	}
 
-	@Bean
-	public SubmitToBrokerStep submitToBrokerStep() {
-		return new SubmitToBrokerStep();
-	}
-
-	@Bean
-	@Scope("prototype")
-	public BulkExportCreateReportStep createReportStep() {
-		return new BulkExportCreateReportStep();
-	}
 }

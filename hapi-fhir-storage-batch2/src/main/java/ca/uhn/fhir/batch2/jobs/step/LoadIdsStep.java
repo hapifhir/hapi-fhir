@@ -29,10 +29,15 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
+	private static final Logger ourLog = getLogger(LoadIdsStep.class);
+
 
 	private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
@@ -44,6 +49,7 @@ public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParamete
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> theStepExecutionDetails, @Nonnull IJobDataSink<ResourceIdListWorkChunkJson> theDataSink) throws JobExecutionFailedException {
+		ourLog.info("Beginning Load Ids Step");
 		return myResourceIdListStep.run(theStepExecutionDetails, theDataSink);
 	}
 

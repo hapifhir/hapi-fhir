@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -15,17 +17,28 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.Servlet;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
@@ -45,6 +58,16 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 
 	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
 
+	public static Stream<Arguments> requestTypes() {
+		ServletRequestDetails asyncSrd = mock(ServletRequestDetails.class);
+		when(asyncSrd.getHeader("Prefer")).thenReturn("respond-async");
+		ServletRequestDetails syncSrd = mock(ServletRequestDetails.class);
+
+		return Stream.of(
+			Arguments.of(Named.of("Asynchronous Request", asyncSrd)),
+			Arguments.of(Named.of("Synchronous Request", syncSrd))
+		);
+	}
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
@@ -75,21 +98,23 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		super.after();
 	}
 
-	@Test
-	public void testBatchRunOnAllMedications() throws InterruptedException {
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllMedications(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
-	@Test
-	public void testBatchRunOnAllPractitioners() throws InterruptedException {
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllPractitioners(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		StringType criteria = null;
 		clearMdmLinks();
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPractitionerType(criteria, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 	@Test
@@ -109,12 +134,13 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	@Test
-	public void testBatchRunOnAllPatients() throws InterruptedException {
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllPatients(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		assertLinkCount(3);
 		StringType criteria = null;
 		clearMdmLinks();
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProvider.mdmBatchPatientType(criteria, theSyncOrAsyncRequest));
 		assertLinkCount(1);
 	}
 
@@ -137,31 +163,33 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		}
 	}
 
-	@Tag("intermittent")
-//	@Test
-	public void testBatchRunOnAllTypes() throws InterruptedException {
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllTypes(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
 		assertLinkCount(3);
 		StringType criteria = new StringType("");
 		clearMdmLinks();
 		afterMdmLatch.runWithExpectedCount(3, () -> {
-			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, null);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria, theSyncOrAsyncRequest);
 		});
 		assertLinkCount(3);
 	}
 
-	@Test
-	public void testBatchRunOnAllTypesWithInvalidCriteria() {
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testBatchRunOnAllTypesWithInvalidCriteria(ServletRequestDetails theSyncOrAsyncRequest) {
 		assertLinkCount(3);
 		StringType criteria = new StringType("death-date=2020-06-01");
 		clearMdmLinks();
 
 		try {
-			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null);
+			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , theSyncOrAsyncRequest);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(containsString(Msg.code(2039) + "Failed to validate parameters for job")));
-			assertThat(e.getMessage(), is(containsString("Search parameter death-date is not recognized for resource type Practitioner.")));
-			assertThat(e.getMessage(), is(containsString("Search parameter death-date is not recognized for resource type Medication")));
+
+			assertThat(e.getMessage(), either(
+				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
+				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
 		}
 	}
 }

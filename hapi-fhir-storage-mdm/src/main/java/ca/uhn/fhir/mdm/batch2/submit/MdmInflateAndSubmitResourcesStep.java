@@ -26,6 +26,8 @@ import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.batch.log.Logs;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -40,44 +42,41 @@ import java.util.stream.Collectors;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class MdmExpandResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, ExpandedResourcesList> {
-	private static final Logger ourLog = getLogger(MdmExpandResourcesStep.class);
+public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private FhirContext myFhirContext;
-
 	@Autowired(required = false)
 	private ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
+	@Autowired
+	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<MdmSubmitJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<ExpandedResourcesList> theDataSink) throws JobExecutionFailedException {
+								 @Nonnull IJobDataSink<VoidModel> theDataSink) throws JobExecutionFailedException {
 		ResourceIdListWorkChunkJson idList = theStepExecutionDetails.getData();
 
-		ourLog.info("Step 2 for $mdm-submit - Expand resources");
+		ourLog.info("Final Step  for $mdm-submit - Expand and submit resources");
 		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getResourcePersistentIds().size());
 
-		// search the resources
+		//Inflate the resources by PID
 		List<IBaseResource> allResources = fetchAllResources(idList.getResourcePersistentIds());
 
+		//Replace the terminology
 		if (myResponseTerminologyTranslationSvc != null) {
 			myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
 		}
 
-		// encode them
-		IParser parser = myFhirContext.newJsonParser().setPrettyPrint(false);
-		List<String> stringified = allResources.stream().map(parser::encodeResourceToString).collect(Collectors.toList());;
-		ExpandedResourcesList output = new ExpandedResourcesList();
-		output.setStringifiedResources(stringified);
-		theDataSink.accept(output);
-		ourLog.info("Expanding of {} resources of type {} completed", idList.size(), idList.getResourceType(0));//FIXME GGG
+		//Submit
+		for (IBaseResource nextResource : allResources) {
+			myMdmChannelSubmitterSvc.submitResourceToMdmChannel(nextResource);
+		}
 
-		// and return
-		return RunOutcome.SUCCESS;
+		ourLog.info("Expanding of {} resources of type {} completed", idList.size(), idList.getResourceType(0));//FIXME GGG
+		return new RunOutcome(allResources.size());
 	}
 
 	private List<IBaseResource> fetchAllResources(List<ResourcePersistentId> theIds) {

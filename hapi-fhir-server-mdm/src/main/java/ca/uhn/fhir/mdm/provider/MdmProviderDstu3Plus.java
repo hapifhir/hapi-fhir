@@ -20,7 +20,6 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
-import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
@@ -249,7 +248,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			List<String> urls = buildUrlsForJob(criteria, resourceType);
 			return myMdmControllerSvc.submitMdmSubmitJob(urls, theRequestDetails);
 		} else {
-			if (resourceType != null) {
+			if (StringUtils.isNotBlank(resourceType)) {
 				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
 			} else {
 				submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
