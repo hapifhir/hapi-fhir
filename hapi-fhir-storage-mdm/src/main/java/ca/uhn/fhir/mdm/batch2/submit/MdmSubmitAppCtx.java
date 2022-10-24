@@ -22,8 +22,6 @@ package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.export.BulkExportCreateReportStep;
-import ca.uhn.fhir.batch2.jobs.export.WriteBinaryStep;
 import ca.uhn.fhir.batch2.jobs.step.GenerateRangeChunksStep;
 import ca.uhn.fhir.batch2.jobs.step.LoadIdsStep;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -33,7 +31,6 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class MdmSubmitAppCtx {

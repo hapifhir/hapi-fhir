@@ -22,13 +22,10 @@ package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.api.*;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
-import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -39,9 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmitJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
