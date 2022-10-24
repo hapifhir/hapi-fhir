@@ -24,7 +24,6 @@ public class Batch2JobDefinitionConstants {
 
 	// Bulk Export job
 	public static final String BULK_EXPORT = "BULK_EXPORT";
-	public static final String MDM_SUBMIT = "BULK_EXPORT";
 
 	private Batch2JobDefinitionConstants() {}
 }

@@ -48,10 +48,10 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -258,7 +258,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 
 	}
 
-	@NotNull
+	@Nonnull
 	private List<String> buildUrlsForJob(String criteria, String resourceType) {
 		List<String> urls = new ArrayList<>();
 		if (StringUtils.isNotBlank(resourceType)) {
@@ -303,8 +303,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
 		if (doAsync) {
 			String theUrl = "Patient?";
-			IBaseParameters iBaseParameters = myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
-			return iBaseParameters;
+			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
 			long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
@@ -332,8 +331,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		boolean doAsync = shouldPerformAsBatch2Job(theRequest);
 		if (doAsync) {
 			String theUrl = "Practitioner?";
-			IBaseParameters iBaseParameters = myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
-			return iBaseParameters;
+			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theRequest);
 		} else {
 			String criteria = convertStringTypeToString(theCriteria);
 			long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);

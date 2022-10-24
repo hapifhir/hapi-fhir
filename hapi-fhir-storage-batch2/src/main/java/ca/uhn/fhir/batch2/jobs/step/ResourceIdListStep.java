@@ -129,10 +129,8 @@ public class ResourceIdListStep<PT extends PartitionedJobParameters, IT extends 
 			return;
 		}
 		ourLog.info("Submitting work chunk with {} IDs", theTypedPids.size());
-
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson(theTypedPids);
-
-		ourLog.info("IDs are: {}", data);
+		ourLog.debug("IDs are: {}", data);
 		theDataSink.accept(data);
 	}
 }

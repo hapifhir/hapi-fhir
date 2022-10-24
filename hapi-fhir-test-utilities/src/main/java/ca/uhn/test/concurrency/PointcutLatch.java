@@ -72,7 +72,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public void runWithExpectedCount(int theExpectedCount, Runnable r) throws InterruptedException {
 		this.setExpectedCount(theExpectedCount);
 		r.run();
-		this.awaitExpectedWithTimeout(400);
+		this.awaitExpected();
 	}
 
 	public long getLastInvoke() {

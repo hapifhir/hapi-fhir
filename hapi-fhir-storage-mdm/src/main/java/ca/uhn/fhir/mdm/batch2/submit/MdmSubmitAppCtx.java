@@ -59,9 +59,4 @@ public class MdmSubmitAppCtx {
 		return new MdmInflateAndSubmitResourcesStep();
 	}
 
-	@Bean
-	public WriteBinaryStep writeBinaryStep() {
-		return new WriteBinaryStep();
-	}
-
 }
