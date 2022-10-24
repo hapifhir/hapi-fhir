@@ -357,7 +357,7 @@ public class MemberMatcherR4HelperTest {
 	void TestUpdateConsentPatientAndPerformer() {
 		Consent consent = getConsent("#sensitive");
 		Patient patient = (Patient)new Patient().setId("Patient/123");
-		myTestedHelper.updateConsentPatientAndPerformer(consent, patient);
+		myHelper.updateConsentPatientAndPerformer(consent, patient);
 		String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
 		assertEquals(patientRef, consent.getPatient().getReference());
 		assertEquals(patientRef, consent.getPerformer().get(0).getReference());
