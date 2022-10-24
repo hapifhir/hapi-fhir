@@ -423,7 +423,9 @@ public class BulkDataExportProvider {
 		outputFormat = outputFormat.replace(" ", "+");
 
 		Set<String> resourceTypes = new HashSet<>();
-		resourceTypes.addAll(myDaoRegistry.getSupportedResourceTypes());
+		if(myDaoRegistry.getSupportedResourceTypes() != null) {
+			resourceTypes.addAll(myDaoRegistry.getSupportedResourceTypes());
+		}
 
 		if (theType != null) {
 			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
