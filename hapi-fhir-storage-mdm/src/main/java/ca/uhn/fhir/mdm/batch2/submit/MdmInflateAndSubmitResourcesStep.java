@@ -2,7 +2,7 @@ package ca.uhn.fhir.mdm.batch2.submit;
 
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * hapi-fhir-storage-mdm
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
