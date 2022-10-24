@@ -9,6 +9,10 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Consent;
@@ -21,6 +25,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -29,14 +34,15 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ca.uhn.fhir.jpa.provider.r4.MemberMatcherR4Helper.CONSENT_IDENTIFIER_CODE_SYSTEM;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONSENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_MEMBER_PATIENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
@@ -46,12 +52,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberMatcherR4HelperTest {
+
+	private static final Logger ourLog = (Logger) LoggerFactory.getLogger(MemberMatcherR4Helper.class);
+
+	@Mock
+	private ListAppender<ILoggingEvent> myAppender;
 
 	@Spy
 	private final FhirContext myFhirContext = FhirContext.forR4();
@@ -73,6 +85,13 @@ public class MemberMatcherR4HelperTest {
 			myConsentDao,
 			null // extension provider
 		);
+
+		ourLog.addAppender(myAppender);
+	}
+
+	@AfterEach
+	public void after() {
+		ourLog.detachAppender(myAppender);
 	}
 
 	@Mock private Coverage myCoverageToMatch;
@@ -181,15 +200,6 @@ public class MemberMatcherR4HelperTest {
 
 		assertEquals("new-identifier-system", patient.getIdentifier().get(1).getSystem());
 		assertEquals("new-identifier-value", patient.getIdentifier().get(1).getValue());
-	}
-
-	@Test
-	void TestAddIdentifierToConsent() {
-		Consent consent = new Consent();
-		myHelper.addIdentifierToConsent(consent);
-		assertEquals(1, consent.getIdentifier().size());
-		assertEquals(myTestedHelper.CONSENT_IDENTIFIER_CODE_SYSTEM, consent.getIdentifier().get(0).getSystem());
-		assertNotNull(consent.getIdentifier().get(0).getValue());
 	}
 
 	@Nested
@@ -353,16 +363,6 @@ public class MemberMatcherR4HelperTest {
 
 	}
 
-	@Test
-	void TestUpdateConsentPatientAndPerformer() {
-		Consent consent = getConsent("#sensitive");
-		Patient patient = (Patient)new Patient().setId("Patient/123");
-		myHelper.updateConsentPatientAndPerformer(consent, patient);
-		String patientRef = patient.getIdElement().toUnqualifiedVersionless().getValue();
-		assertEquals(patientRef, consent.getPatient().getReference());
-		assertEquals(patientRef, consent.getPerformer().get(0).getReference());
-	}
-
 	@Nested
 	public class TestValidvalidConsentDataAccess {
 
@@ -459,21 +459,70 @@ public class MemberMatcherR4HelperTest {
 		return new Consent.ConsentPolicyComponent().setUri(uri + uriAccess);
 	}
 
+	private Patient createPatientForMemberMatchUpdate() {
+		Patient patient = new Patient();
+		patient.setId("Patient/RED");
+
+		return patient;
+	}
+
+	private void verifyConsentUpdatedAfterMemberMatch(
+		Consent theConsent,
+		Patient thePatient,
+		List<Extension> theSavedExtensions
+	) {
+		// check consent identifier
+		assertEquals(1, theConsent.getIdentifier().size());
+		assertEquals(CONSENT_IDENTIFIER_CODE_SYSTEM, theConsent.getIdentifier().get(0).getSystem());
+		assertNotNull(theConsent.getIdentifier().get(0).getValue());
+
+		// check consent patient info
+		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals(patientRef, theConsent.getPatient().getReference());
+		assertEquals(patientRef, theConsent.getPerformer().get(0).getReference());
+
+		if (!theSavedExtensions.isEmpty()) {
+			// check consent extensions
+			assertNotNull(theConsent.getExtension());
+			assertEquals(theSavedExtensions.size(), theConsent.getExtension().size());
+			for (Extension ext : theSavedExtensions) {
+				boolean found = false;
+				for (Extension consentExt : theConsent.getExtension()) {
+					if (consentExt.getUrl().equals(ext.getUrl())
+						&& consentExt.getValue().equals(ext.getValue())) {
+						found = true;
+						break;
+					}
+				}
+				assertTrue(found,
+					"Extension " + ext.getUrl() + "|" + ext.getValue().toString() + " not found"
+				);
+			}
+		}
+	}
 
 	@Nested
 	public class MemberMatchWithoutConsentProvider {
 
 		@Test
-		public void addClientIdAsExtensionToConsentIfAvailable_noProvider_doesNothing() {
+		public void updateConsentForMemberMatch_noProvider_addsIdentifierUpdatePatientButNotExtensionAndSaves() {
 			// setup
-			Consent consent = new Consent();
+			Consent consent = getConsent("#sensitive");
+			Patient patient = createPatientForMemberMatchUpdate();
+
+			ourLog.setLevel(Level.TRACE);
 
 			// test
-			myHelper.addClientIdAsExtensionToConsentIfAvailable(consent);
+			myHelper.updateConsentForMemberMatch(consent, patient);
 
 			// verify
-			verify(myConsentDao, Mockito.never())
-				.create(any(Consent.class));
+			verify(myAppender, never())
+				.doAppend(any(ILoggingEvent.class));
+
+			ArgumentCaptor<Consent> consentCaptor = ArgumentCaptor.forClass(Consent.class);
+			verify(myConsentDao).create(consentCaptor.capture());
+			Consent saved = consentCaptor.getValue();
+			verifyConsentUpdatedAfterMemberMatch(saved, patient, Collections.emptyList());
 		}
 	}
 
@@ -496,29 +545,32 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		public void addClientIdAsExtensionToConsentIfAvailable_withProvider_addsExtensionAndSaves() {
 			// setup
-			Consent consent = new Consent();
+			Consent consent = getConsent("#sensitive");
 			consent.setId("Consent/RED");
 			Extension ext = new Extension();
 			ext.setUrl("http://example.com");
 			ext.setValue(new StringType("value"));
+			Patient patient = createPatientForMemberMatchUpdate();
+
+			ourLog.setLevel(Level.TRACE);
 
 			// when
 			when(myExtensionProvider.getConsentExtension(any(IBaseResource.class)))
 				.thenReturn(Collections.singleton(ext));
 
 			// test
-			myHelper.addClientIdAsExtensionToConsentIfAvailable(consent);
+			myHelper.updateConsentForMemberMatch(consent, patient);
 
 			// verify
-			ArgumentCaptor<Consent> consentArgumentCaptor = ArgumentCaptor.forClass(Consent.class);
-			verify(myConsentDao).create(consentArgumentCaptor.capture());
-			Consent saved = consentArgumentCaptor.getValue();
-			assertEquals(consent.getId(), saved.getId());
-			assertNotNull(saved.getExtension());
-			assertEquals(1, saved.getExtension().size());
-			Extension savedExt = saved.getExtension().get(0);
-			assertEquals(ext.getUrl(), savedExt.getUrl());
-			assertEquals(ext.getValue(), savedExt.getValue());
+			ArgumentCaptor<Consent> consentCaptor = ArgumentCaptor.forClass(Consent.class);
+			verify(myConsentDao).create(consentCaptor.capture());
+			Consent saved = consentCaptor.getValue();
+			verifyConsentUpdatedAfterMemberMatch(saved, patient, Collections.emptyList());
+
+			ArgumentCaptor<ILoggingEvent> eventCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
+			verify(myAppender).doAppend(eventCaptor.capture());
+			ILoggingEvent event = eventCaptor.getValue();
+			assertEquals("1 extension(s) added to Consent", event.getFormattedMessage());
 		}
 	}
 }

@@ -120,16 +120,9 @@ public class MemberMatchR4ResourceProvider {
 		}
 
 		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
-		updateConsentForMemberMatch(theConsent);
-		myMemberMatcherR4Helper.updateConsentPatientAndPerformer(theConsent, patient);
+		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient);
 		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
-
-	private void updateConsentForMemberMatch(Consent theConsent) {
-		myMemberMatcherR4Helper.addClientIdAsExtensionToConsentIfAvailable(theConsent);
-		myMemberMatcherR4Helper.addIdentifierToConsent(theConsent);
-	}
-
 
 	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);

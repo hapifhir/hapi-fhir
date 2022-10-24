@@ -60,6 +60,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
  */
 
 public class MemberMatcherR4Helper {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MemberMatcherR4Helper.class);
 
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE_SYSTEM = "http://terminology.hl7.org/CodeSystem/v2-0203";
 	private static final String OUT_COVERAGE_IDENTIFIER_CODE = "MB";
@@ -141,6 +142,14 @@ public class MemberMatcherR4Helper {
 		return retVal.getAllResources();
 	}
 
+	public void updateConsentForMemberMatch(Consent theConsent, Patient thePatient) {
+		addClientIdAsExtensionToConsentIfAvailable(theConsent);
+		addIdentifierToConsent(theConsent);
+		updateConsentPatientAndPerformer(theConsent, thePatient);
+
+		// save the resource
+		myConsentDao.create(theConsent);
+	}
 
 	public Parameters buildSuccessReturnParameters(Patient theMemberPatient, Coverage theCoverage, Consent theConsent) {
 		IBaseParameters parameters = ParametersUtil.newInstance(myFhirContext);
@@ -149,7 +158,6 @@ public class MemberMatcherR4Helper {
 		ParametersUtil.addParameterToParameters(myFhirContext, parameters, PARAM_CONSENT, theConsent);
 		return (Parameters) parameters;
 	}
-
 
 	public void addMemberIdentifierToMemberPatient(Patient theMemberPatient, Identifier theNewIdentifier) {
 		Coding coding = new Coding()
@@ -175,7 +183,7 @@ public class MemberMatcherR4Helper {
 	 * If there is a client id
 	 * @param theConsent - the consent to modify
 	 */
-	public void addClientIdAsExtensionToConsentIfAvailable(Consent theConsent) {
+	private void addClientIdAsExtensionToConsentIfAvailable(Consent theConsent) {
 		if (myIConsentExtensionProvider != null) {
 			Collection<IBaseExtension> extensions = myIConsentExtensionProvider.getConsentExtension(theConsent);
 
@@ -190,7 +198,7 @@ public class MemberMatcherR4Helper {
 				}
 			}
 
-			myConsentDao.create(theConsent);
+			ourLog.trace("{} extension(s) added to Consent", extensions.size());
 		}
 	}
 
@@ -275,7 +283,7 @@ public class MemberMatcherR4Helper {
 //		return true;
 	}
 
-	public void addIdentifierToConsent(Consent theConsent) {
+	private void addIdentifierToConsent(Consent theConsent) {
 		String consentId = UUID.randomUUID().toString();
 		Identifier consentIdentifier = new Identifier().setSystem(CONSENT_IDENTIFIER_CODE_SYSTEM).setValue(consentId);
 		theConsent.addIdentifier(consentIdentifier);
@@ -285,7 +293,7 @@ public class MemberMatcherR4Helper {
 		myRegularFilterSupported = theRegularFilterSupported;
 	}
 
-	public void updateConsentPatientAndPerformer(Consent theConsent, Patient thePatient) {
+	private void updateConsentPatientAndPerformer(Consent theConsent, Patient thePatient) {
 		String patientRef = thePatient.getIdElement().toUnqualifiedVersionless().getValue();
 		theConsent.getPatient().setReference(patientRef);
 		if (theConsent.getPerformer().size() <= 0) {
