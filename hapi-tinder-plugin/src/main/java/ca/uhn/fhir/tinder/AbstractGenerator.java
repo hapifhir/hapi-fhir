@@ -52,6 +52,9 @@ public abstract class AbstractGenerator {
 		} else if ("r4".equals(context.getVersion())) {
 			fhirContext = FhirContext.forR4();
 			packageSuffix = ".r4";
+		} else if ("r5".equals(context.getVersion())) {
+			fhirContext = FhirContext.forR5();
+			packageSuffix = ".r5";
 		} else {
 			throw new FailureException(Msg.code(95) + "Unknown version configured: " + context.getVersion());
 		}
