@@ -355,7 +355,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 			while (resultIterator.hasNext()) {
 				resPids.add(resultIterator.next());
-//				pids.add(resultIterator.next().toString());
 			}
 		}
 		return resPids;
