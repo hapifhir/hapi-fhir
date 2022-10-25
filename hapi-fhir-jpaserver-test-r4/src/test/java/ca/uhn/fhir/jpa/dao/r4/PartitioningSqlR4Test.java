@@ -60,6 +60,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -110,13 +111,18 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("Running with Timezone {}", TimeZone.getDefault().getID());
 	}
 
+	@AfterEach
+	public void afterEach() {
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(new DaoConfig().isMarkResourcesForReindexingUponSearchParameterChange());
+	}
+
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
-		addReadDefaultPartition();
+		addReadDefaultPartition(); // and one for reindexing
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);

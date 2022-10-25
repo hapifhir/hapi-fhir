@@ -178,27 +178,6 @@ public class HapiTransactionService implements IHapiTransactionService {
 		}
 	}
 
-	/**
-	 * Execute the callback in a transaction with REQUIRES_NEW propagation level
-	 */
-	@Nullable
-	protected <T> T doExecuteCallbackReqNew(TransactionCallback<T> theCallback, Propagation thePropagation, Isolation theIsolation) {
-		try {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(thePropagation.value());
-			if (myCustomIsolationSupported && theIsolation != Isolation.DEFAULT) {
-				txTemplate.setIsolationLevel(theIsolation.value());
-			}
-			return txTemplate.execute(theCallback);
-		} catch (MyException e) {
-			if (e.getCause() instanceof RuntimeException) {
-				throw (RuntimeException) e.getCause();
-			} else {
-				throw new InternalErrorException(Msg.code(551) + e);
-			}
-		}
-	}
-
 	public boolean isCustomIsolationSupported() {
 		if (myTransactionManager instanceof JpaTransactionManager) {
 			JpaDialect jpaDialect = ((JpaTransactionManager) myTransactionManager).getJpaDialect();
