@@ -118,11 +118,12 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
+		myInterceptorRegistry.unregisterAllInterceptors();
+
 		addCreateDefaultPartition();
 		// we need two read partition accesses for when the creation of the SP triggers a reindex of Patient
 		addReadDefaultPartition(); // one to rewrite the resource url
 		addReadDefaultPartition(); // and one for the job request itself
-		addReadDefaultPartition(); // and one for reindexing
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);

@@ -523,7 +523,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
-	private List<Object> myPreviouslyRegisteredInterceptors;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -541,16 +540,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPartitionSettings.setPartitioningEnabled(false);
 	}
 
-	@BeforeEach
-	public final void beforeCaptureInterceptors() {
-		myPreviouslyRegisteredInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
-	}
-
-
 	@AfterEach
 	public void afterResetInterceptors() {
 		myInterceptorRegistry.unregisterAllInterceptors();
-		myInterceptorRegistry.registerInterceptors(myPreviouslyRegisteredInterceptors);
 	}
 
 	@AfterEach
