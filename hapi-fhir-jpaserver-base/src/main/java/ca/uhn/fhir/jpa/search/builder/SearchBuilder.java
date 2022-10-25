@@ -648,6 +648,10 @@ public class SearchBuilder implements ISearchBuilder {
 			createSort(queryStack3, sort);
 		}
 
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+		}
+
 		/*
 		 * Now perform the search
 		 */
