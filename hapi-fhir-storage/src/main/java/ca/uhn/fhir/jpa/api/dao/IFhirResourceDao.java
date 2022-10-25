@@ -42,6 +42,7 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -65,7 +66,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #create(IBaseResource, RequestDetails)} instead
 	 */
 	DaoMethodOutcome create(T theResource);
 
@@ -73,14 +76,16 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #create(IBaseResource, String, RequestDetails)} instead
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist);
 
 	/**
 	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *                           won't be indexed and searches won't work.
-	 * @param theRequestDetails  TODO
+	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
 
@@ -88,7 +93,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Delete a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #delete(IIdType, RequestDetails)} instead
 	 */
 	DaoMethodOutcome delete(IIdType theResource);
 
@@ -125,7 +132,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
 
 	/**
-	 * @deprecated Just use history(IIdType theId, HistorySearchDateRangeParam theHistorySearchDateRangeParam, RequestDetails theRequestDetails) instead;
+	 * @deprecated Use {@link #history(IIdType, HistorySearchDateRangeParam, RequestDetails)} instead
 	 */
 	@Deprecated(since = "6.2")
 	IBundleProvider history(IIdType theId, Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails);
@@ -135,28 +142,28 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Not supported in DSTU1!
 	 *
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
 	<MT extends IBaseMetaType> MT metaAddOperation(IIdType theId1, MT theMetaAdd, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
 	 *
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
 	<MT extends IBaseMetaType> MT metaDeleteOperation(IIdType theId1, MT theMetaDel, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
 	 *
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * Not supported in DSTU1!
 	 *
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
@@ -164,31 +171,41 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #read(IIdType, RequestDetails)} instead
 	 */
 	T read(IIdType theId);
 
 	/**
 	 * Read a resource by its internal PID
+	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException If the resource has been deleted
 	 */
 	T readByPid(ResourcePersistentId thePid);
 
 	/**
 	 * Read a resource by its internal PID
+	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
+	 *
 	 */
 	default T readByPid(ResourcePersistentId thePid, boolean theDeletedOk) {
 		throw new UnsupportedOperationException(Msg.code(571));
 	}
 
 	/**
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException If the resource has been deleted
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
 
 	/**
 	 * Should deleted resources be returned successfully. This should be false for
 	 * a normal FHIR read.
+	 * @throws ResourceNotFoundException If the ID is not known to the server
+	 * @throws ResourceGoneException If the resource has been deleted and theDeletedOk is true
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
@@ -210,6 +227,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void removeTag(IIdType theId, TagTypeEnum theTagType, String theSystem, String theCode);
 
+	/**
+	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 */
 	IBundleProvider search(SearchParameterMap theParams);
 
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails);
@@ -246,7 +266,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #update(T, RequestDetails)} instead
 	 */
 	DaoMethodOutcome update(T theResource);
 
@@ -254,14 +276,16 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	/**
 	 * Update a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
-	 * therefore can not fire any interceptors. Use only for internal system calls
+	 * therefore can not fire any interceptors.
+	 *
+	 * @deprecated Use {@link #update(T, String, RequestDetails)} instead
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl);
 
 	/**
 	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *                           won't be indexed and searches won't work.
-	 * @param theRequestDetails  TODO
+	 * @param theRequestDetails  The request details including permissions and partitioning information
 	 */
 	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
@@ -276,7 +300,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Not supported in DSTU1!
 	 *
-	 * @param theRequestDetails TODO
+	 * @param theRequestDetails The request details including permissions and partitioning information
 	 */
 	MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails);
 
@@ -299,7 +323,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
 	/**
-	 * Returns the current version ID for the given resource
+	 * @deprecated use #read(IIdType, RequestDetails) instead
 	 */
 	default String getCurrentVersionId(IIdType theReferenceElement) {
 		return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();

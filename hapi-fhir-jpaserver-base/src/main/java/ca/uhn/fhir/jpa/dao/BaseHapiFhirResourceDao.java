@@ -190,6 +190,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
 
+	/**
+	 * @deprecated Use {@link #create(T, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
 		return create(theResource, null, true, new TransactionDetails(), null);
@@ -200,6 +203,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return create(theResource, null, true, new TransactionDetails(), theRequestDetails);
 	}
 
+	/**
+	 * @deprecated Use {@link #create(T, String, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome create(final T theResource, String theIfNoneExist) {
 		return create(theResource, theIfNoneExist, null);
@@ -473,6 +479,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myInstanceValidator;
 	}
 
+	/**
+	 * @deprecated Use {@link #delete(IIdType, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome delete(IIdType theId) {
 		return delete(theId, null);
@@ -924,6 +933,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #history(IIdType, HistorySearchDateRangeParam, RequestDetails)} instead
+	 */
 	@Override
 	@Transactional
 	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
@@ -1219,6 +1231,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #read(IIdType, RequestDetails)} instead
+	 */
 	@Override
 	public T read(IIdType theId) {
 		return read(theId, null);
@@ -1285,12 +1300,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
 		return readEntity(theId, true, theRequest);
-	}
-
-	@Override
-	@Transactional
-	public String getCurrentVersionId(IIdType theReferenceElement) {
-		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1469,6 +1478,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Processed remove tag {}/{} on {} in {}ms", theScheme, theTerm, theId.getValue(), w.getMillisAndRestart());
 	}
 
+	/**
+	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
@@ -1639,6 +1651,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #update(T, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome update(T theResource) {
 		return update(theResource, null, null);
@@ -1649,6 +1664,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return update(theResource, null, theRequestDetails);
 	}
 
+	/**
+	 * @deprecated Use {@link #update(T, String, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl) {
 		return update(theResource, theMatchUrl, null);
