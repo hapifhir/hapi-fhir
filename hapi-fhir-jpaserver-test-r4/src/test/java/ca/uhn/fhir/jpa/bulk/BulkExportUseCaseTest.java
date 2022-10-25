@@ -70,7 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@ExtendWith(BeforeEachAfterEachParameterResolver.class)
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
@@ -80,15 +79,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
+
 	@BeforeEach
-	public void setUp(DaoConfig.ClientIdStrategyEnum theClientIdStrategyEnum) {
-		myDaoConfig.setResourceClientIdStrategy(theClientIdStrategyEnum);
+	public void setup() {
+		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
 	}
 
-	@AfterEach
-	public void tearDown() {
-
-	}
 	public static Stream<Arguments> clientIdStrategies() {
 		return Stream.of(
 			Arguments.of(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC),
@@ -98,8 +94,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class SpecConformanceTests {
-		@ParameterizedTest
-		@MethodSource("clientIdStrategies")
+		@Test
 		public void testPollingLocationContainsAllRequiredAttributesUponCompletion() throws IOException {
 
 			//Given a patient exists
