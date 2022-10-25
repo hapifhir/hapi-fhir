@@ -27,7 +27,7 @@ public class SearchParameterHelper {
 			return Optional.empty();
 		}
 
-		SearchParameterMap retVal = new SearchParameterMap();
+		SearchParameterMap retVal = SearchParameterMap.newSynchronous();
 
 		String theCode = canonicalSearchParam.getName();
 		List<String> theBases = List.copyOf(canonicalSearchParam.getBase());
