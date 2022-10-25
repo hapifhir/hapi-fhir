@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
+import com.helger.commons.lang.StackTraceHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -205,12 +207,23 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
 			myReadRequestPartitionIds.add(theRequestPartitionId);
+			ourLog.info("Adding partition {} for read (not have {})", theRequestPartitionId, myReadRequestPartitionIds.size());
 		}
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 		public RequestPartitionId partitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+
+			String stack;
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				stack = StackTraceHelper.getStackAsString(e);
+				int lastWantedNewLine = StringUtils.ordinalIndexOf(stack, "\n", 15);
+				stack = stack.substring(0, lastWantedNewLine);
+			}
+
 			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for read: {}", retVal);
+			ourLog.info("Returning partition {} for read at: {}", retVal, stack);
 			return retVal;
 		}
 

@@ -43,6 +43,7 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		myTargetPatientId = new StringType(myTargetPatient.getIdElement().getValue());
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(false);

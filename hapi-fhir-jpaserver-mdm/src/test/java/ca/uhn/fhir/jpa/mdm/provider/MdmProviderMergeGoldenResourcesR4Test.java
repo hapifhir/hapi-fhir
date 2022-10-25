@@ -47,6 +47,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		myToGoldenPatientId = new StringType(myToGoldenPatient.getIdElement().getValue());
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());

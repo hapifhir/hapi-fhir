@@ -25,6 +25,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@Autowired
 	MdmResourceDaoSvc myResourceDaoSvc;
 
+	@Override
 	@AfterEach
 	public void after() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
