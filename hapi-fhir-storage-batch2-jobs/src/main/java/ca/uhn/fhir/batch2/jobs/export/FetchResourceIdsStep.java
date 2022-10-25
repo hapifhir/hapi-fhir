@@ -79,7 +79,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
-				ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
+				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
 
