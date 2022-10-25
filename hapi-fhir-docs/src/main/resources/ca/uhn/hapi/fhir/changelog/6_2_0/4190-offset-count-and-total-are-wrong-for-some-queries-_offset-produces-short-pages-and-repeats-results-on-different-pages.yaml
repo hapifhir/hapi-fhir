@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4190
+title: "Previously, when using _offset, the queries will result in short pages, and repeats results on different pages.
+This has now been fixed."
