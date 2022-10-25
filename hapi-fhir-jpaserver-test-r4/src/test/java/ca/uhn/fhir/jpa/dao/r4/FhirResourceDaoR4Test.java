@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -83,6 +84,7 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.MolecularSequence;
@@ -133,6 +135,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -336,7 +339,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 
-@Tag("intermittent")
+	@Tag("intermittent")
 	//	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {
 		myDaoConfig.setSchedulingDisabled(true);
@@ -4258,6 +4261,72 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider results = myEncounterDao.search(map);
 		assertEquals(0, results.size().intValue());
 		assertNotEquals(uuid, results.getUuid());
+	}
+
+	@Test
+	public void testSearchWithReverseChainingAndOffset() {
+		int amountOfPatients = 5;
+		{
+			for (int i = 0; i < amountOfPatients; i++) {
+				Patient p = new Patient();
+				p.setActive(true);
+				String pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+				for (int j = 0; j < 20; j++) {
+					Observation o = new Observation();
+					o.setSubject(new Reference().setReference(pid));
+					o.setCode(new CodeableConcept().addCoding(new Coding().setCode("sample")));
+					myObservationDao.create(o, mySrd);
+				}
+			}
+		}
+		SearchParameterMap spMap;
+		List<IBaseResource> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.add(PARAM_HAS, new HasParam("Observation", "patient", "code", "sample"));
+		spMap.setOffset(0);
+		spMap.setCount(5);
+
+		IBundleProvider search = myPatientDao.search(spMap);
+		actual = search.getResources(0, 100);
+		assertEquals(amountOfPatients, actual.size());
+	}
+
+	@Test
+	public void testSearchWithReverseChainingOffsetAndSort() {
+		int amountOfPatients = 5;
+		String[] namesNotInAlpha = {"Charlie", "Tim", "Adam", "Dan", "Bob"};
+		String[] namesInAlpha = {"Adam", "Bob", "Charlie", "Dan", "Tim"};
+		{
+			for (int i = 0; i < amountOfPatients; i++) {
+				Patient p = new Patient();
+				p.setActive(true);
+				p.addName(new HumanName().addGiven(namesNotInAlpha[i]));
+				String pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+				for (int j = 0; j < 20; j++) {
+					Observation o = new Observation();
+					o.setSubject(new Reference().setReference(pid));
+					o.setCode(new CodeableConcept().addCoding(new Coding().setCode("sample")));
+					myObservationDao.create(o, mySrd);
+				}
+			}
+		}
+		SearchParameterMap spMap;
+		List<IBaseResource> actual;
+
+		spMap = SearchParameterMap.newSynchronous();
+		spMap.add(PARAM_HAS, new HasParam("Observation", "patient", "code", "sample"));
+		spMap.setOffset(0);
+		spMap.setCount(5);
+		spMap.setSort(new SortSpec(Patient.SP_GIVEN));
+
+		IBundleProvider search = myPatientDao.search(spMap);
+		actual = search.getResources(0, 100);
+		List<String> actualNameList = actual.stream().map((resource) -> ((Patient) resource).getName().get(0).getGiven().get(0).toString()).toList();
+		ourLog.info("Results: {}", actualNameList);
+
+		assertEquals(amountOfPatients, actual.size());
+		assertThat(actualNameList, contains(namesInAlpha));
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {
