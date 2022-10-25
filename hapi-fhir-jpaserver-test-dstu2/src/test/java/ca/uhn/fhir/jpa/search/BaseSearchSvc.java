@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.stubbing.Answer;
@@ -31,9 +32,7 @@ public class BaseSearchSvc {
 	protected int myExpectedNumberOfSearchBuildersCreated = 2;
 	@Mock
 	protected SearchBuilderFactory mySearchBuilderFactory;
-
-	@Mock
-	protected PlatformTransactionManager myTxManager;
+	@Spy
 	protected HapiTransactionService myTransactionService = new MockHapiTransactionService();
 	@Mock
 	protected SearchBuilder mySearchBuilder;

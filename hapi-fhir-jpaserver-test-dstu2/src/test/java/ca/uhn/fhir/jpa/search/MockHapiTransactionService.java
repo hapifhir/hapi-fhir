@@ -13,9 +13,10 @@ import java.util.concurrent.Callable;
 
 public class MockHapiTransactionService extends HapiTransactionService {
 
-
+	@Nullable
 	@Override
-	public <T> T execute(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull TransactionCallback<T> theCallback, @Nullable Runnable theOnRollback, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation) {
+	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
 		return theCallback.doInTransaction(null);
 	}
+
 }

@@ -221,6 +221,117 @@ public class HapiTransactionService implements IHapiTransactionService {
 		myTransactionManager = theTransactionManager;
 	}
 
+	@Nullable
+	protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+		final RequestPartitionId requestPartitionId;
+		if (theExecutionBuilder.myRequestPartitionId != null) {
+			requestPartitionId = theExecutionBuilder.myRequestPartitionId;
+		} else if (theExecutionBuilder.myRequestDetails != null) {
+			requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(theExecutionBuilder.myRequestDetails);
+		} else {
+			requestPartitionId = null;
+		}
+		RequestPartitionId previousRequestPartitionId = null;
+		if (requestPartitionId != null) {
+			previousRequestPartitionId = ourRequestPartition.get();
+			ourRequestPartition.set(requestPartitionId);
+		}
+
+		try {
+			for (int i = 0; ; i++) {
+				try {
+
+					try {
+						TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+
+						if (theExecutionBuilder.myPropagation != null) {
+							txTemplate.setPropagationBehavior(theExecutionBuilder.myPropagation.value());
+						}
+
+						if (myCustomIsolationSupported && theExecutionBuilder.myIsolation != null && theExecutionBuilder.myIsolation != Isolation.DEFAULT) {
+							txTemplate.setIsolationLevel(theExecutionBuilder.myIsolation.value());
+						}
+
+						if (theExecutionBuilder.myReadOnly) {
+							txTemplate.setReadOnly(true);
+						}
+
+						return txTemplate.execute(theCallback);
+					} catch (MyException e) {
+						if (e.getCause() instanceof RuntimeException) {
+							throw (RuntimeException) e.getCause();
+						} else {
+							throw new InternalErrorException(Msg.code(551) + e);
+						}
+					}
+
+				} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
+					ourLog.debug("Version conflict detected", e);
+
+					if (theExecutionBuilder.myOnRollback != null) {
+						theExecutionBuilder.myOnRollback.run();
+					}
+
+					int maxRetries = 0;
+
+					/*
+					 * If two client threads both concurrently try to add the same tag that isn't
+					 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
+					 * which is the tag definition table. In that case, a constraint error will be
+					 * thrown by one of the client threads, so we auto-retry in order to avoid
+					 * annoying spurious failures for the client.
+					 */
+					if (DaoFailureUtil.isTagStorageFailure(e)) {
+						maxRetries = 3;
+					}
+
+					if (maxRetries == 0) {
+						HookParams params = new HookParams()
+							.add(RequestDetails.class, theExecutionBuilder.myRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, theExecutionBuilder.myRequestDetails);
+						ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theExecutionBuilder.myRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
+						if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
+							maxRetries = conflictResolutionStrategy.getMaxRetries();
+						}
+					}
+
+					if (i < maxRetries) {
+						if (theExecutionBuilder.myTransactionDetails != null) {
+							theExecutionBuilder.myTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
+							theExecutionBuilder.myTransactionDetails.clearRollbackUndoActions();
+							theExecutionBuilder.myTransactionDetails.clearResolvedItems();
+							theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
+							theExecutionBuilder.myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
+						}
+						double sleepAmount = (250.0d * i) * Math.random();
+						long sleepAmountLong = (long) sleepAmount;
+						TestUtil.sleepAtLeast(sleepAmountLong, false);
+
+						ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
+						continue;
+					}
+
+					IBaseOperationOutcome oo = null;
+					if (e instanceof ResourceVersionConflictException) {
+						oo = ((ResourceVersionConflictException) e).getOperationOutcome();
+					}
+
+					if (maxRetries > 0) {
+						String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
+						ourLog.info(msg, maxRetries);
+						throw new ResourceVersionConflictException(Msg.code(549) + msg);
+					}
+
+					throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
+				}
+			}
+		} finally {
+			if (requestPartitionId != null) {
+				ourRequestPartition.set(previousRequestPartitionId);
+			}
+		}
+	}
+
 	public static <T> T executeWithDefaultPartitionInContext(@Nonnull ICallable<T> theCallback) {
 		RequestPartitionId previousRequestPartitionId = ourRequestPartition.get();
 		ourRequestPartition.set(RequestPartitionId.defaultPartition());
@@ -309,113 +420,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		public <T> T task(TransactionCallback<T> callback) {
 			assert callback != null;
 
-			final RequestPartitionId requestPartitionId;
-			if (myRequestPartitionId != null) {
-				requestPartitionId = myRequestPartitionId;
-			} else if (myRequestDetails != null) {
-				requestPartitionId = myRequestPartitionHelperSvc.determineGenericPartitionForRequest(myRequestDetails);
-			} else {
-				requestPartitionId = null;
-			}
-			RequestPartitionId previousRequestPartitionId = null;
-			if (requestPartitionId != null) {
-				previousRequestPartitionId = ourRequestPartition.get();
-				ourRequestPartition.set(requestPartitionId);
-			}
-
-			try {
-				for (int i = 0; ; i++) {
-					try {
-
-						try {
-							TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-
-							if (myPropagation != null) {
-								txTemplate.setPropagationBehavior(myPropagation.value());
-							}
-
-							if (myCustomIsolationSupported && myIsolation != null && myIsolation != Isolation.DEFAULT) {
-								txTemplate.setIsolationLevel(myIsolation.value());
-							}
-
-							if (myReadOnly) {
-								txTemplate.setReadOnly(true);
-							}
-
-							return txTemplate.execute(callback);
-						} catch (MyException e) {
-							if (e.getCause() instanceof RuntimeException) {
-								throw (RuntimeException) e.getCause();
-							} else {
-								throw new InternalErrorException(Msg.code(551) + e);
-							}
-						}
-
-					} catch (ResourceVersionConflictException | DataIntegrityViolationException e) {
-						ourLog.debug("Version conflict detected", e);
-
-						if (myOnRollback != null) {
-							myOnRollback.run();
-						}
-
-						int maxRetries = 0;
-
-						/*
-						 * If two client threads both concurrently try to add the same tag that isn't
-						 * known to the system already, they'll both try to create a row in HFJ_TAG_DEF,
-						 * which is the tag definition table. In that case, a constraint error will be
-						 * thrown by one of the client threads, so we auto-retry in order to avoid
-						 * annoying spurious failures for the client.
-						 */
-						if (DaoFailureUtil.isTagStorageFailure(e)) {
-							maxRetries = 3;
-						}
-
-						if (maxRetries == 0) {
-							HookParams params = new HookParams()
-								.add(RequestDetails.class, myRequestDetails)
-								.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-							ResourceVersionConflictResolutionStrategy conflictResolutionStrategy = (ResourceVersionConflictResolutionStrategy) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, myRequestDetails, Pointcut.STORAGE_VERSION_CONFLICT, params);
-							if (conflictResolutionStrategy != null && conflictResolutionStrategy.isRetry()) {
-								maxRetries = conflictResolutionStrategy.getMaxRetries();
-							}
-						}
-
-						if (i < maxRetries) {
-							if (myTransactionDetails != null) {
-								myTransactionDetails.getRollbackUndoActions().forEach(t -> t.run());
-								myTransactionDetails.clearRollbackUndoActions();
-								myTransactionDetails.clearResolvedItems();
-								myTransactionDetails.clearUserData(XACT_USERDATA_KEY_RESOLVED_TAG_DEFINITIONS);
-								myTransactionDetails.clearUserData(XACT_USERDATA_KEY_EXISTING_SEARCH_PARAMS);
-							}
-							double sleepAmount = (250.0d * i) * Math.random();
-							long sleepAmountLong = (long) sleepAmount;
-							TestUtil.sleepAtLeast(sleepAmountLong, false);
-
-							ourLog.info("About to start a transaction retry due to conflict or constraint error. Sleeping {}ms first.", sleepAmountLong);
-							continue;
-						}
-
-						IBaseOperationOutcome oo = null;
-						if (e instanceof ResourceVersionConflictException) {
-							oo = ((ResourceVersionConflictException) e).getOperationOutcome();
-						}
-
-						if (maxRetries > 0) {
-							String msg = "Max retries (" + maxRetries + ") exceeded for version conflict: " + e.getMessage();
-							ourLog.info(msg, maxRetries);
-							throw new ResourceVersionConflictException(Msg.code(549) + msg);
-						}
-
-						throw new ResourceVersionConflictException(Msg.code(550) + e.getMessage(), e, oo);
-					}
-				}
-			} finally {
-				if (requestPartitionId != null) {
-					ourRequestPartition.set(previousRequestPartitionId);
-				}
-			}
+			return doExecute(this, callback);
 		}
 
 	}
