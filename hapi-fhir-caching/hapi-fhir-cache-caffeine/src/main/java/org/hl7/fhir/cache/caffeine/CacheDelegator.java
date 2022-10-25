@@ -12,7 +12,7 @@ public class CacheDelegator<K, V> implements org.hl7.fhir.cache.Cache<K, V> {
 	}
 
 	@Override
-	public V getIfPresent(Object key) {
+	public V getIfPresent(K key) {
 		return cache.getIfPresent(key);
 	}
 
