@@ -951,6 +951,11 @@ public class QueryStack {
 		}
 	}
 
+	public void addGrouping() {
+		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
+		mySqlBuilder.getSelect().addGroupings(firstPredicateBuilder.getResourceIdColumn());
+	}
+
 	private class ChainElement {
 		private final String myResourceType;
 		private final String mySearchParameterName;
