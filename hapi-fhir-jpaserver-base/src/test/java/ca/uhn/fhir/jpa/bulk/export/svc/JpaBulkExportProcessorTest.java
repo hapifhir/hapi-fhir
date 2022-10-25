@@ -273,9 +273,6 @@ public class JpaBulkExportProcessorTest {
 		IFhirResourceDao<?> mockDao = mock(IFhirResourceDao.class);
 		ISearchBuilder searchBuilder = mock(ISearchBuilder.class);
 
-		// when
-		when(myIdHelperService.getPidsOrThrowException(any(), anyList()))
-			.thenReturn(pids);
 		// from getMembersFromGroupWithFilter
 		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters)))
 			.thenReturn(Collections.singletonList(new SearchParameterMap()));

@@ -62,6 +62,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
+
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
@@ -70,6 +72,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IJobPersistence myJobPersistence;
+
 
 	@Nested
 	public class SpecConformanceTests {
@@ -114,6 +117,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class SystemBulkExportTests {
+
 		@Test
 		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
 			int patientCount = 5;
@@ -228,6 +232,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+
+
 	@Nested
 	public class PatientBulkExportTests {
 
@@ -267,6 +273,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
 		}
 	}
+
 
 	@Nested
 	public class GroupBulkExportTests {
@@ -702,6 +709,53 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation"), containsString("obs-included-0"));
 			assertThat(typeToContents.get("Observation"), containsString("obs-included-999"));
 		}
+
+		@Nested
+		public class WithClientIdStrategyEnumANY {
+
+			@BeforeEach
+			void setUp() {
+				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
+			}
+
+			@AfterEach
+			void tearDown() {
+				myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC);
+			}
+
+			@Test
+			public void testGroupExportPatientOnly() {
+				Patient patient = new Patient();
+				patient.setId("PING1");
+				patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+				patient.setActive(true);
+				myClient.update().resource(patient).execute();
+
+				//Other patient not in group
+				Patient patient2 = new Patient();
+				patient2.setId("POG2");
+				patient2.setGender(Enumerations.AdministrativeGender.FEMALE);
+				patient2.setActive(true);
+				myClient.update().resource(patient2).execute();
+
+				Group group = new Group();
+				group.setId("Group/G2");
+				group.setActive(true);
+				group.addMember().getEntity().setReference("Patient/PING1");
+				myClient.update().resource(group).execute();
+
+				HashSet<String> resourceTypes = Sets.newHashSet("Patient");
+				BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(resourceTypes, new HashSet<>(), "G2");
+
+				Map<String, List<IBaseResource>> typeToResources = convertJobResultsToResources(bulkExportJobResults);
+				assertThat(typeToResources.get("Patient"), hasSize(1));
+
+				Map<String, String> typeToContents = convertJobResultsToStringContents(bulkExportJobResults);
+				assertThat(typeToContents.get("Patient"), containsString("PING1"));
+				assertThat(typeToContents.get("Patient"), not(containsString("POG2")));
+			}
+		}
+
 	}
 
 	private Map<String, String> convertJobResultsToStringContents(BulkExportJobResults theResults) {
