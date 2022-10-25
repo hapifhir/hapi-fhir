@@ -274,13 +274,6 @@ public class MemberMatcherR4Helper {
 			return true;
 		}
 		return false;
-//		if (!policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
-//			return false;
-//		}
-//		if (policyTypes.equals(CONSENT_POLICY_REGULAR_TYPE) && !myRegularFilterSupported) {
-//			return false;
-//		}
-//		return true;
 	}
 
 	private void addIdentifierToConsent(Consent theConsent) {
