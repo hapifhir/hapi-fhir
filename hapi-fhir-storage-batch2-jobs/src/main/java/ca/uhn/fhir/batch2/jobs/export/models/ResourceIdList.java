@@ -20,32 +20,28 @@ package ca.uhn.fhir.batch2.jobs.export.models;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.jobs.models.Id;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Multimap;
 
 import java.util.List;
 
-public class BulkExportExpandedResources extends BulkExportJobBase {
+public class ResourceIdList extends BulkExportJobBase {
 
 	/**
-	 * List of stringified resources ready for writing
-	 * to a file/binary.
+	 * List of Id objects for serialization
 	 */
-	@JsonProperty("resources")
-	private List<String> myStringifiedResources;
+	@JsonProperty("ids")
+	private List<Id> myIds;
 
-	/**
-	 * only a single resource type per batch step
-	 */
 	@JsonProperty("resourceType")
 	private String myResourceType;
 
-	public List<String> getStringifiedResources() {
-		return myStringifiedResources;
+	public List<Id> getIds() {
+		return myIds;
 	}
 
-	public void setStringifiedResources(List<String> theStringifiedResources) {
-		myStringifiedResources = theStringifiedResources;
+	public void setIds(List<Id> theIds) {
+		myIds = theIds;
 	}
 
 	public String getResourceType() {
