@@ -33,14 +33,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -70,6 +63,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportUseCaseTest.class);
 
@@ -79,18 +73,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 	@Autowired
 	private IJobPersistence myJobPersistence;
 
-
-	@BeforeEach
-	public void setup() {
-		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.ANY);
-	}
-
-	public static Stream<Arguments> clientIdStrategies() {
-		return Stream.of(
-			Arguments.of(DaoConfig.ClientIdStrategyEnum.ALPHANUMERIC),
-			Arguments.of(DaoConfig.ClientIdStrategyEnum.ANY)
-		);
-	}
 
 	@Nested
 	public class SpecConformanceTests {
@@ -135,6 +117,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	@Nested
 	public class SystemBulkExportTests {
+
 		@Test
 		public void testBinariesAreStreamedWithRespectToAcceptHeader() throws IOException {
 			int patientCount = 5;
@@ -249,6 +232,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+
+
 	@Nested
 	public class PatientBulkExportTests {
 
@@ -288,6 +273,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(typeToContents.get("Observation"), not(containsString("obs-excluded")));
 		}
 	}
+
 
 	@Nested
 	public class GroupBulkExportTests {
