@@ -49,8 +49,10 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 
+import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +80,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 										 IMdmControllerSvc theMdmControllerSvc,
 										 MdmControllerHelper theMdmHelper,
 										 IMdmSubmitSvc theMdmSubmitSvc,
-										 IMdmSettings theIMdmSettings) {
+										 IMdmSettings theIMdmSettings
+										 ) {
 		super(theFhirContext);
 		myMdmControllerSvc = theMdmControllerSvc;
 		myMdmControllerHelper = theMdmHelper;
@@ -148,7 +151,7 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, typeName = "decimal")
 	})
 	public IBaseParameters clearMdmLinks(@OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_RESOURCE_NAME, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theResourceNames,
-													 @OperationParam(name = ProviderConstants.OPERATION_MDM_CLEAR_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+													 @OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 													 ServletRequestDetails theRequestDetails) {
 
 		List<String> resourceNames = new ArrayList<>();
@@ -234,20 +237,43 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseParameters mdmBatchOnAllSourceResources(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theResourceType,
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theCriteria,
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
 		ServletRequestDetails theRequestDetails) {
 		String criteria = convertStringTypeToString(theCriteria);
 		String resourceType = convertStringTypeToString(theResourceType);
 		long submittedCount;
-		if (resourceType != null) {
-			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
+		if (theRequestDetails.isPreferRespondAsync()) {
+			List<String> urls = buildUrlsForJob(criteria, resourceType);
+			return myMdmControllerSvc.submitMdmSubmitJob(urls, theBatchSize, theRequestDetails);
 		} else {
-			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
+			if (StringUtils.isNotBlank(resourceType)) {
+				submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria, theRequestDetails);
+			} else {
+				submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria, theRequestDetails);
+			}
+			return buildMdmOutParametersWithCount(submittedCount);
 		}
-		return buildMdmOutParametersWithCount(submittedCount);
+
 	}
 
+	@Nonnull
+	private List<String> buildUrlsForJob(String criteria, String resourceType) {
+		List<String> urls = new ArrayList<>();
+		if (StringUtils.isNotBlank(resourceType)) {
+			String theUrl = resourceType + "?" + criteria;
+			urls.add(theUrl);
+		} else {
+			myMdmSettings.getMdmRules().getMdmTypes()
+				.stream()
+				.map(type -> type + "?" + criteria)
+				.forEach(urls::add);
+		}
+		return urls;
+	}
+
+
 	private String convertStringTypeToString(IPrimitiveType<String> theCriteria) {
-		return theCriteria == null ? null : theCriteria.getValueAsString();
+		return theCriteria == null ? "" : theCriteria.getValueAsString();
 	}
 
 
@@ -266,10 +292,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	})
 	public IBaseParameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
-		return buildMdmOutParametersWithCount(submittedCount);
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+		ServletRequestDetails theRequest) {
+		if (theRequest.isPreferRespondAsync()) {
+			String theUrl = "Patient?";
+			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize, theRequest);
+		} else {
+			String criteria = convertStringTypeToString(theCriteria);
+			long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria, theRequest);
+			return buildMdmOutParametersWithCount(submittedCount);
+		}
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, typeName = "Practitioner", returnParameters = {
@@ -287,10 +319,16 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	})
 	public IBaseParameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA, typeName = "string") IPrimitiveType<String> theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertStringTypeToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
-		return buildMdmOutParametersWithCount(submittedCount);
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_SIZE, typeName = "decimal", min = 0, max = 1) IPrimitiveType<BigDecimal> theBatchSize,
+		ServletRequestDetails theRequest) {
+		if (theRequest.isPreferRespondAsync()) {
+			String theUrl = "Practitioner?";
+			return myMdmControllerSvc.submitMdmSubmitJob(Collections.singletonList(theUrl), theBatchSize,  theRequest);
+		} else {
+			String criteria = convertStringTypeToString(theCriteria);
+			long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria, theRequest);
+			return buildMdmOutParametersWithCount(submittedCount);
+		}
 	}
 
 	/**

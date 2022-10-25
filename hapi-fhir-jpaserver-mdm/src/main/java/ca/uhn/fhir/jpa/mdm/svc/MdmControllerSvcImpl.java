@@ -38,6 +38,8 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearAppCtx;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitAppCtx;
+import ca.uhn.fhir.mdm.batch2.submit.MdmSubmitJobParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmControllerUtil;
@@ -190,6 +192,31 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 		request.setParameters(params);
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		String id = response.getJobId();
+
+		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
+		return retVal;
+	}
+
+
+	@Override
+	public IBaseParameters submitMdmSubmitJob(List<String> theUrls,  IPrimitiveType<BigDecimal> theBatchSize, ServletRequestDetails theRequestDetails) {
+		MdmSubmitJobParameters params = new MdmSubmitJobParameters();
+
+		if (theBatchSize != null && theBatchSize.getValue() !=null && theBatchSize.getValue().longValue() > 0) {
+			params.setBatchSize(theBatchSize.getValue().intValue());
+		}
+		ReadPartitionIdRequestDetails details= new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null);
+		params.setRequestPartitionId(RequestPartitionId.allPartitions());
+
+		theUrls.forEach(params::addUrl);
+
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setParameters(params);
+		request.setJobDefinitionId(MdmSubmitAppCtx.MDM_SUBMIT_JOB);
+
+		Batch2JobStartResponse batch2JobStartResponse = myJobCoordinator.startInstance(request);
+		String id = batch2JobStartResponse.getJobId();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersString(myFhirContext, retVal, ProviderConstants.OPERATION_BATCH_RESPONSE_JOB_ID, id);
