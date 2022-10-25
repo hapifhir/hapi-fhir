@@ -71,7 +71,7 @@ public class MdmInflateAndSubmitResourcesStep implements IJobStepWorker<MdmSubmi
 			myMdmChannelSubmitterSvc.submitResourceToMdmChannel(nextResource);
 		}
 
-		ourLog.info("Expanding of {} resources of type {} completed", idList.size(), idList.getResourceType(0));//FIXME GGG
+		ourLog.info("Expanding of {} resources of type completed", idList.size());
 		return new RunOutcome(allResources.size());
 	}
 
