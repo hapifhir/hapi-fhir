@@ -23,7 +23,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cache-testing</artifactId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

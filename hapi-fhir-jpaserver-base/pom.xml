@@ -149,7 +149,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cache-caffeine</artifactId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -369,12 +369,12 @@
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cache</artifactId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-cache-testing</artifactId>
+			<artifactId>hapi-fhir-caching-testing</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
