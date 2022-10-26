@@ -123,18 +123,4 @@ public class JpaR4Config {
 	public MemberMatchR4ResourceProvider memberMatchR4ResourceProvider(FhirContext theFhirContext, MemberMatcherR4Helper theMemberMatchR4Helper) {
 		return new MemberMatchR4ResourceProvider(theFhirContext, theMemberMatchR4Helper);
 	}
-
-	@Bean
-	public ProviderLoader r4ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
-		return new ProviderLoader(theResourceProviderFactory, theMemberMatchR4ResourceProvider);
-	}
-
-	public static class ProviderLoader {
-
-		public ProviderLoader(ResourceProviderFactory theResourceProviderFactory, MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider) {
-			theResourceProviderFactory.addSupplier(()->theMemberMatchR4ResourceProvider);
-		}
-
-	}
-
 }
