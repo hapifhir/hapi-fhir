@@ -38,6 +38,11 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
 
+	@Column(name = "TAG_USER_SELECTED", nullable = false)
+	private Boolean myUserSelected;
+	@Column(name = "TAG_VERSION", nullable = false, length = 30)
+	private String myVersion;
+
 	public Long getTagId() {
 		return myTagId;
 	}
@@ -50,4 +55,19 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 		myTag = theTag;
 	}
 
+	public Boolean getUserSelected() {
+		return myUserSelected;
+	}
+
+	public void setUserSelected(Boolean theUserSelected) {
+		myUserSelected = theUserSelected;
+	}
+
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public void setVersion(String theVersion) {
+		myVersion = theVersion;
+	}
 }

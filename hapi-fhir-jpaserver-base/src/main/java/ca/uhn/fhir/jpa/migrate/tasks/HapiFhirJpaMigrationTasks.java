@@ -86,6 +86,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init600(); // 20211102 -
 		init610();
 		init620();
+		init630();
+	}
+
+	// TODO:  try to figure out why SchemaMigrationTest is failing:   note that the H2 schema is CORRECT
+	// TODO:  figure out what these numbers mean
+	private void init630() {
+		// TODO:  change this if we don't have the November milestone
+		// according to Gary yes
+		Builder version = forVersion(VersionEnum.V6_2_0);
+
+		// TODO: ResourceTag and ResourceHistoryTag
+
+		version
+			.onTable("HFJ_RES_TAG")
+			// TODO: today's date and unique key
+			.addColumn("20221026.1", "TAG_USER_SELECTED")
+			.nullable()
+			.type(ColumnTypeEnum.BOOLEAN);
+
+		version
+			.onTable("HFJ_RES_TAG")
+			// TODO: today's date and unique key
+			.addColumn("20221026.2", "TAG_VERSION")
+			.nullable()
+			// TODO: max length
+			.type(ColumnTypeEnum.STRING, 30);
+
+		version
+			.onTable("HFJ_HISTORY_TAG")
+			// TODO: today's date and unique key
+			.addColumn("20221026.3", "TAG_USER_SELECTED")
+			.nullable()
+			.type(ColumnTypeEnum.BOOLEAN);
+
+		version
+			.onTable("HFJ_HISTORY_TAG")
+			// TODO: today's date and unique key
+			.addColumn("20221026.4", "TAG_VERSION")
+			.nullable()
+			.type(ColumnTypeEnum.STRING, 30);
 	}
 
 	private void init620() {

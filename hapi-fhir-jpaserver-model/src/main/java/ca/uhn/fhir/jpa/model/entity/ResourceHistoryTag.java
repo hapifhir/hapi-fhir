@@ -69,6 +69,8 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	}
 
 
+	// TODO:  figure out all constructor calls and how to populate them
+	// TOOO:  somewhere trim all versions longer than 30 chars
 	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
 		setTag(theTag);
 		setResource(theResourceHistoryTable);

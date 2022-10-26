@@ -75,6 +75,8 @@ public class ResourceTag extends BaseTag {
 		super();
 	}
 
+	// TODO:  figure out all constructor calls and how to populate them
+	// TOOO:  somewhere trim all versions longer than 30 chars
 	/**
 	 * Constructor
 	 */
