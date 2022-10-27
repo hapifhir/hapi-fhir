@@ -202,6 +202,9 @@ public class MemberMatcherR4HelperTest {
 		assertEquals("new-identifier-value", patient.getIdentifier().get(1).getValue());
 	}
 
+	/**
+	 * Testing multiple scenarios for getting patient resource from coverage's plan beneficiary
+	 */
 	@Nested
 	public class TestGetBeneficiaryPatient {
 
@@ -280,6 +283,9 @@ public class MemberMatcherR4HelperTest {
 
 	}
 
+	/**
+	 * Testing multiple scenarios for validity of Patient Member parameter
+	 */
 	@Nested
 	public class TestValidPatientMember {
 
@@ -363,6 +369,10 @@ public class MemberMatcherR4HelperTest {
 
 	}
 
+	/**
+	 * Testing multiple scenarios for consent's policy data that is defined in
+	 * https://build.fhir.org/ig/HL7/davinci-ehrx/StructureDefinition-hrex-consent.html#notes
+	 */
 	@Nested
 	public class TestValidvalidConsentDataAccess {
 
@@ -380,21 +390,23 @@ public class MemberMatcherR4HelperTest {
 
 		@Test
 		void noDataAccessValueProvidedReturnsFalse() {
-			consent = getConsent("");
+			consent = getConsent();
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertFalse(result);
 		}
 
 		@Test
 		void wrongDataAccessValueProvidedReturnsFalse() {
-			consent = getConsent("#access_data");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#access_data"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertFalse(result);
 		}
 
 		@Test
 		void regularDataAccessWithRegularNotAllowedReturnsFalse() {
-			consent = getConsent("#regular");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertFalse(result);
 		}
@@ -402,21 +414,24 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		void regularDataAccessWithRegularAllowedReturnsTrue() {
 			myHelper.setRegularFilterSupported(true);
-			consent = getConsent("#regular");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
 		}
 
 		@Test
 		void sensitiveDataAccessAllowedReturnsTrue() {
-			consent = getConsent("#sensitive");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
 		}
 
 		@Test
 		void multipleSensitivePolicyDataAccessAllowedReturnsTrue() {
-			consent = getConsent("#sensitive");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
@@ -425,7 +440,8 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		void multipleRegularPolicyDataAccessWithRegularAllowedReturnsTrue() {
 			myHelper.setRegularFilterSupported(true);
-			consent = getConsent("#regular");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
@@ -433,7 +449,8 @@ public class MemberMatcherR4HelperTest {
 
 		@Test
 		void multipleMixedPolicyDataAccessWithRegularNotAllowedReturnsFalse() {
-			consent = getConsent("#regular");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertFalse(result);
@@ -442,15 +459,16 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		void multipleMixedPolicyDataAccessWithRegularAllowedReturnsTrue() {
 			myHelper.setRegularFilterSupported(true);
-			consent = getConsent("#regular");
+			consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#regular"));
 			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			boolean result = myHelper.validConsentDataAccess(consent);
 			assertTrue(result);
 		}
 	}
 
-	private Consent getConsent(String uriAccess) {
-		Consent consent = new Consent().addPolicy(constructConsentPolicyComponent(uriAccess));
+	private Consent getConsent() {
+		Consent consent = new Consent();
 		consent.getPerformer().add(new Reference("Patient/1"));
 		return consent;
 	}
@@ -508,7 +526,8 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		public void updateConsentForMemberMatch_noProvider_addsIdentifierUpdatePatientButNotExtensionAndSaves() {
 			// setup
-			Consent consent = getConsent("#sensitive");
+			Consent consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			Patient patient = createPatientForMemberMatchUpdate();
 
 			ourLog.setLevel(Level.TRACE);
@@ -546,7 +565,8 @@ public class MemberMatcherR4HelperTest {
 		@Test
 		public void addClientIdAsExtensionToConsentIfAvailable_withProvider_addsExtensionAndSaves() {
 			// setup
-			Consent consent = getConsent("#sensitive");
+			Consent consent = getConsent();
+			consent.addPolicy(constructConsentPolicyComponent("#sensitive"));
 			consent.setId("Consent/RED");
 			Extension ext = new Extension();
 			ext.setUrl("http://example.com");

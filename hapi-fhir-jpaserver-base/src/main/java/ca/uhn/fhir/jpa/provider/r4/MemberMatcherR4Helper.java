@@ -265,6 +265,10 @@ public class MemberMatcherR4Helper {
 		return true;
 	}
 
+	/**
+	 * This is filtering the Consent policy data. The rule is specified in
+	 * https://build.fhir.org/ig/HL7/davinci-ehrx/StructureDefinition-hrex-consent.html#notes
+	 */
 	private boolean validConsentPolicy(String thePolicyUri) {
 		String policyTypes = StringUtils.substringAfterLast(thePolicyUri, "#");
 		if (policyTypes.equals(CONSENT_POLICY_SENSITIVE_TYPE)) {
