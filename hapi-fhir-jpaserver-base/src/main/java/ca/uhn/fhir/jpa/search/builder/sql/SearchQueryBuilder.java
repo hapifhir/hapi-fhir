@@ -79,7 +79,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.rest.param.ParamPrefixEnum.*;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
+import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class SearchQueryBuilder {
@@ -125,10 +129,10 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
-		if (myDialect instanceof org.hibernate.dialect.MySQLDialect){
+		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
 			dialectIsMySql = true;
 		}
-		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect){
+		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect) {
 			dialectIsMsSql = true;
 		}
 
@@ -272,7 +276,7 @@ public class SearchQueryBuilder {
 	 * Create a predicate builder for selecting on a REFERENCE search parameter
 	 */
 	public ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack) {
-		return  mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
+		return mySqlBuilderFactory.referenceIndexTable(theQueryStack, this, false);
 	}
 
 	/**
@@ -322,7 +326,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Create a predicate builder for selecting on a TOKEN search parameter
 	 */
-	public TokenPredicateBuilder createTokenPredicateBuilder(){
+	public TokenPredicateBuilder createTokenPredicateBuilder() {
 		return mySqlBuilderFactory.tokenIndexTable(this);
 	}
 
@@ -330,7 +334,7 @@ public class SearchQueryBuilder {
 		mySelect.addCustomJoin(theJoinType, theFromTable, theToTable, theCondition);
 	}
 
-	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn){
+	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
 		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
 
@@ -359,7 +363,7 @@ public class SearchQueryBuilder {
 	 * Create a predicate builder for selecting on a URI search parameter
 	 */
 	public UriPredicateBuilder createUriPredicateBuilder() {
-		return  mySqlBuilderFactory.uriIndexTable(this);
+		return mySqlBuilderFactory.uriIndexTable(this);
 	}
 
 	public SqlObjectFactory getSqlBuilderFactory() {
@@ -709,21 +713,33 @@ public class SearchQueryBuilder {
 	}
 
 	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending) {
+		addSortString(theColumnValueNormalized, theAscending, false);
+	}
+
+	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending, boolean theUseAggregate) {
 		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
-		addSortString(theColumnValueNormalized, theAscending, nullOrder);
+		addSortString(theColumnValueNormalized, theAscending, nullOrder, theUseAggregate);
 	}
 
 	public void addSortNumeric(DbColumn theColumnValueNormalized, boolean theAscending) {
+		addSortNumeric(theColumnValueNormalized, theAscending, false);
+	}
+
+	public void addSortNumeric(DbColumn theColumnValueNormalized, boolean theAscending, boolean theUseAggregate) {
 		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
-		addSortNumeric(theColumnValueNormalized, theAscending, nullOrder);
+		addSortNumeric(theColumnValueNormalized, theAscending, nullOrder, theUseAggregate);
 	}
 
 	public void addSortDate(DbColumn theColumnValueNormalized, boolean theAscending) {
-		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
-		addSortDate(theColumnValueNormalized, theAscending, nullOrder);
+		addSortDate(theColumnValueNormalized, theAscending, false);
 	}
 
-	public void addSortString(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+	public void addSortDate(DbColumn theColumnValueNormalized, boolean theAscending, boolean theUseAggregate) {
+		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
+		addSortDate(theColumnValueNormalized, theAscending, nullOrder, theUseAggregate);
+	}
+
+	public void addSortString(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
 		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			String direction = theTheAscending ? " ASC" : " DESC";
@@ -740,14 +756,28 @@ public class SearchQueryBuilder {
 				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
 		   */
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			sortColumnNameBuilder.append(sortColumnName).append(direction);
 			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
-			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder, theUseAggregate);
 		}
 	}
 
-	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+	private static String formatColumnNameForAggregate(boolean theTheAscending, boolean theUseAggregate, String sortColumnName) {
+		if (theUseAggregate) {
+			String aggregateFunction;
+			if (theTheAscending) {
+				aggregateFunction = "MIN";
+			} else {
+				aggregateFunction = "MAX";
+			}
+			sortColumnName = aggregateFunction + "(" + sortColumnName + ")";
+		}
+		return sortColumnName;
+	}
+
+	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
 		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			// Null values are always treated as less than non-null values.
@@ -763,13 +793,14 @@ public class SearchQueryBuilder {
 			} else {
 				direction = theTheAscending ? " ASC" : " DESC";
 			}
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			mySelect.addCustomOrderings(sortColumnName + direction);
 		} else {
-			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder, theUseAggregate);
 		}
 	}
 
-	public void addSortDate(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+	public void addSortDate(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
 		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			String direction = theTheAscending ? " ASC" : " DESC";
@@ -786,16 +817,25 @@ public class SearchQueryBuilder {
 				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
  		   */
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			sortColumnNameBuilder.append(sortColumnName).append(direction);
 			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
-			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder, theUseAggregate);
 		}
 	}
 
-	private void addSort(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+	private void addSort(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder, boolean theUseAggregate) {
 		OrderObject.Dir direction = theTheAscending ? OrderObject.Dir.ASCENDING : OrderObject.Dir.DESCENDING;
-		OrderObject orderObject = new OrderObject(direction, theTheColumnValueNormalized);
+		Object columnToOrder = theTheColumnValueNormalized;
+		if (theUseAggregate) {
+			if (theTheAscending) {
+				columnToOrder = FunctionCall.min().addColumnParams(theTheColumnValueNormalized);
+			} else {
+				columnToOrder = FunctionCall.max().addColumnParams(theTheColumnValueNormalized);
+			}
+		}
+		OrderObject orderObject = new OrderObject(direction, columnToOrder);
 		orderObject.setNullOrder(theNullOrder);
 		mySelect.addCustomOrderings(orderObject);
 	}
@@ -804,7 +844,7 @@ public class SearchQueryBuilder {
 	 * If set to true (default is false), force the generated SQL to start
 	 * with the {@link ca.uhn.fhir.jpa.model.entity.ResourceTable HFJ_RESOURCE}
 	 * table at the root of the query.
-	 *
+	 * <p>
 	 * This seems to perform better if there are multiple joins on the
 	 * resource ID table.
 	 */
