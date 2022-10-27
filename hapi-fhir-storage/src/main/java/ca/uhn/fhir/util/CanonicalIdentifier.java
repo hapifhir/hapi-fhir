@@ -1,4 +1,4 @@
-package ca.uhn.fhir.mdm.util;
+package ca.uhn.fhir.util;
 
 /*-
  * #%L

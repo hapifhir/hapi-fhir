@@ -357,7 +357,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
-						match = new ResourcePersistentId(placeholderOpt.get().getPersistentId());
+						match = placeholderOpt.get().getPersistentId();
 						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
