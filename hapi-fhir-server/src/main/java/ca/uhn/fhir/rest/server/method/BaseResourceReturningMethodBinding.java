@@ -375,11 +375,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					}
 
 					Integer resultSize = result.size();
-					int start;
+					int start = offsetI;
 					if (resultSize != null) {
-						start = Math.max(0, Math.min(offsetI, resultSize - 1));
-					} else {
-						start = offsetI;
+						start = Math.max(0, Math.min(offsetI, resultSize));
 					}
 
 					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());

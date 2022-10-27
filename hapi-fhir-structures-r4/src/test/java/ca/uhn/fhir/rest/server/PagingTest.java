@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
