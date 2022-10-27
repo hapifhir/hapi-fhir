@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Patient;
@@ -29,6 +30,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -139,6 +141,25 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals(1, patient2.getMeta().getSecurity().size());
 		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
+	}
+
+	@Test
+	public void testAddTagWithVersionAndUserSelected() {
+		Patient patient1 = new Patient();
+		Coding tag = patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		assertFalse(tag.getUserSelected());
+		String testVersion = "testVersion";
+		tag.setVersion(testVersion).setUserSelected(true);
+		patient1.setActive(true);
+		IIdType pid1 = myPatientDao.create(patient1).getId();
+
+		patient1 = myPatientDao.read(pid1);
+		assertEquals(1, patient1.getMeta().getTag().size());
+		assertEquals(0, patient1.getMeta().getSecurity().size());
+		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
+		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
+		assertEquals(testVersion, patient1.getMeta().getTagFirstRep().getVersion());
+		assertTrue(patient1.getMeta().getTagFirstRep().getUserSelected());
 	}
 
 
