@@ -637,6 +637,14 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		/*
+		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 */
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+			queryStack3.setUseAggregate(true);
+		}
+
+		/*
 		 * Sort
 		 *
 		 * If we have a sort, we wrap the criteria search (the search that actually
@@ -645,12 +653,9 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCountOnlyFlag;
 
-			createSort(queryStack3, sort, (theOffset != null));
+			createSort(queryStack3, sort);
 		}
 
-		if (theOffset != null) {
-			queryStack3.addGrouping();
-		}
 
 		/*
 		 * Now perform the search
@@ -735,7 +740,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void createSort(QueryStack theQueryStack, SortSpec theSort, boolean theUseAggregate) {
+	private void createSort(QueryStack theQueryStack, SortSpec theSort) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -744,11 +749,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 
-			theQueryStack.addSortOnResourceId(ascending, theUseAggregate);
+			theQueryStack.addSortOnResourceId(ascending);
 
 		} else if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
 
-			theQueryStack.addSortOnLastUpdated(ascending, theUseAggregate);
+			theQueryStack.addSortOnLastUpdated(ascending);
 
 		} else {
 
@@ -760,25 +765,25 @@ public class SearchBuilder implements ISearchBuilder {
 
 			switch (param.getParamType()) {
 				case STRING:
-					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case DATE:
-					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case REFERENCE:
-					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case TOKEN:
-					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case NUMBER:
-					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case URI:
-					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case QUANTITY:
-					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending, theUseAggregate);
+					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
 					break;
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
@@ -793,8 +798,8 @@ public class SearchBuilder implements ISearchBuilder {
 					RuntimeSearchParam left = compositeList.get(0);
 					RuntimeSearchParam right = compositeList.get(1);
 
-					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending, theUseAggregate);
-					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending, theUseAggregate);
+					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
+					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
 
 					break;
 				case SPECIAL:
@@ -806,24 +811,24 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// Recurse
-		createSort(theQueryStack, theSort.getChain(), theUseAggregate);
+		createSort(theQueryStack, theSort.getChain());
 
 	}
 
-	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending, boolean theUseAggregate) {
+	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
 
 		switch (theParamType) {
 			case STRING:
-				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending, theUseAggregate);
+				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending);
 				break;
 			case DATE:
-				theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending, theUseAggregate);
+				theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending);
 				break;
 			case TOKEN:
-				theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending, theUseAggregate);
+				theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending);
 				break;
 			case QUANTITY:
-				theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending, theUseAggregate);
+				theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending);
 				break;
 			case NUMBER:
 			case REFERENCE:

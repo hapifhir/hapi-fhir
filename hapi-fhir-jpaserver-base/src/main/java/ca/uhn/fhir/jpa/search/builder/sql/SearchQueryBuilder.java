@@ -756,7 +756,7 @@ public class SearchQueryBuilder {
 				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
 		   */
-			sortColumnName = formatColumnNameForAggrate(theTheAscending, theUseAggregate, sortColumnName);
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			sortColumnNameBuilder.append(sortColumnName).append(direction);
 			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
@@ -764,10 +764,12 @@ public class SearchQueryBuilder {
 		}
 	}
 
-	private static String formatColumnNameForAggrate(boolean theTheAscending, boolean theUseAggregate, String sortColumnName) {
+	private static String formatColumnNameForAggregate(boolean theTheAscending, boolean theUseAggregate, String sortColumnName) {
 		if (theUseAggregate) {
-			String aggregateFunction = "MIN";
-			if (!theTheAscending) {
+			String aggregateFunction;
+			if (theTheAscending) {
+				aggregateFunction = "MIN";
+			} else {
 				aggregateFunction = "MAX";
 			}
 			sortColumnName = aggregateFunction + "(" + sortColumnName + ")";
@@ -791,7 +793,7 @@ public class SearchQueryBuilder {
 			} else {
 				direction = theTheAscending ? " ASC" : " DESC";
 			}
-			sortColumnName = formatColumnNameForAggrate(theTheAscending, theUseAggregate, sortColumnName);
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			mySelect.addCustomOrderings(sortColumnName + direction);
 		} else {
 			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder, theUseAggregate);
@@ -815,7 +817,7 @@ public class SearchQueryBuilder {
 				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
  		   */
-			sortColumnName = formatColumnNameForAggrate(theTheAscending, theUseAggregate, sortColumnName);
+			sortColumnName = formatColumnNameForAggregate(theTheAscending, theUseAggregate, sortColumnName);
 			sortColumnNameBuilder.append(sortColumnName).append(direction);
 			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
