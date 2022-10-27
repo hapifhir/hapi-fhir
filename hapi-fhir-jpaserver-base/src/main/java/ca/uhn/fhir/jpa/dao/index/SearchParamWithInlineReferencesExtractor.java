@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
@@ -354,10 +355,10 @@ public class SearchParamWithInlineReferencesExtractor {
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
+					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
-						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
-						match.setAssociatedResourceId(placeholderOpt.get().getIdType(myContext));
+						match = new ResourcePersistentId(placeholderOpt.get().getPersistentId());
+						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);
 					} else {
