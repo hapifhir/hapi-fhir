@@ -174,7 +174,7 @@ public class QueryStack {
 		myReusePredicateBuilderTypes = theReusePredicateBuilderTypes;
 	}
 
-	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		DatePredicateBuilder datePredicateBuilder = mySqlBuilder.createDatePredicateBuilder();
 
@@ -182,10 +182,10 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, datePredicateBuilder, hashIdentityPredicate);
 
-		mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending);
+		mySqlBuilder.addSortDate(datePredicateBuilder.getColumnValueLow(), theAscending, theIsOffset);
 	}
 
-	public void addSortOnLastUpdated(boolean theAscending) {
+	public void addSortOnLastUpdated(boolean theAscending, boolean theIsOffset) {
 		ResourceTablePredicateBuilder resourceTablePredicateBuilder;
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		if (firstPredicateBuilder instanceof ResourceTablePredicateBuilder) {
@@ -193,10 +193,10 @@ public class QueryStack {
 		} else {
 			resourceTablePredicateBuilder = mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		}
-		mySqlBuilder.addSortDate(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending);
+		mySqlBuilder.addSortDate(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending, theIsOffset);
 	}
 
-	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		NumberPredicateBuilder numberPredicateBuilder = mySqlBuilder.createNumberPredicateBuilder();
 
@@ -204,10 +204,10 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, numberPredicateBuilder, hashIdentityPredicate);
 
-		mySqlBuilder.addSortNumeric(numberPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortNumeric(numberPredicateBuilder.getColumnValue(), theAscending, theIsOffset);
 	}
 
-	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
 		BaseQuantityPredicateBuilder quantityPredicateBuilder = mySqlBuilder.createQuantityPredicateBuilder();
@@ -219,19 +219,19 @@ public class QueryStack {
 		mySqlBuilder.addSortNumeric(quantityPredicateBuilder.getColumnValue(), theAscending);
 	}
 
-	public void addSortOnResourceId(boolean theAscending) {
+	public void addSortOnResourceId(boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ForcedIdPredicateBuilder sortPredicateBuilder = mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		if (!theAscending) {
-			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST);
+			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST, theIsOffset);
 		} else {
-			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), true);
+			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), true, theIsOffset);
 		}
-		mySqlBuilder.addSortNumeric(firstPredicateBuilder.getResourceIdColumn(), theAscending);
+		mySqlBuilder.addSortNumeric(firstPredicateBuilder.getResourceIdColumn(), theAscending, theIsOffset);
 
 	}
 
-	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
@@ -239,10 +239,10 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, resourceLinkPredicateBuilder, pathPredicate);
 
-		mySqlBuilder.addSortNumeric(resourceLinkPredicateBuilder.getColumnTargetResourceId(), theAscending);
+		mySqlBuilder.addSortNumeric(resourceLinkPredicateBuilder.getColumnTargetResourceId(), theAscending, theIsOffset);
 	}
 
-	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
 		StringPredicateBuilder stringPredicateBuilder = mySqlBuilder.createStringPredicateBuilder();
@@ -250,10 +250,10 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, stringPredicateBuilder, hashIdentityPredicate);
 
-		mySqlBuilder.addSortString(stringPredicateBuilder.getColumnValueNormalized(), theAscending);
+		mySqlBuilder.addSortString(stringPredicateBuilder.getColumnValueNormalized(), theAscending, theIsOffset);
 	}
 
-	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
 		TokenPredicateBuilder tokenPredicateBuilder = mySqlBuilder.createTokenPredicateBuilder();
@@ -261,12 +261,12 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, tokenPredicateBuilder, hashIdentityPredicate);
 
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending);
-		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnSystem(), theAscending, theIsOffset);
+		mySqlBuilder.addSortString(tokenPredicateBuilder.getColumnValue(), theAscending, theIsOffset);
 
 	}
 
-	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
+	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending, boolean theIsOffset) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
 		UriPredicateBuilder uriPredicateBuilder = mySqlBuilder.createUriPredicateBuilder();
@@ -274,7 +274,7 @@ public class QueryStack {
 
 		addSortCustomJoin(firstPredicateBuilder, uriPredicateBuilder, hashIdentityPredicate);
 
-		mySqlBuilder.addSortString(uriPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortString(uriPredicateBuilder.getColumnValue(), theAscending, theIsOffset);
 	}
 
 	private void addSortCustomJoin(BaseJoiningPredicateBuilder theFromJoiningPredicateBuilder, BaseJoiningPredicateBuilder theToJoiningPredicateBuilder, Condition theCondition){

@@ -645,7 +645,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCountOnlyFlag;
 
-			createSort(queryStack3, sort);
+			createSort(queryStack3, sort, (theOffset != null));
 		}
 
 		if (theOffset != null) {
@@ -735,7 +735,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void createSort(QueryStack theQueryStack, SortSpec theSort) {
+	private void createSort(QueryStack theQueryStack, SortSpec theSort, boolean theIsOffset) {
 		if (theSort == null || isBlank(theSort.getParamName())) {
 			return;
 		}
@@ -744,11 +744,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (IAnyResource.SP_RES_ID.equals(theSort.getParamName())) {
 
-			theQueryStack.addSortOnResourceId(ascending);
+			theQueryStack.addSortOnResourceId(ascending, theIsOffset);
 
 		} else if (Constants.PARAM_LASTUPDATED.equals(theSort.getParamName())) {
 
-			theQueryStack.addSortOnLastUpdated(ascending);
+			theQueryStack.addSortOnLastUpdated(ascending, theIsOffset);
 
 		} else {
 
@@ -760,25 +760,25 @@ public class SearchBuilder implements ISearchBuilder {
 
 			switch (param.getParamType()) {
 				case STRING:
-					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnString(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case DATE:
-					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnDate(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case REFERENCE:
-					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnResourceLink(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case TOKEN:
-					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnToken(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case NUMBER:
-					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnNumber(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case URI:
-					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnUri(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case QUANTITY:
-					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
+					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending, theIsOffset);
 					break;
 				case COMPOSITE:
 					List<RuntimeSearchParam> compositeList = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, param);
@@ -793,8 +793,8 @@ public class SearchBuilder implements ISearchBuilder {
 					RuntimeSearchParam left = compositeList.get(0);
 					RuntimeSearchParam right = compositeList.get(1);
 
-					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
-					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
+					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending, theIsOffset);
+					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending, theIsOffset);
 
 					break;
 				case SPECIAL:
@@ -806,24 +806,24 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// Recurse
-		createSort(theQueryStack, theSort.getChain());
+		createSort(theQueryStack, theSort.getChain(), theIsOffset);
 
 	}
 
-	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
+	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending, boolean theIsOffset) {
 
 		switch (theParamType) {
 			case STRING:
-				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending);
+				theQueryStack.addSortOnString(myResourceName, theParamName, theAscending, theIsOffset);
 				break;
 			case DATE:
-				theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending);
+				theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending, theIsOffset);
 				break;
 			case TOKEN:
-				theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending);
+				theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending, theIsOffset);
 				break;
 			case QUANTITY:
-				theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending);
+				theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending, theIsOffset);
 				break;
 			case NUMBER:
 			case REFERENCE:
