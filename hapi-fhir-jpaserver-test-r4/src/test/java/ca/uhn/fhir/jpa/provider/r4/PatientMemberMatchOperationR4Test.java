@@ -68,6 +68,9 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 	@Autowired
 	MemberMatcherR4Helper myMemberMatcherR4Helper;
 
+	@Autowired
+	MemberMatchR4ResourceProvider theMemberMatchR4ResourceProvider;
+
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
@@ -81,6 +84,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		ourRestServer.unregisterProvider(theMemberMatchR4ResourceProvider);
 	}
 
 	@Override
@@ -108,6 +112,7 @@ public class PatientMemberMatchOperationR4Test extends BaseResourceProviderR4Tes
 			.addPolicy(new Consent.ConsentPolicyComponent().setUri(CONSENT_POLICY_SENSITIVE_DATA_URI))
 			.setPatient(new Reference("Patient/A123"))
 			.addPerformer(new Reference("Patient/A123"));
+		ourRestServer.registerProvider(theMemberMatchR4ResourceProvider);
 		myMemberMatcherR4Helper.setRegularFilterSupported(false);
 	}
 
