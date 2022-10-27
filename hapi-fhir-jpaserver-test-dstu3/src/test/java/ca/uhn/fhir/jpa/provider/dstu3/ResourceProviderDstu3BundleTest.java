@@ -1,14 +1,20 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
+import org.hl7.fhir.dstu3.model.CarePlan;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.PrimitiveType;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,7 +62,31 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
 			assertEquals(searchInclude.size(), 4);
 		}
-
-
 	}
+
+	@Test
+	void testTransactionBundleEntryLinks() {
+		CarePlan carePlan = new CarePlan();
+		carePlan.getText().setDivAsString("A CarePlan");
+//		client.create().resource(carePlan).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		ourClient.create().resource(carePlan).execute();
+		ourClient.registerInterceptor(new LoggingInterceptor(true));
+
+		// GET CarePlans from server
+		Bundle bundle = ourClient.search()
+			.byUrl(ourServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
+
+		// Create and populate list of CarePlans
+		List<CarePlan> carePlans = new ArrayList<>();
+		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
+
+//		Bundle b1 = new Bundle();
+//		b1.addEntry().se;
+
+		// Post CarePlans
+		ourClient.transaction().withResources(carePlans).execute();
+	}
+
+
 }
