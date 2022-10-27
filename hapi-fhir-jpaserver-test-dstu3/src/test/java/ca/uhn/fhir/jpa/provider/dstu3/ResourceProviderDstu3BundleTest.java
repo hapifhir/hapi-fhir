@@ -81,11 +81,22 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		List<CarePlan> carePlans = new ArrayList<>();
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
-//		Bundle b1 = new Bundle();
-//		b1.addEntry().se;
+		Bundle b1 = new Bundle();
+		b1.setType(Bundle.BundleType.TRANSACTION);
+		for (CarePlan cp  : carePlans) {
+			Bundle.BundleEntryComponent entry = b1.addEntry();
+			entry.setResource(cp);
+			Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
+			request.setUrl("Careplan/" + cp.getIdElement().getIdPart());
+			request.setMethod(Bundle.HTTPVerb.PUT);
+			entry.setRequest(request);
+		}
 
+		ourClient.transaction().withBundle(b1).execute();
+		ourLog.error("*******************************");
 		// Post CarePlans
 		ourClient.transaction().withResources(carePlans).execute();
+
 	}
 
 
