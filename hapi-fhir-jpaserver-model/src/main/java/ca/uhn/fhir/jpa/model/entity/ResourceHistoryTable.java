@@ -129,7 +129,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	}
 
 	public void addTag(ResourceTag theTag) {
-		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId());
+//		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId());
+		// TODO:  where to source userSelected and version from?
+		ResourceHistoryTag tag = new ResourceHistoryTag(this, theTag.getTag(), getPartitionId(), false, null);
 		tag.setResourceType(theTag.getResourceType());
 		getTags().add(tag);
 	}
@@ -141,7 +143,9 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 				return next;
 			}
 		}
-		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag, getPartitionId());
+//		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag, getPartitionId());
+		// TODO:  where to source userSelected and version from?
+		ResourceHistoryTag historyTag = new ResourceHistoryTag(this, theTag, getPartitionId(), false, null);
 		getTags().add(historyTag);
 		return historyTag;
 	}

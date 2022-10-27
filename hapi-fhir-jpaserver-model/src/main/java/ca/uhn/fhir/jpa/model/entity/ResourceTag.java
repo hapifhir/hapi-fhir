@@ -76,16 +76,16 @@ public class ResourceTag extends BaseTag {
 	}
 
 	// TODO:  figure out all constructor calls and how to populate them
-	// TOOO:  somewhere trim all versions longer than 30 chars
 	/**
 	 * Constructor
 	 */
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
+	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId, Boolean theUserSelected, String theVersion) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
 		setResourceType(theResourceTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
+		setVersionAfterTrim(theVersion);
 	}
 
 	public Long getResourceId() {

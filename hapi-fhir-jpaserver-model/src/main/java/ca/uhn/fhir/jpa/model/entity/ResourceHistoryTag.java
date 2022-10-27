@@ -65,18 +65,25 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 	@Column(name = "RES_ID", nullable = false)
 	private Long myResourceId;
 
+	@Column(name = "TAG_USER_SELECTED")
+	private Boolean myUserSelected;
+	@Column(name = "TAG_VERSION", length = 30)
+	private String myVersion;
+
 	public ResourceHistoryTag() {
 	}
 
 
 	// TODO:  figure out all constructor calls and how to populate them
-	// TOOO:  somewhere trim all versions longer than 30 chars
-	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId) {
+
+	public ResourceHistoryTag(ResourceHistoryTable theResourceHistoryTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId, Boolean theUserSelected, String theVersion) {
 		setTag(theTag);
 		setResource(theResourceHistoryTable);
 		setResourceId(theResourceHistoryTable.getResourceId());
 		setResourceType(theResourceHistoryTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
+		setUserSelected(theUserSelected);
+		setVersionAfterTrim(theVersion);
 	}
 
 	public String getResourceType() {

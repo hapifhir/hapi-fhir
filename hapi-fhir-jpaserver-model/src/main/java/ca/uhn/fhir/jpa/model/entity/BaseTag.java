@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -38,9 +40,9 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 	@Column(name = "TAG_ID", insertable = false, updatable = false)
 	private Long myTagId;
 
-	@Column(name = "TAG_USER_SELECTED", nullable = false)
+	@Column(name = "TAG_USER_SELECTED")
 	private Boolean myUserSelected;
-	@Column(name = "TAG_VERSION", nullable = false, length = 30)
+	@Column(name = "TAG_VERSION", length = 30)
 	private String myVersion;
 
 	public Long getTagId() {
@@ -69,5 +71,11 @@ public abstract class BaseTag extends BasePartitionable implements Serializable 
 
 	public void setVersion(String theVersion) {
 		myVersion = theVersion;
+	}
+
+	protected void setVersionAfterTrim(String theVersion) {
+		if (theVersion != null) {
+			setVersion(StringUtils.truncate(theVersion, 30));
+		}
 	}
 }

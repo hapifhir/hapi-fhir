@@ -276,6 +276,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (Tag next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -288,6 +289,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (BaseCodingDt next : securityLabels) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -300,6 +302,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IIdType next : profiles) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -314,6 +317,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IBaseCoding next : tagList) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
@@ -326,6 +330,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IBaseCoding next : securityLabels) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
@@ -338,6 +343,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IPrimitiveType<String> next : profiles) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				if (def != null) {
+					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
@@ -766,6 +772,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (isNotBlank(profile)) {
 				TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
 
+				// TODO:  add userSelected and version from theResource?
 				ResourceTag tag = theEntity.addTag(profileDef);
 				allDefs.add(tag);
 				theEntity.setHasTags(true);
