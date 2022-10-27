@@ -4,6 +4,7 @@
 			<level>TRACE</level>
 		</filter>
 		<encoder>
+<!--N.B use this pattern to remove timestamp/thread/level/logger information from logs during testing.<pattern>[%file:%line] %msg%n</pattern>-->
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
 		</encoder>
 	</appender>
@@ -70,6 +71,11 @@
 	<logger name="ca.uhn.fhir.log.mdm_troubleshooting" level="TRACE">
 		<appender-ref ref="MDM_TROUBLESHOOTING"/>
 	</logger>
+
+<!--	<logger name="ca.uhn.fhir.log.batch_troubleshooting" level="DEBUG" additivity="false">-->
+<!--		<appender-ref ref="STDOUT"/>-->
+<!--	</logger>-->
+
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

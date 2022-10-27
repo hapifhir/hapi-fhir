@@ -827,7 +827,7 @@
         <httpcore_version>4.4.13</httpcore_version>
         <httpclient_version>4.5.13</httpclient_version>
         <jackson_version>2.13.2</jackson_version>
-        <jackson_databind_version>2.13.2.2</jackson_databind_version>
+        <jackson_databind_version>2.13.4.1</jackson_databind_version>
         <maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
         <maven_license_plugin_version>1.8</maven_license_plugin_version>
         <okhttp_version>4.10.0</okhttp_version>
@@ -947,7 +947,7 @@
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>17.3</version>
+				<version>17.4</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
@@ -1848,16 +1848,6 @@
 				<version>${spring_retry_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.batch</groupId>
-				<artifactId>spring-batch-core</artifactId>
-				<version>${spring_batch_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.batch</groupId>
-				<artifactId>spring-batch-infrastructure</artifactId>
-				<version>${spring_batch_version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.thymeleaf</groupId>
 				<artifactId>thymeleaf</artifactId>
 				<version>${thymeleaf-version}</version>
@@ -1966,12 +1956,6 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-core</artifactId>
 				<version>${flyway_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.batch</groupId>
-				<artifactId>spring-batch-test</artifactId>
-				<version>${spring_batch_version}</version>
-				<scope>test</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

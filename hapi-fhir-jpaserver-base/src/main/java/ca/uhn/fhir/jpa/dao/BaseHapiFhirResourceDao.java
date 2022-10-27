@@ -122,6 +122,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -135,6 +137,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
+import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -190,6 +193,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private UrlPartitioner myUrlPartitioner;
 
+	/**
+	 * @deprecated Use {@link #create(T, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome create(final T theResource) {
 		return create(theResource, null, true, new TransactionDetails(), null);
@@ -200,6 +206,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return create(theResource, null, true, new TransactionDetails(), theRequestDetails);
 	}
 
+	/**
+	 * @deprecated Use {@link #create(T, String, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome create(final T theResource, String theIfNoneExist) {
 		return create(theResource, theIfNoneExist, null);
@@ -473,6 +482,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myInstanceValidator;
 	}
 
+	/**
+	 * @deprecated Use {@link #delete(IIdType, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome delete(IIdType theId) {
 		return delete(theId, null);
@@ -924,6 +936,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #history(IIdType, HistorySearchDateRangeParam, RequestDetails)} instead
+	 */
 	@Override
 	@Transactional
 	public IBundleProvider history(final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
@@ -1219,6 +1234,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #read(IIdType, RequestDetails)} instead
+	 */
 	@Override
 	public T read(IIdType theId) {
 		return read(theId, null);
@@ -1285,12 +1303,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Transactional
 	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
 		return readEntity(theId, true, theRequest);
-	}
-
-	@Override
-	@Transactional
-	public String getCurrentVersionId(IIdType theReferenceElement) {
-		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1469,6 +1481,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ourLog.debug("Processed remove tag {}/{} on {} in {}ms", theScheme, theTerm, theId.getValue(), w.getMillisAndRestart());
 	}
 
+	/**
+	 * @deprecated Use {@link #search(SearchParameterMap, RequestDetails)} instead
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
 	@Override
 	public IBundleProvider search(final SearchParameterMap theParams) {
@@ -1639,6 +1654,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	/**
+	 * @deprecated Use {@link #update(T, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome update(T theResource) {
 		return update(theResource, null, null);
@@ -1649,6 +1667,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return update(theResource, null, theRequestDetails);
 	}
 
+	/**
+	 * @deprecated Use {@link #update(T, String, RequestDetails)} instead
+	 */
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl) {
 		return update(theResource, theMatchUrl, null);
@@ -2006,7 +2027,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@Override
 		public void validateResource(IValidationContext<IBaseResource> theCtx) {
-			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			IBaseResource resource = theCtx.getResource();
+			if (resource instanceof Parameters) {
+				List<ParametersParameterComponent> params = ((Parameters) resource).getParameter();
+				params = params.stream().filter(param -> param.getName().contains("resource")).collect(Collectors.toList());
+				resource = params.get(0).getResource();
+			}
+			boolean hasId = resource.getIdElement().hasIdPart();
 			if (myMode == ValidationModeEnum.CREATE) {
 				if (hasId) {
 					throw new UnprocessableEntityException(Msg.code(997) + "Resource has an ID - ID must not be populated for a FHIR create");
