@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
-import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

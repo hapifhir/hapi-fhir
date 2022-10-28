@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+
 import java.util.Date;
 
 public class ResourceLookup implements IResourceLookup {
@@ -39,12 +41,12 @@ public class ResourceLookup implements IResourceLookup {
     }
 
     @Override
-    public Long getResourceId() {
-        return myResourcePid;
-    }
-
-    @Override
     public Date getDeleted() {
         return myDeletedAt;
     }
+
+	@Override
+	public ResourcePersistentId getPersistentId() {
+		return new ResourcePersistentId(myResourcePid);
+	}
 }
