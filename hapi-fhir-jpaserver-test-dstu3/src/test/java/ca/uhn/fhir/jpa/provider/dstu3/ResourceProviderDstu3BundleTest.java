@@ -1,10 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
@@ -65,12 +61,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 	}
 
 	@Test
-	void testTransactionBundleEntryLinks() {
+	void testTransactionBundleEntryUri() {
 		CarePlan carePlan = new CarePlan();
 		carePlan.getText().setDivAsString("A CarePlan");
-//		client.create().resource(carePlan).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		carePlan.setId("ACarePlan");
 		ourClient.create().resource(carePlan).execute();
-		ourClient.registerInterceptor(new LoggingInterceptor(true));
 
 		// GET CarePlans from server
 		Bundle bundle = ourClient.search()
@@ -81,22 +76,8 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 		List<CarePlan> carePlans = new ArrayList<>();
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
-		Bundle b1 = new Bundle();
-		b1.setType(Bundle.BundleType.TRANSACTION);
-		for (CarePlan cp  : carePlans) {
-			Bundle.BundleEntryComponent entry = b1.addEntry();
-			entry.setResource(cp);
-			Bundle.BundleEntryRequestComponent request = new Bundle.BundleEntryRequestComponent();
-			request.setUrl("Careplan/" + cp.getIdElement().getIdPart());
-			request.setMethod(Bundle.HTTPVerb.PUT);
-			entry.setRequest(request);
-		}
-
-		ourClient.transaction().withBundle(b1).execute();
-		ourLog.error("*******************************");
-		// Post CarePlans
+		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
 		ourClient.transaction().withResources(carePlans).execute();
-
 	}
 
 

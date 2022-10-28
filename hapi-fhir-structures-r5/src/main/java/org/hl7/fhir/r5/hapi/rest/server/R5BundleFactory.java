@@ -138,7 +138,7 @@ public class R5BundleFactory implements IVersionSpecificBundleFactory {
 			if (httpVerb != null) {
 				entry.getRequest().getMethodElement().setValueAsString(httpVerb);
 				if (id != null) {
-					entry.getRequest().setUrl(id.getValue());
+					entry.getRequest().setUrl(id.toUnqualified().getValue());
 				}
 			}
 			if ("DELETE".equals(httpVerb)) {
