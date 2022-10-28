@@ -162,15 +162,15 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		// TODO: test history tag
 		final String expectedSystem1 = "http://foo";
 		final String expectedCode1 = "code1";
-		final String testVersion1 = "testVersion1";
+		final String expectedVersion1 = "testVersion1";
 		final String expectedSystem2 = "http://another.system";
 		final String expectedCode2 = "code2";
-		final String testVersion2 = "testVersion2";
+		final String expectedVersion2 = "testVersion2";
 
 		final Patient savedPatient = new Patient();
 		final Coding tag = savedPatient.getMeta().addTag().setSystem(expectedSystem1).setCode(expectedCode1);
 		assertFalse(tag.getUserSelected());
-		tag.setVersion(testVersion1).setUserSelected(true);
+		tag.setVersion(expectedVersion1).setUserSelected(true);
 		savedPatient.setActive(true);
 		final IIdType pid1 = myPatientDao.create(savedPatient).getId();
 
@@ -184,8 +184,8 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			() -> assertTrue(retrievedPatient.getMeta().getTagFirstRep().getUserSelected()),
 			() -> assertEquals(expectedCode1, retrievedPatient.getMeta().getTagFirstRep().getCode())
 			// TODO:  why isn't this working?
-			//	,
-			//	() -> assertEquals(testVersion1, retrievedPatient.getMeta().getTagFirstRep().getVersion())
+				,
+				() -> assertEquals(expectedVersion1, retrievedPatient.getMeta().getTagFirstRep().getVersion())
 		);
 
 		// Update the patient to create a ResourceHistoryTag record
@@ -193,13 +193,24 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals(1, tagsFromDbPatient.size());
 
 		tagsFromDbPatient.get(0)
-			.setCode("code2")
-			.setSystem("http://newsystem")
-			.setVersion("testVersion2")
+			.setCode(expectedCode2)
+			.setSystem(expectedSystem2)
+			.setVersion(expectedVersion2)
 			.setUserSelected(false);
 
 		myPatientDao.update(retrievedPatient);
 		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1);
+
+		assertAll(
+			() -> assertEquals(1, retrievedUpdatedPatient.getMeta().getTag().size()),
+			() -> assertEquals(0, retrievedUpdatedPatient.getMeta().getSecurity().size()),
+			() -> assertEquals(expectedSystem2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getSystem()),
+			() -> assertTrue(retrievedUpdatedPatient.getMeta().getTagFirstRep().getUserSelected()),
+			() -> assertEquals(expectedCode2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getCode())
+			// TODO:  why isn't this working?
+			,
+			() -> assertEquals(expectedVersion2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getVersion())
+		);
 
 //		final DateRangeParam dateRange =
 //			new DateRangeParam(Date.from(LocalDateTime.now().minusSeconds(10).atZone(ZoneId.systemDefault()).toInstant()),
@@ -209,6 +220,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 //		final IBundleProvider history = myPatientDao.history(pid1, historyDetails, requestDetailsForHistory);
 //		ourLog.info("history: {}", history);
 
+		// TODO: verify that for each ResourceHistoryTag  we have the correct userSelected value
 		// TODO:  why do we got from 1 ResourceHistoryTag to 3?
 		final List<ResourceHistoryTag> resourceHistoryTags3 = myResourceHistoryTagDao.findAll();
 
@@ -216,9 +228,6 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		// TODO:  why do we have tagId
 		resourceHistoryTags3.forEach(historyTag -> ourLog.info("tagId: {}, resourceId: {}, userSelected: {}", historyTag.getTagId(), historyTag.getResourceId(), historyTag.getUserSelected()));
-		// TODO:  myPatientDao.update(retrievedPatient)
-		// TODO:  similar assertAll() post update
-		// TODO:  how retrieve resource tag history?
 
 		myCaptureQueriesListener.getInsertQueriesForCurrentThread()
 			.stream()

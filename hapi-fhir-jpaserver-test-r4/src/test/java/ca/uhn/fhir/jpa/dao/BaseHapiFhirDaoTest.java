@@ -77,12 +77,13 @@ public class BaseHapiFhirDaoTest {
 														 TagTypeEnum theEnum,
 														 String theScheme,
 														 String theTerm,
-														 String theLabel) {
+														 String theLabel,
+														 String theVersion) {
 			// we need to init synchronization due to what
 			// the underlying class is doing
 			try {
 				TransactionSynchronizationManager.initSynchronization();
-				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel);
+				return super.getTagOrNull(theDetails, theEnum, theScheme, theTerm, theLabel, theVersion);
 			} finally {
 				TransactionSynchronizationManager.clearSynchronization();
 			}
@@ -175,6 +176,7 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
+		String version = "v1.0";
 		String raceConditionError = "Entity exists; if this is logged, you have race condition issues!";
 
 		TagDefinition tagDefinition = new TagDefinition(tagType,
@@ -271,7 +273,7 @@ public class BaseHapiFhirDaoTest {
 		Runnable task = () -> {
 			latch.countDown();
 			try {
-				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label);
+				TagDefinition retTag = myTestDao.getTagOrNull(new TransactionDetails(), tagType, scheme, term, label, version);
 				outcomes.put(retTag.hashCode(), retTag);
 				counter.incrementAndGet();
 			} catch (Exception ex) {
@@ -331,6 +333,7 @@ public class BaseHapiFhirDaoTest {
 		String scheme = "http://localhost";
 		String term = "code123";
 		String label = "hollow world";
+		String version = "v1.0";
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String exMsg = "Hi there";
 		String readError = "No read for you";
@@ -359,7 +362,7 @@ public class BaseHapiFhirDaoTest {
 
 		// test
 		try {
-			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label);
+			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version);
 			fail();
 		} catch (Exception ex) {
 			// verify

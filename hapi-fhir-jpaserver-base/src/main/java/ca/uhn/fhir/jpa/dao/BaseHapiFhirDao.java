@@ -275,14 +275,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				// TODO:  check
 				final Set<Coding> codings = theResource.getMeta().getTag().stream()
 					.filter(Coding.class::isInstance)
 					.map(Coding.class::cast)
 					.collect(Collectors.toSet());
 				final String versionOrNull =
-					codings.isEmpty()  ? ((Coding)iBaseCoding).getVersion()
+					codings.isEmpty()  ? codings.iterator().next().getVersion()
 						: null;
+				// TODO:  test if this works
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), versionOrNull);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
@@ -323,14 +323,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
+				final Set<Coding> codings = theResource.getMeta().getTag().stream()
+					.filter(Coding.class::isInstance)
+					.map(Coding.class::cast)
+					.collect(Collectors.toSet());
+				final String versionOrNull =
+					codings.isEmpty()  ? codings.iterator().next().getVersion()
+						: null;
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay(), versionOrNull);
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
-					final Set<Coding> codings = theResource.getMeta().getTag().stream()
-						.filter(Coding.class::isInstance)
-						.map(Coding.class::cast)
-						.collect(Collectors.toSet());
-
 					ResourceTag tag = theEntity.addTag(def);
 					if (!codings.isEmpty()) {
 						// TODO:  what if there are more than one?
@@ -348,7 +349,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> securityLabels = theResource.getMeta().getSecurity();
 		if (securityLabels != null) {
 			for (IBaseCoding next : securityLabels) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
+				// TODO:  I think this is from security and so the label should be null
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -360,7 +362,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IPrimitiveType<String>> profiles = theResource.getMeta().getProfile();
 		if (profiles != null) {
 			for (IPrimitiveType<String> next : profiles) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				// TODO:  I think this is from Profile and so the label should be null
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
@@ -789,7 +792,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (def.isStandardType() == false) {
 			String profile = def.getResourceProfile("");
 			if (isNotBlank(profile)) {
-				// TODO:  I think this is from the Profile and so the label should be null
+				// TODO:  I think this is from Profile and so the label should be null
 				TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null);
 
 				ResourceTag tag = theEntity.addTag(profileDef);
