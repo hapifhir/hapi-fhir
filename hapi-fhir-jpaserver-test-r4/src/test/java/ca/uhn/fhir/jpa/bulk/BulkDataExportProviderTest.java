@@ -863,6 +863,46 @@ public class BulkDataExportProviderTest {
 		}
 	}
 
+	@Test
+	public void testGetBulkExport_outputFormat_FhirNdJson() throws IOException {
+//		http://localhost:8000/$export?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z
+
+		// setup
+		final Batch2JobInfo info = new Batch2JobInfo();
+		info.setJobId(A_JOB_ID);
+		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
+		info.setEndTime(InstantType.now().getValue());
+
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+//		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
+//			.thenReturn(info);
+
+		// call
+//		final String url = String.format("http://localhost:%s/%s?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z");
+
+
+		// TODO:  the bug only happens if you encode it in the URL
+		final HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT + "?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z");
+//		final HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
+//		httpGet.addHeader("_outputFormat", "application/fhir+ndjson");
+//		httpGet.addHeader("_type", "Patient");
+//		httpGet.addHeader("_typeFilter", "Patient?gender=female");
+//		httpGet.addHeader("since", "2022-10-30T11:14:00Z");
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
+			ourLog.info("Response: {}", response.toString());
+			// TODO:  assert equals
+		}
+
+		final BulkExportParameters params = verifyJobStart();
+
+		final String outputFormat = params.getOutputFormat();
+		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+	}
+
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
 		HttpPost post;
 		post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
