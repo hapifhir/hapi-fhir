@@ -85,13 +85,13 @@ public class IdHelperServiceTest {
 
 		Object[] redView = new Object[] {
 			"Patient",
-			new Long(123l),
+			123l,
 			"RED",
 			new Date()
 		};
 		Object[] blueView = new Object[] {
 			"Patient",
-			new Long(456l),
+			456l,
 			"BLUE",
 			new Date()
 		};
@@ -124,8 +124,8 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("RED");
 		patientIdsToResolve.add("BLUE");
 
-		ResourcePersistentId red = new ResourcePersistentId("Patient", new Long(123l));
-		ResourcePersistentId blue = new ResourcePersistentId("Patient",  new Long(456l));
+		ResourcePersistentId red = new ResourcePersistentId("Patient", 123l);
+		ResourcePersistentId blue = new ResourcePersistentId("Patient", 456l);
 
 		// we will pretend the lookup value is in the cache
 		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
@@ -167,7 +167,7 @@ public class IdHelperServiceTest {
 
 		IResourceLookup result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
 		assertEquals(forcedIdView[0], result.getResourceType());
-		assertEquals(forcedIdView[1], result.getResourceId());
+		assertEquals(forcedIdView[1], result.getPersistentId().getId());
 		assertEquals(forcedIdView[3], result.getDeleted());
 	}
 

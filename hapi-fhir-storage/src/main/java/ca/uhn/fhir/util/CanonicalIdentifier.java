@@ -1,8 +1,8 @@
-package ca.uhn.fhir.mdm.util;
+package ca.uhn.fhir.util;
 
 /*-
  * #%L
- * HAPI FHIR - Master Data Management
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
