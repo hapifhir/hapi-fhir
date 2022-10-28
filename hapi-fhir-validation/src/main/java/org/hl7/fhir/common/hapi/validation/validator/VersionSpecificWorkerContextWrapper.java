@@ -1,11 +1,11 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -27,6 +27,7 @@ import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.NamingSystem;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -124,8 +125,18 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public Map<String, byte[]> getBinaries() {
-		return null;
+	public Set<String> getBinaryKeysAsSet() {
+		throw new UnsupportedOperationException(Msg.code(2118));
+	}
+
+	@Override
+	public boolean hasBinaryKey(String s) {
+		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s) != null;
+	}
+
+	@Override
+	public byte[] getBinaryForKey(String s) {
+		return myValidationSupportContext.getRootValidationSupport().fetchBinary(s);
 	}
 
 	@Override
@@ -174,8 +185,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public IPackageLoadingTracker getPackageTracker() {
+		throw new UnsupportedOperationException(Msg.code(2108));
+	}
+
+	@Override
+	public IWorkerContext setPackageTracker(
+		IPackageLoadingTracker packageTracker) {
+		throw new UnsupportedOperationException(Msg.code(2114));
+	}
+
+	@Override
 	public PackageVersion getPackageForUrl(String s) {
-		return null;
+		throw new UnsupportedOperationException(Msg.code(2109));
 	}
 
 	@Override
@@ -236,7 +258,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public void cacheResource(Resource res) {
-		throw new UnsupportedOperationException(Msg.code(660));
+
 	}
 
 	@Override
@@ -414,6 +436,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public List<String> getCanonicalResourceNames() {
+		throw new UnsupportedOperationException(Msg.code(2110));
+	}
+
+	@Override
 	public org.hl7.fhir.r5.model.StructureMap getTransform(String url) {
 		throw new UnsupportedOperationException(Msg.code(673));
 	}
@@ -512,6 +539,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public String oid2Uri(String code) {
 		throw new UnsupportedOperationException(Msg.code(686));
+	}
+
+	@Override
+	public Map<String, NamingSystem> getNSUrlMap() {
+		throw new UnsupportedOperationException(Msg.code(2111));
 	}
 
 	@Override
@@ -755,6 +787,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 			case R4: {
 				converter = new VersionTypeConverterR4();
+				break;
+			}
+
+			case R4B: {
+				converter = new VersionTypeConverterR4B();
 				break;
 			}
 

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 3839
+title: "Advanced Lucene indexing now fully supports composite SearchParameters."

@@ -18,6 +18,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,5 +70,20 @@ public class CachingValidationSupportTest {
 		assertEquals(1, responses.size());
 	}
 
+	@Test
+	public void fetchBinary_normally_accessesSuperOnlyOnce() {
+		final byte[] EXPECTED_BINARY = "dummyBinaryContent".getBytes();
+		final String EXPECTED_BINARY_KEY = "dummyBinaryKey";
+		when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
+		when(myValidationSupport.fetchBinary(EXPECTED_BINARY_KEY)).thenReturn(EXPECTED_BINARY);
+		CachingValidationSupport support = new CachingValidationSupport(myValidationSupport);
 
+		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
+		assertEquals(EXPECTED_BINARY,firstActualBinary);
+		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
+
+		final byte[] secondActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
+		assertEquals(EXPECTED_BINARY,secondActualBinary);
+		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
+	}
 }

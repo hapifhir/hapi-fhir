@@ -23,15 +23,16 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 class InstanceProgress {
-	private static final Logger ourLog = LoggerFactory.getLogger(InstanceProgress.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	private int myRecordsProcessed = 0;
 	private int myIncompleteChunkCount = 0;
@@ -42,6 +43,7 @@ class InstanceProgress {
 	private Long myEarliestStartTime = null;
 	private Long myLatestEndTime = null;
 	private String myErrormessage = null;
+	private StatusEnum myNewStatus = null;
 
 	public void addChunk(WorkChunk theChunk) {
 		myErrorCountForAllStatuses += theChunk.getErrorCount();
@@ -129,9 +131,9 @@ class InstanceProgress {
 			theInstance.setProgress(percentComplete);
 
 			if (jobSuccessfullyCompleted()) {
-				theInstance.setStatus(StatusEnum.COMPLETED);
+				myNewStatus = StatusEnum.COMPLETED;
 			} else if (myErroredChunkCount > 0) {
-				theInstance.setStatus(StatusEnum.ERRORED);
+				myNewStatus = StatusEnum.ERRORED;
 			}
 
 			if (myEarliestStartTime != null && myLatestEndTime != null) {
@@ -157,5 +159,25 @@ class InstanceProgress {
 
 	public boolean changed() {
 		return (myIncompleteChunkCount + myCompleteChunkCount + myErroredChunkCount) >= 2 || myErrorCountForAllStatuses > 0;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myIncompleteChunkCount", myIncompleteChunkCount)
+			.append("myCompleteChunkCount", myCompleteChunkCount)
+			.append("myErroredChunkCount", myErroredChunkCount)
+			.append("myFailedChunkCount", myFailedChunkCount)
+			.append("myErrormessage", myErrormessage)
+			.append("myRecordsProcessed", myRecordsProcessed)
+			.toString();
+	}
+
+	public StatusEnum getNewStatus() {
+		return myNewStatus;
+	}
+
+	public boolean hasNewStatus() {
+		return myNewStatus != null;
 	}
 }

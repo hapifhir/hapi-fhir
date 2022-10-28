@@ -30,7 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	private ISearchResultDao mySearchResultDao;
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<ResourcePersistentId> fetchResultPids(Search theSearch, int theFrom, int theTo) {
 		final Pageable page = toPage(theFrom, theTo);
 		if (page == null) {
@@ -60,7 +61,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public List<ResourcePersistentId> fetchAllResultPids(Search theSearch) {
 		List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
 		ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
@@ -68,7 +69,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public void storeResults(Search theSearch, List<ResourcePersistentId> thePreviouslyStoredResourcePids, List<ResourcePersistentId> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 

@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
  */
 
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -28,11 +29,13 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
@@ -44,19 +47,21 @@ import java.util.Optional;
  * This handler receives batch work request messages and performs the batch work requested by the message
  */
 class WorkChannelMessageHandler implements MessageHandler {
-	private static final Logger ourLog = LoggerFactory.getLogger(WorkChannelMessageHandler.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
+	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
 
 	WorkChannelMessageHandler(@Nonnull IJobPersistence theJobPersistence,
 									  @Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 									  @Nonnull BatchJobSender theBatchJobSender,
-									  @Nonnull StepExecutionSvc theExecutorSvc
-	) {
+									  @Nonnull WorkChunkProcessor theExecutorSvc,
+									  @Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc);
+		myJobStepExecutorFactory = new JobStepExecutorFactory(theJobPersistence, theBatchJobSender, theExecutorSvc, theJobMaintenanceService);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobPersistence);
 	}
 
 	@Override
@@ -80,8 +85,10 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		Validate.isTrue(workChunk.getTargetStepId().equals(cursor.getCurrentStepId()), "Chunk %s has target step %s but expected %s", chunkId, workChunk.getTargetStepId(), cursor.getCurrentStepId());
 
-		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstanceAndMarkInProgress(workNotification.getInstanceId());
+		Optional<JobInstance> instanceOpt = myJobPersistence.fetchInstance(workNotification.getInstanceId());
 		JobInstance instance = instanceOpt.orElseThrow(() -> new InternalErrorException("Unknown instance: " + workNotification.getInstanceId()));
+		markInProgressIfQueued(instance);
+		myJobDefinitionRegistry.setJobDefinition(instance);
 		String instanceId = instance.getInstanceId();
 
 		if (instance.isCancelled()) {
@@ -92,6 +99,12 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		JobStepExecutor<?,?,?> stepExecutor = myJobStepExecutorFactory.newJobStepExecutor(instance, workChunk, cursor);
 		stepExecutor.executeStep();
+	}
+
+	private void markInProgressIfQueued(JobInstance theInstance) {
+		if (theInstance.getStatus() == StatusEnum.QUEUED) {
+			myJobInstanceStatusUpdater.updateInstanceStatus(theInstance, StatusEnum.IN_PROGRESS);
+		}
 	}
 
 	private JobWorkCursor<?, ?, ?> buildCursorFromNotification(JobWorkNotification workNotification) {

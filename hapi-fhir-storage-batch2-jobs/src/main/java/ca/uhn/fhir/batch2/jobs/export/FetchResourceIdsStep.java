@@ -26,10 +26,11 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -39,10 +40,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
-public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, BulkExportIdList> {
+public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
 	public static final int MAX_IDS_TO_BATCH = 900;
@@ -50,10 +53,13 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
+	@Autowired
+	private DaoConfig myDaoConfig;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<BulkExportIdList> theDataSink) throws JobExecutionFailedException {
+								 @Nonnull IJobDataSink<ResourceIdList> theDataSink) throws JobExecutionFailedException {
 		BulkExportJobParameters params = theStepExecutionDetails.getParameters();
 		ourLog.info("Starting BatchExport job");
 
@@ -62,15 +68,18 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setStartDate(params.getStartDate());
 		providerParams.setExportStyle(params.getExportStyle());
 		providerParams.setGroupId(params.getGroupId());
+		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
 
 		int submissionCount = 0;
 		try {
+			Set<Id> submittedIds = new HashSet<>();
+
 			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
-				ourLog.info("Running FetchResourceIdsStep with params: {}", providerParams);
+				ourLog.info("Running FetchResourceIdsStep for resource type: {} with params: {}", resourceType, providerParams);
 				Iterator<ResourcePersistentId> pidIterator = myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<Id> idsToSubmit = new ArrayList<>();
 
@@ -80,11 +89,21 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 				while (pidIterator.hasNext()) {
 					ResourcePersistentId pid = pidIterator.next();
 
-					idsToSubmit.add(Id.getIdFromPID(pid, resourceType));
+					Id id;
+					if (pid.getResourceType() != null) {
+						id = Id.getIdFromPID(pid, pid.getResourceType());
+					} else {
+						id = Id.getIdFromPID(pid, resourceType);
+					}
 
-					// >= so that we know (with confidence)
-					// that every batch is <= 1000 items
-					if (idsToSubmit.size() >= MAX_IDS_TO_BATCH) {
+					if (!submittedIds.add(id)) {
+						continue;
+					}
+
+					idsToSubmit.add(id);
+
+					// Make sure resources stored in each batch does not go over the max capacity
+					if (idsToSubmit.size() >= myDaoConfig.getBulkExportFileMaximumCapacity()) {
 						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
@@ -112,8 +131,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private void submitWorkChunk(List<Id> theIds,
 										  String theResourceType,
 										  BulkExportJobParameters theParams,
-										  IJobDataSink<BulkExportIdList> theDataSink) {
-		BulkExportIdList idList = new BulkExportIdList();
+										  IJobDataSink<ResourceIdList> theDataSink) {
+		ResourceIdList idList = new ResourceIdList();
 
 		idList.setIds(theIds);
 

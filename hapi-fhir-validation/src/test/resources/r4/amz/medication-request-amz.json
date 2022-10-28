@@ -1,0 +1,38 @@
+{
+	"resourceType" : "MedicationRequest",
+	"meta" : {
+		"versionId" : "1",
+		"tag" : [
+			{
+				"system" : "https://smarthealthit.org/tags",
+				"code" : "synthea-8-2017"
+			}
+		],
+		"lastUpdated" : "2021-04-17T02:39:06.885-04:00",
+		"extension" : [
+			{
+				"valueUri" : "https://r2.smarthealthit.org",
+				"url" : "http://hl7.org/fhir/4.0/StructureDefinition/extension-Meta.source"
+			}
+		]
+	},
+	"encounter" : {
+		"reference" : "Encounter/a83e5350-6462-4331-adba-dc72552cecbd"
+	},
+	"subject" : {
+		"reference" : "Patient/ab606cad-b848-4a24-b3b6-61075563fadf"
+	},
+	"authoredOn" : "2018-02-19",
+	"status" : "stopped",
+	"medicationCodeableConcept" : {
+		"coding" : [
+			{
+				"display" : "Atorvastatin",
+				"system" : "http://www.nlm.nih.gov/research/umls/rxnorm",
+				"code" : "259255"
+			}
+		],
+		"text" : "Atorvastatin"
+	},
+	"intent" : "order"
+}

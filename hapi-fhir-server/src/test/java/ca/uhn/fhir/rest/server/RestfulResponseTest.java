@@ -11,14 +11,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.withSettings;
 
 /**
- * Unit tests of {@link RestfulResponse}.
+ * Unit tests of {@link BaseRestfulResponse}.
  */
 public class RestfulResponseTest {
 	@Test
 	public void addMultipleHeaderValues() {
 		@SuppressWarnings("unchecked")
-		final RestfulResponse<?> restfulResponse =
-			mock(RestfulResponse.class, withSettings()
+		final BaseRestfulResponse<?> restfulResponse =
+			mock(BaseRestfulResponse.class, withSettings()
 				.useConstructor((RequestDetails) null).defaultAnswer(CALLS_REAL_METHODS));
 
 		restfulResponse.addHeader("Authorization", "Basic");

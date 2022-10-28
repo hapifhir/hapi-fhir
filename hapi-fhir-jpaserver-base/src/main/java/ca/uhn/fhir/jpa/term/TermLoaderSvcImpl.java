@@ -10,9 +10,11 @@ import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.term.icd10.Icd10Loader;
 import ca.uhn.fhir.jpa.term.icd10cm.Icd10CmLoader;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincAnswerListLinkHandler;
+import ca.uhn.fhir.jpa.term.loinc.LoincCodingPropertiesHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincConsumerNameHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincDocumentOntologyHandler;
 import ca.uhn.fhir.jpa.term.loinc.LoincGroupFileHandler;
@@ -163,7 +165,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	static final String IMGTHLA_HLA_XML = "hla.xml";
 	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
 	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full";
 	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
@@ -298,6 +300,39 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			return processSnomedCtFiles(descriptors, theRequestDetails);
 		}
+	}
+
+	@Override
+	public UploadStatistics loadIcd10(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		ourLog.info("Beginning ICD-10 processing");
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(ICD10_URI);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		int count = 0;
+
+		try (LoadedFileDescriptors compressedDescriptors = getLoadedFileDescriptors(theFiles)) {
+			for (FileDescriptor nextDescriptor : compressedDescriptors.getUncompressedFileDescriptors()) {
+				if (nextDescriptor.getFilename().toLowerCase(Locale.US).endsWith(".xml")) {
+					try (InputStream inputStream = nextDescriptor.getInputStream();
+						  InputStreamReader reader = new InputStreamReader(inputStream, Charsets.UTF_8) ) {
+						Icd10Loader loader = new Icd10Loader(codeSystem, codeSystemVersion);
+						loader.load(reader);
+						count += loader.getConceptCount();
+					}
+				}
+			}
+		} catch (IOException | SAXException e) {
+			throw new InternalErrorException(Msg.code(2135) + e);
+		}
+
+		codeSystem.setVersion(codeSystemVersion.getCodeSystemVersionId());
+
+		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, codeSystem, null, null);
+		return new UploadStatistics(count, target);
 	}
 
 	@Override
@@ -460,7 +495,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		CodeSystem imgthlaCs;
 		try {
-			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
+			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
@@ -600,7 +635,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		Map<PartTypeAndPartName, String> partTypeAndPartNameToPartNumber = ((LoincPartHandler) handler).getPartTypeAndPartNameToPartNumber();
 
-		// LOINC codes
+		// LOINC string properties
 		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
@@ -672,6 +707,10 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		// Consumer Name
 		handler = new LoincConsumerNameHandler(code2concept);
 		iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_CONSUMER_NAME_FILE.getCode(), LOINC_CONSUMER_NAME_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// LOINC coding properties (must run after all TermConcepts were created)
+		handler = new LoincCodingPropertiesHandler(code2concept, propertyNamesToTypes);
+		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Linguistic Variants
 		handler = new LoincLinguisticVariantsHandler(linguisticVariants);

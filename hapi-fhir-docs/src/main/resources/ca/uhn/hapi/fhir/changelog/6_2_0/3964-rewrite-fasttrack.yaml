@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3964
+title: "Fast-tracking batch jobs that produced only one chunk has been rewritten to use Quartz triggerJob.  This will
+ensure that at most one thread is updating job status at a time.  Also jobs that had FAILED, ERRORED, or been CANCELLED
+could be accidentally set back to IN_PROGRESS; this has been corrected."

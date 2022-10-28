@@ -83,6 +83,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 
 	@Column(name = "JOB_CANCELLED", nullable = false)
 	private boolean myCancelled;
+	@Column(name = "FAST_TRACKING", nullable = true)
+	private Boolean myFastTracking;
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 	@Lob
@@ -298,5 +300,19 @@ public class Batch2JobInstanceEntity implements Serializable {
 			.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
 			.append("report", myReport)
 			.toString();
+	}
+
+	/**
+	 * @return true if every step of the job has produced exactly 1 chunk.
+	 */
+	public boolean isFastTracking() {
+		if (myFastTracking == null) {
+			myFastTracking = false;
+		}
+		return myFastTracking;
+	}
+
+	public void setFastTracking(boolean theFastTracking) {
+		myFastTracking = theFastTracking;
 	}
 }

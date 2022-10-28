@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -238,14 +238,6 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-sqlserver</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
 		<!-- Test Deps -->

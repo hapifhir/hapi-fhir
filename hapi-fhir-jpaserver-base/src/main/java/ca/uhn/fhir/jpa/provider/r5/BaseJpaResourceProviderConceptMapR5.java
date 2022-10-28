@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.provider.r5;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -45,7 +46,7 @@ import org.hl7.fhir.r5.model.UriType;
 
 import javax.servlet.http.HttpServletRequest;
 
-public class BaseJpaResourceProviderConceptMapR5 extends JpaResourceProviderR5<ConceptMap> {
+public abstract class BaseJpaResourceProviderConceptMapR5 extends BaseJpaResourceProvider<ConceptMap> {
 	@Operation(name = JpaConstants.OPERATION_TRANSLATE, idempotent = true, returnParameters = {
 		@OperationParam(name = "result", type = BooleanType.class, min = 1, max = 1),
 		@OperationParam(name = "message", type = StringType.class, min = 0, max = 1),

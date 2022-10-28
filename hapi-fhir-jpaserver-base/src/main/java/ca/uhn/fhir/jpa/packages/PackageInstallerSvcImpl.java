@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
@@ -28,6 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
+import ca.uhn.fhir.jpa.searchparam.util.SearchParameterHelper;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -92,7 +93,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		"ConceptMap",
 		"SearchParameter",
 		"Subscription"
-	));
+		));
 
 	boolean enabled = true;
 	@Autowired
@@ -113,6 +114,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private ISearchParamRegistryController mySearchParamRegistryController;
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+	@Autowired
+	private SearchParameterHelper mySearchParameterHelper;
+
 	/**
 	 * Constructor
 	 */
@@ -163,7 +167,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					return existing.isPresent();
 				});
 				if (exists) {
-					ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
+						ourLog.info("Package {}#{} is already installed", theInstallationSpec.getName(), theInstallationSpec.getVersion());
 				}
 
 				NpmPackage npmPackage = myPackageCacheManager.installPackage(theInstallationSpec);
@@ -225,7 +229,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
-					create(next, theOutcome);
+					create(next, theInstallationSpec, theOutcome);
 				} catch (Exception e) {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
 					throw new ImplementationGuideInstallationException(Msg.code(1286) + String.format("Error installing IG %s#%s: %s", name, version, e), e);
@@ -323,7 +327,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		return resources;
 	}
 
-	private void create(IBaseResource theResource, PackageInstallOutcomeJson theOutcome) {
+	private void create(IBaseResource theResource, PackageInstallationSpec theInstallationSpec, PackageInstallOutcomeJson theOutcome) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource);
 		IBundleProvider searchResult = searchResource(dao, map);
@@ -347,11 +351,15 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					ourLog.info("Created resource with existing id");
 				}
 			} else {
-			ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
-				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
-				DaoMethodOutcome outcome = updateResource(dao, theResource);
-				if (!outcome.isNop()) {
-					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+				if (theInstallationSpec.isReloadExisting()) {
+					ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
+					theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+					DaoMethodOutcome outcome = updateResource(dao, theResource);
+					if (!outcome.isNop()) {
+						theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+					}
+				} else {
+					ourLog.info("Skipping update of existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				}
 			}
 		}
@@ -385,12 +393,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		}
 	}
 
-	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
+	DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			SystemRequestDetails requestDetails = newSystemRequestDetails();
 			return theDao.update(theResource, requestDetails);
 		} else {
-			return theDao.update(theResource);
+			return theDao.update(theResource, new SystemRequestDetails());
 		}
 	}
 
@@ -488,6 +496,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		} else if (resource.getClass().getSimpleName().equals("Subscription")) {
 			String id = extractIdFromSubscription(resource);
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
+		} else if (resource.getClass().getSimpleName().equals("SearchParameter")) {
+			return buildSearchParameterMapForSearchParameter(resource);
 		} else if (resourceHasUrlElement(resource)) {
 			String url = extractUniqueUrlFromMetadataResource(resource);
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
@@ -496,6 +506,30 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
+
+
+	/**
+	 * Strategy is to build a SearchParameterMap same way the SearchParamValidatingInterceptor does, to make sure that
+	 * the loader search detects existing resources and routes process to 'update' path, to avoid treating it as a new
+	 * upload which validator later rejects as duplicated.
+	 * To achieve this, we try canonicalizing the SearchParameter first (as the validator does) and if that is not possible
+	 * we cascade to building the map from 'url' or 'identifier'.
+	 */
+	private SearchParameterMap buildSearchParameterMapForSearchParameter(IBaseResource theResource) {
+		Optional<SearchParameterMap> spmFromCanonicalized = mySearchParameterHelper.buildSearchParameterMapFromCanonical(theResource);
+		if (spmFromCanonicalized.isPresent()) {
+			return spmFromCanonicalized.get();
+		}
+
+		if (resourceHasUrlElement(theResource)) {
+			String url = extractUniqueUrlFromMetadataResource(theResource);
+			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
+		} else {
+			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(theResource);
+			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
+		}
+	}
+
 
 	private String extractUniqeIdFromNamingSystem(IBaseResource resource) {
 		FhirTerser terser = myFhirContext.newTerser();

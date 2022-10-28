@@ -21,14 +21,13 @@ package ca.uhn.fhir.rest.server.util;
  */
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nullable;
 
-public class BaseServerCapabilityStatementProvider {
+public abstract class BaseServerCapabilityStatementProvider {
 
   private RestfulServerConfiguration myConfiguration;
 

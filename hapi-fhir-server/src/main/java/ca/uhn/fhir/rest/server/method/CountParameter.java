@@ -40,7 +40,7 @@ public class CountParameter implements IParameter {
 	private Class<?> myType;
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		String[] countParam = theRequest.getParameters().get(Constants.PARAM_COUNT);
 		if (countParam != null) {
 			if (countParam.length > 0) {

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.parser;
 
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 
 /*
  * #%L

@@ -43,7 +43,8 @@ import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeAppCtx.JOB_DELETE_EXPUNGE;
@@ -65,7 +66,7 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 	UrlPartitioner myUrlPartitioner;
 
 	@Override
-	@Transactional(Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	public String submitJob(Integer theBatchSize, List<String> theUrlsToDeleteExpunge, RequestDetails theRequestDetails) {
 		if (theBatchSize == null) {
 			theBatchSize = myDaoConfig.getExpungeBatchSize();

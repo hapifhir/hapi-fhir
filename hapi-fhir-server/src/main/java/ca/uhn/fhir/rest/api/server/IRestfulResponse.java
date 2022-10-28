@@ -42,7 +42,7 @@ public interface IRestfulResponse {
 	 * This is only used for DSTU1 getTags operations, so it can be removed at some point when we
 	 * drop DSTU1
 	 */
-	Object returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException;
+	Object returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer, MethodOutcome response, String resourceName) throws IOException;
 
 	Writer getResponseWriter(int theStatusCode, String theStatusMessage, String theContentType, String theCharset, boolean theRespondGzip) throws IOException;
 

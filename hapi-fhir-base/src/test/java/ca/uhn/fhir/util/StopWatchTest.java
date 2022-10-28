@@ -9,7 +9,10 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.oneOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StopWatchTest {
@@ -18,7 +21,7 @@ public class StopWatchTest {
 
 	@AfterEach
 	public void after() {
-		StopWatch.setNowForUnitTestForUnitTest(null);
+		StopWatch.setNowForUnitTest(null);
 	}
 
 	private double calculateThroughput(int theMinutesElapsed, int theNumOperations) {
@@ -30,70 +33,70 @@ public class StopWatchTest {
 
 	@Test
 	public void testEstimatedTimeRemainingOutOfOne() {
-		StopWatch.setNowForUnitTestForUnitTest(777777777L);
+		StopWatch.setNowForUnitTest(777777777L);
 		StopWatch sw = new StopWatch();
 
 		// Less than half
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(0.1, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(1, 10));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE + 100);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE + 100);
 		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(0.1, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:19:00", sw.getEstimatedTimeRemaining(0.05, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:39:00", sw.getEstimatedTimeRemaining(0.025, 1.0));
 
 		// More than half
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:01:00.000", sw.getEstimatedTimeRemaining(0.5, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:00:59.760", sw.getEstimatedTimeRemaining(0.501, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("00:00:40.000", sw.getEstimatedTimeRemaining(0.6, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("6666ms", sw.getEstimatedTimeRemaining(0.9, 1.0));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
+		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
 		assertEquals("60ms", sw.getEstimatedTimeRemaining(0.999, 1.0));
 
 	}
 
 	@Test
 	public void testEstimatedTimeRemainingOutOfOneHundred() {
-		StopWatch.setNowForUnitTestForUnitTest(777777777L);
+		StopWatch.setNowForUnitTest(777777777L);
 		StopWatch sw = new StopWatch();
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (10 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (10 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("01:30:00", sw.getEstimatedTimeRemaining(10, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:04:00", sw.getEstimatedTimeRemaining(20, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (30 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (30 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("01:10:00", sw.getEstimatedTimeRemaining(30, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (40 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (40 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("01:00:00", sw.getEstimatedTimeRemaining(40, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (50 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (50 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:50:00", sw.getEstimatedTimeRemaining(50, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:40:00", sw.getEstimatedTimeRemaining(60, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:00:36.363", sw.getEstimatedTimeRemaining(99, 100));
 
-		StopWatch.setNowForUnitTestForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
+		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("360ms", sw.getEstimatedTimeRemaining(99.99, 100));
 
 	}
@@ -116,13 +119,13 @@ public class StopWatchTest {
 	public void testFormatTaskDurations() {
 		StopWatch sw = new StopWatch();
 
-		StopWatch.setNowForUnitTestForUnitTest(1000L);
+		StopWatch.setNowForUnitTest(1000L);
 		sw.startTask("TASK1");
 
-		StopWatch.setNowForUnitTestForUnitTest(1500L);
+		StopWatch.setNowForUnitTest(1500L);
 		sw.startTask("TASK2");
 
-		StopWatch.setNowForUnitTestForUnitTest(1600L);
+		StopWatch.setNowForUnitTest(1600L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
 		assertEquals("TASK1: 500ms\nTASK2: 100ms", taskDurations);
@@ -132,19 +135,19 @@ public class StopWatchTest {
 	public void testFormatTaskDurationsDelayBetweenTasks() {
 		StopWatch sw = new StopWatch();
 
-		StopWatch.setNowForUnitTestForUnitTest(1000L);
+		StopWatch.setNowForUnitTest(1000L);
 		sw.startTask("TASK1");
 
-		StopWatch.setNowForUnitTestForUnitTest(1500L);
+		StopWatch.setNowForUnitTest(1500L);
 		sw.endCurrentTask();
 
-		StopWatch.setNowForUnitTestForUnitTest(2000L);
+		StopWatch.setNowForUnitTest(2000L);
 		sw.startTask("TASK2");
 
-		StopWatch.setNowForUnitTestForUnitTest(2100L);
+		StopWatch.setNowForUnitTest(2100L);
 		sw.endCurrentTask();
 
-		StopWatch.setNowForUnitTestForUnitTest(2200L);
+		StopWatch.setNowForUnitTest(2200L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
 		assertEquals("TASK1: 500ms\n" +
@@ -157,13 +160,13 @@ public class StopWatchTest {
 	public void testFormatTaskDurationsLongDelayBeforeStart() {
 		StopWatch sw = new StopWatch(0);
 
-		StopWatch.setNowForUnitTestForUnitTest(1000L);
+		StopWatch.setNowForUnitTest(1000L);
 		sw.startTask("TASK1");
 
-		StopWatch.setNowForUnitTestForUnitTest(1500L);
+		StopWatch.setNowForUnitTest(1500L);
 		sw.startTask("TASK2");
 
-		StopWatch.setNowForUnitTestForUnitTest(1600L);
+		StopWatch.setNowForUnitTest(1600L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
 		assertEquals("Before first task: 1000ms\nTASK1: 500ms\nTASK2: 100ms", taskDurations);

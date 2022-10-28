@@ -52,6 +52,9 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
 				return null;
 			}
+			if (theInputResource == null) {
+				return null;
+			}
 
 			switch (myAppliesTo) {
 				case ALL_RESOURCES:
@@ -65,7 +68,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 						}
 					} else {
 						String inputResourceName = theRequestDetails.getFhirContext().getResourceType(theInputResource);
-						if (theInputResource == null || !myAppliesToTypes.contains(inputResourceName)) {
+						if (!myAppliesToTypes.contains(inputResourceName)) {
 							return null;
 						}
 					}

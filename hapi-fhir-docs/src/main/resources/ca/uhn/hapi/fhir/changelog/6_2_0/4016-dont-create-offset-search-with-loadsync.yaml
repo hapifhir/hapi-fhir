@@ -1,0 +1,7 @@
+---
+type: add
+issue: 4016
+title: "When using ForcedOffsetSearchModeInterceptor, any synchronous searches initiated programmatically (i.e. through the
+  internal java API, not the REST API) will not be modified. This prevents issues when a java call requests a synchronous
+  search larger than the default offset search page size."
+

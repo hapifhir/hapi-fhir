@@ -60,9 +60,7 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -303,7 +301,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
-				persCs.getConcepts().addAll(BaseTermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
+				persCs.getConcepts().addAll(TermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(),
 					theCodeSystem.getVersion(), persCs, theResourceEntity, theRequestDetails);
@@ -656,13 +654,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			// Check if a non-versioned TermCodeSystemVersion entity already exists for this TermCodeSystem.
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidVersionIsNull(theCodeSystem.getPid());
 			if (codeSystemVersionEntity != null) {
-				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			}
 		} else {
 			// Check if a TermCodeSystemVersion entity already exists for this TermCodeSystem and version.
 			codeSystemVersionEntity = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCodeSystem.getPid(), theSystemVersionId);
 			if (codeSystemVersionEntity != null) {
-				msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri, theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrlAndVersion", theSystemUri, theSystemVersionId, codeSystemVersionEntity.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 			}
 		}
 		// Throw exception if the TermCodeSystemVersion is being duplicated.

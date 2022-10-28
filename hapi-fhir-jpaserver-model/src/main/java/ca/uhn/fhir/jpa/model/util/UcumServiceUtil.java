@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.model.util;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import ca.uhn.fhir.rest.param.QuantityParam;
 import org.fhir.ucum.Decimal;
@@ -43,6 +45,10 @@ public class UcumServiceUtil {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(UcumServiceUtil.class);
 
+	public static final String CELSIUS_CODE = "Cel";
+	public static final String FAHRENHEIT_CODE = "[degF]";
+	public static final float CELSIUS_KELVIN_DIFF = 273.15f;
+
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	private static final String UCUM_SOURCE = "/ucum-essence.xml";
 
@@ -63,7 +69,7 @@ public class UcumServiceUtil {
 				myUcumEssenceService = new UcumEssenceService(input);
 
 			} catch (UcumException e) {
-				ourLog.warn("Failed to load ucum code from ", UCUM_SOURCE, e);
+				ourLog.warn("Failed to load ucum code from {}: {}", UCUM_SOURCE, e);
 			} finally {
 				ClasspathUtil.close(input);
 			}
@@ -87,6 +93,15 @@ public class UcumServiceUtil {
 		if (!UCUM_CODESYSTEM_URL.equals(theSystem) || theValue == null || theCode == null)
 			return null;
 
+		if ( isCelsiusOrFahrenheit(theCode) ) {
+			try {
+				return getCanonicalFormForCelsiusOrFahrenheit(theValue, theCode);
+			} catch (UcumException theE) {
+				ourLog.error("Exception when trying to obtain canonical form for value {} and code {}: {}", theValue, theCode, theE.getMessage());
+				return null;
+			}
+		}
+
 		init();
 		Pair theCanonicalPair;
 
@@ -103,7 +118,47 @@ public class UcumServiceUtil {
 		return theCanonicalPair;
 	}
 
-    @Nullable
+
+	private static Pair getCanonicalFormForCelsiusOrFahrenheit(BigDecimal theValue, String theCode) throws UcumException {
+		return theCode.equals(CELSIUS_CODE)
+			? canonicalizeCelsius(theValue)
+			: canonicalizeFahrenheit(theValue);
+	}
+
+	/**
+	 * Returns the received Fahrenheit value converted to Kelvin units and code
+	 * Formula is K = (x°F − 32) × 5/9 + 273.15
+	 */
+	private static Pair canonicalizeFahrenheit(BigDecimal theValue) throws UcumException {
+		BigDecimal converted = theValue
+			.subtract( BigDecimal.valueOf(32) )
+			.multiply( BigDecimal.valueOf(5f / 9f) )
+			.add( BigDecimal.valueOf(CELSIUS_KELVIN_DIFF) );
+		// disallow precision larger than input, as it matters when defining ranges
+		BigDecimal adjusted = converted.setScale(theValue.precision(), RoundingMode.HALF_UP);
+
+		Decimal newValue = new Decimal(adjusted.toPlainString());
+		return new Pair(newValue, "K");
+	}
+
+	/**
+	 * Returns the received Celsius value converted to Kelvin units and code
+	 */
+	private static Pair canonicalizeCelsius(BigDecimal theValue) throws UcumException {
+		Decimal valueDec = new Decimal(theValue.toPlainString(), theValue.precision());
+		Decimal converted = valueDec
+			.add(new Decimal(Float.toString(CELSIUS_KELVIN_DIFF)));
+
+		return new Pair(converted, "K");
+	}
+
+
+	private static boolean isCelsiusOrFahrenheit(String theCode) {
+		return theCode.equals(CELSIUS_CODE) || theCode.equals(FAHRENHEIT_CODE);
+	}
+
+
+	@Nullable
     public static QuantityParam toCanonicalQuantityOrNull(QuantityParam theQuantityParam) {
         Pair canonicalForm = getCanonicalForm(theQuantityParam.getSystem(), theQuantityParam.getValue(), theQuantityParam.getUnits());
         if (canonicalForm != null) {

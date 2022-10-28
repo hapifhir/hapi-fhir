@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -35,11 +35,6 @@
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-		</plugins>
-	</build>
 
 	<profiles>
 		<!-- For releases, we need to generate javadoc and sources JAR -->

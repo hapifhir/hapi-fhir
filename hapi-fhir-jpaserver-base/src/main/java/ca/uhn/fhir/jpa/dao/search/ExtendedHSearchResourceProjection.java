@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.dao.search;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.IParser;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -29,12 +31,16 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  * Query result when fetching full resources from HSearch.
  */
 public class ExtendedHSearchResourceProjection {
+	public static final String RESOURCE_NOT_STORED_ERROR = "Resource not stored in search index: ";
+
 	final long myPid;
 	final String myForcedId;
 	final String myResourceString;
 
 	public ExtendedHSearchResourceProjection(long thePid, String theForcedId, String theResourceString) {
-		Validate.notEmpty(theResourceString, "Resource not stored in search index: " + thePid);
+		if (StringUtils.isEmpty(theResourceString)) {
+			throw new ResourceNotFoundInIndexException(Msg.code(2130) + RESOURCE_NOT_STORED_ERROR + thePid);
+		}
 		myPid = thePid;
 		myForcedId = theForcedId;
 		myResourceString = theResourceString;

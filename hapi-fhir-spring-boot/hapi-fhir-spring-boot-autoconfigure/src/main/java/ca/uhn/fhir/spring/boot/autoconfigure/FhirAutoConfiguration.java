@@ -191,7 +191,7 @@ public class FhirAutoConfiguration {
 
 			@Bean
 			@Primary
-			public PlatformTransactionManager hapiTransactionManager() {
+			public PlatformTransactionManager transactionManager() {
 				return new JpaTransactionManager(emf);
 			}
 

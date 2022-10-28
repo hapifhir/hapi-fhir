@@ -42,8 +42,10 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.TimeoutManager;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.quartz.JobExecutionContext;
@@ -57,6 +59,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,12 +70,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
-import static ca.uhn.fhir.jpa.batch.config.BatchConstants.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
+	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
+	private static final long SAVE_ALL_DEFERRED_ERROR_MINUTES = 5;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -249,7 +255,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private void clearJobExecutions() {
-		for (String id : myJobExecutions) {
+		for (String id : new ArrayList<>(myJobExecutions)) {
 			myJobCoordinator.cancelInstance(id);
 		}
 		myJobExecutions.clear();
@@ -268,7 +274,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
+		TimeoutManager timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
+			Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+			Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+
 		while (!isStorageQueueEmpty()) {
+			if (timeoutManager.checkTimeout()) {
+				ourLog.info(toString());
+			}
 			saveDeferred();
 		}
 	}
@@ -353,7 +366,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		TermCodeSystemDeleteVersionJobParameters parameters = new TermCodeSystemDeleteVersionJobParameters();
 		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
 		request.setParameters(parameters);
-		
+
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 		myJobExecutions.add(response.getJobId());
 	}
@@ -500,5 +513,17 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 	}
 
-
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myDeferredCodeSystemsDeletions", myDeferredCodeSystemsDeletions.size())
+			.append("myDeferredCodeSystemVersionsDeletions", myDeferredCodeSystemVersionsDeletions.size())
+			.append("myDeferredConcepts", myDeferredConcepts.size())
+			.append("myDeferredValueSets", myDeferredValueSets.size())
+			.append("myDeferredConceptMaps", myDeferredConceptMaps.size())
+			.append("myConceptLinksToSaveLater", myConceptLinksToSaveLater.size())
+			.append("myJobExecutions", myJobExecutions.size())
+			.append("myProcessDeferred", myProcessDeferred)
+			.toString();
+	}
 }

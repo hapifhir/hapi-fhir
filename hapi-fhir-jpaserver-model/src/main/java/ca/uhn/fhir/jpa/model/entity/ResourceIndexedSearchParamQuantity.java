@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 	@Index(name = "IDX_SP_QUANTITY_HASH_SYSUN_V2", columnList = "HASH_IDENTITY_SYS_UNITS,SP_VALUE,RES_ID,PARTITION_ID"),
 	@Index(name = "IDX_SP_QUANTITY_RESID_V2", columnList = "RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 })
-public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchParamBaseQuantity {
+public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
 	

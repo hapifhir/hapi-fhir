@@ -56,7 +56,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.DeferredInterceptorBroadcasts;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -69,7 +68,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -81,7 +79,6 @@ import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.ThreadPoolUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
@@ -102,7 +99,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -166,6 +162,9 @@ public abstract class BaseTransactionProcessor {
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 
+	@Autowired
+	private ThreadPoolFactory myThreadPoolFactory;
+
 	private TaskExecutor myExecutor;
 
 	@Autowired
@@ -192,22 +191,12 @@ public abstract class BaseTransactionProcessor {
 
 	private TaskExecutor getTaskExecutor() {
 		if (myExecutor == null) {
-			if (myDaoConfig.getBundleBatchPoolSize() > 1) {
-				myExecutor = ThreadPoolUtil.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
-			} else {
-				SyncTaskExecutor executor = new SyncTaskExecutor();
-				myExecutor = executor;
-			}
+				myExecutor = myThreadPoolFactory.newThreadPool(myDaoConfig.getBundleBatchPoolSize(), myDaoConfig.getBundleBatchMaxPoolSize(), "bundle-batch-");
 		}
 		return myExecutor;
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest, boolean theNestedMode) {
-		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
-			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
-			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
-		}
-
 		String actionName = "Transaction";
 		IBaseBundle response = processTransactionAsSubRequest(theRequestDetails, theRequest, actionName, theNestedMode);
 
@@ -336,6 +325,16 @@ public abstract class BaseTransactionProcessor {
 	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName, boolean theNestedMode) {
 		BaseStorageDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
+
+			// Interceptor call: STORAGE_TRANSACTION_PROCESSING
+			if (CompositeInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_TRANSACTION_PROCESSING, myInterceptorBroadcaster, theRequestDetails)) {
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(IBaseBundle.class, theRequest);
+				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_TRANSACTION_PROCESSING, params);
+			}
+
 			return processTransaction(theRequestDetails, theRequest, theActionName, theNestedMode);
 		} finally {
 			BaseStorageDao.clearRequestAsProcessingSubRequest(theRequestDetails);
@@ -379,7 +378,11 @@ public abstract class BaseTransactionProcessor {
 		//Execute all non-gets on calling thread.
 		nonGetCalls.forEach(RetriableBundleTask::run);
 		//Execute all gets (potentially in a pool)
-		getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
+		if (myDaoConfig.getBundleBatchPoolSize() == 1) {
+			getCalls.forEach(RetriableBundleTask::run);
+		} else {
+			getCalls.forEach(getCall -> getTaskExecutor().execute(getCall));
+		}
 
 		// waiting for all async tasks to be completed
 		AsyncUtil.awaitLatchAndIgnoreInterrupt(completionLatch, 300L, TimeUnit.SECONDS);
@@ -389,8 +392,8 @@ public abstract class BaseTransactionProcessor {
 		for (int i = 0; i < requestEntriesSize; i++) {
 
 			nextResponseEntry = responseMap.get(i);
-			if (nextResponseEntry instanceof BaseServerResponseExceptionHolder) {
-				BaseServerResponseExceptionHolder caughtEx = (BaseServerResponseExceptionHolder) nextResponseEntry;
+			if (nextResponseEntry instanceof ServerResponseExceptionHolder) {
+				ServerResponseExceptionHolder caughtEx = (ServerResponseExceptionHolder) nextResponseEntry;
 				if (caughtEx.getException() != null) {
 					IBase nextEntry = myVersionAdapter.addEntry(response);
 					populateEntryWithOperationOutcome(caughtEx.getException(), nextEntry);
@@ -547,7 +550,7 @@ public abstract class BaseTransactionProcessor {
 
 				String url = requestDetails.getRequestPath();
 
-				BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
+				BaseMethodBinding method = srd.getServer().determineResourceMethod(requestDetails, url);
 				if (method == null) {
 					throw new IllegalArgumentException(Msg.code(532) + "Unable to handle GET " + url);
 				}
@@ -1867,14 +1870,14 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		private void populateResponseMapWithLastSeenException() {
-			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
+			ServerResponseExceptionHolder caughtEx = new ServerResponseExceptionHolder();
 			caughtEx.setException(myLastSeenException);
 			myResponseMap.put(myResponseOrder, caughtEx);
 		}
 
 	}
 
-	private static class BaseServerResponseExceptionHolder {
+	private static class ServerResponseExceptionHolder {
 		private BaseServerResponseException myException;
 
 		public BaseServerResponseException getException() {

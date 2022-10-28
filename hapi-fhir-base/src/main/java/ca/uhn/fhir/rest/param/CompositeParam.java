@@ -111,6 +111,13 @@ public class CompositeParam<A extends IQueryParameterType, B extends IQueryParam
 		return myRightType;
 	}
 
+	/**
+	 * Get the values of the subcomponents, in order.
+	 */
+	public List<IQueryParameterType> getValues() {
+		return List.of(myLeftType, myRightType);
+	}
+
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);

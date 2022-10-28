@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import javax.servlet.http.HttpServletRequest;
@@ -176,22 +176,10 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// test
 		myDaoConfig.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
-		IBundleProvider outcome = runInTransaction(() -> {
-			IBundleProvider res =  dao.patientInstanceEverything(
+		IBundleProvider outcome = dao.patientInstanceEverything(
 				req,
-				new IdDt(id),
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				theDetails
-			);
-			return res;
-		});
+                    theDetails, new PatientEverythingParameters(), new IdDt(id)
+            );
 
 		// verify return results
 		// we expect all the linked ids to be returned too

@@ -4,11 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -29,9 +28,12 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -54,19 +56,21 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes=TestR4ConfigWithElasticHSearch.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract public class BaseR4SearchLastN extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseR4SearchLastN.class);
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
 	private static final Map<String, String> observationCategoryMap = new HashMap<>();
 	private static final Map<String, String> observationCodeMap = new HashMap<>();
 	private static final Map<String, Date> observationEffectiveMap = new HashMap<>();
+	// todo mb make these normal fields.  This static setup wasn't working
 	protected static IIdType patient0Id = null;
 	protected static IIdType patient1Id = null;
 	protected static IIdType patient2Id = null;
 	// Using static variables including the flag below so that we can initalize the database and indexes once
 	// (all of the tests only read from the DB and indexes and so no need to re-initialze them for each test).
-	private static boolean dataLoaded = false;
 	private static Calendar observationDate = new GregorianCalendar();
 	protected final String observationCd0 = "code0";
 	protected final String observationCd1 = "code1";
@@ -108,35 +112,35 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
 
-	@BeforeEach
+	@BeforeAll
 	public void beforeCreateTestPatientsAndObservations() throws IOException {
+		ourLog.info("setup Patients and Observations");
 		myDaoConfig.setLastNEnabled(true);
+		// enabled to also create extended lucene index during creation of test data
+		boolean hsearchSaved = myDaoConfig.isAdvancedHSearchIndexing();
+		myDaoConfig.setAdvancedHSearchIndexing(true);
 
 		// Using a static flag to ensure that test data and elasticsearch index is only created once.
 		// Creating this data and the index is time consuming and as such want to avoid having to repeat for each test.
 		// Normally would use a static @BeforeClass method for this purpose, but Autowired objects cannot be accessed in static methods.
-		if (!dataLoaded || patient0Id == null) {
-			// enabled to also create extended lucene index during creation of test data
-			myDaoConfig.setAdvancedHSearchIndexing(true);
-			Patient pt = new Patient();
-			pt.addName().setFamily("Lastn").addGiven("Arthur");
-			patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
-			createObservationsForPatient(patient0Id);
-			pt = new Patient();
-			pt.addName().setFamily("Lastn").addGiven("Johnathan");
-			patient1Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
-			createObservationsForPatient(patient1Id);
-			pt = new Patient();
-			pt.addName().setFamily("Lastn").addGiven("Michael");
-			patient2Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
-			createObservationsForPatient(patient2Id);
-			dataLoaded = true;
 
-			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-			myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
-			// turn off the setting enabled earlier
-			myDaoConfig.setAdvancedHSearchIndexing(false);
-		}
+		Patient pt = new Patient();
+		pt.addName().setFamily("Lastn").addGiven("Arthur");
+		patient0Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
+		createObservationsForPatient(patient0Id);
+		pt = new Patient();
+		pt.addName().setFamily("Lastn").addGiven("Johnathan");
+		patient1Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
+		createObservationsForPatient(patient1Id);
+		pt = new Patient();
+		pt.addName().setFamily("Lastn").addGiven("Michael");
+		patient2Id = myPatientDao.create(pt, mockSrd()).getId().toUnqualifiedVersionless();
+		createObservationsForPatient(patient2Id);
+
+		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		myElasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_CODE_INDEX);
+		// turn off the setting enabled earlier
+		myDaoConfig.setAdvancedHSearchIndexing(hsearchSaved);
 
 	}
 
@@ -211,6 +215,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 
 	@Test
 	public void testLastNNoPatients() {
+		ourLog.info("testLastNNoPatients lastn {} hsearch {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
 
 		SearchParameterMap params = new SearchParameterMap();
 

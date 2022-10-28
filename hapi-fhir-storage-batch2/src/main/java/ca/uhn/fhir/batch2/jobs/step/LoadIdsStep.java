@@ -29,17 +29,19 @@ import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrlListJobParameters;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class LoadIdsStep implements IJobStepWorker<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson, ResourceIdListWorkChunkJson> {
-	private final IBatch2DaoSvc myBatch2DaoSvc;
+	private static final Logger ourLog = getLogger(LoadIdsStep.class);
+
 
 	private final ResourceIdListStep<PartitionedUrlListJobParameters, PartitionedUrlChunkRangeJson> myResourceIdListStep;
 
 	public LoadIdsStep(IBatch2DaoSvc theBatch2DaoSvc) {
-		myBatch2DaoSvc = theBatch2DaoSvc;
-
 		IIdChunkProducer<PartitionedUrlChunkRangeJson> idChunkProducer = new PartitionedUrlListIdChunkProducer(theBatch2DaoSvc);
 		myResourceIdListStep = new ResourceIdListStep<>(idChunkProducer);
 	}

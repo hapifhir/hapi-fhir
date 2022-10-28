@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3846
+title: "Migrated Bulk Import Pull to Batch2 Framework"

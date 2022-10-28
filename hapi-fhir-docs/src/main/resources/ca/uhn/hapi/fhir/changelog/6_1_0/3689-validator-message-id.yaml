@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3689
+title: "hapi now populates issue.detail with the messageID from the core validator, org.hl7.fhir.core was updated to the latest version (5.6.48)
+ Thanks to Patrick Werner for the feature request and pull request!"

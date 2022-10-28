@@ -66,16 +66,4 @@ public class TokenParamTest {
 		assertTrue(param.isNicknameExpand());
 	}
 
-	@Test
-	public void testInvalidNickname() {
-		StringParam param = new StringParam();
-		assertFalse(param.isNicknameExpand());
-		try {
-			param.setValueAsQueryToken(ourCtx, "family", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HAPI-2077: Modifier :nickname may only be used with 'name' and 'given' search parameters", e.getMessage());
-		}
-	}
-
 }

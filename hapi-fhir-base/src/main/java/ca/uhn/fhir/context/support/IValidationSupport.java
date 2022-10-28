@@ -256,6 +256,13 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Fetch the given binary data by key.
+	 * @param binaryKey
+	 * @return
+	 */
+	default byte[] fetchBinary(String binaryKey) { return null; }
+
+	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code>) in the default profile.

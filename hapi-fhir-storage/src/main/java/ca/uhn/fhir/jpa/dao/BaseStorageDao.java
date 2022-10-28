@@ -40,7 +40,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,12 +48,10 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.QualifierDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -93,6 +90,9 @@ public abstract class BaseStorageDao {
 	public static final String OO_SEVERITY_WARN = "warning";
 	private static final String PROCESSING_SUB_REQUEST = "BaseStorageDao.processingSubRequest";
 
+	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";
+	protected static final String MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED = "deleteResourceAlreadyDeleted";
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -105,42 +105,6 @@ public abstract class BaseStorageDao {
 	protected IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
 	protected DaoConfig myDaoConfig;
-
-	/**
-	 * @see ModelConfig#getAutoVersionReferenceAtPaths()
-	 */
-	@Nonnull
-	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
-		Map<IBaseReference, Object> references = Collections.emptyMap();
-		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
-			String resourceName = theFhirContext.getResourceType(theResource);
-			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
-				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-				for (IBaseReference next : nextReferences) {
-					if (next.getReferenceElement().hasVersionIdPart()) {
-						continue;
-					}
-					if (references.isEmpty()) {
-						references = new IdentityHashMap<>();
-					}
-					references.put(next, null);
-				}
-			}
-		}
-		return references.keySet();
-	}
-
-	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
-		}
-	}
-
-	public static void markRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
-		if (theRequestDetails != null) {
-			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
-		}
-	}
 
 	@VisibleForTesting
 	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
@@ -171,7 +135,7 @@ public abstract class BaseStorageDao {
 
 		verifyBundleTypeIsAppropriateForStorage(theResource);
 
-		if(!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
+		if (!getConfig().getTreatBaseUrlsAsLocal().isEmpty()) {
 			replaceAbsoluteReferencesWithRelative(theResource, myFhirContext.newTerser());
 		}
 
@@ -219,16 +183,16 @@ public abstract class BaseStorageDao {
 	 * Replace absolute references with relative ones if configured to do so
 	 */
 	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource, FhirTerser theTerser) {
-			List<ResourceReferenceInfo> refs = theTerser.getAllResourceReferences(theResource);
-			for (ResourceReferenceInfo nextRef : refs) {
-				IIdType refId = nextRef.getResourceReference().getReferenceElement();
-				if (refId != null && refId.hasBaseUrl()) {
-					if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
-						IIdType newRefId = refId.toUnqualified();
-						nextRef.getResourceReference().setReference(newRefId.getValue());
-					}
+		List<ResourceReferenceInfo> refs = theTerser.getAllResourceReferences(theResource);
+		for (ResourceReferenceInfo nextRef : refs) {
+			IIdType refId = nextRef.getResourceReference().getReferenceElement();
+			if (refId != null && refId.hasBaseUrl()) {
+				if (getConfig().getTreatBaseUrlsAsLocal().contains(refId.getBaseUrl())) {
+					IIdType newRefId = refId.toUnqualified();
+					nextRef.getResourceReference().setReference(newRefId.getValue());
 				}
 			}
+		}
 	}
 
 	/**
@@ -406,6 +370,30 @@ public abstract class BaseStorageDao {
 		return oo;
 	}
 
+	/**
+	 * Creates a base method outcome for a delete request for the provided ID.
+	 * <p>
+	 * Additional information may be set on the outcome.
+	 *
+	 * @param theResourceId - the id of the object being deleted. Eg: Patient/123
+	 */
+	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		IIdType id = getContext().getVersion().newIdType();
+		id.setValue(theResourceId);
+		outcome.setId(id);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theMessageKey, id);
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		outcome.setOperationOutcome(oo);
+
+		return outcome;
+	}
+
 	@Nonnull
 	protected ResourceGoneException createResourceGoneException(IBasePersistedResource theResourceEntity) {
 		StringBuilder b = new StringBuilder();
@@ -463,15 +451,40 @@ public abstract class BaseStorageDao {
 		}
 	}
 
-	public void notifyInterceptors(RestOperationTypeEnum theOperationType, IServerInterceptor.ActionRequestDetails theRequestDetails) {
-		if (theRequestDetails.getId() != null && theRequestDetails.getId().hasResourceType() && isNotBlank(theRequestDetails.getResourceType())) {
-			if (theRequestDetails.getId().getResourceType().equals(theRequestDetails.getResourceType()) == false) {
-				throw new InternalErrorException(Msg.code(525) + "Inconsistent server state - Resource types don't match: " + theRequestDetails.getId().getResourceType() + " / " + theRequestDetails.getResourceType());
+	/**
+	 * @see ModelConfig#getAutoVersionReferenceAtPaths()
+	 */
+	@Nonnull
+	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
+		Map<IBaseReference, Object> references = Collections.emptyMap();
+		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
+			String resourceName = theFhirContext.getResourceType(theResource);
+			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
+				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
+				for (IBaseReference next : nextReferences) {
+					if (next.getReferenceElement().hasVersionIdPart()) {
+						continue;
+					}
+					if (references.isEmpty()) {
+						references = new IdentityHashMap<>();
+					}
+					references.put(next, null);
+				}
 			}
 		}
+		return references.keySet();
+	}
 
-		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
-			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
+	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
 		}
 	}
+
+	public static void markRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
+		if (theRequestDetails != null) {
+			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
+		}
+	}
+
 }

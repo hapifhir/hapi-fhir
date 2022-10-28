@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
@@ -148,10 +149,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	 */
 	private List<IBaseResource> doHistoryInTransaction(Integer theOffset, int theFromIndex, int theToIndex) {
 
-		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(), mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
+		HistoryBuilder historyBuilder = myHistoryBuilderFactory.newHistoryBuilder(mySearchEntity.getResourceType(),
+			mySearchEntity.getResourceId(), mySearchEntity.getLastUpdatedLow(), mySearchEntity.getLastUpdatedHigh());
 
 		RequestPartitionId partitionId = getRequestPartitionIdForHistory();
-		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex, theToIndex);
+		List<ResourceHistoryTable> results = historyBuilder.fetchEntities(partitionId, theOffset, theFromIndex,
+			theToIndex, mySearchEntity.getHistorySearchStyle());
 
 		List<IBaseResource> retVal = new ArrayList<>();
 		for (ResourceHistoryTable next : results) {
@@ -384,7 +387,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	@Override
 	public Integer size() {
 		ensureSearchEntityLoaded();
-		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
+		QueryParameterUtils.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 
 		Integer size = mySearchEntity.getTotalCount();
 		if (size != null) {

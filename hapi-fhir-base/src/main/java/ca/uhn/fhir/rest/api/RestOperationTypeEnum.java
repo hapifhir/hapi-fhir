@@ -191,7 +191,7 @@ public enum RestOperationTypeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public RestOperationTypeEnum forCode(@Nonnull String theCode) {
+	public static RestOperationTypeEnum forCode(@Nonnull String theCode) {
 		Validate.notNull(theCode, "theCode must not be null");
 		return CODE_TO_ENUM.get(theCode);
 	}

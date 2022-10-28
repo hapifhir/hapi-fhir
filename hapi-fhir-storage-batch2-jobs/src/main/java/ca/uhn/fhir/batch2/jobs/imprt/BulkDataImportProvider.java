@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -241,6 +242,13 @@ public class BulkDataImportProvider {
 				String msg = "Job is in " + status.getStatus() + " state with " +
 					status.getErrorCount() + " error count. Last error: " + status.getErrorMessage();
 				streamOperationOutcomeResponse(response, msg, "error");
+				break;
+			}
+			case CANCELLED: {
+				response.setStatus(Constants.STATUS_HTTP_404_NOT_FOUND);
+				String msg = "Job was cancelled.";
+				streamOperationOutcomeResponse(response, msg, "information");
+				break;
 			}
 		}
 	}
@@ -255,6 +263,8 @@ public class BulkDataImportProvider {
 
 	public void writePollingLocationToResponseHeaders(ServletRequestDetails theRequestDetails, String theJobId) {
 		String pollLocation = createPollLocationLink(theRequestDetails, theJobId);
+		pollLocation = UrlUtil.sanitizeHeaderValue(pollLocation);
+
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		// Add standard headers
 		theRequestDetails.getServer().addHeadersToResponse(response);

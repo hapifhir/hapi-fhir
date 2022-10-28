@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
 import ca.uhn.fhir.jpa.config.util.ResourceCountCacheUtil;
 import ca.uhn.fhir.jpa.config.util.ValidationSupportConfigUtil;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
@@ -40,7 +39,6 @@ import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.rest.api.IResourceSupportedSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,11 +71,6 @@ public class HapiJpaConfig {
 	@Bean
 	public CachingValidationSupport validationSupportChain(JpaValidationSupportChain theJpaValidationSupportChain) {
 		return ValidationSupportConfigUtil.newCachingValidationSupport(theJpaValidationSupportChain);
-	}
-
-	@Bean
-	public BatchConfigurer batchConfigurer() {
-		return new NonPersistedBatchConfigurer();
 	}
 
 	@Bean

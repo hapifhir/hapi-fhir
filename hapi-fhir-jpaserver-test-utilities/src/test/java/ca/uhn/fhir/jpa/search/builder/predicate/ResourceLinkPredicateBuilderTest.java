@@ -37,7 +37,7 @@ public class ResourceLinkPredicateBuilderTest {
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(),
-			1l, 2l); //fixme
+			1l, 2l);
 
 		Assertions.assertTrue(condition instanceof InCondition);
 	}
@@ -45,14 +45,14 @@ public class ResourceLinkPredicateBuilderTest {
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(),
-			1l); //fixme
+			1l);
 
 		Assertions.assertTrue(condition instanceof InCondition);
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), //fixme
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(),
 			new Long[0]);
 
 		Assertions.assertTrue(condition instanceof BinaryCondition);

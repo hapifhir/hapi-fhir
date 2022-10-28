@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -173,17 +173,6 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
 			<optional>true</optional>
-		</dependency>
-
-		<!--
-		Android includes an old version of commons-codec, so
-		we compile against the old version to make sure we can compile
-		against it
-		-->
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.1</version>
 		</dependency>
 
 		<!--

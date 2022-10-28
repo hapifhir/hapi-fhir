@@ -38,6 +38,16 @@ public class FetchJobInstancesRequest {
 		myParameters = theParameters;
 	}
 
+	public FetchJobInstancesRequest(@Nonnull String theJobDefinition,
+											  @Nonnull String theParameters,
+											  StatusEnum... theStatuses) {
+		myJobDefinition = theJobDefinition;
+		myParameters = theParameters;
+		for (StatusEnum status : theStatuses) {
+			addStatus(status);
+		}
+	}
+
 	public String getJobDefinition() {
 		return myJobDefinition;
 	}
@@ -46,7 +56,7 @@ public class FetchJobInstancesRequest {
 		return myParameters;
 	}
 
-	public void addStatus(StatusEnum theStatusEnum) {
+	private void addStatus(StatusEnum theStatusEnum) {
 		myStatuses.add(theStatusEnum);
 	}
 

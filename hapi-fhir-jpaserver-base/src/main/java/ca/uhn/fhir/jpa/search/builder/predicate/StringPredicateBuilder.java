@@ -25,8 +25,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
-import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -82,7 +82,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 														StringPredicateBuilder theFrom,
 														SearchFilterParser.CompareOperation operation) {
 		String rawSearchTerm;
-		String paramName = QueryStack.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
+		String paramName = QueryParameterUtils.getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		
 		if (theParameter instanceof TokenParam) {
 			TokenParam id = (TokenParam) theParameter;

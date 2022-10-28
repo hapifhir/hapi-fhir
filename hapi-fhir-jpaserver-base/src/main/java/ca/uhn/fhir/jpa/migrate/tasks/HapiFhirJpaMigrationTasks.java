@@ -85,6 +85,24 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init570(); // 20211102 -
 		init600(); // 20211102 -
 		init610();
+		init620();
+	}
+
+	private void init620() {
+		Builder version = forVersion(VersionEnum.V6_2_0);
+
+		// add new REPORT column to BATCH2 tables
+		version
+			.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20220830.1", "FAST_TRACKING")
+			.nullable()
+			.type(ColumnTypeEnum.BOOLEAN);
+
+		version
+			.onTable("HFJ_BINARY_STORAGE_BLOB")
+			.modifyColumn("20221017.1", "BLOB_SIZE")
+			.nullable()
+			.withType(ColumnTypeEnum.LONG);
 	}
 
 	private void init610() {

@@ -38,7 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -108,7 +108,7 @@ import static org.mockito.Mockito.when;
  */
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
 public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetHSearchExpansionR4Test.class);
 
@@ -143,7 +143,7 @@ public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
@@ -213,7 +213,7 @@ public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
@@ -1785,7 +1785,7 @@ public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest
 				SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 
 				Optional<PredicateFinalStep> lastStepOpt = ReflectionTestUtils.invokeMethod(
-					new TermReadSvcR4(), "buildExpansionPredicate", theSearchedCodes, predicate);
+					new TermReadSvcImpl(), "buildExpansionPredicate", theSearchedCodes, predicate);
 
 				assertNotNull(lastStepOpt);
 				assertTrue(lastStepOpt.isPresent());

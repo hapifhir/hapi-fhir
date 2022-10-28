@@ -3,14 +3,13 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
 import ca.uhn.fhir.jpa.dao.ObservationLastNIndexPersistSvc;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -63,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
+@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistObservationIndexedSearchParamLastNR4IT {
 
@@ -105,49 +104,49 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		myDaoConfig.setLastNEnabled(new DaoConfig().isLastNEnabled());
 	}
 
-	@Order(3)
+	@Order(0)
 	@Test
-	public void testIndexObservationSingle() throws IOException {
-		indexSingleObservation();
+	public void testDeleteObservation() throws IOException {
+		indexMultipleObservations();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setLastNMax(10);
-		List<ObservationJson> persistedObservationEntities = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
-		assertEquals(1, persistedObservationEntities.size());
-		ObservationJson persistedObservationEntity = persistedObservationEntities.get(0);
-		assertEquals(SINGLE_SUBJECT_ID, persistedObservationEntity.getSubject());
-		assertEquals(SINGLE_OBSERVATION_PID, persistedObservationEntity.getIdentifier());
-		assertEquals(SINGLE_EFFECTIVEDTM, persistedObservationEntity.getEffectiveDtm());
-
-		String observationCodeNormalizedId = persistedObservationEntity.getCode_concept_id();
-
-		// List<CodeJson> persistedObservationCodes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
-		// assertEquals(1, persistedObservationCodes.size());
-
-		// Check that we can retrieve code by hash value.
-		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash();
-		CodeJson persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(codeSystemHash, null);
-		assertNotNull(persistedObservationCode);
-		assertEquals(observationCodeNormalizedId, persistedObservationCode.getCodeableConceptId());
-		assertEquals(SINGLE_OBSERVATION_CODE_TEXT, persistedObservationCode.getCodeableConceptText());
-
-		// Also confirm that we can retrieve code by text value.
-		persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(null, SINGLE_OBSERVATION_CODE_TEXT);
-		assertNotNull(persistedObservationCode);
+		searchParameterMap.setLastNMax(100);
+		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(100, observationDocuments.size());
+		// Check that fifth observation for fifth patient has been indexed.
+		ObservationJson observation = elasticsearchSvc.getObservationDocument("55");
+		assertNotNull(observation);
 
 		searchParameterMap = new SearchParameterMap();
-		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
-		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
-		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
-		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
-		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
-		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
-		searchParameterMap.setLastNMax(3);
+		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
+		searchParameterMap.setLastNMax(10);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
+		assertEquals(100, observationIdsOnly.size());
+		assertTrue(observationIdsOnly.contains("55"));
 
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 100);
+		// Delete fifth observation for fifth patient.
+		ResourceTable entity = new ResourceTable();
+		entity.setId(55L);
+		entity.setResourceType("Observation");
+		entity.setVersion(0L);
 
-		assertEquals(1, observationIdsOnly.size());
-		assertEquals(SINGLE_OBSERVATION_PID, observationIdsOnly.get(0));
+		testObservationPersist.deleteObservationIndex(entity);
+		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+
+		// Confirm that observation was deleted.
+		searchParameterMap = new SearchParameterMap();
+		searchParameterMap.setLastNMax(100);
+		observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(99, observationDocuments.size());
+		observation = elasticsearchSvc.getObservationDocument("55");
+		assertNull(observation);
+
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
+		assertEquals(99, observationIdsOnly.size());
+		assertTrue(!observationIdsOnly.contains("55"));
+
 	}
+
+
 
 	private void indexSingleObservation() throws IOException {
 
@@ -204,6 +203,63 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		CodeableConcept codeableConceptField = new CodeableConcept().setText(SINGLE_OBSERVATION_CODE_TEXT);
 		codeableConceptField.addCoding(new Coding(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE, "test-code display"));
 		return codeableConceptField;
+	}
+
+	@Order(1)
+	@Test
+	public void testSampleBundleInTransaction() throws IOException {
+		FhirContext myFhirCtx = FhirContext.forR4Cached();
+
+		PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
+		final Resource[] bundleResources = provider.getResources("lastntestbundle.json");
+		assertEquals(1, bundleResources.length);
+
+		AtomicInteger index = new AtomicInteger();
+
+		Arrays.stream(bundleResources).forEach(
+			resource -> {
+				index.incrementAndGet();
+
+				InputStream resIs = null;
+				String nextBundleString;
+				try {
+					resIs = resource.getInputStream();
+					nextBundleString = IOUtils.toString(resIs, Charsets.UTF_8);
+				} catch (IOException e) {
+					return;
+				} finally {
+					try {
+						if (resIs != null) {
+							resIs.close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+				}
+
+				IParser parser = myFhirCtx.newJsonParser();
+				Bundle bundle = parser.parseResource(Bundle.class, nextBundleString);
+
+				myDao.transaction(null, bundle);
+
+			}
+		);
+
+		elasticsearchSvc.refreshIndex("*");
+
+		SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+		// execute Observation ID search - Composite Aggregation
+		searchParameterMap.setLastNMax(1);
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
+
+		assertEquals(20, observationIdsOnly.size());
+
+		searchParameterMap.setLastNMax(3);
+		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
+
+		assertEquals(38, observationIdsOnly.size());
+
 	}
 
 	@Order(2)
@@ -309,46 +365,48 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Order(0)
+	@Order(3)
 	@Test
-	public void testDeleteObservation() throws IOException {
-		indexMultipleObservations();
+	public void testIndexObservationSingle() throws IOException {
+		indexSingleObservation();
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setLastNMax(100);
-		List<ObservationJson> observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
-		assertEquals(100, observationDocuments.size());
-		// Check that fifth observation for fifth patient has been indexed.
-		ObservationJson observation = elasticsearchSvc.getObservationDocument("55");
-		assertNotNull(observation);
-
-		searchParameterMap = new SearchParameterMap();
-		searchParameterMap.add(Observation.SP_SUBJECT, multiSubjectParams);
 		searchParameterMap.setLastNMax(10);
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
-		assertEquals(100, observationIdsOnly.size());
-		assertTrue(observationIdsOnly.contains("55"));
+		List<ObservationJson> persistedObservationEntities = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
+		assertEquals(1, persistedObservationEntities.size());
+		ObservationJson persistedObservationEntity = persistedObservationEntities.get(0);
+		assertEquals(SINGLE_SUBJECT_ID, persistedObservationEntity.getSubject());
+		assertEquals(SINGLE_OBSERVATION_PID, persistedObservationEntity.getIdentifier());
+		assertEquals(SINGLE_EFFECTIVEDTM, persistedObservationEntity.getEffectiveDtm());
 
-		// Delete fifth observation for fifth patient.
-		ResourceTable entity = new ResourceTable();
-		entity.setId(55L);
-		entity.setResourceType("Observation");
-		entity.setVersion(0L);
+		String observationCodeNormalizedId = persistedObservationEntity.getCode_concept_id();
 
-		testObservationPersist.deleteObservationIndex(entity);
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
+		// List<CodeJson> persistedObservationCodes = elasticsearchSvc.queryAllIndexedObservationCodesForTest();
+		// assertEquals(1, persistedObservationCodes.size());
 
-		// Confirm that observation was deleted.
+		// Check that we can retrieve code by hash value.
+		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash();
+		CodeJson persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(codeSystemHash, null);
+		assertNotNull(persistedObservationCode);
+		assertEquals(observationCodeNormalizedId, persistedObservationCode.getCodeableConceptId());
+		assertEquals(SINGLE_OBSERVATION_CODE_TEXT, persistedObservationCode.getCodeableConceptText());
+
+		// Also confirm that we can retrieve code by text value.
+		persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(null, SINGLE_OBSERVATION_CODE_TEXT);
+		assertNotNull(persistedObservationCode);
+
 		searchParameterMap = new SearchParameterMap();
-		searchParameterMap.setLastNMax(100);
-		observationDocuments = elasticsearchSvc.executeLastNWithAllFieldsForTest(searchParameterMap, myFhirCtx);
-		assertEquals(99, observationDocuments.size());
-		observation = elasticsearchSvc.getObservationDocument("55");
-		assertNull(observation);
+		ReferenceParam subjectParam = new ReferenceParam("Patient", "", SINGLE_SUBJECT_ID);
+		searchParameterMap.add(Observation.SP_SUBJECT, new ReferenceAndListParam().addAnd(new ReferenceOrListParam().addOr(subjectParam)));
+		TokenParam categoryParam = new TokenParam(CATEGORYFIRSTCODINGSYSTEM, FIRSTCATEGORYFIRSTCODINGCODE);
+		searchParameterMap.add(Observation.SP_CATEGORY, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(categoryParam)));
+		TokenParam codeParam = new TokenParam(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE);
+		searchParameterMap.add(Observation.SP_CODE, new TokenAndListParam().addAnd(new TokenOrListParam().addOr(codeParam)));
+		searchParameterMap.setLastNMax(3);
 
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
-		assertEquals(99, observationIdsOnly.size());
-		assertTrue(!observationIdsOnly.contains("55"));
+		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 100);
 
+		assertEquals(1, observationIdsOnly.size());
+		assertEquals(SINGLE_OBSERVATION_PID, observationIdsOnly.get(0));
 	}
 
 	@Order(4)
@@ -412,61 +470,5 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 
 	}
 
-	@Order(1)
-	@Test
-	public void testSampleBundleInTransaction() throws IOException {
-		FhirContext myFhirCtx = FhirContext.forR4Cached();
-
-		PathMatchingResourcePatternResolver provider = new PathMatchingResourcePatternResolver();
-		final Resource[] bundleResources;
-		bundleResources = provider.getResources("lastntestbundle.json");
-
-		AtomicInteger index = new AtomicInteger();
-
-		Arrays.stream(bundleResources).forEach(
-			resource -> {
-				index.incrementAndGet();
-
-				InputStream resIs = null;
-				String nextBundleString;
-				try {
-					resIs = resource.getInputStream();
-					nextBundleString = IOUtils.toString(resIs, Charsets.UTF_8);
-				} catch (IOException e) {
-					return;
-				} finally {
-					try {
-						if (resIs != null) {
-							resIs.close();
-						}
-					} catch (final IOException ioe) {
-						// ignore
-					}
-				}
-
-				IParser parser = myFhirCtx.newJsonParser();
-				Bundle bundle = parser.parseResource(Bundle.class, nextBundleString);
-
-				myDao.transaction(null, bundle);
-
-			}
-		);
-
-		elasticsearchSvc.refreshIndex(ElasticsearchSvcImpl.OBSERVATION_INDEX);
-
-		SearchParameterMap searchParameterMap = new SearchParameterMap();
-
-		// execute Observation ID search - Composite Aggregation
-		searchParameterMap.setLastNMax(1);
-		List<String> observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
-
-		assertEquals(20, observationIdsOnly.size());
-
-		searchParameterMap.setLastNMax(3);
-		observationIdsOnly = elasticsearchSvc.executeLastN(searchParameterMap, myFhirCtx, 200);
-
-		assertEquals(38, observationIdsOnly.size());
-
-	}
 
 }

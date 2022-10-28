@@ -32,7 +32,7 @@ class ServletResponseParameter implements IParameter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServletResponseParameter.class);
 
 	@Override
-	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
+	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		return ((ServletRequestDetails) theRequest).getServletResponse();
 	}
 

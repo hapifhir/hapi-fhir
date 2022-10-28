@@ -554,11 +554,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return mdmLink;
 	}
 
-//	protected void loadMdmSearchParameters() {
-//		myMdmSearchParameterLoader.daoUpdateMdmSearchParameters();
-//		mySearchParamRegistry.forceRefresh();
-//	}
-
 	protected void logAllLinks() {
 		ourLog.info("Logging all MDM Links:");
 		List<MdmLink> links = myMdmLinkDao.findAll();

@@ -34,7 +34,7 @@ import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.stream.Stream;
 
-public class BaseFhirVersionParameterizedTest {
+public abstract class BaseFhirVersionParameterizedTest {
 
 	@RegisterExtension
 	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);

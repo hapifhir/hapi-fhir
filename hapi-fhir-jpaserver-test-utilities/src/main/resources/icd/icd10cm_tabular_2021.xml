@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ICD10CM.tabular>
+	<version>2021</version>
+	<introduction>
+		<introSection type="title">
+			<title>ICD-10-CM TABULAR LIST of DISEASES and INJURIES</title>
+		</introSection>
+	</introduction>
+	<chapter>
+		<name>1</name>
+		<desc>Certain infectious and parasitic diseases (A00-B99)</desc>
+		<sectionIndex>
+			<sectionRef first="A00" last="A09" id="A00-A09">
+				Intestinal infectious diseases
+			</sectionRef>
+		</sectionIndex>
+		<section id="A00-A09">
+			<desc>Intestinal infectious diseases (A00-A09)</desc>
+			<diag>
+				<name>A00</name>
+				<desc>Cholera</desc>
+				<diag>
+					<name>A00.0</name>
+					<desc>Cholera due to Vibrio cholerae 01, biovar cholerae</desc>
+					<inclusionTerm>
+						<note>Classical cholera</note>
+					</inclusionTerm>
+				</diag>
+				<diag>
+					<name>A00.1</name>
+					<desc>Cholera due to Vibrio cholerae 01, biovar eltor</desc>
+					<inclusionTerm>
+						<note>Cholera eltor</note>
+					</inclusionTerm>
+				</diag>
+				<diag>
+					<name>A00.9</name>
+					<desc>Cholera, unspecified</desc>
+				</diag>
+			</diag>
+			<diag>
+				<name>A01</name>
+				<desc>Typhoid and paratyphoid fevers</desc>
+				<diag>
+					<name>A01.0</name>
+					<desc>Typhoid fever</desc>
+					<inclusionTerm>
+						<note>Infection due to Salmonella typhi</note>
+					</inclusionTerm>
+					<diag>
+						<name>A01.00</name>
+						<desc>Typhoid fever, unspecified</desc>
+					</diag>
+					<diag>
+						<name>A01.01</name>
+						<desc>Typhoid meningitis</desc>
+					</diag>
+					<diag>
+						<name>A01.02</name>
+						<desc>Typhoid fever with heart involvement</desc>
+						<inclusionTerm>
+							<note>Typhoid endocarditis</note>
+							<note>Typhoid myocarditis</note>
+						</inclusionTerm>
+					</diag>
+					<diag>
+						<name>A01.03</name>
+						<desc>Typhoid pneumonia</desc>
+					</diag>
+					<diag>
+						<name>A01.04</name>
+						<desc>Typhoid arthritis</desc>
+					</diag>
+					<diag>
+						<name>A01.05</name>
+						<desc>Typhoid osteomyelitis</desc>
+					</diag>
+					<diag>
+						<name>A01.09</name>
+						<desc>Typhoid fever with other complications</desc>
+					</diag>
+				</diag>
+				<diag>
+					<name>A01.1</name>
+					<desc>Paratyphoid fever A</desc>
+				</diag>
+				<diag>
+					<name>A01.2</name>
+					<desc>Paratyphoid fever B</desc>
+				</diag>
+				<diag>
+					<name>A01.3</name>
+					<desc>Paratyphoid fever C</desc>
+				</diag>
+				<diag>
+					<name>A01.4</name>
+					<desc>Paratyphoid fever, unspecified</desc>
+					<inclusionTerm>
+						<note>Infection due to Salmonella paratyphi NOS</note>
+					</inclusionTerm>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>2</name>
+		<desc>Diseases of the eye and adnexa (H00-H59)</desc>
+		<sectionIndex>
+			<sectionRef first="H40" last="H42" id="H40-H42">
+				Glaucoma
+			</sectionRef>
+		</sectionIndex>
+		<section id="H40-H42">
+			<desc>Glaucoma (H40-H42)</desc>
+			<diag>
+				<name>H40</name>
+				<desc>Glaucoma</desc>
+				<diag>
+					<name>H40.4</name>
+					<desc>Glaucoma secondary to eye inflammation</desc>
+					<codeAlso>
+						<note>underlying condition</note>
+					</codeAlso>
+					<sevenChrNote>
+						<note>One of the following 7th characters is to be assigned to each code in subcategory H40.4 to designate the stage of glaucoma</note>
+					</sevenChrNote>
+					<sevenChrDef>
+						<extension char="0">stage unspecified</extension>
+						<extension char="1">mild stage</extension>
+						<extension char="2">moderate stage</extension>
+						<extension char="3">severe stage</extension>
+						<extension char="4">indeterminate stage</extension>
+					</sevenChrDef>
+					<diag>
+						<name>H40.40</name>
+						<desc>Glaucoma secondary to eye inflammation, unspecified eye</desc>
+					</diag>
+					<diag>
+						<name>H40.41</name>
+						<desc>Glaucoma secondary to eye inflammation, right eye</desc>
+					</diag>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+	<chapter>
+		<name>3</name>
+		<desc>Symptoms, signs and abnormal clinical and laboratory findings, not elsewhere classified (R00-R99)</desc>
+		<sectionIndex>
+			<sectionRef first="R40" last="R46" id="R40-R46">
+				Symptoms and signs involving cognition, perception, emotional state and behavior
+			</sectionRef>
+		</sectionIndex>
+		<section id="R40-R46">
+			<desc>Symptoms and signs involving cognition, perception, emotional state and behavior (R40-R46)</desc>
+			<diag>
+				<name>R40</name>
+				<desc>Somnolence, stupor and coma</desc>
+				<diag>
+					<name>R40.0</name>
+					<desc>Somnolence</desc>
+					<diag>
+						<name>R40.1</name>
+						<desc>Stupor</desc>
+						<diag>
+							<name>R40.2</name>
+							<desc>Coma</desc>
+							<diag>
+								<name>R40.20</name>
+								<desc>Unspecified coma</desc>
+								<diag>
+									<name>R40.21</name>
+									<desc>Coma scale, eyes open</desc>
+									<sevenChrNote>
+										<note>The following appropriate 7th character is to be added to subcategory R40.21-:</note>
+									</sevenChrNote>
+									<sevenChrDef>
+										<extension char="0">unspecified time</extension>
+										<extension char="1">in the field [EMT or ambulance]</extension>
+										<extension char="2">at arrival to emergency department</extension>
+										<extension char="3">at hospital admission</extension>
+										<extension char="4">24 hours or more after hospital admission</extension>
+									</sevenChrDef>
+									<diag>
+										<name>R40.211</name>
+										<desc>Coma scale, eyes open, never</desc>
+									</diag>
+								</diag>
+							</diag>
+						</diag>
+					</diag>
+				</diag>
+			</diag>
+		</section>
+	</chapter>
+</ICD10CM.tabular>

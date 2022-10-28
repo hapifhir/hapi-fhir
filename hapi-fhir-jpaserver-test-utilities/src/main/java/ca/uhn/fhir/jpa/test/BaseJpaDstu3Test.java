@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
@@ -49,12 +48,12 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptMapDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptMapGroupElementTargetDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -141,9 +140,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	private static IValidationSupport ourJpaValidationSupportChainDstu3;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
-
-	@Autowired
-	protected IBatchJobSubmitter myBatchJobSubmitter;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Autowired
@@ -313,7 +309,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirSystemDao<Bundle, Meta> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu3")
-	protected JpaSystemProviderDstu3 mySystemProvider;
+	protected JpaSystemProvider<Bundle, Meta> mySystemProvider;
 	@Autowired
 	protected ITagDefinitionDao myTagDefinitionDao;
 	@Autowired
@@ -371,7 +367,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 
 	@AfterEach
 	public void afterClearTerminologyCaches() {
-		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationCache();
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();

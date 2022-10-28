@@ -32,7 +32,6 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,7 +47,7 @@ public class JaxRsMethodBindings {
 	/** Static collection of bindings mapped to a class*/
 	private static final ConcurrentHashMap<Class<?>, JaxRsMethodBindings> classBindings = new ConcurrentHashMap<Class<?>, JaxRsMethodBindings>();
 	/** Static collection of operationBindings mapped to a class */
-    private ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding<?>>> operationBindings = new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String,BaseMethodBinding<?>>>();
+    private ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String, BaseMethodBinding>> operationBindings = new ConcurrentHashMap<RestOperationTypeEnum, ConcurrentHashMap<String,BaseMethodBinding>>();
     
     /**
      * The constructor
@@ -59,7 +58,7 @@ public class JaxRsMethodBindings {
 	    List<Method> declaredMethodsForCurrentProvider = ReflectionUtil.getDeclaredMethods(theProviderClass);
 	    declaredMethodsForCurrentProvider.addAll(ReflectionUtil.getDeclaredMethods(theProviderClass.getSuperclass()));
 	    for (final Method m : declaredMethodsForCurrentProvider) {
-            final BaseMethodBinding<?> foundMethodBinding = BaseMethodBinding.bindMethod(m, theProvider.getFhirContext(), theProvider);
+            final BaseMethodBinding foundMethodBinding = BaseMethodBinding.bindMethod(m, theProvider.getFhirContext(), theProvider);
             if (foundMethodBinding == null) {
                 continue;
             }
@@ -78,7 +77,7 @@ public class JaxRsMethodBindings {
 	 * @param theBinding the methodbinding
 	 * @return the key for the methodbinding.
 	 */
-	private String getBindingKey(final BaseMethodBinding<?> theBinding) {
+	private String getBindingKey(final BaseMethodBinding theBinding) {
 		if (theBinding instanceof OperationMethodBinding) {
 		    return ((OperationMethodBinding) theBinding).getName();
 		} else if (theBinding instanceof SearchMethodBinding) {
@@ -89,8 +88,8 @@ public class JaxRsMethodBindings {
 		}
 	}
 
-    private void addMethodBinding(String key, BaseMethodBinding<?> binding) {
-    	ConcurrentHashMap<String, BaseMethodBinding<?>> mapByOperation = getMapForOperation(binding.getRestOperationType());
+    private void addMethodBinding(String key, BaseMethodBinding binding) {
+    	ConcurrentHashMap<String, BaseMethodBinding> mapByOperation = getMapForOperation(binding.getRestOperationType());
         if (mapByOperation.containsKey(key)) {
             throw new IllegalArgumentException(Msg.code(597) + "Multiple Search Method Bindings Found : " + mapByOperation.get(key) + " -- " + binding.getMethod());
         }
@@ -104,10 +103,10 @@ public class JaxRsMethodBindings {
 	 * @param operationType the operation type.
 	 * @return the map defined in the operation bindings
 	 */
-	private ConcurrentHashMap<String, BaseMethodBinding<?>> getMapForOperation(RestOperationTypeEnum operationType) {
-		ConcurrentHashMap<String, BaseMethodBinding<?>> result = operationBindings.get(operationType);
+	private ConcurrentHashMap<String, BaseMethodBinding> getMapForOperation(RestOperationTypeEnum operationType) {
+		ConcurrentHashMap<String, BaseMethodBinding> result = operationBindings.get(operationType);
 		if(result == null) {
-			operationBindings.putIfAbsent(operationType, new ConcurrentHashMap<String, BaseMethodBinding<?>>());
+			operationBindings.putIfAbsent(operationType, new ConcurrentHashMap<String, BaseMethodBinding>());
 			return getMapForOperation(operationType);
 		} else {
 			return result;
@@ -122,9 +121,9 @@ public class JaxRsMethodBindings {
      * @return the binding defined
      * @throws NotImplementedOperationException cannot be found
      */
-    public BaseMethodBinding<?> getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
+    public BaseMethodBinding getBinding(RestOperationTypeEnum operationType, String theBindingKey) {
         String bindingKey = StringUtils.defaultIfBlank(theBindingKey, DEFAULT_METHOD_KEY);
-		ConcurrentHashMap<String, BaseMethodBinding<?>> map = getMapForOperation(operationType);
+		ConcurrentHashMap<String, BaseMethodBinding> map = getMapForOperation(operationType);
         if(map == null || !map.containsKey(bindingKey)) {
             throw new NotImplementedOperationException(Msg.code(598) + "Operation not implemented");
         }  else {

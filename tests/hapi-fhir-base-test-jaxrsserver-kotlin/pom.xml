@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -156,6 +156,6 @@
 
 	<properties>
 		<!--<kotlin.compiler.incremental>true</kotlin.compiler.incremental>-->
-		<kotlin.version>1.5.31</kotlin.version>
+		<kotlin.version>1.6.21</kotlin.version>
 	</properties>
 </project>

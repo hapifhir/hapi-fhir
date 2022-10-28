@@ -37,6 +37,9 @@ import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @deprecated use new batch2 reindex job
+ */
 @Deprecated
 @Entity
 @Table(name = "HFJ_RES_REINDEX_JOB")

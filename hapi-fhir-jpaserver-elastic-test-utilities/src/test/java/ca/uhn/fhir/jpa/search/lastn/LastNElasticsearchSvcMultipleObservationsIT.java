@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.search.elastic.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;

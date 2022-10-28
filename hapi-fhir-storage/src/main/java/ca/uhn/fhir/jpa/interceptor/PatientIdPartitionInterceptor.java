@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -224,7 +224,7 @@ public class PatientIdPartitionInterceptor {
 	@Nonnull
 	protected RequestPartitionId provideCompartmentMemberInstanceResponse(RequestDetails theRequestDetails, String theResourceIdPart) {
 		int partitionId = providePartitionIdForPatientId(theRequestDetails, theResourceIdPart);
-		return RequestPartitionId.fromPartitionId(partitionId);
+		return RequestPartitionId.fromPartitionIdAndName(partitionId, theResourceIdPart);
 	}
 
 	/**

@@ -27,7 +27,7 @@ package ca.uhn.fhir.cql.common.builder;
     Tip of the hat to Philips Healthcare developer nly98977
 */
 
-public class BaseBuilder<T> {
+public abstract class BaseBuilder<T> {
 
     protected T complexProperty;
 

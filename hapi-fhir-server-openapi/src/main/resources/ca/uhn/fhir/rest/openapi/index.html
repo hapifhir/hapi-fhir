@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <title>Swagger UI</title>
     <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
-    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
-    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
     <link rel="stylesheet" type="text/css" href="./index.css" />
+    <link rel="stylesheet" type="text/css" href="./swagger-ui-custom.css" th:if="${ADDITIONAL_CSS_TEXT} != null"/>
 </head>
 
 <body>
 <div class="container">
 </div>
 <div class="banner">
-    <img th:src="${BANNER_IMAGE_URL}" style="height: 100px;"/>
+    <img id="banner_img" th:src="${BANNER_IMAGE_URL}" style="height: 100px;" th:if="${BANNER_IMAGE_URL} != null"/>
     <h1>[[${DESCRIPTION}]]<br/><span class="version" th:text="${SERVER_NAME} + ' ' + ${SERVER_VERSION}"></span></h1>
 </div>
 <div class="banner2">
@@ -29,7 +28,7 @@
 </div>
 <div class="bannerCopyright" th:if="${COPYRIGHT_HTML} != null" th:utext="${COPYRIGHT_HTML}">
 </div>
-<div class="banner3">
+<div class="banner3" th:if="${USE_RESOURCE_PAGES}">
     <div class="pageButtons" id="pageButtons">
         <a class="pageButton" th:each="pageName : ${PAGE_NAMES}" th:classappend="${pageName} == ${PAGE} ? 'pageButtonSelected' : ''" th:href="@{/swagger-ui/(page=${pageName})}">
             [[${pageName}]]

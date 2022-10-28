@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,6 +28,8 @@ class JobInstanceStatusUpdaterTest {
 	private static final String TEST_NAME = "test name";
 	private static final String TEST_ERROR_MESSAGE = "test error message";
 	private static final int TEST_ERROR_COUNT = 729;
+	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
+
 	@Mock
 	IJobPersistence myJobPersistence;
 	@Mock
@@ -57,6 +60,7 @@ class JobInstanceStatusUpdaterTest {
 		AtomicReference<JobCompletionDetails> calledDetails = new AtomicReference<>();
 
 		// setup
+		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 		IJobCompletionHandler<TestParameters> completionHandler = details -> calledDetails.set(details);
 		when(myJobDefinition.getCompletionHandler()).thenReturn(completionHandler);
@@ -113,6 +117,7 @@ class JobInstanceStatusUpdaterTest {
 		myDetails = new AtomicReference<>();
 
 		// setup
+		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
 		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 		IJobCompletionHandler<TestParameters> errorHandler = details -> myDetails.set(details);
 		when(myJobDefinition.getErrorHandler()).thenReturn(errorHandler);

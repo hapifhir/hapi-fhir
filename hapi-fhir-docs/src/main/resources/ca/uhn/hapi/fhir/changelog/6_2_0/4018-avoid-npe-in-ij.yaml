@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4018
+title: "When running HAPI FHIR inside intellij with runtime Nonnull assertions enabled, a sequencing issue in OperationMethodBinding could cause a null pointer exception. This has been corrected."

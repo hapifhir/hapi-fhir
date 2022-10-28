@@ -72,7 +72,7 @@ public class MethodUtil {
 
 
 	@SuppressWarnings("unchecked")
-	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
+	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider) {
 		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
@@ -240,7 +240,7 @@ public class MethodUtil {
 					} else if (nextAnnotation instanceof TransactionParam) {
 						param = new TransactionParameter(theContext);
 					} else if (nextAnnotation instanceof ConditionalUrlParam) {
-						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam) nextAnnotation).supportsMultiple());
+						param = new ConditionalParamBinder(((ConditionalUrlParam) nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
 						if (op == null) {

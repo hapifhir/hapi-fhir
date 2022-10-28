@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3890
+title: "When serializing references where the reference target has been instantiated using a resource object and
+  not a reference string, the serialization was omitted when the reference appeared in the resource
+  metadata section. This has been corrected."

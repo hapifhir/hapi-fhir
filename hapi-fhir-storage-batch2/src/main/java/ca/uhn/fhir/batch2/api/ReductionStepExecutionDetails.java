@@ -43,6 +43,10 @@ public class ReductionStepExecutionDetails<PT extends IModelJson, IT extends IMo
 		super(theParameters, theData, theInstance, "VOID");
 	}
 
+	public ReductionStepExecutionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
+		this(theParameters, null, theInstance);
+	}
+
 	@Override
 	@Nonnull
 	public final IT getData() {

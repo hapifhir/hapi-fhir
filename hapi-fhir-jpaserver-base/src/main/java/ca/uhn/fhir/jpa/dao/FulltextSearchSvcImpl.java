@@ -129,6 +129,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public boolean supportsSomeOf(SearchParameterMap myParams) {
+
 		// keep this in sync with the guts of doSearch
 		boolean requiresHibernateSearchAccess = myParams.containsKey(Constants.PARAM_CONTENT) || myParams.containsKey(Constants.PARAM_TEXT) || myParams.isLastN();
 
@@ -139,12 +140,16 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public void reindex(ResourceTable theEntity) {
+		validateHibernateSearchIsEnabled();
+
 		SearchIndexingPlan plan = getSearchSession().indexingPlan();
 		plan.addOrUpdate(theEntity);
 	}
 
 	@Override
 	public ISearchQueryExecutor searchNotScrolled(String theResourceName, SearchParameterMap theParams, Integer theMaxResultsToFetch) {
+		validateHibernateSearchIsEnabled();
+
 		return doSearch(theResourceName, theParams, null, theMaxResultsToFetch);
 	}
 
@@ -166,12 +171,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 
 	private int getMaxFetchSize(SearchParameterMap theParams, Integer theMax) {
-		if (theParams.getCount() != null) {
-			return theParams.getCount();
-		}
-
 		if (theMax != null) {
 			return theMax;
+		}
+
+		// todo mb we should really pass this in.
+		if (theParams.getCount() != null) {
+			return theParams.getCount();
 		}
 
 		return DEFAULT_MAX_NON_PAGED_SIZE;
@@ -263,12 +269,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Override
 	public List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-		// wipmb what about max results here?
+		validateHibernateSearchIsEnabled();
+
+		// todo mb what about max results here?
 		List<ResourcePersistentId> retVal = toList(doSearch(null, theParams, theReferencingPid, 10_000), 10_000);
 		if (theReferencingPid != null) {
 			retVal.add(theReferencingPid);
 		}
 		return retVal;
+	}
+
+	private void validateHibernateSearchIsEnabled() {
+		if (isDisabled()) {
+			throw new UnsupportedOperationException(Msg.code(2137) + "Hibernate search is not enabled!");
+		}
 	}
 
 	@Override
@@ -297,6 +311,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Transactional()
 	@Override
 	public List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams) {
+		validateHibernateSearchIsEnabled();
 		return toList(doSearch(theResourceName, theParams, null, DEFAULT_MAX_NON_PAGED_SIZE), DEFAULT_MAX_NON_PAGED_SIZE);
 	}
 
@@ -313,6 +328,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Transactional()
 	@Override
 	public IBaseResource tokenAutocompleteValueSetSearch(ValueSetAutocompleteOptions theOptions) {
+		validateHibernateSearchIsEnabled();
 		ensureElastic();
 
 		ValueSetAutocompleteSearch autocomplete = new ValueSetAutocompleteSearch(myFhirContext, myModelConfig, getSearchSession());
@@ -328,7 +344,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	 * Lastn and the autocomplete search use nested aggregations which are Elasticsearch-only
 	 */
 	private void ensureElastic() {
-		//String hibernateSearchBackend = (String) myEntityManager.g.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
 		try {
 			getSearchSession().scope( ResourceTable.class )
 				.aggregation()
@@ -420,7 +435,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				.select(this::buildResourceSelectClause)
 				.where(f -> buildWhereClause(f, theResourceType, theParams, null));
 
-		if (theParams.getSort() != null && offset == 0) {
+		if (theParams.getSort() != null) {
 			query.sort(
 				f -> myExtendedFulltextSortHelper.getSortClauses(f, theParams.getSort(), theResourceType) );
 		}

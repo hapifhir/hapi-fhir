@@ -22,8 +22,10 @@ package ca.uhn.fhir.jpa.dao.search;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -38,6 +40,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_MISSING;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,7 +116,7 @@ public class ExtendedHSearchSearchBuilder {
 		} else if (param instanceof StringParam) {
 			switch (modifier) {
 				// we support string:text, string:contains, string:exact, and unmodified string.
-				case Constants.PARAMQUALIFIER_TOKEN_TEXT:
+				case Constants.PARAMQUALIFIER_STRING_TEXT:
 				case Constants.PARAMQUALIFIER_STRING_EXACT:
 				case Constants.PARAMQUALIFIER_STRING_CONTAINS:
 				case EMPTY_MODIFIER:
@@ -123,6 +126,14 @@ public class ExtendedHSearchSearchBuilder {
 			}
 		} else if (param instanceof QuantityParam) {
 			return modifier.equals(EMPTY_MODIFIER);
+
+		} else if (param instanceof CompositeParam) {
+			switch(modifier) {
+				case PARAMQUALIFIER_MISSING:
+					return false;
+				default:
+					return true;
+			}
 
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.
@@ -202,6 +213,13 @@ public class ExtendedHSearchSearchBuilder {
 					List<List<IQueryParameterType>> dateAndOrTerms = nextParam.equalsIgnoreCase("_lastupdated")
 						? getLastUpdatedAndOrList(theParams) : theParams.removeByNameUnmodified(nextParam);
 					builder.addDateUnmodifiedSearch(nextParam, dateAndOrTerms);
+					break;
+
+				case COMPOSITE:
+					List<List<IQueryParameterType>> compositeAndOrTerms = theParams.removeByNameUnmodified(nextParam);
+					// RuntimeSearchParam only points to the subs by reference.  Resolve here while we have ISearchParamRegistry
+					List<RuntimeSearchParam> subSearchParams = JpaParamUtil.resolveCompositeComponentsDeclaredOrder(theSearchParamRegistry, activeParam);
+					builder.addCompositeUnmodifiedSearch(activeParam, subSearchParams, compositeAndOrTerms);
 					break;
 
 				case URI:

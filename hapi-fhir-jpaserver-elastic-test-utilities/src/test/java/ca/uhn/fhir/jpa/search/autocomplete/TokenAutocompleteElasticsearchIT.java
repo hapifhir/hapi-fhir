@@ -6,12 +6,12 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticHSearch;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
-import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
-import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
@@ -26,12 +26,14 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -49,10 +51,12 @@ import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
-@ContextConfiguration(classes = {
-	TestR4Config.class,
-	TestHSearchAddInConfig.Elasticsearch.class,
-	DaoTestDataBuilder.Config.class
+@ContextHierarchy({
+	@ContextConfiguration(classes = TestR4ConfigWithElasticHSearch.class),
+	@ContextConfiguration(classes = {
+		DaoTestDataBuilder.Config.class,
+		TestDaoSearch.Config.class
+	})
 })
 public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	public static final Coding erythrocyte_by_volume = new Coding("http://loinc.org", "789-8", "Erythrocytes [#/volume] in Blood by Automated count");
@@ -94,6 +98,12 @@ public class TokenAutocompleteElasticsearchIT extends BaseJpaTest {
 	public void beforePurgeDatabase() {
 		BaseJpaTest.purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataScheduleHelper);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
+	}
+
+	@AfterEach
+	void resetConfig() {
+		DaoConfig defaultConfig = new DaoConfig();
+		myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 	}
 
 	@Override

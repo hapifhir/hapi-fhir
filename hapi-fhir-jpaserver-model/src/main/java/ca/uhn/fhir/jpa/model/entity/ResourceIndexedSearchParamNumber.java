@@ -129,6 +129,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
 		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getValue(), obj.getValue());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
@@ -160,6 +161,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
+		b.append(getHashIdentity());
 		b.append(getValue());
 		b.append(isMissing());
 		return b.toHashCode();

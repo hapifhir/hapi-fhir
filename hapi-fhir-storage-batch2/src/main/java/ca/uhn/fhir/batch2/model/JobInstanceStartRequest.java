@@ -79,6 +79,9 @@ public class JobInstanceStartRequest implements IModelJson {
 	}
 
 	public <T extends IModelJson> T getParameters(Class<T> theType) {
+		if (myParameters == null) {
+			return null;
+		}
 		return JsonUtil.deserialize(myParameters, theType);
 	}
 

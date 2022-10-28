@@ -22,11 +22,11 @@ package ca.uhn.fhir.parser.json.jackson;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.json.JsonLikeArray;
-import ca.uhn.fhir.parser.json.JsonLikeObject;
+import ca.uhn.fhir.parser.json.BaseJsonLikeArray;
+import ca.uhn.fhir.parser.json.BaseJsonLikeObject;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue;
+import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeValue;
-import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -119,7 +119,7 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	@Override
-	public JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
+	public BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException {
 		if (null == jacksonWriter) {
 			jacksonWriter = new JacksonWriter(OBJECT_MAPPER.getFactory(), writer);
 		}
@@ -128,7 +128,7 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	@Override
-	public JsonLikeWriter getJsonLikeWriter() {
+	public BaseJsonLikeWriter getJsonLikeWriter() {
 		if (null == jacksonWriter) {
 			jacksonWriter = new JacksonWriter();
 		}
@@ -136,7 +136,7 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	@Override
-	public JsonLikeObject getRootObject() throws DataFormatException {
+	public BaseJsonLikeObject getRootObject() throws DataFormatException {
 		if (rootType == ROOT_TYPE.OBJECT) {
 			if (null == jsonLikeRoot) {
 				jsonLikeRoot = nativeRoot;
@@ -150,7 +150,7 @@ public class JacksonStructure implements JsonLikeStructure {
 
 	private enum ROOT_TYPE {OBJECT, ARRAY}
 
-	private static class JacksonJsonObject extends JsonLikeObject {
+	private static class JacksonJsonObject extends BaseJsonLikeObject {
 		private final ObjectNode nativeObject;
 
 		public JacksonJsonObject(ObjectNode json) {
@@ -168,7 +168,7 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 
 		@Override
-		public JsonLikeValue get(String key) {
+		public BaseJsonLikeValue get(String key) {
 			JsonNode child = nativeObject.get(key);
 			if (child != null) {
 				return new JacksonJsonValue(child);
@@ -222,9 +222,9 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 	}
 
-	private static class JacksonJsonArray extends JsonLikeArray {
+	private static class JacksonJsonArray extends BaseJsonLikeArray {
 		private final ArrayNode nativeArray;
-		private final Map<Integer, JsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, JsonLikeValue>();
+		private final Map<Integer, BaseJsonLikeValue> jsonLikeMap = new LinkedHashMap<Integer, BaseJsonLikeValue>();
 
 		public JacksonJsonArray(ArrayNode json) {
 			this.nativeArray = json;
@@ -241,9 +241,9 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 
 		@Override
-		public JsonLikeValue get(int index) {
+		public BaseJsonLikeValue get(int index) {
 			Integer key = index;
-			JsonLikeValue result = null;
+			BaseJsonLikeValue result = null;
 			if (jsonLikeMap.containsKey(key)) {
 				result = jsonLikeMap.get(key);
 			} else {
@@ -257,10 +257,10 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 	}
 
-	private static class JacksonJsonValue extends JsonLikeValue {
+	private static class JacksonJsonValue extends BaseJsonLikeValue {
 		private final JsonNode nativeValue;
-		private JsonLikeObject jsonLikeObject = null;
-		private JsonLikeArray jsonLikeArray = null;
+		private BaseJsonLikeObject jsonLikeObject = null;
+		private BaseJsonLikeArray jsonLikeArray = null;
 
 		public JacksonJsonValue(JsonNode jsonNode) {
 			this.nativeValue = jsonNode;
@@ -325,7 +325,7 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 
 		@Override
-		public JsonLikeArray getAsArray() {
+		public BaseJsonLikeArray getAsArray() {
 			if (nativeValue != null && nativeValue.isArray()) {
 				if (null == jsonLikeArray) {
 					jsonLikeArray = new JacksonJsonArray((ArrayNode) nativeValue);
@@ -335,7 +335,7 @@ public class JacksonStructure implements JsonLikeStructure {
 		}
 
 		@Override
-		public JsonLikeObject getAsObject() {
+		public BaseJsonLikeObject getAsObject() {
 			if (nativeValue != null && nativeValue.isObject()) {
 				if (null == jsonLikeObject) {
 					jsonLikeObject = new JacksonJsonObject((ObjectNode) nativeValue);

@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-class BaseBinder<T> {
+abstract class BaseBinder<T> {
 	private List<Class<? extends IQueryParameterType>> myCompositeTypes;
 	private Constructor<? extends T> myConstructor;
 	private final Class<? extends T> myType;

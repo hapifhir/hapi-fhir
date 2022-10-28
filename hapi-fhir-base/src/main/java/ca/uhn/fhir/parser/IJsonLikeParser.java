@@ -20,14 +20,13 @@ package ca.uhn.fhir.parser;
  * #L%
  */
 
-import java.io.IOException;
-
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
+import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.parser.json.JsonLikeStructure;
-import ca.uhn.fhir.parser.json.JsonLikeWriter;
+import java.io.IOException;
 
 /**
  * An extension to the parser interface that is implemented by parsers that understand a generalized form of
@@ -39,7 +38,7 @@ import ca.uhn.fhir.parser.json.JsonLikeWriter;
  */
 public interface IJsonLikeParser extends IParser {
 
-	void encodeResourceToJsonLikeWriter(IBaseResource theResource, JsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
+	void encodeResourceToJsonLikeWriter(IBaseResource theResource, BaseJsonLikeWriter theJsonLikeWriter) throws IOException, DataFormatException;
 
 	/**
 	 * Parses a resource from a JSON-like data structure

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -29,8 +30,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 import java.util.Set;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 
 public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	private final DbColumn myColumnResId;
@@ -62,10 +63,10 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 		if (getResourceType() != null) {
 			typePredicate = BinaryCondition.equalTo(myColumnResType, generatePlaceholder(getResourceType()));
 		}
-		return toAndPredicate(
-			typePredicate,
-			UnaryCondition.isNull(myColumnResDeletedAt)
-		);
+		return QueryParameterUtils.toAndPredicate(
+                typePredicate,
+                UnaryCondition.isNull(myColumnResDeletedAt)
+        );
 	}
 
 	public DbColumn getLastUpdatedColumn() {
@@ -73,7 +74,7 @@ public class ResourceTablePredicateBuilder extends BaseJoiningPredicateBuilder {
 	}
 
 	public Condition createLanguagePredicate(Set<String> theValues, boolean theNegated) {
-		Condition condition = toEqualToOrInPredicate(myColumnLanguage, generatePlaceholders(theValues));
+		Condition condition = QueryParameterUtils.toEqualToOrInPredicate(myColumnLanguage, generatePlaceholders(theValues));
 		if (theNegated) {
 			condition = new NotCondition(condition);
 		}

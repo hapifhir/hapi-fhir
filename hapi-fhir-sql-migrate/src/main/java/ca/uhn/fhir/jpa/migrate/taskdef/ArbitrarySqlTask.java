@@ -42,7 +42,7 @@ public class ArbitrarySqlTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
 	private final String myTableName;
-	private List<Task> myTask = new ArrayList<>();
+	private List<BaseTask> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
@@ -82,7 +82,7 @@ public class ArbitrarySqlTask extends BaseTask {
 			}
 		}
 
-		for (Task next : myTask) {
+		for (BaseTask next : myTask) {
 			next.execute();
 		}
 
@@ -104,7 +104,7 @@ public class ArbitrarySqlTask extends BaseTask {
 	}
 
 	@Override
-	protected void generateEquals(EqualsBuilder theBuilder, BaseTask theOtherObject) {
+	protected void generateEquals(EqualsBuilder theBuilder, ca.uhn.fhir.jpa.migrate.taskdef.BaseTask theOtherObject) {
 		ArbitrarySqlTask otherObject = (ArbitrarySqlTask) theOtherObject;
 		theBuilder.append(myTableName, otherObject.myTableName);
 	}
@@ -136,11 +136,11 @@ public class ArbitrarySqlTask extends BaseTask {
 		}
 	}
 
-	private abstract class Task {
+	private abstract class BaseTask {
 		public abstract void execute();
 	}
 
-	private class QueryTask extends Task {
+	private class QueryTask extends BaseTask {
 		private final String mySql;
 		private final Consumer<Map<String, Object>> myConsumer;
 

@@ -11,11 +11,11 @@ public class ResourceIndexedSearchParamQuantityNormalizedTest {
 
 	@Test
 	public void testEquals() {
-		ResourceIndexedSearchParamBaseQuantity val1 = new ResourceIndexedSearchParamQuantityNormalized()
+		BaseResourceIndexedSearchParamQuantity val1 = new ResourceIndexedSearchParamQuantityNormalized()
 			.setValue(Double.parseDouble("123"));
 		val1.setPartitionSettings(new PartitionSettings());
 		val1.calculateHashes();
-		ResourceIndexedSearchParamBaseQuantity val2 = new ResourceIndexedSearchParamQuantityNormalized()
+		BaseResourceIndexedSearchParamQuantity val2 = new ResourceIndexedSearchParamQuantityNormalized()
 			.setValue(Double.parseDouble("123"));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();

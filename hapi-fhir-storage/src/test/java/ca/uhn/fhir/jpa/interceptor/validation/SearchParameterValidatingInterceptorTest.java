@@ -8,8 +8,11 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,41 +37,37 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterValidatingInterceptorTest {
 
+	public static final String UPLIFT_URL = "https://some-url";
 	static final FhirContext ourFhirContext = FhirContext.forR4();
-
+	static String ID1 = "ID1";
+	static String ID2 = "ID2";
 	@Mock
 	RequestDetails myRequestDetails;
-
 	@Mock
 	IFhirResourceDao myIFhirResourceDao;
-
 	@Mock
 	DaoRegistry myDaoRegistry;
 	@Mock
 	IIdHelperService myIdHelperService;
-
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
-
-	SearchParameter mySearchParameterId1;
-
-	static String ID1 = "ID1";
-	static String ID2 = "ID2";
+	SearchParameter myExistingSearchParameter;
 
 	@BeforeEach
-	public void beforeEach(){
+	public void beforeEach() {
 
 		mySearchParamValidatingInterceptor = new SearchParamValidatingInterceptor();
 		mySearchParamValidatingInterceptor.setFhirContext(ourFhirContext);
 		mySearchParamValidatingInterceptor.setSearchParameterCanonicalizer(new SearchParameterCanonicalizer(ourFhirContext));
 		mySearchParamValidatingInterceptor.setIIDHelperService(myIdHelperService);
 		mySearchParamValidatingInterceptor.setDaoRegistry(myDaoRegistry);
+		mySearchParamValidatingInterceptor.addUpliftExtension(UPLIFT_URL);
 
-		mySearchParameterId1 = aSearchParameter(ID1);
+		myExistingSearchParameter = buildSearchParameterWithId(ID1);
 
 	}
 
 	@Test
-	public void whenValidatingInterceptorCalledForNonSearchParamResoucre_thenIsAllowed(){
+	public void whenValidatingInterceptorCalledForNonSearchParamResoucre_thenIsAllowed() {
 		Patient patient = new Patient();
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(patient, null);
@@ -75,87 +75,137 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	public void whenCreatingNonOverlappingSearchParam_thenIsAllowed(){
+	public void whenCreatingNonOverlappingSearchParam_thenIsAllowed() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(emptyList());
+		setPersistedSearchParameterIds(emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 
 	}
 
 	@Test
-	public void whenCreatingOverlappingSearchParam_thenExceptionIsThrown(){
+	public void whenCreatingOverlappingSearchParam_thenExceptionIsThrown() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
-		SearchParameter newSearchParam = aSearchParameter(ID2);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreCreate(newSearchParam, myRequestDetails);
 			fail();
-		}catch (UnprocessableEntityException e){
-			assertTrue(e.getMessage().contains("2124"));
+		} catch (UnprocessableEntityException e) {
+			assertTrue(e.getMessage().contains("2131"));
 		}
 
 	}
 
 	@Test
-	public void whenUsingPutOperationToCreateNonOverlappingSearchParam_thenIsAllowed(){
+	public void whenUsingPutOperationToCreateNonOverlappingSearchParam_thenIsAllowed() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(emptyList());
+		setPersistedSearchParameterIds(emptyList());
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 	}
 
 	@Test
-	public void whenUsingPutOperationToCreateOverlappingSearchParam_thenExceptionIsThrown(){
+	public void whenUsingPutOperationToCreateOverlappingSearchParam_thenExceptionIsThrown() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
 
-		SearchParameter newSearchParam = aSearchParameter(ID2);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID2);
 
 		try {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 			fail();
-		}catch (UnprocessableEntityException e){
+		} catch (UnprocessableEntityException e) {
 			assertTrue(e.getMessage().contains("2125"));
 		}
 	}
 
 	@Test
-	public void whenUpdateSearchParam_thenIsAllowed(){
+	public void whenUpdateSearchParam_thenIsAllowed() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
-		setPersistedSearchParameters(asList(mySearchParameterId1));
-		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(mySearchParameterId1.getId()));
+		setPersistedSearchParameterIds(asList(myExistingSearchParameter));
+		when(myIdHelperService.translatePidsToFhirResourceIds(any())).thenReturn(Set.of(myExistingSearchParameter.getId()));
 
 
-		SearchParameter newSearchParam = aSearchParameter(ID1);
+		SearchParameter newSearchParam = buildSearchParameterWithId(ID1);
 
 		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 
 	}
 
-	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams){
+	@Test
+	public void whenUpliftSearchParameter_thenMoreGranularComparisonSucceeds() {
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+
+		setPersistedSearchParameters(asList(myExistingSearchParameter));
+
+		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
+
+		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+	}
+
+	@Test
+	public void whenUpliftSearchParameter_thenMoreGranularComparisonFails() {
+		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
+		SearchParameter existingUpliftSp = buildSearchParameterWithUpliftExtension(ID1);
+		setPersistedSearchParameters(asList(existingUpliftSp));
+
+		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
+
+		try {
+			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertTrue(e.getMessage().contains("2125"));
+		}
+	}
+
+	@Nonnull
+	private SearchParameter buildSearchParameterWithUpliftExtension(String theID) {
+		SearchParameter newSearchParam = buildSearchParameterWithId(theID);
+
+		Extension topLevelExtension = new Extension();
+		topLevelExtension.setUrl(UPLIFT_URL);
+
+		Extension codeExtension = new Extension();
+		codeExtension.setUrl("code");
+		codeExtension.setValue(new CodeType("identifier"));
+
+		Extension elementExtension = new Extension();
+		elementExtension.setUrl("element-name");
+		elementExtension.setValue(new CodeType("patient-identifier"));
+
+		topLevelExtension.addExtension(codeExtension);
+		topLevelExtension.addExtension(elementExtension);
+		newSearchParam.addExtension(topLevelExtension);
+		return newSearchParam;
+	}
+
+	private void setPersistedSearchParameterIds(List<SearchParameter> theSearchParams) {
 		List<ResourcePersistentId> resourcePersistentIds = theSearchParams
 			.stream()
 			.map(SearchParameter::getId)
 			.map(theS -> new ResourcePersistentId(theS))
 			.collect(Collectors.toList());
-		Set<String> ids = theSearchParams.stream().map(sp -> sp.getId()).collect(Collectors.toSet());
-
 		when(myIFhirResourceDao.searchForIds(any(), any())).thenReturn(resourcePersistentIds);
 	}
 
-	private SearchParameter aSearchParameter(String id) {
+	private void setPersistedSearchParameters(List<SearchParameter> theSearchParams) {
+		when(myIFhirResourceDao.search(any(), any())).thenReturn(new SimpleBundleProvider(theSearchParams));
+	}
+
+	private SearchParameter buildSearchParameterWithId(String id) {
 		SearchParameter retVal = new SearchParameter();
 		retVal.setId(id);
 		retVal.setCode("patient");

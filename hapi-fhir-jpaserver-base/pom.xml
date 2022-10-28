@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -95,6 +95,11 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -442,21 +447,6 @@
 				</dependencies>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<configuration>
-					<dumpOnExit>true</dumpOnExit>
-				</configuration>
-				<executions>
-					<execution>
-						<id>default-prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
@@ -504,6 +494,22 @@
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.r4</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4.xml
+							</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
+							<excludeResourceNames>
+							</excludeResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_r4b</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>r4b</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.r4b</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r4b.xml
 							</targetResourceSpringBeansFile>
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>

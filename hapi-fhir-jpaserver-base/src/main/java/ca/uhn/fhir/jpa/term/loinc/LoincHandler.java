@@ -34,7 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincHandler implements IZipContentsHandlerCsv {
 
@@ -84,9 +85,11 @@ public class LoincHandler implements IZipContentsHandlerCsv {
 					switch (nextPropertyType) {
 						case STRING:
 							concept.addPropertyString(nextPropertyName, nextPropertyValue);
+							ourLog.trace("Adding string property: {} to concept.code {}", nextPropertyName, concept.getCode());
 							break;
+
 						case CODING:
-							// These are handles by the LOINC PartLink file
+							// "Coding" property types are handled by loincCodingProperties, partlink, hierarchy, RsnaPlaybook or DocumentOntology handlers
 							break;
 
 						case DECIMAL:

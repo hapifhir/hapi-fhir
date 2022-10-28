@@ -48,9 +48,9 @@ public interface JsonLikeStructure {
 
 	void load(Reader theReader, boolean allowArray) throws DataFormatException;
 
-	JsonLikeObject getRootObject() throws DataFormatException;
+	BaseJsonLikeObject getRootObject() throws DataFormatException;
 
-	JsonLikeWriter getJsonLikeWriter();
+	BaseJsonLikeWriter getJsonLikeWriter();
 
-	JsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException;
+	BaseJsonLikeWriter getJsonLikeWriter(Writer writer) throws IOException;
 }

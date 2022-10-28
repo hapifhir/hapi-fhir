@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.model.sched;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.quartz.Job;
+import org.quartz.JobKey;
+import org.quartz.TriggerKey;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,5 +87,13 @@ public class ScheduledJobDefinition {
 			.append("myId", myId)
 			.append("myGroup", myGroup)
 			.toString();
+	}
+
+	public JobKey toJobKey() {
+		return new JobKey(getId(), getGroup());
+	}
+
+	public TriggerKey toTriggerKey() {
+		return new TriggerKey(getId(), getGroup());
 	}
 }

@@ -68,8 +68,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -77,7 +75,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.BaseTest;
-import ca.uhn.fhir.test.utilities.BatchJobHelper;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -104,10 +101,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.batch.core.repository.dao.JobExecutionDao;
-import org.springframework.batch.core.repository.dao.JobInstanceDao;
-import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
-import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -204,8 +197,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired(required = false)
 	protected IFulltextSearchSvc myFulltestSearchSvc;
 	@Autowired(required = false)
-	protected BatchJobHelper myBatchJobHelper;
-	@Autowired(required = false)
 	protected Batch2JobHelper myBatch2JobHelper;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
@@ -232,22 +223,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
-	@Autowired(required = false)
-	private JobExecutionDao myMapJobExecutionDao;
-	@Autowired(required = false)
-	private JobInstanceDao myMapJobInstanceDao;
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
-	}
-
-	@AfterEach
-	public void afterEnsureNoStaleBatchJobs() {
-		if (myMapJobInstanceDao != null) {
-			myBatchJobHelper.ensureNoRunningJobs();
-			ProxyUtil.getSingletonTarget(myMapJobExecutionDao, MapJobExecutionDao.class).clear();
-			ProxyUtil.getSingletonTarget(myMapJobInstanceDao, MapJobInstanceDao.class).clear();
-		}
 	}
 
 	@AfterEach
@@ -554,45 +532,14 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal;
 	}
 
-	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<>();
-		for (Entry next : theFound.getEntry()) {
-			// if (next.getResource()!= null) {
-			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
-			// }
-		}
-		return retVal;
-	}
-
 	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
 
 		List<IIdType> retVal = new ArrayList<>();
-		Integer size = theProvider.size();
-		StopWatch sw = new StopWatch();
-		while (size == null) {
-			int timeout = 20000;
-			if (sw.getMillis() > timeout) {
-				String message = "Waited over " + timeout + "ms for search " + theProvider.getUuid();
-				ourLog.info(message);
-				fail(message);
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException theE) {
-				//ignore
-			}
 
-			if (theProvider instanceof PersistedJpaBundleProvider) {
-				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theProvider;
-				provider.clearCachedDataForUnitTest();
-			}
-			size = theProvider.size();
-		}
+		Integer size = theProvider.size();
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider instanceof PersistedJpaBundleProvider ?
-			theProvider.getResources(0, size) :
-			theProvider.getResources(0, Integer.MAX_VALUE);
+		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE/4);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}

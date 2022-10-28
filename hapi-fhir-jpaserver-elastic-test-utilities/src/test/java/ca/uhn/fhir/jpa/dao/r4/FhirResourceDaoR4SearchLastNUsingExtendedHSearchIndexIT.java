@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -22,6 +24,7 @@ import java.util.List;
  */
 @ExtendWith(SpringExtension.class)
 public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends FhirResourceDaoR4SearchLastNIT {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT.class);
 
 	@Autowired
 	private TestHSearchEventDispatcher myHSearchEventDispatcher;
@@ -32,8 +35,11 @@ public class FhirResourceDaoR4SearchLastNUsingExtendedHSearchIndexIT extends Fhi
 
 	@BeforeEach
 	public void enableAdvancedHSearchIndexing() {
+		myDaoConfig.setLastNEnabled(true);
 		myDaoConfig.setAdvancedHSearchIndexing(true);
 		myHSearchEventDispatcher.register(mySearchEventListener);
+		ourLog.info("enableAdvancedHSearchIndexing finished.  lastn {} advancedHSearchIndexing {}", myDaoConfig.isLastNEnabled(), myDaoConfig.isAdvancedHSearchIndexing());
+
 	}
 
 	@AfterEach

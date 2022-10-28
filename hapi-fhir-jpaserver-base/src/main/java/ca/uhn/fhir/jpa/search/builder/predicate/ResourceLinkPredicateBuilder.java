@@ -40,7 +40,9 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
+import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -72,6 +74,9 @@ import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.NotCondition;
+import com.healthmarketscience.sqlbuilder.SelectQuery;
+import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -91,13 +96,15 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
-public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
+public class ResourceLinkPredicateBuilder
+	extends BaseJoiningPredicateBuilder
+	implements ICanMakeMissingParamPredicate {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
 	private final DbColumn myColumnSrcType;
@@ -136,6 +143,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 		myReversed = theReversed;
 		myQueryStack = theQueryStack;
+	}
+
+	private DbColumn getResourceTypeColumn() {
+		if (myReversed) {
+			return myColumnTargetResourceType;
+		} else {
+			return myColumnSrcType;
+		}
 	}
 
 	public DbColumn getColumnSourcePath() {
@@ -241,13 +256,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
 			List<String> placeholders = generatePlaceholders(theTargetPidList);
-			targetPidCondition = toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
+			targetPidCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
 		}
 
 		Condition targetUrlsCondition = null;
 		if (!theTargetQualifiedUrls.isEmpty()) {
 			List<String> placeholders = generatePlaceholders(theTargetQualifiedUrls);
-			targetUrlsCondition = toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
+			targetUrlsCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceUrl, placeholders, theInverse);
 		}
 
 		Condition joinedCondition;
@@ -267,7 +282,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateSourcePaths(List<String> thePathsToMatch) {
-		return toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
+		return QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcPath, generatePlaceholders(thePathsToMatch));
 	}
 
 	public Condition createPredicateSourcePaths(String theResourceName, String theParamName, List<String> theQualifiers) {
@@ -338,7 +353,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 			Condition condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theReferenceParam.getValue()));
 
-			return toAndPredicate(typeCondition, condition);
+			return QueryParameterUtils.toAndPredicate(typeCondition, condition);
 		}
 
 		boolean foundChainMatch = false;
@@ -415,7 +430,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 			List<List<IQueryParameterType>> chainParamValues = Collections.singletonList(orValues);
 			andPredicates.add(childQueryFactory.searchForIdsWithAndOr(myColumnTargetResourceId, subResourceName, chain, chainParamValues, theRequest, theRequestPartitionId, SearchContainedModeEnum.FALSE));
 
-			orPredicates.add(toAndPredicate(andPredicates));
+			orPredicates.add(QueryParameterUtils.toAndPredicate(andPredicates));
 		}
 
 		if (candidateTargetTypes.isEmpty()) {
@@ -429,14 +444,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		// If :not modifier for a token, switch OR with AND in the multi-type case
 		Condition multiTypePredicate;
 		if (paramInverted) {
-			multiTypePredicate = toAndPredicate(orPredicates);
+			multiTypePredicate = QueryParameterUtils.toAndPredicate(orPredicates);
 		} else {
-			multiTypePredicate = toOrPredicate(orPredicates);
+			multiTypePredicate = QueryParameterUtils.toOrPredicate(orPredicates);
 		}
 		
 		List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 		Condition pathPredicate = createPredicateSourcePaths(pathsToMatch);
-		return toAndPredicate(pathPredicate, multiTypePredicate);
+		return QueryParameterUtils.toAndPredicate(pathPredicate, multiTypePredicate);
 	}
 
 	@Nonnull
@@ -695,7 +710,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 		if (theTargetPids != null && theTargetPids.length >= 1) {
 			// if resource ids are provided, we'll create the predicate
 			// with ids in or equal to this value
-			condition = toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
+			condition = QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, generatePlaceholders(Arrays.asList(theTargetPids)));
 		} else {
 			// ... otherwise we look for resource types
 			condition = BinaryCondition.equalTo(myColumnTargetResourceType, generatePlaceholder(theResourceName));
@@ -703,10 +718,35 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 		if (!theSourceResourceNames.isEmpty()) {
 			// if source resources are provided, add on predicate for _type operation
-			Condition typeCondition = toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
-			condition = toAndPredicate(List.of(condition, typeCondition));
+			Condition typeCondition = QueryParameterUtils.toEqualToOrInPredicate(myColumnSrcType, generatePlaceholders(theSourceResourceNames));
+			condition = QueryParameterUtils.toAndPredicate(List.of(condition, typeCondition));
 		}
 
 		return condition;
+	}
+
+
+	@Override
+	public Condition createPredicateParamMissingValue(MissingQueryParameterPredicateParams theParams) {
+		SelectQuery subquery = new SelectQuery();
+		subquery.addCustomColumns(1);
+		subquery.addFromTable(getTable());
+
+		Condition subQueryCondition = ComboCondition.and(
+			BinaryCondition.equalTo(getResourceIdColumn(),
+				theParams.getResourceTablePredicateBuilder().getResourceIdColumn()
+			),
+			BinaryCondition.equalTo(getResourceTypeColumn(),
+				generatePlaceholder(theParams.getResourceTablePredicateBuilder().getResourceType()))
+		);
+
+		subquery.addCondition(subQueryCondition);
+
+		Condition unaryCondition = UnaryCondition.exists(subquery);
+		if (theParams.isMissing()) {
+			unaryCondition = new NotCondition(unaryCondition);
+		}
+
+		return combineWithRequestPartitionIdPredicate(theParams.getRequestPartitionId(), unaryCondition);
 	}
 }

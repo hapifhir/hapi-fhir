@@ -57,7 +57,7 @@ public class MdmClearAppCtx {
 				"Load ids of golden resources to be cleared",
 				ResourceIdListWorkChunkJson.class,
 				loadGoldenIdsStep(theGoldenResourceSearchSvc))
-			.addLastStep("Mdm",
+			.addLastStep("remove-golden-resources-and-links",
 				"Remove golden resources and mdm links",
 				mdmClearStep()
 			)

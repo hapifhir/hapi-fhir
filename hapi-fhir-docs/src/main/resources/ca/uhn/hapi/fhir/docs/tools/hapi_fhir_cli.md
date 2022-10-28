@@ -74,19 +74,25 @@ Note that the path and exact filename of the terminology files will likely need 
 ###	SNOMED CT
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_RF2Release_INT_20160131.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://snomed.info/sct
+./hapi-fhir-cli upload-terminology -d Downloads/SnomedCT_InternationalRF2_PRODUCTION_20220131T120000Z.zip -v r4 -t http://localhost:8080/fhir -u http://snomed.info/sct
 ```
 
 ### LOINC
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -f dstu3 -t http://localhost:8080/baseDstu3 -u http://loinc.org
+./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d Downloads/LOINC_2.54_Text.zip -v r4 -t http://localhost:8080/fhir -u http://loinc.org
+```
+
+### ICD-10 (International Version)
+
+```
+./hapi-fhir-cli upload-terminology -d Downloads/icdClaML2019ens.zip -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10
 ```
 
 ### ICD-10-CM
 
 ```
-./hapi-fhir-cli upload-terminology -d Downloads/LOINC_2.54_MULTI-AXIAL_HIERARCHY.zip -d icd10cm_tabular_2021.xml -f dstu3 -t http://localhost:8080/baseDstu3 -u http://hl7.org/fhir/sid/icd-10-cm
+./hapi-fhir-cli upload-terminology -d Downloads/icd10cm_tabular_2021.xml -v r4 -t http://localhost:8080/fhir -u http://hl7.org/fhir/sid/icd-10-cm
 ```
 
 # Migrate Database
@@ -94,3 +100,13 @@ Note that the path and exact filename of the terminology files will likely need 
 The `migrate-database` command may be used to Migrate a database schema when upgrading a [HAPI FHIR JPA](/docs/server_jpa/introduction.html) project from one version of HAPI	FHIR to another version.
 
 See [Upgrading HAPI FHIR JPA](/docs/server_jpa/upgrading.html) for information on how to use this command.
+
+# Reindex Terminology
+
+The `reindex-terminology` command may be used to recreate freetext indexes for terminology resources.
+
+To execute this command to reindex terminology resources to a local CLI server, issue the following: 
+```
+reindex-terminology -v r4 -t "http://localhost:8000"
+```
+

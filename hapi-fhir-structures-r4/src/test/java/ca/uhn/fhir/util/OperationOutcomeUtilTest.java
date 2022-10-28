@@ -5,7 +5,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OperationOutcomeUtilTest {
 
@@ -32,6 +35,13 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "line 3");
 		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}", myCtx.newJsonParser().encodeResourceToString(oo));
+	}
+
+	@Test
+	public void testAddIssueWithMessageId() {
+		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
+		OperationOutcomeUtil.addIssueWithMessageId(myCtx, oo, "error", "message", "messageID", "location", "processing");
+		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
 	}
 
 }

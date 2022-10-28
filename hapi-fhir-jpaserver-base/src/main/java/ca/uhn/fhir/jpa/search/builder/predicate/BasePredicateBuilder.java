@@ -34,7 +34,7 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.List;
 
-public class BasePredicateBuilder {
+public abstract class BasePredicateBuilder {
 
 	private final SearchQueryBuilder mySearchSqlBuilder;
 

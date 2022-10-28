@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
 import org.hl7.fhir.dstu3.model.ValueSet;
 
-public class BaseJpaResourceProviderValueSetDstu3 extends JpaResourceProviderDstu3<ValueSet> {
+public abstract class BaseJpaResourceProviderValueSetDstu3 extends BaseJpaResourceProvider<ValueSet> {
 	
 }

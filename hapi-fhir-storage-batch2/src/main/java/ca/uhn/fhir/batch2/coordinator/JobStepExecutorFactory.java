@@ -20,6 +20,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * #L%
  */
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -32,17 +33,20 @@ import javax.annotation.Nonnull;
 public class JobStepExecutorFactory {
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
-	private final StepExecutionSvc myJobStepExecutorSvc;
+	private final WorkChunkProcessor myJobStepExecutorSvc;
+	private final IJobMaintenanceService myJobMaintenanceService;
 
 	public JobStepExecutorFactory(@Nonnull IJobPersistence theJobPersistence,
 											@Nonnull BatchJobSender theBatchJobSender,
-											@Nonnull StepExecutionSvc theExecutorSvc) {
+											@Nonnull WorkChunkProcessor theExecutorSvc,
+											@Nonnull IJobMaintenanceService theJobMaintenanceService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
+		myJobMaintenanceService = theJobMaintenanceService;
 	}
 
 	public <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> JobStepExecutor<PT,IT,OT> newJobStepExecutor(@Nonnull JobInstance theInstance, @Nonnull WorkChunk theWorkChunk, @Nonnull JobWorkCursor<PT, IT, OT> theCursor) {
-		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc);
+		return new JobStepExecutor<>(myJobPersistence, myBatchJobSender, theInstance, theWorkChunk, theCursor, myJobStepExecutorSvc, myJobMaintenanceService);
 	}
 }

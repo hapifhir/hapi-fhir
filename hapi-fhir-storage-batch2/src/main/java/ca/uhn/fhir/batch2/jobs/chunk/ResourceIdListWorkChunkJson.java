@@ -64,7 +64,11 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 
 		return myTypedPids
 			.stream()
-			.map(t -> new ResourcePersistentId(t.getPid()))
+			.map(t -> {
+				ResourcePersistentId retval = new ResourcePersistentId(t.getPid());
+				retval.setResourceType(t.getResourceType());
+				return retval;
+			})
 			.collect(Collectors.toList());
 	}
 

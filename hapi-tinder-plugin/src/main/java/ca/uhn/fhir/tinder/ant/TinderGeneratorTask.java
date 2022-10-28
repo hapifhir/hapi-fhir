@@ -73,7 +73,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top">version</td>
  *     <td valign="top">The FHIR version whose resource metadata
  *     is to be used to generate the files<br>
- *     Valid values:&nbsp;<code><b>dstu2</b></code>&nbsp;|&nbsp;<code><b>dstu3</b></code>&nbsp;|&nbsp;<code><b>r4</b></code></td>
+ *     Valid values:&nbsp;<code><b>dstu2</b></code>&nbsp;|&nbsp;<code><b>dstu3</b></code>&nbsp;|&nbsp;<code><b>r4</b></code>&nbsp;|&nbsp;<code><b>r5</b></code></td>
  *     <td valign="top" align="center">Yes</td>
  *   </tr>
  *   <tr>
@@ -432,8 +432,8 @@ public class TinderGeneratorTask extends Task {
 				}
 
 				String capitalize = WordUtils.capitalize(version);
-				if ("Dstu".equals(capitalize)) {
-					capitalize="Dstu1";
+				if ("R4b".equals(capitalize)) {
+					capitalize="R4B";
 				}
 				ctx.put("versionCapitalized", capitalize);
 

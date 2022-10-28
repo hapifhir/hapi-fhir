@@ -21,9 +21,9 @@ package ca.uhn.fhir.rest.client.tls;
  */
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.tls.BaseStoreInfo;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.PathType;
-import ca.uhn.fhir.tls.StoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
 import ca.uhn.fhir.tls.TrustStoreInfo;
 import org.apache.commons.lang3.Validate;
@@ -80,7 +80,7 @@ public class TlsAuthenticationSvc {
 		}
 	}
 	
-	public static KeyStore createKeyStore(StoreInfo theStoreInfo){
+	public static KeyStore createKeyStore(BaseStoreInfo theStoreInfo){
 		try {
 			KeyStore keyStore = KeyStore.getInstance(theStoreInfo.getType().toString());
 

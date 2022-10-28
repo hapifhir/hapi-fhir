@@ -5,8 +5,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.server.ParseAction;
-import ca.uhn.fhir.rest.server.RestfulResponse;
+import ca.uhn.fhir.rest.api.server.BaseParseAction;
+import ca.uhn.fhir.rest.server.BaseRestfulResponse;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -47,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * 
  * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
-public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
+public class JaxRsResponse extends BaseRestfulResponse<JaxRsRequest> {
 
 	/**
 	 * The constructor
@@ -89,8 +89,8 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 	}
 
 	@Override
-	public Response returnResponse(ParseAction<?> outcome, int operationStatus, boolean allowPrefer,
-			MethodOutcome response, String resourceName) throws IOException {
+	public Response returnResponse(BaseParseAction<?> outcome, int operationStatus, boolean allowPrefer,
+											 MethodOutcome response, String resourceName) throws IOException {
 		StringWriter writer = new StringWriter();
 		if (outcome != null) {
 			FhirContext fhirContext = getRequestDetails().getServer().getFhirContext();

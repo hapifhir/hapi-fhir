@@ -108,7 +108,7 @@ public class GraphQLEngineTest {
 		output.write(outputBuilder, 0, "\n");
 
 		String expected = "{\n" +
-			"  \"id\":\"http://foo.com/Patient/PATA\"\n" +
+			"  \"id\":\"PATA\"\n" +
 			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
@@ -130,7 +130,7 @@ public class GraphQLEngineTest {
 		output.write(outputBuilder, 0, "\n");
 
 		String expected = "{\n" +
-			"  \"id\":\"http://foo.com/Patient/PATA\",\n" +
+			"  \"id\":\"PATA\",\n" +
 			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
 			"}";
 		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
@@ -163,7 +163,7 @@ public class GraphQLEngineTest {
 		output.write(outputBuilder, 0, "\n");
 
 		String expected = "{\n" +
-			"  \"id\":\"http://foo.com/Patient/PATA\",\n" +
+			"  \"id\":\"PATA\",\n" +
 			"  \"subject\":{\n" +
 			"    \"reference\":\"Patient/123\",\n" +
 			"    \"resource\":{\n" +

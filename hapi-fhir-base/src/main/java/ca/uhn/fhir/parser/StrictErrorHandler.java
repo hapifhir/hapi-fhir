@@ -2,8 +2,8 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
-import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
+import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
 import ca.uhn.fhir.util.UrlUtil;
 
 /*
@@ -33,7 +33,7 @@ import ca.uhn.fhir.util.UrlUtil;
  * @see IParser#setParserErrorHandler(IParserErrorHandler)
  * @see FhirContext#setParserErrorHandler(IParserErrorHandler)
  */
-public class StrictErrorHandler extends BaseErrorHandler implements IParserErrorHandler {
+public class StrictErrorHandler extends ParseErrorHandler implements IParserErrorHandler {
 
 	@Override
 	public void containedResourceWithNoId(IParseLocation theLocation) {

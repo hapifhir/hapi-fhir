@@ -138,7 +138,7 @@ public class ValidationResult {
 				location = null;
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
-			IBase issue = OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			IBase issue = OperationOutcomeUtil.addIssueWithMessageId(myCtx, theOperationOutcome, severity, next.getMessage(), next.getMessageId(), location, Constants.OO_INFOSTATUS_PROCESSING);
 			
 			if (next.getLocationLine() != null || next.getLocationCol() != null) {
 				String unknown = "(unknown)";

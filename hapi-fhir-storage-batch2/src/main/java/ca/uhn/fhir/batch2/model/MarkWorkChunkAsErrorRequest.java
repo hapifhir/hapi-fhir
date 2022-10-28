@@ -31,23 +31,26 @@ public class MarkWorkChunkAsErrorRequest {
 		return myChunkId;
 	}
 
-	public void setChunkId(String theChunkId) {
+	public MarkWorkChunkAsErrorRequest setChunkId(String theChunkId) {
 		myChunkId = theChunkId;
+		return this;
 	}
 
 	public String getErrorMsg() {
 		return myErrorMsg;
 	}
 
-	public void setErrorMsg(String theErrorMsg) {
+	public MarkWorkChunkAsErrorRequest setErrorMsg(String theErrorMsg) {
 		myErrorMsg = theErrorMsg;
+		return this;
 	}
 
 	public boolean isIncludeData() {
 		return myIncludeData;
 	}
 
-	public void setIncludeData(boolean theIncludeData) {
+	public MarkWorkChunkAsErrorRequest setIncludeData(boolean theIncludeData) {
 		myIncludeData = theIncludeData;
+		return this;
 	}
 }

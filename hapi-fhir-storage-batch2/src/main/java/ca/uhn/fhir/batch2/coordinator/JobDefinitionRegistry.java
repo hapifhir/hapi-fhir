@@ -25,34 +25,37 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import com.google.common.collect.ImmutableSortedMap;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public class JobDefinitionRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(JobDefinitionRegistry.class);
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
-	private final Map<String, TreeMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
+	private volatile Map<String, NavigableMap<Integer, JobDefinition<?>>> myJobs = new HashMap<>();
 
 	/**
 	 * Add a job definition only if it is not registered
-	 * @param theDefinition
-	 * @return true if it did not already exist and was registered
+	 *
 	 * @param <PT> the job parameter type for the definition
+	 * @return true if it did not already exist and was registered
 	 */
-	public <PT extends IModelJson> boolean addJobDefinitionIfNotRegistered(@Nonnull JobDefinition<PT> theDefinition) {
+	public synchronized <PT extends IModelJson> boolean addJobDefinitionIfNotRegistered(@Nonnull JobDefinition<PT> theDefinition) {
 		Optional<JobDefinition<?>> orig = getJobDefinition(theDefinition.getJobDefinitionId(), theDefinition.getJobDefinitionVersion());
 		if (orig.isPresent()) {
 			return false;
@@ -61,7 +64,7 @@ public class JobDefinitionRegistry {
 		return true;
 	}
 
-	public <PT extends IModelJson> void addJobDefinition(@Nonnull JobDefinition<PT> theDefinition) {
+	public synchronized <PT extends IModelJson> void addJobDefinition(@Nonnull JobDefinition<PT> theDefinition) {
 		Validate.notNull(theDefinition);
 		String jobDefinitionId = theDefinition.getJobDefinitionId();
 		Validate.notBlank(jobDefinitionId);
@@ -75,7 +78,8 @@ public class JobDefinitionRegistry {
 			}
 		}
 
-		TreeMap<Integer, JobDefinition<?>> versionMap = myJobs.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
+		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = cloneJobsMap();
+		NavigableMap<Integer, JobDefinition<?>> versionMap = newJobsMap.computeIfAbsent(jobDefinitionId, t -> new TreeMap<>());
 		if (versionMap.containsKey(theDefinition.getJobDefinitionVersion())) {
 			if (versionMap.get(theDefinition.getJobDefinitionVersion()) == theDefinition) {
 				ourLog.warn("job[{}] version: {} already registered.  Not registering again.", jobDefinitionId, theDefinition.getJobDefinitionVersion());
@@ -84,10 +88,37 @@ public class JobDefinitionRegistry {
 			throw new ConfigurationException(Msg.code(2047) + "Multiple definitions for job[" + jobDefinitionId + "] version: " + theDefinition.getJobDefinitionVersion());
 		}
 		versionMap.put(theDefinition.getJobDefinitionVersion(), theDefinition);
+
+		myJobs = newJobsMap;
+	}
+
+	public synchronized void removeJobDefinition(@Nonnull String theDefinitionId, int theVersion) {
+		Validate.notBlank(theDefinitionId);
+		Validate.isTrue(theVersion >= 1);
+
+		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = cloneJobsMap();
+		NavigableMap<Integer, JobDefinition<?>> versionMap = newJobsMap.get(theDefinitionId);
+		if (versionMap != null) {
+			versionMap.remove(theVersion);
+			if (versionMap.isEmpty()) {
+				newJobsMap.remove(theDefinitionId);
+			}
+		}
+
+		myJobs = newJobsMap;
+	}
+
+	@Nonnull
+	private Map<String, NavigableMap<Integer, JobDefinition<?>>> cloneJobsMap() {
+		Map<String, NavigableMap<Integer, JobDefinition<?>>> newJobsMap = new HashMap<>();
+		for (Map.Entry<String, NavigableMap<Integer, JobDefinition<?>>> nextEntry : myJobs.entrySet()) {
+			newJobsMap.put(nextEntry.getKey(), new TreeMap<>(nextEntry.getValue()));
+		}
+		return newJobsMap;
 	}
 
 	public Optional<JobDefinition<?>> getLatestJobDefinition(@Nonnull String theJobDefinitionId) {
-		TreeMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
 		if (versionMap == null || versionMap.isEmpty()) {
 			return Optional.empty();
 		}
@@ -95,7 +126,7 @@ public class JobDefinitionRegistry {
 	}
 
 	public Optional<JobDefinition<?>> getJobDefinition(@Nonnull String theJobDefinitionId, int theJobDefinitionVersion) {
-		TreeMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
+		NavigableMap<Integer, JobDefinition<?>> versionMap = myJobs.get(theJobDefinitionId);
 		if (versionMap == null || versionMap.isEmpty()) {
 			return Optional.empty();
 		}
@@ -137,5 +168,9 @@ public class JobDefinitionRegistry {
 
 	public JobDefinition<?> getJobDefinitionOrThrowException(JobInstance theJobInstance) {
 		return getJobDefinitionOrThrowException(theJobInstance.getJobDefinitionId(), theJobInstance.getJobDefinitionVersion());
+	}
+
+	public Collection<Integer> getJobDefinitionVersions(String theDefinitionId) {
+		return myJobs.getOrDefault(theDefinitionId, ImmutableSortedMap.of()).keySet();
 	}
 }

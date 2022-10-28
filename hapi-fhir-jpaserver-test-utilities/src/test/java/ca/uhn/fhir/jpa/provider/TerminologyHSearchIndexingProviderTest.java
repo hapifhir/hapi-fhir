@@ -35,7 +35,7 @@ public class TerminologyHSearchIndexingProviderTest {
 	@Mock private SystemRequestDetails myRequestDetails;
 
 	@InjectMocks
-	private BaseJpaSystemProvider<?, ?> testedProvider = new BaseJpaSystemProvider<>();
+	private BaseJpaSystemProvider<?, ?> testedProvider = new BaseJpaSystemProvider<>() {};
 
 	@BeforeEach
 	void setUp() {

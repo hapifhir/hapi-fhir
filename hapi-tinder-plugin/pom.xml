@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>6.1.4</version>
+		<version>6.2.0-PRE18-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -14,6 +14,13 @@
 	<!-- <packaging>jar</packaging> -->
 
 	<name>HAPI Tinder Plugin</name>
+
+	<properties>
+		<previous_hapi_fhir_version>6.1.0</previous_hapi_fhir_version>
+		<!-- TODO KHS is this still needed?
+		<maven_version>3.1.1</maven_version>
+		-->
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -36,7 +43,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>5.3.0</version>
+			<version>${previous_hapi_fhir_version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.uhn.hapi.fhir</groupId>
@@ -47,7 +54,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-			<version>5.3.0</version>
+			<version>${previous_hapi_fhir_version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>ca.uhn.hapi.fhir</groupId>
@@ -58,37 +65,47 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
-			<version>6.1.4</version>
+			<version>6.2.0-PRE18-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>6.2.0-PRE9-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
@@ -141,22 +158,22 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-project</artifactId>
-            <!--
-			<exclusions>
-				<exclusion>
-					<groupId>org.codehaus.plexus</groupId>
-					<artifactId>plexus-utils</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.maven</groupId>
-					<artifactId>maven-model</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.maven</groupId>
-					<artifactId>maven-artifact</artifactId>
-				</exclusion>
-			</exclusions>
-			-->
+			<!--
+		<exclusions>
+			<exclusion>
+				<groupId>org.codehaus.plexus</groupId>
+				<artifactId>plexus-utils</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-model</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-artifact</artifactId>
+			</exclusion>
+		</exclusions>
+		-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -190,7 +207,7 @@
 			<artifactId>ant</artifactId>
 			<version>1.10.11</version>
 		</dependency>
-		
+
 		<!-- This is just used for  -->
 		<dependency>
 			<groupId>org.ini4j</groupId>
@@ -207,10 +224,6 @@
 
 
 	</dependencies>
-
-	<properties>
-		<maven_version>3.1.1</maven_version>
-	</properties>
 
 	<reporting>
 		<plugins>

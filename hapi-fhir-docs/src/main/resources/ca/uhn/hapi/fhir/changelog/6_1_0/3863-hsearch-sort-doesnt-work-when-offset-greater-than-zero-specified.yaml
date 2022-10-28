@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 3863
+title: "Previously a lucene/elastic enabled sorted search including offset greater than zero was not sorting results.
+   This has now been fixed."
+

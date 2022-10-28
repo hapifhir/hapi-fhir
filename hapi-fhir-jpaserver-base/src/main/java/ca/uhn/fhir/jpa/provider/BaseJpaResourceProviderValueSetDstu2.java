@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.provider;
  * #L%
  */
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
+public abstract class BaseJpaResourceProviderValueSetDstu2 extends JpaResourceProviderDstu2<ValueSet> {
 
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)

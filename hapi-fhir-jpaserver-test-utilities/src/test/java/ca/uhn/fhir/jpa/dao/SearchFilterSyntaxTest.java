@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +10,7 @@ public class SearchFilterSyntaxTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchFilterSyntaxTest.class);
 
 	private void testParse(String theExpression) throws SearchFilterParser.FilterSyntaxException {
-		SearchFilterParser.Filter filter = SearchFilterParser.parse(theExpression);
+		SearchFilterParser.BaseFilter filter = SearchFilterParser.parse(theExpression);
 		ourLog.info("Source: {}", theExpression);
 		ourLog.info("Parsed: {}", filter.toString());
 		assertNotNull(filter, "Parsing failed - returned null");

@@ -24,14 +24,18 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.coordinator.StepExecutionSvc;
+import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -39,6 +43,8 @@ import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class performs regular polls of the stored jobs in order to
@@ -63,16 +69,26 @@ import java.util.Set;
  * have gated execution. For these instances, we check if the current step
  * is complete (all chunks are in COMPLETE status) and trigger the next step.
  * </p>
+ *
+ * <p>
+ *    The maintenance pass is run once per minute.  However if a gated job is fast-tracking (i.e. every step produced
+ *    exactly one chunk, then the maintenance task will be triggered earlier than scheduled by the step executor.
+ * </p>
  */
 public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
+	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 
 	public static final int INSTANCES_PER_PASS = 100;
+	public static final String SCHEDULED_JOB_ID = JobMaintenanceScheduledJob.class.getName();
+	public static final int MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT = 5;
 
 	private final IJobPersistence myJobPersistence;
 	private final ISchedulerService mySchedulerService;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
-	private final StepExecutionSvc myJobExecutorSvc;
+	private final WorkChunkProcessor myJobExecutorSvc;
+
+	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
 	/**
 	 * Constructor
@@ -81,7 +97,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 												@Nonnull IJobPersistence theJobPersistence,
 												@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 												@Nonnull BatchJobSender theBatchJobSender,
-												@Nonnull StepExecutionSvc theExecutor
+												@Nonnull WorkChunkProcessor theExecutor
 	) {
 		Validate.notNull(theSchedulerService);
 		Validate.notNull(theJobPersistence);
@@ -97,17 +113,71 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService {
 
 	@PostConstruct
 	public void start() {
+		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, buildJobDefinition());
+	}
+
+	@Nonnull
+	private ScheduledJobDefinition buildJobDefinition() {
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(JobMaintenanceScheduledJob.class.getName());
+		jobDefinition.setId(SCHEDULED_JOB_ID);
 		jobDefinition.setJobClass(JobMaintenanceScheduledJob.class);
-		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_MINUTE, jobDefinition);
+		return jobDefinition;
+	}
+
+	/**
+	 * @return true if a request to run a maintance pass was submitted
+	 */
+	@Override
+	public boolean triggerMaintenancePass() {
+		if (mySchedulerService.isClusteredSchedulingEnabled()) {
+			mySchedulerService.triggerClusteredJobImmediately(buildJobDefinition());
+			return true;
+		} else {
+			// We are probably running a unit test
+			return runMaintenanceDirectlyWithTimeout();
+		}
+	}
+
+	private boolean runMaintenanceDirectlyWithTimeout() {
+		if (getQueueLength() > 0) {
+			ourLog.debug("There are already {} threads waiting to run a maintenance pass.  Ignoring request.", getQueueLength());
+			return false;
+		}
+
+		try {
+			ourLog.debug("There is no clustered scheduling service.  Requesting semaphore to run maintenance pass directly.");
+			// Some unit test, esp. the Loinc terminology tests, depend on this maintenance pass being run shortly after it is requested
+			myRunMaintenanceSemaphore.tryAcquire(MAINTENANCE_TRIGGER_RUN_WITHOUT_SCHEDULER_TIMEOUT, TimeUnit.MINUTES);
+			ourLog.debug("Semaphore acquired.  Starting maintenance pass.");
+			doMaintenancePass();
+			return true;
+		} catch (InterruptedException e) {
+			throw new RuntimeException(Msg.code(2134) + "Timed out waiting to run a maintenance pass", e);
+		} finally {
+			ourLog.debug("Maintenance pass complete.  Releasing semaphore.");
+			myRunMaintenanceSemaphore.release();
+		}
+	}
+
+	@VisibleForTesting
+	int getQueueLength() {
+		return myRunMaintenanceSemaphore.getQueueLength();
 	}
 
 	@Override
 	public void runMaintenancePass() {
+		if (!myRunMaintenanceSemaphore.tryAcquire()) {
+			ourLog.debug("Another maintenance pass is already in progress.  Ignoring request.");
+			return;
+		}
+		try {
+			doMaintenancePass();
+		} finally {
+			myRunMaintenanceSemaphore.release();
+		}
+	}
 
-		// NB: If you add any new logic, update the class javadoc
-
+	private void doMaintenancePass() {
 		Set<String> processedInstanceIds = new HashSet<>();
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		for (int page = 0; ; page++) {

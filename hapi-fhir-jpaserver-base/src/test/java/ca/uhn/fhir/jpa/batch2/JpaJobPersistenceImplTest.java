@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +48,8 @@ class JpaJobPersistenceImplTest {
 	IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Mock
 	IBatch2WorkChunkRepository myWorkChunkRepository;
+	@Mock
+	PlatformTransactionManager myTxManager;
 	@InjectMocks
 	JpaJobPersistenceImpl mySvc;
 
@@ -321,6 +324,7 @@ class JpaJobPersistenceImplTest {
 		entity.setEndTime(new Date(2000, 2, 3));
 		entity.setStatus(StatusEnum.COMPLETED);
 		entity.setCancelled(true);
+		entity.setFastTracking(true);
 		entity.setCombinedRecordsProcessed(12);
 		entity.setCombinedRecordsProcessedPerSecond(2d);
 		entity.setTotalElapsedMillis(1000);

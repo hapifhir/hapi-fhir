@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-public class BaseValidationSupportWrapper extends BaseValidationSupport {
+public abstract class BaseValidationSupportWrapper extends BaseValidationSupport {
 	private final IValidationSupport myWrap;
 
 	/**
@@ -54,6 +54,11 @@ public class BaseValidationSupportWrapper extends BaseValidationSupport {
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
 		return myWrap.fetchResource(theClass, theUri);
+	}
+
+	@Override
+	public byte[] fetchBinary(String theBinaryKey) {
+		return myWrap.fetchBinary(theBinaryKey);
 	}
 
 	@Override

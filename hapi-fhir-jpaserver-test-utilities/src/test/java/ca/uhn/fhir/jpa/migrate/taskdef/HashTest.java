@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,19 +33,20 @@ public class HashTest {
 
 	@Test
 	public void testCheckAllHashes() {
-		List<BaseTask> tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		MigrationTaskList tasks1 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
 		Map<String, Integer> hashesByVersion = new HashMap<>();
-		for (BaseTask task : tasks1) {
-			String version = task.getFlywayVersion();
+
+		tasks1.forEach(task -> {
+			String version = task.getMigrationVersion();
 			assertNull(hashesByVersion.get(version), "Duplicate flyway version " + version + " in " + HapiFhirJpaMigrationTasks.class.getName());
 			hashesByVersion.put(version, task.hashCode());
-		}
+		});
 
-		List<BaseTask> tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
-		for (BaseTask task : tasks2) {
-			String version = task.getFlywayVersion();
+		MigrationTaskList tasks2 = new HapiFhirJpaMigrationTasks(Collections.emptySet()).getAllTasks(VersionEnum.values());
+		tasks2.forEach(task -> {
+			String version = task.getMigrationVersion();
 			int origHash = hashesByVersion.get(version);
 			assertEquals(origHash, task.hashCode(), "Hashes differ for task " + version);
-		}
+		});
 	}
 }

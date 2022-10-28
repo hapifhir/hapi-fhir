@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.flywaydb.core.api.MigrationVersion;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,7 @@ public abstract class BaseTask {
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
-	private int myChangesCount;
+	private Integer myChangesCount = 0;
 	private boolean myDryRun;
 
 	/**
@@ -147,11 +149,9 @@ public abstract class BaseTask {
 		if (!isDryRun()) {
 			Integer changes;
 			if (myTransactional) {
-				changes = getConnectionProperties().getTxTemplate().execute(t -> {
-					return doExecuteSql(theSql, theArguments);
-				});
+				changes = getConnectionProperties().getTxTemplate().execute(t -> doExecuteSql(theSql, theArguments));
 			} else {
-				changes =  doExecuteSql(theSql, theArguments);
+				changes = doExecuteSql(theSql, theArguments);
 			}
 
 			myChangesCount += changes;
@@ -160,7 +160,28 @@ public abstract class BaseTask {
 		captureExecutedStatement(theTableName, theSql, theArguments);
 	}
 
-	private int doExecuteSql(@Language("SQL") String theSql, Object[] theArguments) {
+	protected void executeSqlListInTransaction(String theTableName, List<String> theSqlStatements) {
+		if (!isDryRun()) {
+			Integer changes;
+			changes = getConnectionProperties().getTxTemplate().execute(t -> doExecuteSqlList(theSqlStatements));
+			myChangesCount += changes;
+		}
+
+		for (@Language("SQL") String sqlStatement : theSqlStatements) {
+			captureExecutedStatement(theTableName, sqlStatement);
+		}
+	}
+
+	private Integer doExecuteSqlList(List<String> theSqlStatements) {
+		int changesCount = 0;
+		for (String nextSql : theSqlStatements) {
+			changesCount += doExecuteSql(nextSql);
+		}
+
+		return changesCount;
+	}
+
+	private int doExecuteSql(@Language("SQL") String theSql, Object... theArguments) {
 		JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 		// 0 means no timeout -- we use this for index rebuilds that may take time.
 		jdbcTemplate.setQueryTimeout(0);
@@ -172,18 +193,16 @@ public abstract class BaseTask {
 			return changesCount;
 		} catch (DataAccessException e) {
 			if (myFailureAllowed) {
-				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getFlywayVersion());
+				ourLog.info("Task {} did not exit successfully, but task is allowed to fail", getMigrationVersion());
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new DataAccessException(Msg.code(61) + "Failed during task " + getFlywayVersion() + ": " + e, e) {
-					private static final long serialVersionUID = 8211678931579252166L;
-				};
+				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}
 
-	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object[] theArguments) {
+	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
 		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
 	}
 
@@ -226,12 +245,6 @@ public abstract class BaseTask {
 				return;
 			}
 		}
-		if (!myOnlyAppliesToPlatforms.isEmpty()) {
-			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
-				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
-				return;
-			}
-		}
 		doExecute();
 	}
 
@@ -245,16 +258,18 @@ public abstract class BaseTask {
 		myFailureAllowed = theFailureAllowed;
 	}
 
-	public String getFlywayVersion() {
+	public String getMigrationVersion() {
 		String releasePart = myProductVersion;
 		if (releasePart.startsWith("V")) {
 			releasePart = releasePart.substring(1);
 		}
-		return releasePart + "." + mySchemaVersion;
+		String version = releasePart + "." + mySchemaVersion;
+		MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
+		return migrationVersion.getVersion();
 	}
 
 	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
-		theLog.info(getFlywayVersion() + ": " + theFormattedMessage, theArguments);
+		theLog.info(getMigrationVersion() + ": " + theFormattedMessage, theArguments);
 	}
 
 	public void validateVersion() {

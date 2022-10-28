@@ -32,7 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Required;
 
-public class BaseStorageSystemProvider<T, MT> extends BaseJpaProvider {
+public abstract class BaseStorageSystemProvider<T, MT> extends BaseJpaProvider {
 	protected IFhirSystemDao<T, MT> myDao;
 
 	@Operation(name = ProviderConstants.OPERATION_EXPUNGE, idempotent = false, returnParameters = {

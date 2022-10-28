@@ -8,12 +8,8 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
-import ca.uhn.fhir.jpa.batch.config.BatchConstants;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
@@ -45,6 +41,7 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -73,11 +70,9 @@ import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -99,6 +94,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
+import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -115,10 +111,10 @@ import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
-import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermConceptMappingSvc;
-import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.config.TermCodeSystemConfig;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ResourceLoaderImpl;
@@ -131,13 +127,11 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
-import ca.uhn.fhir.util.ThreadPoolUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.npm.PackageClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -145,7 +139,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
@@ -179,12 +172,12 @@ import java.util.Date;
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @Import({
 	BeanPostProcessorConfig.class,
-	BatchJobsConfig.class,
 	TermCodeSystemConfig.class,
 	SearchParamConfig.class,
 	ValidationSupportConfig.class,
 	Batch2SupportConfig.class,
-	JpaBulkExportConfig.class
+	JpaBulkExportConfig.class,
+	SearchConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -208,8 +201,14 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {
-		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster);
+	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
+		return new CascadingDeleteInterceptor(theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+	}
+
+	@Lazy
+	@Bean
+	public ThreadSafeResourceDeleterSvc safeDeleter(DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster, HapiTransactionService hapiTransactionService) {
+		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService.getTransactionManager());
 	}
 
 	@Lazy
@@ -329,11 +328,6 @@ public class JpaConfig {
 		retVal.setConcurrentExecutor(scheduledExecutorService().getObject());
 		retVal.setScheduledExecutor(scheduledExecutorService().getObject());
 		return retVal;
-	}
-
-	@Bean(name = BatchConstants.JOB_LAUNCHING_TASK_EXECUTOR)
-	public TaskExecutor jobLaunchingTaskExecutor() {
-		return ThreadPoolUtil.newThreadPool(0, 10, "job-launcher-");
 	}
 
 	@Bean
@@ -499,7 +493,7 @@ public class JpaConfig {
 
 	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
 	@Scope("prototype")
-	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
+	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
 		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
 	}
 
@@ -618,12 +612,6 @@ public class JpaConfig {
 		return new SearchQueryExecutor(theGeneratedSql, theMaxResultsToFetch);
 	}
 
-	@Bean(name = ISearchBuilder.SEARCH_BUILDER_BEAN_NAME)
-	@Scope("prototype")
-	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType, DaoConfig theDaoConfig) {
-		return new SearchBuilder(theDao, theResourceName, theResourceType);
-	}
-
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
 	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
@@ -639,11 +627,6 @@ public class JpaConfig {
 	@Bean
 	public IIdHelperService idHelperService () {
 		return new IdHelperService();
-	}
-
-	@Bean
-	public ISearchCoordinatorSvc searchCoordinatorSvc() {
-		return new SearchCoordinatorSvcImpl();
 	}
 
 	@Bean
@@ -729,12 +712,6 @@ public class JpaConfig {
 
 	@Lazy
 	@Bean
-	public MemberMatcherR4Helper memberMatcherR4Helper(FhirContext theFhirContext) {
-		return new MemberMatcherR4Helper(theFhirContext);
-	}
-
-	@Lazy
-	@Bean
 	public NicknameInterceptor nicknameInterceptor() throws IOException {
 		return new NicknameInterceptor();
 	}
@@ -743,4 +720,17 @@ public class JpaConfig {
 	public ISynchronousSearchSvc synchronousSearchSvc(){
 		return new SynchronousSearchSvcImpl();
 	}
+
+
+	@Bean
+	public VersionCanonicalizer versionCanonicalizer(FhirContext theFhirContext) {
+		return new VersionCanonicalizer(theFhirContext);
+	}
+
+	@Bean
+	public ITermReadSvc terminologyService() {
+		return new TermReadSvcImpl();
+	}
+
+
 }

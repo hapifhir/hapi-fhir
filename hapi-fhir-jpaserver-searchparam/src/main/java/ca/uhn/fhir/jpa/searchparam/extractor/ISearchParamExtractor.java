@@ -53,6 +53,8 @@ public interface ISearchParamExtractor {
 
 	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 
+	SearchParamSet<ResourceIndexedSearchParamComposite> extractSearchParamComposites(IBaseResource theResource);
+
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
 
 	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource, RuntimeSearchParam theSearchParam);
@@ -67,7 +69,7 @@ public interface ISearchParamExtractor {
 
 	List<String> extractParamValuesAsStrings(RuntimeSearchParam theActiveSearchParam, IBaseResource theResource);
 
-	List<IBase> extractValues(String thePaths, IBaseResource theResource);
+	List<IBase> extractValues(String thePaths, IBase theResource);
 
 	String toRootTypeName(IBase nextObject);
 
@@ -81,7 +83,7 @@ public interface ISearchParamExtractor {
 
 	String getDisplayTextForCoding(IBase theValue);
 
-	BaseSearchParamExtractor.IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath);
+	BaseSearchParamExtractor.IValueExtractor getPathValueExtractor(IBase theResource, String theSinglePath);
 
 	List<IBase> getCodingsFromCodeableConcept(IBase theValue);
 

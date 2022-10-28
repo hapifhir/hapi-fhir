@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 3962
+jira: SMILE-4516
+title: "Previously, using the `import-csv-to-conceptmap` command in the CLI successfully created ConceptMap resources 
+without a `ConceptMap.status` element, which is against the FHIR specification. This has been fixed by adding a required
+option for status for the command."

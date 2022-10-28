@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -32,10 +33,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class AnalyticsInterceptor extends InterceptorAdapter {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AnalyticsInterceptor.class);
-
+	private final LinkedList<AnalyticsEvent> myEventBuffer = new LinkedList<>();
 	private String myAnalyticsTid;
 	private int myCollectThreshold = 100000;
-	private final LinkedList<AnalyticsEvent> myEventBuffer = new LinkedList<>();
 	private String myHostname;
 	private HttpClient myHttpClient;
 	private long mySubmitPeriod = 60000;
@@ -61,16 +61,6 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(5000, jobDetail);
-	}
-
-	public static class Job implements HapiJob {
-		@Autowired
-		private AnalyticsInterceptor myAnalyticsInterceptor;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myAnalyticsInterceptor.flush();
-		}
 	}
 
 	@PreDestroy
@@ -105,13 +95,13 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 			b.append("&an=").append(UrlUtil.escapeUrlParam(myHostname)).append('+').append(UrlUtil.escapeUrlParam(next.getApplicationName()));
 			b.append("&ec=").append(next.getResourceName());
 			b.append("&ea=").append(next.getRestOperation());
-			
+
 			b.append("&cid=").append(next.getClientId());
 			b.append("&uip=").append(UrlUtil.escapeUrlParam(next.getSourceIp()));
 			b.append("&ua=").append(UrlUtil.escapeUrlParam(next.getUserAgent()));
 			b.append("\n");
 		}
-		
+
 		String contents = b.toString();
 		HttpPost post = new HttpPost("https://www.google-analytics.com/batch");
 		post.setEntity(new StringEntity(contents, ContentType.APPLICATION_FORM_URLENCODED));
@@ -121,7 +111,7 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 		} catch (Exception e) {
 			ourLog.error("Failed to submit analytics:", e);
 		}
-		
+
 	}
 
 	private synchronized void flush() {
@@ -145,15 +135,15 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 	}
 
 	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theRequest) {
-		ServletRequestDetails details = (ServletRequestDetails) theRequest.getRequestDetails();
-		
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, RequestDetails theRequest) {
+		ServletRequestDetails details = (ServletRequestDetails) theRequest;
+
 		// Make sure we only send one event per request
 		if (details.getUserData().containsKey(getClass().getName())) {
 			return;
 		}
 		details.getUserData().put(getClass().getName(), "");
-		
+
 		String sourceIp = details.getHeader("x-forwarded-for");
 		if (isBlank(sourceIp)) {
 			sourceIp = details.getServletRequest().getRemoteAddr();
@@ -178,62 +168,72 @@ public class AnalyticsInterceptor extends InterceptorAdapter {
 			myEventBuffer.add(event);
 		}
 	}
-	
+
 	public void setAnalyticsTid(String theAnalyticsTid) {
 		myAnalyticsTid = theAnalyticsTid;
 	}
-	
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private AnalyticsInterceptor myAnalyticsInterceptor;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myAnalyticsInterceptor.flush();
+		}
+	}
+
 	public static class AnalyticsEvent {
 		private String myApplicationName;
 		private String myClientId;
 		private String myResourceName;
 		private RestOperationTypeEnum myRestOperation;
 		private String mySourceIp;
-		
+
 		private String myUserAgent;
 
 		String getApplicationName() {
 			return myApplicationName;
 		}
 
-		String getClientId() {
-			return myClientId;
-		}
-
-		String getResourceName() {
-			return myResourceName;
-		}
-
-		RestOperationTypeEnum getRestOperation() {
-			return myRestOperation;
-		}
-
-		String getSourceIp() {
-			return mySourceIp;
-		}
-
-		String getUserAgent() {
-			return myUserAgent;
-		}
-
 		void setApplicationName(String theApplicationName) {
 			myApplicationName = theApplicationName;
+		}
+
+		String getClientId() {
+			return myClientId;
 		}
 
 		void setClientId(String theClientId) {
 			myClientId = theClientId;
 		}
 
+		String getResourceName() {
+			return myResourceName;
+		}
+
 		void setResourceName(String theResourceName) {
 			myResourceName = theResourceName;
+		}
+
+		RestOperationTypeEnum getRestOperation() {
+			return myRestOperation;
 		}
 
 		void setRestOperation(RestOperationTypeEnum theRestOperation) {
 			myRestOperation = theRestOperation;
 		}
 
+		String getSourceIp() {
+			return mySourceIp;
+		}
+
 		void setSourceIp(String theSourceIp) {
 			mySourceIp = theSourceIp;
+		}
+
+		String getUserAgent() {
+			return myUserAgent;
 		}
 
 		void setUserAgent(String theUserAgent) {

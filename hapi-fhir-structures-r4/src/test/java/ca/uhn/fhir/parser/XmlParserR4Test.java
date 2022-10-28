@@ -5,19 +5,25 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.net.URL;
 
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +48,32 @@ public class XmlParserR4Test extends BaseTest {
 		c.setText(compositionText);
 		c.addSection().setText(compositionSectionText);
 		return c;
+	}
+
+
+	/**
+	 * See #3890
+	 */
+	@Test
+	public void testEncodeExtensionWithReferenceObjectValue() {
+
+		Appointment appointment = new Appointment();
+		appointment.setId("123");
+
+		Meta meta = new Meta();
+		Extension extension = new Extension();
+		extension.setUrl("http://example-source-team.com");
+		extension.setValue(new Reference(new Organization().setId("546")));
+		meta.addExtension(extension);
+		appointment.setMeta(meta);
+
+		var parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(appointment);
+		ourLog.info("Output: {}", output);
+
+		Appointment input = parser.parseResource(Appointment.class, output);
+
+		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
 	}
 
 

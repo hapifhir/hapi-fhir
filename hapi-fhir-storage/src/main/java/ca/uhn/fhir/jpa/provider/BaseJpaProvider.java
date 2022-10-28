@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
@@ -42,7 +42,7 @@ import java.util.TreeSet;
  * #L%
  */
 
-public class BaseJpaProvider {
+public abstract class BaseJpaProvider {
 	public static final String REMOTE_ADDR = "req.remoteAddr";
 	public static final String REMOTE_UA = "req.userAgent";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);

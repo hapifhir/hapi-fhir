@@ -1,7 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.validator;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
@@ -22,6 +22,7 @@ import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.hl7.fhir.r5.utils.validation.constants.IdStatus;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class ValidatorWrapper {
 
@@ -193,29 +195,19 @@ class ValidatorWrapper {
 		} else {
 			throw new IllegalArgumentException(Msg.code(649) + "Unknown encoding: " + encoding);
 		}
+		// TODO: are these still needed?
+		messages = messages.stream()
+			.filter(m -> m.getMessageId() == null
+				|| !(m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE)
+				|| m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_BINDING_NOSOURCE2)
+				|| (m.getMessageId().equals(I18nConstants.TERMINOLOGY_TX_VALUESET_NOTFOUND) && m.getMessage().contains("http://hl7.org/fhir/ValueSet/mimetypes"))))
+			.collect(Collectors.toList());
 
-		for (int i = 0; i < messages.size(); i++) {
-			ValidationMessage next = messages.get(i);
-			String message = next.getMessage();
-
-			// TODO: are these still needed?
-			if ("Binding has no source, so can't be checked".equals(message) ||
-				"ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message)) {
-				messages.remove(i);
-				i--;
-			}
-
-			if (
-				myErrorForUnknownProfiles &&
-				next.getLevel() == ValidationMessage.IssueSeverity.WARNING &&
-				message.contains("Profile reference '") &&
-				message.contains("' has not been checked because it is unknown")
-			) {
-				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
-			}
-
+		if (myErrorForUnknownProfiles) {
+			messages.stream().filter(m -> m.getMessageId() != null && (m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN) || m.getMessageId().equals(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)))
+				.filter(m -> m.getLevel() == ValidationMessage.IssueSeverity.WARNING)
+				.forEach(m -> m.setLevel(ValidationMessage.IssueSeverity.ERROR));
 		}
-
 		return messages;
 	}
 

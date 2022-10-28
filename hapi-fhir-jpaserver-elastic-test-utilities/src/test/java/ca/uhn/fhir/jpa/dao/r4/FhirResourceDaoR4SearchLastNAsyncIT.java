@@ -58,6 +58,8 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		SearchBuilder.setMaxPageSize50ForTest(true);
 
+		myDaoConfig.setLastNEnabled(true);
+
 	}
 
 	@AfterEach

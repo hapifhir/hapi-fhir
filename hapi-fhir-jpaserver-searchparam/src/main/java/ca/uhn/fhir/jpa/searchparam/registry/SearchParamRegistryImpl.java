@@ -277,7 +277,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	 */
 	@PostConstruct
 	public void registerListener() {
-		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
+ 		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy
@@ -360,5 +360,4 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	public void setSearchParameterCanonicalizerForUnitTest(SearchParameterCanonicalizer theSearchParameterCanonicalizerForUnitTest) {
 		mySearchParameterCanonicalizer = theSearchParameterCanonicalizerForUnitTest;
 	}
-
 }

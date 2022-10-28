@@ -26,10 +26,12 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
@@ -157,5 +159,27 @@ public class OperationOutcomeUtil {
 			locationElem.setValueAsString(theLocation);
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
+	}
+
+	public static IBase addIssueWithMessageId(FhirContext myCtx, IBaseOperationOutcome theOperationOutcome, String severity, String message, String messageId, String location, String theCode) {
+		IBase issue = addIssue(myCtx, theOperationOutcome, severity, message, location, theCode);
+		BaseRuntimeElementCompositeDefinition<?> issueElement = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition(issue.getClass());
+		BaseRuntimeChildDefinition detailsChildDef = issueElement.getChildByName("details");
+
+		IPrimitiveType<?> system = (IPrimitiveType<?>) myCtx.getElementDefinition("uri").newInstance();
+		system.setValueAsString(Constants.JAVA_VALIDATOR_DETAILS_SYSTEM);
+		IPrimitiveType<?> code = (IPrimitiveType<?>) myCtx.getElementDefinition("code").newInstance();
+		code.setValueAsString(messageId);
+
+		BaseRuntimeElementCompositeDefinition<?> codingDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("Coding");
+		ICompositeType coding = (ICompositeType) codingDef.newInstance();
+		codingDef.getChildByName("system").getMutator().addValue(coding, system);
+		codingDef.getChildByName("code").getMutator().addValue(coding, code);
+		BaseRuntimeElementCompositeDefinition<?> ccDef = (BaseRuntimeElementCompositeDefinition<?>) myCtx.getElementDefinition("CodeableConcept");
+		ICompositeType codeableConcept = (ICompositeType) ccDef.newInstance();
+		ccDef.getChildByName("coding").getMutator().addValue(codeableConcept, coding);
+
+		detailsChildDef.getMutator().addValue(issue, codeableConcept);
+		return issue;
 	}
 }

@@ -57,7 +57,7 @@ public class Icd10CmLoader {
 	public void load(Reader theReader) throws IOException, SAXException {
 		myConceptCount = 0;
 
-		Document document = XmlUtil.parseDocument(theReader, false);
+		Document document = XmlUtil.parseDocument(theReader, false, false);
 		Element documentElement = document.getDocumentElement();
 
 		// Extract version: Should only be 1 tag

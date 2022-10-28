@@ -209,7 +209,7 @@ public class IdHelperService implements IIdHelperService {
 				// is a forced id
 				// we must resolve!
 				if (myDaoConfig.isDeleteEnabled()) {
-					retVal = new ResourcePersistentId(resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted).getResourceId());
+					retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, id, theExcludeDeleted).getPersistentId();
 					retVals.put(id, retVal);
 				} else {
 					// fetch from cache... adding to cache if not available
@@ -248,6 +248,7 @@ public class IdHelperService implements IIdHelperService {
 	 *
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
+	@Override
 	public ResourcePersistentId resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted){
 		Validate.notNull(theId, "theId must not be null");
 
@@ -578,13 +579,13 @@ public class IdHelperService implements IIdHelperService {
 				.stream()
 				.map(t -> new ResourceLookup((String) t[0], (Long) t[1], (Date) t[2]))
 				.forEach(t -> {
-					String id = t.getResourceId().toString();
+					String id = t.getPersistentId().toString();
 					if (!theTargets.containsKey(id)) {
 						theTargets.put(id, new ArrayList<>());
 					}
 					theTargets.get(id).add(t);
 					if (!myDaoConfig.isDeleteEnabled()) {
-						String nextKey = Long.toString(t.getResourceId());
+						String nextKey = t.getPersistentId().toString();
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey, t);
 					}
 				});
@@ -718,7 +719,7 @@ public class IdHelperService implements IIdHelperService {
 	public IIdType resourceIdFromPidOrThrowException(ResourcePersistentId thePid, String theResourceType) {
 		Optional<ResourceTable> optionalResource = myResourceTableDao.findById(thePid.getIdAsLong());
 		if (!optionalResource.isPresent()) {
-			throw new ResourceNotFoundException(Msg.code(2107) + "Requested resource not found");
+			throw new ResourceNotFoundException(Msg.code(2124) + "Requested resource not found");
 		}
 		return optionalResource.get().getIdDt().toVersionless();
 	}

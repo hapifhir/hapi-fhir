@@ -4,8 +4,8 @@ package ca.uhn.fhir.batch2.jobs.export;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -13,9 +13,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -31,11 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,10 +66,10 @@ public class ExpandResourcesStepTest {
 		return parameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> createInput(BulkExportIdList theData,
-																													BulkExportJobParameters theParameters,
-																													JobInstance theInstance) {
-		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = new StepExecutionDetails<>(
+	private StepExecutionDetails<BulkExportJobParameters, ResourceIdList> createInput(ResourceIdList theData,
+                                                                                      BulkExportJobParameters theParameters,
+                                                                                      JobInstance theInstance) {
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = new StepExecutionDetails<>(
 			theParameters,
 			theData,
 			theInstance,
@@ -97,9 +90,9 @@ public class ExpandResourcesStepTest {
 		//setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
-		IJobDataSink<BulkExportExpandedResources> sink = mock(IJobDataSink.class);
+		IJobDataSink<ExpandedResourcesList> sink = mock(IJobDataSink.class);
 		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
-		BulkExportIdList idList = new BulkExportIdList();
+		ResourceIdList idList = new ResourceIdList();
 		idList.setResourceType("Patient");
 		ArrayList<IBaseResource> resources = new ArrayList<>();
 		ArrayList<Id> ids = new ArrayList<>();
@@ -116,7 +109,7 @@ public class ExpandResourcesStepTest {
 		}
 		idList.setIds(ids);
 
-		StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> input = createInput(
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
 			idList,
 			createParameters(),
 			instance
@@ -132,10 +125,10 @@ public class ExpandResourcesStepTest {
 
 
 		// data sink
-		ArgumentCaptor<BulkExportExpandedResources> expandedCaptor = ArgumentCaptor.forClass(BulkExportExpandedResources.class);
+		ArgumentCaptor<ExpandedResourcesList> expandedCaptor = ArgumentCaptor.forClass(ExpandedResourcesList.class);
 		verify(sink)
 			.accept(expandedCaptor.capture());
-		BulkExportExpandedResources expandedResources = expandedCaptor.getValue();
+		ExpandedResourcesList expandedResources = expandedCaptor.getValue();
 		assertEquals(resources.size(), expandedResources.getStringifiedResources().size());
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
