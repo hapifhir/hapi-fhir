@@ -1617,13 +1617,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ArrayList<TagDefinition> retVal = new ArrayList<>();
 
 		for (IBaseCoding next : theMeta.getTag()) {
-			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay()));
+			// TODO:  how to handle this?
+			retVal.add(new TagDefinition(TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay(), null));
 		}
 		for (IBaseCoding next : theMeta.getSecurity()) {
-			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay()));
+			// TODO:  how to handle this?
+			retVal.add(new TagDefinition(TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay(), null));
 		}
 		for (IPrimitiveType<String> next : theMeta.getProfile()) {
-			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, next.getValue(), null));
+			// TODO:  how to handle this?
+			retVal.add(new TagDefinition(TagTypeEnum.PROFILE, BaseHapiFhirDao.NS_JPA_PROFILE, next.getValue(), null, null));
 		}
 
 		return retVal;

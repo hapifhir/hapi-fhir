@@ -306,7 +306,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		}
 //		ResourceTag tag = new ResourceTag(this, theTag, getPartitionId());
 		// TODO:  where to source userSelected and version from?
-		ResourceTag tag = new ResourceTag(this, theTag, getPartitionId(), false, null);
+		ResourceTag tag = new ResourceTag(this, theTag, getPartitionId(), false);
 		getTags().add(tag);
 		return tag;
 	}

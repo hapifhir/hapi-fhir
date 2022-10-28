@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -18,8 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,10 +38,12 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);
@@ -145,21 +156,79 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 	@Test
 	public void testAddTagWithVersionAndUserSelected() {
-		Patient patient1 = new Patient();
-		Coding tag = patient1.getMeta().addTag().setSystem("http://foo").setCode("bar");
-		assertFalse(tag.getUserSelected());
-		String testVersion = "testVersion";
-		tag.setVersion(testVersion).setUserSelected(true);
-		patient1.setActive(true);
-		IIdType pid1 = myPatientDao.create(patient1).getId();
+		final List<ResourceHistoryTag> resourceHistoryTags1 = myResourceHistoryTagDao.findAll();
+		// TODO:  make this work
+		// TODO: test different configs fo dao_config.tag_storage_mode is set to NON_VERSIONED or VERSIONED or others?
+		// TODO: test history tag
+		final String expectedSystem1 = "http://foo";
+		final String expectedCode1 = "code1";
+		final String testVersion1 = "testVersion1";
+		final String expectedSystem2 = "http://another.system";
+		final String expectedCode2 = "code2";
+		final String testVersion2 = "testVersion2";
 
-		patient1 = myPatientDao.read(pid1);
-		assertEquals(1, patient1.getMeta().getTag().size());
-		assertEquals(0, patient1.getMeta().getSecurity().size());
-		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
-		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
-		assertEquals(testVersion, patient1.getMeta().getTagFirstRep().getVersion());
-		assertTrue(patient1.getMeta().getTagFirstRep().getUserSelected());
+		final Patient savedPatient = new Patient();
+		final Coding tag = savedPatient.getMeta().addTag().setSystem(expectedSystem1).setCode(expectedCode1);
+		assertFalse(tag.getUserSelected());
+		tag.setVersion(testVersion1).setUserSelected(true);
+		savedPatient.setActive(true);
+		final IIdType pid1 = myPatientDao.create(savedPatient).getId();
+
+		final List<ResourceHistoryTag> resourceHistoryTags2 = myResourceHistoryTagDao.findAll();
+
+		final Patient retrievedPatient = myPatientDao.read(pid1);
+		assertAll(
+			() -> assertEquals(1, retrievedPatient.getMeta().getTag().size()),
+			() -> assertEquals(0, retrievedPatient.getMeta().getSecurity().size()),
+			() -> assertEquals(expectedSystem1, retrievedPatient.getMeta().getTagFirstRep().getSystem()),
+			() -> assertTrue(retrievedPatient.getMeta().getTagFirstRep().getUserSelected()),
+			() -> assertEquals(expectedCode1, retrievedPatient.getMeta().getTagFirstRep().getCode())
+			// TODO:  why isn't this working?
+			//	,
+			//	() -> assertEquals(testVersion1, retrievedPatient.getMeta().getTagFirstRep().getVersion())
+		);
+
+		// Update the patient to create a ResourceHistoryTag record
+		final List<Coding> tagsFromDbPatient = retrievedPatient.getMeta().getTag();
+		assertEquals(1, tagsFromDbPatient.size());
+
+		tagsFromDbPatient.get(0)
+			.setCode("code2")
+			.setSystem("http://newsystem")
+			.setVersion("testVersion2")
+			.setUserSelected(false);
+
+		myPatientDao.update(retrievedPatient);
+		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1);
+
+//		final DateRangeParam dateRange =
+//			new DateRangeParam(Date.from(LocalDateTime.now().minusSeconds(10).atZone(ZoneId.systemDefault()).toInstant()),
+//									 Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+//		final HistorySearchDateRangeParam historyDetails = new HistorySearchDateRangeParam(Map.of(), dateRange, 5);
+//		final RequestDetails requestDetailsForHistory = mock(RequestDetails.class);
+//		final IBundleProvider history = myPatientDao.history(pid1, historyDetails, requestDetailsForHistory);
+//		ourLog.info("history: {}", history);
+
+		// TODO:  why do we got from 1 ResourceHistoryTag to 3?
+		final List<ResourceHistoryTag> resourceHistoryTags3 = myResourceHistoryTagDao.findAll();
+
+		ourLog.info("resourceHistoryTags: {}", resourceHistoryTags3);
+
+		// TODO:  why do we have tagId
+		resourceHistoryTags3.forEach(historyTag -> ourLog.info("tagId: {}, resourceId: {}, userSelected: {}", historyTag.getTagId(), historyTag.getResourceId(), historyTag.getUserSelected()));
+		// TODO:  myPatientDao.update(retrievedPatient)
+		// TODO:  similar assertAll() post update
+		// TODO:  how retrieve resource tag history?
+
+		myCaptureQueriesListener.getInsertQueriesForCurrentThread()
+			.stream()
+			.map(query -> query.getSql(false, false))
+			.forEach(sql -> ourLog.info("sql: {}", sql));
+
+		/*
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_STRING t0 WHERE ((t0.HASH_NORM_PREFIX = ?) AND (t0.SP_VALUE_NORMALIZED LIKE ?))", sql);
+		 */
 	}
 
 

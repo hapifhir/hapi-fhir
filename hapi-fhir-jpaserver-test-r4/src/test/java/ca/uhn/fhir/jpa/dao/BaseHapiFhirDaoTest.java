@@ -180,7 +180,8 @@ public class BaseHapiFhirDaoTest {
 		TagDefinition tagDefinition = new TagDefinition(tagType,
 			scheme,
 			term,
-			label);
+			label,
+			null); // TODO:  how to handle this?
 
 		// mock objects
 		CriteriaBuilder builder = getMockedCriteriaBuilder();

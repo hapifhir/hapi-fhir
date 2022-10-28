@@ -55,7 +55,8 @@ class MemoryCacheServiceTest {
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
 		assertThat(retVal, nullValue());
 
-		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
+		// TODO:  how to handle this?
+		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel", null);
 		mySvc.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey, tagDef);
 
 		retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);

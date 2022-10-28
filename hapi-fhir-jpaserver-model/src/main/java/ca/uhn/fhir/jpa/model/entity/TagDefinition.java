@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -73,6 +74,8 @@ public class TagDefinition implements Serializable {
 	@Column(name = "TAG_TYPE", nullable = false)
 	@Enumerated(EnumType.ORDINAL)
 	private TagTypeEnum myTagType;
+	@Column(name = "TAG_VERSION", length = 30)
+	private String myVersion;
 	@Transient
 	private transient Integer myHashCode;
 
@@ -83,11 +86,12 @@ public class TagDefinition implements Serializable {
 		super();
 	}
 
-	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay) {
+	public TagDefinition(TagTypeEnum theTagType, String theSystem, String theCode, String theDisplay, String theVersion) {
 		setTagType(theTagType);
 		setCode(theCode);
 		setSystem(theSystem);
 		setDisplay(theDisplay);
+		setVersionAfterTrim(theVersion);
 	}
 
 	public String getCode() {
@@ -133,6 +137,20 @@ public class TagDefinition implements Serializable {
 		myHashCode = null;
 	}
 
+	public String getVersion() {
+		return myVersion;
+	}
+
+	public void setVersion(String theVersion) {
+		myVersion = theVersion;
+	}
+
+	private void setVersionAfterTrim(String theVersion) {
+		if (theVersion != null) {
+			setVersion(StringUtils.truncate(theVersion, 30));
+		}
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -153,6 +171,8 @@ public class TagDefinition implements Serializable {
 			b.append(myCode, other.myCode);
 		}
 
+		b.append(myVersion, other.myVersion);
+
 		return b.isEquals();
 	}
 
@@ -163,6 +183,7 @@ public class TagDefinition implements Serializable {
 			b.append(myTagType);
 			b.append(mySystem);
 			b.append(myCode);
+			b.append(myVersion);
 			myHashCode = b.toHashCode();
 		}
 		return myHashCode;
@@ -175,6 +196,7 @@ public class TagDefinition implements Serializable {
 		retVal.append("system", mySystem);
 		retVal.append("code", myCode);
 		retVal.append("display", myDisplay);
+		retVal.append("version", myVersion);
 		return retVal.build();
 	}
 }

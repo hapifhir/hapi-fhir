@@ -108,6 +108,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Coding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -274,9 +275,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel());
+				// TODO:  check
+				final Set<Coding> codings = theResource.getMeta().getTag().stream()
+					.filter(Coding.class::isInstance)
+					.map(Coding.class::cast)
+					.collect(Collectors.toSet());
+				final String versionOrNull =
+					codings.isEmpty()  ? ((Coding)iBaseCoding).getVersion()
+						: null;
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), versionOrNull);
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -287,9 +295,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<BaseCodingDt> securityLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(theResource);
 		if (securityLabels != null) {
 			for (BaseCodingDt next : securityLabels) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue());
+				// TODO: I think version should be null here
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystemElement().getValue(), next.getCodeElement().getValue(), next.getDisplayElement().getValue(), null);
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -300,9 +308,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<IdDt> profiles = ResourceMetadataKeyEnum.PROFILES.get(theResource);
 		if (profiles != null) {
 			for (IIdType next : profiles) {
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
+				// TODO: I think version should be null here
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null, null);
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
 					theEntity.setHasTags(true);
@@ -318,7 +326,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
 					// TODO:  add userSelected and version from theResource?
+					final Set<Coding> codings = theResource.getMeta().getTag().stream()
+						.filter(Coding.class::isInstance)
+						.map(Coding.class::cast)
+						.collect(Collectors.toSet());
+
 					ResourceTag tag = theEntity.addTag(def);
+					if (!codings.isEmpty()) {
+						// TODO:  what if there are more than one?
+						final Coding coding = codings.iterator().next();
+						tag.setUserSelected(coding.getUserSelected());
+						// TODO:  why isn't this setting anything
+						def.setVersion(coding.getVersion());
+					}
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -330,7 +350,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IBaseCoding next : securityLabels) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.SECURITY_LABEL, next.getSystem(), next.getCode(), next.getDisplay());
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
@@ -343,7 +362,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			for (IPrimitiveType<String> next : profiles) {
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, next.getValue(), null);
 				if (def != null) {
-					// TODO:  add userSelected and version from theResource?
 					ResourceTag tag = theEntity.addTag(def);
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
@@ -388,7 +406,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	/**
 	 * <code>null</code> will only be returned if the scheme and tag are both blank
 	 */
-	protected TagDefinition getTagOrNull(TransactionDetails theTransactionDetails, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+	protected TagDefinition getTagOrNull(TransactionDetails theTransactionDetails, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, String theVersion) {
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
 		}
@@ -403,7 +421,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			if (retVal == null) {
 				// actual DB hit(s) happen here
-				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel);
+				retVal = getOrCreateTag(theTagType, theScheme, theTerm, theLabel, theVersion);
 
 				TransactionSynchronization sync = new AddTagDefinitionToCacheAfterCommitSynchronization(key, retVal);
 				TransactionSynchronizationManager.registerSynchronization(sync);
@@ -421,7 +439,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * <p>
 	 * Can also throw an InternalErrorException if something bad happens.
 	 */
-	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+	private TagDefinition getOrCreateTag(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, String theVersion) {
 		CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 		Root<TagDefinition> from = cq.from(TagDefinition.class);
@@ -461,7 +479,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						try {
 							val = q.getSingleResult();
 						} catch (NoResultException e) {
-							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+							// TODO:  how to handle this?
+							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel, theVersion);
 							myEntityManager.persist(val);
 						}
 						return val;
@@ -770,9 +789,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		if (def.isStandardType() == false) {
 			String profile = def.getResourceProfile("");
 			if (isNotBlank(profile)) {
-				TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null);
+				// TODO:  I think this is from the Profile and so the label should be null
+				TagDefinition profileDef = getTagOrNull(theTransactionDetails, TagTypeEnum.PROFILE, NS_JPA_PROFILE, profile, null, null);
 
-				// TODO:  add userSelected and version from theResource?
 				ResourceTag tag = theEntity.addTag(profileDef);
 				allDefs.add(tag);
 				theEntity.setHasTags(true);
@@ -918,10 +937,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						sec.setDisplay(next.getTag().getDisplay());
 						break;
 					case TAG:
+						// TODO:  populate userSelected and version from DB
 						IBaseCoding tag = res.getMeta().addTag();
 						tag.setSystem(next.getTag().getSystem());
 						tag.setCode(next.getTag().getCode());
 						tag.setDisplay(next.getTag().getDisplay());
+
+						// TODO:  START new code
+						if (tag instanceof Coding) {
+							final Coding codingTag = (Coding) tag;
+							if (theEntity instanceof ResourceTable) {
+								final ResourceTable theResourceTable = (ResourceTable) theEntity;
+								final Collection<ResourceTag> tags = theResourceTable.getTags();
+
+								if (! tags.isEmpty()) {
+									final ResourceTag resourceTag = tags.iterator().next();
+
+									codingTag.setVersion(resourceTag.getTag().getVersion());
+									codingTag.setUserSelected(resourceTag.getUserSelected());
+								}
+							}
+						}
+						// TODO:  END new code
+
 						break;
 				}
 			}

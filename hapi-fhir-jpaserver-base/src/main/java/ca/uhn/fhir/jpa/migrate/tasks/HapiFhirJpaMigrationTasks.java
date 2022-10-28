@@ -101,14 +101,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_RES_TAG")
 			// TODO: today's date and unique key
-			.addColumn("20221026.1", "TAG_USER_SELECTED")
+			.addColumn("20221027.1", "TAG_USER_SELECTED")
 			.nullable()
 			.type(ColumnTypeEnum.BOOLEAN);
 
 		version
-			.onTable("HFJ_RES_TAG")
+			.onTable("HFJ_TAG_DEF")
 			// TODO: today's date and unique key
-			.addColumn("20221026.2", "TAG_VERSION")
+			.addColumn("20221027.2", "TAG_VERSION")
 			.nullable()
 			// TODO: max length
 			.type(ColumnTypeEnum.STRING, 30);
@@ -116,16 +116,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version
 			.onTable("HFJ_HISTORY_TAG")
 			// TODO: today's date and unique key
-			.addColumn("20221026.3", "TAG_USER_SELECTED")
+			.addColumn("20221027.3", "TAG_USER_SELECTED")
 			.nullable()
 			.type(ColumnTypeEnum.BOOLEAN);
-
-		version
-			.onTable("HFJ_HISTORY_TAG")
-			// TODO: today's date and unique key
-			.addColumn("20221026.4", "TAG_VERSION")
-			.nullable()
-			.type(ColumnTypeEnum.STRING, 30);
 	}
 
 	private void init620() {

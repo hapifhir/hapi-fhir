@@ -79,13 +79,13 @@ public class ResourceTag extends BaseTag {
 	/**
 	 * Constructor
 	 */
-	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId, Boolean theUserSelected, String theVersion) {
+	public ResourceTag(ResourceTable theResourceTable, TagDefinition theTag, PartitionablePartitionId theRequestPartitionId, Boolean theUserSelected) {
 		setTag(theTag);
 		setResource(theResourceTable);
 		setResourceId(theResourceTable.getId());
 		setResourceType(theResourceTable.getResourceType());
 		setPartitionId(theRequestPartitionId);
-		setVersionAfterTrim(theVersion);
+		setUserSelected(theUserSelected);
 	}
 
 	public Long getResourceId() {
@@ -127,6 +127,7 @@ public class ResourceTag extends BaseTag {
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceId(), other.getResourceId());
 		b.append(getTag(), other.getTag());
+		b.append(getUserSelected(), other.getUserSelected());
 		return b.isEquals();
 	}
 
@@ -135,6 +136,7 @@ public class ResourceTag extends BaseTag {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceId());
 		b.append(getTag());
+		b.append(getUserSelected());
 		return b.toHashCode();
 	}
 
@@ -146,6 +148,7 @@ public class ResourceTag extends BaseTag {
 		}
 		b.append("resId", getResourceId());
 		b.append("tag", getTag().getId());
+		b.append("userSelected", getUserSelected());
 		return b.build();
 	}
 
