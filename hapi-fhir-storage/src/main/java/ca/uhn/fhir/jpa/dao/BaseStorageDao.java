@@ -90,6 +90,9 @@ public abstract class BaseStorageDao {
 	public static final String OO_SEVERITY_WARN = "warning";
 	private static final String PROCESSING_SUB_REQUEST = "BaseStorageDao.processingSubRequest";
 
+	protected static final String MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING = "deleteResourceNotExisting";
+	protected static final String MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED = "deleteResourceAlreadyDeleted";
+
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -365,6 +368,30 @@ public abstract class BaseStorageDao {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
 		return oo;
+	}
+
+	/**
+	 * Creates a base method outcome for a delete request for the provided ID.
+	 * <p>
+	 * Additional information may be set on the outcome.
+	 *
+	 * @param theResourceId - the id of the object being deleted. Eg: Patient/123
+	 */
+	protected DaoMethodOutcome createMethodOutcomeForResourceId(String theResourceId, String theMessageKey) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		IIdType id = getContext().getVersion().newIdType();
+		id.setValue(theResourceId);
+		outcome.setId(id);
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theMessageKey, id);
+		String severity = "information";
+		String code = "informational";
+		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
+		outcome.setOperationOutcome(oo);
+
+		return outcome;
 	}
 
 	@Nonnull

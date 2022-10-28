@@ -137,7 +137,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
-import javax.persistence.Parameter;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -514,30 +513,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
-	/**
-	 * Creates a base method outcome for a delete request for the provided ID.
-	 * <p>
-	 * Additional information may be set on the outcome.
-	 *
-	 * @param theId - the id of the object being deleted. Eg: Patient/123
-	 */
-	private DaoMethodOutcome createMethodOutcomeForDelete(String theId, String theKey) {
-		DaoMethodOutcome outcome = new DaoMethodOutcome();
-
-		IIdType id = getContext().getVersion().newIdType();
-		id.setValue(theId);
-		outcome.setId(id);
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theKey, id);
-		String severity = "information";
-		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-		outcome.setOperationOutcome(oo);
-
-		return outcome;
-	}
-
 	@Override
 	public DaoMethodOutcome delete(IIdType theId,
 											 DeleteConflictList theDeleteConflicts,
@@ -554,7 +529,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "deleteResourceNotExisting");
+			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(theId.getValue(), MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING);
 			return outcome;
 		}
 
@@ -564,7 +539,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue(), "deleteResourceAlreadyDeleted");
+			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
