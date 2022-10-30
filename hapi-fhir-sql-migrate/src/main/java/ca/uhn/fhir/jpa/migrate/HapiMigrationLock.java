@@ -55,7 +55,7 @@ public class HapiMigrationLock implements AutoCloseable {
 					return;
 				}
 				retryCount++;
-				ourLog.info("Waiting for lock on " + this);
+				ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, MAX_RETRY_ATTEMPTS);
 				Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
 			} catch (InterruptedException ex) {
 				// Ignore - if interrupted, we still need to wait for lock to become available
@@ -72,6 +72,7 @@ public class HapiMigrationLock implements AutoCloseable {
 		try {
 			return myMigrationStorageSvc.insertLockRecord(myLockDescription);
 		} catch (Exception e) {
+			ourLog.warn("Failed to insert lock record: {}", e.getMessage());
 			return false;
 		}
 	}
