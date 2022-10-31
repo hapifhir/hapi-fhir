@@ -330,7 +330,7 @@ public class UploadTerminologyCommandTest {
 			));
 			fail();
 		} catch (Error e) {
-			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
+			assertThat(e.toString().replace('\\', '/'), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
 		}
 	}
 
