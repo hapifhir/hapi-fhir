@@ -101,7 +101,6 @@ public abstract class BaseMethodBinding {
 	}
 
 	protected Object[] createMethodParams(RequestDetails theRequest) {
-		// TODO:  the bug with NdJson is somewhere in here
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {
 			IParameter param = getParameters().get(i);
