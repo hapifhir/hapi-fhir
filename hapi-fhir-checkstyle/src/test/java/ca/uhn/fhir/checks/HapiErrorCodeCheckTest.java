@@ -45,9 +45,9 @@ class HapiErrorCodeCheckTest {
 		String[] errorLines = errors.toString().split("\n");
 		Arrays.stream(errorLines).forEach(ourLog::info);
 		assertEquals(2, errorLines.length);
-		assertThat(errorLines[0], startsWith("[ERROR] "));
-		assertThat(errorLines[0], endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
-		assertThat(errorLines[1], startsWith("[ERROR] "));
+		assertThat(errorLines[0].trim(), startsWith("[ERROR] "));
+		assertThat(errorLines[0].trim(), endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]"));
+		assertThat(errorLines[1].trim(), startsWith("[ERROR] "));
 		assertThat(errorLines[1], containsString("BadClass.java:11: Two different exception messages call Msg.code(2).  Each thrown exception throw call Msg.code() with a different code."));
 		assertThat(errorLines[1], containsString("BadClass.java:9:9"));
 	}
