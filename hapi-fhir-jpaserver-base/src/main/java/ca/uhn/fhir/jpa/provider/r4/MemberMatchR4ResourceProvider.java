@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Consent;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -69,16 +70,20 @@ public class MemberMatchR4ResourceProvider {
 		@OperationParam(name = Constants.PARAM_NEW_COVERAGE, min = 1, max = 1)
 		Coverage newCoverage,
 
+		@Description(shortDefinition = "Consent information. Consent held by the system seeking the match that grants permission to access the patient information.")
+		@OperationParam(name = Constants.PARAM_CONSENT, min = 1, max = 1)
+			Consent theConsent,
+
 		RequestDetails theRequestDetails
 	) {
-		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theRequestDetails);
+		return doMemberMatchOperation(theServletRequest, theMemberPatient, oldCoverage, newCoverage, theConsent, theRequestDetails);
 	}
 
 
 	private Parameters doMemberMatchOperation(HttpServletRequest theServletRequest, Patient theMemberPatient,
-															Coverage theCoverageToMatch, Coverage theCoverageToLink, RequestDetails theRequestDetails) {
+				Coverage theCoverageToMatch, Coverage theCoverageToLink, Consent theConsent, RequestDetails theRequestDetails) {
 
-		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink);
+		validateParams(theMemberPatient, theCoverageToMatch, theCoverageToLink, theConsent);
 
 		Optional<Coverage> coverageOpt = myMemberMatcherR4Helper.findMatchingCoverage(theCoverageToMatch);
 		if ( ! coverageOpt.isPresent()) {
@@ -108,16 +113,24 @@ public class MemberMatchR4ResourceProvider {
 			throw new UnprocessableEntityException(Msg.code(1157) + i18nMessage);
 		}
 
-		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+		if (!myMemberMatcherR4Helper.validConsentDataAccess(theConsent)) {
+			String i18nMessage = myFhirContext.getLocalizer().getMessage(
+				"operation.member.match.error.consent.release.data.mismatch");
+			throw new UnprocessableEntityException(Msg.code(2147) + i18nMessage);
+		}
 
-		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink);
+		myMemberMatcherR4Helper.addMemberIdentifierToMemberPatient(theMemberPatient, patient.getIdentifierFirstRep());
+		myMemberMatcherR4Helper.updateConsentForMemberMatch(theConsent, patient);
+		return myMemberMatcherR4Helper.buildSuccessReturnParameters(theMemberPatient, theCoverageToLink, theConsent);
 	}
 
-	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage) {
+	private void validateParams(Patient theMemberPatient, Coverage theOldCoverage, Coverage theNewCoverage, Consent theConsent) {
 		validateParam(theMemberPatient, Constants.PARAM_MEMBER_PATIENT);
 		validateParam(theOldCoverage, Constants.PARAM_OLD_COVERAGE);
 		validateParam(theNewCoverage, Constants.PARAM_NEW_COVERAGE);
+		validateParam(theConsent, Constants.PARAM_CONSENT);
 		validateMemberPatientParam(theMemberPatient);
+		validateConsentParam(theConsent);
 	}
 
 	private void validateParam(Object theParam, String theParamName) {
@@ -135,5 +148,14 @@ public class MemberMatchR4ResourceProvider {
 
 		validateParam(theMemberPatient.getName().get(0).getFamily(), Constants.PARAM_MEMBER_PATIENT_NAME);
 		validateParam(theMemberPatient.getBirthDate(), Constants.PARAM_MEMBER_PATIENT_BIRTHDATE);
+	}
+
+	private void validateConsentParam(Consent theConsent) {
+		if (theConsent.getPatient().isEmpty()) {
+			validateParam(null, Constants.PARAM_CONSENT_PATIENT_REFERENCE);
+		}
+		if (theConsent.getPerformer().isEmpty()) {
+			validateParam(null, Constants.PARAM_CONSENT_PERFORMER_REFERENCE);
+		}
 	}
 }
