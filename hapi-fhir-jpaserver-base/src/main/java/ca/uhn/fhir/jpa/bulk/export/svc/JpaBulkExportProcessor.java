@@ -434,7 +434,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		List<SearchParameterMap> expandedSpMaps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
 		for (SearchParameterMap expandedSpMap : expandedSpMaps) {
 
-			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we need to manually set that.
+			//Since we are in a bulk job, we have to ensure the user didn't jam in a patient search param, since we needgto manually set that.
 			validateSearchParametersForGroup(expandedSpMap, theParams.getResourceType());
 
 			// Fetch and cache a search builder for this resource type
