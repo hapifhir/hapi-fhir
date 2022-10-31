@@ -115,6 +115,44 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testPollingLocationContainsAllRequiredAttributesUponCompletion_noTypeParameter() throws IOException {
+
+		//Given a patient exists
+		Patient p = new Patient();
+		p.setId("Pat-1");
+		myClient.update().resource(p).execute();
+
+		//And Given we start a bulk export job
+		HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		String pollingLocation;
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+			Header[] headers = status.getHeaders("Content-Location");
+			pollingLocation = headers[0].getValue();
+		}
+		String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+		myBatch2JobHelper.awaitJobCompletion(jobId);
+
+		//Then: When the poll shows as complete, all attributes should be filled.
+		HttpGet statusGet = new HttpGet(pollingLocation);
+		String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+		try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
+			ourLog.info(responseContent);
+
+			BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+			assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+			assertThat(result.getTransactionTime(), is(notNullValue()));
+			assertThat(result.getOutput(), is(not(empty())));
+
+			//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+			assertThat(responseContent, containsString("\"error\" : [ ]"));
+		}
+	}
+
 	@Nested
 	public class SystemBulkExportTests {
 

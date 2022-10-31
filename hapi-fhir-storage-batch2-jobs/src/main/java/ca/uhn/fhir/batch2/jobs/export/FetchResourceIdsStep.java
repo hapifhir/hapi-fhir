@@ -26,11 +26,12 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -56,6 +57,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	@Autowired
 	private DaoConfig myDaoConfig;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
@@ -75,7 +79,12 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		try {
 			Set<Id> submittedIds = new HashSet<>();
 
-			for (String resourceType : params.getResourceTypes()) {
+			List<String> resourceTypes = params.getResourceTypes();
+			if (resourceTypes == null || resourceTypes.isEmpty()) {
+				resourceTypes = myDaoRegistry.getRegisteredDaoTypes().stream().toList();
+			}
+
+			for (String resourceType : resourceTypes) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
