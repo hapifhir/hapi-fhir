@@ -131,6 +131,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();
 			ourClient = ourServer.getFhirClient();
+			myClient = ourServer.getFhirClient();
 			ourRestServer = ourServer.getRestfulServer();
 
 			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
