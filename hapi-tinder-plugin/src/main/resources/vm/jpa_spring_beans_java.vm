@@ -67,7 +67,7 @@ FhirContext myFhirContext;
 		IFhirResourceDaoCodeSystem<org.hl7.fhir.${version}.model.CodeSystem, org.hl7.fhir.${version}.model.Coding, org.hl7.fhir.${version}.model.CodeableConcept>
 #elseif ( (${versionCapitalized.startsWith('R')} || ${versionCapitalized} == 'Dstu3') && (${res.name} == 'ConceptMap') )
 		IFhirResourceDao${res.name}<org.hl7.fhir.${version}.model.${res.name}>
-#elseif ( ${versionCapitalized} != 'Dstu1' && (${res.name} == 'Composition' ||  ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'MessageHeader' || ${res.name} == 'StructureDefinition'))
+#elseif ( ${versionCapitalized} != 'Dstu1' && (${res.name} == 'Composition' ||  ${res.name} == 'Encounter' || ${res.name} == 'Everything' || ${res.name} == 'Patient' || ${res.name} == 'Subscription' || ${res.name} == 'SearchParameter' || ${res.name} == 'StructureDefinition'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
 #elseif ( ${versionCapitalized} != 'Dstu1' && ${versionCapitalized} != 'Dstu2' && (${res.name} == 'Observation'))
 		IFhirResourceDao${res.name}<${resourcePackage}.${res.declaringClassNameComplete}>
@@ -82,7 +82,7 @@ FhirContext myFhirContext;
 #elseif ( (${versionCapitalized.startsWith('R')} || ${versionCapitalized} == 'Dstu3') && (${res.name} == 'ConceptMap') )
 		ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<org.hl7.fhir.${version}.model.${res.name}> retVal;
 		retVal = new ca.uhn.fhir.jpa.dao.JpaResourceDao${res.name}<>();
-#elseif ( ${res.name} == 'Everything' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'MessageHeader' || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
+#elseif ( ${res.name} == 'Everything' || ${res.name} == 'Subscription' || ${res.name} == 'ValueSet' || ${res.name} == 'SearchParameter' || ${res.name} == 'CodeSystem'  || ${res.name} == 'Composition' || ${res.name} == 'StructureDefinition')
     	ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized} retVal;
 		retVal = new ca.uhn.fhir.jpa.dao${package_suffix}.FhirResourceDao${res.name}${versionCapitalized}();
 #elseif ( ${versionCapitalized} != 'Dstu1' && ${versionCapitalized} != 'Dstu2' && ${res.name} == 'Observation')

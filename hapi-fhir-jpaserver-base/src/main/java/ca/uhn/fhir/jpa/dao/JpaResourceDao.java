@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -36,4 +39,7 @@ public class JpaResourceDao<T extends IBaseResource> extends BaseHapiFhirResourc
 	}
 
 
+	public static IBaseBundle throwProcessMessageNotImplemented() {
+		throw new NotImplementedOperationException(Msg.code(945) + "This operation is not yet implemented on this server");
+	}
 }
