@@ -46,7 +46,7 @@ public class EmailSenderImplTest {
 		details.setBodyTemplate("foo");
 		fixture.send(details);
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 1));
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertEquals(2, messages.length);
