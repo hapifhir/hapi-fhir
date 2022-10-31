@@ -67,6 +67,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -864,42 +865,48 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
-	public void testGetBulkExport_outputFormat_FhirNdJson() throws IOException {
-//		http://localhost:8000/$export?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z
-
-		// setup
-		final Batch2JobInfo info = new Batch2JobInfo();
-		info.setJobId(A_JOB_ID);
-		info.setStatus(BulkExportJobStatusEnum.COMPLETE);
-		info.setEndTime(InstantType.now().getValue());
-
+	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() throws IOException {
 		// when
 		when(myJobRunner.startNewJob(any()))
 			.thenReturn(createJobStartResponse());
-//		when(myJobRunner.getJobInfo(eq(A_JOB_ID)))
-//			.thenReturn(info);
 
 		// call
-//		final String url = String.format("http://localhost:%s/%s?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z");
-
-
-		// TODO:  the bug only happens if you encode it in the URL
-		final HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT + "?_outputFormat=application/fhir+ndjson&_type=Patient&_typeFilter=Patient?gender=female&_since=2022-10-30T11:14:00Z");
-//		final HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
-//		httpGet.addHeader("_outputFormat", "application/fhir+ndjson");
-//		httpGet.addHeader("_type", "Patient");
-//		httpGet.addHeader("_typeFilter", "Patient?gender=female");
-//		httpGet.addHeader("since", "2022-10-30T11:14:00Z");
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myPort, JpaConstants.OPERATION_EXPORT));
+		httpGet.addHeader("_outputFormat", Constants.CT_FHIR_NDJSON);
 		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			ourLog.info("Response: {}", response.toString());
-			// TODO:  assert equals
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty());
 		}
 
 		final BulkExportParameters params = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+	}
 
-		final String outputFormat = params.getOutputFormat();
+	@Test
+	public void testGetBulkExport_outputFormat_FhirNdJson_inUrl() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		// call
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myPort, JpaConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
+			assertAll(
+				() -> assertEquals(202, response.getStatusLine().getStatusCode()),
+				() -> assertEquals("Accepted", response.getStatusLine().getReasonPhrase()),
+				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
+				() -> assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty())
+			);
+		}
+
+		final BulkExportParameters params = verifyJobStart();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 	}
 
