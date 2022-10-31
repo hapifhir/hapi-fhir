@@ -168,12 +168,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(wac);
 			reader.register(myEnableSpringWebsocketSupport);
 
-			DispatcherServlet dispatcherServlet = new DispatcherServlet(){
-				@Override
-				protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
-					super.doService(request, response);
-				}
-			};
+			DispatcherServlet dispatcherServlet = new DispatcherServlet();
 			dispatcherServlet.setApplicationContext(wac);
 			ServletHolder subsServletHolder = new ServletHolder();
 			subsServletHolder.setServlet(dispatcherServlet);
@@ -181,7 +176,6 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 			ServletContextHandler servletContextHandler = new ServletContextHandler();
 			servletContextHandler.setContextPath(myEnableSpringWebsocketContextPath);
 			servletContextHandler.setAllowNullPathInfo(true);
-			// FIXME: make path configurable
 			servletContextHandler.addServlet(new ServletHolder(dispatcherServlet), "/*");
 			JettyWebSocketServletContainerInitializer.configure(servletContextHandler, null);
 

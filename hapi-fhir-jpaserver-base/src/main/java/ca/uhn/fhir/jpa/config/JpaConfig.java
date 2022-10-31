@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
 import ca.uhn.fhir.jpa.partition.PartitionManagementProvider;
 import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -410,6 +411,12 @@ public class JpaConfig {
 	@Lazy
 	public TerminologyUploaderProvider terminologyUploaderProvider() {
 		return new TerminologyUploaderProvider();
+	}
+
+	@Bean
+	@Lazy
+	public ProcessMessageProvider processMessageProvider() {
+		return new ProcessMessageProvider();
 	}
 
 	@Bean

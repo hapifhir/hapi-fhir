@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.dstu3.FhirContextDstu3Config;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -61,10 +62,12 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			s.setDefaultPrettyPrint(false);
 
 			s.registerProvider(mySystemProvider);
-			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
+			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myDaoConfig, mySearchParamRegistry);

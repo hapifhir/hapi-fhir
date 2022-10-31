@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -96,6 +97,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			s.registerProvider(myAppCtx.getBean(DeleteExpungeProvider.class));
 			s.registerProvider(myAppCtx.getBean(DiffProvider.class));
 			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
 			s.registerProvider(myAppCtx.getBean(ReindexProvider.class));
 			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));

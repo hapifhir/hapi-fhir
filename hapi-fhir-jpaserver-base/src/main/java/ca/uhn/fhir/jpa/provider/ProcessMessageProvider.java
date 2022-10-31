@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.endRequest;
 import static ca.uhn.fhir.jpa.provider.BaseJpaProvider.startRequest;
 
-// FIXME: who needs this?
 public class ProcessMessageProvider {
 
 	@Autowired

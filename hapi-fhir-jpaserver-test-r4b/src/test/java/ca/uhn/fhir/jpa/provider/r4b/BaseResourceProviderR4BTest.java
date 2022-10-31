@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.config.r4b.FhirContextR4BConfig;
 import ca.uhn.fhir.jpa.dao.r4b.BaseJpaR4BTest;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
+import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -57,10 +58,11 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 			s.setDefaultPrettyPrint(false);
 
 			s.registerProvider(mySystemProvider);
-			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
 			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
 			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 			s.registerProvider(myBinaryAccessProvider);

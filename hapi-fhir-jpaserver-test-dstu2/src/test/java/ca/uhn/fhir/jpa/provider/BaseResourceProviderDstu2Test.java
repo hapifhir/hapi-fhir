@@ -55,6 +55,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
 
+			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
+
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(s, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			s.setServerConformanceProvider(confProvider);
