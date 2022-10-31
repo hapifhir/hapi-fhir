@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
@@ -18,7 +18,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -97,12 +96,12 @@ public class WriteBinaryStepTest {
 		ourLog.detachAppender(myAppender);
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> createInput(BulkExportExpandedResources theData,
-																																  JobInstance theInstance) {
+	private StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> createInput(ExpandedResourcesList theData,
+                                                                                             JobInstance theInstance) {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setStartDate(new Date());
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
-		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = new StepExecutionDetails<>(
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = new StepExecutionDetails<>(
 			parameters,
 			theData,
 			theInstance,
@@ -114,7 +113,7 @@ public class WriteBinaryStepTest {
 	@Test
 	public void run_validInputNoErrors_succeeds() {
 		// setup
-		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
+		ExpandedResourcesList expandedResources = new ExpandedResourcesList();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
@@ -122,7 +121,7 @@ public class WriteBinaryStepTest {
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources, instance);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance);
 		IIdType binaryId = new IdType("Binary/123");
 		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
 		methodOutcome.setId(binaryId);
@@ -137,7 +136,7 @@ public class WriteBinaryStepTest {
 		RunOutcome outcome = myFinalStep.run(input, sink);
 
 		// verify
-		assertEquals(RunOutcome.SUCCESS, outcome);
+		assertEquals(new RunOutcome(stringified.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		verify(binaryDao)
@@ -163,13 +162,13 @@ public class WriteBinaryStepTest {
 		String testException = "I am an exceptional exception.";
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
-		BulkExportExpandedResources expandedResources = new BulkExportExpandedResources();
+		ExpandedResourcesList expandedResources = new ExpandedResourcesList();
 		List<String> stringified = Arrays.asList("first", "second", "third", "forth");
 		expandedResources.setStringifiedResources(stringified);
 		expandedResources.setResourceType("Patient");
 		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
 		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
-		StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> input = createInput(expandedResources, instance);
+		StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> input = createInput(expandedResources, instance);
 
 		ourLog.setLevel(Level.ERROR);
 

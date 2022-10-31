@@ -785,6 +785,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			if (!allDefs.contains(tag)) {
 				if (shouldDroppedTagBeRemovedOnUpdate(theRequest, tag)) {
 					theEntity.getTags().remove(tag);
+				} else if (HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(tag.getTag().getSystem())) {
+					theEntity.getTags().remove(tag);
 				}
 			}
 
@@ -1178,13 +1180,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		// 5. fill MetaData
-		if (retVal instanceof IResource) {
-			IResource res = (IResource) retVal;
-			retVal = populateResourceMetadataHapi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
-		} else {
-			IAnyResource res = (IAnyResource) retVal;
-			retVal = populateResourceMetadataRi(resourceType, theEntity, tagList, theForHistoryOperation, res, version);
-		}
+		retVal = populateResourceMetadata(theEntity, theForHistoryOperation, tagList, version, resourceType, retVal);
 
 		// 6. Handle source (provenance)
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
@@ -1207,6 +1203,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 
 		return retVal;
+	}
+
+	protected <R extends IBaseResource> R populateResourceMetadata(IBaseResourceEntity theEntity, boolean theForHistoryOperation, @Nullable Collection<? extends BaseTag> tagList, long theVersion, Class<R> theResourceType, R theResource) {
+		if (theResource instanceof IResource) {
+			IResource res = (IResource) theResource;
+			theResource = populateResourceMetadataHapi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+		} else {
+			IAnyResource res = (IAnyResource) theResource;
+			theResource = populateResourceMetadataRi(theResourceType, theEntity, tagList, theForHistoryOperation, res, theVersion);
+		}
+		return theResource;
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {

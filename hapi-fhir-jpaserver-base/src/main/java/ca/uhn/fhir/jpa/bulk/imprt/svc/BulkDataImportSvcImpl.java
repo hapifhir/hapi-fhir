@@ -49,11 +49,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -156,7 +157,7 @@ public class BulkDataImportSvcImpl implements IBulkDataImportSvc {
 	/**
 	 * To be called by the job scheduler
 	 */
-	@Transactional(value = Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public ActivateJobResult activateNextReadyJob() {
 		if (!myDaoConfig.isEnableTaskBulkImportJobExecution()) {

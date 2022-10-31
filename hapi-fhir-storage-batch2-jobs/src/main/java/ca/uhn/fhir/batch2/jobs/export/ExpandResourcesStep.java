@@ -25,8 +25,8 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.context.FhirContext;
@@ -38,20 +38,17 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Multimap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, BulkExportIdList, BulkExportExpandedResources> {
+public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParameters, ResourceIdList, ExpandedResourcesList> {
 	private static final Logger ourLog = getLogger(ExpandResourcesStep.class);
 
 	@Autowired
@@ -68,9 +65,9 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportIdList> theStepExecutionDetails,
-								 @Nonnull IJobDataSink<BulkExportExpandedResources> theDataSink) throws JobExecutionFailedException {
-		BulkExportIdList idList = theStepExecutionDetails.getData();
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+								 @Nonnull IJobDataSink<ExpandedResourcesList> theDataSink) throws JobExecutionFailedException {
+		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		ourLog.info("Step 2 for bulk export - Expand resources");
@@ -95,7 +92,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		// set to datasink
 		for (String nextResourceType : resources.keySet()) {
 
-			BulkExportExpandedResources output = new BulkExportExpandedResources();
+			ExpandedResourcesList output = new ExpandedResourcesList();
 			output.setStringifiedResources(resources.get(nextResourceType));
 			output.setResourceType(nextResourceType);
 			theDataSink.accept(output);
@@ -111,7 +108,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		return RunOutcome.SUCCESS;
 	}
 
-	private List<IBaseResource> fetchAllResources(BulkExportIdList theIds) {
+	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {
 		List<IBaseResource> resources = new ArrayList<>();
 
 		for (Id id : theIds.getIds()) {

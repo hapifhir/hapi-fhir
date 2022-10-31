@@ -37,7 +37,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -53,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -121,17 +121,17 @@ public class SubscriptionCanonicalizer {
 
 	/**
 	 * Extract the meta tags from the subscription and convert them to a simple string map.
+	 *
 	 * @param theSubscription The subscription to extract the tags from
 	 * @return A map of tags System:Code
 	 */
 	private Map<String, String> extractTags(IBaseResource theSubscription) {
-		return theSubscription.getMeta().getTag()
+		Map<String, String> retVal = new HashMap<>();
+		theSubscription.getMeta().getTag()
 			.stream()
 			.filter(t -> t.getSystem() != null && t.getCode() != null)
-			.collect(Collectors.toMap(
-				IBaseCoding::getSystem,
-				IBaseCoding::getCode
-			));
+			.forEach(t -> retVal.put(t.getSystem(), t.getCode()));
+		return retVal;
 	}
 
 	private CanonicalSubscription canonicalizeDstu3(IBaseResource theSubscription) {

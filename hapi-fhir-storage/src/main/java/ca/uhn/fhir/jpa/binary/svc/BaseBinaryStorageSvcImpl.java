@@ -49,10 +49,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
+	public static long DEFAULT_MAXIMUM_BINARY_SIZE = Long.MAX_VALUE - 1;
+
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
-	private int myMaximumBinarySize = Integer.MAX_VALUE;
+	private long myMaximumBinarySize = DEFAULT_MAXIMUM_BINARY_SIZE;
 	private int myMinimumBinarySize;
 
 	@Autowired
@@ -63,13 +65,13 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public int getMaximumBinarySize() {
+	public long getMaximumBinarySize() {
 		return myMaximumBinarySize;
 	}
 
 	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
+	public void setMaximumBinarySize(long theMaximumBinarySize) {
+		Validate.inclusiveBetween(1, DEFAULT_MAXIMUM_BINARY_SIZE, theMaximumBinarySize);
 		myMaximumBinarySize = theMaximumBinarySize;
 	}
 
@@ -110,8 +112,8 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
-			public int getCount() {
-				int retVal = super.getCount();
+			public long getByteCount() {
+				long retVal = super.getByteCount();
 				if (retVal > getMaximumBinarySize()) {
 					throw new PayloadTooLargeException(Msg.code(1343) + "Binary size exceeds maximum: " + getMaximumBinarySize());
 				}

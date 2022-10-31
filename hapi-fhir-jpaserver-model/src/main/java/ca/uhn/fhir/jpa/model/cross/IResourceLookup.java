@@ -20,12 +20,18 @@ package ca.uhn.fhir.jpa.model.cross;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+
 import java.util.Date;
 
 public interface IResourceLookup {
 	String getResourceType();
 
-	Long getResourceId();
-
+	/**
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
+	 */
 	Date getDeleted();
+
+	ResourcePersistentId getPersistentId();
+
 }

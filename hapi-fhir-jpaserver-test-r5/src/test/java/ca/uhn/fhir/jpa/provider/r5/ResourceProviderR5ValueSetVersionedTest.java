@@ -303,7 +303,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		loadAndPersistCodeSystemAndValueSet();
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(2, page.getContent().size());
 
 		// Verify v1 ValueSet
@@ -400,7 +400,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(2, page.getContent().size());
 
 		// Validate ValueSet v1
@@ -568,7 +568,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(2, page.getContent().size());
 
 		// Check expansion of multi-versioned ValueSet with version 1

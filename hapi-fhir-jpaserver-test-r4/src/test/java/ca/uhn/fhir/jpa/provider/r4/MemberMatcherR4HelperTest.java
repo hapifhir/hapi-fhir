@@ -6,8 +6,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -32,6 +35,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_NEW_COVERAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,10 +51,10 @@ class MemberMatcherR4HelperTest {
 	private MemberMatcherR4Helper myTestedHelper;
 
 	@Mock private Coverage myCoverageToMatch;
-	@Mock private Patient myPatient;
 	@Mock private IBundleProvider myBundleProvider;
 
-	private final Coverage myMatchedCoverage = new Coverage();
+	private final Coverage myMatchedCoverage = new Coverage()
+		.setBeneficiary(new Reference("Patient/123"));
 	private final Identifier myMatchingIdentifier = new Identifier()
 		.setSystem("identifier-system").setValue("identifier-value");
 
@@ -237,5 +241,87 @@ class MemberMatcherR4HelperTest {
 
 	}
 
+	@Nested
+	public class TestValidPatientMember {
+
+		@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+		private Coverage coverage;
+		private Patient patient;
+
+		@Test
+		void noPatientFoundFromContractReturnsFalse() {
+			boolean result = myTestedHelper.validPatientMember(null, patient);
+			assertFalse(result);
+		}
+
+		@Test
+		void noPatientFoundFromPatientMemberReturnsFalse() {
+			boolean result = myTestedHelper.validPatientMember(patient, null);
+			assertFalse(result);
+		}
+
+		@Test
+		void noMatchingFamilyNameReturnsFalse() {
+			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "2020-01-01");
+			Patient patientFromContractFound = getPatientWithIDParm("A123", "Smith", "2020-01-01");
+			when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myTestedHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch);
+			assertFalse(result);
+		}
+
+
+		@Test
+		void noMatchingBirthdayReturnsFalse() {
+			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "1990-01-01");
+			Patient patientFromContractFound = getPatientWithIDParm("A123", "Person", "2020-01-01");
+			when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myTestedHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch);
+			assertFalse(result);
+		}
+
+		@Test
+		void noMatchingFieldsReturnsFalse() {
+			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "1990-01-01");
+			Patient patientFromContractFound = getPatientWithIDParm("A123", "Smith", "2020-01-01");
+			when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(new Patient().setId("B123")));
+				return provider;
+			});
+			boolean result = myTestedHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch);
+			assertFalse(result);
+		}
+
+		@Test
+		void patientMatchingReturnTrue() {
+			Patient patientFromMemberMatch = getPatientWithNoIDParm("Person", "2020-01-01");
+			Patient patientFromContractFound = getPatientWithIDParm("A123", "Person", "2020-01-01");
+			when(myPatientDao.search(any(SearchParameterMap.class))).thenAnswer(t -> {
+				IBundleProvider provider = new SimpleBundleProvider(Collections.singletonList(patientFromContractFound));
+				return provider;
+			});
+			boolean result = myTestedHelper.validPatientMember(patientFromContractFound, patientFromMemberMatch);
+			assertTrue(result);
+		}
+
+		private Patient getPatientWithNoIDParm(String familyName, String birthdate) {
+			Patient patient = new Patient().setName(Lists.newArrayList(new HumanName()
+					.setUse(HumanName.NameUse.OFFICIAL).setFamily(familyName)))
+				   .setBirthDateElement(new DateType(birthdate));
+			return patient;
+		}
+
+		private Patient getPatientWithIDParm(String id, String familyName, String birthdate) {
+			Patient patient = getPatientWithNoIDParm(familyName, birthdate);
+			patient.setId(id);
+			return patient;
+		}
+
+	}
 
 }

@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
@@ -59,6 +60,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.Bundle;
@@ -578,6 +580,48 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 
 	@Test
+	public void testTransactionWithModifyingInterceptor() {
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient pt = new Patient();
+		pt.setId("A");
+		pt.setActive(true);
+		bb.addTransactionUpdateEntry(pt);
+		Bundle input = (Bundle) bb.getBundle();
+
+		IAnonymousInterceptor interceptor = new IAnonymousInterceptor() {
+			@Override
+			public void invoke(IPointcut thePointcut, HookParams theArgs) {
+				Bundle transactionBundle = (Bundle) theArgs.get(IBaseBundle.class);
+
+				Patient pt = new Patient();
+				pt.setId("B");
+				pt.setActive(false);
+				transactionBundle
+					.addEntry()
+					.setResource(pt)
+					.getRequest()
+					.setMethod(HTTPVerb.PUT)
+					.setUrl("Patient/B");
+
+			}
+		};
+
+		Bundle output;
+		try {
+			myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_TRANSACTION_PROCESSING, interceptor);
+			output = mySystemDao.transaction(mySrd, input);
+		}finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+
+		assertEquals(2, output.getEntry().size());
+		assertEquals("A", new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart());
+		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
+	}
+
+
+	@Test
 	public void testTransactionFromBundle() throws Exception {
 		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/transaction_link_patient_eve.xml");
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
@@ -958,7 +1002,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
-		return myClient.search().forResource(theResourceName).cacheControl(new CacheControlDirective().setNoCache(true)).returnBundle(Bundle.class).execute();
+		return myClient.search().forResource(theResourceName)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.cacheControl(new CacheControlDirective().setNoCache(true))
+			.returnBundle(Bundle.class).execute();
 	}
 
 	@AfterAll

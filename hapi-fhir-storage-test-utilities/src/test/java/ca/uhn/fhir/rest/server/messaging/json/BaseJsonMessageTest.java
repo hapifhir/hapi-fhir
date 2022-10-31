@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class BaseJsonMessageTest {
 	FhirContext ourFhirContext = FhirContext.forR4Cached();
 	static final String RESOURCE_ID = "Patient/123";
+	static final String MESSAGE_KEY = "MY_TEST_KEY";
 
 	@Test
 	void test_messageKeyIsResourceId_ResourceOperationJsonMessage() {
@@ -32,7 +34,7 @@ class BaseJsonMessageTest {
 	@Nonnull
 	private static IBaseResource buildPatient() {
 		IBaseResource patient = new Patient();
-		patient.setId(RESOURCE_ID);
+		patient.setId(new IdDt("Patient", RESOURCE_ID, "1"));
 		return patient;
 	}
 
@@ -44,6 +46,17 @@ class BaseJsonMessageTest {
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		message.setPayload(payload);
 		assertEquals(RESOURCE_ID, message.getMessageKeyOrNull());
+	}
+
+	@Test
+	void test_messageKeyIsResourceId_MdmResourceDeliveryJsonMessage() {
+		ResourceDeliveryJsonMessage message = new ResourceDeliveryJsonMessage();
+		IBaseResource patient = buildPatient();
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
+		payload.setMessageKey(MESSAGE_KEY);
+		message.setPayload(payload);
+		assertEquals(MESSAGE_KEY, message.getMessageKeyOrNull());
 	}
 
 	@Test

@@ -11,7 +11,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -57,6 +57,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
@@ -121,7 +122,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
 		myValidationSettings.setLocalReferenceValidationDefaultPolicy(ReferenceValidationPolicy.IGNORE);
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
@@ -1193,7 +1194,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	@Disabled
 	public void testValidate_TermSvcHasDatabaseRollback() {
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			try {
 				myResourceTableDao.save(new ResourceTable());
 				myResourceTableDao.flush();
@@ -1232,7 +1233,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs);
 
-		BaseTermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
+		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(() -> {
 			throw new NullPointerException("MY ERROR");
 		});
 
@@ -1626,6 +1627,34 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("ID must be populated"));
+		}
+
+	}
+
+	@Test
+	public void testValidateRawResourceForUpdateWithId() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.setId("Patient/123");
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+	}
+	@Test
+	public void testValidateRawResourceForUpdateWithNoId() {
+		String methodName = "testValidateForUpdate";
+		Patient pat = new Patient();
+		pat.addName().setFamily(methodName);
+		Parameters params = new Parameters();
+		params.addParameter().setName("resource").setResource(pat);
+		String rawResource = myFhirContext.newJsonParser().encodeResourceToString(params);
+		try {
+			myPatientDao.validate(pat, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("ID must be populated"));

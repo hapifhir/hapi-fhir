@@ -581,7 +581,7 @@ public class SearchTask implements Callable<Void> {
 		int currentlyLoaded = defaultIfNull(mySearch.getNumFound(), 0);
 		int minWanted = 0;
 		if (myParams.getCount() != null) {
-			minWanted = myParams.getCount();
+			minWanted = myParams.getCount() + 1; // Always fetch one past this page, so we know if there is a next page.
 			minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
 			minWanted += currentlyLoaded;
 		}

@@ -41,9 +41,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
@@ -87,7 +88,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		myCutoffSlack = theCutoffSlack;
 	}
 
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Search save(Search theSearch) {
 		Search newSearch = mySearchDao.save(theSearch);
@@ -95,7 +96,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.REQUIRED)
+	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<Search> fetchByUuid(String theUuid) {
 		Validate.notBlank(theUuid);
 		return mySearchDao.findByUuidAndFetchIncludes(theUuid);
@@ -110,7 +111,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	@Transactional(Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	public Optional<Search> tryToMarkSearchAsInProgress(Search theSearch) {
 		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
 		try {
@@ -152,7 +153,7 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		return Optional.empty();
 	}
 
-	@Transactional(Transactional.TxType.NEVER)
+	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public void pollForStaleSearchesAndDeleteThem() {
 		if (!myDaoConfig.isExpireSearchResults()) {

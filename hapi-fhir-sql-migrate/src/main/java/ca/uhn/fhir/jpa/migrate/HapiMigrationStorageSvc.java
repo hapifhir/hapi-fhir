@@ -1,18 +1,47 @@
 package ca.uhn.fhir.jpa.migrate;
 
+/*-
+ * #%L
+ * HAPI FHIR Server - SQL Migration
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.flywaydb.core.api.MigrationVersion;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
+	private static final String LOCK_TYPE = "hapi-fhir-lock";
+	static final Integer LOCK_PID = -100;
+
 	private final HapiMigrationDao myHapiMigrationDao;
 
 	public HapiMigrationStorageSvc(HapiMigrationDao theHapiMigrationDao) {
 		myHapiMigrationDao = theHapiMigrationDao;
+	}
+
+	public String getMigrationTablename() {
+		return myHapiMigrationDao.getMigrationTablename();
 	}
 
 	/**
@@ -63,5 +92,38 @@ public class HapiMigrationStorageSvc {
 
 	public void createMigrationTableIfRequired() {
 		myHapiMigrationDao.createMigrationTableIfRequired();
+	}
+
+
+	/**
+	 *
+	 * @param  theLockDescription value of the Description for the lock record
+	 * @return true if the record was successfully deleted
+	 */
+	public boolean deleteLockRecord(String theLockDescription) {
+		verifyNoOtherLocksPresent(theLockDescription);
+
+		// Remove the locking row
+		return myHapiMigrationDao.deleteLockRecord(LOCK_PID, theLockDescription);
+	}
+
+	void verifyNoOtherLocksPresent(String theLockDescription) {
+		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(LOCK_PID, theLockDescription);
+
+		// Check that there are no other locks in place. This should not happen!
+		if (otherLockFound.isPresent()) {
+			throw new HapiMigrationException(Msg.code(2152) + "Internal error: on unlocking, a competing lock was found");
+		}
+	}
+
+	public boolean insertLockRecord(String theLockDescription) {
+		HapiMigrationEntity entity = new HapiMigrationEntity();
+		entity.setPid(LOCK_PID);
+		entity.setType(LOCK_TYPE);
+		entity.setDescription(theLockDescription);
+		entity.setExecutionTime(0);
+		entity.setSuccess(true);
+
+		return myHapiMigrationDao.save(entity);
 	}
 }

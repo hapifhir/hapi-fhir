@@ -183,7 +183,11 @@ public class DaoConfig {
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
-	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
+
+	// start with a tiny number so our first page always loads quickly.
+	// If they fetch the second page, fetch more.
+	// Use prime sizes to avoid empty next links.
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(13, 503, 2003, -1);
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
@@ -315,6 +319,11 @@ public class DaoConfig {
 	private int myBulkExportFileRetentionPeriodHours = 2;
 
 	/**
+	 * Since 6.2.0
+	 */
+	private boolean myEnableBulkExportJobReuse = true;
+
+	/**
 	 * Since 6.1.0
 	 */
 	private boolean myUpdateWithHistoryRewriteEnabled = false;
@@ -323,6 +332,11 @@ public class DaoConfig {
 	 * Since 6.2.0
 	 */
 	private boolean myPreserveRequestIdInResourceBody = false;
+
+	/**
+	 * Since 6.2.0
+	 */
+	private int myBulkExportFileMaximumCapacity = 1_000;
 
 	/**
 	 * Constructor
@@ -2897,6 +2911,22 @@ public class DaoConfig {
 	}
 
 	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public boolean getEnableBulkExportJobReuse() {
+		return myEnableBulkExportJobReuse;
+	}
+
+	/**
+	 * This setting controls whether, upon receiving a request for an $export operation, if a batch job already exists
+	 * that exactly matches the new request, the system should attempt to reuse the batch job. Default is true.
+	 */
+	public void setEnableBulkExportJobReuse(boolean theEnableBulkExportJobReuse) {
+		myEnableBulkExportJobReuse = theEnableBulkExportJobReuse;
+	}
+
+	/**
 	 * This setting indicates whether updating the history of a resource is allowed.
 	 * Default is false.
 	 *
@@ -2937,6 +2967,25 @@ public class DaoConfig {
 		myPreserveRequestIdInResourceBody = thePreserveRequestIdInResourceBody;
 	}
 
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public int getBulkExportFileMaximumCapacity() {
+		return myBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * This setting controls how many resources will be stored in each binary file created by a bulk export.
+	 * Default is 1000 resources per file.
+	 *
+	 * @since 6.2.0
+	 */
+	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
+		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
 
 	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),

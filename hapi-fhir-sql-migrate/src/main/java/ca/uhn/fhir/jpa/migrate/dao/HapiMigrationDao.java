@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
+/*-
+ * #%L
+ * HAPI FHIR Server - SQL Migration
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
@@ -17,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +56,10 @@ public class HapiMigrationDao {
 		myMigrationQueryBuilder = new MigrationQueryBuilder(theDriverType, theMigrationTablename);
 	}
 
+	public String getMigrationTablename() {
+		return myMigrationTablename;
+	}
+
 	public Set<MigrationVersion> fetchSuccessfulMigrationVersions() {
 		List<HapiMigrationEntity> allEntries = findAll();
 		return allEntries.stream()
@@ -48,24 +73,31 @@ public class HapiMigrationDao {
 		myJdbcTemplate.execute(myMigrationQueryBuilder.deleteAll());
 	}
 
-	public HapiMigrationEntity save(HapiMigrationEntity theEntity) {
+	/**
+	 *
+	 * @param theEntity to save.  If the pid is null, the next available pid will be set
+	 * @return true if any database records were changed
+	 */
+	public boolean save(HapiMigrationEntity theEntity) {
 		Validate.notNull(theEntity.getDescription(), "Description may not be null");
 		Validate.notNull(theEntity.getExecutionTime(), "Execution time may not be null");
 		Validate.notNull(theEntity.getSuccess(), "Success may not be null");
 
-		Integer highestKey = getHighestKey();
-		if (highestKey == null || highestKey < 0) {
-			highestKey = 0;
+		if (theEntity.getPid() == null) {
+			Integer highestKey = getHighestKey();
+			if (highestKey == null || highestKey < 0) {
+				highestKey = 0;
+			}
+			Integer nextAvailableKey = highestKey + 1;
+			theEntity.setPid(nextAvailableKey);
 		}
-		Integer nextAvailableKey = highestKey + 1;
-		theEntity.setPid(nextAvailableKey);
 		theEntity.setType("JDBC");
 		theEntity.setScript("HAPI FHIR");
 		theEntity.setInstalledBy(VersionEnum.latestVersion().name());
 		theEntity.setInstalledOn(new Date());
 		String insertRecordStatement = myMigrationQueryBuilder.insertPreparedStatement();
-		int result = myJdbcTemplate.update(insertRecordStatement, theEntity.asPreparedStatementSetter());
-		return theEntity;
+		int changedRecordCount = myJdbcTemplate.update(insertRecordStatement, theEntity.asPreparedStatementSetter());
+		return changedRecordCount > 0;
 	}
 
 	private Integer getHighestKey() {
@@ -86,6 +118,9 @@ public class HapiMigrationDao {
 		String createIndexStatement = myMigrationQueryBuilder.createIndexStatement();
 		ourLog.info(createIndexStatement);
 		myJdbcTemplate.execute(createIndexStatement);
+
+		HapiMigrationEntity entity = HapiMigrationEntity.tableCreatedRecord();
+		myJdbcTemplate.update(myMigrationQueryBuilder.insertPreparedStatement(), entity.asPreparedStatementSetter());
 	}
 
 	private boolean migrationTableExists() {
@@ -111,5 +146,19 @@ public class HapiMigrationDao {
 		String allQuery = myMigrationQueryBuilder.findAllQuery();
 		ourLog.debug("Executing query: [{}]", allQuery);
 		return myJdbcTemplate.query(allQuery, HapiMigrationEntity.rowMapper());
+	}
+
+	/**
+	 * @return true if the record was successfully deleted
+	 */
+	public boolean deleteLockRecord(Integer theLockPid, String theLockDescription) {
+		int recordsChanged = myJdbcTemplate.update(myMigrationQueryBuilder.deleteLockRecordStatement(theLockPid, theLockDescription));
+		return recordsChanged > 0;
+	}
+
+	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+		String query = myMigrationQueryBuilder.findByPidAndNotDescriptionQuery(theLockPid, theLockDescription);
+
+		return myJdbcTemplate.query(query, HapiMigrationEntity.rowMapper()).stream().findFirst();
 	}
 }

@@ -9,18 +9,16 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
-import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
-import ca.uhn.fhir.jpa.provider.r5.JpaSystemProviderR5;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -40,6 +38,7 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhirtest.config.SqlCaptureInterceptor;
 import ca.uhn.fhirtest.config.TestDstu2Config;
 import ca.uhn.fhirtest.config.TestDstu3Config;
+import ca.uhn.fhirtest.config.TestR4BConfig;
 import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
@@ -59,6 +58,7 @@ public class TestRestfulServer extends RestfulServer {
 
 	public static final String FHIR_BASEURL_R5 = "fhir.baseurl.r5";
 	public static final String FHIR_BASEURL_R4 = "fhir.baseurl.r4";
+	public static final String FHIR_BASEURL_R4B = "fhir.baseurl.r4b";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
 	public static final String FHIR_BASEURL_TDL2 = "fhir.baseurl.tdl2";
@@ -111,9 +111,8 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU2;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forDstu2());
+				setFhirContext(FhirContext.forDstu2Cached());
 				beans = myAppCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
-				providers.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
@@ -127,9 +126,8 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_DSTU3;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forDstu3());
+				setFhirContext(FhirContext.forDstu3Cached());
 				beans = myAppCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
-				providers.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class));
@@ -145,10 +143,27 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.register(TestR4Config.class, WebsocketDispatcherConfig.class);
 				baseUrlProperty = FHIR_BASEURL_R4;
 				myAppCtx.refresh();
-				setFhirContext(FhirContext.forR4());
+				setFhirContext(FhirContext.forR4Cached());
 				beans = myAppCtx.getBean("myResourceProvidersR4", ResourceProviderFactory.class);
-				providers.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
+				etagSupport = ETagSupportEnum.ENABLED;
+				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
+				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
+				setServerConformanceProvider(confProvider);
+				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				break;
+			}
+			case "R4B": {
+				myAppCtx = new AnnotationConfigWebApplicationContext();
+				myAppCtx.setServletConfig(getServletConfig());
+				myAppCtx.setParent(parentAppCtx);
+				myAppCtx.register(TestR4BConfig.class);
+				baseUrlProperty = FHIR_BASEURL_R4B;
+				myAppCtx.refresh();
+				setFhirContext(FhirContext.forR4BCached());
+				beans = myAppCtx.getBean("myResourceProvidersR4B", ResourceProviderFactory.class);
+				systemDao = myAppCtx.getBean("mySystemDaoR4B", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
 				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(this, systemDao, myAppCtx.getBean(DaoConfig.class), myAppCtx.getBean(ISearchParamRegistry.class), validationSupport);
@@ -166,7 +181,6 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forR5());
 				beans = myAppCtx.getBean("myResourceProvidersR5", ResourceProviderFactory.class);
-				providers.add(myAppCtx.getBean("mySystemProviderR5", JpaSystemProviderR5.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR5", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				IValidationSupport validationSupport = myAppCtx.getBean(IValidationSupport.class);
@@ -179,6 +193,8 @@ public class TestRestfulServer extends RestfulServer {
 			default:
 				throw new ServletException(Msg.code(1975) + "Unknown FHIR version specified in init-param[FhirVersion]: " + fhirVersionParam);
 		}
+
+		providers.add(myAppCtx.getBean(JpaSystemProvider.class));
 
 		/*
 		 * On the DSTU2 endpoint, we want to enable ETag support
@@ -262,7 +278,8 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster);
+		ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc = myAppCtx.getBean(ThreadSafeResourceDeleterSvc.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(ctx, daoRegistry, interceptorBroadcaster, threadSafeResourceDeleterSvc);
 		registerInterceptor(cascadingDeleteInterceptor);
 
 		/*

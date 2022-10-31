@@ -40,6 +40,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_MISSING;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,7 +128,12 @@ public class ExtendedHSearchSearchBuilder {
 			return modifier.equals(EMPTY_MODIFIER);
 
 		} else if (param instanceof CompositeParam) {
-			return true;
+			switch(modifier) {
+				case PARAMQUALIFIER_MISSING:
+					return false;
+				default:
+					return true;
+			}
 
 		} else if (param instanceof ReferenceParam) {
 			//We cannot search by chain.

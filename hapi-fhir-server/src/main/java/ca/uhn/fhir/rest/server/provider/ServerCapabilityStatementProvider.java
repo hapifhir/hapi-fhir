@@ -20,7 +20,6 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
-import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.IParameter;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding;
 import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
@@ -101,7 +100,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private final IValidationSupport myValidationSupport;
 	private String myPublisher = "Not provided";
 	private boolean myRestResourceRevIncludesEnabled = DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED;
-
+	private HashMap<String, String> operationCanonicalUrlToId = new HashMap<>();
 	/**
 	 * Constructor
 	 */
@@ -416,7 +415,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					}
 
 					String spUri = next.getUri();
-					
+
 					if (isNotBlank(spUri)) {
 						terser.addElement(searchParam, "definition", spUri);
 					}
@@ -555,7 +554,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
-		theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		String operationCanonicalUrl = theMethodBinding.getCanonicalUrl();
+		if (isNotBlank(operationCanonicalUrl)) {
+			theTerser.addElement(theOperation, "definition", operationCanonicalUrl);
+			operationCanonicalUrlToId.put(operationCanonicalUrl, theOpName);
+		}
+		else {
+			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
+		}
 		if (isNotBlank(theMethodBinding.getDescription())) {
 			theTerser.addElement(theOperation, "documentation", theMethodBinding.getDescription());
 		}
@@ -634,8 +640,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
-
-		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(theId.getIdPart());
+		String operationId = getOperationId(theId);
+		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(operationId);
 		if (operationBindings != null && !operationBindings.isEmpty()) {
 			return readOperationDefinitionForOperation(theRequestDetails, bindings, operationBindings);
 		}
@@ -645,6 +651,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
 		throw new ResourceNotFoundException(Msg.code(1978) + theId);
+	}
+
+	private String getOperationId(IIdType theId) {
+		if (operationCanonicalUrlToId.get(theId.getValue()) !=null ) {
+			return operationCanonicalUrlToId.get(theId.getValue());
+		}
+		return theId.getIdPart();
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {

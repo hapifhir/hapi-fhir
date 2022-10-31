@@ -26,7 +26,7 @@ import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -49,7 +49,7 @@ import java.io.OutputStreamWriter;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, BulkExportExpandedResources, BulkExportBinaryFileId> {
+public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, ExpandedResourcesList, BulkExportBinaryFileId> {
 	private static final Logger ourLog = getLogger(WriteBinaryStep.class);
 
 	@Autowired
@@ -60,13 +60,14 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 
 	@Nonnull
 	@Override
-	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, BulkExportExpandedResources> theStepExecutionDetails,
+	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, ExpandedResourcesList> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<BulkExportBinaryFileId> theDataSink) throws JobExecutionFailedException {
 
-		BulkExportExpandedResources expandedResources = theStepExecutionDetails.getData();
+		ExpandedResourcesList expandedResources = theStepExecutionDetails.getData();
+		final int numResourcesProcessed = expandedResources.getStringifiedResources().size();
 
 		ourLog.info("Write binary step of Job Export");
-		ourLog.info("Writing {} resources to binary file", expandedResources.getStringifiedResources().size());
+		ourLog.info("Writing {} resources to binary file", numResourcesProcessed);
 
 		@SuppressWarnings("unchecked")
 		IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
@@ -113,7 +114,7 @@ public class WriteBinaryStep implements IJobStepWorker<BulkExportJobParameters, 
 			processedRecordsCount,
 			expandedResources.getResourceType());
 
-		return RunOutcome.SUCCESS;
+		return new RunOutcome(numResourcesProcessed);
 	}
 
 	/**

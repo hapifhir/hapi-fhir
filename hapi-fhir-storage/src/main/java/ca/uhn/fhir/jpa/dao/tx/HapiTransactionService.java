@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nullable;
@@ -156,6 +155,10 @@ public class HapiTransactionService {
 				throw new InternalErrorException(Msg.code(551) + e);
 			}
 		}
+	}
+
+	public PlatformTransactionManager getTransactionManager() {
+		return myTransactionManager;
 	}
 
 	/**

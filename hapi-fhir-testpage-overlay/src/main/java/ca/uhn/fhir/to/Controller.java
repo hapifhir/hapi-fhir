@@ -1,5 +1,6 @@
 package ca.uhn.fhir.to;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -78,24 +79,18 @@ public class Controller extends BaseController {
 		addCommonParams(theServletRequest, theRequest, theModel);
 
 		CaptureInterceptor interceptor = new CaptureInterceptor();
-		GenericClient client = theRequest.newClient(theServletRequest, getContext(theRequest), myConfig, interceptor);
+		FhirContext context = getContext(theRequest);
+		GenericClient client = theRequest.newClient(theServletRequest, context, myConfig, interceptor);
 		ResultType returnsResource = ResultType.RESOURCE;
 
 		long start = System.currentTimeMillis();
 		try {
-			Class<? extends IBaseConformance> type;
-			switch (getContext(theRequest).getVersion().getVersion()) {
-			default:
-			case DSTU2:
-				type = ca.uhn.fhir.model.dstu2.resource.Conformance.class;
-				break;
-			case DSTU3:
-				type = org.hl7.fhir.dstu3.model.CapabilityStatement.class;
-				break;
-			case R4:
-				type = org.hl7.fhir.r4.model.CapabilityStatement.class;
-				break;
+			String name = "CapabilityStatement";
+			if (context.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				name = "Conformance";
 			}
+
+			Class<? extends IBaseConformance> type = (Class<? extends IBaseConformance>) context.getResourceDefinition(name).getImplementingClass();
 			client.fetchConformance().ofType(type).execute();
 		} catch (Exception e) {
 			returnsResource = handleClientException(client, e, theModel);
@@ -294,7 +289,7 @@ public class Controller extends BaseController {
 	}
 
 	private void populateModelForResource(HttpServletRequest theServletRequest, HomeRequest theRequest, ModelMap theModel) {
-		IBaseResource conformance = addCommonParams(theServletRequest, theRequest, theModel);
+		org.hl7.fhir.r5.model.CapabilityStatement conformance = addCommonParams(theServletRequest, theRequest, theModel);
 
 		String resourceName = theRequest.getResource();
 
@@ -304,22 +299,7 @@ public class Controller extends BaseController {
 		boolean haveSearchParams = false;
 		List<List<String>> queryIncludes = new ArrayList<>();
 
-		switch (theRequest.getFhirVersion(myConfig)) {
-			case DSTU2:
-				haveSearchParams = extractSearchParamsDstu2(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-				break;
-			case DSTU3:
-				haveSearchParams = extractSearchParamsDstu3CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-				break;
-			case R4:
-				haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-				break;
-			case R5:
-				haveSearchParams = extractSearchParamsR5CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
-				break;
-			default:
-				throw new IllegalStateException(Msg.code(190) + "Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
-		}
+		haveSearchParams = extractSearchParamsR5CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 
 		theModel.put("includes", includes);
 		theModel.put("revincludes", revIncludes);

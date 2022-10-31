@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
+import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistryController;
@@ -202,7 +202,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected IFhirSystemDao<Bundle, MetaDt> mySystemDao;
 	@Autowired
 	@Qualifier("mySystemProviderDstu2")
-	protected JpaSystemProviderDstu2 mySystemProvider;
+	protected JpaSystemProvider mySystemProvider;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
 	@Autowired

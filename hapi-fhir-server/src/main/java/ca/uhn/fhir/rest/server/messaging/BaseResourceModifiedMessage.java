@@ -79,7 +79,7 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	public void setPayloadId(IIdType thePayloadId) {
 		myPayloadId = null;
 		if (thePayloadId != null) {
-			myPayloadId = thePayloadId.getValue();
+			myPayloadId = thePayloadId.toUnqualifiedVersionless().getValue();
 		}
 	}
 
@@ -207,6 +207,9 @@ public abstract class BaseResourceModifiedMessage extends BaseResourceMessage im
 	@Nullable
 	@Override
 	public String getMessageKeyOrNull() {
+		if (super.getMessageKeyOrNull() != null) {
+			return super.getMessageKeyOrNull();
+		}
 		return myPayloadId;
 	}
 

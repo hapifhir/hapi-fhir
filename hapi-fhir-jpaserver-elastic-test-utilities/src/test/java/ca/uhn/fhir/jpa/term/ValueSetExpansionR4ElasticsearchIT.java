@@ -20,7 +20,7 @@ import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -87,7 +86,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
-	protected ITermReadSvcR4 myTermSvc;
+	protected ITermReadSvc myTermSvc;
 	@Autowired
 	protected ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -245,13 +244,13 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		// need to be more than elastic [index.max_result_window] index level setting (default = 10_000)
 		addTermConcepts(codeSystemVersion, 11_000);
 
-		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts( codeSystemVersion.getCodeSystemVersionId() );
+		ValueSet valueSet = getValueSetWithAllCodeSystemConcepts(codeSystemVersion.getCodeSystemVersionId());
 
 		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until( myTerminologyDeferredStorageSvc::isStorageQueueEmpty );
+		await().atMost(10, SECONDS).until(myTerminologyDeferredStorageSvc::isStorageQueueEmpty);
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
@@ -260,7 +259,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
 		assertEquals(1, page.getContent().size());
 	}
-
 
 
 	private ValueSet getValueSetWithAllCodeSystemConcepts(String theCodeSystemVersionId) {
@@ -288,7 +286,6 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	 * Reproduced: https://github.com/hapifhir/hapi-fhir/issues/3992
 	 */
 	@Test
-	@Disabled("until bug gets fixed")
 	public void testExpandValueSetWithMoreThanElasticDefaultNestedObjectCount() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
@@ -302,8 +299,13 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		codeSystemVersion.setResource(csResource);
 
 		TermConcept tc = new TermConcept(codeSystemVersion, "test-code-1");
-		// need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
-		addTerConceptProperties(tc, 10_100);
+
+//		 need to be more than elastic [index.mapping.nested_objects.limit] index level setting (default = 10_000)
+//		 however, the new mapping (not nested, multivalued) groups properties by key, and there can't be more than 1000
+//		 properties (keys), so we test here with a number of properties > 10_000 but grouped in max 200 property keys
+//		 (current loinc version (2.73) has 82 property keys maximum in a TermConcept)
+		addTermConceptProperties(tc, 10_100, 200);
+
 		codeSystemVersion.getConcepts().add(tc);
 
 		ValueSet valueSet = new ValueSet();
@@ -316,15 +318,26 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		valueSet.setDescription("A value set that includes all LOINC codes");
 		valueSet.getCompose().addInclude().setSystem(CS_URL).setVersion(codeSystemVersion.getCodeSystemVersionId());
 
-		assertDoesNotThrow( () -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
-				new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList() ));
+		assertDoesNotThrow(() -> myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion,
+			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList()));
 
 	}
 
-	private void addTerConceptProperties(TermConcept theTermConcept, int theCount) {
-		for (int i = 0; i < theCount; i++) {
-			String suff = String.format("%05d", i);
-			theTermConcept.addPropertyString("prop-" + suff, "value-" + suff);
+	private void addTermConceptProperties(TermConcept theTermConcept, int thePropertiesCount, int thePropertyKeysCount) {
+		int valuesPerPropKey = thePropertiesCount / thePropertyKeysCount;
+
+		int propsCreated = 0;
+		while(propsCreated < thePropertiesCount) {
+
+			int propKeysCreated = 0;
+			while(propKeysCreated < thePropertyKeysCount && propsCreated < thePropertiesCount) {
+				String propKey = String.format("%05d", propKeysCreated);
+				String propSeq = String.format("%05d", propsCreated);
+				theTermConcept.addPropertyString("prop-key-" + propKey, "value-" + propSeq);
+
+				propKeysCreated++;
+				propsCreated++;
+			}
 		}
 	}
 

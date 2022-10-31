@@ -27,6 +27,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
@@ -158,6 +159,10 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		when(mockRequestDetails.getServer().getDefaultPageSize()).thenReturn(25);
 	}
 
+	@AfterEach
+	public void afterEach() {
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+	}
 
 	/**
 	 * For input version or for current (when input is null) validates search, expand, lookup and validateCode operations

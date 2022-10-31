@@ -4,10 +4,11 @@ import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
@@ -54,6 +55,8 @@ public class FetchResourceIdsStepTest {
 
 	@InjectMocks
 	private FetchResourceIdsStep myFirstStep;
+	@Mock
+	private DaoConfig myDaoConfig;
 
 	@BeforeEach
 	public void init() {
@@ -88,7 +91,7 @@ public class FetchResourceIdsStepTest {
 	@Test
 	public void run_withValidInputs_succeeds() {
 		// setup
-		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
+		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
 		BulkExportJobParameters parameters = createParameters();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
@@ -115,20 +118,22 @@ public class FetchResourceIdsStepTest {
 			any(ExportPIDIteratorParameters.class)
 		)).thenReturn(patientIds.iterator())
 			.thenReturn(observationIds.iterator());
+		int maxFileCapacity = 1000;
+		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
 		assertEquals(RunOutcome.SUCCESS, outcome);
-		ArgumentCaptor<BulkExportIdList> resultCaptor = ArgumentCaptor.forClass(BulkExportIdList.class);
+		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
 		verify(sink, times(parameters.getResourceTypes().size()))
 			.accept(resultCaptor.capture());
 
-		List<BulkExportIdList> results = resultCaptor.getAllValues();
+		List<ResourceIdList> results = resultCaptor.getAllValues();
 		assertEquals(parameters.getResourceTypes().size(), results.size());
 		for (int i = 0; i < results.size(); i++) {
-			BulkExportIdList idList = results.get(i);
+			ResourceIdList idList = results.get(i);
 
 			String resourceType = idList.getResourceType();
 			assertTrue(parameters.getResourceTypes().contains(resourceType));
@@ -158,9 +163,9 @@ public class FetchResourceIdsStepTest {
 	}
 
 	@Test
-	public void run_moreThanAThousandPatients_hasAtLeastTwoJobs() {
+	public void run_moreThanTheMaxFileCapacityPatients_hasAtLeastTwoJobs() {
 		// setup
-		IJobDataSink<BulkExportIdList> sink = mock(IJobDataSink.class);
+		IJobDataSink<ResourceIdList> sink = mock(IJobDataSink.class);
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("1");
 		BulkExportJobParameters parameters = createParameters();
@@ -169,7 +174,11 @@ public class FetchResourceIdsStepTest {
 		ourLog.setLevel(Level.INFO);
 		List<ResourcePersistentId> patientIds = new ArrayList<>();
 
-		for (int i = 0; i < FetchResourceIdsStep.MAX_IDS_TO_BATCH + 1; i++) {
+		// when
+		int maxFileCapacity = 5;
+		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+
+		for (int i = 0; i <= maxFileCapacity; i++) {
 			ResourcePersistentId id = new ResourcePersistentId("Patient/RED" + i);
 			patientIds.add(id);
 		}
@@ -183,18 +192,18 @@ public class FetchResourceIdsStepTest {
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
-		ArgumentCaptor<BulkExportIdList> captor = ArgumentCaptor.forClass(BulkExportIdList.class);
+		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
 		assertEquals(RunOutcome.SUCCESS, outcome);
 
 		verify(sink, times(2))
 			.accept(captor.capture());
-		List<BulkExportIdList> listIds = captor.getAllValues();
+		List<ResourceIdList> listIds = captor.getAllValues();
 
 		// verify all submitted ids are there
 		boolean found = false;
 		for (ResourcePersistentId pid : patientIds) {
 			Id id = Id.getIdFromPID(pid, "Patient");
-			for (BulkExportIdList idList : listIds) {
+			for (ResourceIdList idList : listIds) {
 				found = idList.getIds().contains(id);
 				if (found) {
 					break;

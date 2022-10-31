@@ -22,23 +22,18 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -85,20 +80,23 @@ public class CascadingDeleteInterceptor {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final FhirContext myFhirContext;
+	private final ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 
 	/**
 	 * Constructor
 	 *
 	 * @param theDaoRegistry The DAO registry (must not be null)
 	 */
-	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster) {
+	public CascadingDeleteInterceptor(@Nonnull FhirContext theFhirContext, @Nonnull DaoRegistry theDaoRegistry, @Nonnull IInterceptorBroadcaster theInterceptorBroadcaster, @Nonnull ThreadSafeResourceDeleterSvc theThreadSafeResourceDeleterSvc) {
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorBroadcaster, "theInterceptorBroadcaster must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
+		Validate.notNull(theThreadSafeResourceDeleterSvc, "theSafeDeleter must not be null");
 
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myFhirContext = theFhirContext;
+		myThreadSafeResourceDeleterSvc = theThreadSafeResourceDeleterSvc;
 	}
 
 	@Hook(value = Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, order = CASCADING_DELETE_INTERCEPTOR_ORDER)
@@ -118,36 +116,12 @@ public class CascadingDeleteInterceptor {
 			return null;
 		}
 
-		List<String> cascadedDeletes = getCascadedDeletesMap(theRequest, true);
-		for (DeleteConflict next : theConflictList) {
-			IdDt nextSource = next.getSourceId();
-			String nextSourceId = nextSource.toUnqualifiedVersionless().getValue();
-
-			if (!cascadedDeletes.contains(nextSourceId)) {
-				cascadedDeletes.add(nextSourceId);
-
-				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
-
-				// Interceptor call: STORAGE_CASCADE_DELETE
-				IBaseResource resource = dao.read(nextSource, theRequest);
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(DeleteConflictList.class, theConflictList)
-					.add(IBaseResource.class, resource);
-				CompositeInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
-
-				// Actually perform the delete
-				ourLog.info("Have delete conflict {} - Cascading delete", next);
-				dao.delete(nextSource, theConflictList, theRequest, theTransactionDetails);
-			}
-		}
+		myThreadSafeResourceDeleterSvc.delete(theRequest, theConflictList, theTransactionDetails);
 
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<String> getCascadedDeletesMap(RequestDetails theRequest, boolean theCreate) {
+	public static List<String> getCascadedDeletesList(RequestDetails theRequest, boolean theCreate) {
 		List<String> retVal = (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
 		if (retVal == null && theCreate) {
 			retVal = new ArrayList<>();
@@ -178,7 +152,7 @@ public class CascadingDeleteInterceptor {
 		if (theRequestDetails != null) {
 
 			// Successful delete list
-			List<String> deleteList = getCascadedDeletesMap(theRequestDetails, false);
+			List<String> deleteList = getCascadedDeletesList(theRequestDetails, false);
 			if (deleteList != null) {
 				if (theResponseDetails.getResponseCode() == 200) {
 					if (theResponse instanceof IBaseOperationOutcome) {
@@ -206,6 +180,4 @@ public class CascadingDeleteInterceptor {
 	protected DeleteCascadeModeEnum shouldCascade(@Nullable RequestDetails theRequest) {
 		return RestfulServerUtils.extractDeleteCascadeParameter(theRequest);
 	}
-
-
 }

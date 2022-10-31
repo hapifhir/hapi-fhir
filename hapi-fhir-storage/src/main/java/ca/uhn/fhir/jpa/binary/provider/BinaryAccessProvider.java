@@ -19,6 +19,7 @@ package ca.uhn.fhir.jpa.binary.provider;
  * limitations under the License.
  * #L%
  */
+
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -59,8 +60,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
@@ -102,7 +103,7 @@ public class BinaryAccessProvider {
 		Optional<String> attachmentId = target.getAttachmentId();
 
 		//for unit test only
-		if (addTargetAttachmentIdForTest){
+		if (addTargetAttachmentIdForTest) {
 			attachmentId = Optional.of("1");
 		}
 
@@ -186,24 +187,22 @@ public class BinaryAccessProvider {
 		ourLog.trace("Request specified content length: {}", size);
 
 		String blobId = null;
+		byte[] bytes = theRequestDetails.loadRequestContents();
 
-		if (size > 0) {
-			if (myBinaryStorageSvc != null) {
-				InputStream inputStream = theRequestDetails.getInputStream();
-				if (inputStream.available() == 0 ) {
-					throw new IllegalStateException(Msg.code(2073) + "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
-				}
-				if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, inputStream);
-					size = storedDetails.getBytes();
-					blobId = storedDetails.getBlobId();
-					Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
-				}
+		if (size > 0 && myBinaryStorageSvc != null) {
+			if (bytes == null || bytes.length == 0) {
+				throw new IllegalStateException(Msg.code(2073) + "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
+			}
+			if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
+				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, new ByteArrayInputStream(bytes));
+				size = storedDetails.getBytes();
+				blobId = storedDetails.getBlobId();
+				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
+				Validate.isTrue(size == theServletRequest.getContentLength(), "Unexpected stored size"); // Sanity check
 			}
 		}
 
 		if (blobId == null) {
-			byte[] bytes = theRequestDetails.loadRequestContents();
 			size = bytes.length;
 			target.setData(bytes);
 		} else {

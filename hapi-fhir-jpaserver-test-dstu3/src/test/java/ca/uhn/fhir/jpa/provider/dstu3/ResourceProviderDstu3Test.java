@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -14,7 +15,9 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -27,6 +30,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -103,6 +107,7 @@ import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Period;
+import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.ProcedureRequest;
@@ -112,6 +117,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.SearchParameter;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
@@ -151,7 +157,6 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -259,6 +264,49 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Assert
 		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
+	@Test
+	public void createResourceSearchParameter_withExpressionMetaSecurity_succeeds(){
+		String spCallingName = "securitySP";
+		String secCode = "secCode";
+
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode(spCallingName);
+		searchParameter.addBase("Patient").addBase("Account");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("meta.security");
+
+		ourClient.create().resource(searchParameter).execute();
+		mySearchParamRegistry.forceRefresh();
+
+		IIdType expectedPatientId = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode(secCode)));
+		IIdType dontCare = createPatientWithMeta(new Meta().addSecurity(new Coding().setCode("L")));
+
+		Bundle searchResultBundle = ourClient.search().forResource(Patient.class).where(new StringClientParam(spCallingName).matches().value(secCode)).returnBundle(Bundle.class).execute();
+
+		List<String> foundPatients = toUnqualifiedVersionlessIdValues(searchResultBundle);
+
+		assertEquals(1, foundPatients.size());
+
+		assertEquals(foundPatients.get(0), expectedPatientId.getValue());
+
+	}
+
+	@Test
+	public void createSearchParameter_with2Expressions_succeeds(){
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode("myGender");
+		searchParameter.addBase("Patient").addBase("Person");
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setExpression("Patient.gender|Person.gender");
+
+		MethodOutcome result= ourClient.create().resource(searchParameter).execute();
+
+		assertEquals(true, result.getCreated());
+
 	}
 
 	@Test
@@ -602,12 +650,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		Bundle found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(10).returnBundle(Bundle.class).execute();
+		Bundle found = ourClient.search().forResource(Organization.class)
+			.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
+			.totalMode(SearchTotalModeEnum.ACCURATE)
+			.count(10).returnBundle(Bundle.class).execute();
 		assertEquals(100, found.getTotal());
 		assertEquals(10, found.getEntry().size());
 
-		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		assertEquals(100, found.getTotal());
+		found = ourClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(50).returnBundle(Bundle.class).execute();
 		assertEquals(50, found.getEntry().size());
 
 	}
@@ -3178,7 +3228,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, hasItems(id2));
-			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
+			assertThat(patients, not(hasItems(id1a, id1b)));
 		}
 		{
 			//@formatter:off
@@ -3190,7 +3240,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
+			assertThat(patients.toString(), patients, not(hasItems(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
 		{
@@ -3204,7 +3254,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients, not(hasItems(id2)));
 		}
 	}
 
@@ -3701,7 +3751,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(oid1));
-			assertThat(ids, not(hasItem(oid2)));
+			assertThat(ids, not(contains(oid2)));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -3888,7 +3938,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids, contains(id1.getValue()));
-			assertThat(ids, not(hasItem(id2.getValue())));
+			assertThat(ids, not(contains(id2.getValue())));
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
@@ -4781,5 +4831,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		return new InstantDt(theDate).getValueAsString();
 	}
 
+	private IIdType createPatientWithMeta(Meta theMeta){
+
+		Patient patient = new Patient();
+		patient.setMeta(theMeta);
+		return ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	}
 
 }

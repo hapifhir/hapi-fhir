@@ -1,6 +1,27 @@
 package ca.uhn.fhir.jpa.migrate.entity;
 
+/*-
+ * #%L
+ * HAPI FHIR Server - SQL Migration
+ * %%
+ * Copyright (C) 2014 - 2022 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.util.VersionEnum;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -21,6 +42,9 @@ public class HapiMigrationEntity {
 	public static final int TYPE_MAX_SIZE = 20;
 	public static final int SCRIPT_MAX_SIZE = 1000;
 	public static final int INSTALLED_BY_MAX_SIZE = 100;
+	public static final int CREATE_TABLE_PID = -1;
+	public static final String INITIAL_RECORD_DESCRIPTION = "<< HAPI FHIR Schema History table created >>";
+	public static final String INITIAL_RECORD_SCRIPT = "HAPI FHIR";
 	@Id
 	@SequenceGenerator(name = "SEQ_FLY_HFJ_MIGRATION", sequenceName = "SEQ_FLY_HFJ_MIGRATION")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_FLY_HFJ_MIGRATION")
@@ -53,6 +77,19 @@ public class HapiMigrationEntity {
 
 	@Column(name = "SUCCESS")
 	private Boolean mySuccess;
+
+	public static HapiMigrationEntity tableCreatedRecord() {
+		HapiMigrationEntity retVal = new HapiMigrationEntity();
+		retVal.setPid(CREATE_TABLE_PID);
+		retVal.setDescription(INITIAL_RECORD_DESCRIPTION);
+		retVal.setType("TABLE");
+		retVal.setScript(INITIAL_RECORD_SCRIPT);
+		retVal.setInstalledBy(VersionEnum.latestVersion().name());
+		retVal.setInstalledOn(new Date());
+		retVal.setExecutionTime(0);
+		retVal.setSuccess(true);
+		return retVal;
+	}
 
 	public Integer getPid() {
 		return myPid;
