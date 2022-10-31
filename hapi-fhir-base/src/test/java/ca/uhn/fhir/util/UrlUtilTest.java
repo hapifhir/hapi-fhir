@@ -1,10 +1,12 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,6 +45,20 @@ public class UrlUtilTest {
 	public void testEscape() {
 		assertEquals("A%20B", UrlUtil.escapeUrlParam("A B"));
 		assertEquals("A%2BB", UrlUtil.escapeUrlParam("A+B"));
+	}
+
+	@Test
+	public void testUnescape() {
+		assertAll(
+			() -> assertEquals(Constants.CT_JSON, UrlUtil.unescape(Constants.CT_JSON)),
+			() -> assertEquals(Constants.CT_NDJSON, UrlUtil.unescape(Constants.CT_NDJSON)),
+			() -> assertEquals(Constants.CT_XML, UrlUtil.unescape(Constants.CT_XML)),
+			() -> assertEquals(Constants.CT_XML_PATCH, UrlUtil.unescape(Constants.CT_XML_PATCH)),
+			() -> assertEquals(Constants.CT_APPLICATION_GZIP, UrlUtil.unescape(Constants.CT_APPLICATION_GZIP)),
+			() -> assertEquals(Constants.CT_RDF_TURTLE, UrlUtil.unescape(Constants.CT_RDF_TURTLE)),
+			() -> assertEquals(Constants.CT_FHIR_JSON, UrlUtil.unescape(Constants.CT_FHIR_JSON)),
+			() -> assertEquals(Constants.CT_FHIR_NDJSON, UrlUtil.unescape(Constants.CT_FHIR_NDJSON))
+		);
 	}
 
 	@Test
