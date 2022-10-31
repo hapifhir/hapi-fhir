@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 3685
+title: "When performing an export bulk, if the user does not provide resource types, all registered resource types are used."
