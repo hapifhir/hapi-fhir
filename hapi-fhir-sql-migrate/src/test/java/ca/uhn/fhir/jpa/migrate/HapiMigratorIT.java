@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.migrate.dao.MigrationQueryBuilder;
+import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -106,6 +108,41 @@ class HapiMigratorIT {
 		// Tasks were only run on the first migration
 		assertThat(result1.succeededTasks, hasSize(1));
 		assertThat(result2.succeededTasks, hasSize(1));
+	}
+
+	@Test
+	void test_twoSequentialCalls_noblock() throws InterruptedException, ExecutionException {
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("first", "1");
+
+		HapiMigrator migrator = buildMigrator(latchMigrationTask);
+		assertEquals(0, countLockRecords());
+
+		{
+			latchMigrationTask.setExpectedCount(1);
+			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
+			latchMigrationTask.awaitExpected();
+			assertEquals(1, countLockRecords());
+			latchMigrationTask.release("1");
+
+			MigrationResult result = future.get();
+			assertEquals(0, countLockRecords());
+			assertThat(result.succeededTasks, hasSize(1));
+		}
+
+		{
+			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
+
+			MigrationResult result = future.get();
+			assertEquals(0, countLockRecords());
+			assertThat(result.succeededTasks, hasSize(0));
+		}
+
+	}
+
+	private int countLockRecords() {
+		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationStorageSvc.LOCK_PID, Integer.class);
 	}
 
 	@Nonnull

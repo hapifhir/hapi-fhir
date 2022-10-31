@@ -67,6 +67,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -861,6 +862,52 @@ public class BulkDataExportProviderTest {
 			ourLog.info("Response content: {}", responseContent);
 			assertThat(responseContent, containsString("was already cancelled or has completed."));
 		}
+	}
+
+	@Test
+	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		// call
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myPort, JpaConstants.OPERATION_EXPORT));
+		httpGet.addHeader("_outputFormat", Constants.CT_FHIR_NDJSON);
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty());
+		}
+
+		final BulkExportParameters params = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+	}
+
+	@Test
+	public void testGetBulkExport_outputFormat_FhirNdJson_inUrl() throws IOException {
+		// when
+		when(myJobRunner.startNewJob(any()))
+			.thenReturn(createJobStartResponse());
+
+		// call
+		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myPort, JpaConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
+		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
+			assertAll(
+				() -> assertEquals(202, response.getStatusLine().getStatusCode()),
+				() -> assertEquals("Accepted", response.getStatusLine().getReasonPhrase()),
+				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myPort, A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
+				() -> assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty())
+			);
+		}
+
+		final BulkExportParameters params = verifyJobStart();
+		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
 	}
 
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {

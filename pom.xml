@@ -1018,6 +1018,13 @@
 				<artifactId>okhttp</artifactId>
 				<version>${okhttp_version}</version>
 			</dependency>
+			<!-- Pinned here for CVE: CVE-2022-24329 -->
+			<dependency>
+				<groupId>com.squareup.okio</groupId>
+				<artifactId>okio-jvm</artifactId>
+				<version>3.2.0</version>
+			</dependency>
+
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>javax.activation</artifactId>
