@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.util.JobInstanceUtil;
 import ca.uhn.fhir.model.api.PagingIterator;
+import ca.uhn.fhir.narrative.BaseThymeleafNarrativeGenerator;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
