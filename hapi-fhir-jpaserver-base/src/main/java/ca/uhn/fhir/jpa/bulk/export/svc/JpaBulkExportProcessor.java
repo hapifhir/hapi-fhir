@@ -425,7 +425,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 
 		//Convert Resource Persistent IDs to actual client IDs.
 		Set<ResourcePersistentId> pidSet = new HashSet<>(resourcePersistentIdChunk);
+//		fixme jm: works if following line replaced
 		Set<String> resourceIds = myIdHelperService.translatePidsToFhirResourceIds(pidSet);
+//		Set<String> resourceIds = Set.of("Patient/P1");
 
 		//Build SP map
 		//First, inject the _typeFilters and _since from the export job
