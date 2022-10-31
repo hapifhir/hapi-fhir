@@ -61,7 +61,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -80,15 +79,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 @Disabled
 public class StressTestR4Test extends BaseResourceProviderR4Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
+
 	static {
 		TestR4Config.ourMaxThreads = 10;
 	}
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
 	@Autowired
 	private DatabaseBackedPagingProvider myPagingProvider;
 	private int myPreviousMaxPageSize;
+	@Autowired
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 	@Override
 	@AfterEach
@@ -120,10 +122,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
-	@Autowired
-	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-
-
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
 		int resourceCount = 1000;
@@ -138,14 +136,14 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 0; i < resourceCount; i++) {
 			Observation o = new Observation();
 			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
-			o.setEffective( DateTimeType.now());
+			o.setEffective(DateTimeType.now());
 			o.setStatus(Observation.ObservationStatus.FINAL);
 			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
 		}
 		StopWatch sw = new StopWatch();
 		ourLog.info("Saving {} resources", bundle.getEntry().size());
 		mySystemDao.transaction(null, bundle);
-		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
 
 		Map<String, IBaseResource> ids = new HashMap<>();
 
@@ -161,12 +159,12 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			.count(queryCount)
 			.returnBundle(Bundle.class)
 			.execute();
-		while(true) {
+		while (true) {
 			List<String> passIds = searchResult
 				.getEntry()
 				.stream()
 				.map(t -> t.getResource().getIdElement().getValue())
-				.collect(Collectors.toList());
+				.toList();
 
 			int index = 0;
 			for (String nextId : passIds) {
@@ -228,14 +226,14 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		StopWatch sw = new StopWatch();
 		ourLog.info("Saving {} resources", bundle.getEntry().size());
 		mySystemDao.transaction(null, bundle);
-		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
 
 		// Load from DAOs
 		List<String> ids = new ArrayList<>();
 		Bundle resultBundle = myClient.search().forResource("Observation").count(100).returnBundle(Bundle.class).execute();
 		int pageIndex = 0;
 		while (true) {
-			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
+			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).toList());
 			if (resultBundle.getLink("next") == null) {
 				break;
 			}
@@ -249,7 +247,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ids = new ArrayList<>();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("status", new TokenOrListParam().add("final").add("aaa")); // add some noise to guarantee we don't reuse a previous query
-		IBundleProvider results = myObservationDao.search(map);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
 		for (int i = 0; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
@@ -262,7 +260,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ids = new ArrayList<>();
 		map = new SearchParameterMap();
 		map.add("status", new TokenOrListParam().add("final").add("aaa")); // add some noise to guarantee we don't reuse a previous query
-		results = myObservationDao.search(map);
+		results = myObservationDao.search(map, mySrd);
 		for (int i = 1000; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
@@ -288,14 +286,14 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		StopWatch sw = new StopWatch();
 		ourLog.info("Saving {} resources", bundle.getEntry().size());
 		mySystemDao.transaction(null, bundle);
-		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
 
 		// Load from DAOs
 		List<String> ids = new ArrayList<>();
 		Bundle resultBundle = myClient.search().forResource("Observation").count(300).returnBundle(Bundle.class).execute();
 		int pageIndex = 0;
 		while (true) {
-			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList()));
+			ids.addAll(resultBundle.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).toList());
 			if (resultBundle.getLink("next") == null) {
 				break;
 			}
@@ -335,13 +333,13 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		StopWatch sw = new StopWatch();
 		ourLog.info("Saving {} resources", bundle.getEntry().size());
 		mySystemDao.transaction(null, bundle);
-		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
 
 		// Using _include=*
 		SearchParameterMap map = new SearchParameterMap();
 		map.addInclude(IBaseResource.INCLUDE_ALL.asRecursive());
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myDiagnosticReportDao.search(map);
+		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
 		assertEquals(1202, resultsAndIncludes.size());
 
@@ -350,7 +348,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.addInclude(DiagnosticReport.INCLUDE_RESULT.asRecursive());
 		map.addInclude(Observation.INCLUDE_HAS_MEMBER.asRecursive());
 		map.setLoadSynchronous(true);
-		results = myDiagnosticReportDao.search(map);
+		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
 		assertEquals(1202, resultsAndIncludes.size());
 	}
@@ -439,7 +437,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 				Patient p = new Patient();
 				p.setId("A" + finalI);
-				p.addIdentifier().setValue("A"+finalI);
+				p.addIdentifier().setValue("A" + finalI);
 				input.addEntry().setResource(p).setFullUrl("Patient/A" + finalI).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/A" + finalI);
 
 				try {
@@ -475,7 +473,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		Patient p = new Patient();
 		p.setActive(true);
-		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		ExecutorService executor = Executors.newFixedThreadPool(20);
 
@@ -490,7 +488,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 				Patient updatePatient = new Patient();
 				updatePatient.setId(id);
-				updatePatient.addIdentifier().setValue("A"+finalI);
+				updatePatient.addIdentifier().setValue("A" + finalI);
 				input.addEntry().setResource(updatePatient).setFullUrl(updatePatient.getId()).getRequest().setMethod(HTTPVerb.PUT).setUrl(updatePatient.getId());
 
 				try {
@@ -580,7 +578,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			Patient patient = new Patient();
 			patient.setId("tracer" + i);
 			patient.setActive(true);
-			MethodOutcome result = myClient.update().resource(patient).execute();
+			myClient.update().resource(patient).execute();
 		}
 		ourLog.info("Patients created");
 
@@ -623,7 +621,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		patient.setId(result.getId());
 		patient.getMeta().addTag().setSystem(UUID.randomUUID().toString()).setCode(UUID.randomUUID().toString());
-		result = myClient.update().resource(patient).execute();
+		myClient.update().resource(patient).execute();
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Patient?active=true");
@@ -661,35 +659,17 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Loaded {} searches", total);
 	}
 
-	public class BaseTask extends Thread {
-		protected Throwable myError;
-		protected int myTaskCount = 0;
-
-		public BaseTask() {
-			setDaemon(true);
-		}
-
-		public Throwable getError() {
-			return myError;
-		}
-
-		public int getTaskCount() {
-			return myTaskCount;
-		}
-
-	}
-
 	private final class SearchTask extends BaseTask {
 
 		@Override
 		public void run() {
-			CloseableHttpResponse getResp = null;
+			CloseableHttpResponse getResp;
 			for (int i = 0; i < 10; i++) {
 				try {
 					Bundle respBundle;
 
 					// Load search
-					HttpGet get = new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID().toString());
+					HttpGet get = new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {
@@ -707,8 +687,6 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					getResp = ourHttpClient.execute(get);
 					try {
 						assertEquals(200, getResp.getStatusLine().getStatusCode());
-						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
 						IOUtils.closeQuietly(getResp);
@@ -734,7 +712,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					p.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.MALE);
 					myClient.create().resource(p).execute();
 
-					ourSearchParamRegistry.forceRefresh();
+					mySearchParamRegistry.forceRefresh();
 
 				} catch (Throwable e) {
 					ourLog.error("Failure during search", e);
@@ -743,6 +721,24 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 				}
 			}
 		}
+	}
+
+	public static class BaseTask extends Thread {
+		protected Throwable myError;
+		protected int myTaskCount = 0;
+
+		public BaseTask() {
+			setDaemon(true);
+		}
+
+		public Throwable getError() {
+			return myError;
+		}
+
+		public int getTaskCount() {
+			return myTaskCount;
+		}
+
 	}
 
 

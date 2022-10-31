@@ -41,7 +41,7 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 
 		myDaoConfig.setAllowMultipleDelete(true);
 
-		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(ourSearchCoordinatorSvc);
+		mySearchCoordinatorSvcRaw = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
 	}
 
 	@Test

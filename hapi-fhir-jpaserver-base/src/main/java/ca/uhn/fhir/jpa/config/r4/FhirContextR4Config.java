@@ -34,10 +34,16 @@ public class FhirContextR4Config {
 	public FhirContext fhirContextR4() {
 		FhirContext retVal = FhirContext.forR4();
 
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);
+		configureFhirContext(retVal);
 
 		return retVal;
+	}
+
+	public static FhirContext configureFhirContext(FhirContext theFhirContext) {
+		// Don't strip versions in some places
+		ParserOptions parserOptions = theFhirContext.getParserOptions();
+		parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);
+
+		return theFhirContext;
 	}
 }

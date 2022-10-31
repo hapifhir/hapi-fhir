@@ -67,6 +67,7 @@ import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1662,35 +1663,41 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingWithNoPagingProvider() {
-		ourRestServer.setPagingProvider(null);
+		IPagingProvider previousPagingProvider = ourServer.getRestfulServer().getPagingProvider();
+		ourServer.getRestfulServer().setPagingProvider(null);
+		try {
 
-		Patient p = new Patient();
-		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+			Patient p = new Patient();
+			p.setActive(true);
+			String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
 
-		for (int i = 0; i < 20; i++) {
-			Observation o = new Observation();
-			o.getSubject().setReference(pid);
-			o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
-			myObservationDao.create(o);
+			for (int i = 0; i < 20; i++) {
+				Observation o = new Observation();
+				o.getSubject().setReference(pid);
+				o.addIdentifier().setSystem("foo").setValue(Integer.toString(i));
+				myObservationDao.create(o);
+			}
+
+			mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
+			mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
+			mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
+
+			ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
+				.operation()
+				.onInstance(new IdDt(pid))
+				.named("everything")
+				.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
+				.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.useHttpGet()
+				.execute();
+
+			assertEquals(10, response.getEntry().size());
+			assertEquals(null, response.getTotalElement().getValue());
+			assertEquals(null, response.getLink("next"));
+
+		} finally {
+			ourServer.getRestfulServer().setPagingProvider(previousPagingProvider);
 		}
-
-		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(50);
-		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(10);
-		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(true);
-
-		ca.uhn.fhir.model.dstu2.resource.Bundle response = ourClient
-			.operation()
-			.onInstance(new IdDt(pid))
-			.named("everything")
-			.withSearchParameter(Parameters.class, "_count", new NumberParam(10))
-			.returnResourceType(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-			.useHttpGet()
-			.execute();
-
-		assertEquals(10, response.getEntry().size());
-		assertEquals(null, response.getTotalElement().getValue());
-		assertEquals(null, response.getLink("next"));
 	}
 
 	@Test

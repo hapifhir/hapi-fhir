@@ -34,6 +34,12 @@ public class FhirContextR4BConfig {
 	public FhirContext fhirContextR4B() {
 		FhirContext retVal = FhirContext.forR4B();
 
+		configureFhirContext(retVal);
+
+		return retVal;
+	}
+
+	public static FhirContext configureFhirContext(FhirContext retVal) {
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
 		parserOptions.setDontStripVersionsFromReferencesAtPaths(DEFAULT_PRESERVE_VERSION_REFS);

@@ -19,11 +19,6 @@
 	</description>
 
 	<dependencies>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
 		<!--test dependencies -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

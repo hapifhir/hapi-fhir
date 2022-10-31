@@ -23,7 +23,9 @@ package ca.uhn.fhir.test.utilities.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.apache.commons.lang3.Validate;
@@ -71,7 +73,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
-		myFhirClient = myFhirContext.newRestfulGenericClient("http://localhost:" + getPort());
+		myFhirClient = myFhirContext.newRestfulGenericClient(getBaseUrl());
 	}
 
 	@Override
@@ -129,7 +131,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public RestfulServerExtension registerProvider(Object theProvider) {
 		Validate.notNull(theProvider);
-		if (myServlet != null) {
+		if (isStarted()) {
 			myServlet.registerProvider(theProvider);
 		} else {
 			myProviders.add(theProvider);
@@ -138,12 +140,16 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension withServer(Consumer<RestfulServer> theConsumer) {
-		if (myServlet != null) {
+		if (isStarted()) {
 			theConsumer.accept(myServlet);
 		} else {
 			myConsumers.add(theConsumer);
 		}
 		return this;
+	}
+
+	private boolean isStarted() {
+		return myServlet != null;
 	}
 
 	public RestfulServerExtension registerInterceptor(Object theInterceptor) {
@@ -160,7 +166,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
-		if (myServlet != null) {
+		if (isStarted()) {
 			myServlet.setPagingProvider(thePagingProvider);
 		} else {
 			myPagingProvider = thePagingProvider;
@@ -175,4 +181,5 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	public void unregisterProvider(Object theProvider) {
 		withServer(t -> t.unregisterProvider(theProvider));
 	}
+
 }

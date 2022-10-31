@@ -78,6 +78,7 @@ import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
+import ca.uhn.fhir.test.utilities.server.SpringContextGrabbingTestExecutionListener;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
@@ -104,6 +105,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -141,6 +143,7 @@ import static org.mockito.Mockito.when;
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
+@TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
@@ -150,6 +153,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
+	public static final String WEBSOCKET_CONTEXT = "/ws";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
@@ -672,6 +676,13 @@ public abstract class BaseJpaTest extends BaseTest {
 			return first.get();
 		}
 
+	}
+
+	@BeforeEach
+	protected void before() throws Exception {
+		// nothing - just here so other test can override it. We used to do stuff here,
+		// and having this stub is easier than removing all of the super.before() calls
+		// in the existing overridden versions
 	}
 
 	@SuppressWarnings("BusyWait")

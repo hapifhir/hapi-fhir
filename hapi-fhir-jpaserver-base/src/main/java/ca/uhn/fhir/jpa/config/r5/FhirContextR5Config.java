@@ -31,6 +31,12 @@ public class FhirContextR5Config {
 	public FhirContext fhirContextR5() {
 		FhirContext retVal = FhirContext.forR5();
 
+		configureFhirContext(retVal);
+
+		return retVal;
+	}
+
+	public static FhirContext configureFhirContext(FhirContext retVal) {
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.what");

@@ -1,132 +1,75 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.config.dstu3.FhirContextDstu3Config;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
-import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.servlet.DispatcherServlet;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
-	protected static IValidationSupport myValidationSupport;
-	protected static IGenericClient ourClient;
-	protected static CloseableHttpClient ourHttpClient;
+	@RegisterExtension
+	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 	protected static int ourPort;
-	protected static RestfulServer ourRestServer;
 	protected static String ourServerBase;
-	protected static GenericWebApplicationContext ourWebApplicationContext;
-	protected static SearchParamRegistryImpl ourSearchParamRegistry;
-	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
-	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
-	private static Server ourServer;
+	protected static IGenericClient ourClient;
+	protected static RestfulServer ourRestServer;
 
-	public BaseResourceProviderDstu3Test() {
-		super();
-	}
+	@RegisterExtension
+	protected static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContextDstu3Config.configureFhirContext(FhirContext.forDstu3Cached()))
+		.keepAliveBetweenTests()
+		.withValidationMode(ServerValidationModeEnum.NEVER)
+		.withContextPath("/fhir")
+		.withServletPath("/context/*")
+		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
 
-	@AfterEach
-	public void after() throws Exception {
-		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myResourceCountsCache.clear();
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
-	}
+	@RegisterExtension
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
+		.withServer(s -> {
+			s.registerProviders(myResourceProviders.createProviders());
+			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			s.setDefaultResponseEncoding(EncodingEnum.XML);
+			s.setDefaultPrettyPrint(false);
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@BeforeEach
-	public void before() throws Exception {
-		myResourceCountsCache.clear();
-		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
-		myFhirContext.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
-		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
+			s.registerProvider(mySystemProvider);
+			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
+			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-		if (ourServer == null) {
-			ourRestServer = new RestfulServer(myFhirContext);
-			ourRestServer.registerProviders(myResourceProviders.createProviders());
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
-
-			TerminologyUploaderProvider terminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
-			ourRestServer.registerProviders(mySystemProvider, terminologyUploaderProvider);
-
-			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
-			ourRestServer.registerProvider(subscriptionTriggeringProvider);
-
-			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
-
-			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(ourRestServer, mySystemDao, myDaoConfig, ourSearchParamRegistry);
+			JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(s, mySystemDao, myDaoConfig, mySearchParamRegistry);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
-			ourRestServer.setServerConformanceProvider(confProvider);
-
-			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
-			ourSearchCoordinatorSvc = myAppCtx.getBean(ISearchCoordinatorSvc.class);
-
-			Server server = new Server(0);
-
-			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
-
-			ServletHolder servletHolder = new ServletHolder();
-			servletHolder.setServlet(ourRestServer);
-			proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-
-			ourWebApplicationContext = new GenericWebApplicationContext();
-			ourWebApplicationContext.setParent(myAppCtx);
-			ourWebApplicationContext.refresh();
-			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
-
-			DispatcherServlet dispatcherServlet = new DispatcherServlet();
-			dispatcherServlet.setContextClass(AnnotationConfigWebApplicationContext.class);
-			ServletHolder subsServletHolder = new ServletHolder();
-			subsServletHolder.setServlet(dispatcherServlet);
-			subsServletHolder.setInitParameter(
-				ContextLoader.CONFIG_LOCATION_PARAM,
-				WebsocketDispatcherConfig.class.getName());
-			proxyHandler.addServlet(subsServletHolder, "/*");
+			s.setServerConformanceProvider(confProvider);
 
 			// Register a CORS filter
 			CorsConfiguration config = new CorsConfiguration();
@@ -144,37 +87,36 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			config.addExposedHeader("Location");
 			config.addExposedHeader("Content-Location");
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-			ourRestServer.registerInterceptor(corsInterceptor);
+			s.registerInterceptor(corsInterceptor);
 
-			server.setHandler(proxyHandler);
-			JettyUtil.startServer(server);
-			ourPort = JettyUtil.getPortForStartedServer(server);
-			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
+			ourPort = ourServer.getPort();
+			ourServerBase = ourServer.getBaseUrl();
+			ourClient = ourServer.getFhirClient();
+			ourRestServer = ourServer.getRestfulServer();
 
-			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
-			myValidationSupport = wac.getBean(IValidationSupport.class);
-			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			ourSearchParamRegistry = wac.getBean(SearchParamRegistryImpl.class);
-			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
-
-			confProvider.setSearchParamRegistry(ourSearchParamRegistry);
-
-			myFhirContext.getRestfulClientFactory().setSocketTimeout(5000000);
-			ourClient = myFhirContext.newRestfulGenericClient(ourServerBase);
+			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
 
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			builder.setMaxConnPerRoute(99);
-			ourHttpClient = builder.build();
+		});
 
-			ourServer = server;
-		}
 
-		ourRestServer.setPagingProvider(ourPagingProvider);
+	public BaseResourceProviderDstu3Test() {
+		super();
+	}
+
+	@AfterEach
+	public void after() throws Exception {
+		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		myResourceCountsCache.clear();
+		ourServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
+	}
+
+	@BeforeEach
+	public void before() throws Exception {
+		myResourceCountsCache.clear();
 	}
 
 	protected boolean shouldLogClient() {
@@ -191,18 +133,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			}
 		}
 		return names;
-	}
-
-	@AfterAll
-	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
-		JettyUtil.closeServer(ourServer);
-		ourHttpClient.close();
-		ourServer = null;
-		ourHttpClient = null;
-		myValidationSupport.invalidateCaches();
-		myValidationSupport = null;
-		ourWebApplicationContext.close();
-		ourWebApplicationContext = null;
 	}
 
 	public static int getNumberOfParametersByName(Parameters theParameters, String theName) {

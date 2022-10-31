@@ -151,7 +151,6 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(ServerCapabilityStatementProvider.DEFAULT_REST_RESOURCE_REV_INCLUDES_ENABLED);
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
@@ -194,8 +193,6 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(fooSp);
 		mySearchParamRegistry.forceRefresh();
-
-		ourCapabilityStatementProvider.setRestResourceRevIncludesEnabled(true);
 
 		CapabilityStatement cs = myClient
 			.capabilities()

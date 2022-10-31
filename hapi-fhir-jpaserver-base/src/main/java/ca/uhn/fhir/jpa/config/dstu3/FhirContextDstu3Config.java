@@ -31,10 +31,15 @@ public class FhirContextDstu3Config {
 	public FhirContext fhirContextDstu3() {
 		FhirContext retVal = FhirContext.forDstu3();
 
+		configureFhirContext(retVal);
+
+		return retVal;
+	}
+
+	public static FhirContext configureFhirContext(FhirContext retVal) {
 		// Don't strip versions in some places
 		ParserOptions parserOptions = retVal.getParserOptions();
 		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
-
 		return retVal;
 	}
 }

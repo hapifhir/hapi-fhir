@@ -89,7 +89,7 @@ public abstract class BaseRestServerHelper {
 
 		myListenerServer.setHandler(proxyHandler);
 
-		SslContextFactory sslContextFactory = getSslContextFactory();
+		SslContextFactory.Server sslContextFactory = getSslContextFactory();
 
 		HttpConfiguration httpsConfig = new HttpConfiguration();
 		httpsConfig.setSecureScheme("https");
@@ -120,9 +120,9 @@ public abstract class BaseRestServerHelper {
 		myHttpsListenerPort = ((ServerConnector)myListenerServer.getConnectors()[1]).getLocalPort();
 	}
 
-	private SslContextFactory getSslContextFactory() throws Exception{
+	private SslContextFactory.Server getSslContextFactory() throws Exception{
 		try {
-			SslContextFactory sslContextFactory = new SslContextFactory.Server();
+			SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
 			KeyStore keyStore = KeyStore.getInstance(KeyStoreType.PKCS12.toString());
 			keyStore.load(BaseRestServerHelper.class.getResourceAsStream(SERVER_KEYSTORE_PATH), PASSWORD.toCharArray());
