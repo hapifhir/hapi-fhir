@@ -86,8 +86,6 @@ public class HapiMigrationLock implements AutoCloseable {
 		throw new HapiMigrationException(Msg.code(2153) + message);
 	}
 
-	// FIXME KHS test
-
 	/**
 	 *
 	 * @return whether a lock record was successfully deleted
