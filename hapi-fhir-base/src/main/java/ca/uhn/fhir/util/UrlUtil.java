@@ -489,11 +489,11 @@ public class UrlUtil {
 			return null;
 		}
 		// If the user passes "_outputFormat" as a GET request parameter directly in the URL:
-		final boolean hasOutputFormat = theString.startsWith("application/");
+		final boolean shouldEscapePlus = !theString.startsWith("application/");
 
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
-			if (nextChar == '%' || (nextChar == '+') && !hasOutputFormat) {
+			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
 				try {
 					// Yes it would be nice to not use a string "UTF-8" but the equivalent
 					// method that takes Charset is JDK10+ only... sigh....
