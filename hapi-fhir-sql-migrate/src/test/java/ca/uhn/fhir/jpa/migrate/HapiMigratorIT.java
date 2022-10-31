@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.migrate.dao.MigrationQueryBuilder;
-import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -142,7 +140,7 @@ class HapiMigratorIT {
 	}
 
 	private int countLockRecords() {
-		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationStorageSvc.LOCK_PID, Integer.class);
+		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationLock.LOCK_PID, Integer.class);
 	}
 
 	@Nonnull

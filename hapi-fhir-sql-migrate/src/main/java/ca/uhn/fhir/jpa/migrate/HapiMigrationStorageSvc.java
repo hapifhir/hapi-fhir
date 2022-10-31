@@ -32,7 +32,6 @@ import java.util.Set;
 public class HapiMigrationStorageSvc {
 	public static final String UNKNOWN_VERSION = "unknown";
 	private static final String LOCK_TYPE = "hapi-fhir-lock";
-	static final Integer LOCK_PID = -100;
 
 	private final HapiMigrationDao myHapiMigrationDao;
 
@@ -104,11 +103,11 @@ public class HapiMigrationStorageSvc {
 		verifyNoOtherLocksPresent(theLockDescription);
 
 		// Remove the locking row
-		return myHapiMigrationDao.deleteLockRecord(LOCK_PID, theLockDescription);
+		return myHapiMigrationDao.deleteLockRecord(HapiMigrationLock.LOCK_PID, theLockDescription);
 	}
 
 	void verifyNoOtherLocksPresent(String theLockDescription) {
-		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(LOCK_PID, theLockDescription);
+		Optional<HapiMigrationEntity> otherLockFound = myHapiMigrationDao.findFirstByPidAndNotDescription(HapiMigrationLock.LOCK_PID, theLockDescription);
 
 		// Check that there are no other locks in place. This should not happen!
 		if (otherLockFound.isPresent()) {
@@ -118,12 +117,16 @@ public class HapiMigrationStorageSvc {
 
 	public boolean insertLockRecord(String theLockDescription) {
 		HapiMigrationEntity entity = new HapiMigrationEntity();
-		entity.setPid(LOCK_PID);
+		entity.setPid(HapiMigrationLock.LOCK_PID);
 		entity.setType(LOCK_TYPE);
 		entity.setDescription(theLockDescription);
 		entity.setExecutionTime(0);
 		entity.setSuccess(true);
 
 		return myHapiMigrationDao.save(entity);
+	}
+
+	public Optional<HapiMigrationEntity> findFirstByPidAndNotDescription(Integer theLockPid, String theLockDescription) {
+		return myHapiMigrationDao.findFirstByPidAndNotDescription(theLockPid, theLockDescription);
 	}
 }
