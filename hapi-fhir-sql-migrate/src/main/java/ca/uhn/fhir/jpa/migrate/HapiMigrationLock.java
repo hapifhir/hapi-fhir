@@ -37,8 +37,9 @@ public class HapiMigrationLock implements AutoCloseable {
 	static final Integer LOCK_PID = -100;
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLock.class);
 	public static final int SLEEP_MILLIS_BETWEEN_LOCK_RETRIES = 1000;
-	public static final int MAX_RETRY_ATTEMPTS = 50;
-	private static final String REPAIR_LOCK_TABLE_SYSTEM_PROPERTY_NAME = "repair_lock_table_with_description";
+	public static final int DEFAULT_MAX_RETRY_ATTEMPTS = 50;
+	public static int ourMaxRetryAttampts = DEFAULT_MAX_RETRY_ATTEMPTS;
+	public static final String CLEAR_LOCK_TABLE_WITH_DESCRIPTION = "CLEAR_LOCK_TABLE_WITH_DESCRIPTION";
 
 	private final String myLockDescription = UUID.randomUUID().toString();
 
@@ -62,12 +63,15 @@ public class HapiMigrationLock implements AutoCloseable {
 					return;
 				}
 				retryCount++;
-				ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, MAX_RETRY_ATTEMPTS);
-				Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
+
+				if (retryCount < ourMaxRetryAttampts) {
+					ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, ourMaxRetryAttampts);
+					Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
+				}
 			} catch (InterruptedException ex) {
 				// Ignore - if interrupted, we still need to wait for lock to become available
 			}
-		} while (retryCount < MAX_RETRY_ATTEMPTS);
+		} while (retryCount < ourMaxRetryAttampts);
 
 		String message = "Unable to obtain table lock - another database migration may be running.  If no " +
 			"other database migration is running, then the previous migration did not shut down properly and the " +
@@ -83,10 +87,18 @@ public class HapiMigrationLock implements AutoCloseable {
 	}
 
 	// FIXME KHS test
-	private void cleanLockTableIfRequested() {
-		String description = System.getProperty(REPAIR_LOCK_TABLE_SYSTEM_PROPERTY_NAME);
+
+	/**
+	 *
+	 * @return whether a lock record was successfully deleted
+	 */
+	boolean cleanLockTableIfRequested() {
+		String description = System.getProperty(CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 		if (isBlank(description)) {
-			return;
+			description = System.getenv(CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
+		}
+		if (isBlank(description)) {
+			return false;
 		}
 
 		ourLog.info("Repairing lock table.  Removing row in " + myMigrationStorageSvc.getMigrationTablename() + " with INSTALLED_RANK = " + LOCK_PID + " and DESCRIPTION = " + description);
@@ -96,13 +108,14 @@ public class HapiMigrationLock implements AutoCloseable {
 		} else {
 			ourLog.info("No lock record found");
 		}
+		return result;
 	}
 
 	private boolean insertLockingRow() {
 		try {
 			return myMigrationStorageSvc.insertLockRecord(myLockDescription);
 		} catch (Exception e) {
-			ourLog.warn("Failed to insert lock record: {}", e.getMessage());
+			ourLog.debug("Failed to insert lock record: {}", e.getMessage());
 			return false;
 		}
 	}
@@ -113,5 +126,9 @@ public class HapiMigrationLock implements AutoCloseable {
 		if (!result) {
 			ourLog.error("Failed to delete migration lock record for description = [{}]", myLockDescription);
 		}
+	}
+
+	public static void setMaxRetryAttempts(int theMaxRetryAttempts) {
+		ourMaxRetryAttampts = theMaxRetryAttempts;
 	}
 }

@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -16,6 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigratorIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigratorIT.class);
@@ -32,6 +36,7 @@ class HapiMigratorIT {
 
 	private final BasicDataSource myDataSource = BaseMigrationTest.getDataSource();
 	private final JdbcTemplate myJdbcTemplate = new JdbcTemplate(myDataSource);
+	private HapiMigrationStorageSvc myMigrationStorageSvc;
 
 	@BeforeEach
 	void before() {
@@ -39,12 +44,17 @@ class HapiMigratorIT {
 		migrator.createMigrationTableIfRequired();
 		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
 		assertTrue(count > 0);
+		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
+		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
+
 	}
 
 	@AfterEach
 	void after() {
 		myJdbcTemplate.execute("DROP TABLE " + MIGRATION_TABLENAME);
 		assertEquals(0, myDataSource.getNumActive());
+		HapiMigrationLock.setMaxRetryAttempts(HapiMigrationLock.DEFAULT_MAX_RETRY_ATTEMPTS);
+		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
 
 	@Test
@@ -76,8 +86,7 @@ class HapiMigratorIT {
 
 		LatchMigrationTask latchMigrationTask2 = new LatchMigrationTask("second new", "2");
 		LatchMigrationTask latchMigrationTask3 = new LatchMigrationTask("third repeat", "1");
-		HapiMigrator migrator2 = buildMigrator(latchMigrationTask2);
-		migrator2.addTask(latchMigrationTask3);
+		HapiMigrator migrator2 = buildMigrator(latchMigrationTask2, latchMigrationTask3);
 
 		// We only expect the first migration to run because the second one will block on the lock and by the time the lock
 		// is released, the first one will have already run so there will be nothing to do
@@ -139,14 +148,46 @@ class HapiMigratorIT {
 
 	}
 
+
+	@Test
+	void test_oldLockFails_block() {
+		HapiMigrationLock.setMaxRetryAttempts(0);
+		String description = UUID.randomUUID().toString();
+		HapiMigrator migrator = buildMigrator();
+		myMigrationStorageSvc.insertLockRecord(description);
+
+		try {
+			migrator.migrate();
+			fail();
+		} catch (HapiMigrationException e) {
+			assertEquals("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description, e.getMessage());
+		}
+	}
+
+	@Test
+	void test_oldLockWithSystemProperty_cleared() {
+		HapiMigrationLock.setMaxRetryAttempts(0);
+		String description = UUID.randomUUID().toString();
+		HapiMigrator migrator = buildMigrator(new NopTask("1", "1"));
+		myMigrationStorageSvc.insertLockRecord(description);
+
+		System.setProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION, description);
+
+		MigrationResult result = migrator.migrate();
+		assertThat(result.succeededTasks, hasSize(1));
+	}
+
+
 	private int countLockRecords() {
 		return myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME + " WHERE \"installed_rank\" = " + HapiMigrationLock.LOCK_PID, Integer.class);
 	}
 
 	@Nonnull
-	private HapiMigrator buildMigrator(LatchMigrationTask theLatchMigrationTask) {
+	private HapiMigrator buildMigrator(BaseTask... theTasks) {
 		HapiMigrator retval = buildMigrator();
-		retval.addTask(theLatchMigrationTask);
+		for (BaseTask next : theTasks) {
+			retval.addTask(next);
+		}
 		return retval;
 	}
 
