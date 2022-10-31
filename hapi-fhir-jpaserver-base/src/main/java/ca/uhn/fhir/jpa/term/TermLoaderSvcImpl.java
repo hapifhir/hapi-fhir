@@ -213,7 +213,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			ourLog.info("Beginning IMGTHLA processing");
 
-			return processImgthlaFiles(descriptors, theRequestDetails);
+			return processImgthlaFiles(descriptors);
 		}
 	}
 
@@ -492,18 +492,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return Optional.empty();
 	}
 
-	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
+	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final List<ValueSet> valueSets = new ArrayList<>();
-		final List<ConceptMap> conceptMaps = new ArrayList<>();
-
-		CodeSystem imgthlaCs;
-		try {
-			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
-			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
-		} catch (Exception e) {
-			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
-		}
 
 		boolean foundHlaNom = false;
 		boolean foundHlaXml = false;
@@ -642,10 +633,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		handler = new LoincHandler(codeSystemVersion, code2concept, propertyNamesToTypes, partTypeAndPartNameToPartNumber);
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_FILE.getCode(), LOINC_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
-		// LOINC MapTo codes
-		handler = new LoincMapToHandler(code2concept);
-		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
-
 		// LOINC hierarchy
 		handler = new LoincHierarchyHandler(codeSystemVersion, code2concept);
 		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_HIERARCHY_FILE.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
@@ -729,6 +716,10 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			langFileName = linguisticVariant.getLinguisticVariantFileName();
 			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);
 		}
+
+		// LOINC MapTo codes (last to make sure that all concepts were added to code2concept map)
+		handler = new LoincMapToHandler(code2concept);
+		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		if (theCloseFiles) {
 			IOUtils.closeQuietly(theDescriptors);
