@@ -38,7 +38,7 @@ public class HapiMigrationLock implements AutoCloseable {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLock.class);
 	public static final int SLEEP_MILLIS_BETWEEN_LOCK_RETRIES = 1000;
 	public static final int DEFAULT_MAX_RETRY_ATTEMPTS = 50;
-	public static int ourMaxRetryAttampts = DEFAULT_MAX_RETRY_ATTEMPTS;
+	public static int ourMaxRetryAttempts = DEFAULT_MAX_RETRY_ATTEMPTS;
 	public static final String CLEAR_LOCK_TABLE_WITH_DESCRIPTION = "CLEAR_LOCK_TABLE_WITH_DESCRIPTION";
 
 	private final String myLockDescription = UUID.randomUUID().toString();
@@ -64,14 +64,14 @@ public class HapiMigrationLock implements AutoCloseable {
 				}
 				retryCount++;
 
-				if (retryCount < ourMaxRetryAttampts) {
-					ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, ourMaxRetryAttampts);
+				if (retryCount < ourMaxRetryAttempts) {
+					ourLog.info("Waiting for lock on {}.  Retry {}/{}", myMigrationStorageSvc.getMigrationTablename(), retryCount, ourMaxRetryAttempts);
 					Thread.sleep(SLEEP_MILLIS_BETWEEN_LOCK_RETRIES);
 				}
 			} catch (InterruptedException ex) {
 				// Ignore - if interrupted, we still need to wait for lock to become available
 			}
-		} while (retryCount < ourMaxRetryAttampts);
+		} while (retryCount < ourMaxRetryAttempts);
 
 		String message = "Unable to obtain table lock - another database migration may be running.  If no " +
 			"other database migration is running, then the previous migration did not shut down properly and the " +
@@ -127,6 +127,6 @@ public class HapiMigrationLock implements AutoCloseable {
 	}
 
 	public static void setMaxRetryAttempts(int theMaxRetryAttempts) {
-		ourMaxRetryAttampts = theMaxRetryAttempts;
+		ourMaxRetryAttempts = theMaxRetryAttempts;
 	}
 }
