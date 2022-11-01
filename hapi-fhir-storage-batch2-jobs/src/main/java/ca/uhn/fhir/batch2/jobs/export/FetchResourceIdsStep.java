@@ -81,7 +81,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 			List<String> resourceTypes = params.getResourceTypes();
 			if (resourceTypes == null || resourceTypes.isEmpty()) {
-				resourceTypes = myDaoRegistry.getRegisteredDaoTypes().stream().toList();
+				resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
 			}
 
 			for (String resourceType : resourceTypes) {
