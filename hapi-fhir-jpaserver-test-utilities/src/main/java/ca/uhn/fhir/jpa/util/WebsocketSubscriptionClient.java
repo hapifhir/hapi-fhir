@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 
 public class WebsocketSubscriptionClient implements AfterEachCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(WebsocketSubscriptionClient.class);
-	private final RestfulServerExtension myServer;
+	private final Supplier<RestfulServerExtension> myServerSupplier;
 	private final Supplier<ModelConfig> myModelConfig;
 	private WebSocketClient myWebSocketClient;
 	private SocketImplementation mySocketImplementation;
@@ -29,11 +29,11 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 	/**
 	 * Constructor
 	 */
-	public WebsocketSubscriptionClient(RestfulServerExtension theRestfulServerExtension, Supplier<ModelConfig> theModelConfig) {
-		assert theRestfulServerExtension != null;
+	public WebsocketSubscriptionClient(Supplier<RestfulServerExtension> theServerSupplier, Supplier<ModelConfig> theModelConfig) {
+		assert theServerSupplier != null;
 		assert theModelConfig != null;
 
-		myServer = theRestfulServerExtension;
+		myServerSupplier = theServerSupplier;
 		myModelConfig = theModelConfig;
 	}
 
@@ -41,12 +41,15 @@ public class WebsocketSubscriptionClient implements AfterEachCallback {
 		assert theSubscriptionId != null;
 		assert !theSubscriptionId.contains("/");
 
+		RestfulServerExtension server = myServerSupplier.get();
+		assert server != null;
+
 		myWebSocketClient = new WebSocketClient();
 		mySocketImplementation = new SocketImplementation(theSubscriptionId, EncodingEnum.JSON);
 
 		try {
 			myWebSocketClient.start();
-			URI echoUri = new URI("ws://localhost:" + myServer.getPort() + myServer.getWebsocketContextPath() + myModelConfig.get().getWebsocketContextPath());
+			URI echoUri = new URI("ws://localhost:" + server.getPort() + server.getWebsocketContextPath() + myModelConfig.get().getWebsocketContextPath());
 			ClientUpgradeRequest request = new ClientUpgradeRequest();
 			ourLog.info("Connecting to : {}", echoUri);
 

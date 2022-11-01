@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,9 +51,9 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderQuestionnaireResponseR4Test.class);
 	private static RequestValidatingInterceptor ourValidatingInterceptor;
 
-	@AfterAll
-	public static void afterClassClearContext() {
-		ourRestServer.unregisterInterceptor(ourValidatingInterceptor);
+	@AfterEach
+	public void afterClearInterceptor() {
+		myServer.unregisterInterceptor(ourValidatingInterceptor);
 		ourValidatingInterceptor = null;
 	}
 

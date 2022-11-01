@@ -21,9 +21,10 @@ package ca.uhn.fhir.jpa.config.dstu3;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ParserOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
 
 public class FhirContextDstu3Config {
 	@Primary
@@ -36,10 +37,4 @@ public class FhirContextDstu3Config {
 		return retVal;
 	}
 
-	public static FhirContext configureFhirContext(FhirContext retVal) {
-		// Don't strip versions in some places
-		ParserOptions parserOptions = retVal.getParserOptions();
-		parserOptions.setDontStripVersionsFromReferencesAtPaths("AuditEvent.entity.reference");
-		return retVal;
-	}
 }

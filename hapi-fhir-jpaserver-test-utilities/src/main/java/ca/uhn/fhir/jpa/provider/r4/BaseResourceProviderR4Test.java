@@ -25,7 +25,6 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
-import ca.uhn.fhir.jpa.config.r4b.FhirContextR4BConfig;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.DiffProvider;
@@ -57,39 +56,44 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@ContextConfiguration(classes = BaseResourceProviderR4Test.ServerConfiguration.class)
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-	protected static int ourPort;
-	protected static String ourServerBase;
-	protected static IGenericClient ourClient;
-	protected static RestfulServer ourRestServer;
+
+	// TODO: JA2 These are no longer static but are named like static. I'm going to
+	// rename them in a separate PR that only makes that change so that it's easier to review
+	protected int ourPort;
+	protected String ourServerBase;
+	protected IGenericClient ourClient;
+	protected RestfulServer ourRestServer;
+
+	protected IGenericClient myClient;
+
+	@Autowired
+	@RegisterExtension
+	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContextR4BConfig.configureFhirContext(FhirContext.forR4Cached()))
-		.keepAliveBetweenTests()
-		.withValidationMode(ServerValidationModeEnum.NEVER)
-		.withContextPath("/fhir")
-		.withServletPath("/context/*")
-		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
-	protected IGenericClient myClient;
-	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(()->myServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
 
-			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			s.registerProvider(mySystemProvider);
@@ -130,11 +134,11 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		}).withServerBeforeAll(s -> {
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = ourServer.getPort();
-			ourServerBase = ourServer.getBaseUrl();
-			ourClient = ourServer.getFhirClient();
-			myClient = ourServer.getFhirClient();
-			ourRestServer = ourServer.getRestfulServer();
+			ourPort = myServer.getPort();
+			ourServerBase = myServer.getBaseUrl();
+			ourClient = myServer.getFhirClient();
+			myClient = myServer.getFhirClient();
+			ourRestServer = myServer.getRestfulServer();
 
 			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
@@ -227,6 +231,21 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		return false;
+	}
+
+	@Configuration
+	public static class ServerConfiguration {
+
+		@Bean
+		public RestfulServerExtension restfulServerExtension() {
+			return new RestfulServerExtension(configureFhirContext(FhirContext.forR4Cached()))
+				.keepAliveBetweenTests()
+				.withValidationMode(ServerValidationModeEnum.NEVER)
+				.withContextPath("/fhir")
+				.withServletPath("/context/*")
+				.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
+		}
+
 	}
 
 }

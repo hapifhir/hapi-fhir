@@ -8,6 +8,7 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * This JUnit extension can be used to perform configuration of the
@@ -16,7 +17,8 @@ import java.util.function.Consumer;
  */
 public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 
-	private final RestfulServerExtension myRestfulServerExtension;
+	private Supplier<RestfulServerExtension> myRestfulServerExtensionSupplier;
+	private RestfulServerExtension myRestfulServerExtension;
 	private final List<Consumer<RestfulServer>> myBeforeEachConsumers = new ArrayList<>();
 	private final List<Consumer<RestfulServer>> myBeforeAllConsumers = new ArrayList<>();
 
@@ -26,6 +28,14 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 	public RestfulServerConfigurerExtension(RestfulServerExtension theRestfulServerExtension) {
 		Assert.notNull(theRestfulServerExtension, "theRestfulServerExtension must not be null");
 		myRestfulServerExtension = theRestfulServerExtension;
+	}
+
+	/**
+	 * Constructor - Use this if the server is dependency injected
+	 */
+	public RestfulServerConfigurerExtension(Supplier<RestfulServerExtension> theRestfulServerExtension) {
+		Assert.notNull(theRestfulServerExtension, "theRestfulServerExtension must not be null");
+		myRestfulServerExtensionSupplier = theRestfulServerExtension;
 	}
 
 	/**
@@ -48,7 +58,8 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 
 	@Override
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
-		Assert.isTrue(myRestfulServerExtension.isRunning());
+		ensureServerIsPresentAndRunning();
+
 		String key = getClass().getName();
 
 		// One time
@@ -64,5 +75,12 @@ public class RestfulServerConfigurerExtension implements BeforeEachCallback {
 		for (Consumer<RestfulServer> next : myBeforeAllConsumers) {
 			myRestfulServerExtension.withServer(next::accept);
 		}
+	}
+
+	private void ensureServerIsPresentAndRunning() {
+		if (myRestfulServerExtension == null) {
+			myRestfulServerExtension = myRestfulServerExtensionSupplier.get();
+		}
+		Assert.isTrue(myRestfulServerExtension.isRunning(), "Server is not running");
 	}
 }

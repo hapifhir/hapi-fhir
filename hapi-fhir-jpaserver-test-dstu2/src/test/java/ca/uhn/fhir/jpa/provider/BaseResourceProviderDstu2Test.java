@@ -46,11 +46,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
-			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.registerProvider(mySystemProvider);
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
 
+			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.registerProvider(myAppCtx.getBean(ProcessMessageProvider.class));
 
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(s, mySystemDao, myDaoConfig);

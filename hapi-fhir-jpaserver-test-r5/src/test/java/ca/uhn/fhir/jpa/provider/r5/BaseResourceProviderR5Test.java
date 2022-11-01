@@ -57,9 +57,10 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
-			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
+
+			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			s.registerProvider(mySystemProvider);
 			s.registerProvider(myBinaryAccessProvider);

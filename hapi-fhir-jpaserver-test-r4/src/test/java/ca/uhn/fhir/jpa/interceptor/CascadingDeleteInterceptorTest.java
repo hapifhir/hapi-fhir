@@ -276,8 +276,8 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		HttpDelete delete = new HttpDelete(ourServerBase + "/Organization/" + o0id.getIdPart() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			assertEquals(200, response.getStatusLine().getStatusCode(), deleteResponse);
 			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse, containsString("Cascaded delete to "));
 		}
