@@ -10,6 +10,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -329,6 +330,27 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			ids.add(id);
 		}
 		return ids;
+	}
+
+
+	@Test
+	void testTransactionBundleEntryUri() {
+		CarePlan carePlan = new CarePlan();
+		carePlan.getText().setDivAsString("A CarePlan");
+		carePlan.setId("ACarePlan");
+		myClient.create().resource(carePlan).execute();
+
+		// GET CarePlans from server
+		Bundle bundle = myClient.search()
+			.byUrl(ourServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
+
+		// Create and populate list of CarePlans
+		List<CarePlan> carePlans = new ArrayList<>();
+		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
+
+		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
+		myClient.transaction().withResources(carePlans).execute();
 	}
 
 }
