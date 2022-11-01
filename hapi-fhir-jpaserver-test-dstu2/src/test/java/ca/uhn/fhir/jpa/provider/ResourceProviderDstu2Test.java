@@ -1663,8 +1663,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testEverythingWithNoPagingProvider() {
-		IPagingProvider previousPagingProvider = ourServer.getRestfulServer().getPagingProvider();
-		ourServer.getRestfulServer().setPagingProvider(null);
+		IPagingProvider previousPagingProvider = myServer.getRestfulServer().getPagingProvider();
+		myServer.getRestfulServer().setPagingProvider(null);
 		try {
 
 			Patient p = new Patient();
@@ -1696,7 +1696,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertEquals(null, response.getLink("next"));
 
 		} finally {
-			ourServer.getRestfulServer().setPagingProvider(previousPagingProvider);
+			myServer.getRestfulServer().setPagingProvider(previousPagingProvider);
 		}
 	}
 

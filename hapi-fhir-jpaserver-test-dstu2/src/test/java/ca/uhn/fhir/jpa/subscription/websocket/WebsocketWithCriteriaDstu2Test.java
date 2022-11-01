@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.websocket;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.FhirDstu2Util;
-import ca.uhn.fhir.jpa.subscription.SocketImplementation;
 import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -14,11 +13,7 @@ import ca.uhn.fhir.model.dstu2.resource.Subscription.Channel;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.client.ClientUpgradeRequest;
-import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,29 +22,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 
-import java.net.URI;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import static org.hamcrest.Matchers.contains;
 
 // This is currently disabled as the criteria mechanism was a non-standard experiment
 @Disabled
 public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithCriteriaDstu2Test.class);
-
+	@RegisterExtension
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myModelConfig);
 	private String myPatientId;
 	private String mySubscriptionId;
-
-	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(ourServer, ()->myModelConfig);
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
 	}
-	
+
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
@@ -58,12 +47,12 @@ public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Tes
 		/*
 		 * Create patient
 		 */
-		
+
 		Patient patient = FhirDstu2Util.getPatient();
 		MethodOutcome methodOutcome = ourClient.create().resource(patient).execute();
 		myPatientId = methodOutcome.getId().getIdPart();
 
-		/* 
+		/*
 		 * Create subscription
 		 */
 		Subscription subscription = new Subscription();
@@ -79,7 +68,7 @@ public class WebsocketWithCriteriaDstu2Test extends BaseResourceProviderDstu2Tes
 
 		methodOutcome = ourClient.create().resource(subscription).execute();
 		mySubscriptionId = methodOutcome.getId().getIdPart();
-		
+
 		/*
 		 * Attach websocket
 		 */

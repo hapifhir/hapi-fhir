@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.websocket;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.FhirDstu2Util;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -14,7 +15,6 @@ import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionChannelTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,14 +42,12 @@ import static org.hamcrest.Matchers.contains;
  */
 public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDstu2Test {
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(WebsocketWithSubscriptionIdDstu2Test.class);
-
+	@RegisterExtension
+	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(() -> myServer, () -> myModelConfig);
 	private String myPatientId;
 	private String mySubscriptionId;
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
-
-	@RegisterExtension
-	private final WebsocketSubscriptionClient myWebsocketClientExtension = new WebsocketSubscriptionClient(ourServer, ()->myModelConfig);
 
 	@Override
 	@AfterEach

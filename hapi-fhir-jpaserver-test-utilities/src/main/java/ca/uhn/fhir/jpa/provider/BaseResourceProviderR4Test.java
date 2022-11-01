@@ -140,7 +140,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected IPartitionDao myPartitionDao;
 	@Autowired
-	ResourceCountCache myResourceCountsCache;
+	protected ResourceCountCache myResourceCountsCache;
 
 	public BaseResourceProviderR4Test() {
 		super();
