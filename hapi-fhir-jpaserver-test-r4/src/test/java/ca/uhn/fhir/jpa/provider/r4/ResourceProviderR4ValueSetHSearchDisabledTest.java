@@ -70,10 +70,10 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
 	private ResourceProviderFactory myResourceProviders;

@@ -448,6 +448,31 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		});
 	}
 
+	/**
+	 * See #4206
+	 */
+	@Test
+	public void testUpdateLargeCodeSystemInRapidSuccession() {
+		CodeSystem codeSystem = createCodeSystemWithManyCodes(0, 1000);
+
+		myCodeSystemDao.update(codeSystem, mySrd);
+
+	}
+
+	@Nonnull
+	private static CodeSystem createCodeSystemWithManyCodes(int theCodeCountStart, int theCodeCountEnd) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/A");
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setVersion("1");
+		for (int i = theCodeCountStart; i <= theCodeCountEnd; i++) {
+			codeSystem
+				.addConcept().setCode("A" + i).setDisplay("Code A" + i);
+		}
+		return codeSystem;
+	}
+
 	@Test
 	public void testUpdateCodeSystemContentModeNotPresent() {
 		CodeSystem codeSystem = new CodeSystem();

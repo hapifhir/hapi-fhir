@@ -130,7 +130,7 @@ public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest
 
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<org.hl7.fhir.r4.model.CodeSystem> myCodeSystemDao;
 
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
@@ -140,7 +140,7 @@ public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest
 
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	@Autowired
 	protected ITermReadSvc myTermSvc;

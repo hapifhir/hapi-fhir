@@ -165,7 +165,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 
 	private TermCodeSystemVersion termCodeSystemVersion;
 

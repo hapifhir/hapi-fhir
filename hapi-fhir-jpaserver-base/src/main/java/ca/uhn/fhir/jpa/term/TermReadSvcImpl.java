@@ -831,7 +831,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(theExpansionOptions, theValueSetCodeAccumulator,
 					theAddedCodes, theIncludeOrExclude, theAdd, theExpansionFilter, system, cs);
-				return;
 
 			} else {
 
@@ -2008,74 +2007,75 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return myPreExpandingValueSets;
 	}
 
-	@Override
-	@Transactional
-	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
-
-		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConceptToValidate);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
-
-		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCodingToValidate);
-		boolean haveCoding = canonicalCodingToValidate != null && !canonicalCodingToValidate.isEmpty();
-
-		boolean haveCode = theCodeToValidate != null && !theCodeToValidate.isEmpty();
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(900) + "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = isNotBlank(theValueSetIdentifier);
-		String valueSetIdentifier;
-		if (theValueSetId != null) {
-			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId);
-			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
-			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
-			if (valueSetVersion != null) {
-				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
-			}
-			valueSetIdentifier = valueSetIdentifierBuilder.toString();
-
-		} else if (haveIdentifierParam) {
-			valueSetIdentifier = theValueSetIdentifier;
-		} else {
-			throw new InvalidRequestException(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-		}
-
-		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
-
-		String codeValueToValidate = theCodeToValidate;
-		String codeSystemIdentifierValueToValidate = theCodeSystemIdentifierToValidate;
-		String codeDisplayValueToValidate = theDisplayToValidate;
-
-		if (haveCodeableConcept) {
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String codeSystemIdentifier;
-				if (nextCoding.hasVersion()) {
-					codeSystemIdentifier = nextCoding.getSystem() + "|" + nextCoding.getVersion();
-				} else {
-					codeSystemIdentifier = nextCoding.getSystem();
-				}
-				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, codeSystemIdentifier, nextCoding.getCode(), nextCoding.getDisplay(), valueSetIdentifier);
-				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
-					return nextValidation;
-				}
-			}
-		} else if (haveCoding) {
-			if (canonicalCodingToValidate.hasVersion()) {
-				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem() + "|" + canonicalCodingToValidate.getVersion();
-			} else {
-				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem();
-			}
-			codeValueToValidate = canonicalCodingToValidate.getCode();
-			codeDisplayValueToValidate = canonicalCodingToValidate.getDisplay();
-		}
-
-		return validateCode(validationContext, theOptions, codeSystemIdentifierValueToValidate, codeValueToValidate, codeDisplayValueToValidate, valueSetIdentifier);
-	}
+	// FIXME: remove
+//	@Override
+//	@Transactional
+//	public CodeValidationResult validateCode(ConceptValidationOptions theOptions, IIdType theValueSetId, String theValueSetIdentifier, String theCodeSystemIdentifierToValidate, String theCodeToValidate, String theDisplayToValidate, IBaseDatatype theCodingToValidate, IBaseDatatype theCodeableConceptToValidate) {
+//
+//		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConceptToValidate);
+//		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+//
+//		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCodingToValidate);
+//		boolean haveCoding = canonicalCodingToValidate != null && !canonicalCodingToValidate.isEmpty();
+//
+//		boolean haveCode = theCodeToValidate != null && !theCodeToValidate.isEmpty();
+//
+//		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+//			throw new InvalidRequestException(Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
+//		}
+//		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+//			throw new InvalidRequestException(Msg.code(900) + "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
+//		}
+//
+//		boolean haveIdentifierParam = isNotBlank(theValueSetIdentifier);
+//		String valueSetIdentifier;
+//		if (theValueSetId != null) {
+//			IBaseResource valueSet = myDaoRegistry.getResourceDao("ValueSet").read(theValueSetId);
+//			StringBuilder valueSetIdentifierBuilder = new StringBuilder(CommonCodeSystemsTerminologyService.getValueSetUrl(valueSet));
+//			String valueSetVersion = CommonCodeSystemsTerminologyService.getValueSetVersion(valueSet);
+//			if (valueSetVersion != null) {
+//				valueSetIdentifierBuilder.append("|").append(valueSetVersion);
+//			}
+//			valueSetIdentifier = valueSetIdentifierBuilder.toString();
+//
+//		} else if (haveIdentifierParam) {
+//			valueSetIdentifier = theValueSetIdentifier;
+//		} else {
+//			foo;
+//		}
+//
+//		ValidationSupportContext validationContext = new ValidationSupportContext(provideValidationSupport());
+//
+//		String codeValueToValidate = theCodeToValidate;
+//		String codeSystemIdentifierValueToValidate = theCodeSystemIdentifierToValidate;
+//		String codeDisplayValueToValidate = theDisplayToValidate;
+//
+//		if (haveCodeableConcept) {
+//			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
+//				Coding nextCoding = codeableConcept.getCoding().get(i);
+//				String codeSystemIdentifier;
+//				if (nextCoding.hasVersion()) {
+//					codeSystemIdentifier = nextCoding.getSystem() + "|" + nextCoding.getVersion();
+//				} else {
+//					codeSystemIdentifier = nextCoding.getSystem();
+//				}
+//				CodeValidationResult nextValidation = validateCode(validationContext, theOptions, codeSystemIdentifier, nextCoding.getCode(), nextCoding.getDisplay(), valueSetIdentifier);
+//				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+//					return nextValidation;
+//				}
+//			}
+//		} else if (haveCoding) {
+//			if (canonicalCodingToValidate.hasVersion()) {
+//				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem() + "|" + canonicalCodingToValidate.getVersion();
+//			} else {
+//				codeSystemIdentifierValueToValidate = canonicalCodingToValidate.getSystem();
+//			}
+//			codeValueToValidate = canonicalCodingToValidate.getCode();
+//			codeDisplayValueToValidate = canonicalCodingToValidate.getDisplay();
+//		}
+//
+//		return validateCode(validationContext, theOptions, codeSystemIdentifierValueToValidate, codeValueToValidate, codeDisplayValueToValidate, valueSetIdentifier);
+//	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
 		return myDeferredStorageSvc != null && !myDeferredStorageSvc.isStorageQueueEmpty();
@@ -2494,69 +2494,69 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return new FhirVersionIndependentConcept(system, code, null, systemVersion);
 	}
 
-	@Override
-	@Transactional
-	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
-
-		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
-
-		Coding coding = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
-		boolean haveCoding = coding != null && !coding.isEmpty();
-
-		boolean haveCode = theCode != null && !theCode.isEmpty();
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
-		String codeSystemUrl;
-		if (theCodeSystemId != null) {
-			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
-			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
-		} else if (haveIdentifierParam) {
-			codeSystemUrl = theCodeSystemUrl;
-		} else {
-			throw new InvalidRequestException(Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
-		}
-
-
-		String code = theCode;
-		String display = theDisplay;
-
-		if (haveCodeableConcept) {
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				if (nextCoding.hasSystem()) {
-					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-					}
-					codeSystemUrl = nextCoding.getSystem();
-				}
-				code = nextCoding.getCode();
-				display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
-					return nextValidation;
-				}
-			}
-		} else if (haveCoding) {
-			if (coding.hasSystem()) {
-				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-				}
-				codeSystemUrl = coding.getSystem();
-			}
-			code = coding.getCode();
-			display = coding.getDisplay();
-		}
-
-		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-	}
+//	@Override
+//	@Transactional
+//	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept) {
+//
+//		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
+//		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+//
+//		Coding coding = myVersionCanonicalizer.codingToCanonical(theCoding);
+//		boolean haveCoding = coding != null && !coding.isEmpty();
+//
+//		boolean haveCode = theCode != null && !theCode.isEmpty();
+//
+//		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+//			throw new InvalidRequestException(Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
+//		}
+//		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+//			throw new InvalidRequestException(Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+//		}
+//
+//		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
+//		String codeSystemUrl;
+//		if (theCodeSystemId != null) {
+//			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
+//			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+//		} else if (haveIdentifierParam) {
+//			codeSystemUrl = theCodeSystemUrl;
+//		} else {
+//			throw new InvalidRequestException(Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+//		}
+//
+//
+//		String code = theCode;
+//		String display = theDisplay;
+//
+//		if (haveCodeableConcept) {
+//			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
+//				Coding nextCoding = codeableConcept.getCoding().get(i);
+//				if (nextCoding.hasSystem()) {
+//					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+//						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+//					}
+//					codeSystemUrl = nextCoding.getSystem();
+//				}
+//				code = nextCoding.getCode();
+//				display = nextCoding.getDisplay();
+//				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
+//				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+//					return nextValidation;
+//				}
+//			}
+//		} else if (haveCoding) {
+//			if (coding.hasSystem()) {
+//				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
+//					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+//				}
+//				codeSystemUrl = coding.getSystem();
+//			}
+//			code = coding.getCode();
+//			display = coding.getDisplay();
+//		}
+//
+//		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
+//	}
 
 	/**
 	 * When the search is for unversioned loinc system it uses the forcedId to obtain the current

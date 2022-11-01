@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -34,20 +36,20 @@ import java.util.List;
  * #L%
  */
 
-public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
+public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
 	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest);
 
 	@Transactional
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, RequestDetails theRequestDetails);
 
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails);
+	IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails);
 
-	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, RequestDetails theRequestDetails);
+	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB, RequestDetails theRequestDetails);
 
-	IValidationSupport.CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
+	IValidationSupport.CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails);
 
 	class SubsumesResult {
 

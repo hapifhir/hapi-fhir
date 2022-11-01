@@ -125,8 +125,6 @@ import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.ChargeItem;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.CompartmentDefinition;
@@ -294,7 +292,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CareTeam> myCareTeamDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -494,7 +492,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -754,7 +752,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChainR4.invalidateCaches();
 	}
 
