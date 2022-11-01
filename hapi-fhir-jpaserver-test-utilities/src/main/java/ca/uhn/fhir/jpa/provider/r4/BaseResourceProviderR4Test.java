@@ -46,7 +46,6 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -82,14 +81,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		.withContextPath("/fhir")
 		.withServletPath("/context/*")
 		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
-
+	protected IGenericClient myClient;
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
-		.withServer(s -> {
+		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
-			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
+
+			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			myFhirContext.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			s.registerProvider(mySystemProvider);
 			s.registerProvider(myBinaryAccessProvider);
@@ -104,8 +105,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
 			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
-
-			s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 
 			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
@@ -129,6 +128,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
+		}).withServerBeforeAll(s -> {
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();
@@ -140,11 +140,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
-
 		});
-
-
-	protected IGenericClient myClient;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired

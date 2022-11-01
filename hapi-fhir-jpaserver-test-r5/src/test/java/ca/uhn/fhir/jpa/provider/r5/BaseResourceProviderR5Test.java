@@ -55,7 +55,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 	protected IGenericClient myClient;
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
-		.withServer(s -> {
+		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -99,6 +99,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
+		}).withServerBeforeAll(s -> {
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();

@@ -55,7 +55,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
-		.withServer(s -> {
+		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -92,6 +92,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
+		}).withServerBeforeAll(s -> {
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();
@@ -102,7 +103,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
-
 		});
 
 

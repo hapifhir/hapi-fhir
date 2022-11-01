@@ -89,7 +89,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testRead() throws IOException, InterruptedException {
+	public void testRead() throws IOException {
 		IIdType id = createDocumentReference(true);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);

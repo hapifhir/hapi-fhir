@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.config.r4b.FhirContextR4BConfig;
 import ca.uhn.fhir.jpa.dao.r4b.BaseJpaR4BTest;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
-import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
@@ -51,7 +50,7 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
-		.withServer(s -> {
+		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -90,6 +89,8 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
+		}).withServerBeforeAll(s -> {
+
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();
@@ -100,7 +101,6 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 			if (shouldLogClient()) {
 				ourClient.registerInterceptor(new LoggingInterceptor());
 			}
-
 		});
 
 	protected IGenericClient myClient;

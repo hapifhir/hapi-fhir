@@ -23,9 +23,7 @@ package ca.uhn.fhir.test.utilities.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.apache.commons.lang3.Validate;
@@ -35,7 +33,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
@@ -45,9 +45,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private IGenericClient myFhirClient;
 	private RestfulServer myServlet;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private Map<String, Object> myRunningServerUserData = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 	private IPagingProvider myPagingProvider;
-
 	/**
 	 * Constructor
 	 */
@@ -65,6 +65,13 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	public RestfulServerExtension(FhirVersionEnum theFhirVersionEnum) {
 		Validate.notNull(theFhirVersionEnum);
 		myFhirVersion = theFhirVersionEnum;
+	}
+
+	/**
+	 * User data map which is automatically cleared when the server is stopped
+	 */
+	public Map<String, Object> getRunningServerUserData() {
+		return myRunningServerUserData;
 	}
 
 	@Override
@@ -101,6 +108,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			return;
 		}
 		myFhirClient = null;
+		myRunningServerUserData.clear();
 	}
 
 

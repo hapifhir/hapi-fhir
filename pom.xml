@@ -793,6 +793,7 @@
         <apache_karaf_version>4.2.5</apache_karaf_version>
         <aries_spifly_version>1.2</aries_spifly_version>
         <caffeine_version>3.1.1</caffeine_version>
+        <checkstyle_version>10.4</checkstyle_version>
         <commons_codec_version>1.15</commons_codec_version>
         <commons_compress_version>1.21</commons_compress_version>
         <commons_text_version>1.10.0</commons_text_version>
@@ -1012,6 +1013,11 @@
 				<groupId>com.jamesmurty.utils</groupId>
 				<artifactId>java-xmlbuilder</artifactId>
 				<version>${com_jamesmurty_utils_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.puppycrawl.tools</groupId>
+				<artifactId>checkstyle</artifactId>
+				<version>${checkstyle_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
@@ -1980,27 +1986,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<!--
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ossrh</id>
-			<name>Sonatype</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>maven2</id>
-			<name>Maven2</name>
-			<url>https://central.maven.org/maven2/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-	</pluginRepositories>
-	-->
-
 	<build>
 		<pluginManagement>
 			<plugins>
@@ -2012,7 +1997,7 @@
 						<dependency>
 							<groupId>com.puppycrawl.tools</groupId>
 							<artifactId>checkstyle</artifactId>
-							<version>8.43</version>
+							<version>${checkstyle_version}</version>
 						</dependency>
                         <dependency>
                             <groupId>ca.uhn.hapi.fhir</groupId>
@@ -2371,9 +2356,6 @@
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-mdm">
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
-								</copy>
-								<copy todir="target/site/apidocs-jpaserver-batch">
-									<fileset dir="hapi-fhir-batch/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-storage-batch2">
 									<fileset dir="hapi-fhir-storage-batch2/target/site/apidocs"/>
@@ -2794,7 +2776,6 @@
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
-				<module>hapi-fhir-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-sql-migrate</module>
 				<module>hapi-fhir-jpaserver-mdm</module>

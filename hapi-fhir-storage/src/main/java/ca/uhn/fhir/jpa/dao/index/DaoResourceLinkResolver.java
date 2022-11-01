@@ -81,8 +81,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	public IResourceLookup findTargetResource(@Nonnull RequestPartitionId theRequestPartitionId, String theSourceResourceName, PathAndRef thePathAndRef, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
 		IBaseReference targetReference = thePathAndRef.getRef();
-		IIdType targetResourceId = targetReference.getReferenceElement();
 		String sourcePath = thePathAndRef.getPath();
+
+		IIdType targetResourceId = targetReference.getReferenceElement();
+		if (targetResourceId.isEmpty() && targetReference.getResource() != null) {
+			targetResourceId = targetReference.getResource().getIdElement();
+		}
 
 		String resourceType = targetResourceId.getResourceType();
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(resourceType);

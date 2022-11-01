@@ -15,13 +15,9 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.test.utilities.server.SpringContextGrabbingTestExecutionListener;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -48,7 +44,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@RegisterExtension
 	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
-		.withServer(s -> {
+		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			s.registerProvider(mySystemProvider);
@@ -64,11 +60,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			DatabaseBackedPagingProvider pagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 			s.setPagingProvider(pagingProvider);
 
+		}).withServerBeforeAll(s->{
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
 			ourPort = ourServer.getPort();
 			ourServerBase = ourServer.getBaseUrl();
 			ourClient = ourServer.getFhirClient();
-
 		});
 
 	public BaseResourceProviderDstu2Test() {
