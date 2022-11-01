@@ -18,6 +18,7 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -25,25 +26,26 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-	protected static int ourPort;
-	protected static String ourServerBase;
+
+	// TODO: JA2 These are no longer static but are named like static. I'm going to
+	// rename them in a separate PR that only makes that change so that it's easier to review
+	protected int ourPort;
+	protected String ourServerBase;
+	protected IGenericClient ourClient;
 	@Autowired
-	protected static PlatformTransactionManager ourTxManager;
-	protected static IGenericClient ourClient;
+	protected PlatformTransactionManager ourTxManager;
+
+	@Autowired
 	@RegisterExtension
-	protected static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forDstu2Cached())
-		.keepAliveBetweenTests()
-		.withValidationMode(ServerValidationModeEnum.NEVER)
-		.withContextPath("/fhir")
-		.withServletPath("/context/*")
-		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
+	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.registerProvider(mySystemProvider);
@@ -62,9 +64,9 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 		}).withServerBeforeAll(s->{
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = ourServer.getPort();
-			ourServerBase = ourServer.getBaseUrl();
-			ourClient = ourServer.getFhirClient();
+			ourPort = myServer.getPort();
+			ourServerBase = myServer.getBaseUrl();
+			ourClient = myServer.getFhirClient();
 		});
 
 	public BaseResourceProviderDstu2Test() {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider;
 
 /*-
  * #%L
@@ -22,19 +22,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexProvider;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
-import ca.uhn.fhir.jpa.provider.DiffProvider;
-import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
-import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
-import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
-import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -56,8 +48,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -65,10 +55,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.config.r4.FhirContextR4Config.configureFhirContext;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@ContextConfiguration(classes = BaseResourceProviderR4Test.ServerConfiguration.class)
+@ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	@RegisterExtension
@@ -80,7 +69,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected String ourServerBase;
 	protected IGenericClient ourClient;
 	protected RestfulServer ourRestServer;
-
 	protected IGenericClient myClient;
 
 	@Autowired
@@ -231,21 +219,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		}
 
 		return false;
-	}
-
-	@Configuration
-	public static class ServerConfiguration {
-
-		@Bean
-		public RestfulServerExtension restfulServerExtension() {
-			return new RestfulServerExtension(configureFhirContext(FhirContext.forR4Cached()))
-				.keepAliveBetweenTests()
-				.withValidationMode(ServerValidationModeEnum.NEVER)
-				.withContextPath("/fhir")
-				.withServletPath("/context/*")
-				.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
-		}
-
 	}
 
 }

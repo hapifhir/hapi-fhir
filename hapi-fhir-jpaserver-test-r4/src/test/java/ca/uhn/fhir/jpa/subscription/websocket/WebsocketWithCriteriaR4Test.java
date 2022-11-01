@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.websocket;
 
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.FhirR4Util;
 import ca.uhn.fhir.jpa.util.WebsocketSubscriptionClient;
 import ca.uhn.fhir.rest.api.MethodOutcome;

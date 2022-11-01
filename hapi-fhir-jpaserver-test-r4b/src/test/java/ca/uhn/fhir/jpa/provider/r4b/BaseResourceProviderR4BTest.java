@@ -1,19 +1,16 @@
 package ca.uhn.fhir.jpa.provider.r4b;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.config.r4b.FhirContextR4BConfig;
 import ca.uhn.fhir.jpa.dao.r4b.BaseJpaR4BTest;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
+import ca.uhn.fhir.jpa.provider.ServerConfiguration;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -24,32 +21,32 @@ import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
 
+@ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-	protected static int ourPort;
-	protected static String ourServerBase;
-	protected static IGenericClient ourClient;
-	protected static RestfulServer ourRestServer;
+
+	// TODO: JA2 These are no longer static but are named like static. I'm going to
+	// rename them in a separate PR that only makes that change so that it's easier to review
+	protected int ourPort;
+	protected String ourServerBase;
+	protected IGenericClient ourClient;
+	protected RestfulServer ourRestServer;
+
+	@Autowired
+	@RegisterExtension
+	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContextR4BConfig.configureFhirContext(FhirContext.forR4BCached()))
-		.keepAliveBetweenTests()
-		.withValidationMode(ServerValidationModeEnum.NEVER)
-		.withContextPath("/fhir")
-		.withServletPath("/context/*")
-		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
-
-	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -91,10 +88,10 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 		}).withServerBeforeAll(s -> {
 
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = ourServer.getPort();
-			ourServerBase = ourServer.getBaseUrl();
-			ourClient = ourServer.getFhirClient();
-			ourRestServer = ourServer.getRestfulServer();
+			ourPort = myServer.getPort();
+			ourServerBase = myServer.getBaseUrl();
+			ourClient = myServer.getFhirClient();
+			ourRestServer = myServer.getRestfulServer();
 
 			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
@@ -120,10 +117,6 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 		if (ourRestServer != null) {
 			ourRestServer.getInterceptorService().unregisterAllInterceptors();
 		}
-	}
-
-	@BeforeEach
-	public void before() throws Exception {
 	}
 
 	protected boolean shouldLogClient() {

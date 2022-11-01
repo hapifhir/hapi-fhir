@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.dstu3.FhirContextDstu3Config;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.ProcessMessageProvider;
+import ca.uhn.fhir.jpa.provider.ServerConfiguration;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -28,6 +26,8 @@ import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.ArrayList;
@@ -36,25 +36,25 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-	protected static int ourPort;
-	protected static String ourServerBase;
-	protected static IGenericClient ourClient;
-	protected static RestfulServer ourRestServer;
+
+	// TODO: JA2 These are no longer static but are named like static. I'm going to
+	// rename them in a separate PR that only makes that change so that it's easier to review
+	protected int ourPort;
+	protected String ourServerBase;
+	protected IGenericClient ourClient;
+	protected RestfulServer ourRestServer;
+
+	@Autowired
+	@RegisterExtension
+	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected static RestfulServerExtension ourServer = new RestfulServerExtension(FhirContextDstu3Config.configureFhirContext(FhirContext.forDstu3Cached()))
-		.keepAliveBetweenTests()
-		.withValidationMode(ServerValidationModeEnum.NEVER)
-		.withContextPath("/fhir")
-		.withServletPath("/context/*")
-		.withSpringWebsocketSupport(WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
-
-	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(ourServer)
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
 		.withServerBeforeEach(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
@@ -95,10 +95,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 		}).withServerBeforeAll(s -> {
 			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = ourServer.getPort();
-			ourServerBase = ourServer.getBaseUrl();
-			ourClient = ourServer.getFhirClient();
-			ourRestServer = ourServer.getRestfulServer();
+			ourPort = myServer.getPort();
+			ourServerBase = myServer.getBaseUrl();
+			ourClient = myServer.getFhirClient();
+			ourRestServer = myServer.getRestfulServer();
 
 			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
@@ -115,11 +115,13 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	public void after() throws Exception {
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myResourceCountsCache.clear();
-		ourServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
+		super.before();
 		myResourceCountsCache.clear();
 	}
 
@@ -128,7 +130,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	protected List<String> toNameList(Bundle resp) {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (BundleEntryComponent next : resp.getEntry()) {
 			Patient nextPt = (Patient) next.getResource();
 			String nextStr = nextPt.getName().size() > 0 ? nextPt.getName().get(0).getGivenAsSingleString() + " " + nextPt.getName().get(0).getFamily() : "";
@@ -182,13 +184,4 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 		return new ParametersParameterComponent();
 	}
 
-	public static boolean hasParameterByName(Parameters theParameters, String theName) {
-		for (ParametersParameterComponent param : theParameters.getParameter()) {
-			if (param.getName().equals(theName)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
 }
