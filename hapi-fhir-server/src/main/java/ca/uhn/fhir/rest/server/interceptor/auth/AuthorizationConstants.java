@@ -24,6 +24,7 @@ public class AuthorizationConstants {
 
 	public static final int ORDER_CONSENT_INTERCEPTOR = 100;
 	public static final int ORDER_AUTH_INTERCEPTOR = 200;
+	public static final int ORDER_CONVERTER_INTERCEPTOR = 300;
 
 	private AuthorizationConstants() {
 		super();
