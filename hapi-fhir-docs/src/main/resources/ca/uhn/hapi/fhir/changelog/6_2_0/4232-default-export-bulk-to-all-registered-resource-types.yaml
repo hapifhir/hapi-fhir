@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4232
+jira: SMILE-3685
+title: "When bulk exporting, if no resource type param is provided, default to all registered types instead of throwing an error about the lack of type parameter."

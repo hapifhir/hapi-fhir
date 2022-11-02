@@ -31,6 +31,7 @@ import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.jobs.models.Id;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -54,6 +55,9 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
 	private DaoConfig myDaoConfig;
 
 	@Nonnull
@@ -75,7 +79,12 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		try {
 			Set<Id> submittedIds = new HashSet<>();
 
-			for (String resourceType : params.getResourceTypes()) {
+			List<String> resourceTypes = params.getResourceTypes();
+			if (resourceTypes == null || resourceTypes.isEmpty()) {
+				resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
+			}
+
+			for (String resourceType : resourceTypes) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
