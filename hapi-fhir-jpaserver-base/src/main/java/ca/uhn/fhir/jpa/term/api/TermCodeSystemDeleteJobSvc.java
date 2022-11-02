@@ -121,6 +121,11 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	public void deleteCodeSystemVersion(long theVersionPid) {
 		ourLog.debug("Executing for codeSystemVersionId: {}", theVersionPid);
 
+		// Force a failure for unit tests
+		if (ourFailNextDeleteCodeSystemVersion.getAndSet(false)) {
+			Validate.isTrue(false,"Unit test exception");
+		}
+
 		// if TermCodeSystemVersion being deleted is current, disconnect it form TermCodeSystem
 		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
 		if (codeSystemOpt.isPresent()) {
@@ -142,9 +147,6 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	@Override
 	public void deleteCodeSystem(long thePid) {
 		ourLog.info("Deleting code system by id : {}", thePid);
-		if (ourFailNextDeleteCodeSystemVersion.getAndSet(false)) {
-			Validate.isTrue(false,"Unit test exception");
-		}
 
 		Optional<TermCodeSystem> csop = myTermCodeSystemDao.findById(thePid);
 		if (csop.isPresent()) {

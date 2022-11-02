@@ -30,8 +30,6 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -250,7 +248,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 			new SystemRequestDetails(), Collections.singletonList(valueSet), Collections.emptyList());
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
-		await().atMost(10, SECONDS).until(myTerminologyDeferredStorageSvc::isStorageQueueEmpty);
+		await().atMost(10, SECONDS).until(() -> myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 

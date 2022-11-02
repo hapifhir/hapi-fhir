@@ -423,7 +423,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
-		if (!myDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.info("Note that some concept saving has been deferred");
 		}
 	}

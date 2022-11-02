@@ -32,8 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.dialect.PostgreSQL10Dialect;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -66,7 +64,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -253,7 +250,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 
 	private void saveAllDeferredNoTimeout() {
-		while( ! myTerminologyDeferredStorageSvc.isStorageQueueEmpty() ) {
+		while( ! myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true) ) {
 			myTerminologyDeferredStorageSvc.saveDeferred();
 		}
 	}

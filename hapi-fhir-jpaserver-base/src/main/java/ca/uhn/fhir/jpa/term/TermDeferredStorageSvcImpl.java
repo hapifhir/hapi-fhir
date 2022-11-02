@@ -278,7 +278,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
 			Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
 
-		while (!isStorageQueueEmpty()) {
+		// Don't include executing jobs here since there's no point in thrashing over and over
+		// in a busy wait while we wait for batch2 jobs to finish
+		while (!isStorageQueueEmpty(false)) {
 			if (timeoutManager.checkTimeout()) {
 				ourLog.info(toString());
 			}
@@ -383,14 +385,16 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 
 	@Override
-	public boolean isStorageQueueEmpty() {
+	public boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs) {
 		boolean retVal = !isProcessDeferredPaused();
 		retVal &= !isDeferredConcepts();
 		retVal &= !isConceptLinksToSaveLater();
 		retVal &= !isDeferredValueSets();
 		retVal &= !isDeferredConceptMaps();
 		retVal &= !isDeferredCodeSystemDeletions();
-		retVal &= !isJobsExecuting();
+		if (theIncludeExecutingJobs) {
+			retVal &= !isJobsExecuting();
+		}
 		return retVal;
 	}
 

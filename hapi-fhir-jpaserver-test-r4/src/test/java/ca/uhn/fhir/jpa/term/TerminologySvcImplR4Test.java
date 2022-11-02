@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,9 +56,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
 
+	@Override
 	@AfterEach
 	public void after() {
+		super.after();
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+		TermCodeSystemDeleteJobSvc.setFailNextDeleteCodeSystemVersion(false);
 	}
 
 	@Test
@@ -458,12 +462,16 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		});
 	}
 
+//	@Autowired
+//	proivate
+
 	/**
 	 * See #4206
 	 */
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
+		TermCodeSystemDeleteJobSvc.setFailNextDeleteCodeSystemVersion(true);
 
 		CodeSystem codeSystem;
 		codeSystem = createCodeSystemWithManyCodes(0, 1000);
@@ -473,10 +481,17 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem = createCodeSystemWithManyCodes(2, 1002);
 		myCodeSystemDao.update(codeSystem, mySrd);
 
-		// FIXME: remove atLeast
-		await().atLeast(10, TimeUnit.MINUTES).until(() -> {
+		// FIXME: remove atMost
+		await().atMost(10, TimeUnit.MINUTES).until(() -> {
+
+//			runInTransaction(()->{
+//				myBatch2JobHelper.
+//			});
+
+
+
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
-			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));
 	}
 

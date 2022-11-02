@@ -22,18 +22,9 @@ package ca.uhn.fhir.jpa.subscription.channel.impl;
 
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +35,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	private final BlockingQueue<?> myQueue;
 
 	public LinkedBlockingChannel(String theName, Executor theExecutor, BlockingQueue<?> theQueue) {
-		super(wrapExecutor(theExecutor));
+		super(theExecutor);
 		myName = theName;
 		myQueue = theQueue;
 	}
@@ -65,49 +56,6 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	@Override
 	public void destroy() {
 		// nothing
-	}
-
-	private static class WrappedExecutor implements Executor {
-		private final Executor myWrap;
-
-		public WrappedExecutor(Executor theExecutor) {
-			myWrap = theExecutor;
-		}
-
-		@Override
-		public void execute(@Nonnull Runnable command) {
-			myWrap.execute(new WrappedRunnable(command));
-		}
-
-		private class WrappedRunnable implements Runnable {
-			private final Runnable myWrappedRunnable;
-
-			public WrappedRunnable(Runnable theCommand) {
-				myWrappedRunnable = theCommand;
-			}
-
-			@Override
-			public void run() {
-				RetryTemplate retryTemplate = new RetryTemplate();
-				final FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
-				fixedBackOffPolicy.setBackOffPeriod(DateUtils.MILLIS_PER_MINUTE);
-				retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
-
-				final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(100, Collections.singletonMap(Exception.class, true));
-				retryTemplate.setRetryPolicy(retryPolicy);
-				retryTemplate.execute(new RetryCallback<Object, InternalErrorException>() {
-					@Override
-					public Object doWithRetry(RetryContext context) {
-						myWrappedRunnable.run();
-						return null;
-					}
-				});
-			}
-		}
-	}
-
-	private static Executor wrapExecutor(Executor theExecutor) {
-		return new WrappedExecutor(theExecutor);
 	}
 
 	/**

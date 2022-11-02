@@ -37,7 +37,7 @@ public interface ITermDeferredStorageSvc {
 
 	void saveDeferred();
 
-	boolean isStorageQueueEmpty();
+	boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs);
 
 	/**
 	 * This is mostly for unit tests - we can disable processing of deferred concepts

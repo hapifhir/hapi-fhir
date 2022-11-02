@@ -39,6 +39,7 @@ import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -104,7 +105,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};
-		ThreadPoolExecutor executor = new ThreadPoolExecutor(
+		Executor executor = new ThreadPoolExecutor(
 			theConcurrentConsumers,
 			theConcurrentConsumers,
 			0L,
@@ -112,6 +113,8 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			queue,
 			threadFactory,
 			rejectedExecutionHandler);
+
+		executor = wrapExecutor(executor, channelName);
 
 		LinkedBlockingChannel retval = new LinkedBlockingChannel(channelName, executor, queue);
 		return retval;
@@ -132,4 +135,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		myChannels.clear();
 	}
 
+	private static Executor wrapExecutor(Executor theExecutor, String theChannelName) {
+		return new LinkedBlockingChannelExecutorWrapper(theExecutor, theChannelName);
+	}
 }
