@@ -42,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
-	private MigrationTaskList myTaskList = new MigrationTaskList();
+	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 	private final DriverTypeEnum myDriverType;
@@ -101,44 +101,28 @@ public class HapiMigrator {
 
 	public MigrationResult migrate() {
 		ourLog.info("Loaded {} migration tasks", myTaskList.size());
-		MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
-		ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
-
 		MigrationResult retval = new MigrationResult();
 
-		try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
+		// Lock the migration table so only one server migrates the database at once
+		try (HapiMigrationLock ignored = new HapiMigrationLock(myHapiMigrationStorageSvc)) {
+			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
+			ourLog.info("{} of these {} migration tasks are new.  Executing them now.", newTaskList.size(), myTaskList.size());
 
-			newTaskList.forEach(next -> {
+			try (DriverTypeEnum.ConnectionProperties connectionProperties = getDriverType().newConnectionProperties(getDataSource())) {
 
-				next.setDriverType(getDriverType());
-				next.setDryRun(isDryRun());
-				next.setNoColumnShrink(isNoColumnShrink());
-				next.setConnectionProperties(connectionProperties);
+				newTaskList.forEach(next -> {
 
-				StopWatch sw = new StopWatch();
-				try {
-					if (isDryRun()) {
-						ourLog.info("Dry run {} {}", next.getMigrationVersion(), next.getDescription());
-					} else {
-						ourLog.info("Executing {} {}", next.getMigrationVersion(), next.getDescription());
-					}
-					preExecute(next);
-					next.execute();
-					postExecute(next, sw, true);
-					retval.changes += next.getChangesCount();
-					retval.executedStatements.addAll(next.getExecutedStatements());
-					retval.succeededTasks.add(next);
-				} catch (SQLException|HapiMigrationException e) {
-					retval.failedTasks.add(next);
-					postExecute(next, sw, false);
-					String description = next.getDescription();
-					if (isBlank(description)) {
-						description = next.getClass().getSimpleName();
-					}
-					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
-					throw new HapiMigrationException(Msg.code(47) + prefix + e, retval, e);
-				}
-			});
+					next.setDriverType(getDriverType());
+					next.setDryRun(isDryRun());
+					next.setNoColumnShrink(isNoColumnShrink());
+					next.setConnectionProperties(connectionProperties);
+
+					executeTask(next, retval);
+				});
+			}
+		} catch (Exception e) {
+			ourLog.error("Migration failed", e);
+			throw e;
 		}
 
 		ourLog.info(retval.summary());
@@ -149,6 +133,32 @@ public class HapiMigrator {
 		}
 
 		return retval;
+	}
+
+	private void executeTask(BaseTask theTask, MigrationResult theMigrationResult) {
+		StopWatch sw = new StopWatch();
+		try {
+			if (isDryRun()) {
+				ourLog.info("Dry run {} {}", theTask.getMigrationVersion(), theTask.getDescription());
+			} else {
+				ourLog.info("Executing {} {}", theTask.getMigrationVersion(), theTask.getDescription());
+			}
+			preExecute(theTask);
+			theTask.execute();
+			postExecute(theTask, sw, true);
+			theMigrationResult.changes += theTask.getChangesCount();
+			theMigrationResult.executedStatements.addAll(theTask.getExecutedStatements());
+			theMigrationResult.succeededTasks.add(theTask);
+		} catch (SQLException | HapiMigrationException e) {
+			theMigrationResult.failedTasks.add(theTask);
+			postExecute(theTask, sw, false);
+			String description = theTask.getDescription();
+			if (isBlank(description)) {
+				description = theTask.getClass().getSimpleName();
+			}
+			String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
+			throw new HapiMigrationException(Msg.code(47) + prefix + e, theMigrationResult, e);
+		}
 	}
 
 	private void preExecute(BaseTask theTask) {
@@ -175,11 +185,6 @@ public class HapiMigrator {
 
 	public void addTask(BaseTask theTask) {
 		myTaskList.add(theTask);
-	}
-
-	@Nonnull
-	public List<IHapiMigrationCallback> getCallbacks() {
-		return myCallbacks;
 	}
 
 	public void setCallbacks(@Nonnull List<IHapiMigrationCallback> theCallbacks) {

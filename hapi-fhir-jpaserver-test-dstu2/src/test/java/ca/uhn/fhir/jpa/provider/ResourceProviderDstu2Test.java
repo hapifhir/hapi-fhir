@@ -58,6 +58,7 @@ import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
@@ -325,6 +326,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.forResource(Organization.class)
 			.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
 			.count(10)
+			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.returnBundle(Bundle.class)
 			.execute();
 		assertEquals(100, found.getTotalElement().getValue().intValue());
@@ -334,10 +336,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.search()
 			.forResource(Organization.class)
 			.where(Organization.NAME.matches().value("rpdstu2_testCountParam_01"))
-			.count(999)
+			.count(50)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(100, found.getTotalElement().getValue().intValue());
 		assertEquals(50, found.getEntry().size());
 
 	}

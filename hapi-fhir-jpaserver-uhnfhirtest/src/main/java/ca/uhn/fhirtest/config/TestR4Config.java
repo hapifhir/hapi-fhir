@@ -102,8 +102,7 @@ public class TestR4Config {
 		}
 		retVal.setUsername(myDbUsername);
 		retVal.setPassword(myDbPassword);
-		retVal.setDefaultQueryTimeout(20);
-		retVal.setTestOnBorrow(true);
+		TestR5Config.applyCommonDatasourceParams(retVal);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)

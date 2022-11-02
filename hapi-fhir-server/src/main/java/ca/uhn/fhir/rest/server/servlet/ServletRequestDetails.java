@@ -24,8 +24,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -204,6 +206,15 @@ public class ServletRequestDetails extends RequestDetails {
 			}
 		}
 		return Collections.unmodifiableMap(retVal);
+	}
+
+	/**
+	 * Returns true if the `Prefer` header contains a value of `respond-async`
+	 */
+	public boolean isPreferRespondAsync() {
+		String preferHeader = getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		return prefer.getRespondAsync();
 	}
 
 }

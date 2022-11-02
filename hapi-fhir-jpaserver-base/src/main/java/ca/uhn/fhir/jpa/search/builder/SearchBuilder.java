@@ -338,7 +338,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {
 		myCriteriaBuilder = myEntityManager.getCriteriaBuilder();
-		myParams = theParams;
+		// we mutate the params.  Make a private copy.
+		myParams = theParams.clone();
 		mySearchUuid = theSearchUuid;
 		myRequestPartitionId = theRequestPartitionId;
 	}
@@ -636,6 +637,14 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		/*
+		 * If offset is present, we want deduplicate the results by using GROUP BY
+		 */
+		if (theOffset != null) {
+			queryStack3.addGrouping();
+			queryStack3.setUseAggregate(true);
+		}
+
+		/*
 		 * Sort
 		 *
 		 * If we have a sort, we wrap the criteria search (the search that actually
@@ -646,6 +655,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			createSort(queryStack3, sort);
 		}
+
 
 		/*
 		 * Now perform the search

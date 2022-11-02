@@ -34,9 +34,11 @@ public class MandatoryTransactionListener implements ProxyDataSourceBuilder.Sing
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			for (QueryInfo nextQuery : queryInfoList) {
 				String query = nextQuery.getQuery().toLowerCase(Locale.US);
-				if (query.contains("hfj_") || query.contains("trm_")) {
+				if (query.contains("hfj_") || query.contains("trm_") || query.contains("bt2_")) {
 					if (query.startsWith("select ") || query.startsWith("insert ") || query.startsWith("update ")) {
-						throw new IllegalStateException("No transaction active executing query: " + nextQuery.getQuery());
+						if (!query.contains("1=0")) {
+							throw new IllegalStateException("No transaction active executing query: " + nextQuery.getQuery());
+						}
 					}
 				}
 

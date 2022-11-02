@@ -8,14 +8,18 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import org.flywaydb.core.api.MigrationVersion;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	private static final String RELEASE = "V5_5_0";
@@ -58,6 +62,35 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		createTasks();
 		String newLatest = ourHapiMigrationStorageSvc.getLatestAppliedVersion();
 		assertEquals(RELEASE_VERSION_PREFIX + LAST_SUCCEEDED_VERSION, newLatest);
+	}
+
+	@Test
+	void insert_delete() {
+		String description = UUID.randomUUID().toString();
+		int initialCount = countRecords();
+		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(description));
+		assertEquals(initialCount + 1, countRecords());
+		ourHapiMigrationStorageSvc.deleteLockRecord(description);
+		assertEquals(initialCount, countRecords());
+	}
+
+	@Test
+	void verifyNoOtherLocksPresent() {
+		String otherLock = UUID.randomUUID().toString();
+		String thisLock = UUID.randomUUID().toString();
+		ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
+		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(otherLock));
+		try {
+			ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
+			fail();
+		} catch (HapiMigrationException e) {
+			assertEquals("HAPI-2152: Internal error: on unlocking, a competing lock was found", e.getMessage());
+		}
+	}
+
+	private int countRecords() {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(getDataSource());
+		return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + BaseMigrationTest.TABLE_NAME, Integer.class);
 	}
 
 	void createTasks() {

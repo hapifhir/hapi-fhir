@@ -108,7 +108,7 @@ import static org.mockito.Mockito.when;
  */
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
-//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
+//@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
 public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetHSearchExpansionR4Test.class);
 

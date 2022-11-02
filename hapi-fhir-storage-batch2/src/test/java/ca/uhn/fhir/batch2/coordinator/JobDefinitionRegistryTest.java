@@ -11,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -120,6 +123,17 @@ class JobDefinitionRegistryTest {
 		} catch (InternalErrorException e) {
 			assertEquals("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testRemoveJobDefinition() {
+		mySvc.removeJobDefinition("A", 1);
+
+		assertThat(mySvc.getJobDefinitionIds(), containsInAnyOrder("A"));
+		assertThat(mySvc.getJobDefinitionVersions("A"), containsInAnyOrder(2));
+
+		mySvc.removeJobDefinition("A", 2);
+		assertThat(mySvc.getJobDefinitionIds(), empty());
 	}
 
 
