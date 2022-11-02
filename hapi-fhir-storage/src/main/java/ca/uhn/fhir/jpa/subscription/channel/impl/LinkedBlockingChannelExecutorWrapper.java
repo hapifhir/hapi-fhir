@@ -53,10 +53,9 @@ class LinkedBlockingChannelExecutorWrapper implements Executor {
 			retryTemplate.setRetryPolicy(retryPolicy);
 			retryTemplate.setThrowLastExceptionOnExhausted(true);
 			RetryListener retryListener = new RetryListenerSupport() {
-
 				@Override
 				public <T, E extends Throwable> void onError(RetryContext theContext, RetryCallback<T, E> theCallback, Throwable theThrowable) {
-					ourLog.error("Failure {} processing message in channel[{}]", theContext.getRetryCount() + 1, myChannelName, theThrowable);
+					ourLog.error("Failure {} processing message in channel[{}]: {}", theContext.getRetryCount(), myChannelName, theThrowable.toString());
 				}
 			};
 			retryTemplate.setListeners(new RetryListener[]{retryListener});

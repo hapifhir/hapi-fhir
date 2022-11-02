@@ -114,7 +114,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 			threadFactory,
 			rejectedExecutionHandler);
 
-		executor = wrapExecutor(executor, channelName);
+		executor = new LinkedBlockingChannelExecutorWrapper(executor, channelName);
 
 		LinkedBlockingChannel retval = new LinkedBlockingChannel(channelName, executor, queue);
 		return retval;
@@ -124,7 +124,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		return new Thread.UncaughtExceptionHandler() {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
-				ourLog.error("Failure handling message in channel {}", theChannelName, e);
+				ourLog.error("Failure handling message in channel {}: {}", theChannelName, e.toString());
 			}
 		};
 	}
@@ -135,7 +135,4 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		myChannels.clear();
 	}
 
-	private static Executor wrapExecutor(Executor theExecutor, String theChannelName) {
-		return new LinkedBlockingChannelExecutorWrapper(theExecutor, theChannelName);
-	}
 }

@@ -481,18 +481,22 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem = createCodeSystemWithManyCodes(2, 1002);
 		myCodeSystemDao.update(codeSystem, mySrd);
 
-		// FIXME: remove atMost
 		await().atMost(10, TimeUnit.MINUTES).until(() -> {
-
-//			runInTransaction(()->{
-//				myBatch2JobHelper.
-//			});
-
-
-
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));
+
+		IValidationSupport.CodeValidationResult outcome;
+
+		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1002", null, null);
+		assertTrue(outcome.isOk());
+
+		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1003", null, null);
+		assertFalse(outcome.isOk());
+
 	}
 
 	@Nonnull

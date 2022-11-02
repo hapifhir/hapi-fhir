@@ -106,7 +106,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
 		}
 
-		if (LogicUtil.multiXor(haveId, haveIdentifier, haveValueSet)) {
+		if (!LogicUtil.multiXor(haveId, haveIdentifier, haveValueSet)) {
 			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
@@ -221,7 +221,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		if (getConfig().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
-				ValueSet valueSet = (ValueSet) theResource;
+				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
 				myTerminologySvc.storeTermValueSet(retVal, valueSet);
 			} else {
 				myTerminologySvc.deleteValueSetAndChildren(retVal);
