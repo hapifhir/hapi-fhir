@@ -33,10 +33,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -461,12 +464,20 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
-		CodeSystem codeSystem = createCodeSystemWithManyCodes(0, 1000);
 
+		CodeSystem codeSystem;
+		codeSystem = createCodeSystemWithManyCodes(0, 1000);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(1, 1001);
+		myCodeSystemDao.update(codeSystem, mySrd);
+		codeSystem = createCodeSystemWithManyCodes(2, 1002);
 		myCodeSystemDao.update(codeSystem, mySrd);
 
-		
-
+		// FIXME: remove atLeast
+		await().atLeast(10, TimeUnit.MINUTES).until(() -> {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty();
+			}, equalTo(true));
 	}
 
 	@Nonnull
