@@ -213,7 +213,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			ourLog.info("Beginning IMGTHLA processing");
 
-			return processImgthlaFiles(descriptors);
+			return processImgthlaFiles(descriptors, theRequestDetails);
 		}
 	}
 
@@ -492,9 +492,18 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return Optional.empty();
 	}
 
-	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors) {
+	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final List<ValueSet> valueSets = new ArrayList<>();
+		final List<ConceptMap> conceptMaps = new ArrayList<>();
+
+		CodeSystem imgthlaCs;
+		try {
+			String imgthlaCsString = IOUtils.toString(TermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
+			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
+		} catch (IOException e) {
+			throw new InternalErrorException(Msg.code(869) + "Failed to load imgthla.xml", e);
+		}
 
 		boolean foundHlaNom = false;
 		boolean foundHlaXml = false;
