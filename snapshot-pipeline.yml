@@ -87,6 +87,6 @@ steps:
     displayName: 'Deploy to Sonatype staging'
     inputs:
        mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
-      goals: deploy
+       goals: deploy
        options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests'
-      publishJUnitResults: false
+       publishJUnitResults: false
