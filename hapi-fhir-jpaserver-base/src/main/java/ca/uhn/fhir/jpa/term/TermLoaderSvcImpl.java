@@ -726,9 +726,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			iterateOverZipFileCsvOptional(theDescriptors, theUploadProperties.getProperty(LOINC_LINGUISTIC_VARIANTS_PATH.getCode() + langFileName, LOINC_LINGUISTIC_VARIANTS_PATH_DEFAULT.getCode() + langFileName), handler, ',', QuoteMode.NON_NUMERIC, false);
 		}
 
-		// LOINC MapTo codes (last to make sure that all concepts were added to code2concept map)
-		handler = new LoincMapToHandler(code2concept);
-		iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		if (theDescriptors.isOptionalFilesExist(List.of(theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode())))) {
+			// LOINC MapTo codes (last to make sure that all concepts were added to code2concept map)
+			handler = new LoincMapToHandler(code2concept);
+			iterateOverZipFileCsv(theDescriptors, theUploadProperties.getProperty(LOINC_MAPTO_FILE.getCode(), LOINC_MAPTO_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		}
 
 		if (theCloseFiles) {
 			IOUtils.closeQuietly(theDescriptors);
