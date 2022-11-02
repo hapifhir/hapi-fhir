@@ -35,6 +35,7 @@ import org.hibernate.dialect.PostgreSQL10Dialect;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -204,13 +205,20 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		"ValidHL7AttachmentRequest"
 	);
 
+
+	@BeforeEach
+	void setUp() {
+		if (LOAD_DB) {
+			// real load requires longer time than allowed for unit tests
+			myTerminologyDeferredStorageSvc.disallowDeferredTaskTimeout();
+		}
+	}
+
+
 	@Test()
 	public void uploadLoincCodeSystem() throws Exception {
 
 		if (LOAD_DB) {
-			// real test load requires longer time than unit tests
-			TermDeferredStorageSvcImpl.ourAllowTimeout = false;
-
 			List<ITermLoaderSvc.FileDescriptor> myFileDescriptors = buildFileDescriptors();
 
 			// upload terminology
