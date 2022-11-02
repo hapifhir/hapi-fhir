@@ -77,14 +77,14 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermReadSvc myTermSvc;
 	@Autowired

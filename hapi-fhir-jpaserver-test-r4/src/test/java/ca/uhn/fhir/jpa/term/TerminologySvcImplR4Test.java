@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -17,6 +18,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 	ConceptValidationOptions optsNoGuess = new ConceptValidationOptions();
 	ConceptValidationOptions optsGuess = new ConceptValidationOptions().setInferSystem(true);
+
+	@AfterEach
+	public void after() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
+	}
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
@@ -453,9 +460,12 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	 */
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
+		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
 		CodeSystem codeSystem = createCodeSystemWithManyCodes(0, 1000);
 
 		myCodeSystemDao.update(codeSystem, mySrd);
+
+		
 
 	}
 

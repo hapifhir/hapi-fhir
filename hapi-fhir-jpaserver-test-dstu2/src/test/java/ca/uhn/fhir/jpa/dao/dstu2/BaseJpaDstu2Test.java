@@ -24,8 +24,6 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionLoader;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu2Config;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -207,7 +205,7 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	protected PlatformTransactionManager myTxManager;
 	@Autowired
 	@Qualifier("myValueSetDaoDstu2")
-	protected IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired
@@ -259,7 +257,6 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 

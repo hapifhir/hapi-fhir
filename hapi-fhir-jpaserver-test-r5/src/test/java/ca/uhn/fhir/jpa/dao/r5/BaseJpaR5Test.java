@@ -157,7 +157,7 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {TestR5Config.class})
 public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuilder {
 	private static IValidationSupport ourJpaValidationSupportChainR5;
-	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
+	private static IFhirResourceDaoValueSet<ValueSet> ourValueSetDao;
 	@Autowired
 	protected ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Autowired
@@ -206,7 +206,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
 	@Qualifier("myCodeSystemDaoR5")
-	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
 	@Autowired
@@ -377,7 +377,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IValidationSupport myValidationSupport;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
-	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	protected IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
@@ -548,7 +548,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterEachClearCaches() {
-		myValueSetDao.purgeCaches();
 		myJpaValidationSupportChain.invalidateCaches();
 	}
 
