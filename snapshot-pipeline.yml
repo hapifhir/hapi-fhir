@@ -86,7 +86,7 @@ steps:
       JAVA_HOME_11_X64: /usr/java/openjdk-17
     displayName: 'Deploy to Sonatype staging'
     inputs:
-      mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
+       mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
       goals: deploy
-      options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST,ALLMODULES -DskipTests'
+       options: '--settings $(System.DefaultWorkingDirectory)/settings.xml -P DIST -DskipTests'
       publishJUnitResults: false
