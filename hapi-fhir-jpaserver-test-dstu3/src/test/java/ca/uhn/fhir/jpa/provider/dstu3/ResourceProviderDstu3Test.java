@@ -130,6 +130,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -4821,6 +4822,33 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			response.close();
 		}
 
+	}
+
+	@Test
+	public void testDocumentReferenceWith256CharAttachmentUrl() throws IOException {
+		final DocumentReference.ReferredDocumentStatus docStatus = DocumentReference.ReferredDocumentStatus.FINAL;
+		final String longUrl = StringUtils.repeat("a", 255);
+
+		DocumentReference submittedDocumentReference = new DocumentReference();
+		submittedDocumentReference.setDocStatus(docStatus);
+
+		Attachment attachment = new Attachment();
+		attachment.setUrl(longUrl);
+		submittedDocumentReference.getContentFirstRep().setAttachment(attachment);
+
+		String json = myFhirContext.newJsonParser().encodeResourceToString(submittedDocumentReference);
+		HttpPost post = new HttpPost(ourServerBase + "/DocumentReference");
+		post.setEntity(new StringEntity(json, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
+
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(HttpStatus.CREATED.value(), response.getStatusLine().getStatusCode());
+
+			DocumentReference createdDocumentReferenced = myFhirContext.newJsonParser().parseResource(DocumentReference.class, resp);
+			assertEquals(docStatus, createdDocumentReferenced.getDocStatus());
+			assertEquals(longUrl, createdDocumentReferenced.getContentFirstRep().getAttachment().getUrl());
+		}
 	}
 
 	private String toStr(Date theDate) {
