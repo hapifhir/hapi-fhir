@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.is;
@@ -56,12 +58,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 
 
 public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
@@ -115,7 +117,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void testPollingLocationContainsAllRequiredAttributesUponCompletion_withoutTypeParameter() throws IOException {
+		public void export_shouldSucceed_withPatientResource_andNoTypeParameter() throws IOException {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -151,6 +153,58 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(responseContent, containsString("\"error\" : [ ]"));
 			}
 		}
+
+		@Test
+		public void export_shouldSucceed_withPatientAndObservationAndEncounterResources_andNoTypeParameter() throws IOException {
+
+			//Add a patient
+			Patient patient = new Patient();
+			patient.setId("Pat-1");
+			myClient.update().resource(patient).execute();
+
+			//Add an observation
+			Observation observation = new Observation();
+			observation.setId("Obs-1");
+			myClient.update().resource(observation).execute();
+
+			//Add an observation
+			Encounter encounter = new Encounter();
+			encounter.setId("Enc-1");
+			myClient.update().resource(encounter).execute();
+
+			//And Given we start a bulk export job
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation = headers[0].getValue();
+			}
+			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			//Then: When the poll shows as complete, all attributes should be filled.
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
+				ourLog.info(responseContent);
+
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertEquals(result.getOutput().size(), 3);
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size());
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size());
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+		}
+
 	}
 
 	@Nested
@@ -269,7 +323,6 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			assertThat(bundle.getEntry(), hasSize(theExpectedCount));
 		}
 	}
-
 
 
 	@Nested
