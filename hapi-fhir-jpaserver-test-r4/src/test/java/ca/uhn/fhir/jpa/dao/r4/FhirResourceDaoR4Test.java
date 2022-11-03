@@ -396,12 +396,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		// TODO:  count patients
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-		myDeleteInterceptor.setExpectedCount(1);
+		myDeleteInterceptor.setExpectedCount(2);
 		ourLog.info("Start background delete");
-		final Future<DaoMethodOutcome> future = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
 
 		// We are paused before deleting the first patient.
-		myDeleteInterceptor.awaitExpected();
+//		myDeleteInterceptor.awaitExpected();
 
 		// START:  TRY THIS
 		// Unpause and delete the first patient
@@ -413,15 +414,18 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		// END:  TRY THIS
 
 		//   Let's delete the second patient from under its nose.
-		ourLog.info("delete patient in main thread");
-		myPatientDao.delete(patient.getIdElement());
+//		ourLog.info("delete patient in main thread");
+//		myPatientDao.delete(patient.getIdElement());
 
 		myDeleteInterceptor.release("first");
+		assertNotNull(future1.get());
+		myDeleteInterceptor.release("second");
+		assertNotNull(future2.get());
 
 //		// START:  TRY THIS
 		// Unpause and fail to delete the second patient
-		myDeleteInterceptor.setExpectedCount(1);
-		myDeleteInterceptor.release("first");
+//		myDeleteInterceptor.setExpectedCount(1);
+//		myDeleteInterceptor.release("first");
 //		myDeleteInterceptor.release("second");
 
 		// Red Green: If you delete the updatePatient above, it will timeout here
@@ -433,7 +437,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 //		myDeleteInterceptor.release("second");
 
 		// future.get() returns total number of resources deleted, which in this case is 1
-		assertEquals(1, future.get());
 	}
 
 
