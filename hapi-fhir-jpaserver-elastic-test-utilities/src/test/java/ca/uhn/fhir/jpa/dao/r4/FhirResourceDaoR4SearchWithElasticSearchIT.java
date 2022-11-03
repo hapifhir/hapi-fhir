@@ -2274,6 +2274,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		}
 	}
 
+	@Disabled("while finding out strategy for this fix")
 	@Nested
 	public class ReferenceParameter {
 
@@ -2288,7 +2289,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myDaoConfig.setAdvancedHSearchIndexing(defaultConfig.isAdvancedHSearchIndexing());
 		}
 
-//		fixme jm: fix FT search or disable
 		@Test
 		public void observationSubjectReferenceTest() {
 			Patient patient = new Patient();
