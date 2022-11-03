@@ -1,9 +1,14 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -31,7 +36,9 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
@@ -48,6 +55,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.test.concurrency.IPointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -116,6 +125,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -164,6 +174,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
+	private final PointcutLatch myPointcutLatch = new PointcutLatch(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED);
+
+	@Autowired
+	private IInterceptorService myInterceptorService;
+
+	private final MyDeleteInterceptor myDeleteInterceptor = new MyDeleteInterceptor();
+
 	@AfterEach
 	public final void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
@@ -181,6 +198,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
+	@AfterEach
+	public void tearDown() {
+		myInterceptorService.unregisterInterceptor(myPointcutLatch);
+		myInterceptorService.unregisterInterceptor(myDeleteInterceptor);
+		myDeleteInterceptor.clear();
+	}
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -336,6 +359,81 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		observation = (Observation) patient.getContained().get(1);
 		assertEquals("#2", observation.getId());
 		assertEquals("#", observation.getSubject().getReference());
+	}
+
+	// TODO: 3727
+	@Test
+	public void delete_then_delete_same_entity() throws ExecutionException, InterruptedException {
+		// TODO:  luke
+		myInterceptorService.registerInterceptor(myDeleteInterceptor);
+
+		Patient patient = new Patient();
+		patient.setId("patientId1");
+
+		myPatientDao.create(patient);
+
+		final ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+
+		final DaoMethodOutcome outcome1 = future1.get();
+		final DaoMethodOutcome outcome2 = future2.get();
+	}
+
+	// TODO: 3727
+	@Test
+	public void delete_then_delete_same_entity2() throws ExecutionException, InterruptedException {
+		final String patientId1 = "patientId1";
+
+		myInterceptorService.registerInterceptor(myDeleteInterceptor);
+
+		Patient patient = new Patient();
+		patient.setId(patientId1);
+
+		myPatientDao.create(patient);
+
+		// TODO:  count patients
+		final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+		myDeleteInterceptor.setExpectedCount(1);
+		ourLog.info("Start background delete");
+		final Future<DaoMethodOutcome> future = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+
+		// We are paused before deleting the first patient.
+		myDeleteInterceptor.awaitExpected();
+
+		// START:  TRY THIS
+		// Unpause and delete the first patient
+//		myDeleteInterceptor.setExpectedCount(1);
+//		myDeleteInterceptor.release("first");
+
+		// Second Patient delete  We are paused after reading the version but before deleting the second patient.
+//		myDeleteInterceptor.awaitExpected();
+		// END:  TRY THIS
+
+		//   Let's delete the second patient from under its nose.
+		ourLog.info("delete patient in main thread");
+		myPatientDao.delete(patient.getIdElement());
+
+		myDeleteInterceptor.release("first");
+
+//		// START:  TRY THIS
+		// Unpause and fail to delete the second patient
+		myDeleteInterceptor.setExpectedCount(1);
+		myDeleteInterceptor.release("first");
+//		myDeleteInterceptor.release("second");
+
+		// Red Green: If you delete the updatePatient above, it will timeout here
+		myDeleteInterceptor.awaitExpected();
+//		// END:  TRY THIS
+
+		// Unpause and delete the patient within the thread
+//		myDeleteInterceptor.release("first");
+//		myDeleteInterceptor.release("second");
+
+		// future.get() returns total number of resources deleted, which in this case is 1
+		assertEquals(1, future.get());
 	}
 
 
@@ -4341,6 +4439,45 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			retVal.add(next.getValue());
 		}
 		return retVal;
+	}
+
+	private static class MyDeleteInterceptor implements IPointcutLatch {
+		private final PointcutLatch myCalledLatch = new PointcutLatch("Called");
+		private final PointcutLatch myWaitLatch = new PointcutLatch("Wait");
+
+		MyDeleteInterceptor() {
+			myWaitLatch.setExpectedCount(1);
+		}
+
+		@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
+		public void delete(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) throws InterruptedException {
+			myCalledLatch.call(theResource);
+			ourLog.info("Waiting to proceed with delete");
+			myWaitLatch.awaitExpected();
+			ourLog.info("Cascade Delete proceeding: {}", myWaitLatch.getLatchInvocationParameter());
+			myWaitLatch.setExpectedCount(1);
+		}
+
+		void release(String theMessage) {
+			ourLog.info("Releasing {}", theMessage);
+			myWaitLatch.call(theMessage);
+		}
+
+		@Override
+		public void clear() {
+			myCalledLatch.clear();
+			myWaitLatch.clear();
+		}
+
+		@Override
+		public void setExpectedCount(int count) {
+			myCalledLatch.setExpectedCount(count);
+		}
+
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return myCalledLatch.awaitExpected();
+		}
 	}
 
 }
