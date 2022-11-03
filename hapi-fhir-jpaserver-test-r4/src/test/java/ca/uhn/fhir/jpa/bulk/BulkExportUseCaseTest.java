@@ -117,7 +117,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldSucceed_withPatientResource_andNoTypeParameter() throws IOException {
+		public void export_shouldExportPatientResource_whenTypeParameterOmitted() throws IOException {
 
 			//Given a patient exists
 			Patient p = new Patient();
@@ -155,24 +155,20 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldSucceed_withPatientAndObservationAndEncounterResources_andNoTypeParameter() throws IOException {
+		public void export_shouldExportAllResources_whenTypeParameterOmitted() throws IOException {
 
-			//Add a patient
 			Patient patient = new Patient();
 			patient.setId("Pat-1");
 			myClient.update().resource(patient).execute();
 
-			//Add an observation
 			Observation observation = new Observation();
 			observation.setId("Obs-1");
 			myClient.update().resource(observation).execute();
 
-			//Add an observation
 			Encounter encounter = new Encounter();
 			encounter.setId("Enc-1");
 			myClient.update().resource(encounter).execute();
 
-			//And Given we start a bulk export job
 			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
 			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 			String pollingLocation;
@@ -183,14 +179,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
 			myBatch2JobHelper.awaitJobCompletion(jobId);
 
-			//Then: When the poll shows as complete, all attributes should be filled.
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-
-				ourLog.info(responseContent);
-
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
 				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
@@ -199,6 +191,44 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size());
 				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size());
+
+				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
+				assertThat(responseContent, containsString("\"error\" : [ ]"));
+			}
+		}
+
+		@Test
+		public void export_shouldNotExportBinaryResource_whenTypeParameterOmitted() throws IOException {
+
+			Patient patient = new Patient();
+			patient.setId("Pat-1");
+			myClient.update().resource(patient).execute();
+
+			Binary binary = new Binary();
+			binary.setId("Bin-1");
+			myClient.update().resource(binary).execute();
+
+			HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export");
+			httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			String pollingLocation;
+			try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
+				Header[] headers = status.getHeaders("Content-Location");
+				pollingLocation = headers[0].getValue();
+			}
+			String jobId = pollingLocation.substring(pollingLocation.indexOf("_jobId=") + 7);
+			myBatch2JobHelper.awaitJobCompletion(jobId);
+
+			HttpGet statusGet = new HttpGet(pollingLocation);
+			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
+			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
+				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+				assertThat(result.getRequest(), is(equalTo(expectedOriginalUrl)));
+				assertThat(result.getRequiresAccessToken(), is(equalTo(true)));
+				assertThat(result.getTransactionTime(), is(notNullValue()));
+				assertEquals(result.getOutput().size(), 1);
+				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
+				assertEquals(0, result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList()).size());
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
 				assertThat(responseContent, containsString("\"error\" : [ ]"));
