@@ -902,7 +902,7 @@
         <servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
         <servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
         <swagger_version>2.1.12</swagger_version>
-        <slf4j_version>1.7.33</slf4j_version>
+        <slf4j_version>2.0.3</slf4j_version>
         <log4j_to_slf4j_version>2.17.1</log4j_to_slf4j_version>
         <spring_version>5.3.23</spring_version>
 		  <spring_data_bom_version>2021.2.2</spring_data_bom_version>
