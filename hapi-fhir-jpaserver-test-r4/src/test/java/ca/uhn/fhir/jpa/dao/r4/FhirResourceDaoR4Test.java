@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -55,6 +56,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.base.Charsets;
@@ -131,12 +133,14 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -167,7 +171,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
@@ -180,6 +186,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	private IInterceptorService myInterceptorService;
 
 	private final MyDeleteInterceptor myDeleteInterceptor = new MyDeleteInterceptor();
+	private final UserRequestRetryVersionConflictsInterceptor myUserRequestRetryVersionConflictsInterceptor = new UserRequestRetryVersionConflictsInterceptor();
 
 	@AfterEach
 	public final void after() {
@@ -364,8 +371,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	// TODO: 3727
 	@Test
 	public void delete_then_delete_same_entity() throws ExecutionException, InterruptedException {
-		// TODO:  luke
-		myInterceptorService.registerInterceptor(myDeleteInterceptor);
+		myInterceptorService.registerInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 
 		Patient patient = new Patient();
 		patient.setId("patientId1");
@@ -374,69 +380,57 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
-		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+		when(mySrd.getHeaders(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))
+			.thenReturn(Collections.singletonList("retry; max-retries=3"));
 
+		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement().toUnqualifiedVersionless(), mySrd));
+//		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement(), mySrd));
+		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement().toUnqualifiedVersionless(), mySrd));
+
+		ourLog.info("START future1.get()");
 		final DaoMethodOutcome outcome1 = future1.get();
+		ourLog.info("END future1.get()");
+		ourLog.info("START future2.get()");
 		final DaoMethodOutcome outcome2 = future2.get();
+		ourLog.info("END future2.get()");
 	}
 
 	// TODO: 3727
 	@Test
-	public void delete_then_delete_same_entity2() throws ExecutionException, InterruptedException {
+	public void delete_then_delete_same_entity_with_retry_interceptor() throws ExecutionException, InterruptedException {
 		final String patientId1 = "patientId1";
 
 		myInterceptorService.registerInterceptor(myDeleteInterceptor);
+		myInterceptorService.registerInterceptor(myUserRequestRetryVersionConflictsInterceptor);
 
 		Patient patient = new Patient();
 		patient.setId(patientId1);
 
 		myPatientDao.create(patient);
 
-		// TODO:  count patients
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myDeleteInterceptor.setExpectedCount(2);
-		ourLog.info("Start background delete");
-		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
-		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement()));
+		when(mySrd.getHeaders(UserRequestRetryVersionConflictsInterceptor.HEADER_NAME))
+			.thenReturn(Collections.singletonList("retry; max-retries=3"));
+		final Future<DaoMethodOutcome> future1 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement(), mySrd));
+		// TODO:  if I do this there are no retries and the test passes
+		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement().toUnqualifiedVersionless(), mySrd));
+		// TODO:  if I do this I get this error after 3 retries:  HAPI-0961: Trying to delete Patient/1/_history/1 but this is not the current version
+//		final Future<DaoMethodOutcome> future2 = executorService.submit(() -> myPatientDao.delete(patient.getIdElement(), mySrd));
 
-		// We are paused before deleting the first patient.
-//		myDeleteInterceptor.awaitExpected();
-
-		// START:  TRY THIS
-		// Unpause and delete the first patient
-//		myDeleteInterceptor.setExpectedCount(1);
-//		myDeleteInterceptor.release("first");
-
-		// Second Patient delete  We are paused after reading the version but before deleting the second patient.
-//		myDeleteInterceptor.awaitExpected();
-		// END:  TRY THIS
-
-		//   Let's delete the second patient from under its nose.
-//		ourLog.info("delete patient in main thread");
-//		myPatientDao.delete(patient.getIdElement());
 
 		myDeleteInterceptor.release("first");
-		assertNotNull(future1.get());
+		ourLog.info("START future1.get()");
+		final DaoMethodOutcome daoMethodOutcome = future1.get();
+		ourLog.info("END future1.get()");
+		assertNotNull(daoMethodOutcome);
 		myDeleteInterceptor.release("second");
+		final Integer numPatients = countPatients();
+		ourLog.info("Patient count after delete: {}", numPatients);
+		ourLog.info("START future2.get()");
 		assertNotNull(future2.get());
-
-//		// START:  TRY THIS
-		// Unpause and fail to delete the second patient
-//		myDeleteInterceptor.setExpectedCount(1);
-//		myDeleteInterceptor.release("first");
-//		myDeleteInterceptor.release("second");
-
-		// Red Green: If you delete the updatePatient above, it will timeout here
-		myDeleteInterceptor.awaitExpected();
-//		// END:  TRY THIS
-
-		// Unpause and delete the patient within the thread
-//		myDeleteInterceptor.release("first");
-//		myDeleteInterceptor.release("second");
-
-		// future.get() returns total number of resources deleted, which in this case is 1
+		ourLog.info("END future2.get()");
 	}
 
 
@@ -4442,6 +4436,11 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			retVal.add(next.getValue());
 		}
 		return retVal;
+	}
+
+	private Integer countPatients() {
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		return myPatientDao.search(map).size();
 	}
 
 	private static class MyDeleteInterceptor implements IPointcutLatch {
