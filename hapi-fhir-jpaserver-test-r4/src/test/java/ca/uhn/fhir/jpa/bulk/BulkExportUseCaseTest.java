@@ -155,7 +155,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void export_shouldExportAllResources_whenTypeParameterOmitted() throws IOException {
+		public void export_shouldExportPatientAndObservationAndEncounterResources_whenTypeParameterOmitted() throws IOException {
 
 			Patient patient = new Patient();
 			patient.setId("Pat-1");

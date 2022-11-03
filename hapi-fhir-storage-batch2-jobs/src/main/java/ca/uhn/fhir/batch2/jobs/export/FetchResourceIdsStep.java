@@ -55,9 +55,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private IBulkExportProcessor myBulkExportProcessor;
 
 	@Autowired
-	private DaoRegistry myDaoRegistry;
-
-	@Autowired
 	private DaoConfig myDaoConfig;
 
 	@Nonnull
@@ -79,12 +76,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		try {
 			Set<Id> submittedIds = new HashSet<>();
 
-			List<String> resourceTypes = params.getResourceTypes();
-			if (resourceTypes == null || resourceTypes.isEmpty()) {
-				resourceTypes = new ArrayList<>(myDaoRegistry.getRegisteredDaoTypes());
-			}
-
-			for (String resourceType : resourceTypes) {
+			for (String resourceType : params.getResourceTypes()) {
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching
