@@ -51,5 +51,6 @@ public class MdmBatch2Config {
 		JobDefinition clearJobDefinition = myApplicationContext.getBean(MDM_CLEAR_JOB_BEAN_NAME, JobDefinition.class);
 		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(clearJobDefinition);
 		JobDefinition submitJobDefinition = myApplicationContext.getBean(MDM_SUBMIT_JOB_BEAN_NAME, JobDefinition.class);
+		myJobDefinitionRegistry.addJobDefinitionIfNotRegistered(submitJobDefinition);
 	}
 }
