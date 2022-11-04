@@ -4825,9 +4825,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testDocumentReferenceWith2000CharAttachmentUrl() throws IOException {
+	public void testDocumentReferenceWith500CharAttachmentUrl() throws IOException {
 		final DocumentReference.ReferredDocumentStatus docStatus = DocumentReference.ReferredDocumentStatus.FINAL;
-		final String longUrl = StringUtils.repeat("a", 2000);
+		final String longUrl = StringUtils.repeat("a", 500);
 
 		DocumentReference submittedDocumentReference = new DocumentReference();
 		submittedDocumentReference.setDocStatus(docStatus);
