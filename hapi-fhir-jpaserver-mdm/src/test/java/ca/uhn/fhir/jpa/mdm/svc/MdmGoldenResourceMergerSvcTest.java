@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -125,8 +126,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
 		MdmLink mdmLink = (MdmLink) myMdmLinkDaoSvc.newMdmLink()
-			.setGoldenResourcePersistenceId(new ResourcePersistentId(myToGoldenPatientPid))
-			.setSourcePersistenceId(new ResourcePersistentId(myFromGoldenPatientPid))
+			.setGoldenResourcePersistenceId(new JpaPid(myToGoldenPatientPid))
+			.setSourcePersistenceId(new JpaPid(myFromGoldenPatientPid))
 			.setMdmSourceType("Patient")
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(MdmLinkSourceEnum.AUTO);

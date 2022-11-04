@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -123,7 +124,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		String jobId = theParams.getJobId();
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-		Set<ResourcePersistentId> pids;
+		LinkedHashSet<ResourcePersistentId> pids;
 		if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.PATIENT) {
 			pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, def);
 		} else if (theParams.getExportStyle() == BulkDataExportOptions.ExportStyle.GROUP) {
@@ -136,8 +137,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids.iterator();
 	}
 
-	private Set<ResourcePersistentId> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String jobId, RuntimeResourceDefinition def) {
-		Set<ResourcePersistentId> pids = new HashSet<>();
+	private LinkedHashSet<ResourcePersistentId> getPidsForPatientStyleExport(ExportPIDIteratorParameters theParams, String resourceType, String jobId, RuntimeResourceDefinition def) {
+		LinkedHashSet<ResourcePersistentId> pids = new LinkedHashSet<>();
 		// Patient
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
 			String errorMessage = "You attempted to start a Patient Bulk Export, but the system has `Index Missing Fields` disabled. It must be enabled for Patient Bulk Export";
@@ -190,8 +191,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return referenceOrListParam;
 	}
 
-	private Set<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
-		Set<ResourcePersistentId> pids = new HashSet<>();
+	private LinkedHashSet<ResourcePersistentId> getPidsForSystemStyleExport(ExportPIDIteratorParameters theParams, String theJobId, RuntimeResourceDefinition theDef) {
+		LinkedHashSet<ResourcePersistentId> pids = new LinkedHashSet<>();
 		// System
 		List<SearchParameterMap> maps = myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theDef, theParams);
 		ISearchBuilder searchBuilder = getSearchBuilderForResourceType(theParams.getResourceType());
@@ -209,8 +210,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getPidsForGroupStyleExport(ExportPIDIteratorParameters theParams, String theResourceType, RuntimeResourceDefinition theDef) {
-		Set<ResourcePersistentId> pids;
+	private LinkedHashSet<ResourcePersistentId> getPidsForGroupStyleExport(ExportPIDIteratorParameters theParams, String theResourceType, RuntimeResourceDefinition theDef) {
+		LinkedHashSet<ResourcePersistentId> pids;
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
 			ourLog.info("Expanding Patients of a Group Bulk Export.");
@@ -224,8 +225,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getRelatedResourceTypePids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) {
-		Set<ResourcePersistentId> pids = new HashSet<>();
+	private LinkedHashSet<ResourcePersistentId> getRelatedResourceTypePids(ExportPIDIteratorParameters theParams, RuntimeResourceDefinition theDef) {
+		LinkedHashSet<ResourcePersistentId> pids = new LinkedHashSet<>();
 		Set<ResourcePersistentId> expandedMemberResourceIds = expandAllPatientPidsFromGroup(theParams);
 		assert expandedMemberResourceIds != null && !expandedMemberResourceIds.isEmpty();
 		if (ourLog.isDebugEnabled()) {
@@ -241,10 +242,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		return pids;
 	}
 
-	private Set<ResourcePersistentId> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
+	private LinkedHashSet<ResourcePersistentId> getSingletonGroupList(ExportPIDIteratorParameters theParams) {
 		IBaseResource group = myDaoRegistry.getResourceDao("Group").read(new IdDt(theParams.getGroupId()), SystemRequestDetails.newSystemRequestAllPartitions());
 		ResourcePersistentId pidOrNull = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), group);
-		Set<ResourcePersistentId> pids = new HashSet<>();
+		LinkedHashSet<ResourcePersistentId> pids = new LinkedHashSet<>();
 		pids.add(pidOrNull);
 		return pids;
 	}
@@ -307,7 +308,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 	 * In case we are doing a Group Bulk Export and resourceType `Patient` is requested, we can just return the group members,
 	 * possibly expanded by MDM, and don't have to go and fetch other resource DAOs.
 	 */
-	private Set<ResourcePersistentId> getExpandedPatientList(ExportPIDIteratorParameters theParameters) {
+	private LinkedHashSet<ResourcePersistentId> getExpandedPatientList(ExportPIDIteratorParameters theParameters) {
 		List<ResourcePersistentId> members = getMembersFromGroupWithFilter(theParameters);
 		List<IIdType> ids = members.stream().map(member -> new IdDt("Patient/" + member)).collect(Collectors.toList());
 		ourLog.info("While extracting patients from a group, we found {} patients.", ids.size());
@@ -315,7 +316,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		// Are bulk exports partition aware or care about partition at all? This does
 
 		List<ResourcePersistentId> pidsOrThrowException = members;
-		Set<ResourcePersistentId> patientPidsToExport = new HashSet<>(pidsOrThrowException);
+		LinkedHashSet<ResourcePersistentId> patientPidsToExport = new LinkedHashSet<>(pidsOrThrowException);
 
 		if (theParameters.isExpandMdm()) {
 			SystemRequestDetails srd = SystemRequestDetails.newSystemRequestAllPartitions();

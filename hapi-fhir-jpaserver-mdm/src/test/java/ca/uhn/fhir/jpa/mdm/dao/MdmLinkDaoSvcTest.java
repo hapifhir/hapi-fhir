@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -80,7 +81,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<Long> expectedExpandedPids = mdmLinks.stream().map(MdmLink::getSourcePid).collect(Collectors.toList());
 
 		//SUT
-		List<MdmPidTuple> lists = runInTransaction(()->myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new ResourcePersistentId(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
+		List<MdmPidTuple> lists = runInTransaction(()->myMdmLinkDao.expandPidsBySourcePidAndMatchResult(new JpaPid(mdmLinks.get(0).getSourcePid()), MdmMatchResultEnum.MATCH));
 
 		assertThat(lists, hasSize(10));
 
@@ -99,7 +100,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		mdmLink.setMatchResult(theMdmMatchResultEnum);
 		mdmLink.setCreated(new Date());
 		mdmLink.setUpdated(new Date());
-		mdmLink.setGoldenResourcePersistenceId(new ResourcePersistentId(thePatientPid));
+		mdmLink.setGoldenResourcePersistenceId(new JpaPid(thePatientPid));
 		mdmLink.setSourcePersistenceId(runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)));
 		MdmLink saved= (MdmLink) myMdmLinkDao.save(mdmLink);
 		return saved;

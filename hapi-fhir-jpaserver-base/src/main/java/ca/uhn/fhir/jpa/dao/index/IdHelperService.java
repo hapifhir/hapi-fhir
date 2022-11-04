@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -203,7 +204,7 @@ public class IdHelperService implements IIdHelperService {
 			ResourcePersistentId retVal;
 			if (!idRequiresForcedId(id)) {
 				// is already a PID
-				retVal = new ResourcePersistentId(Long.parseLong(id));
+				retVal = new JpaPid(Long.parseLong(id));
 				retVals.put(id, retVal);
 			} else {
 				// is a forced id
@@ -316,7 +317,7 @@ public class IdHelperService implements IIdHelperService {
 				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY) {
 					if (nextId.isIdPartValidLong()) {
 						if (!theOnlyForcedIds) {
-							retVal.add(new ResourcePersistentId(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
+							retVal.add(new JpaPid(nextId.getIdPartAsLong()).setAssociatedResourceId(nextId));
 						}
 						continue;
 					}
@@ -365,12 +366,12 @@ public class IdHelperService implements IIdHelperService {
 		for (ForcedId nextId : results) {
 			// Check if the nextId has a resource ID. It may have a null resource ID if a commit is still pending.
 			if (nextId.getResourceId() != null) {
-				ResourcePersistentId persistentId = new ResourcePersistentId(nextId.getResourceId());
-				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), persistentId);
-				theOutputListToPopulate.add(persistentId);
+				JpaPid jpaPid = new JpaPid(nextId.getResourceId());
+				populateAssociatedResourceId(nextId.getResourceType(), nextId.getForcedId(), jpaPid);
+				theOutputListToPopulate.add(jpaPid);
 
 				String key = toForcedIdToPidKey(theRequestPartitionId, nextId.getResourceType(), nextId.getForcedId());
-				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, persistentId);
+				myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.FORCED_ID_TO_PID, key, jpaPid);
 			}
 		}
 	}
@@ -401,10 +402,10 @@ public class IdHelperService implements IIdHelperService {
 		return Optional.empty();
 	}
 
-	private void populateAssociatedResourceId(String nextResourceType, String forcedId, ResourcePersistentId persistentId) {
+	private void populateAssociatedResourceId(String nextResourceType, String forcedId, JpaPid jpaPid) {
 		IIdType resourceId = myFhirCtx.getVersion().newIdType();
 		resourceId.setValue(nextResourceType + "/" + forcedId);
-		persistentId.setAssociatedResourceId(resourceId);
+		jpaPid.setAssociatedResourceId(resourceId);
 	}
 
 	/**
@@ -626,7 +627,7 @@ public class IdHelperService implements IIdHelperService {
 		Map<ResourcePersistentId, Optional<String>> convertRetVal = new HashMap<>();
 		retVal.forEach(
 			(k, v) -> {
-				convertRetVal.put(new ResourcePersistentId(k), v);
+				convertRetVal.put(new JpaPid(k), v);
 			}
 		);
 		return new PersistentIdToForcedIdMap(convertRetVal);
@@ -639,7 +640,7 @@ public class IdHelperService implements IIdHelperService {
 	public void addResolvedPidToForcedId(ResourcePersistentId theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt) {
 		if (theForcedId != null) {
 			if (theResourcePersistentId.getAssociatedResourceId() == null) {
-				populateAssociatedResourceId(theResourceType, theForcedId, theResourcePersistentId);
+				populateAssociatedResourceId(theResourceType, theForcedId, (JpaPid) theResourcePersistentId);
 			}
 
 			myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID, theResourcePersistentId.getIdAsLong(), Optional.of(theForcedId));
@@ -685,11 +686,11 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nullable
 	public ResourcePersistentId getPidOrNull(@Nonnull RequestPartitionId theRequestPartitionId, IBaseResource theResource) {
-		ResourcePersistentId retVal = new ResourcePersistentId(theResource.getUserData(RESOURCE_PID));
+		JpaPid retVal = new JpaPid(Long.parseLong(theResource.getUserData(RESOURCE_PID).toString()));
 		if (retVal.getId() == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
+				retVal = (JpaPid) resolveResourcePersistentIds(theRequestPartitionId, id.getResourceType(), id.getIdPart());
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}
@@ -708,11 +709,11 @@ public class IdHelperService implements IIdHelperService {
 	@Override
 	@Nonnull
 	public ResourcePersistentId getPidOrThrowException(@Nonnull IAnyResource theResource) {
-		Object theResourcePID = theResource.getUserData(RESOURCE_PID);
+		Long theResourcePID = (Long) theResource.getUserData(RESOURCE_PID);
 		if (theResourcePID == null) {
 			throw new IllegalStateException(Msg.code(2108) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId()));
 		}
-		return new ResourcePersistentId(theResourcePID);
+		return new JpaPid(theResourcePID);
 	}
 
 	@Override

@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -350,14 +351,15 @@ public class SearchParamWithInlineReferencesExtractor {
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
 
 				//Attempt to find the target reference before creating a placeholder
-				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest);
+				Set<JpaPid> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theTransactionDetails, theRequest)
+					.stream().map(id -> (JpaPid) id).collect(Collectors.toSet());
 
-				ResourcePersistentId match;
+				JpaPid match;
 				if (matches.isEmpty()) {
 
 					Optional<IBasePersistedResource> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest, theTransactionDetails);
 					if (placeholderOpt.isPresent()) {
-						match = placeholderOpt.get().getPersistentId();
+						match = (JpaPid) placeholderOpt.get().getPersistentId();
 						match.setAssociatedResourceId(placeholderOpt.get().getIdDt());
 						theTransactionDetails.addResolvedMatchUrl(nextIdText, match);
 						myMemoryCacheService.putAfterCommit(MemoryCacheService.CacheEnum.MATCH_URL, nextIdText, match);

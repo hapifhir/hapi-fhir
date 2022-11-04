@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.search.ResourceNotFoundInIndexException;
@@ -145,7 +146,7 @@ public class SearchBuilder implements ISearchBuilder {
 	public static final int MAXIMUM_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 	public static final int MAXIMUM_PAGE_SIZE_FOR_TESTING = 50;
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchBuilder.class);
-	private static final ResourcePersistentId NO_MORE = new ResourcePersistentId(-1L);
+	private static final JpaPid NO_MORE = new JpaPid(-1L);
 	private static final String MY_TARGET_RESOURCE_PID = "myTargetResourcePid";
 	private static final String MY_SOURCE_RESOURCE_PID = "mySourceResourcePid";
 	private static final String MY_TARGET_RESOURCE_TYPE = "myTargetResourceType";
@@ -566,7 +567,7 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(output.size());
 				}
-				myAlsoIncludePids.addAll(ResourcePersistentId.fromLongList(output));
+				myAlsoIncludePids.addAll(JpaPid.fromLongList(output));
 
 			}
 
@@ -855,7 +856,7 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 		}
 
-		List<Long> versionlessPids = ResourcePersistentId.toLongList(thePids);
+		List<Long> versionlessPids = JpaPid.toLongList(thePids);
 		if (versionlessPids.size() < getMaximumPageSize()) {
 			versionlessPids = normalizeIdListForLastNInClause(versionlessPids);
 		}
@@ -873,7 +874,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(next.getResourceType()).getImplementingClass();
 
-			ResourcePersistentId resourceId = new ResourcePersistentId(next.getResourceId());
+			JpaPid resourceId = new JpaPid(next.getResourceId());
 
 			/*
 			 * If a specific version is requested via an include, we'll replace the current version
@@ -949,11 +950,11 @@ public class SearchBuilder implements ISearchBuilder {
 		Collection<ResourceTag> tagList = myResourceTagDao.findByResourceIds(thePidList);
 
 		//-- build the map, key = resourceId, value = list of ResourceTag
-		ResourcePersistentId resourceId;
+		JpaPid resourceId;
 		Collection<ResourceTag> tagCol;
 		for (ResourceTag tag : tagList) {
 
-			resourceId = new ResourcePersistentId(tag.getResourceId());
+			resourceId = new JpaPid(tag.getResourceId());
 			tagCol = tagMap.get(resourceId.getIdAsLong());
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
@@ -1118,7 +1119,7 @@ public class SearchBuilder implements ISearchBuilder {
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
 						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
-						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+						q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 						if (wantResourceType != null) {
 							q.setParameter("want_resource_type", wantResourceType);
 						}
@@ -1141,7 +1142,7 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 
 							if (resourceLink != null) {
-								ResourcePersistentId pid = new ResourcePersistentId(resourceLink, version);
+								JpaPid pid = new JpaPid(resourceLink, version);
 								pid.setResourceType(resourceType);
 								pidsToInclude.add(pid);
 							}
@@ -1238,7 +1239,7 @@ public class SearchBuilder implements ISearchBuilder {
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
 							Query q = theEntityManager.createNativeQuery(sql, Tuple.class);
 							q.setParameter("src_path", nextPath);
-							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
+							q.setParameter("target_pids", JpaPid.toLongList(nextPartition));
 							if (targetResourceType != null) {
 								q.setParameter("target_resource_type", targetResourceType);
 							} else if (haveTargetTypesDefinedByParam) {
@@ -1256,7 +1257,7 @@ public class SearchBuilder implements ISearchBuilder {
 									if (findVersionFieldName != null && result.get(RESOURCE_VERSION_ALIAS) != null) {
 										resourceVersion = NumberUtils.createLong(String.valueOf(result.get(RESOURCE_VERSION_ALIAS)));
 									}
-									pidsToInclude.add(new ResourcePersistentId(resourceId, resourceVersion));
+									pidsToInclude.add(new JpaPid(resourceId, resourceVersion));
 								}
 							}
 						}
@@ -1619,7 +1620,7 @@ public class SearchBuilder implements ISearchBuilder {
 							}
 
 							if (nextLong != null) {
-								ResourcePersistentId next = new ResourcePersistentId(nextLong);
+								JpaPid next = new JpaPid(nextLong);
 								if (myPidSet.add(next)) {
 									myNext = next;
 									myNonSkipCount++;

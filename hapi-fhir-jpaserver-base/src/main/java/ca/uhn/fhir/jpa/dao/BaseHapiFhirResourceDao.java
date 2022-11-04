@@ -278,12 +278,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity.setVersion(1);
 
 		if (isNotBlank(theIfNoneExist)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest);
+			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theTransactionDetails, theRequest)
+				.stream().map(id -> (JpaPid) id).collect(Collectors.toSet());
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(Msg.code(958) + msg);
 			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
+				JpaPid pid = match.iterator().next();
 
 				Supplier<LazyDaoMethodOutcome.EntityAndResource> entitySupplier = () -> {
 					return myTxTemplate.execute(tx -> {
@@ -349,7 +350,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, false, theTransactionDetails, false, thePerformIndexing);
 
 		// Store the resource forced ID if necessary
-		ResourcePersistentId persistentId = new ResourcePersistentId(updatedEntity.getResourceId());
+		JpaPid jpaPid = new JpaPid(updatedEntity.getResourceId());
 		if (resourceHadIdBeforeStorage) {
 			if (resourceIdWasServerAssigned) {
 				boolean createForPureNumericIds = true;
@@ -378,13 +379,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		theResource.setId(entity.getIdDt());
 
 		// Pre-cache the resource ID
-		persistentId.setAssociatedResourceId(entity.getIdType(myFhirContext));
-		myIdHelperService.addResolvedPidToForcedId(persistentId, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
-		theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
+		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
+		myIdHelperService.addResolvedPidToForcedId(jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
+		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 
 		// Pre-cache the match URL
 		if (theIfNoneExist != null) {
-			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, persistentId);
+			myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, getResourceName(), theIfNoneExist, jpaPid);
 		}
 
 		// Update the version/last updated in the resource so that interceptors get
@@ -542,7 +543,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
-			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
+			outcome.setPersistentId(new JpaPid(entity.getResourceId()));
 			outcome.setEntity(entity);
 
 			return outcome;
@@ -872,10 +873,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException(Msg.code(969) + "Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
+			return myExpungeService.expunge(getResourceName(), new JpaPid(entity.getResourceId(), entity.getVersion()), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), new ResourcePersistentId(entity.getResourceId()), theExpungeOptions, theRequest);
+		return myExpungeService.expunge(getResourceName(), new JpaPid(entity.getResourceId()), theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -1104,12 +1105,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		ResourceTable entityToUpdate;
 		if (isNotBlank(theConditionalUrl)) {
 
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theTransactionDetails, theRequest);
+			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType, theTransactionDetails, theRequest)
+				.stream().map(id -> (JpaPid) id).collect(Collectors.toSet());
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(972) + msg);
 			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
+				JpaPid pid = match.iterator().next();
 				entityToUpdate = myEntityManager.find(ResourceTable.class, pid.getId());
 			} else {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
@@ -1307,7 +1309,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(theRequest, getResourceName(), theId);
 
 		BaseHasResource entity;
-		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
+		JpaPid pid = (JpaPid) myIdHelperService.resolveResourcePersistentIds(requestPartitionId, getResourceName(), theId.getIdPart());
 		Set<Integer> readPartitions = null;
 		if (requestPartitionId.isAllPartitions()) {
 			entity = myEntityManager.find(ResourceTable.class, pid.getIdAsLong());
@@ -1383,18 +1385,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nonnull RequestPartitionId theRequestPartitionId, TransactionDetails theTransactionDetails) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
-		ResourcePersistentId persistentId = null;
+		JpaPid persistentId = null;
 		if (theTransactionDetails != null) {
 			if (theTransactionDetails.isResolvedResourceIdEmpty(theId.toUnqualifiedVersionless())) {
 				throw new ResourceNotFoundException(Msg.code(1997) + theId);
 			}
 			if (theTransactionDetails.hasResolvedResourceIds()) {
-				persistentId = theTransactionDetails.getResolvedResourceId(theId);
+				persistentId = (JpaPid) theTransactionDetails.getResolvedResourceId(theId);
 			}
 		}
 
 		if (persistentId == null) {
-			persistentId = myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
+			persistentId = (JpaPid) myIdHelperService.resolveResourcePersistentIds(theRequestPartitionId, getResourceName(), theId.getIdPart());
 		}
 
 		ResourceTable entity = myEntityManager.find(ResourceTable.class, persistentId.getId());
@@ -1700,12 +1702,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource);
+			Set<JpaPid> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theTransactionDetails, theRequest, theResource)
+				.stream().map(id -> (JpaPid) id).collect(Collectors.toSet());
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessageSanitized(BaseStorageDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(Msg.code(988) + msg);
 			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
+				JpaPid pid = match.iterator().next();
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				resourceId = entity.getIdDt();
 			} else {

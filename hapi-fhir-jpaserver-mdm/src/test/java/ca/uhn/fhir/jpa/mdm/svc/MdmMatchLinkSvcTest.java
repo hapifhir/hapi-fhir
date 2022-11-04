@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -157,7 +158,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(janePatient.getIdElement().getIdPartAsLong()));
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new JpaPid(janePatient.getIdElement().getIdPartAsLong()));
 		assertThat(mdmLink.isPresent(), is(true));
 
 		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
@@ -170,7 +171,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testWhenPatientIsCreatedWithoutAnEIDTheGoldenResourceGetsAutomaticallyAssignedOne() {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
-		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(patient.getIdElement().getIdPartAsLong())).get();
+		IMdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new JpaPid(patient.getIdElement().getIdPartAsLong())).get();
 
 		Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 		Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
@@ -182,7 +183,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientAttributesAreCopiedOverWhenGoldenResourceIsCreatedFromPatient() {
 		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
-		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new ResourcePersistentId(patient.getIdElement().getIdPartAsLong()));
+		Optional<? extends IMdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(new JpaPid(patient.getIdElement().getIdPartAsLong()));
 		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
 		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));

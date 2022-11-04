@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -111,11 +112,11 @@ public class ResourceVersionSvcTest {
 	@Test
 	public void getLatestVersionIdsForResourceIds_whenResourceExists_returnsMapWithPIDAndVersion() {
 		IIdType type = new IdDt("Patient/RED");
-		ResourcePersistentId pid = new ResourcePersistentId(1L);
-		pid.setAssociatedResourceId(type);
+		JpaPid jpaPid = new JpaPid(1L);
+		jpaPid.setAssociatedResourceId(type);
 		HashMap<IIdType, ResourcePersistentId> map = new HashMap<>();
-		map.put(type, pid);
-		ResourceIdPackage pack = new ResourceIdPackage(type, pid, 2L);
+		map.put(type, jpaPid);
+		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
 		// when
 		mockReturnsFor_getIdsOfExistingResources(pack);
@@ -125,7 +126,7 @@ public class ResourceVersionSvcTest {
 			Collections.singletonList(type));
 
 		Assertions.assertTrue(retMap.containsKey(type));
-		Assertions.assertEquals(pid.getVersion(), map.get(type).getVersion());
+		Assertions.assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
 	}
 
 	@Test
@@ -146,9 +147,9 @@ public class ResourceVersionSvcTest {
 	public void getLatestVersionIdsForResourceIds_whenSomeResourcesDoNotExist_returnsOnlyExistingElements() {
 		// resource to be found
 		IIdType type = new IdDt("Patient/RED");
-		ResourcePersistentId pid = new ResourcePersistentId(1L);
-		pid.setAssociatedResourceId(type);
-		ResourceIdPackage pack = new ResourceIdPackage(type, pid, 2L);
+		JpaPid jpaPid = new JpaPid(1L);
+		jpaPid.setAssociatedResourceId(type);
+		ResourceIdPackage pack = new ResourceIdPackage(type, jpaPid, 2L);
 
 		// resource that won't be found
 		IIdType type2 = new IdDt("Patient/BLUE");

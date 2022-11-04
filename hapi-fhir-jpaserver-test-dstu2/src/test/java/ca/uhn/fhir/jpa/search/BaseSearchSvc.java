@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.util.BaseIterator;
@@ -54,17 +55,17 @@ public class BaseSearchSvc {
 		verify(mySearchBuilderFactory, atMost(myExpectedNumberOfSearchBuildersCreated)).newSearchBuilder(any(), any(), any());
 	}
 
-	protected List<ResourcePersistentId> createPidSequence(int to) {
-		List<ResourcePersistentId> pids = new ArrayList<>();
+	protected List<JpaPid> createPidSequence(int to) {
+		List<JpaPid> pids = new ArrayList<>();
 		for (long i = 10; i < to; i++) {
-			pids.add(new ResourcePersistentId(i));
+			pids.add(new JpaPid(i));
 		}
 		return pids;
 	}
 
 	protected Answer<Void> loadPids() {
 		return theInvocation -> {
-			List<ResourcePersistentId> pids = (List<ResourcePersistentId>) theInvocation.getArguments()[0];
+			List<JpaPid> pids = (List<JpaPid>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
 			for (ResourcePersistentId nextPid : pids) {
 				Patient pt = new Patient();
@@ -77,10 +78,10 @@ public class BaseSearchSvc {
 
 	public static class ResultIterator extends BaseIterator<ResourcePersistentId> implements IResultIterator {
 
-		private final Iterator<ResourcePersistentId> myWrap;
+		private final Iterator<JpaPid> myWrap;
 		private int myCount;
 
-		ResultIterator(Iterator<ResourcePersistentId> theWrap) {
+		ResultIterator(Iterator<JpaPid> theWrap) {
 			myWrap = theWrap;
 		}
 
@@ -90,7 +91,7 @@ public class BaseSearchSvc {
 		}
 
 		@Override
-		public ResourcePersistentId next() {
+		public JpaPid next() {
 			myCount++;
 			return myWrap.next();
 		}

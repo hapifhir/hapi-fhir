@@ -111,7 +111,7 @@ public abstract class BaseHapiFhirResourceDaoObservation<T extends IBaseResource
 				for (IQueryParameterType nextOr : nextPatientList) {
 					if (nextOr instanceof ReferenceParam) {
 						ReferenceParam ref = (ReferenceParam) nextOr;
-						ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
+						JpaPid pid = (JpaPid) myIdHelperService.resolveResourcePersistentIds(requestPartitionId, ref.getResourceType(), ref.getIdPart());
 						orderedSubjectReferenceMap.put(pid.getIdAsLong(), nextOr);
 					} else {
 						throw new IllegalArgumentException(Msg.code(942) + "Invalid token type (expecting ReferenceParam): " + nextOr.getClass());

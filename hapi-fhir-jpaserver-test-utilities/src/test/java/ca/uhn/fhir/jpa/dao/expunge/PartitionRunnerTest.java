@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;
@@ -58,7 +59,7 @@ public class PartitionRunnerTest {
 	private List<ResourcePersistentId> buildPidList(int size) {
 		List<ResourcePersistentId> list = new ArrayList<>();
 		for (long i = 0; i < size; ++i) {
-			list.add(new ResourcePersistentId(i + 1));
+			list.add(new JpaPid(i + 1));
 		}
 		return list;
 	}

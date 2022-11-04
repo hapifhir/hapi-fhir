@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
@@ -182,7 +183,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IHapiPackageCacheManager.PackageContents loadPackageContents(NpmPackageVersionEntity thePackageVersion) {
 		IFhirResourceDao<? extends IBaseBinary> binaryDao = getBinaryDao();
-		IBaseBinary binary = binaryDao.readByPid(new ResourcePersistentId(thePackageVersion.getPackageBinary().getId()));
+		IBaseBinary binary = binaryDao.readByPid(new JpaPid(thePackageVersion.getPackageBinary().getId()));
 		try {
 			byte[] content = fetchBlobFromBinary(binary);
 			PackageContents retVal = new PackageContents()
@@ -529,7 +530,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 	private IBaseResource loadPackageEntity(NpmPackageVersionResourceEntity contents) {
 		try {
-			ResourcePersistentId binaryPid = new ResourcePersistentId(contents.getResourceBinary().getId());
+			JpaPid binaryPid = new JpaPid(contents.getResourceBinary().getId());
 			IBaseBinary binary = getBinaryDao().readByPid(binaryPid);
 			byte[] resourceContentsBytes= fetchBlobFromBinary(binary);
 			String resourceContents = new String(resourceContentsBytes, StandardCharsets.UTF_8);

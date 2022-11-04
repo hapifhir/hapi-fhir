@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.SearchConfig;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -150,7 +151,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -169,10 +170,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		initSearches();
 		initAsyncSearches();
 
-		List<ResourcePersistentId> allResults = new ArrayList<>();
+		List<JpaPid> allResults = new ArrayList<>();
 		doAnswer(t -> {
-			List<ResourcePersistentId> oldResults = t.getArgument(1, List.class);
-			List<ResourcePersistentId> newResults = t.getArgument(2, List.class);
+			List<JpaPid> oldResults = t.getArgument(1, List.class);
+			List<JpaPid> newResults = t.getArgument(2, List.class);
 			ourLog.info("Saving {} new results - have {} old results", newResults.size(), oldResults.size());
 			assertEquals(allResults.size(), oldResults.size());
 			allResults.addAll(newResults);
@@ -182,7 +183,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
 		when(mySearchBuilder.createQuery(any(), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -269,7 +270,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -316,7 +317,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -369,7 +370,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(800);
+		List<JpaPid> pids = createPidSequence(800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		when(mySearchCacheSvc.save(any())).thenAnswer(t ->{
@@ -410,7 +411,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<ResourcePersistentId> pids = createPidSequence(100);
+		List<JpaPid> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 		mockSearchTask();
@@ -465,7 +466,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 				ArrayList<ResourcePersistentId> results = new ArrayList<>();
 				for (long i = theInvocation.getArgument(1, Integer.class); i < theInvocation.getArgument(2, Integer.class); i++) {
 					Long nextPid = i + 10L;
-					results.add(new ResourcePersistentId(nextPid));
+					results.add(new JpaPid(nextPid));
 				}
 
 				return results;
@@ -669,11 +670,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 		private static final Logger ourLog = LoggerFactory.getLogger(SlowIterator.class);
 		private final IResultIterator myResultIteratorWrap;
 		private final int myDelay;
-		private final Iterator<ResourcePersistentId> myWrap;
+		private final Iterator<JpaPid> myWrap;
 		private final List<ResourcePersistentId> myReturnedValues = new ArrayList<>();
 		private final AtomicInteger myCountReturned = new AtomicInteger(0);
 
-		SlowIterator(Iterator<ResourcePersistentId> theWrap, int theDelay) {
+		SlowIterator(Iterator<JpaPid> theWrap, int theDelay) {
 			myWrap = theWrap;
 			myDelay = theDelay;
 			myResultIteratorWrap = null;

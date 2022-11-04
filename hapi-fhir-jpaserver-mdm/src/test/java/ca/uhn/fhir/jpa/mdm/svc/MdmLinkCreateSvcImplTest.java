@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.util.MdmPartitionHelper;
@@ -73,8 +74,8 @@ class MdmLinkCreateSvcImplTest {
 
 	@BeforeEach
 	public void setup() {
-		ResourcePersistentId goldenId = new ResourcePersistentId(1L);
-		ResourcePersistentId sourceId = new ResourcePersistentId(2L);
+		JpaPid goldenId = new JpaPid(1L);
+		JpaPid sourceId = new JpaPid(2L);
 		when(myIdHelperService.getPidOrThrowException(any()))
 			.thenReturn(goldenId, sourceId);
 		when(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(any(ResourcePersistentId.class), any(ResourcePersistentId.class))).thenReturn(Optional.empty());

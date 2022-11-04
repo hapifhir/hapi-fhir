@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
@@ -124,8 +125,8 @@ public class IdHelperServiceTest {
 		patientIdsToResolve.add("RED");
 		patientIdsToResolve.add("BLUE");
 
-		ResourcePersistentId red = new ResourcePersistentId("Patient", 123l);
-		ResourcePersistentId blue = new ResourcePersistentId("Patient", 456l);
+		JpaPid red = new JpaPid(123L, 123L);
+		JpaPid blue = new JpaPid(456L, 456L);
 
 		// we will pretend the lookup value is in the cache
 		when(myMemoryCacheService.getThenPutAfterCommit(any(MemoryCacheService.CacheEnum.class),
@@ -177,29 +178,29 @@ public class IdHelperServiceTest {
 		String resourceType = "Patient";
 		List<String> ids = Arrays.asList("A", "B", "C");
 
-		ResourcePersistentId resourcePersistentId1 = new ResourcePersistentId("TEST1");
-		ResourcePersistentId resourcePersistentId2 = new ResourcePersistentId("TEST2");
-		ResourcePersistentId resourcePersistentId3 = new ResourcePersistentId("TEST3");
+		JpaPid resourcePersistentId1 = new JpaPid(1L);
+		JpaPid resourcePersistentId2 = new JpaPid(2L);
+		JpaPid resourcePersistentId3 = new JpaPid(3L);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any()))
 			.thenReturn(resourcePersistentId1)
 			.thenReturn(resourcePersistentId2)
 			.thenReturn(resourcePersistentId3);
 		Map<String, ResourcePersistentId> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids);
 		assertThat(result.keySet(), hasSize(3));
-		assertEquals("TEST1", result.get("A").getId());
-		assertEquals("TEST2", result.get("B").getId());
-		assertEquals("TEST3", result.get("C").getId());
+		assertEquals(1L, result.get("A").getId());
+		assertEquals(2L, result.get("B").getId());
+		assertEquals(3L, result.get("C").getId());
 	}
 
 	@Test
 	public void testResolveResourcePersistentIds_resourcePidDefaultFunctionality(){
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(1, "partition");
 		String resourceType = "Patient";
-		String id = "A";
+		Long id = 1L;
 
-		ResourcePersistentId resourcePersistentId1 = new ResourcePersistentId(id);
-		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(resourcePersistentId1);
-		ResourcePersistentId result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id);
+		JpaPid jpaPid1 = new JpaPid(id);
+		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
+		JpaPid result = (JpaPid) myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
 		assertEquals(id, result.getId());
 	}
 }

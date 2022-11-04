@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 
 		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		return ResourcePersistentId.fromLongList(retVal);
+		return JpaPid.fromLongList(retVal);
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	public List<ResourcePersistentId> fetchAllResultPids(Search theSearch) {
 		List<Long> retVal = mySearchResultDao.findWithSearchPidOrderIndependent(theSearch.getId());
 		ourLog.trace("fetchAllResultPids returned {} pids", retVal.size());
-		return ResourcePersistentId.fromLongList(retVal);
+		return JpaPid.fromLongList(retVal);
 	}
 
 	@Override

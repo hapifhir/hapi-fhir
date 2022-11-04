@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -118,7 +119,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			TermConcept childCA = new TermConcept(cs, "childCA").setDisplay("Child CA");
 			parentC.addChild(childCA, RelationshipTypeEnum.ISA);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			return codeSystem;
 		});
 	}
@@ -157,7 +158,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			TermConcept beagle = new TermConcept(cs, "beagle").setDisplay("Beagle");
 			dogs.addChild(beagle, RelationshipTypeEnum.ISA);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			return codeSystem;
 		});
 	}
@@ -190,7 +191,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			parentB.addChild(childI, RelationshipTypeEnum.ISA);
 		}
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 	}
@@ -525,7 +526,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		concept = new TermConcept(cs, "LA9999-7");
 		cs.getConcepts().add(concept);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), TermTestUtil.URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(TermTestUtil.URL_MY_VALUE_SET);
@@ -836,7 +837,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		cs.setResource(table);
 		TermConcept parentA = new TermConcept(cs, "ParentA").setDisplay("Parent A");
 		cs.getConcepts().add(parentA);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), "http://snomed.info/sct", "Snomed CT", "SYSTEM VERSION", cs, table);
 
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -982,7 +983,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.clear();
 		}
-		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		if (theCaptureQueriesListener != null) {
 			theCaptureQueriesListener.logAllQueries();
 		}

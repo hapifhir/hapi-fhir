@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -79,8 +80,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 		return myMdmLinkDao.expandPidsFromGroupPidGivenMatchResult(theGroupPid.getIdAsLong(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
+				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
+				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
 			.collect(Collectors.toList());
 	}
 
@@ -89,8 +90,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 		return myMdmLinkDao.expandPidsBySourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
+				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
+				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
 			.collect(Collectors.toList());
 	}
 
@@ -99,8 +100,8 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 		return myMdmLinkDao.expandPidsByGoldenResourcePidAndMatchResult(theSourcePid.getIdAsLong(), theMdmMatchResultEnum)
 			.stream()
 			.map( theMdmPidTuple -> new MdmPidTuple()
-				.setSourcePid(new ResourcePersistentId(theMdmPidTuple.getSourcePid()))
-				.setGoldenPid(new ResourcePersistentId(theMdmPidTuple.getGoldenPid())))
+				.setSourcePid(new JpaPid(theMdmPidTuple.getSourcePid()))
+				.setGoldenPid(new JpaPid(theMdmPidTuple.getGoldenPid())))
 			.collect(Collectors.toList());
 	}
 
@@ -108,7 +109,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	public List<ResourcePersistentId> findPidByResourceNameAndThreshold(String theResourceName, Date theHighThreshold, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThreshold(theResourceName,theHighThreshold, thePageable)
 			.stream()
-			.map( theResourcePids -> new ResourcePersistentId(theResourcePids))
+			.map( theResourcePids -> new JpaPid(theResourcePids))
 			.collect(Collectors.toList());
 	}
 
@@ -116,7 +117,7 @@ public class MdmLinkDaoJpaImpl implements IMdmLinkDao<MdmLink> {
 	public List<ResourcePersistentId> findPidByResourceNameAndThresholdAndPartitionId(String theResourceName, Date theHighThreshold, List<Integer> thePartitionIds, Pageable thePageable) {
 		return myMdmLinkDao.findPidByResourceNameAndThresholdAndPartitionId(theResourceName,theHighThreshold, thePartitionIds, thePageable)
 			.stream()
-			.map( theResourcePids -> new ResourcePersistentId(theResourcePids))
+			.map( theResourcePids -> new JpaPid(theResourcePids))
 			.collect(Collectors.toList());
 	}
 

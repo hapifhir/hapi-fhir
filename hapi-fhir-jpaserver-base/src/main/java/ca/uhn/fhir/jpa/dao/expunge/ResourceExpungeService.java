@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -48,12 +49,12 @@ import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -144,7 +145,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 			}
 		}
 
-		return ResourcePersistentId.fromLongList(ids.getContent());
+		return JpaPid.fromLongList(ids.getContent());
 	}
 
 	@Override
@@ -164,7 +165,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 				ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
 			}
 		}
-		return ResourcePersistentId.fromLongList(ids.getContent());
+		return JpaPid.fromLongList(ids.getContent());
 	}
 
 	@Override
@@ -257,7 +258,7 @@ public class ResourceExpungeService implements IResourceExpungeService {
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
-		deleteAllSearchParams(new ResourcePersistentId(resource.getResourceId()));
+		deleteAllSearchParams(new JpaPid(resource.getResourceId()));
 
 		myResourceTagDao.deleteByResourceId(resource.getId());
 

@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -34,10 +34,6 @@ import org.apache.commons.lang3.Validate;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOrPredicate;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 

@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmExpansionCacheSvc;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
@@ -166,12 +167,12 @@ public class JpaBulkExportProcessorTest {
 		return new MdmPidTuple() {
 			@Override
 			public ResourcePersistentId getGoldenPid() {
-				return new ResourcePersistentId(theGoldenId);
+				return new JpaPid(theGoldenId);
 			}
 
 			@Override
 			public ResourcePersistentId getSourcePid() {
-				return new ResourcePersistentId(theGroupId);
+				return new JpaPid(theGroupId);
 			}
 		};
 	}
@@ -186,8 +187,8 @@ public class JpaBulkExportProcessorTest {
 		List<SearchParameterMap> maps = new ArrayList<>();
 		maps.add(map);
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = new JpaPid(123L);
+		JpaPid pid2 = new JpaPid(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);
@@ -252,7 +253,7 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setResourceType("Patient");
 
-		ResourcePersistentId groupId = new ResourcePersistentId(Long.parseLong(parameters.getGroupId()));
+		JpaPid groupId = new JpaPid(Long.parseLong(parameters.getGroupId()));
 		long groupGoldenPid = 4567l;
 
 		Group groupResource = new Group();
@@ -261,7 +262,7 @@ public class JpaBulkExportProcessorTest {
 		List<IPrimitiveType> patientTypes = createPatientTypes();
 		List<ResourcePersistentId> pids = new ArrayList<>();
 		for (IPrimitiveType type : patientTypes) {
-			pids.add(new ResourcePersistentId(((IdDt) type).getIdPartAsLong()));
+			pids.add(new JpaPid(((IdDt) type).getIdPartAsLong()));
 		}
 
 		MdmPidTuple tuple = createTuple(groupId.getIdAsLong(), groupGoldenPid);
@@ -320,9 +321,9 @@ public class JpaBulkExportProcessorTest {
 		int count = 0;
 		assertTrue(pidIterator.hasNext());
 		while (pidIterator.hasNext()) {
-			ResourcePersistentId pid = pidIterator.next();
+			JpaPid pid = (JpaPid) pidIterator.next();
 			long idAsLong = pid.getIdAsLong();
-			boolean existing = pids.contains(new ResourcePersistentId(idAsLong));
+			boolean existing = pids.contains(new JpaPid(idAsLong));
 			if (!existing) {
 				assertTrue(theMdm);
 				assertEquals(groupGoldenPid, idAsLong);
@@ -341,13 +342,13 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.GROUP);
 		parameters.setResourceType("Observation");
 
-		ResourcePersistentId groupId = new ResourcePersistentId(Long.parseLong(parameters.getGroupId()));
+		JpaPid groupId = new JpaPid(Long.parseLong(parameters.getGroupId()));
 		Group groupResource = new Group();
 		groupResource.setId(parameters.getGroupId());
 		long groupGoldenPid = 4567l;
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = new JpaPid(123L);
+		JpaPid pid2 = new JpaPid(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);
@@ -414,8 +415,8 @@ public class JpaBulkExportProcessorTest {
 		ExportPIDIteratorParameters parameters = createExportParameters(BulkDataExportOptions.ExportStyle.SYSTEM);
 		parameters.setResourceType("Patient");
 
-		ResourcePersistentId pid = new ResourcePersistentId("Patient/123");
-		ResourcePersistentId pid2 = new ResourcePersistentId("Observation/123");
+		JpaPid pid = new JpaPid(123L);
+		JpaPid pid2 = new JpaPid(456L);
 		ListResultIterator resultIterator = new ListResultIterator(
 			Arrays.asList(pid, pid2)
 		);

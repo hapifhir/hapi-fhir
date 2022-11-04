@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
@@ -214,7 +215,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// Updating a Golden Resource Patient who was created via MDM should fail.
 		IMdmLink mdmLink = runInTransaction(() -> myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), patient)).orElseThrow(() -> new IllegalStateException()));
 		Long sourcePatientPid = mdmLink.getGoldenResourcePersistenceId().getIdAsLong();
-		Patient goldenResourcePatient = myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
+		Patient goldenResourcePatient = myPatientDao.readByPid(new JpaPid(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
 			myMdmHelper.doUpdateResource(goldenResourcePatient, true);

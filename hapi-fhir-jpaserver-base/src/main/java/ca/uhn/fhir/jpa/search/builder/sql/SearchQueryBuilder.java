@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
@@ -672,9 +673,9 @@ public class SearchQueryBuilder {
 		// Do  nothing if it's empty
 		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
 			return;
-
-		List<Long> excludePids = ResourcePersistentId.toLongList(theExsitinghPidSetToExclude);
-
+		
+		List<Long> excludePids = JpaPid.toLongList(theExsitinghPidSetToExclude);
+		
 		ourLog.trace("excludePids = " + excludePids);
 
 		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();

@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -278,7 +279,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 				Long pid = (Long)theCodeSystem.getUserData(RESOURCE_PID_KEY);
 				assert pid != null;
-				ResourcePersistentId codeSystemResourcePid = new ResourcePersistentId(pid);
+				JpaPid codeSystemResourcePid = new JpaPid(pid);
 
 				/*
 				 * If this is a not-present codesystem and codesystem version already exists, we don't want to
@@ -321,7 +322,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource, theRequest);
 
-		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
+		JpaPid codeSystemResourcePid = (JpaPid) myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());

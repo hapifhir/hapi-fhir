@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -140,7 +141,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public ResourcePersistentId getId() {
-		return new ResourcePersistentId(myId);
+		return new JpaPid(myId);
 	}
 
 	@Override
@@ -151,7 +152,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public ResourcePersistentId getGoldenResourcePersistenceId() {
-		return new ResourcePersistentId(myGoldenResourcePid);
+		return new JpaPid(myGoldenResourcePid);
 	}
 
 	@Override
@@ -164,7 +165,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public ResourcePersistentId getSourcePersistenceId() {
-		return new ResourcePersistentId(mySourcePid);
+		return new JpaPid(mySourcePid);
 	}
 
 	@Override

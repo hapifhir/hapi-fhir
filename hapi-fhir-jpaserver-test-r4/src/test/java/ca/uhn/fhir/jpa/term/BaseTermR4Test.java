@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
@@ -88,7 +89,7 @@ public abstract class BaseTermR4Test extends BaseJpaR4Test {
 			TermConcept parentB = new TermConcept(cs, "ParentB");
 			cs.getConcepts().add(parentB);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new ResourcePersistentId(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(new JpaPid(table.getId()), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 			return id;
 		});

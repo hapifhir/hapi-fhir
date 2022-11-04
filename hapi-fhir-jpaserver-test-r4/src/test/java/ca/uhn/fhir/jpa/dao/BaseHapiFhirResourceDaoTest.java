@@ -156,7 +156,7 @@ class BaseHapiFhirResourceDaoTest {
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
-		ResourcePersistentId resourcePersistentId = new ResourcePersistentId("Patient", 1l);
+		JpaPid jpaPid = new JpaPid(123L, 1L);
 		ResourceTable entity = new ResourceTable();
 		entity.setForcedId(new ForcedId());
 
@@ -170,10 +170,10 @@ class BaseHapiFhirResourceDaoTest {
 			Mockito.any(RequestPartitionId.class),
 			Mockito.anyString(),
 			Mockito.anyString()
-		)).thenReturn(resourcePersistentId);
+		)).thenReturn(jpaPid);
 		Mockito.when(myEntityManager.find(
 			Mockito.any(Class.class),
-			Mockito.anyString()
+			Mockito.anyLong()
 		)).thenReturn(entity);
 		// we don't stub myConfig.getResourceClientIdStrategy()
 		// because even a null return isn't ANY...

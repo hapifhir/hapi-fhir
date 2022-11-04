@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -1642,12 +1643,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
-		ResourcePersistentId valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
 		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
 	}
 
-	private ResourcePersistentId getValueSetResourcePersistentId(ValueSet theValueSet) {
-		return myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theValueSet.getIdElement().getResourceType(), theValueSet.getIdElement().getIdPart());
+	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
+		return (JpaPid) myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), theValueSet.getIdElement().getResourceType(), theValueSet.getIdElement().getIdPart());
 	}
 
 	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
@@ -1656,7 +1657,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		ResourcePersistentId valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
+		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
 
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();

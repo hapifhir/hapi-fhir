@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -57,7 +58,8 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 	@Deprecated
 	@Nonnull
 	public List<Long> getPidsOrThrowException(List<IIdType> theIds) {
-		List<ResourcePersistentId> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds);
+		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), theIds)
+			.stream().map(id -> (JpaPid) id).toList();
 		return resourcePersistentIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
 	}
 
@@ -96,7 +98,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 		assert TransactionSynchronizationManager.isSynchronizationActive();
 
 		List<IIdType> ids = Collections.singletonList(theId);
-		List<ResourcePersistentId> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
+		List<JpaPid> resourcePersistentIds = super.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids).stream().map(id -> (JpaPid) id).toList();;
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
@@ -108,7 +110,7 @@ public class JpaIdHelperService extends IdHelperService implements IJpaIdHelperS
 			throw new IllegalStateException(Msg.code(1102) + String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())
 			);
 		}
-		return new ResourcePersistentId(retVal);
+		return new JpaPid(retVal);
 	}
 
 	@Override

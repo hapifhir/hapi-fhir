@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -255,11 +256,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		{
 			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
-			assertThat(ResourcePersistentId.toLongList(found), hasItem(id2.getIdPartAsLong()));
+			assertThat(JpaPid.toLongList(found), hasItem(id2.getIdPartAsLong()));
 		}
 		{
 			List<ResourcePersistentId> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(ResourcePersistentId.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
 

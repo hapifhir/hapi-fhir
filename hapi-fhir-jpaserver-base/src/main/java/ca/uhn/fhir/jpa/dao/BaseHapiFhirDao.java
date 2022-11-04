@@ -1448,7 +1448,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		 */
 		if (thePerformIndexing) {
 			if (newParams == null) {
-				myExpungeService.deleteAllSearchParams(new ResourcePersistentId(entity.getId()));
+				myExpungeService.deleteAllSearchParams(new JpaPid(entity.getId()));
 			} else {
 
 				// Synchronize search param indexes

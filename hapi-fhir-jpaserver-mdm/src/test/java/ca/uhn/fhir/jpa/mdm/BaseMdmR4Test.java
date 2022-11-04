@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
@@ -369,7 +370,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		Optional<? extends IMdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(runInTransaction(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theBaseResource)));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePersistenceId().getIdAsLong();
-			return (T) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
+			return (T) relevantDao.readByPid(new JpaPid(goldenResourcePid));
 		} else {
 			return null;
 		}
@@ -377,7 +378,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected <T extends IBaseResource> T getTargetResourceFromMdmLink(IMdmLink theMdmLink, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		return (T) resourceDao.readByPid(new ResourcePersistentId(theMdmLink.getGoldenResourcePersistenceId().getIdAsLong()));
+		return (T) resourceDao.readByPid(new JpaPid(theMdmLink.getGoldenResourcePersistenceId().getIdAsLong()));
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {

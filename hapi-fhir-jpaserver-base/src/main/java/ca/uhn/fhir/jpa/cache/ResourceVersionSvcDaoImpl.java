@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -137,14 +138,14 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			return retval;
 		}
 
-		List<ResourcePersistentId> resourcePersistentIds = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
-			theIds.stream().collect(Collectors.toList()));
+		List<JpaPid> jpaPids = myIdHelperService.resolveResourcePersistentIdsWithCache(thePartitionId,
+			new ArrayList<>(theIds)).stream().map(id -> (JpaPid) id).toList();
 
 		// we'll use this map to fetch pids that require versions
-		HashMap<Long, ResourcePersistentId> pidsToVersionToResourcePid = new HashMap<>();
+		HashMap<Long, JpaPid> pidsToVersionToResourcePid = new HashMap<>();
 
 		// fill in our map
-		for (ResourcePersistentId pid : resourcePersistentIds) {
+		for (JpaPid pid : jpaPids) {
 			if (pid.getVersion() == null) {
 				pidsToVersionToResourcePid.put(pid.getIdAsLong(), pid);
 			}

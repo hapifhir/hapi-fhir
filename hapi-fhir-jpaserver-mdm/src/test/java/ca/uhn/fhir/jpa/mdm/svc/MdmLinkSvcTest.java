@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.IExpungeEverythingService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -90,8 +91,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		ResourcePersistentId goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
-		ResourcePersistentId goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
+		JpaPid goldenPatient1Pid = (JpaPid) runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
+		JpaPid goldenPatient2Pid = (JpaPid) runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getIdAsLong(), goldenPatient2Pid.getIdAsLong()).isPresent());
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getIdAsLong(), goldenPatient1Pid.getIdAsLong()).isPresent());
 
@@ -108,8 +109,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient1 = createGoldenPatient();
 		Patient goldenPatient2 = createGoldenPatient();
 
-		ResourcePersistentId goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
-		ResourcePersistentId goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
+		JpaPid goldenPatient1Pid = (JpaPid) runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
+		JpaPid goldenPatient2Pid = (JpaPid) runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getIdAsLong(), goldenPatient2Pid.getIdAsLong()).isPresent());
 		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getIdAsLong(), goldenPatient1Pid.getIdAsLong()).isPresent());
 

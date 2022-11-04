@@ -28,10 +28,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -166,8 +164,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					}
 				}
 			}
-			List<ResourcePersistentId> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(requestPartitionId, idsToPreResolve);
-			for (ResourcePersistentId next : outcome) {
+			List<JpaPid> outcome = myIdHelperService.resolveResourcePersistentIdsWithCache(requestPartitionId, idsToPreResolve)
+				.stream().map(id -> (JpaPid) id).toList();
+			for (JpaPid next : outcome) {
 				foundIds.add(next.getAssociatedResourceId().toUnqualifiedVersionless().getValue());
 				theTransactionDetails.addResolvedResourceId(next.getAssociatedResourceId(), next);
 				if (myDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY || !next.getAssociatedResourceId().isIdPartValidLong()) {
@@ -192,7 +191,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					String requestIfNoneExist = versionAdapter.getEntryIfNoneExist(nextEntry);
 					String resourceType = myFhirContext.getResourceType(resource);
 					if ("PUT".equals(verb) && requestUrl != null && requestUrl.contains("?")) {
-						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
+						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestUrl);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getIdAsLong());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestUrl).matches()) {
@@ -201,7 +200,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 							searchParameterMapsToResolve.add(new MatchUrlToResolve(requestUrl, matchUrlSearchMap, resourceDefinition));
 						}
 					} else if ("POST".equals(verb) && requestIfNoneExist != null && requestIfNoneExist.contains("?")) {
-						ResourcePersistentId cachedId = myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
+						JpaPid cachedId = (JpaPid) myMatchResourceUrlService.processMatchUrlUsingCacheOnly(resourceType, requestIfNoneExist);
 						if (cachedId != null) {
 							idsToPreFetch.add(cachedId.getIdAsLong());
 						} else if (SINGLE_PARAMETER_MATCH_URL_PATTERN.matcher(requestIfNoneExist).matches()) {
@@ -277,7 +276,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			}
 
 			IFhirSystemDao<?,?> systemDao = myApplicationContext.getBean(IFhirSystemDao.class);
-			systemDao.preFetchResources(ResourcePersistentId.fromLongList(idsToPreFetch));
+			systemDao.preFetchResources(JpaPid.fromLongList(idsToPreFetch));
 
 		}
 
@@ -322,8 +321,8 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 	private void setSearchToResolvedAndPrefetchFoundResourcePid(TransactionDetails theTransactionDetails, List<Long> idsToPreFetch, ResourceIndexedSearchParamToken nextResult, MatchUrlToResolve nextSearchParameterMap) {
 		ourLog.debug("Matched url {} from database", nextSearchParameterMap.myRequestUrl);
 		idsToPreFetch.add(nextResult.getResourcePid());
-		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
-		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new ResourcePersistentId(nextResult.getResourcePid()));
+		myMatchResourceUrlService.matchUrlResolved(theTransactionDetails, nextSearchParameterMap.myResourceDefinition.getName(), nextSearchParameterMap.myRequestUrl, new JpaPid(nextResult.getResourcePid()));
+		theTransactionDetails.addResolvedMatchUrl(nextSearchParameterMap.myRequestUrl, new JpaPid(nextResult.getResourcePid()));
 		nextSearchParameterMap.setResolved(true);
 	}
 

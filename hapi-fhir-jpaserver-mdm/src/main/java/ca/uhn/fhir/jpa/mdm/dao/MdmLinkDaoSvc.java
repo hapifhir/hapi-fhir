@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -116,7 +117,7 @@ public class MdmLinkDaoSvc {
 	 */
 	@Deprecated
 	public Optional<? extends IMdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
-		return getLinkByGoldenResourcePidAndSourceResourcePid(new ResourcePersistentId(theGoldenResourcePid), new ResourcePersistentId(theSourceResourcePid));
+		return getLinkByGoldenResourcePidAndSourceResourcePid(new JpaPid(theGoldenResourcePid), new JpaPid(theSourceResourcePid));
 	}
 
 	/**
@@ -203,7 +204,7 @@ public class MdmLinkDaoSvc {
 	 */
 	public Optional<? extends IMdmLink> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(Long theGoldenResourcePid,
 																															Long theSourcePid, MdmMatchResultEnum theMatchResult) {
-		return getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(new ResourcePersistentId(theGoldenResourcePid), new ResourcePersistentId(theSourcePid), theMatchResult);
+		return getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(new JpaPid(theGoldenResourcePid), new JpaPid(theSourcePid), theMatchResult);
 	}
 
 	public Optional<? extends IMdmLink> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(ResourcePersistentId theGoldenResourcePid,

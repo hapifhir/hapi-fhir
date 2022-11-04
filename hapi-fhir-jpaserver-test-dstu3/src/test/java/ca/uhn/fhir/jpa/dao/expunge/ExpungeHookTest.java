@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -125,7 +126,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		options.setExpungeDeletedResources(true);
 
 		myExpungeResourceLatch.setExpectedCount(2);
-		myExpungeService.expunge("Patient", new ResourcePersistentId(expungeId.getIdPartAsLong()), options, null);
+		myExpungeService.expunge("Patient", new JpaPid(expungeId.getIdPartAsLong()), options, null);
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
 
 		IIdType hookId = hookParams.get(IIdType.class);
