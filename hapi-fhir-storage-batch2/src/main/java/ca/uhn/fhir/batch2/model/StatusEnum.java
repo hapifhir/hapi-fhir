@@ -146,7 +146,7 @@ public enum StatusEnum {
 			case IN_PROGRESS:
 				return theNewStatus != QUEUED;
 			case ERRORED:
-				return theNewStatus == FAILED;
+				return theNewStatus == FAILED || theNewStatus == COMPLETED || theNewStatus == CANCELLED;
 			case COMPLETED:
 			case CANCELLED:
 			case FAILED:

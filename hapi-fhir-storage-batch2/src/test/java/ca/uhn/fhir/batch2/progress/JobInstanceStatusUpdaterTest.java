@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +29,7 @@ class JobInstanceStatusUpdaterTest {
 	private static final String TEST_NAME = "test name";
 	private static final String TEST_ERROR_MESSAGE = "test error message";
 	private static final int TEST_ERROR_COUNT = 729;
-	private final JobInstance ourQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
+	private final JobInstance myQueuedInstance = new JobInstance().setStatus(StatusEnum.QUEUED);
 
 	@Mock
 	IJobPersistence myJobPersistence;
@@ -51,36 +52,58 @@ class JobInstanceStatusUpdaterTest {
 		myInstance.setParameters(myTestParameters);
 		myInstance.setErrorMessage(TEST_ERROR_MESSAGE);
 		myInstance.setErrorCount(TEST_ERROR_COUNT);
-
-		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
 	}
 
 	@Test
 	public void testCompletionHandler() {
-		AtomicReference<JobCompletionDetails> calledDetails = new AtomicReference<>();
-
 		// setup
-		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
-		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
-		IJobCompletionHandler<TestParameters> completionHandler = details -> calledDetails.set(details);
-		when(myJobDefinition.getCompletionHandler()).thenReturn(completionHandler);
+		setupCompleteCallback();
 
 		// execute
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.COMPLETED);
 
-		JobCompletionDetails<TestParameters> receivedDetails = calledDetails.get();
+		assertCompleteCallbackCalled();
+	}
+
+	@Test
+	public void testCompletionHandler_ERROR_to_COMPLETED() {
+		setupCompleteCallback();
+		myInstance.setStatus(StatusEnum.ERRORED);
+		myQueuedInstance.setStatus(StatusEnum.ERRORED);
+		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
+
+		// execute
+		mySvc.updateInstanceStatus(myInstance, StatusEnum.COMPLETED);
+
+		assertCompleteCallbackCalled();
+	}
+
+	private void assertCompleteCallbackCalled() {
+		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
 		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstance().getInstanceId());
 		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
 	}
 
+	private void setupCompleteCallback() {
+		myDetails = new AtomicReference<>();
+		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
+		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
+		IJobCompletionHandler<TestParameters> completionHandler = details -> myDetails.set(details);
+		when(myJobDefinition.getCompletionHandler()).thenReturn(completionHandler);
+		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
+	}
+
 	@Test
 	public void testErrorHandler_ERROR() {
-		setupErrorCallback();
+		// setup
+		myDetails = new AtomicReference<>();
+		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
+		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 
 		// execute
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.ERRORED);
 
-		assertErrorCallbackCalled(StatusEnum.ERRORED);
+		assertNull(myDetails.get());
 	}
 
 	@Test
@@ -117,10 +140,11 @@ class JobInstanceStatusUpdaterTest {
 		myDetails = new AtomicReference<>();
 
 		// setup
-		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(ourQueuedInstance));
+		when(myJobPersistence.fetchInstance(TEST_INSTANCE_ID)).thenReturn(Optional.of(myQueuedInstance));
 		when(myJobPersistence.updateInstance(myInstance)).thenReturn(true);
 		IJobCompletionHandler<TestParameters> errorHandler = details -> myDetails.set(details);
 		when(myJobDefinition.getErrorHandler()).thenReturn(errorHandler);
+		when(myJobDefinition.getParametersType()).thenReturn(TestParameters.class);
 	}
 
 
