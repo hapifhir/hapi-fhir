@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.Batch2JobInfo;
 import ca.uhn.fhir.jpa.api.model.Batch2JobOperationResult;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -74,6 +76,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,7 +98,7 @@ public class BulkDataExportProviderTest {
 	private IBatch2JobRunner myJobRunner;
 
 	private DaoConfig myDaoConfig;
-
+	private DaoRegistry myDaoRegistry;
 	private CloseableHttpClient myClient;
 
 	@InjectMocks
@@ -137,6 +141,9 @@ public class BulkDataExportProviderTest {
 	public void injectDaoConfig() {
 		myDaoConfig = new DaoConfig();
 		myProvider.setDaoConfig(myDaoConfig);
+		myDaoRegistry = mock(DaoRegistry.class);
+		lenient().when(myDaoRegistry.getRegisteredDaoTypes()).thenReturn(Set.of("Patient", "Observation", "Encounter"));
+		myProvider.setDaoRegistry(myDaoRegistry);
 	}
 
 	public void startWithFixedBaseUrl() {
