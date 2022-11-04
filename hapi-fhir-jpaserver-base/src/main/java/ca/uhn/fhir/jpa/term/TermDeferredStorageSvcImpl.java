@@ -284,7 +284,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
         // Don't include executing jobs here since there's no point in thrashing over and over
         // in a busy wait while we wait for batch2 job processes to finish
-        while (!isStorageQueueEmpty(false))) {
+        while (!isStorageQueueEmpty(false)) {
 			if (myAllowDeferredTasksTimeout) {
 				if (timeoutManager.checkTimeout()) {
 					ourLog.info(toString());
