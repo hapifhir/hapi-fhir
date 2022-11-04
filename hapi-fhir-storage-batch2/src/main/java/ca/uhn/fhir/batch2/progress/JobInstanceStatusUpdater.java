@@ -87,10 +87,10 @@ public class JobInstanceStatusUpdater {
 				invokeCompletionHandler(theJobInstance, definition, definition.getCompletionHandler());
 				break;
 			case FAILED:
-			case ERRORED:
 			case CANCELLED:
 				invokeCompletionHandler(theJobInstance, definition, definition.getErrorHandler());
 				break;
+			case ERRORED:
 			case QUEUED:
 			case IN_PROGRESS:
 			default:
