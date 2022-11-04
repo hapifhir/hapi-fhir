@@ -3,6 +3,7 @@ package ca.uhn.fhir.system;
 import org.apache.commons.lang3.time.DateUtils;
 
 public final class HapiSystemProperties {
+	private static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	private static final String UNLIMITED_DB_CONNECTION = "unlimited_db_connection";
 	private static final String MASS_INGESTION_MODE = "mass_ingestion_mode";
 	/**
@@ -14,9 +15,10 @@ public final class HapiSystemProperties {
 	private static final String HAPI_CLIENT_KEEPRESPONSES = "hapi.client.keepresponses";
 	private static final String TEST_MODE = "test";
 	private static final String UNIT_TEST_MODE = "unit_test_mode";
-	public static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	private static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
-	private HapiSystemProperties() {}
+	private HapiSystemProperties() {
+	}
 
 	/**
 	 * This property is used by unit tests - do not rely on it in production code
@@ -100,5 +102,17 @@ public final class HapiSystemProperties {
 
 	public static void disableMassIngestionMode() {
 		System.clearProperty(MASS_INGESTION_MODE);
+	}
+
+	public static boolean isDisableStatusBasedReindex() {
+		return "true".equals(System.getProperty(DISABLE_STATUS_BASED_REINDEX));
+	}
+
+	public static void disableStatusBasedReindex() {
+		System.setProperty(DISABLE_STATUS_BASED_REINDEX, "true");
+	}
+
+	public static void enableStatusBasedReindex() {
+		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);
 	}
 }
