@@ -173,6 +173,11 @@ public class JpaConstants {
 	public static final String OPERATION_LASTN = "$lastn";
 
 	/**
+	 * Operation name for the $member-match operation
+	 */
+	public static final String OPERATION_MEMBER_MATCH = "$member-match";
+
+	/**
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";
