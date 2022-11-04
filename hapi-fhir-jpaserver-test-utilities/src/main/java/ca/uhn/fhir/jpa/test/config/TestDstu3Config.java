@@ -35,7 +35,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
 import ca.uhn.fhir.rest.server.mail.MailConfig;
 import ca.uhn.fhir.rest.server.mail.MailSvc;
-import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.system.HapiTestSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -140,7 +140,7 @@ public class TestDstu3Config {
 		 */
 		int maxThreads = (int) (Math.random() * 6.0) + 2;
 
-		if (HapiSystemProperties.isSingleDbConnectionEnabled()) {
+		if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 			maxThreads = 1;
 		}
 

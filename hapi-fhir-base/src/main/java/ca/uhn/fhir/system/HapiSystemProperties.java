@@ -2,13 +2,9 @@ package ca.uhn.fhir.system;
 
 import org.apache.commons.lang3.time.DateUtils;
 
-// FIXME KHS split this into test-only properties and prod properties
 public final class HapiSystemProperties {
-	private static final String SINGLE_DB_CONNECTION = "single_db_connection";
 	private static final String SUPPRESS_HAPI_FHIR_VERSION_LOG = "suppress_hapi_fhir_version_log";
 	private static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
-	private static final String UNLIMITED_DB_CONNECTION = "unlimited_db_connection";
-	private static final String MASS_INGESTION_MODE = "mass_ingestion_mode";
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
@@ -87,30 +83,6 @@ public final class HapiSystemProperties {
 		return Long.parseLong(property);
 	}
 
-	public static void enableUnlimitedDbConnections() {
-		System.setProperty(UNLIMITED_DB_CONNECTION, "true");
-	}
-
-	public static boolean isUnlimitedDbConnectionsEnabled() {
-		return "true".equals(System.getProperty(UNLIMITED_DB_CONNECTION));
-	}
-
-	public static void disableUnlimitedDbConnections() {
-		System.clearProperty(UNLIMITED_DB_CONNECTION);
-	}
-
-	public static void enableMassIngestionMode() {
-		System.setProperty(MASS_INGESTION_MODE, "true");
-	}
-
-	public static boolean isMassIngestionModeEnabled() {
-		return "true".equals(System.getProperty(MASS_INGESTION_MODE));
-	}
-
-	public static void disableMassIngestionMode() {
-		System.clearProperty(MASS_INGESTION_MODE);
-	}
-
 	public static boolean isDisableStatusBasedReindex() {
 		return "true".equals(System.getProperty(DISABLE_STATUS_BASED_REINDEX));
 	}
@@ -136,7 +108,4 @@ public final class HapiSystemProperties {
 		return "true".equals(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
 	}
 
-	public static boolean isSingleDbConnectionEnabled() {
-		return "true".equals(System.getProperty(SINGLE_DB_CONNECTION));
-	}
 }
