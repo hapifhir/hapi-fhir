@@ -30,17 +30,13 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.config.JpaConfig;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -72,7 +68,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
 	@Autowired
-	private IValidationSupport myValidationSupport;
+	protected IValidationSupport myValidationSupport;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -121,7 +117,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	}
 
 	@SuppressWarnings("unchecked")
-	private IFhirResourceDaoValueSet<IBaseResource> getDao() {
+	protected IFhirResourceDaoValueSet<IBaseResource> getDao() {
 		return (IFhirResourceDaoValueSet<IBaseResource>) myDaoRegistry.getResourceDao("ValueSet");
 	}
 
@@ -136,7 +132,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		@IdParam(optional = true) IIdType theId,
 		@OperationParam(name = "url", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theValueSetUrl,
 		@OperationParam(name = "valueSetVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theValueSetVersion,
-		@OperationParam(name = "code", min = 0, max = 1) IPrimitiveType<String> theCode,
+		@OperationParam(name = "code", min = 0, max = 1, typeName = "code") IPrimitiveType<String> theCode,
 		@OperationParam(name = "system", min = 0, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 		@OperationParam(name = "systemVersion", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theSystemVersion,
 		@OperationParam(name = "display", min = 0, max = 1, typeName = "string") IPrimitiveType<String> theDisplay,

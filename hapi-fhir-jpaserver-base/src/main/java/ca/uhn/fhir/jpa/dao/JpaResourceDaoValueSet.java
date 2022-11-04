@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -103,10 +104,18 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		}
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
+			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+				// "url" parameter is called "identifier" in DSTU2
+				throw new InvalidRequestException(Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
+			}
 			throw new InvalidRequestException(Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
 		}
 
 		if (!LogicUtil.multiXor(haveId, haveIdentifier, haveValueSet)) {
+			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU2) {
+				// "url" parameter is called "identifier" in DSTU2
+				throw new InvalidRequestException(Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+			}
 			throw new InvalidRequestException(Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 

@@ -76,6 +76,8 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
 
+			ourRestServer.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
 			ourConnectionPoolSize = myAppCtx.getBean("maxDatabaseThreadsForTest", Integer.class);
 			ourRestServer.setPagingProvider(ourPagingProvider);

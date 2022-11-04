@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
@@ -188,6 +189,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
@@ -393,6 +396,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void logAllTokenIndexes() {
 		runInTransaction(() -> {
 			ourLog.info("Token indexes:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+	}
+
+	protected void logAllUriIndexes() {
+		runInTransaction(() -> {
+			ourLog.info("URI indexes:\n * {}", myResourceIndexedSearchParamUriDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 	}
 

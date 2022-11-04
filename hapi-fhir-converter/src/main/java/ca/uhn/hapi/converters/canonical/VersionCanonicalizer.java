@@ -49,6 +49,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * This class converts versions of various resources to/from a canonical version
@@ -216,7 +217,8 @@ public class VersionCanonicalizer {
 		@Override
 		public ValueSet valueSetToCanonical(IBaseResource theValueSet) {
 			org.hl7.fhir.dstu2.model.Resource reencoded = reencodeToHl7Org(theValueSet);
-			return (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
+			ValueSet valueSet = (ValueSet) VersionConvertorFactory_10_40.convertResource(reencoded, ADVISOR_10_40);
+			return valueSet;
 		}
 
 		@Override

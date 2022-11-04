@@ -2287,12 +2287,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Override
-	public IBaseResource fetchCodeSystem(String theSystem) {
-		IValidationSupport jpaValidationSupport = provideJpaValidationSupport();
-		return jpaValidationSupport.fetchCodeSystem(theSystem);
-	}
-
-	@Override
 	public CodeSystem fetchCanonicalCodeSystemFromCompleteContext(String theSystem) {
 		IValidationSupport validationSupport = provideValidationSupport();
 		IBaseResource codeSystem = validationSupport.fetchCodeSystem(theSystem);

@@ -117,7 +117,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 		}
 	}
 
-	private static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
+	static void applyVersionToSystem(IPrimitiveType<String> theSystem, IPrimitiveType<String> theVersion) {
 		if (theVersion != null && isNotBlank(theVersion.getValueAsString()) && theSystem != null) {
 			theSystem.setValue(theSystem.getValueAsString() + "|" + theVersion.getValueAsString());
 		}

@@ -106,67 +106,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage, RequestDetails theRequestDetails) {
-		boolean haveCoding = theCoding != null && isNotBlank(extractCodingSystem(theCoding)) && isNotBlank(extractCodingCode(theCoding));
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
-		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
-		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
-
-		if (!haveCoding && !(haveSystem && haveCode)) {
-			throw new InvalidRequestException(Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
-			throw new InvalidRequestException(Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
-		}
-
-		String code;
-		String system;
-		if (haveCoding) {
-			code = extractCodingCode(theCoding);
-			system = extractCodingSystem(theCoding);
-			String version = extractCodingVersion(theCoding);
-			if (isNotBlank(version)) {
-				system = system + "|" + version;
-			}
-		} else {
-			code = theCode.getValue();
-			system = theSystem.getValue();
-		}
-
-		String displayLanguage = null;
-		if (haveDisplayLanguage) {
-			displayLanguage = theDisplayLanguage.getValue();
-		}
-
-		ourLog.info("Looking up {} / {}", system, code);
-
-		if (myValidationSupport.isCodeSystemSupported(new ValidationSupportContext(myValidationSupport), system)) {
-
-			ourLog.info("Code system {} is supported", system);
-			IValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), system, code, displayLanguage);
-			if (retVal != null) {
-				return retVal;
-			}
-
-		}
-
-		// We didn't find it..
-		return IValidationSupport.LookupCodeResult.notFound(system, code);
-
-	}
-
-	private String extractCodingSystem(IBaseCoding theCoding) {
-		return theCoding.getSystem();
-	}
-
-	private String extractCodingCode(IBaseCoding theCoding) {
-		return theCoding.getCode();
-	}
-
-	private String extractCodingVersion(IBaseCoding theCoding) {
-		if (myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-			return null;
-		}
-		return myTerser.getSinglePrimitiveValueOrNull(theCoding, "version");
+		return doLookupCode(myFhirContext, myTerser, myValidationSupport, theCode, theSystem, theCoding, theDisplayLanguage);
 	}
 
 	@Override
@@ -183,8 +123,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+	public ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing, boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
 		if (!retVal.isUnchangedInCurrentOperation()) {
 
@@ -198,9 +137,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	}
 
 	@Override
-	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl,
-														  IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay,
-														  IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails) {
+	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails) {
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
@@ -272,6 +209,69 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		String codeSystemUrl = createVersionedSystemIfVersionIsPresent(theCodeSystemUrl, theVersion);
 
 		return myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+	}
+
+	public static IValidationSupport.LookupCodeResult doLookupCode(FhirContext theFhirContext, FhirTerser theFhirTerser, IValidationSupport theValidationSupport, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage) {
+		boolean haveCoding = theCoding != null && isNotBlank(extractCodingSystem(theCoding)) && isNotBlank(extractCodingCode(theCoding));
+		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
+		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
+
+		if (!haveCoding && !(haveSystem && haveCode)) {
+			throw new InvalidRequestException(Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
+		}
+		if (!LogicUtil.multiXor(haveCoding, (haveSystem && haveCode)) || (haveSystem != haveCode)) {
+			throw new InvalidRequestException(Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+		}
+
+		String code;
+		String system;
+		if (haveCoding) {
+			code = extractCodingCode(theCoding);
+			system = extractCodingSystem(theCoding);
+			String version = extractCodingVersion(theFhirContext, theFhirTerser, theCoding);
+			if (isNotBlank(version)) {
+				system = system + "|" + version;
+			}
+		} else {
+			code = theCode.getValue();
+			system = theSystem.getValue();
+		}
+
+		String displayLanguage = null;
+		if (haveDisplayLanguage) {
+			displayLanguage = theDisplayLanguage.getValue();
+		}
+
+		ourLog.info("Looking up {} / {}", system, code);
+
+		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
+
+			ourLog.info("Code system {} is supported", system);
+			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(new ValidationSupportContext(theValidationSupport), system, code, displayLanguage);
+			if (retVal != null) {
+				return retVal;
+			}
+
+		}
+
+		// We didn't find it..
+		return IValidationSupport.LookupCodeResult.notFound(system, code);
+	}
+
+	private static String extractCodingSystem(IBaseCoding theCoding) {
+		return theCoding.getSystem();
+	}
+
+	private static String extractCodingCode(IBaseCoding theCoding) {
+		return theCoding.getCode();
+	}
+
+	private static String extractCodingVersion(FhirContext theFhirContext, FhirTerser theFhirTerser, IBaseCoding theCoding) {
+		if (theFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+			return null;
+		}
+		return theFhirTerser.getSinglePrimitiveValueOrNull(theCoding, "version");
 	}
 
 	public static String createVersionedSystemIfVersionIsPresent(String theCodeSystemUrl, String theVersion) {

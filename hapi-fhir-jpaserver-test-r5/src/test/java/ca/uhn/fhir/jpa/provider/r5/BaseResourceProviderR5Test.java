@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.JpaCapabilityStatementProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
