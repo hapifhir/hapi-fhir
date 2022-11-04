@@ -102,7 +102,6 @@
 		<module>hapi-fhir-jpaserver-searchparam</module>
 		<module>hapi-fhir-jpaserver-subscription</module>
 		<module>hapi-fhir-jaxrsserver-base</module>
-		<module>hapi-fhir-batch</module>
 		<module>hapi-fhir-jpaserver-base</module>
 		<module>hapi-fhir-sql-migrate</module>
 		<module>hapi-fhir-jpaserver-mdm</module>
