@@ -49,6 +49,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -1994,7 +1995,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		});
 
 		// Perform pre-expansion
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		await().until(() -> {
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
+		}, equalTo(true));
+
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		runInTransaction(() -> {
