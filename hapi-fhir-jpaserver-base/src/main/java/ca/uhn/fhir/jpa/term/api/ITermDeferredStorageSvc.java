@@ -37,6 +37,19 @@ public interface ITermDeferredStorageSvc {
 
 	void saveDeferred();
 
+	/**
+	 * @deprecated Use {@link #isStorageQueueEmpty(boolean)} instead
+	 */
+	@Deprecated
+	default boolean isStorageQueueEmpty() {
+		return isStorageQueueEmpty(true);
+	}
+
+	/**
+	 * If you are calling this in a loop or something similar, consider the impact of
+	 * setting {@literal theIncludeExecutingJobs} to true. When that parameter is set
+	 * to true, each call to this method results in a database lookup!
+	 */
 	boolean isStorageQueueEmpty(boolean theIncludeExecutingJobs);
 
 	/**

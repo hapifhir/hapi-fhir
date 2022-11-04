@@ -274,7 +274,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 	}
 
 	@Nonnull
-	private static List<String> toCodes(ValueSet expanded) {
+	public static List<String> toCodes(ValueSet expanded) {
 		List<String> codes = expanded
 			.getExpansion()
 			.getContains()

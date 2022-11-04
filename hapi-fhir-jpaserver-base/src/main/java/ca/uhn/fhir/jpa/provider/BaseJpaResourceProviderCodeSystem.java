@@ -32,8 +32,6 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -46,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.toValidateCodeResult;
+import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
@@ -172,7 +171,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding,  theCodeableConcept, theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result);
+			return toValidateCodeResult(getContext(), result, toStringValue(theCodeSystemUrl));
 		} finally {
 			endRequest(theServletRequest);
 		}

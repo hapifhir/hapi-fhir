@@ -53,6 +53,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ValueSetOperationProvider extends BaseJpaProvider {
@@ -172,7 +173,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				}
 				result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result);
+			return toValidateCodeResult(getContext(), result, toStringValue(theSystem));
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -241,15 +242,20 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		return options;
 	}
 
-	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult, String theSystem) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
-		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
-		if (isNotBlank(theResult.getMessage())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
-		}
-		if (isNotBlank(theResult.getDisplay())) {
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
+		if (theResult == null) {
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", false);
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", "Validator is unable to provide validation for system: " + theSystem);
+		} else {
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
+			if (isNotBlank(theResult.getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
+			}
+			if (isNotBlank(theResult.getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
+			}
 		}
 
 		return retVal;

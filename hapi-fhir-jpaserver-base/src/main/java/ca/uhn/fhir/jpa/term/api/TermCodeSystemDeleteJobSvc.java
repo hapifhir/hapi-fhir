@@ -29,10 +29,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.fasterxml.jackson.databind.util.ArrayIterator;
-import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +39,6 @@ import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Transactional
 public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
@@ -121,11 +117,6 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	public void deleteCodeSystemVersion(long theVersionPid) {
 		ourLog.debug("Executing for codeSystemVersionId: {}", theVersionPid);
 
-		// Force a failure for unit tests
-		if (ourFailNextDeleteCodeSystemVersion.getAndSet(false)) {
-			Validate.isTrue(false,"Unit test exception");
-		}
-
 		// if TermCodeSystemVersion being deleted is current, disconnect it form TermCodeSystem
 		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theVersionPid);
 		if (codeSystemOpt.isPresent()) {
@@ -143,7 +134,6 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 		});
 	}
 
-	@SuppressWarnings("ConstantConditions")
 	@Override
 	public void deleteCodeSystem(long thePid) {
 		ourLog.info("Deleting code system by id : {}", thePid);
@@ -163,15 +153,5 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	@Override
 	public void notifyJobComplete(String theJobId) {
 		myDeferredStorageSvc.notifyJobEnded(theJobId);
-	}
-
-	private static final AtomicBoolean ourFailNextDeleteCodeSystemVersion = new AtomicBoolean(false);
-
-	/**
-	 * This is here for unit tests only
-	 */
-	@VisibleForTesting
-	public static void setFailNextDeleteCodeSystemVersion(boolean theFailNextDeleteCodeSystemVersion) {
-		ourFailNextDeleteCodeSystemVersion.set(theFailNextDeleteCodeSystemVersion);
 	}
 }

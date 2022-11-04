@@ -61,7 +61,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	public void after() {
 		super.after();
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(new DaoConfig().getDeferIndexingForCodesystemsOfSize());
-		TermCodeSystemDeleteJobSvc.setFailNextDeleteCodeSystemVersion(false);
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
 	}
 
 	@Test
@@ -462,16 +462,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		});
 	}
 
-//	@Autowired
-//	proivate
-
 	/**
 	 * See #4206
 	 */
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
 		myDaoConfig.setDeferIndexingForCodesystemsOfSize(100);
-		TermCodeSystemDeleteJobSvc.setFailNextDeleteCodeSystemVersion(true);
+		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(true);
 
 		CodeSystem codeSystem;
 		codeSystem = createCodeSystemWithManyCodes(0, 1000);
@@ -481,7 +478,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem = createCodeSystemWithManyCodes(2, 1002);
 		myCodeSystemDao.update(codeSystem, mySrd);
 
-		await().atMost(10, TimeUnit.MINUTES).until(() -> {
+		await().until(() -> {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
 			}, equalTo(true));

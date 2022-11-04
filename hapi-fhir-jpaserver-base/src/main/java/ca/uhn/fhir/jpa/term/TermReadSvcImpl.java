@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -107,6 +108,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -273,6 +275,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	//We need this bean so we can tell which mode hibernate search is running in.
 	@Autowired
 	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+	@Autowired
+	private CachingValidationSupport myCachingValidationSupport;
 
 
 	@Override
@@ -1613,6 +1617,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 		termValueSet.setExpansionTimestamp(null);
 		myTermValueSetDao.save(termValueSet);
+
+		afterValueSetExpansionStatusChange();
+
 		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "valueSetPreExpansionInvalidated", termValueSet.getUrl(), totalConcepts);
 	}
 
@@ -1980,6 +1987,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 				});
 
+				afterValueSetExpansionStatusChange();
+
 				ourLog.info("Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}", valueSet.getId(), valueSet.getUrl(), accumulator.getConceptsSaved(), sw);
 
 			} catch (Exception e) {
@@ -1994,6 +2003,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				setPreExpandingValueSets(false);
 			}
 		}
+	}
+
+	/*
+	 * If a ValueSet has just finished pre-expanding, let's flush the caches. This is
+	 * kind of a blunt tool, but it should ensure that users don't get unpredictable
+	 * results while they test changes, which is probably a worthwhile sacrifice
+	 */
+	private void afterValueSetExpansionStatusChange() {
+		// TODO: JA2 - Move this caching into the memorycacheservice, and only purge the
+		// relevant individual cache
+		myCachingValidationSupport.invalidateCaches();
 	}
 
 	private synchronized void setPreExpandingValueSets(boolean thePreExpandingValueSets) {
@@ -2273,7 +2293,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		// Check if someone is accidentally using a VS url where it should be a CS URL
-		if (retVal != null && retVal.getCode() == null && theCodeSystem != null) {
+		if (retVal != null && retVal.getCode() == null && theCodeSystem != null && myContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
 			if (isValueSetSupported(theValidationSupportContext, theCodeSystem)) {
 				if (!isCodeSystemSupported(theValidationSupportContext, theCodeSystem)) {
 					String newMessage = "Unable to validate code " + theCodeSystem + "#" + theCode + " - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: " + theCodeSystem;

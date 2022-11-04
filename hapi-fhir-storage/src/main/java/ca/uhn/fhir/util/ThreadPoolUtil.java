@@ -33,11 +33,18 @@ public final class ThreadPoolUtil {
 
 	@Nonnull
 	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix) {
+		return newThreadPool(theCorePoolSize, theMaxPoolSize, theThreadNamePrefix, 0);
+	}
+
+	@Nonnull
+	public static ThreadPoolTaskExecutor newThreadPool(int theCorePoolSize, int theMaxPoolSize, String theThreadNamePrefix, int theQueueCapacity) {
+		assert theCorePoolSize == theMaxPoolSize || theQueueCapacity == 0 : "If the queue capacity is greater than 0, core pool size needs to match max pool size or the system won't grow the queue";
+
 		Validate.isTrue(theThreadNamePrefix.endsWith("-"), "Thread pool prefix name must end with a hyphen");
 		ThreadPoolTaskExecutor asyncTaskExecutor = new ThreadPoolTaskExecutor();
 		asyncTaskExecutor.setCorePoolSize(theCorePoolSize);
 		asyncTaskExecutor.setMaxPoolSize(theMaxPoolSize);
-		asyncTaskExecutor.setQueueCapacity(0);
+		asyncTaskExecutor.setQueueCapacity(theQueueCapacity);
 		asyncTaskExecutor.setAllowCoreThreadTimeOut(true);
 		asyncTaskExecutor.setThreadNamePrefix(theThreadNamePrefix);
 		asyncTaskExecutor.setRejectedExecutionHandler(new BlockPolicy());

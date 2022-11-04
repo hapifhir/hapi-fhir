@@ -25,23 +25,24 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import java.util.ArrayList;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Supplier;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class LinkedBlockingChannel extends ExecutorSubscribableChannel implements IChannelProducer, IChannelReceiver {
 
 	private final String myName;
-	private final BlockingQueue<?> myQueue;
+	private final Supplier<Integer> myQueueSizeSupplier;
 
-	public LinkedBlockingChannel(String theName, Executor theExecutor, BlockingQueue<?> theQueue) {
+	public LinkedBlockingChannel(String theName, Executor theExecutor, Supplier<Integer> theQueueSizeSupplier) {
 		super(theExecutor);
 		myName = theName;
-		myQueue = theQueue;
+		myQueueSizeSupplier = theQueueSizeSupplier;
 	}
 
 	public int getQueueSizeForUnitTest() {
-		return myQueue.size();
+		return defaultIfNull(myQueueSizeSupplier.get(), 0);
 	}
 
 	public void clearInterceptorsForUnitTest() {
@@ -62,7 +63,7 @@ public class LinkedBlockingChannel extends ExecutorSubscribableChannel implement
 	 * Creates a synchronous channel, mostly intended for testing
 	 */
 	public static LinkedBlockingChannel newSynchronous(String theName) {
-		return new LinkedBlockingChannel(theName, null, new LinkedBlockingQueue<>(1));
+		return new LinkedBlockingChannel(theName, null, () -> 0);
 	}
 
 }
