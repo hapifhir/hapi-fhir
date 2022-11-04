@@ -101,8 +101,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		if (theStartRequest.isUseCache()) {
 			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(),
 				StatusEnum.QUEUED,
-				StatusEnum.IN_PROGRESS,
-				StatusEnum.COMPLETED
+				StatusEnum.IN_PROGRESS
 			);
 
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
