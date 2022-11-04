@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystem;
 import ca.uhn.fhir.test.BaseTest;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -34,7 +35,7 @@ public class CreatePackageCommandTest extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommandTest.class);
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystem.enableTestMode();
 	}
 
 	private File myWorkDirectory;

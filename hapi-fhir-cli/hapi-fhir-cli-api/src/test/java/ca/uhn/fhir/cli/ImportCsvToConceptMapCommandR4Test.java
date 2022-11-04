@@ -2,6 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.system.HapiSystem;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -39,7 +40,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 	private static final String STATUS = "Active";
 
 	static {
-		System.setProperty("test", "true");
+		HapiSystem.enableTestMode();
 	}
 
 	private final FhirContext myFhirContext = FhirContext.forR4();

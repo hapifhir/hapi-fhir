@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.system.HapiSystem;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -101,7 +102,7 @@ class TimeoutManagerTest {
 	@Test
 	public void checkTimeout_errorThreadholdHitInUnitTest_throwsException() {
 		// setup
-		System.setProperty("unit_test_mode", "true");
+		HapiSystem.enableUnitTestMode();
 		mySvc.addTimeForUnitTest(Duration.ofDays(20));
 		// execute
 		try {

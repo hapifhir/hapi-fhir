@@ -43,10 +43,10 @@ import ca.uhn.fhir.rest.client.api.IHttpClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
-import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.system.HapiSystem;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -119,7 +119,7 @@ public class GenericClientDstu2Test {
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myResponseCount = 0;
 
-		System.setProperty(BaseClient.HAPI_CLIENT_KEEPRESPONSES, "true");
+		HapiSystem.enableHapiClientKeepResponses();
 	}
 
 	private String extractBody(ArgumentCaptor<HttpUriRequest> capt, int count) throws IOException {
