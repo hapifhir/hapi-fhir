@@ -35,6 +35,9 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_UPLOAD_PROPERTIES_FILE("loincupload.properties"),
 	LOINC_XML_FILE("loinc.xml"),
 
+	LOINC_MAPTO_FILE("loinc.mapto.file"),
+	LOINC_MAPTO_FILE_DEFAULT("LoincTable/MapTo.csv"),
+
 	/*
 	 * MANDATORY
 	 */
@@ -153,7 +156,7 @@ public enum LoincUploadPropertiesEnum {
 
 	public static LoincUploadPropertiesEnum fromCode(String theCode) {
 		if (ourValues == null) {
-			HashMap<String, LoincUploadPropertiesEnum> values = new HashMap<String, LoincUploadPropertiesEnum>();
+			HashMap<String, LoincUploadPropertiesEnum> values = new HashMap<>();
 			for (LoincUploadPropertiesEnum next : values()) {
 				values.put(next.getCode(), next);
 			}

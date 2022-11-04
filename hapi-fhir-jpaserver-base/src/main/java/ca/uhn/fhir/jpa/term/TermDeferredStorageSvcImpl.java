@@ -78,6 +78,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
 	private static final long SAVE_ALL_DEFERRED_WARN_MINUTES = 1;
 	private static final long SAVE_ALL_DEFERRED_ERROR_MINUTES = 5;
+	private boolean myAllowDeferredTasksTimeout = true;
 	private final List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	private final Queue<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = new ConcurrentLinkedQueue<>();
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -274,15 +275,20 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	@Override
 	public void saveAllDeferred() {
-		TimeoutManager timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
-			Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
-			Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+		TimeoutManager timeoutManager = null;
+		if (myAllowDeferredTasksTimeout) {
+			timeoutManager = new TimeoutManager(TermDeferredStorageSvcImpl.class.getName() + ".saveAllDeferred()",
+				Duration.of(SAVE_ALL_DEFERRED_WARN_MINUTES, ChronoUnit.MINUTES),
+				Duration.of(SAVE_ALL_DEFERRED_ERROR_MINUTES, ChronoUnit.MINUTES));
+		}
 
-		// Don't include executing jobs here since there's no point in thrashing over and over
-		// in a busy wait while we wait for batch2 jobs to finish
-		while (!isStorageQueueEmpty(false)) {
-			if (timeoutManager.checkTimeout()) {
-				ourLog.info(toString());
+        // Don't include executing jobs here since there's no point in thrashing over and over
+        // in a busy wait while we wait for batch2 job processes to finish
+        while (!isStorageQueue(false))) {
+			if (myAllowDeferredTasksTimeout) {
+				if (timeoutManager.checkTimeout()) {
+					ourLog.info(toString());
+				}
 			}
 			saveDeferred();
 		}
@@ -490,6 +496,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	void setCodeSystemVersionDaoForUnitTest(ITermCodeSystemVersionDao theCodeSystemVersionDao) {
 		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
+	@Override
+	public void disallowDeferredTaskTimeout() { myAllowDeferredTasksTimeout = false; }
 
 	@Override
 	@VisibleForTesting

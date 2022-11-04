@@ -78,4 +78,9 @@ public interface ITermDeferredStorageSvc {
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();
+
+	/**
+	 * Only to be used from tests - Disallow test timeouts on deferred tasks
+	 */
+	void disallowDeferredTaskTimeout();
 }
