@@ -7,6 +7,9 @@ public final class HapiTestSystemProperties {
 
 	private HapiTestSystemProperties() {}
 
+	/**
+	 * Set the database connection pool size to 100
+	 */
 	public static void enableUnlimitedDbConnections() {
 		System.setProperty(UNLIMITED_DB_CONNECTION, "true");
 	}
@@ -19,6 +22,9 @@ public final class HapiTestSystemProperties {
 		System.clearProperty(UNLIMITED_DB_CONNECTION);
 	}
 
+	/**
+	 * Creates a DaoConfig with setMassIngestionMode(true) at test app context startup time
+	 */
 	public static void enableMassIngestionMode() {
 		System.setProperty(MASS_INGESTION_MODE, "true");
 	}
@@ -31,6 +37,9 @@ public final class HapiTestSystemProperties {
 		System.clearProperty(MASS_INGESTION_MODE);
 	}
 
+	/**
+	 * Set the database connection pool size to 1
+	 */
 	public static boolean isSingleDbConnectionEnabled() {
 		return "true".equals(System.getProperty(SINGLE_DB_CONNECTION));
 	}
