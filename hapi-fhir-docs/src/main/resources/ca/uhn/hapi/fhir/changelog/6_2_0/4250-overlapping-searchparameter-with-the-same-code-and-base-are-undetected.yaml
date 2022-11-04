@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4250
+title: "Custom overlapping SearchParameter on mongodb were undetected previously. This has been fixed, and try creating any SearchParameter which contains the same code and base resources as existing SearchParameters will be rejected."

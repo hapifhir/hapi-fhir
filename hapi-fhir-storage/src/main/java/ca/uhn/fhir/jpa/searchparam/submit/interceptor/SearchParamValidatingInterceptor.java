@@ -127,6 +127,9 @@ public class SearchParamValidatingInterceptor {
 		IBundleProvider bundleProvider = getDao().search(theSearchParameterMap, theRequestDetails);
 		List<IBaseResource> allResources = bundleProvider.getAllResources();
 		if(isNotEmpty(allResources)) {
+			if (isOverlappingExistCodeAndBase(allResources, theRuntimeSearchParam)){
+				throwDuplicateError();
+			}
 			Set<String> existingIds = allResources.stream().map(resource -> resource.getIdElement().getIdPart()).collect(Collectors.toSet());
 			if (isNewSearchParam(theRuntimeSearchParam, existingIds)) {
 				for (String upliftExtensionUrl: getUpliftExtensions()) {
@@ -141,6 +144,23 @@ public class SearchParamValidatingInterceptor {
 				}
 			}
 		}
+	}
+
+	private boolean isOverlappingExistCodeAndBase(List<IBaseResource> allResources, RuntimeSearchParam theRuntimeSearchParam) {
+		for (IBaseResource existResource : allResources){
+			RuntimeSearchParam existSearchParam = mySearchParameterCanonicalizer.canonicalizeSearchParameter(existResource);
+
+			// Check if the same code
+			if (existSearchParam.getName().equalsIgnoreCase(theRuntimeSearchParam.getName())) {
+				for(String base : theRuntimeSearchParam.getBase()){
+					// Check if the same base
+					if (existSearchParam.getBase().contains(base)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean isDuplicateUpliftParameter(RuntimeSearchParam theRuntimeSearchParam, RuntimeSearchParam theSp, String theUpliftUrl) {
