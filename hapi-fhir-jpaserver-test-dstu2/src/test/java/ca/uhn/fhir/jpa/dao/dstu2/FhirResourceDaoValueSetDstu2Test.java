@@ -47,7 +47,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("8450-9-XXX");
-		UriDt system = new UriDt("http://loinc.org");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -72,8 +72,8 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 	public void testValidateCodeOperationByIdentifierCodeInCsButNotInVs() {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
-		CodeDt code = new CodeDt("8450-9");
-		UriDt system = new UriDt("http://loinc.org");
+		CodeDt code = new CodeDt("8493-9");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -86,7 +86,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("11378-7");
-		UriDt system = new UriDt("http://loinc.org");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -100,7 +100,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("11378-7");
-		UriDt system = new UriDt("http://loinc.org");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = new StringDt("Systolic blood pressure at First encounterXXXX");
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -115,7 +115,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt valueSetIdentifier = new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		IdDt id = null;
 		CodeDt code = new CodeDt("11378-7");
-		UriDt system = new UriDt("http://loinc.org");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = new StringDt("Systolic blood pressure at First encounter");
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -132,7 +132,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt system = null;
 		StringDt display = null;
 		CodingDt coding = null;
-		CodeableConceptDt codeableConcept = new CodeableConceptDt("http://loinc.org", "11378-7");
+		CodeableConceptDt codeableConcept = new CodeableConceptDt("http://acme.org", "11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -143,7 +143,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		UriDt valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
 		CodeDt code = new CodeDt("11378-7");
-		UriDt system = new UriDt("http://loinc.org");
+		UriDt system = new UriDt("http://acme.org");
 		StringDt display = null;
 		CodingDt coding = null;
 		CodeableConceptDt codeableConcept = null;
@@ -164,12 +164,12 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 			stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
 				"<expansion>",
 				"<contains>",
-				"<system value=\"http://loinc.org\"/>",
+				"<system value=\"http://acme.org\"/>",
 				"<code value=\"11378-7\"/>",
 				"<display value=\"Systolic blood pressure at First encounter\"/>",
 				"</contains>",
 				"<contains>",
-				"<system value=\"http://loinc.org\"/>",
+				"<system value=\"http://acme.org\"/>",
 				"<code value=\"8450-9\"/>",
 				"<display value=\"Systolic blood pressure--expiration\"/>",
 				"</contains>",
@@ -231,17 +231,6 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		//@formatter:on
 
 		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
-	}
-
-	@Test
-	public void testValidateCodeForCodeSystemOperationNotSupported() {
-		try {
-			((IFhirResourceDaoCodeSystem) myValueSetDao).validateCode(null, null, null, null, null, null, null, null);
-			fail();
-		} catch (UnsupportedOperationException theE) {
-			assertNotNull(theE);
-		}
-
 	}
 
 }
