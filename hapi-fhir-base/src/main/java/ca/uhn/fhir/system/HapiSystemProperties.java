@@ -47,14 +47,42 @@ public final class HapiSystemProperties {
 		System.setProperty(STACKFILTER_PATTERN_PROP, thePattern);
 	}
 
+	/**
+	 * Set the validation resource cache expireAfterWrite timeout in milliseconds
+	 *
+	 * @param theMillis
+	 */
 	public static void setTestValidationResourceCachesMs(long theMillis) {
 		System.setProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "" + theMillis);
 	}
 
+	/**
+	 * Get the validation resource cache expireAfterWrite timeout in milliseconds.  If it has not been set, the default
+	 * value is 10 seconds.
+	 */
+
+	public static long getTestValidationResourceCachesMs() {
+		String property = System.getProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS);
+		if (property == null) {
+			return DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS;
+		}
+		return Long.parseLong(property);
+	}
+
+	/**
+	 * When this property is primarily used to control application shutdown behavior
+	 */
 	public static void enableTestMode() {
 		System.setProperty(TEST_MODE, "true");
 	}
 
+	public static boolean isTestModeEnabled() {
+		return "true".equals(System.getProperty(TEST_MODE));
+	}
+
+	/**
+	 * This property is used to ensure unit test behaviour is deterministic.  It is also used to add extra logging for unit tests.
+	 */
 	public static void enableUnitTestMode() {
 		System.setProperty(UNIT_TEST_MODE, "true");
 	}
@@ -63,6 +91,9 @@ public final class HapiSystemProperties {
 		return "true".equals(System.getProperty(UNIT_TEST_MODE));
 	}
 
+	/**
+	 * This property prevents stack traces from getting truncated and includes the full stack trace in failed search responses.
+	 */
 	public static void enableUnitTestCaptureStack() {
 		System.setProperty(UNIT_TEST_CAPTURE_STACK, "true");
 	}
@@ -75,14 +106,6 @@ public final class HapiSystemProperties {
 		return "true".equals(System.getProperty(HapiSystemProperties.UNIT_TEST_CAPTURE_STACK));
 	}
 
-	public static long getTestValidationResourceCachesMs() {
-		String property = System.getProperty(TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS);
-		if (property == null) {
-			return DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS;
-		}
-		return Long.parseLong(property);
-	}
-
 	public static boolean isDisableStatusBasedReindex() {
 		return "true".equals(System.getProperty(DISABLE_STATUS_BASED_REINDEX));
 	}
@@ -91,14 +114,16 @@ public final class HapiSystemProperties {
 		System.setProperty(DISABLE_STATUS_BASED_REINDEX, "true");
 	}
 
+	/**
+	 * This property sets {@link DaoConfig#setStatusBasedReindexingDisabled(Boolean)} to true when the system starts up.
+	 */
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);
 	}
 
-	public static boolean isTestModeEnabled() {
-		return "true".equals(System.getProperty(TEST_MODE));
-	}
-
+	/**
+	 * This property is used to suppress the logging of the HAPI FHIR version on startup.
+	 */
 	// TODO KHS use this in cdr
 	public static void enableSuppressHapiFhirVersionLog() {
 		System.setProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG, "true");
