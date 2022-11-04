@@ -1703,7 +1703,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 			}
 
-			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\". " + msg).setDisplay(concepts.get(0).getDisplay());
+			String expectedDisplay = concepts.get(0).getDisplay();
+			String append = createMessageAppendForDisplayMismatch(theSystem, theDisplay, expectedDisplay) + " - " + msg;
+			return createFailureCodeValidationResult(theSystem, theCode, systemVersion, append).setDisplay(expectedDisplay);
 		}
 
 		if (!concepts.isEmpty()) {
@@ -2237,30 +2239,31 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public IValidationSupport.CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystemUrl, String theCode, String theDisplay, String theValueSetUrl) {
 		//TODO GGG TRY TO JUST AUTO_PASS HERE AND SEE WHAT HAPPENS.
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
-			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystem, theCode, theDisplay);
+			return validateCodeInValueSet(theValidationSupportContext, theOptions, theValueSetUrl, theCodeSystemUrl, theCode, theDisplay);
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystem, c.getCode())));
+		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystemUrl, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystemUrl, c.getCode(), c.getDisplay(), c.getCodeSystemVersion().getCodeSystemVersionId())));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			FhirVersionIndependentConcept code = codeOpt.get();
-			if (!theOptions.isValidateDisplay() || (isNotBlank(code.getDisplay()) && isNotBlank(theDisplay) && code.getDisplay().equals(theDisplay))) {
+			if (!theOptions.isValidateDisplay() || isBlank(code.getDisplay()) || isBlank(theDisplay) || code.getDisplay().equals(theDisplay)) {
 				return new CodeValidationResult()
 					.setCode(code.getCode())
 					.setDisplay(code.getDisplay());
 			} else {
-				return createFailureCodeValidationResult(theCodeSystem, theCode, code.getSystemVersion(), " - Concept Display \"" + code.getDisplay() + "\" does not match expected \"" + code.getDisplay() + "\"").setDisplay(code.getDisplay());
+				String messageAppend = createMessageAppendForDisplayMismatch(theCodeSystemUrl, theDisplay, code.getDisplay());
+				return createFailureCodeValidationResult(theCodeSystemUrl, theCode, code.getSystemVersion(), messageAppend).setDisplay(code.getDisplay());
 			}
 		}
 
-		return createFailureCodeValidationResult(theCodeSystem, theCode, null, " - Code can not be found in CodeSystem");
+		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, null, createMessageAppendForCodeNotFoundInCodeSystem(theCodeSystemUrl));
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
@@ -2461,60 +2464,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		return Optional.of(termValueSetList.get(0));
 	}
 
-	@SuppressWarnings("unchecked")
-	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
+	@Nonnull
+	private static String createMessageAppendForDisplayMismatch(String theCodeSystemUrl, String theDisplay, String theExpectedDisplay) {
+		return " - Concept Display \"" + theDisplay + "\" does not match expected \"" + theExpectedDisplay + "\" for CodeSystem: " + theCodeSystemUrl;
+	}
 
-		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
-		Root<TermConcept> root = query.from(TermConcept.class);
-
-		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", JoinType.INNER);
-		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>) systemVersionFetch;
-		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
-		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>) systemFetch;
-
-		ArrayList<Predicate> predicates = new ArrayList<>();
-
-		if (isNotBlank(theCode)) {
-			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
-		}
-
-		if (isNoneBlank(theCodeSystemUrl)) {
-			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
-		}
-
-		// for loinc CodeSystem last version is not necessarily the current anymore, so if no version is present
-		// we need to query for the current, which is that which version is null
-		if (isNoneBlank(theCodeSystemVersion)) {
-			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
-		} else {
-			if (theCodeSystemUrl.toLowerCase(Locale.ROOT).contains(LOINC_LOW)) {
-				predicates.add(criteriaBuilder.isNull(systemVersionJoin.get("myCodeSystemVersionId")));
-			} else {
-				query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
-			}
-		}
-
-		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-		query.where(outerPredicate);
-
-		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
-		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
-		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
-		List<TermConcept> resultsList = hibernateQuery.getResultList();
-
-		if (!resultsList.isEmpty()) {
-			TermConcept concept = resultsList.get(0);
-
-			if (isNotBlank(theDisplay) && !theDisplay.equals(concept.getDisplay())) {
-				String message = "Concept Display \"" + theDisplay + "\" does not match expected \"" + concept.getDisplay() + "\" for CodeSystem: " + theCodeSystemUrl;
-				return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, message);
-			}
-
-			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
-		}
-
-		return createFailureCodeValidationResult(theCodeSystemUrl, theCode, theCodeSystemVersion, " - Code is not found in CodeSystem: " + theCodeSystemUrl);
+	@Nonnull
+	private static String createMessageAppendForCodeNotFoundInCodeSystem(String theCodeSystemUrl) {
+		return " - Code is not found in CodeSystem: " + theCodeSystemUrl;
 	}
 
 	@Override

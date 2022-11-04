@@ -171,7 +171,7 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 				IFhirResourceDaoCodeSystem dao = (IFhirResourceDaoCodeSystem) getDao();
 				result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding,  theCodeableConcept, theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result, toStringValue(theCodeSystemUrl));
+			return toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}

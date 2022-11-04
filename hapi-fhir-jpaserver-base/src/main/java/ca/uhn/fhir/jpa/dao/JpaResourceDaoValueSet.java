@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -220,7 +221,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		ValidationSupportContext context = new ValidationSupportContext(myValidationSupport);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		options.setValidateDisplay(isNotBlank(theDisplay));
-		return myValidationSupport.validateCode(context, options, theSystem, theCode, theDisplay, theValueSetIdentifier);
+		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(context, options, theSystem, theCode, theDisplay, theValueSetIdentifier);
+
+		if (result == null) {
+			result = new IValidationSupport.CodeValidationResult();
+			result.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem);
+		}
+
+		return result;
 	}
 
 	@Override

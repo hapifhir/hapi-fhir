@@ -223,7 +223,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1109) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -239,7 +239,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1109) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -254,7 +254,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1108) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 	}
 
@@ -529,7 +529,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Unable to validate code http://acme.org#8452-5Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\" for CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("Unable to validate code http://acme.org#8452-5 - Concept Display \"Old Systolic blood pressure.inspiration - expiration\" does not match expected \"Systolic blood pressure.inspiration - expiration\" for CodeSystem: http://acme.org", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -803,7 +803,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -818,17 +818,28 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
 		inParams.addParameter().setName("codeableConcept").setValue(cc);
 
-		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("validate-code")
+			.withParameters(inParams)
+			.execute();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+		assertEquals("result", respParam.getParameter().get(0).getName());
+		boolean value = ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue();
+
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		String message = ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString();
+
+		assertTrue(value, message);
+		assertEquals("Systolic blood pressure.inspiration - expiration", message);
 	}
 
 	@Test
-	public void testValidateCodeFoundByCodeableConceptWithMultipleMatchedSecondEntry() throws Exception {
+	public void testValidateCodeFoundByCodeableConceptWithMultipleMatchedSecondEntry() {
 
 		CodeableConcept cc = new CodeableConcept();
 		cc.addCoding().setCode("8452-5-a").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure.inspiration - expiration");
@@ -843,7 +854,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Systolic blood pressure--inspiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -863,7 +874,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -884,7 +895,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -904,7 +915,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -923,7 +934,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
@@ -943,7 +954,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 

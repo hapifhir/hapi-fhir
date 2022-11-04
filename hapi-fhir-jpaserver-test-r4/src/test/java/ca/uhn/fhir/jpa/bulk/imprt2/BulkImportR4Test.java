@@ -156,7 +156,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			await().until(() -> {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getStatus();
+				StatusEnum status = instance.getStatus();
+				ourLog.info("Job status: {}", status);
+				return status;
 			}, equalTo(StatusEnum.ERRORED));
 
 			String storageDescription = runInTransaction(() -> {

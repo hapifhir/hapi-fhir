@@ -369,7 +369,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.map(t -> ((IPrimitiveType<String>) t.getValue()).getValue())
 			.findFirst()
 			.orElseThrow(IllegalArgumentException::new);
-		assertThat(message, containsString("Validator is unable to provide validation for system: https://url"));
+		assertThat(message, containsString("Terminology service was unable to provide validation for https://url#1"));
 	}
 
 }

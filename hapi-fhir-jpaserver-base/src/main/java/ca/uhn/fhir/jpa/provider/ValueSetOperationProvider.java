@@ -60,6 +60,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetOperationProvider.class);
 	@Autowired
+	protected IValidationSupport myValidationSupport;
+	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -68,8 +70,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 	@Autowired
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
 	private ValidationSupportChain myValidationSupportChain;
-	@Autowired
-	protected IValidationSupport myValidationSupport;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -173,7 +173,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 				}
 				result = dao.validateCode(valueSetIdentifier, theId, theCode, codeSystemIdentifier, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
 			}
-			return toValidateCodeResult(getContext(), result, toStringValue(theSystem));
+			return toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -235,27 +235,22 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 			options.setFilter(theFilter.getValue());
 		}
 
-		if( theDisplayLanguage != null ) {
+		if (theDisplayLanguage != null) {
 			options.setTheDisplayLanguage(theDisplayLanguage.getValue());
 		}
 
 		return options;
 	}
 
-	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult, String theSystem) {
+	public static IBaseParameters toValidateCodeResult(FhirContext theContext, IValidationSupport.CodeValidationResult theResult) {
 		IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 
-		if (theResult == null) {
-			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", false);
-			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", "Validator is unable to provide validation for system: " + theSystem);
-		} else {
-			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
-			if (isNotBlank(theResult.getMessage())) {
-				ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
-			}
-			if (isNotBlank(theResult.getDisplay())) {
-				ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
-			}
+		ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "result", theResult.isOk());
+		if (isNotBlank(theResult.getMessage())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "message", theResult.getMessage());
+		}
+		if (isNotBlank(theResult.getDisplay())) {
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", theResult.getDisplay());
 		}
 
 		return retVal;

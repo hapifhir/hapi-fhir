@@ -136,6 +136,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		return retVal;
 	}
 
+	@Nonnull
 	@Override
 	public CodeValidationResult validateCode(IIdType theCodeSystemId, IPrimitiveType<String> theCodeSystemUrl, IPrimitiveType<String> theVersion, IPrimitiveType<String> theCode, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails) {
 
@@ -208,7 +209,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		String codeSystemUrl = createVersionedSystemIfVersionIsPresent(theCodeSystemUrl, theVersion);
 
-		return myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+		CodeValidationResult retVal = myValidationSupport.validateCode(context, options, codeSystemUrl, theCode, theDisplay, null);
+		if (retVal == null) {
+			retVal = new CodeValidationResult();
+			retVal.setMessage("Terminology service was unable to provide validation for " + codeSystemUrl + "#" + theCode);
+		}
+		return retVal;
 	}
 
 	public static IValidationSupport.LookupCodeResult doLookupCode(FhirContext theFhirContext, FhirTerser theFhirTerser, IValidationSupport theValidationSupport, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IBaseCoding theCoding, IPrimitiveType<String> theDisplayLanguage) {

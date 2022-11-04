@@ -1642,7 +1642,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(null, outcome.getCode());
 		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
 		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\". Code validation occurred using a ValueSet expansion that was pre-calculated at "));
+		assertThat(outcome.getMessage(), containsString("Unable to validate code http://snomed.info/sct#28571000087109 - Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for CodeSystem: http://snomed.info/sct - Code validation occurred using a ValueSet expansion that was pre-calculated at"));
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";
