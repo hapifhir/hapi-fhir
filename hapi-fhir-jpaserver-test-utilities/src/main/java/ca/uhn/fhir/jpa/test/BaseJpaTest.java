@@ -72,7 +72,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
@@ -152,9 +152,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
-		HapiSystem.setTestValidationResourceCachesMs(1000);
-		HapiSystem.enableTestMode();
-		HapiSystem.enableUnitTestMode();
+		HapiSystemProperties.setTestValidationResourceCachesMs(1000);
+		HapiSystemProperties.enableTestMode();
+		HapiSystemProperties.enableUnitTestMode();
 		TestUtil.setShouldRandomizeTimezones(false);
 	}
 

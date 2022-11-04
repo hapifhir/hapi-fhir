@@ -21,7 +21,7 @@ import ca.uhn.fhir.rest.client.interceptor.UserInfoInterceptor;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -96,7 +96,7 @@ public class GenericClientDstu3Test {
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myHttpResponse = mock(HttpResponse.class, new ReturnsDeepStubs());
 		myAnswerCount = 0;
-		HapiSystem.enableHapiClientKeepResponses();
+		HapiSystemProperties.enableHapiClientKeepResponses();
 	}
 
 	private String expectedUserAgent() {

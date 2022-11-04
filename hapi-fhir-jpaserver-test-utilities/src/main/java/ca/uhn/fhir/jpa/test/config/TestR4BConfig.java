@@ -26,13 +26,13 @@ import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.config.HapiJpaConfig;
-import ca.uhn.fhir.jpa.config.r4.JpaR4Config;
 import ca.uhn.fhir.jpa.config.r4b.JpaR4BConfig;
 import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
@@ -86,7 +86,7 @@ public class TestR4BConfig {
 			if ("true".equals(System.getProperty("single_db_connection"))) {
 				ourMaxThreads = 1;
 			}
-			if ("true".equals(System.getProperty("unlimited_db_connection"))) {
+			if (HapiSystemProperties.isUnlimitedDbConnectionsEnabled()) {
 				ourMaxThreads = 100;
 			}
 		}

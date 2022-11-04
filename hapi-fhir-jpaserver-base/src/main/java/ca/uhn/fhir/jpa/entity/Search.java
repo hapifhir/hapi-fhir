@@ -7,7 +7,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
@@ -237,7 +237,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setFailureMessage(String theFailureMessage) {
 		myFailureMessage = left(theFailureMessage, FAILURE_MESSAGE_LENGTH);
-		if (HapiSystem.isUnitTestCaptureStackEnabled()) {
+		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 			myFailureMessage = theFailureMessage;
 		}
 	}

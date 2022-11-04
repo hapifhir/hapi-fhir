@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.Conformance.ConditionalDeleteStatus;
@@ -63,7 +63,7 @@ import static org.mockito.Mockito.when;
 public class ServerConformanceProviderHl7OrgDstu2Test {
 
   static {
-    HapiSystem.enableTestMode();
+    HapiSystemProperties.enableTestMode();
   }
 
   private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();

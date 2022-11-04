@@ -49,7 +49,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import co.elastic.apm.api.ElasticApm;
@@ -481,7 +481,7 @@ public class SearchTask implements Callable<Void> {
 				failureCode = ((BaseServerResponseException) t).getStatusCode();
 			}
 
-			if (HapiSystem.isUnitTestCaptureStackEnabled()) {
+			if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 				failureMessage += "\nStack\n" + ExceptionUtils.getStackTrace(rootCause);
 			}
 

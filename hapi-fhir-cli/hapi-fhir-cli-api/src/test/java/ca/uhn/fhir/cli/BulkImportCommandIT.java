@@ -10,7 +10,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.io.FileUtils;
@@ -57,7 +57,7 @@ public class BulkImportCommandIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportCommandIT.class);
 
 	static {
-		HapiSystem.enableTestMode();
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@RegisterExtension

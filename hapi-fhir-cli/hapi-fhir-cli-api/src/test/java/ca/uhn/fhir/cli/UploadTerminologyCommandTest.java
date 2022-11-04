@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.BaseRestServerHelper;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -90,7 +90,7 @@ public class UploadTerminologyCommandTest {
 	protected ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
 	static {
-		HapiSystem.enableTestMode();
+		HapiSystemProperties.enableTestMode();
 	}
 
 	static Stream<Arguments> paramsProvider(){

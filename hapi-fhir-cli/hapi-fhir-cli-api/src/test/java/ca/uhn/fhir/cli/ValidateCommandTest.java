@@ -1,6 +1,6 @@
 package ca.uhn.fhir.cli;
 
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -33,7 +33,7 @@ public class ValidateCommandTest {
 
 	@BeforeEach
 	public void before() {
-		HapiSystem.enableTestMode();
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.TestUtil;
@@ -39,7 +39,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 	private final String myVersion = "dstu3";
 
 	static {
-		HapiSystem.enableTestMode();
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@RegisterExtension

@@ -8,7 +8,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
@@ -69,7 +69,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		myValidationSupportContext = theValidationSupportContext;
 		myModelConverter = theModelConverter;
 
-		long timeoutMillis = HapiSystem.getTestValidationResourceCachesMs();
+		long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
 
 		myFetchResourceCache = Caffeine.newBuilder()
 			.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)

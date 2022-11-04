@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.Bundle;
@@ -111,14 +112,14 @@ public class SyntheaPerfTest extends BaseJpaTest {
 
 	@BeforeAll
 	public static void beforeAll() {
-		System.setProperty("unlimited_db_connection", "true");
-		System.setProperty("mass_ingestion_mode", "true");
+		HapiSystemProperties.enableUnlimitedDbConnections();
+		HapiSystemProperties.enableMassIngestionMode();
 	}
 
 	@AfterAll
 	public static void afterAll() {
-		System.clearProperty("unlimited_db_connection");
-		System.clearProperty("mass_ingestion_mode");
+		HapiSystemProperties.disableUnlimitedDbConnections();
+		HapiSystemProperties.disableMassIngestionMode();
 	}
 
 	private class Uploader {

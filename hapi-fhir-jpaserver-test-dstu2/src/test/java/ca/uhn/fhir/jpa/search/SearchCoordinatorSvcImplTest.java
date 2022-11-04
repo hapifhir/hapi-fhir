@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
@@ -110,13 +110,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc{
 
 	@AfterEach
 	public void after() {
-		HapiSystem.disableUnitTestCaptureStack();
+		HapiSystemProperties.disableUnitTestCaptureStack();
 		super.after();
 	}
 
 	@BeforeEach
 	public void before() {
-		HapiSystem.enableUnitTestCaptureStack();
+		HapiSystemProperties.enableUnitTestCaptureStack();
 
 		myCurrentSearch = null;
 

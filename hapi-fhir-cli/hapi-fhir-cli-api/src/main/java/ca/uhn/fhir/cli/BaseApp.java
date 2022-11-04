@@ -21,7 +21,7 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.VersionUtil;
 import com.helger.commons.io.file.FileHelper;
 import org.apache.commons.cli.CommandLine;
@@ -56,7 +56,7 @@ public abstract class BaseApp {
 	private static boolean ourDebugMode;
 
 	static {
-		HapiSystem.setStackFilterPattern(STACKFILTER_PATTERN);
+		HapiSystemProperties.setStackFilterPattern(STACKFILTER_PATTERN);
 		LogbackUtil.loggingConfigOff();
 
 		// We don't use qualified names for loggers in CLI

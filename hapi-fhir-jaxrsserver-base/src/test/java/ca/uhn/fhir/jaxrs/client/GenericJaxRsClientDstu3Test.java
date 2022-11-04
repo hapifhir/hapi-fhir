@@ -17,7 +17,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
@@ -102,7 +102,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		ourCtx.setRestfulClientFactory(clientFactory);
 		ourResponseCount = 0;
-		HapiSystem.enableHapiClientKeepResponses();
+		HapiSystemProperties.enableHapiClientKeepResponses();
 	}
 
 	private String getPatientFeedWithOneResult() {

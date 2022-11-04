@@ -2,7 +2,7 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -38,7 +38,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 	public static final String DB_DIRECTORY = "target/h2_test";
 
 	static {
-		HapiSystem.enableTestMode();
+		HapiSystemProperties.enableTestMode();
 	}
 
 	@Test

@@ -53,7 +53,7 @@ import ca.uhn.fhir.rest.client.method.IClientResponseHandlerHandlesBinary;
 import ca.uhn.fhir.rest.client.method.MethodUtil;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.XmlDetectionUtil;
@@ -112,7 +112,7 @@ public abstract class BaseClient implements IRestfulClient {
 		 * as it may change at any time. If you want to capture responses in a reliable
 		 * way in your own code, just use client interceptors
 		 */
-		if (HapiSystem.isHapiClientKeepResponsesEnabled()) {
+		if (HapiSystemProperties.isHapiClientKeepResponsesEnabled()) {
 			setKeepResponses(true);
 		}
 

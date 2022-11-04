@@ -6,7 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -60,7 +60,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
     myCtx = theCtx;
     myValidationSupport = theValidationSupport;
 
-    long timeoutMillis = HapiSystem.getTestValidationResourceCachesMs();
+    long timeoutMillis = HapiSystemProperties.getTestValidationResourceCachesMs();
     myFetchedResourceCache = Caffeine.newBuilder().expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS).build();
 
     // Set a default locale

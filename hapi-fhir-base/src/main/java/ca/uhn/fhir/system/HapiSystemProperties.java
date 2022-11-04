@@ -2,7 +2,9 @@ package ca.uhn.fhir.system;
 
 import org.apache.commons.lang3.time.DateUtils;
 
-public final class HapiSystem {
+public final class HapiSystemProperties {
+	private static final String UNLIMITED_DB_CONNECTION = "unlimited_db_connection";
+	private static final String MASS_INGESTION_MODE = "mass_ingestion_mode";
 	/**
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
@@ -14,7 +16,7 @@ public final class HapiSystem {
 	private static final String UNIT_TEST_MODE = "unit_test_mode";
 	public static final long DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
-	private HapiSystem() {}
+	private HapiSystemProperties() {}
 
 	/**
 	 * This property is used by unit tests - do not rely on it in production code
@@ -61,11 +63,11 @@ public final class HapiSystem {
 	}
 
 	public static void disableUnitTestCaptureStack() {
-		System.clearProperty(HapiSystem.UNIT_TEST_CAPTURE_STACK);
+		System.clearProperty(HapiSystemProperties.UNIT_TEST_CAPTURE_STACK);
 	}
 
 	public static boolean isUnitTestCaptureStackEnabled() {
-		return "true".equals(System.getProperty(HapiSystem.UNIT_TEST_CAPTURE_STACK));
+		return "true".equals(System.getProperty(HapiSystemProperties.UNIT_TEST_CAPTURE_STACK));
 	}
 
 	public static long getTestValidationResourceCachesMs() {
@@ -74,5 +76,29 @@ public final class HapiSystem {
 			return DEFAULT_TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS;
 		}
 		return Long.parseLong(property);
+	}
+
+	public static void enableUnlimitedDbConnections() {
+		System.setProperty(UNLIMITED_DB_CONNECTION, "true");
+	}
+
+	public static boolean isUnlimitedDbConnectionsEnabled() {
+		return "true".equals(System.getProperty(UNLIMITED_DB_CONNECTION));
+	}
+
+	public static void disableUnlimitedDbConnections() {
+		System.clearProperty(UNLIMITED_DB_CONNECTION);
+	}
+
+	public static void enableMassIngestionMode() {
+		System.setProperty(MASS_INGESTION_MODE, "true");
+	}
+
+	public static boolean isMassIngestionModeEnabled() {
+		return "true".equals(System.getProperty(MASS_INGESTION_MODE));
+	}
+
+	public static void disableMassIngestionMode() {
+		System.clearProperty(MASS_INGESTION_MODE);
 	}
 }

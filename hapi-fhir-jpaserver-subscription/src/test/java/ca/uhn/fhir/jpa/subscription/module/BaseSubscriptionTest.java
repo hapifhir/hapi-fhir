@@ -12,7 +12,7 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.system.HapiSystem;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ import java.util.Collections;
 public abstract class BaseSubscriptionTest {
 
 	static {
-		HapiSystem.enableUnitTestMode();
+		HapiSystemProperties.enableUnitTestMode();
 	}
 
 	@Autowired
