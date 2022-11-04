@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class JpaPid extends ResourcePersistentId {
-
+public class JpaPid extends ResourcePersistentId<Long> {
 	public JpaPid(Long theId) {
 		super(theId);
 	}
@@ -27,7 +26,7 @@ public class JpaPid extends ResourcePersistentId {
 	public static List<ResourcePersistentId> fromLongList(List<Long> theResultList) {
 		List<ResourcePersistentId> retVal = new ArrayList<>(theResultList.size());
 		for (Long next : theResultList) {
-			retVal.add(new JpaPid(next));
+			retVal.add(new ResourcePersistentId(next));
 		}
 		return retVal;
 	}

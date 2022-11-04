@@ -34,21 +34,25 @@ import java.util.Optional;
  *
  * @param myId This is the only required field that needs to be populated, other fields can be populated for specific use cases.
  */
-public class ResourcePersistentId {
-	private Object myId;
+public class ResourcePersistentId<T> {
+	private T myId;
 	private Long myVersion;
 	private String myResourceType;
 	private IIdType myAssociatedResourceId;
 
-	public ResourcePersistentId(Object theId) {
+	/**
+	 * @deprecated use subclass
+	 */
+	public ResourcePersistentId(T theId) {
 		this(theId, null);
 	}
 
 	/**
+	 * @deprecated use subclass
 	 * @param theVersion This should only be populated if a specific version is needed. If you want the current version,
 	 *                   leave this as <code>null</code>
 	 */
-	public ResourcePersistentId(Object theId, Long theVersion) {
+	public ResourcePersistentId(T theId, Long theVersion) {
 		assert !(theId instanceof Optional);
 		assert !(theId instanceof ResourcePersistentId);
 		myId = theId;
@@ -85,14 +89,16 @@ public class ResourcePersistentId {
 		return retVal;
 	}
 
-	public Object getId() {
+	/**
+	 * @deprecated use getId() method of subclass
+	 */
+	public T getId() {
 		return myId;
 	}
 
-	public void setId(Object theId) {
-		myId = theId;
-	}
-
+	/**
+	 * @deprecated use getId() method of subclass
+	 */
 	public Long getIdAsLong() {
 		if (myId instanceof String) {
 			return Long.parseLong((String) myId);
