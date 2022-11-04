@@ -2,7 +2,10 @@ package ca.uhn.fhir.system;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+// FIXME KHS split this into test-only properties and prod properties
 public final class HapiSystemProperties {
+	private static final String SINGLE_DB_CONNECTION = "single_db_connection";
+	private static final String SUPPRESS_HAPI_FHIR_VERSION_LOG = "suppress_hapi_fhir_version_log";
 	private static final String DISABLE_STATUS_BASED_REINDEX = "disable_status_based_reindex";
 	private static final String UNLIMITED_DB_CONNECTION = "unlimited_db_connection";
 	private static final String MASS_INGESTION_MODE = "mass_ingestion_mode";
@@ -60,6 +63,10 @@ public final class HapiSystemProperties {
 		System.setProperty(UNIT_TEST_MODE, "true");
 	}
 
+	public static boolean isUnitTestModeEnabled() {
+		return "true".equals(System.getProperty(UNIT_TEST_MODE));
+	}
+
 	public static void enableUnitTestCaptureStack() {
 		System.setProperty(UNIT_TEST_CAPTURE_STACK, "true");
 	}
@@ -114,5 +121,22 @@ public final class HapiSystemProperties {
 
 	public static void enableStatusBasedReindex() {
 		System.clearProperty(DISABLE_STATUS_BASED_REINDEX);
+	}
+
+	public static boolean isTestModeEnabled() {
+		return "true".equals(System.getProperty(TEST_MODE));
+	}
+
+	// TODO KHS use this in cdr
+	public static void enableSuppressHapiFhirVersionLog() {
+		System.setProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG, "true");
+	}
+
+	public static boolean isSuppressHapiFhirVersionLogEnabled() {
+		return "true".equals(System.getProperty(SUPPRESS_HAPI_FHIR_VERSION_LOG));
+	}
+
+	public static boolean isSingleDbConnectionEnabled() {
+		return "true".equals(System.getProperty(SINGLE_DB_CONNECTION));
 	}
 }

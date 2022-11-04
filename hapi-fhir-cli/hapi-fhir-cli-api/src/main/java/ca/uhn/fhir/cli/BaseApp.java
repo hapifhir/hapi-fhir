@@ -262,12 +262,12 @@ public abstract class BaseApp {
 			myShutdownHookHasNotRun = true;
 			runCleanupHookAndUnregister();
 
-			if (!"true".equals(System.getProperty("test"))) {
+			if (!HapiSystemProperties.isTestModeEnabled()) {
 				System.exit(0);
 			}
 
 		} catch (ParseException e) {
-			if (!"true".equals(System.getProperty("test"))) {
+			if (!HapiSystemProperties.isTestModeEnabled()) {
 				LogbackUtil.loggingConfigOff();
 			}
 			System.err.println("Invalid command options for command: " + command.getCommandName());
@@ -322,7 +322,7 @@ public abstract class BaseApp {
 
 
 	private void exitDueToProblem(String theDescription) {
-		if ("true".equals(System.getProperty("test"))) {
+		if (HapiSystemProperties.isTestModeEnabled()) {
 			throw new Error(Msg.code(1556) + theDescription);
 		} else {
 			System.exit(1);
@@ -330,7 +330,7 @@ public abstract class BaseApp {
 	}
 
 	private void exitDueToException(Throwable e) {
-		if ("true".equals(System.getProperty("test"))) {
+		if (HapiSystemProperties.isTestModeEnabled()) {
 			if (e instanceof CommandFailureException) {
 				throw (CommandFailureException) e;
 			}

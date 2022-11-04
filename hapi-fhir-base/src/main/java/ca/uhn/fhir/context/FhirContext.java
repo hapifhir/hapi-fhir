@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
-import ca.uhn.fhir.tls.TlsAuthentication;
+import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
@@ -204,7 +204,7 @@ public class FhirContext {
 			ourLog.info("Creating new FhirContext with auto-detected version [{}]. It is recommended to explicitly select a version for future compatibility by invoking FhirContext.forDstuX()",
 				myVersion.getVersion().name());
 		} else {
-			if ("true".equals(System.getProperty("unit_test_mode"))) {
+			if (HapiSystemProperties.isUnitTestModeEnabled()) {
 				String calledAt = ExceptionUtils.getStackFrames(new Throwable())[4];
 				ourLog.info("Creating new FHIR context for FHIR version [{}]{}", myVersion.getVersion().name(), calledAt);
 			} else {

@@ -83,7 +83,7 @@ public class TestR4Config {
 		if (ourMaxThreads == null) {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
 
-			if ("true".equals(System.getProperty("single_db_connection"))) {
+			if (HapiSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
 			}
 			if (HapiSystemProperties.isUnlimitedDbConnectionsEnabled()) {
