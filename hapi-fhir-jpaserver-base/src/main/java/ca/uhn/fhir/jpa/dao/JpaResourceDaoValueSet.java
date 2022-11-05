@@ -225,7 +225,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		if (result == null) {
 			result = new IValidationSupport.CodeValidationResult();
-			result.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem);
+			result.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem + " - Unknown or unusable ValueSet[" + theValueSetIdentifier + "]");
 		}
 
 		return result;

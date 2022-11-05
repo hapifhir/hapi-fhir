@@ -62,6 +62,8 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		// WIP KHS find equivalent of this in batch2
 //		myBatchJobHelper.awaitAllBulkJobCompletions(false, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 
+		logAllCodeSystemsAndVersionsCodeSystemsAndVersions();
+
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());
 			assertEquals(2, myTermCodeSystemVersionDao.count());

@@ -294,11 +294,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
 	@Autowired
-	protected ITermCodeSystemDao myTermCodeSystemDao;
-	@Autowired
 	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
-	@Autowired
-	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;

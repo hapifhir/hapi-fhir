@@ -44,6 +44,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
@@ -129,6 +131,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.TestUtil.doRandomizeLocaleAndTimezone;
+import static java.util.stream.Collectors.joining;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -177,6 +180,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 	@Autowired
 	protected ISearchResultCacheSvc mySearchResultCacheSvc;
+	@Autowired
+	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
 	protected ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
@@ -318,6 +325,20 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected abstract FhirContext getFhirContext();
 
 	protected abstract PlatformTransactionManager getTxManager();
+
+	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
+		runInTransaction(()->{
+			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
+				.stream()
+				.map(t->t.toString())
+				.collect(joining("\n * ")));
+			ourLog.info("CodeSystemVersions:\n * " + myTermCodeSystemVersionDao.findAll()
+				.stream()
+				.map(t->t.toString())
+				.collect(Collectors.joining("\n * ")));
+		});
+	}
+
 
 	protected void logAllResourceLinks() {
 		runInTransaction(() -> {
