@@ -157,14 +157,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -174,7 +166,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -199,14 +190,13 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
 import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
-import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 
 public class TermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 	private static final int SINGLE_FETCH_SIZE = 1;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermReadSvcImpl.class);
 	private static final ValueSetExpansionOptions DEFAULT_EXPANSION_OPTIONS = new ValueSetExpansionOptions();
-	private static final TermCodeSystemVersion NO_CURRENT_VERSION = new TermCodeSystemVersion().setId(-1L);
+	private static final TermCodeSystemVersionDetails NO_CURRENT_VERSION = new TermCodeSystemVersionDetails(-1L, null);
 	private static Runnable myInvokeOnNextCallForUnitTest;
 	private static boolean ourForceDisableHibernateSearchForUnitTest;
 
@@ -221,7 +211,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private boolean myPreExpandingValueSets = false;
 
-	private final Cache<String, TermCodeSystemVersion> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
+	private final Cache<String, TermCodeSystemVersionDetails> myCodeSystemCurrentVersionCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
@@ -281,7 +271,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		TermCodeSystemVersion cs = getCurrentCodeSystemVersion(theSystem);
+		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}
 
@@ -1763,7 +1753,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private Optional<TermConcept> fetchLoadedCode(Long theCodeSystemResourcePid, String theCode) {
 		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(theCodeSystemResourcePid);
-		return myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
+		return myConceptDao.findByCodeSystemAndCode(codeSystem.getPid(), theCode);
 	}
 
 	private void fetchParents(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
@@ -1785,31 +1775,31 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		 */
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
+		txTemplate.setReadOnly(true);
 
 		return txTemplate.execute(t -> {
-			TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
+			TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 			if (csv == null) {
 				return Optional.empty();
 			}
-			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
+			return myConceptDao.findByCodeSystemAndCode(csv.myPid, theCode);
 		});
 	}
-
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
 	public List<TermConcept> findCodes(String theCodeSystem, List<String> theCodeList) {
-		TermCodeSystemVersion csv = getCurrentCodeSystemVersion(theCodeSystem);
+		TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(theCodeSystem);
 		if (csv == null) { return Collections.emptyList(); }
 
-		return myConceptDao.findByCodeSystemAndCodeList(csv, theCodeList);
+		return myConceptDao.findByCodeSystemAndCodeList(csv.myPid, theCodeList);
 	}
 
 
 	@Nullable
-	private TermCodeSystemVersion getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
 		String version = getVersionFromIdentifier(theCodeSystemIdentifier);
-		TermCodeSystemVersion retVal = myCodeSystemCurrentVersionCache.get(theCodeSystemIdentifier, t -> myTxTemplate.execute(tx -> {
+		TermCodeSystemVersionDetails retVal = myCodeSystemCurrentVersionCache.get(theCodeSystemIdentifier, t -> myTxTemplate.execute(tx -> {
 			TermCodeSystemVersion csv = null;
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(getUrlFromIdentifier(theCodeSystemIdentifier));
 			if (cs != null) {
@@ -1820,7 +1810,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				}
 			}
 			if (csv != null) {
-				return csv;
+				return new TermCodeSystemVersionDetails(csv.getPid(), csv.getCodeSystemVersionId());
 			} else {
 				return NO_CURRENT_VERSION;
 			}
@@ -1829,6 +1819,19 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 		return retVal;
+	}
+
+
+	private static class TermCodeSystemVersionDetails {
+
+
+		private final long myPid;
+		private final String myCodeSystemVersionId;
+
+		public TermCodeSystemVersionDetails(long thePid, String theCodeSystemVersionId) {
+			myPid = thePid;
+			myCodeSystemVersionId = theCodeSystemVersionId;
+		}
 	}
 
 	private String getVersionFromIdentifier(String theUri) {
@@ -2249,7 +2252,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(t -> findCode(theCodeSystemUrl, theCode).map(c -> new FhirVersionIndependentConcept(theCodeSystemUrl, c.getCode(), c.getDisplay(), c.getCodeSystemVersion().getCodeSystemVersionId())));
+		txTemplate.setReadOnly(true);
+		Optional<FhirVersionIndependentConcept> codeOpt = txTemplate.execute(tx -> findCode(theCodeSystemUrl, theCode).map(c -> {
+			String codeSystemVersionId = getCurrentCodeSystemVersion(theCodeSystemUrl).myCodeSystemVersionId;
+			return new FhirVersionIndependentConcept(theCodeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
+		}));
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			FhirVersionIndependentConcept code = codeOpt.get();

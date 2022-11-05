@@ -271,7 +271,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			validatedPropertiesCounter++;
 
 			runInTransaction(() -> {
-				Optional<TermConcept> tcFomDbOpt = myTermConceptDao.findByCodeSystemAndCode(tcsVersion, recordCode);
+				Optional<TermConcept> tcFomDbOpt = myTermConceptDao.findByCodeSystemAndCode(tcsVersion.getPid(), recordCode);
 				tcFomDbOpt.ifPresentOrElse(
 					tc -> validateTermConceptEntry(tc, tcRecordMap, theConceptMapToCvsMap),
 					() -> ourLog.error("Couldn't find TermConcept with code: {} in DB", recordCode));
@@ -449,7 +449,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 
 		for (Map.Entry<String, String> tcCodeDisplayEntry : srcTcCodeDisplayMap.entrySet()) {
 			Optional<TermConcept> targetTermConceptOpt =
-				myTermConceptDao.findByCodeSystemAndCode(termCodeSystemVersion, tcCodeDisplayEntry.getKey());
+				myTermConceptDao.findByCodeSystemAndCode(termCodeSystemVersion.getPid(), tcCodeDisplayEntry.getKey());
 			if (targetTermConceptOpt.isEmpty()) {
 				ourLog.error("For TC code: {}, target TC with code: {} is not present in DB",
 					theSourceTermConcept.getCode(), tcCodeDisplayEntry.getKey());

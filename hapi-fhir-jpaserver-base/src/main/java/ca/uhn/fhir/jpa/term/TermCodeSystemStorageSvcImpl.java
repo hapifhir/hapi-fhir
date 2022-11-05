@@ -454,7 +454,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
 
-		Optional<TermConcept> existingCodeOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextCodeToAdd);
+		Optional<TermConcept> existingCodeOpt = myConceptDao.findByCodeSystemAndCode(theCsv.getPid(), nextCodeToAdd);
 		List<TermConceptParentChildLink> existingParentLinks;
 		if (existingCodeOpt.isPresent()) {
 			TermConcept existingCode = existingCodeOpt.get();
@@ -476,7 +476,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			TermConcept nextParentOpt = theCodeToConcept.get(nextParentCode);
 			if (nextParentOpt == null) {
-				nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv, nextParentCode).orElse(null);
+				nextParentOpt = myConceptDao.findByCodeSystemAndCode(theCsv.getPid(), nextParentCode).orElse(null);
 			}
 			if (nextParentOpt == null) {
 				throw new InvalidRequestException(Msg.code(846) + "Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
@@ -542,7 +542,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 					String parentCode = nextChild.getParents().get(i).getParent().getCode();
 					TermConcept parentConcept = theCodeToConcept.get(parentCode);
 					if (parentConcept == null) {
-						parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv, parentCode).orElse(null);
+						parentConcept = myConceptDao.findByCodeSystemAndCode(theCsv.getPid(), parentCode).orElse(null);
 					}
 					if (parentConcept == null) {
 						throw new IllegalArgumentException(Msg.code(847) + "Unknown parent code: " + parentCode);

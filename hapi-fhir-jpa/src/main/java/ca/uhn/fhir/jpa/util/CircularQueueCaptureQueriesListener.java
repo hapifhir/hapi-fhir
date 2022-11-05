@@ -229,13 +229,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 
+		List<String> newList = new ArrayList<>();
 		if (theIndexes != null && theIndexes.length > 0) {
-			List<String> newList = new ArrayList<>();
 			for (int i = 0; i < theIndexes.length; i++) {
-				newList.add(queries.get(theIndexes[i]));
+				int index = theIndexes[i];
+				newList.add("[" + index + "] " + queries.get(index));
 			}
-			queries = newList;
+		} else {
+			for (int i = 0; i < queries.size(); i++) {
+				newList.add("[" + i + "] " + queries.get(i));
+			}
 		}
+		queries = newList;
 
 		String queriesAsString = String.join("\n", queries);
 		ourLog.info("Select Queries:\n{}", queriesAsString);
@@ -382,14 +387,14 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	public int countInsertQueries() {
 		return getInsertQueries()
 			.stream()
-			.map(t->t.getSize())
+			.map(t -> t.getSize())
 			.reduce(0, Integer::sum);
 	}
 
 	public int countUpdateQueries() {
 		return getUpdateQueries()
 			.stream()
-			.map(t->t.getSize())
+			.map(t -> t.getSize())
 			.reduce(0, Integer::sum);
 	}
 

@@ -304,9 +304,9 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
-			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version, "NEUT").get();
+			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").get();
 			assertEquals(2, microCode.getProperties().size());
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version, "HB").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").get();
 			assertEquals(1, code.getProperties().size());
 			Integer codeProperties = myTermConceptPropertyDao.countByCodeSystemVersion(version.getPid());
 			assertEquals(6, codeProperties);
@@ -400,9 +400,9 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
-			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version, "NEUT").get();
+			TermConcept microCode = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "NEUT").get();
 			assertEquals(2, microCode.getProperties().size());
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version, "HB").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "HB").get();
 			assertEquals(1, code.getProperties().size());
 			Integer codeProperties = myTermConceptPropertyDao.countByCodeSystemVersion(version.getPid());
 			assertEquals(6, codeProperties);
@@ -467,10 +467,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		runInTransaction(() -> {
 			TermCodeSystem codeSystem = myTermCodeSystemDao.findByCodeSystemUri("https://good.health");
 			TermCodeSystemVersion version = codeSystem.getCurrentVersion();
-			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222233").get();
+			TermConcept code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222233").get();
 			assertEquals("Some label for the parent - with a dash too", code.getDisplay());
 
-			code = myTermConceptDao.findByCodeSystemAndCode(version, "1111222234").get();
+			code = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "1111222234").get();
 			assertEquals("Some very very very very very looooooong child label with a coma, another one, one more, more and final one", code.getDisplay());
 		});
 	}
