@@ -33,10 +33,16 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>jakarta.transaction</groupId>
+			<artifactId>jakarta.transaction-api</artifactId>
+		</dependency>
+
 		<!-- Test Database -->
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -77,14 +83,6 @@
 		<dependency>
 			<groupId>com.healthmarketscience.sqlbuilder</groupId>
 			<artifactId>sqlbuilder</artifactId>
-		</dependency>
-
-		<!-- test -->
-
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>

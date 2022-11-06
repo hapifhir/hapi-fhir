@@ -24,11 +24,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 // TODO KHS merge with HttpClientHelper
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
@@ -45,8 +47,11 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 	@Override
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		myClient = HttpClientBuilder
 			.create()
+			.setConnectionManager(connectionManager)
+			.setMaxConnPerRoute(99)
 			.build();
 	}
 

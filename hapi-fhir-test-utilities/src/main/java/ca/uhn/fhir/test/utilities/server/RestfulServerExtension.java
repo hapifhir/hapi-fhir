@@ -33,7 +33,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import javax.servlet.http.HttpServlet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServerExtension> {
@@ -43,9 +45,9 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	private IGenericClient myFhirClient;
 	private RestfulServer myServlet;
 	private List<Consumer<RestfulServer>> myConsumers = new ArrayList<>();
+	private Map<String, Object> myRunningServerUserData = new HashMap<>();
 	private ServerValidationModeEnum myServerValidationMode = ServerValidationModeEnum.NEVER;
 	private IPagingProvider myPagingProvider;
-
 	/**
 	 * Constructor
 	 */
@@ -65,13 +67,20 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		myFhirVersion = theFhirVersionEnum;
 	}
 
+	/**
+	 * User data map which is automatically cleared when the server is stopped
+	 */
+	public Map<String, Object> getRunningServerUserData() {
+		return myRunningServerUserData;
+	}
+
 	@Override
 	protected void startServer() throws Exception {
 		super.startServer();
 
 		myFhirContext.getRestfulClientFactory().setSocketTimeout((int) (500 * DateUtils.MILLIS_PER_SECOND));
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(myServerValidationMode);
-		myFhirClient = myFhirContext.newRestfulGenericClient("http://localhost:" + getPort());
+		myFhirClient = myFhirContext.newRestfulGenericClient(getBaseUrl());
 	}
 
 	@Override
@@ -99,6 +108,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 			return;
 		}
 		myFhirClient = null;
+		myRunningServerUserData.clear();
 	}
 
 
@@ -129,7 +139,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 
 	public RestfulServerExtension registerProvider(Object theProvider) {
 		Validate.notNull(theProvider);
-		if (myServlet != null) {
+		if (isStarted()) {
 			myServlet.registerProvider(theProvider);
 		} else {
 			myProviders.add(theProvider);
@@ -138,12 +148,16 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension withServer(Consumer<RestfulServer> theConsumer) {
-		if (myServlet != null) {
+		if (isStarted()) {
 			theConsumer.accept(myServlet);
 		} else {
 			myConsumers.add(theConsumer);
 		}
 		return this;
+	}
+
+	private boolean isStarted() {
+		return myServlet != null;
 	}
 
 	public RestfulServerExtension registerInterceptor(Object theInterceptor) {
@@ -160,7 +174,7 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	public RestfulServerExtension withPagingProvider(IPagingProvider thePagingProvider) {
-		if (myServlet != null) {
+		if (isStarted()) {
 			myServlet.setPagingProvider(thePagingProvider);
 		} else {
 			myPagingProvider = thePagingProvider;
@@ -175,4 +189,5 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	public void unregisterProvider(Object theProvider) {
 		withServer(t -> t.unregisterProvider(theProvider));
 	}
+
 }

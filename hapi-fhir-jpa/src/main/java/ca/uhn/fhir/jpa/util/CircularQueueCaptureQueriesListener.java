@@ -409,6 +409,11 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		return getSelectQueriesForCurrentThread().size();
 	}
 
+	// TODO: JA2 The count "forCurrentThread" methods work differently than the non
+	// current thread ones - The other ones aggregate multiple instances of the same
+	// query - In other words if the same query is issued twice with different parameters
+	// that counts for 2 on the other method but 1 for this one. Need to harmonize this,
+	// and should do it on this method since the higher number is more accurate.
 	public int countInsertQueriesForCurrentThread() {
 		return getInsertQueriesForCurrentThread().size();
 	}
