@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4106
+title: "LOINC terminology upload process was enhanced by loading `MAP_TO` properties defined in MapTo.csv input file to TermConcept(s)."

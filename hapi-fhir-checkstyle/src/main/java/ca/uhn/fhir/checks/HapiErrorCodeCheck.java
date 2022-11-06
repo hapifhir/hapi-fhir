@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * mvn -P CI,ALLMODULES checkstyle:check
+ * mvn -P CI checkstyle:check
  */
 @StatelessCheck
 public final class HapiErrorCodeCheck extends AbstractCheck {
