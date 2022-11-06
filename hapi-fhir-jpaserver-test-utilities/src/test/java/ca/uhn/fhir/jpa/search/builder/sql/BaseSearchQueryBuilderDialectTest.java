@@ -57,7 +57,7 @@ public abstract class BaseSearchQueryBuilderDialectTest {
 		if (theNullOrder == null) {
 			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending);
 		} else {
-			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder);
+			searchQueryBuilder.addSortNumeric(sortPredicateBuilder.getColumnValueLow(), theAscending, theNullOrder, false);
 		}
 
 		return searchQueryBuilder.generate(0, 500);

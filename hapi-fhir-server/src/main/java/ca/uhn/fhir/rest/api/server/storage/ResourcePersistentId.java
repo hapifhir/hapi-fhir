@@ -50,6 +50,7 @@ public class ResourcePersistentId {
 	 */
 	public ResourcePersistentId(Object theId, Long theVersion) {
 		assert !(theId instanceof Optional);
+		assert !(theId instanceof ResourcePersistentId);
 		myId = theId;
 		myVersion = theVersion;
 	}

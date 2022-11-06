@@ -22,8 +22,8 @@ package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportBinaryFileId;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportExpandedResources;
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportIdList;
+import ca.uhn.fhir.batch2.jobs.export.models.ExpandedResourcesList;
+import ca.uhn.fhir.batch2.jobs.export.models.ResourceIdList;
 import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
@@ -51,14 +51,14 @@ public class BulkExportAppCtx {
 			.addFirstStep(
 			"fetch-resources",
 			"Fetches resource PIDs for exporting",
-			BulkExportIdList.class,
+			ResourceIdList.class,
 			fetchResourceIdsStep()
 		)
 		// expand out - fetch resources
 		.addIntermediateStep(
 			"expand-resources",
 			"Expand out resources",
-			BulkExportExpandedResources.class,
+			ExpandedResourcesList.class,
 			expandResourcesStep()
 		)
 		// write binaries and save to db

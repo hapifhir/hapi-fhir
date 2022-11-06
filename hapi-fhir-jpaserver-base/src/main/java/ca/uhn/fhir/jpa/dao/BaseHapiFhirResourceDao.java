@@ -122,6 +122,8 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -511,30 +513,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
-	/**
-	 * Creates a base method outcome for a delete request for the provided ID.
-	 * <p>
-	 * Additional information may be set on the outcome.
-	 *
-	 * @param theId - the id of the object being deleted. Eg: Patient/123
-	 */
-	private DaoMethodOutcome createMethodOutcomeForDelete(String theId, String theKey) {
-		DaoMethodOutcome outcome = new DaoMethodOutcome();
-
-		IIdType id = getContext().getVersion().newIdType();
-		id.setValue(theId);
-		outcome.setId(id);
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String message = getContext().getLocalizer().getMessage(BaseStorageDao.class, theKey, id);
-		String severity = "information";
-		String code = "informational";
-		OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
-		outcome.setOperationOutcome(oo);
-
-		return outcome;
-	}
-
 	@Override
 	public DaoMethodOutcome delete(IIdType theId,
 											 DeleteConflictList theDeleteConflicts,
@@ -551,7 +529,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// if not found, return an outcome anyways.
 			// Because no object actually existed, we'll
 			// just set the id and nothing else
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(theId.getValue(), "deleteResourceNotExisting");
+			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(theId.getValue(), MESSAGE_KEY_DELETE_RESOURCE_NOT_EXISTING);
 			return outcome;
 		}
 
@@ -561,7 +539,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Don't delete again if it's already deleted
 		if (isDeleted(entity)) {
-			DaoMethodOutcome outcome = createMethodOutcomeForDelete(entity.getIdDt().getValue(), "deleteResourceAlreadyDeleted");
+			DaoMethodOutcome outcome = createMethodOutcomeForResourceId(entity.getIdDt().getValue(), MESSAGE_KEY_DELETE_RESOURCE_ALREADY_DELETED);
 
 			// used to exist, so we'll set the persistent id
 			outcome.setPersistentId(new ResourcePersistentId(entity.getResourceId()));
@@ -2024,7 +2002,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		@Override
 		public void validateResource(IValidationContext<IBaseResource> theCtx) {
-			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			IBaseResource resource = theCtx.getResource();
+			if (resource instanceof Parameters) {
+				List<ParametersParameterComponent> params = ((Parameters) resource).getParameter();
+				params = params.stream().filter(param -> param.getName().contains("resource")).collect(Collectors.toList());
+				resource = params.get(0).getResource();
+			}
+			boolean hasId = resource.getIdElement().hasIdPart();
 			if (myMode == ValidationModeEnum.CREATE) {
 				if (hasId) {
 					throw new UnprocessableEntityException(Msg.code(997) + "Resource has an ID - ID must not be populated for a FHIR create");

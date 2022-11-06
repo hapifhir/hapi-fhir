@@ -397,7 +397,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor {
 		// }
 		Map<String, String> sourceResourceIdToGoldenResourceIdMap = new HashMap<>();
 		goldenResourceToSourcePidMap.forEach((key, value) -> {
-			String goldenResourceId = myIdHelperService.translatePidIdToForcedIdWithCache(new ResourcePersistentId(key)).orElse(key.toString());
+			String goldenResourceId = myIdHelperService.translatePidIdToForcedIdWithCache(key).orElse(key.toString());
 			PersistentIdToForcedIdMap pidsToForcedIds = myIdHelperService.translatePidsToForcedIds(value);
 
 			Set<String> sourceResourceIds = pidsToForcedIds.getResolvedResourceIds();

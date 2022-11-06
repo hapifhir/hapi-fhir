@@ -1,9 +1,9 @@
 package ca.uhn.fhir.to;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -35,7 +35,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.defaultString;

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.index;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Storage api
  * %%
  * Copyright (C) 2014 - 2022 Smile CDR, Inc.
  * %%
@@ -32,10 +32,10 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
-import ca.uhn.fhir.mdm.util.CanonicalIdentifier;
+import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
@@ -57,9 +57,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
@@ -67,8 +64,6 @@ import java.util.Optional;
 
 public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DaoResourceLinkResolver.class);
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
@@ -99,7 +94,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			}
 		} catch (ResourceNotFoundException e) {
 
-			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest, theTransactionDetails);
+			Optional<IBasePersistedResource> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest, theTransactionDetails);
 			if (!createdTableOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
@@ -114,9 +109,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			resolvedResource = createdTableOpt.get();
 		}
 
-		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getResourceId());
+		ourLog.trace("Resolved resource of type {} as PID: {}", resolvedResource.getResourceType(), resolvedResource.getPersistentId());
 		if (!theResourceType.equals(resolvedResource.getResourceType())) {
-			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getResourceId(), theResourceType, resolvedResource.getResourceType());
+			ourLog.error("Resource with PID {} was of type {} and wanted {}", resolvedResource.getPersistentId(), theResourceType, resolvedResource.getResourceType());
 			throw new UnprocessableEntityException(Msg.code(1095) + "Resource contains reference to unknown resource ID " + theSourceResourceId.getValue());
 		}
 
@@ -126,9 +121,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = new ResourcePersistentId(resolvedResource.getResourceId());
+			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(theSourceResourceId);
-			theTransactionDetails.addResolvedResourceId(theSourceResourceId, persistentId);
+			if (theTransactionDetails != null) {
+				theTransactionDetails.addResolvedResourceId(theSourceResourceId, persistentId);
+			}
 		}
 
 		if (!theSearchParam.hasTargets() && theSearchParam.getTargets().contains(theResourceType)) {
@@ -141,8 +138,8 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
-	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		ResourceTable valueOf = null;
+	public <T extends IBaseResource> Optional<IBasePersistedResource> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+		IBasePersistedResource valueOf = null;
 
 		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
 			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
@@ -162,13 +159,13 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 			if (theIdToAssignToPlaceholder != null) {
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
-				valueOf = ((ResourceTable) placeholderResourceDao.update(newResource, theRequest).getEntity());
+				valueOf = placeholderResourceDao.update(newResource, theRequest).getEntity();
 			} else {
-				valueOf = ((ResourceTable) placeholderResourceDao.create(newResource, theRequest).getEntity());
+				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getResourceId(), 1L);
-			persistentId.setAssociatedResourceId(valueOf.getIdType(myContext));
+			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getPersistentId().getId(), 1L);
+			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}
 
@@ -302,13 +299,13 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		@Override
-		public Long getResourceId() {
-			return myPersistentId.getIdAsLong();
+		public Date getDeleted() {
+			return null;
 		}
 
 		@Override
-		public Date getDeleted() {
-			return null;
+		public ResourcePersistentId getPersistentId() {
+			return myPersistentId;
 		}
 	}
 }
