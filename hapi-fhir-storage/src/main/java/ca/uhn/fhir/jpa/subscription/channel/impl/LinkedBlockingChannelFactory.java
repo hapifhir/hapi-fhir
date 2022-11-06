@@ -29,8 +29,6 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionConstants;
 import ca.uhn.fhir.util.ThreadPoolUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import javax.annotation.Nonnull;
@@ -38,11 +36,9 @@ import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class LinkedBlockingChannelFactory implements IChannelFactory {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(LinkedBlockingChannelFactory.class);
 	private final IChannelNamer myChannelNamer;
 	private final Map<String, LinkedBlockingChannel> myChannels = Collections.synchronizedMap(new HashMap<>());
 
@@ -79,9 +75,7 @@ public class LinkedBlockingChannelFactory implements IChannelFactory {
 		String threadNamePrefix = theChannelName + "-";
 		ThreadPoolTaskExecutor threadPoolExecutor = ThreadPoolUtil.newThreadPool(theConcurrentConsumers, theConcurrentConsumers, threadNamePrefix, SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE);
 
-		Executor executor = new LinkedBlockingChannelExecutorWrapper(threadPoolExecutor, theChannelName);
-
-		return new LinkedBlockingChannel(theChannelName, executor, threadPoolExecutor::getQueueSize);
+		return new LinkedBlockingChannel(theChannelName, threadPoolExecutor, threadPoolExecutor::getQueueSize);
 	}
 
 

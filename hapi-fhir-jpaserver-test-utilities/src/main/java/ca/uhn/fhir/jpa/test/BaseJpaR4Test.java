@@ -183,6 +183,7 @@ import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPo
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -530,6 +531,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 
 		myPartitionSettings.setPartitioningEnabled(false);
+	}
+
+	@Order(Integer.MIN_VALUE)
+	@BeforeEach
+	public void beforeResetInterceptors() {
+		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach
