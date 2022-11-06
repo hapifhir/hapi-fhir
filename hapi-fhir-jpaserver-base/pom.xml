@@ -147,11 +147,6 @@
 			<artifactId>hapi-fhir-storage-batch2-jobs</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-caching-caffeine</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
