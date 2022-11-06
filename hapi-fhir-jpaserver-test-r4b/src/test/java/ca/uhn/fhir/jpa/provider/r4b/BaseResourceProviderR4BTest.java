@@ -38,7 +38,7 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	// rename them in a separate PR that only makes that change so that it's easier to review
 	protected int ourPort;
 	protected String ourServerBase;
-	protected IGenericClient ourClient;
+	protected IGenericClient myClient;
 	protected RestfulServer ourRestServer;
 
 	@Autowired
@@ -46,60 +46,58 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
-		.withServerBeforeEach(s -> {
-			s.registerProviders(myResourceProviders.createProviders());
-			s.setDefaultResponseEncoding(EncodingEnum.XML);
-			s.setDefaultPrettyPrint(false);
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer).withServerBeforeEach(s -> {
+		s.registerProviders(myResourceProviders.createProviders());
+		s.setDefaultResponseEncoding(EncodingEnum.XML);
+		s.setDefaultPrettyPrint(false);
 
-			s.registerProvider(mySystemProvider);
-			s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
-			s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
-			s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
-			s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
+		s.registerProvider(mySystemProvider);
+		s.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
+		s.registerProvider(myAppCtx.getBean(SubscriptionTriggeringProvider.class));
+		s.registerProvider(myAppCtx.getBean(TerminologyUploaderProvider.class));
+		s.registerProvider(myAppCtx.getBean(ValueSetOperationProvider.class));
 
-			s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
+		s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
-			s.registerProvider(myBinaryAccessProvider);
-			s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
+		s.registerProvider(myBinaryAccessProvider);
+		s.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 
-			JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(ourRestServer, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
-			confProvider.setImplementationDescription("THIS IS THE DESC");
-			s.setServerConformanceProvider(confProvider);
+		JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(s, mySystemDao, myDaoConfig, mySearchParamRegistry, myValidationSupport);
+		confProvider.setImplementationDescription("THIS IS THE DESC");
+		s.setServerConformanceProvider(confProvider);
 
-			// Register a CORS filter
-			CorsConfiguration config = new CorsConfiguration();
-			CorsInterceptor corsInterceptor = new CorsInterceptor(config);
-			config.addAllowedHeader("Accept");
-			config.addAllowedHeader("Access-Control-Request-Headers");
-			config.addAllowedHeader("Access-Control-Request-Method");
-			config.addAllowedHeader("Cache-Control");
-			config.addAllowedHeader("Content-Type");
-			config.addAllowedHeader("Origin");
-			config.addAllowedHeader("Prefer");
-			config.addAllowedHeader("x-fhir-starter");
-			config.addAllowedHeader("X-Requested-With");
-			config.addAllowedOrigin("*");
-			config.addExposedHeader("Location");
-			config.addExposedHeader("Content-Location");
-			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-			s.registerInterceptor(corsInterceptor);
+		// Register a CORS filter
+		CorsConfiguration config = new CorsConfiguration();
+		CorsInterceptor corsInterceptor = new CorsInterceptor(config);
+		config.addAllowedHeader("Accept");
+		config.addAllowedHeader("Access-Control-Request-Headers");
+		config.addAllowedHeader("Access-Control-Request-Method");
+		config.addAllowedHeader("Cache-Control");
+		config.addAllowedHeader("Content-Type");
+		config.addAllowedHeader("Origin");
+		config.addAllowedHeader("Prefer");
+		config.addAllowedHeader("x-fhir-starter");
+		config.addAllowedHeader("X-Requested-With");
+		config.addAllowedOrigin("*");
+		config.addExposedHeader("Location");
+		config.addExposedHeader("Content-Location");
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		s.registerInterceptor(corsInterceptor);
 
-		}).withServerBeforeAll(s -> {
+	}).withServerBeforeAll(s -> {
 
-			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = myServer.getPort();
-			ourServerBase = myServer.getBaseUrl();
-			ourClient = myServer.getFhirClient();
-			ourRestServer = myServer.getRestfulServer();
+		// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
+		ourPort = myServer.getPort();
+		ourServerBase = myServer.getBaseUrl();
+		myClient = myServer.getFhirClient();
+		ourRestServer = myServer.getRestfulServer();
 
-			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
-			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor());
-			}
-		});
+		myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+		if (shouldLogClient()) {
+			myClient.registerInterceptor(new LoggingInterceptor());
+		}
+	});
 
-	protected IGenericClient myClient;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
 	@Autowired

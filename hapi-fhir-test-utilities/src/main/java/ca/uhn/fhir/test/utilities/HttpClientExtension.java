@@ -48,6 +48,8 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	@Override
 	public void beforeEach(ExtensionContext theExtensionContext) throws Exception {
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		connectionManager.setMaxTotal(99);
+		connectionManager.setDefaultMaxPerRoute(99);
 		myClient = HttpClientBuilder
 			.create()
 			.setConnectionManager(connectionManager)

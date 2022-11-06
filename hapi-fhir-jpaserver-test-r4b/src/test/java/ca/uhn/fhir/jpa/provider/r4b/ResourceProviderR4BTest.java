@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -13,9 +12,6 @@ import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Bundle;
@@ -26,7 +22,6 @@ import org.hl7.fhir.r4b.model.DateTimeType;
 import org.hl7.fhir.r4b.model.MedicationRequest;
 import org.hl7.fhir.r4b.model.Observation;
 import org.hl7.fhir.r4b.model.Observation.ObservationComponentComponent;
-import org.hl7.fhir.r4b.model.OperationOutcome;
 import org.hl7.fhir.r4b.model.Organization;
 import org.hl7.fhir.r4b.model.Parameters;
 import org.hl7.fhir.r4b.model.Patient;
@@ -53,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceProviderR4BTest.class);
-	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 
 	@Override
 	@AfterEach
@@ -67,9 +61,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		myClient.unregisterInterceptor(myCapturingInterceptor);
-
-		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t->t instanceof OpenApiInterceptor);
+		ourRestServer.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof OpenApiInterceptor);
 	}
 
 	@BeforeEach
@@ -79,7 +71,6 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
 
 		myDaoConfig.setAllowMultipleDelete(true);
-		myClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
@@ -252,7 +243,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 	@Test
 	public void testSearchWithCompositeSort() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -268,76 +259,76 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";		
+
+		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
+
 		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertEquals(4, found.getEntry().size());
 		assertEquals(oid3, list.get(0));
@@ -511,7 +502,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
-			if (next.getResource()!= null) {
+			if (next.getResource() != null) {
 				retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			}
 		}
