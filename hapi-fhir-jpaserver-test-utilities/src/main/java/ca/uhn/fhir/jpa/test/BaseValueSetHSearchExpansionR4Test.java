@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.test;
 
 /*-
  * #%L
@@ -37,11 +37,15 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
+import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
+import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -110,8 +114,8 @@ import static org.mockito.Mockito.when;
 //@ExtendWith(SpringExtension.class)
 //@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.DefaultLuceneHeap.class})
 //@ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.Elasticsearch.class})
-public abstract class AbstractValueSetHSearchExpansionR4Test extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(AbstractValueSetHSearchExpansionR4Test.class);
+public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseValueSetHSearchExpansionR4Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
