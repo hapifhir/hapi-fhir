@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.MessageHandler;
@@ -96,14 +97,9 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
 		}
-
 		// if cache - use that first
 		if (theStartRequest.isUseCache()) {
-			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(),
-				StatusEnum.QUEUED,
-				StatusEnum.IN_PROGRESS,
-				StatusEnum.COMPLETED
-			);
+			FetchJobInstancesRequest request = new FetchJobInstancesRequest(theStartRequest.getJobDefinitionId(), theStartRequest.getParameters(), getStatesThatTriggerCache());
 
 			List<JobInstance> existing = myJobPersistence.fetchInstances(request, 0, 1000);
 			if (!existing.isEmpty()) {
@@ -140,6 +136,13 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setJobId(instanceId);
 		return response;
+	}
+
+	/**
+	 * Cache will be used if an identical job is QUEUED or IN_PROGRESS. Otherwise a new one will kickoff.
+	 */
+	private StatusEnum[] getStatesThatTriggerCache() {
+		return new StatusEnum[]{StatusEnum.QUEUED, StatusEnum.IN_PROGRESS};
 	}
 
 	@Override
