@@ -200,7 +200,7 @@ public class SearchQueryBuilder {
 		Validate.isTrue(theSourceJoinColumn != null);
 
 		ForcedIdPredicateBuilder retVal = mySqlBuilderFactory.newForcedIdPredicateBuilder(this);
-		addTable(retVal, theSourceJoinColumn);
+		addTableForSorting(retVal, theSourceJoinColumn);
 		return retVal;
 	}
 
@@ -379,11 +379,19 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for an arbitrary table
 	 */
 	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.INNER);
+	}
+
+	private void addTableForSorting(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn) {
+		addTable(thePredicateBuilder, theSourceJoinColumn, SelectQuery.JoinType.LEFT_OUTER);
+	}
+
+	private void addTable(BaseJoiningPredicateBuilder thePredicateBuilder, @Nullable DbColumn theSourceJoinColumn, SelectQuery.JoinType theJoinType) {
 		if (theSourceJoinColumn != null) {
 			DbTable fromTable = theSourceJoinColumn.getTable();
 			DbTable toTable = thePredicateBuilder.getTable();
 			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn);
+			addJoin(fromTable, toTable, theSourceJoinColumn, toColumn, theJoinType);
 		} else {
 			if (myFirstPredicateBuilder == null) {
 
@@ -415,20 +423,25 @@ public class SearchQueryBuilder {
 			DbTable toTable = thePredicateBuilder.getTable();
 			DbColumn fromColumn = myFirstPredicateBuilder.getResourceIdColumn();
 			DbColumn toColumn = thePredicateBuilder.getResourceIdColumn();
-			addJoin(fromTable, toTable, fromColumn, toColumn);
-
+			addJoin(fromTable, toTable, fromColumn, toColumn, theJoinType);
 		}
+	}
+
+
+	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn, SelectQuery.JoinType theJoinType) {
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
+		mySelect.addJoins(theJoinType, join);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
-		mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
 	}
 
 	public void addJoinWithCustomOnCondition(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn, Condition theCondition) {
 		Join join = new DbJoin(mySpec, theFromTable, theToTable, new DbColumn[]{theFromColumn}, new DbColumn[]{theToColumn});
 		// add hashIdentity codition here
-		mySelect.addJoins(SelectQuery.JoinType.LEFT_OUTER, join);
+		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
 	}
 
 	/**
