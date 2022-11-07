@@ -185,6 +185,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -198,6 +199,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -208,6 +210,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -217,6 +220,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
+
 	@Autowired
 	protected IPackageInstallerSvc myPackageInstallerSvc;
 	@Autowired
@@ -502,7 +506,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	protected DaoRegistry myDaoRegistry;
 	@Autowired
@@ -516,6 +519,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+
+	@RegisterExtension
+	private PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -536,12 +542,19 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Order(Integer.MIN_VALUE)
 	@BeforeEach
 	public void beforeResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+//	 FIXME: restore?
+//		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
+	@Override
+	@Order(Integer.MAX_VALUE)
 	@AfterEach
 	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+
+		// FIXME: restore?
+//		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@AfterEach
@@ -556,8 +569,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@BeforeEach
 	public void beforeCreateInterceptor() {
-		myInterceptor = mock(IServerInterceptor.class);
-
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor(Level.DEBUG);
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}

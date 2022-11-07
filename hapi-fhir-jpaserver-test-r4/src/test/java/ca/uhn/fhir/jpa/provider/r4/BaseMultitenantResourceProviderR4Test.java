@@ -73,7 +73,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 		super.after();
 
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		ourRestServer.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		if (myAuthorizationInterceptor != null) {
 			ourRestServer.unregisterInterceptor(myAuthorizationInterceptor);
 		}

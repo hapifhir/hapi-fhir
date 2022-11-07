@@ -234,8 +234,10 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 

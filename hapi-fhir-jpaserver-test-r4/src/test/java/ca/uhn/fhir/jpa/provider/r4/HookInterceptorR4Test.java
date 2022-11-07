@@ -45,7 +45,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-
+		myInterceptorRegistry.unregisterAllAnonymousInterceptors();
 		super.after();
 	}
 

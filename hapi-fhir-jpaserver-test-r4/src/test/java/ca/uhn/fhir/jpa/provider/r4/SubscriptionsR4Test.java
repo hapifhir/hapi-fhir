@@ -14,6 +14,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,21 +23,30 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsR4Test.class);
+	private SubscriptionsRequireManualActivationInterceptorR4 mySubscriptionsRequireManualActivationInterceptor;
 
 	@Override
 	@BeforeEach
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();
 
-		SubscriptionsRequireManualActivationInterceptorR4 interceptor = new SubscriptionsRequireManualActivationInterceptorR4();
-		interceptor.setDao(mySubscriptionDao);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		mySubscriptionsRequireManualActivationInterceptor = new SubscriptionsRequireManualActivationInterceptorR4();
+		mySubscriptionsRequireManualActivationInterceptor.setDao(mySubscriptionDao);
+		myInterceptorRegistry.registerInterceptor(mySubscriptionsRequireManualActivationInterceptor);
+	}
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(mySubscriptionsRequireManualActivationInterceptor);
 	}
 
 	@BeforeEach

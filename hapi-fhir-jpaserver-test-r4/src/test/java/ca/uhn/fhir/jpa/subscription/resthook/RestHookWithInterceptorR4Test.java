@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -73,6 +74,13 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
+	}
+
+	@AfterEach
+	@Override
+	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
+		myInterceptorRegistry.unregisterInterceptor(myTestInterceptor);
 	}
 
 	@Override
@@ -194,13 +202,17 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		registerLatch.await(10, TimeUnit.SECONDS);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, (thePointcut, params) -> {
+		IAnonymousInterceptor interceptor = (thePointcut, params) -> {
 			latch.countDown();
-		});
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, interceptor);
+		try {
+			sendObservation();
 
-		sendObservation();
-
-		latch.await(10, TimeUnit.SECONDS);
+			latch.await(10, TimeUnit.SECONDS);
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	protected Observation sendObservation() {

@@ -174,6 +174,8 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			fail();
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("because at least one resource has a reference to this resource"));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(myDeleteInterceptor);
 		}
 	}
 

@@ -434,8 +434,10 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 	}
 
+	@Override
 	@AfterEach
 	public void afterResetInterceptors() {
+		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 

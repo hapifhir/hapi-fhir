@@ -103,7 +103,6 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
 
 		// Pre-cache all StructureDefinitions so that query doesn't affect other counts
 		myValidationSupport.invalidateCaches();
@@ -1464,30 +1463,33 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle input = (Bundle) bb.getBundle();
 
 		when(mySrd.getRestOperationType()).thenReturn(RestOperationTypeEnum.TRANSACTION);
-		myInterceptorRegistry.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW));
+		AuthorizationInterceptor authorizationInterceptor = new AuthorizationInterceptor(PolicyEnum.ALLOW);
+		myInterceptorRegistry.registerInterceptor(authorizationInterceptor);
+		try {
+			myCaptureQueriesListener.clear();
+			mySystemDao.transaction(mySrd, input);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
 
-		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
+			// Second identical pass
 
-		// Second identical pass
+			bb = new BundleBuilder(myFhirContext);
+			for (int i = 0; i < 5; i++) {
+				Encounter enc = new Encounter();
+				enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
+				bb.addTransactionCreateEntry(enc);
+			}
+			input = (Bundle) bb.getBundle();
 
-		bb = new BundleBuilder(myFhirContext);
-		for (int i = 0; i < 5; i++) {
-			Encounter enc = new Encounter();
-			enc.addLocation().setLocation(new Reference("Location?identifier=http://foo|123"));
-			bb.addTransactionCreateEntry(enc);
+			myCaptureQueriesListener.clear();
+			mySystemDao.transaction(mySrd, input);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+			assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+			assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(authorizationInterceptor);
 		}
-		input = (Bundle) bb.getBundle();
-
-		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(11, runInTransaction(() -> myResourceTableDao.count()));
-
 	}
 
 

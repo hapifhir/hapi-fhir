@@ -211,11 +211,6 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 	}
 
 	@AfterEach
-	public void afterResetInterceptors() {
-		myInterceptorRegistry.unregisterAllInterceptors();
-	}
-
-	@AfterEach
 	public void afterClearTerminologyCaches() {
 		TermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearCaches();

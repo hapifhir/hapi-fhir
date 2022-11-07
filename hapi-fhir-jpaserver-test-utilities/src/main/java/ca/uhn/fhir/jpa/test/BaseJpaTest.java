@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -63,7 +64,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -101,6 +101,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -150,6 +151,7 @@ import static org.mockito.Mockito.when;
 @TestExecutionListeners(value = SpringContextGrabbingTestExecutionListener.class, mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS)
 public abstract class BaseJpaTest extends BaseTest {
 
+	public static final String WEBSOCKET_CONTEXT = "/ws";
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
 	protected static final String CS_URL_2 = "http://example.com/my_code_system2";
@@ -157,7 +159,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected static final String CS_URL_4 = "http://example.com/my_code_system4";
 	protected static final String VS_URL = "http://example.com/my_value_set";
 	protected static final String VS_URL_2 = "http://example.com/my_value_set2";
-	public static final String WEBSOCKET_CONTEXT = "/ws";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaTest.class);
 
 	static {
@@ -237,6 +238,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IForcedIdDao myForcedIdDao;
+	private List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	protected <T extends IBaseResource> T loadResourceFromClasspath(Class<T> type, String resourceName) throws IOException {
 		return ClasspathUtil.loadResource(myFhirContext, type, resourceName);
@@ -312,7 +314,9 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
-		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
+		IAnonymousInterceptor interceptor = (thePointcut, t) -> deliveryLatch.countDown();
+		myRegisteredInterceptors.add(interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, interceptor);
 		return deliveryLatch;
 	}
 
@@ -331,14 +335,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected abstract PlatformTransactionManager getTxManager();
 
 	protected void logAllCodeSystemsAndVersionsCodeSystemsAndVersions() {
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ourLog.info("CodeSystems:\n * " + myTermCodeSystemDao.findAll()
 				.stream()
-				.map(t->t.toString())
+				.map(t -> t.toString())
 				.collect(joining("\n * ")));
 			ourLog.info("CodeSystemVersions:\n * " + myTermCodeSystemVersionDao.findAll()
 				.stream()
-				.map(t->t.toString())
+				.map(t -> t.toString())
 				.collect(Collectors.joining("\n * ")));
 		});
 	}
@@ -573,7 +577,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		Integer size = theProvider.size();
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE/4);
+		List<IBaseResource> resources = theProvider.getResources(0, Integer.MAX_VALUE / 4);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -713,6 +717,13 @@ public abstract class BaseJpaTest extends BaseTest {
 		// nothing - just here so other test can override it. We used to do stuff here,
 		// and having this stub is easier than removing all of the super.before() calls
 		// in the existing overridden versions
+	}
+
+	@Order(Integer.MAX_VALUE)
+	@AfterEach
+	protected void afterResetInterceptors() {
+		myRegisteredInterceptors.forEach(t -> myInterceptorRegistry.unregisterInterceptor(t));
+		myRegisteredInterceptors.clear();
 	}
 
 	@SuppressWarnings("BusyWait")

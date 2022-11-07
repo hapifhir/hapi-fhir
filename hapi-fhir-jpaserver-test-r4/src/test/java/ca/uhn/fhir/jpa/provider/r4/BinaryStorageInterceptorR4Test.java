@@ -65,6 +65,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		MemoryBinaryStorageSvcImpl binaryStorageSvc = (MemoryBinaryStorageSvcImpl) myBinaryStorageSvc;
 		binaryStorageSvc.clear();
+
+		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
 
 	@Test
