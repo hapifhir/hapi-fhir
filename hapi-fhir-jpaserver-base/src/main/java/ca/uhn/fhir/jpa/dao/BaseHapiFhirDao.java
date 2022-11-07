@@ -328,8 +328,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					.map(Coding.class::cast)
 					.collect(Collectors.toSet());
 				final String versionOrNull =
-					codings.isEmpty()  ? codings.iterator().next().getVersion()
-						: null;
+					codings.isEmpty()  ? null
+						: codings.iterator().next().getVersion();
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay(), versionOrNull);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
@@ -483,7 +483,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 							val = q.getSingleResult();
 						} catch (NoResultException e) {
 							// TODO:  how to handle this?
+							// TODO:  could this be the tag I'm looking for?
 							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel, theVersion);
+//							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel, "3366:  I AM A FAKE VERSION");
 							myEntityManager.persist(val);
 						}
 						return val;

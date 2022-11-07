@@ -172,20 +172,18 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertFalse(tag.getUserSelected());
 		tag.setVersion(expectedVersion1).setUserSelected(true);
 		savedPatient.setActive(true);
-		final IIdType pid1 = myPatientDao.create(savedPatient).getId();
+		// TODO:  deprecation warning
+		final IIdType pid1 = myPatientDao.create(savedPatient).getId().toVersionless();
 
-		final List<ResourceHistoryTag> resourceHistoryTags2 = myResourceHistoryTagDao.findAll();
-
+		// TODO:  deprecation warning
 		final Patient retrievedPatient = myPatientDao.read(pid1);
 		assertAll(
 			() -> assertEquals(1, retrievedPatient.getMeta().getTag().size()),
 			() -> assertEquals(0, retrievedPatient.getMeta().getSecurity().size()),
 			() -> assertEquals(expectedSystem1, retrievedPatient.getMeta().getTagFirstRep().getSystem()),
 			() -> assertTrue(retrievedPatient.getMeta().getTagFirstRep().getUserSelected()),
-			() -> assertEquals(expectedCode1, retrievedPatient.getMeta().getTagFirstRep().getCode())
-			// TODO:  why isn't this working?
-				,
-				() -> assertEquals(expectedVersion1, retrievedPatient.getMeta().getTagFirstRep().getVersion())
+			() -> assertEquals(expectedCode1, retrievedPatient.getMeta().getTagFirstRep().getCode()),
+			() -> assertEquals(expectedVersion1, retrievedPatient.getMeta().getTagFirstRep().getVersion())
 		);
 
 		// Update the patient to create a ResourceHistoryTag record
@@ -198,7 +196,10 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			.setVersion(expectedVersion2)
 			.setUserSelected(false);
 
+		// TODO:  deprecation warning
 		myPatientDao.update(retrievedPatient);
+		// TODO:  deprecation warning
+		// TODO: why isn't this updating or retrieving the updated version correctly?
 		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1);
 
 		assertAll(
@@ -206,9 +207,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			() -> assertEquals(0, retrievedUpdatedPatient.getMeta().getSecurity().size()),
 			() -> assertEquals(expectedSystem2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getSystem()),
 			() -> assertTrue(retrievedUpdatedPatient.getMeta().getTagFirstRep().getUserSelected()),
-			() -> assertEquals(expectedCode2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getCode())
-			// TODO:  why isn't this working?
-			,
+			() -> assertEquals(expectedCode2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getCode()),
 			() -> assertEquals(expectedVersion2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getVersion())
 		);
 
