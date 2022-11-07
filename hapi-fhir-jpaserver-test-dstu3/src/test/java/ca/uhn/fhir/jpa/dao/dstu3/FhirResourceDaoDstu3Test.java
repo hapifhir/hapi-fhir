@@ -6,7 +6,9 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -542,6 +544,23 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		pat = myPatientDao.read(patId.toUnqualifiedVersionless(), mySrd);
 		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
+	}
+
+	@Test
+	public void testCreateForcedIdPopulatesResourceTableField() {
+		String idName = "forcedId";
+
+		Patient pat = new Patient();
+		pat.setId(idName);
+		pat.addName().setFamily("FAM");
+		IIdType patId = myPatientDao.update(pat, mySrd).getId();
+		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
+
+		ResourceTable readBackResource = myEntityManager
+			.createQuery("select rt from ResourceTable rt where rt.myForcedId.myForcedId = 'forcedId'", ResourceTable.class)
+			.getSingleResult();
+
+		assertEquals(idName, readBackResource.getForcedIdValue());
 	}
 
 	@Test
