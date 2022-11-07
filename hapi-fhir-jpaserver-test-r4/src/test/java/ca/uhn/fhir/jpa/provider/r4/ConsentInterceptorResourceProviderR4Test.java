@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
@@ -280,6 +281,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
+	}
+
+	@Test
+	public void testConsentWorksWithVersionedApiConverterInterceptor() {
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
+		});
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+		ourRestServer.getInterceptorService().registerInterceptor(new VersionedApiConverterInterceptor());
+
+		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
+		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
+
+		assertEquals(1, response.getEntry().size());
+		assertNull(response.getTotalElement().getValue());
+
 	}
 
 	@Test
