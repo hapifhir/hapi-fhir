@@ -882,7 +882,8 @@
         <flyway_version>9.4.0</flyway_version>
         <hibernate_version>5.6.12.Final</hibernate_version>
         <hibernate_search_version>6.1.6.Final</hibernate_search_version>
-        <!-- Update lucene version when you update hibernate-search version -->
+       <logback_version>1.4.4</logback_version>
+		 <!-- Update lucene version when you update hibernate-search version -->
         <lucene_version>8.11.1</lucene_version>
         <hamcrest_version>2.2</hamcrest_version>
         <hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
@@ -907,7 +908,7 @@
         <spring_version>5.3.23</spring_version>
 		  <spring_data_bom_version>2021.2.2</spring_data_bom_version>
 		  <spring_batch_version>4.3.3</spring_batch_version>
-        <spring_boot_version>2.7.4</spring_boot_version>
+        <spring_boot_version>2.7.5</spring_boot_version>
 		 <spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		 <stax2_api_version>3.1.4</stax2_api_version>
@@ -957,7 +958,12 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.4.4</version>
+				<version>${logback_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ch.qos.logback</groupId>
+				<artifactId>logback-core</artifactId>
+				<version>${logback_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
@@ -1845,6 +1851,11 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
 				<version>${slf4j_version}</version>
 			</dependency>
 			<dependency>

@@ -7,6 +7,7 @@
       <li>SLF4j (All): 1.7.33 -> 2.0.3</li>
       <li>Logback (All): 1.2.10 -> 1.4.4</li>
       <li>Jetty (CLI): 9.4.48.v20220622 -> 10.0.12</li>
+      <li>Spring Boot: 2.7.4 -> 2.7.5</li>
       </ul>
       In addition the following dependencies have been replaced with newer equivalents:
       <ul>
