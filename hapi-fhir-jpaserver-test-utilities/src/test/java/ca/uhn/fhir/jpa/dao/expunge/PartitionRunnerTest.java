@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;

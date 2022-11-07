@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -218,7 +219,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Override
 	public ResourcePersistentId getPersistentId() {
-		return new ResourcePersistentId(myResourceId);
+		return new JpaPid(myResourceId);
 	}
 
 	public ResourceTable getResourceTable() {

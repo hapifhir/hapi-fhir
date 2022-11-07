@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,7 +104,7 @@ public class LoadIdsStepTest {
 		List<ResourcePersistentId> ids = new ArrayList<>();
 		List<String> resourceTypes = new ArrayList<>();
 		for (long i = idLow; i < idHigh; i++) {
-			ids.add(new ResourcePersistentId(i));
+			ids.add(new JpaPid(i));
 		}
 		IResourcePidList chunk = new HomogeneousResourcePidList("Patient", ids, lastDate);
 		return chunk;

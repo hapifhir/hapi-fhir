@@ -27,7 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -353,7 +353,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
 
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
 		for (TermCodeSystemVersion next : existing) {
 			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId) && myConceptDao.countByCodeSystemVersion(next.getPid()) == 0) {
 
@@ -633,7 +633,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private TermCodeSystem getOrCreateDistinctTermCodeSystem(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, ResourceTable theCodeSystemResourceTable) {
 		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
 		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid.getIdAsLong());
+			codeSystem = myCodeSystemDao.findByResourcePid(((JpaPid) theCodeSystemResourcePid).getId());
 			if (codeSystem == null) {
 				codeSystem = new TermCodeSystem();
 			}

@@ -1,8 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.JpaPid;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -11,7 +10,6 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmPidTuple;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 

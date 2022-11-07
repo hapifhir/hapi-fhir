@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;

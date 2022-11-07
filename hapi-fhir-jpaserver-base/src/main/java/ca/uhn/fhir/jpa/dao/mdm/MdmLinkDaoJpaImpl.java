@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;

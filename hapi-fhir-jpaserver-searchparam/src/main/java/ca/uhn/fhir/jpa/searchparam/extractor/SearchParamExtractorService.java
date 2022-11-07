@@ -31,6 +31,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
@@ -415,7 +416,7 @@ public class SearchParamExtractorService {
 				return;
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
-				ResourcePersistentId persistentId = new ResourcePersistentId(resourceLink.getTargetResourcePid());
+				JpaPid persistentId = new JpaPid(resourceLink.getTargetResourcePid());
 				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 

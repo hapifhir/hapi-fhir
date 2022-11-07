@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
@@ -79,7 +79,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 		int order = thePreviouslyStoredResourcePids.size();
 		for (ResourcePersistentId nextPid : theNewResourcePids) {
 			SearchResult nextResult = new SearchResult(theSearch);
-			nextResult.setResourcePid(nextPid.getIdAsLong());
+			nextResult.setResourcePid(((JpaPid) nextPid).getId());
 			nextResult.setOrder(order);
 			resultsToSave.add(nextResult);
 			ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());

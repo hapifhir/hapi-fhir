@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -121,7 +122,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		}
 
 		if (persistentId == null) {
-			persistentId = new ResourcePersistentId(resolvedResource.getPersistentId().getId());
+			persistentId = new JpaPid((Long) resolvedResource.getPersistentId().getId());
 			persistentId.setAssociatedResourceId(theSourceResourceId);
 			if (theTransactionDetails != null) {
 				theTransactionDetails.addResolvedResourceId(theSourceResourceId, persistentId);
@@ -164,7 +165,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 				valueOf = placeholderResourceDao.create(newResource, theRequest).getEntity();
 			}
 
-			ResourcePersistentId persistentId = new ResourcePersistentId(valueOf.getPersistentId().getId(), 1L);
+			JpaPid persistentId = new JpaPid((Long) valueOf.getPersistentId().getId(), 1L);
 			persistentId.setAssociatedResourceId(valueOf.getIdDt());
 			theTransactionDetails.addResolvedResourceId(persistentId.getAssociatedResourceId(), persistentId);
 		}

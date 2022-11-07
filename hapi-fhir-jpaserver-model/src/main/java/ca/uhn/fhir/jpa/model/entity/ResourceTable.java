@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.search.ExtendedHSearchIndexData;
 import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.jpa.model.search.SearchParamTextPropertyBinder;
@@ -722,7 +723,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Override
 	public ResourcePersistentId getPersistentId() {
-		return new ResourcePersistentId(getId());
+		return new JpaPid(getId());
 	}
 
 	@Override

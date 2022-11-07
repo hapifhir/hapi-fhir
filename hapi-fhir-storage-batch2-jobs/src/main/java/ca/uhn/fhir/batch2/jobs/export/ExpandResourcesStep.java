@@ -33,6 +33,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
@@ -115,7 +116,7 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 			String value = id.getId();
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(id.getResourceType());
 			// This should be a query, but we have PIDs, and we don't have a _pid search param. TODO GGG, figure out how to make this search by pid.
-			resources.add(dao.readByPid(new ResourcePersistentId(value)));
+			resources.add(dao.readByPid(new JpaPid(Long.parseLong(value))));
 		}
 
 		return resources;

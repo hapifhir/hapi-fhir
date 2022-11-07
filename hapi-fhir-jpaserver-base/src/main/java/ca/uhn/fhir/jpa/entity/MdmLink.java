@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.mdm.api.IMdmLink;
@@ -146,7 +146,7 @@ public class MdmLink extends BasePartitionable implements IMdmLink {
 
 	@Override
 	public MdmLink setId(ResourcePersistentId theId) {
-		myId = theId.getIdAsLong();
+		myId = ((JpaPid) theId).getId();
 		return this;
 	}
 

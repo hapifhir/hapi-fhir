@@ -11,6 +11,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ch.qos.logback.classic.Level;
@@ -101,14 +102,14 @@ public class FetchResourceIdsStepTest {
 		List<ResourcePersistentId> observationIds = new ArrayList<>();
 
 		{
-			ResourcePersistentId id1 = new ResourcePersistentId("Patient/123");
-			ResourcePersistentId id2 = new ResourcePersistentId("Patient/234");
+			JpaPid id1 = new JpaPid(123L);
+			JpaPid id2 = new JpaPid(234L);
 			patientIds.add(id1);
 			patientIds.add(id2);
 		}
 		{
-			ResourcePersistentId id1 = new ResourcePersistentId("Observation/123");
-			ResourcePersistentId id2 = new ResourcePersistentId("Observation/234");
+			JpaPid id1 = new JpaPid(345L);
+			JpaPid id2 = new JpaPid(456L);
 			observationIds.add(id1);
 			observationIds.add(id2);
 		}
@@ -179,7 +180,7 @@ public class FetchResourceIdsStepTest {
 		when(myDaoConfig.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
-			ResourcePersistentId id = new ResourcePersistentId("Patient/RED" + i);
+			JpaPid id = new JpaPid((long) i);
 			patientIds.add(id);
 		}
 

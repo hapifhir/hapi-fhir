@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.delete.batch2;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceForeignKey;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;

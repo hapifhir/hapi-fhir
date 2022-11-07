@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.model.primitive.InstantDt;

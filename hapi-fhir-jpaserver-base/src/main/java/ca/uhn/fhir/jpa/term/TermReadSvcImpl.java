@@ -37,7 +37,7 @@ import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.config.util.ConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.config.util.IConnectionPoolInfoProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -115,7 +115,6 @@ import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.convertors.conv40_50.resources40_50.ValueSet40_50;
-import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -1644,7 +1643,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private Optional<TermValueSet> fetchValueSetEntity(ValueSet theValueSet) {
 		JpaPid valueSetResourcePid = getValueSetResourcePersistentId(theValueSet);
-		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong());
+		return myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId());
 	}
 
 	private JpaPid getValueSetResourcePersistentId(ValueSet theValueSet) {
@@ -1663,7 +1662,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (theValidationOptions.isInferSystem()) {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getIdAsLong(), theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid.getId(), theCode));
 			} else if (isNotBlank(theSystem)) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
 			}
@@ -1684,7 +1683,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getIdAsLong()).orElseThrow(IllegalStateException::new);
+		TermValueSet valueSetEntity = myTermValueSetDao.findByResourcePid(valueSetResourcePid.getId()).orElseThrow(IllegalStateException::new);
 		String timingDescription = toHumanReadableExpansionTimestamp(valueSetEntity);
 		String msg = myContext.getLocalizer().getMessage(TermReadSvcImpl.class, "validationPerformedAgainstPreExpansion", timingDescription);
 
@@ -1740,9 +1739,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (versionIndex >= 0) {
 			String systemUrl = theSystem.substring(0, versionIndex);
 			String systemVersion = theSystem.substring(versionIndex + 1);
-			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(theResourcePid.getIdAsLong(), systemUrl, systemVersion, theCode);
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(
+				((JpaPid) theResourcePid).getId(), systemUrl, systemVersion, theCode);
 		} else {
-			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(
+				((JpaPid) theResourcePid).getId(), theSystem, theCode);
 		}
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;

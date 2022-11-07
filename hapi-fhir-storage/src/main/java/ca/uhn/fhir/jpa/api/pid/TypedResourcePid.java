@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.api.pid;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
 import java.util.Objects;
@@ -35,7 +36,7 @@ public class TypedResourcePid {
 
 	public TypedResourcePid(String theResourceType, Long theId) {
 		this.resourceType = theResourceType;
-		this.id = new ResourcePersistentId(theId);
+		this.id = new JpaPid(theId);
 	}
 
 	@Override
