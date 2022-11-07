@@ -145,14 +145,19 @@ public class SearchParameterValidatingInterceptorTest {
 	}
 
 	@Test
-	public void whenUpliftSearchParameter_thenMoreGranularComparisonSucceeds() {
+	public void whenCreatingOverlappingUpliftSearchParameter_thenExceptionIsThrown() {
 		when(myDaoRegistry.getResourceDao(eq(SearchParamValidatingInterceptor.SEARCH_PARAM))).thenReturn(myIFhirResourceDao);
 
 		setPersistedSearchParameters(asList(myExistingSearchParameter));
 
 		SearchParameter newSearchParam = buildSearchParameterWithUpliftExtension(ID2);
 
-		mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+		try {
+			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertTrue(e.getMessage().contains("2125"));
+		}
 	}
 
 	@Test
