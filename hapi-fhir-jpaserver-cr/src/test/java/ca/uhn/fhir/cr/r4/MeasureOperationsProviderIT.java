@@ -9,35 +9,33 @@ import static ca.uhn.fhir.cr.common.utility.r4.Parameters.part;
 import static ca.uhn.fhir.cr.common.utility.r4.Parameters.stringPart;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cr.common.CrConfig;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
+import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = { MeasureOperationsProviderIT.class }, properties = {
-	"hapi.fhir.fhir_version=r4",
-	"scheduling_disabled=true",
-	"spring.main.allow-circular-references=true",
-//	"spring.main.lazy-initialization=true",
-	"spring.main.allow-bean-definition-overriding=true" })
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { TestCrConfig.class, CrConfig.class})
 class MeasureOperationsProviderIT extends BaseJpaR4Test {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
 	private static IGenericClient ourFhirClient;
+
+	@Autowired
+	MeasureOperationsProvider measureOperationsProvider;
 
 	private void loadBundle(String bundleName) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
@@ -50,19 +48,17 @@ class MeasureOperationsProviderIT extends BaseJpaR4Test {
 	void testMeasureEvaluate() throws IOException {
 		this.loadBundle("/dqm/Exm104FhirR4MeasureBundle.json");
 
-		Parameters params = parameters(
-			stringPart("periodStart", "2019-01-01"),
-			stringPart("periodEnd", "2020-01-01"),
-			stringPart("reportType", "individual"),
-			stringPart("subject", "Patient/numer-EXM104"),
-			stringPart("lastReceivedOn", "2019-12-12"));
-
-		MeasureReport returnMeasureReport = ourFhirClient.operation()
-			.onInstance(new IdType("Measure", "measure-EXM104-8.2.000"))
-			.named("$evaluate-measure")
-			.withParameters(params)
-			.returnResourceType(MeasureReport.class)
-			.execute();
+		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
+			new SystemRequestDetails(),
+			new IdType("Measure", "measure-EXM104-8.2.000"),
+			"2019-01-01",
+			"2020-01-01",
+			"individual",
+			"Patient/numer-EXM104",
+			null,
+			"2019-12-12",
+			null, null, null
+		);
 
 		assertNotNull(returnMeasureReport);
 	}
