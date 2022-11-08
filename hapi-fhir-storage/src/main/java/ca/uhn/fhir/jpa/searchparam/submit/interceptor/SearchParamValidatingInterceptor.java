@@ -166,7 +166,7 @@ public class SearchParamValidatingInterceptor {
 			.map(IPrimitiveType.class::cast)
 			.map(IPrimitiveType::getValueAsString)
 			.findFirst()
-			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2132), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
+			.orElseThrow(() -> new UnprocessableEntityException(Msg.code(2198), "Unable to process Uplift SP addition as the SearchParameter is malformed."));
 		return subExtensionValue;
 	}
 
