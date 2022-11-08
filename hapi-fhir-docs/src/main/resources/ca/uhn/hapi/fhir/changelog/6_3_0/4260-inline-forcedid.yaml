@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4260
+title: "Client assigned resource ids are now stored in a new FORCED_ID column in HFR_RESOURCE.
+   This is parallel storage to allow gradual upgrade away from the current HFJ_FORCED_ID join table."

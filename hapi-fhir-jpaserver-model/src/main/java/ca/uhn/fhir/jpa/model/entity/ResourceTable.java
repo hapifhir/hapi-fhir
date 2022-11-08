@@ -277,7 +277,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "RES_VER")
 	private long myVersion;
 
-	@Column(name= "FORCED_ID")
+	@Column(name= "FORCED_ID", length = 64)
 	private String myForcedIdValue;
 
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
