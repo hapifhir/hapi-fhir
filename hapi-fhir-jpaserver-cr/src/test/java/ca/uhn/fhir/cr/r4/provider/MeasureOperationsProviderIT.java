@@ -10,7 +10,7 @@ import java.io.IOException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.cr.r4.TestCrConfig;
+import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.Bundle;

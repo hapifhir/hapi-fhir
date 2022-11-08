@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.common.behavior.r4;
+package ca.uhn.fhir.cr.common.behavior.dstu3;
 
 /*-
  * #%L
@@ -25,23 +25,23 @@ import ca.uhn.fhir.cr.common.behavior.IdCreator;
 import ca.uhn.fhir.cr.common.utility.Ids;
 import ca.uhn.fhir.cr.common.utility.Searches;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ContactDetail;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
-import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.Coding;
+import org.hl7.fhir.dstu3.model.ContactDetail;
+import org.hl7.fhir.dstu3.model.ContactPoint;
+import org.hl7.fhir.dstu3.model.ContactPoint.ContactPointSystem;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
+import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MeasureReport;
+import org.hl7.fhir.dstu3.model.OperationOutcome;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.SearchParameter.XPathUsageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,16 +88,14 @@ public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
 	}
 
 	default MeasureReportUser getEvaluatedResources(MeasureReport report, Map<String, Resource> resources) {
-		report.getEvaluatedResource().forEach(evaluatedResource -> {
-			IIdType resourceId = evaluatedResource.getReferenceElement();
+		var bundle = (Bundle) read(new IdType(report.getEvaluatedResources().getReference()));
+		bundle.getEntry().forEach(entry -> {
+			var resource = entry.getResource();
+			IIdType resourceId = resource.getIdElement();
 			if (resourceId.getResourceType() == null || resources.containsKey(Ids.simple(resourceId))) {
 				return;
 			}
-			IBaseResource resourceBase = read(resourceId);
-			if (resourceBase instanceof Resource) {
-				Resource resource = (Resource) resourceBase;
-				resources.put(Ids.simple(resourceId), resource);
-			}
+			resources.put(Ids.simple(resourceId), resource);
 		});
 
 		return this;
