@@ -5,10 +5,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<artifactId>hapi-fhir</artifactId>
+		<artifactId>hapi-fhir-serviceloaders</artifactId>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<version>6.3.0-PRE2-SNAPSHOT</version>
-		<relativePath>../../pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-caching-guava</artifactId>

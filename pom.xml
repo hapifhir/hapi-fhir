@@ -1283,7 +1283,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.28</version>
+				<version>8.0.31</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -2055,7 +2055,7 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-                <plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
 					<version>3.2.0</version>
@@ -2072,6 +2072,11 @@
                             <version>6.3.0-PRE2-SNAPSHOT</version>
                         </dependency>
 					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
