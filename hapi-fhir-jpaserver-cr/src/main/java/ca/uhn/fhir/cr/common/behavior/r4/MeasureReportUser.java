@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface MeasureReportUser extends DaoRegistryUser, IdCreator {
-	Logger ourLog = LoggerFactory.getLogger(ParameterUser.class);
+	Logger ourLog = LoggerFactory.getLogger(MeasureReportUser.class);
 
 	static final String MEASUREREPORT_IMPROVEMENT_NOTATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-improvement-notation";
 	static final String MEASUREREPORT_MEASURE_POPULATION_SYSTEM = "http://terminology.hl7.org/CodeSystem/measure-population";

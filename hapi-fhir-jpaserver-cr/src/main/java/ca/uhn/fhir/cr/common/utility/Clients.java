@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * This class provides utility functions for creating IGenericClients and
  * setting up authentication
  */
-public abstract class Clients {
+public class Clients {
 
 	private Clients() {
 	}

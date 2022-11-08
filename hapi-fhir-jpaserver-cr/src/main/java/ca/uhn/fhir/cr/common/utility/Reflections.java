@@ -29,7 +29,7 @@ public class Reflections {
 	 * Gets the IAccessor for the given BaseType and child
 	 * 
 	 * @param <BaseType>       an IBase type
-	 * @param theBaseTypeClass the class of a the IBase type
+	 * @param theBaseTypeClass the class of the IBase type
 	 * @param theChildName     the name of the child property of the
 	 *                         BaseType to generate an accessor for
 	 * @return an IAccessor for the given child and the BaseType
