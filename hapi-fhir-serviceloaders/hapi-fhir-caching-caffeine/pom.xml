@@ -14,7 +14,7 @@
 	<artifactId>hapi-fhir-caching-caffeine</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Cache Caffeine</name>
+	<name>HAPI FHIR - ServiceLoaders - Caching Caffeine</name>
 
 	<dependencies>
 		<dependency>

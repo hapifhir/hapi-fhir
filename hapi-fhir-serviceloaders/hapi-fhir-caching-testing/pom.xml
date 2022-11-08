@@ -16,7 +16,7 @@
 	<artifactId>hapi-fhir-caching-testing</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Active Cache Library for Testing</name>
+	<name>HAPI FHIR - ServiceLoaders - Caching Testing</name>
 
 	<dependencies>
 		<!-- Change here (and run mvn install, mvn test -U) to run test cases with different cache library -->

@@ -14,7 +14,7 @@
 	<artifactId>hapi-fhir-caching-api</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Cache Interfaces</name>
+	<name>HAPI FHIR - ServiceLoaders - Caching API</name>
 
 	<dependencies>
 	</dependencies>
