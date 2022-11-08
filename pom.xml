@@ -1308,9 +1308,16 @@
 				<version>1.5.13</version>
 			</dependency>
 			<dependency>
-				 <groupId>net.sourceforge.htmlunit</groupId>
-				 <artifactId>htmlunit</artifactId>
-				 <version>2.65.1</version>
+				<groupId>net.sourceforge.htmlunit</groupId>
+				<artifactId>htmlunit</artifactId>
+				<version>2.65.1</version>
+				<exclusions>
+					<exclusion>
+						<!-- Don't let HTMLUnit bring in Jetty 9 -->
+						<groupId>org.eclipse.jetty.websocket</groupId>
+						<artifactId>websocket-client</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>

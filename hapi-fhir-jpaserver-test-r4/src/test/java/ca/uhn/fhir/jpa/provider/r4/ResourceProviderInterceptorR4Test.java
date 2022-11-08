@@ -55,6 +55,7 @@ import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -450,7 +451,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		}catch (UnprocessableEntityException e){
 			// all is good
-			assertTrue(e.getMessage().contains("2131"));
+			assertThat(e.getMessage(), containsString("2196"));
 		}
 	}
 
@@ -527,7 +528,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			fail();
 		} catch (UnprocessableEntityException e){
 			// this is good
-			assertTrue(e.getMessage().contains("2131"));
+			assertThat(e.getMessage(), containsString("2196"));
 		}
 
 	}
