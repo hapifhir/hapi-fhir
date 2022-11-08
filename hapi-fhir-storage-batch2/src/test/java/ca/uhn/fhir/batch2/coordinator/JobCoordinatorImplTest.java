@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -151,9 +152,10 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	}
 
 	@Test
-	public void startInstance_usingExistingCache_returnsExistingJobFirst() {
+	public void startInstance_usingExistingCache_returnsExistingIncompleteJobFirst() {
 		// setup
-		String instanceId = "completed-id";
+		String completedInstanceId = "completed-id";
+		String inProgressInstanceId = "someId";
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
 		startRequest.setUseCache(true);
@@ -162,32 +164,32 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		JobDefinition<?> def = createJobDefinition();
 
 		JobInstance existingInProgInstance = createInstance();
-		existingInProgInstance.setInstanceId("someId");
+		existingInProgInstance.setInstanceId(inProgressInstanceId);
 		existingInProgInstance.setStatus(StatusEnum.IN_PROGRESS);
+
 		JobInstance existingCompletedInstance = createInstance();
 		existingCompletedInstance.setStatus(StatusEnum.COMPLETED);
-		existingCompletedInstance.setInstanceId(instanceId);
+		existingCompletedInstance.setInstanceId(completedInstanceId);
 
 		// when
 		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
 			.thenReturn(Optional.of(def));
 		when(myJobInstancePersister.fetchInstances(any(FetchJobInstancesRequest.class), anyInt(), anyInt()))
-			.thenReturn(Arrays.asList(existingInProgInstance, existingCompletedInstance));
+			.thenReturn(Arrays.asList(existingInProgInstance));
 
 		// test
 		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
 
 		// verify
-		assertEquals(instanceId, startResponse.getJobId()); // make sure it's the completed one
+		assertEquals(inProgressInstanceId, startResponse.getJobId()); // make sure it's the completed one
 		assertTrue(startResponse.isUsesCachedResult());
 		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
-		assertEquals(3, req.getStatuses().size());
+		assertEquals(2, req.getStatuses().size());
 		assertTrue(
-			req.getStatuses().contains(StatusEnum.COMPLETED)
-			&& req.getStatuses().contains(StatusEnum.IN_PROGRESS)
+			req.getStatuses().contains(StatusEnum.IN_PROGRESS)
 			&& req.getStatuses().contains(StatusEnum.QUEUED)
 		);
 	}
