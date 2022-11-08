@@ -21,7 +21,6 @@ package ca.uhn.fhir.cr.config;
  */
 
 import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
-// import org.opencds.cqf.ruler.builder.ResourceBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "hapi.fhir.cr")

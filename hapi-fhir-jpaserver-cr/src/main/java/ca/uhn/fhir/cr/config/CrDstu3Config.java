@@ -20,11 +20,9 @@ package ca.uhn.fhir.cr.config;
  * #L%
  */
 
-import ca.uhn.fhir.cr.common.CqlConfig;
 import ca.uhn.fhir.cr.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.dstu3.service.MeasureService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,20 +33,6 @@ import java.util.function.Function;
 @Import(CqlConfig.class)
 @Configuration
 public class CrDstu3Config {
-	@Bean
-	public CrProperties crProperties() {
-		return new CrProperties();
-	}
-
-	@Bean
-	public MeasureEvaluationOptions measureEvaluationOptions() {
-		return crProperties().getMeasureEvaluation();
-	}
-
-	@Bean
-	public MeasureOperationsProvider measureOperationsProvider() {
-		return new MeasureOperationsProvider();
-	}
 
 	@Bean
 	public Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory() {
@@ -64,4 +48,8 @@ public class CrDstu3Config {
 	public MeasureService dstu3measureService() {
 		return new MeasureService();
 	}
+
+	@Bean
+	public MeasureOperationsProvider dstu3measureOperationsProvider() { return new MeasureOperationsProvider();}
+
 }

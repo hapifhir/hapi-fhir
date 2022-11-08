@@ -51,6 +51,12 @@
 			<artifactId>evaluator.jackson-deps</artifactId>
 			<version>${cql-evaluator.version}</version>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>xmlpull</groupId>
+					<artifactId>xmlpull</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

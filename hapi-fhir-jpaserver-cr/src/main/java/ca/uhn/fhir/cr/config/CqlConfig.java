@@ -1,29 +1,25 @@
-package ca.uhn.fhir.cr.common;
-
-/*-
- * #%L
- * HAPI FHIR JPA Server - Clinical Reasoning
- * %%
- * Copyright (C) 2014 - 2022 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
+package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.cr.common.CodeCacheResourceChangeListener;
+import ca.uhn.fhir.cr.common.CqlForkJoinWorkerThreadFactory;
+import ca.uhn.fhir.cr.common.ElmCacheResourceChangeListener;
+import ca.uhn.fhir.cr.common.JpaDataProviderFactory;
+import ca.uhn.fhir.cr.common.JpaFhirDal;
+import ca.uhn.fhir.cr.common.JpaFhirDalFactory;
+import ca.uhn.fhir.cr.common.JpaFhirRetrieveProvider;
+import ca.uhn.fhir.cr.common.JpaLibrarySourceProvider;
+import ca.uhn.fhir.cr.common.JpaLibrarySourceProviderFactory;
+import ca.uhn.fhir.cr.common.JpaTerminologyProvider;
+import ca.uhn.fhir.cr.common.JpaTerminologyProviderFactory;
+import ca.uhn.fhir.cr.common.LibraryLoaderFactory;
+import ca.uhn.fhir.cr.common.LibraryManagerFactory;
+import ca.uhn.fhir.cr.common.PreExpandedValidationSupport;
 import ca.uhn.fhir.cr.common.interceptor.CqlExceptionHandlingInterceptor;
+import ca.uhn.fhir.cr.common.provider.CrProviderFactory;
+import ca.uhn.fhir.cr.common.provider.CrProviderLoader;
 import ca.uhn.fhir.cr.dstu2.PreExpandedTermReadSvcDstu2;
 import ca.uhn.fhir.cr.dstu3.PreExpandedTermReadSvcDstu3;
 import ca.uhn.fhir.cr.r4.PreExpandedTermReadSvcR4;
@@ -62,6 +58,7 @@ import org.opencds.cqf.cql.evaluator.engine.execution.TranslatingLibraryLoader;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.opencds.cqf.cql.evaluator.engine.retrieve.BundleRetrieveProvider;
 import org.opencds.cqf.cql.evaluator.fhir.adapter.AdapterFactory;
+import org.opencds.cqf.cql.evaluator.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +82,31 @@ public class CqlConfig {
 
 	private static final Logger log = LoggerFactory.getLogger(CqlConfig.class);
 
+
+	@Bean
+	CrProviderFactory cqlProviderFactory() {
+		return new CrProviderFactory();
+	}
+
+	@Bean
+	CrProviderLoader cqlProviderLoader() {
+		return new CrProviderLoader();
+	}
+
+
 	@Bean
 	public CqlProperties cqlProperties() {
 		return new CqlProperties();
+	}
+
+	@Bean
+	public CrProperties crProperties() {
+		return new CrProperties();
+	}
+
+	@Bean
+	public MeasureEvaluationOptions measureEvaluationOptions() {
+		return crProperties().getMeasureEvaluation();
 	}
 
 	@Bean
@@ -236,7 +255,7 @@ public class CqlConfig {
 	}
 
 	@Bean
-	public Map<org.hl7.cql.model.ModelIdentifier, org.cqframework.cql.cql2elm.model.Model> globalModelCache() {
+	public Map<ModelIdentifier, Model> globalModelCache() {
 		return new ConcurrentHashMap<>();
 	}
 
