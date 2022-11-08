@@ -546,13 +546,18 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		obs = myObservationDao.read(obsId.toUnqualifiedVersionless(), mySrd);
 	}
 
+	/**
+	 * fixme changelog
+	 * fixme migration
+	 * We are starting a migration to inline forced_id into RESOURCE_TABLE.
+	 * Verify we are populating the new field AND the old join table for a couple of releases to allow smooth upgrades.
+	 */
 	@Test
-	public void testCreateForcedIdPopulatesResourceTableField() {
+	public void testCreateResourceWithForcedId_populatesResourceTableFieldAndJoinTable() {
 		String idName = "forcedId";
 
 		Patient pat = new Patient();
 		pat.setId(idName);
-		pat.addName().setFamily("FAM");
 		IIdType patId = myPatientDao.update(pat, mySrd).getId();
 		assertEquals("Patient/" + idName, patId.toUnqualifiedVersionless().getValue());
 
@@ -560,7 +565,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			.createQuery("select rt from ResourceTable rt where rt.myForcedId.myForcedId = 'forcedId'", ResourceTable.class)
 			.getSingleResult();
 
-		assertEquals(idName, readBackResource.getForcedIdValue());
+		assertEquals(idName, readBackResource.getForcedId().getForcedId(), "legacy join populated");
+		assertEquals(idName, readBackResource.getForcedIdValue(), "inline field poplulated");
 	}
 
 	@Test
