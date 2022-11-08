@@ -73,6 +73,8 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	@Nonnull
 	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
+		// FIXME ND
+		// requestDetails.setMaxRetries(REINDEX_MAX_RETRIES); <- some constant in this file
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 

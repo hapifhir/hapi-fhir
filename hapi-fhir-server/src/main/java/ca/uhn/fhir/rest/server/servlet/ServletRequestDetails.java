@@ -186,6 +186,10 @@ public class ServletRequestDetails extends RequestDetails {
 		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
 			setRewriteHistory(true);
 		}
+		// FIXME ND move constants from UserRequestRetryVersionConflictsInterceptor to here, check those headers here, and set
+		// values in the request details
+		// setMaxRetries(....); <- this method lives in parent RequestDetails
+		//
 		return this;
 	}
 

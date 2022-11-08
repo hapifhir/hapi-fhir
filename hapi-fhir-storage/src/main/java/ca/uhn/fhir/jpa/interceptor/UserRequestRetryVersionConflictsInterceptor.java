@@ -55,6 +55,8 @@ public class UserRequestRetryVersionConflictsInterceptor {
 		ResourceVersionConflictResolutionStrategy retVal = new ResourceVersionConflictResolutionStrategy();
 
 		if (theRequestDetails != null) {
+			// FIXME ND
+//			replace the entire block below with retVal.setMaxRetries(theRequestDetails.getMaxRetries());
 			List<String> headers = theRequestDetails.getHeaders(HEADER_NAME);
 			if (headers != null) {
 				for (String headerValue : headers) {
