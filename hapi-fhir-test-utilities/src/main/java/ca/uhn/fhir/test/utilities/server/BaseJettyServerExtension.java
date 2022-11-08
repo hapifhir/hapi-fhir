@@ -48,6 +48,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
+import javax.annotation.PreDestroy;
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -113,7 +114,8 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		return myRequestHeaders;
 	}
 
-	protected void stopServer() throws Exception {
+	@PreDestroy
+	public void stopServer() throws Exception {
 		if (!isRunning()) {
 			return;
 		}
@@ -201,9 +203,6 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 	protected abstract HttpServlet provideServlet();
 
-	public void shutDownServer() throws Exception {
-		JettyUtil.closeServer(myServer);
-	}
 
 	public String getWebsocketContextPath() {
 		return myEnableSpringWebsocketContextPath;
@@ -259,9 +258,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
-		if (myKeepAliveBetweenTests) {
-			stopServer();
-		}
+		stopServer();
 	}
 
 	/**

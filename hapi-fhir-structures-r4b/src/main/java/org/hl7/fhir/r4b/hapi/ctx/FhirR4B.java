@@ -86,7 +86,7 @@ public class FhirR4B implements IFhirVersion {
 			str = FhirR4B.class.getResourceAsStream(path);
 		}
 		if (str == null) {
-			throw new ConfigurationException(Msg.code(200) + "Can not find model property file on classpath: " + path);
+			throw new ConfigurationException(Msg.code(2156) + "Can not find model property file on classpath: " + path);
 		}
 		return str;
 	}
