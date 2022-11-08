@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cr.common.CrConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -32,16 +33,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = { TestCrConfig.class, CrConfig.class})
 class MeasureOperationsProviderIT extends BaseJpaR4Test {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
-	private static IGenericClient ourFhirClient;
-
 	@Autowired
 	MeasureOperationsProvider measureOperationsProvider;
+
+	@Autowired
+	DaoRegistry daoRegistry;
 
 	private void loadBundle(String bundleName) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		org.springframework.core.io.Resource resource = resourceLoader.getResource(bundleName);
 		String bundle = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		ourFhirClient.transaction().withBundle(bundle).execute();
+		daoRegistry.getSystemDao().transaction(new SystemRequestDetails(), bundle);
 	}
 
 	@Test
