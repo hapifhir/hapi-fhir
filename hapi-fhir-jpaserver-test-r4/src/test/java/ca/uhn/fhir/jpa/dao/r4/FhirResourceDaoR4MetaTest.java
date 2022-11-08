@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
@@ -19,6 +21,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +158,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
 	}
 
-	@Test
+	// TODO:  non-repeated
+//	@Test
+	@RepeatedTest(value = 10)
 	public void testAddTagWithVersionAndUserSelected() {
 		final List<ResourceHistoryTag> resourceHistoryTags1 = myResourceHistoryTagDao.findAll();
 		// TODO:  make this work
@@ -163,20 +169,27 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		final String expectedSystem1 = "http://foo";
 		final String expectedCode1 = "code1";
 		final String expectedVersion1 = "testVersion1";
+		final String expectedDisplay1 = "Test1";
+		final boolean expectedUserSelected1 = true;
 		final String expectedSystem2 = "http://another.system";
 		final String expectedCode2 = "code2";
 		final String expectedVersion2 = "testVersion2";
+		final String expectedDisplay2 = "Test2";
+		final boolean expectedUserSelected2 = false;
 
 		final Patient savedPatient = new Patient();
-		final Coding tag = savedPatient.getMeta().addTag().setSystem(expectedSystem1).setCode(expectedCode1);
-		assertFalse(tag.getUserSelected());
-		tag.setVersion(expectedVersion1).setUserSelected(true);
+		final Coding newTag = savedPatient.getMeta()
+			.addTag()
+			.setSystem(expectedSystem1)
+			.setCode(expectedCode1)
+			.setDisplay(expectedDisplay1);
+		assertFalse(newTag.getUserSelected());
+		newTag.setVersion(expectedVersion1)
+			.setUserSelected(expectedUserSelected1);
 		savedPatient.setActive(true);
-		// TODO:  deprecation warning
-		final IIdType pid1 = myPatientDao.create(savedPatient).getId().toVersionless();
+		final IIdType pid1 = myPatientDao.create(savedPatient, new SystemRequestDetails()).getId().toVersionless();
 
-		// TODO:  deprecation warning
-		final Patient retrievedPatient = myPatientDao.read(pid1);
+		final Patient retrievedPatient = myPatientDao.read(pid1, new SystemRequestDetails());
 		assertAll(
 			() -> assertEquals(1, retrievedPatient.getMeta().getTag().size()),
 			() -> assertEquals(0, retrievedPatient.getMeta().getSecurity().size()),
@@ -194,30 +207,39 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 			.setCode(expectedCode2)
 			.setSystem(expectedSystem2)
 			.setVersion(expectedVersion2)
-			.setUserSelected(false);
+			.setDisplay(expectedDisplay2)
+			.setUserSelected(expectedUserSelected2);
 
-		// TODO:  deprecation warning
-		myPatientDao.update(retrievedPatient);
+		myPatientDao.update(retrievedPatient, new SystemRequestDetails());
 		// TODO:  deprecation warning
 		// TODO: why isn't this updating or retrieving the updated version correctly?
-		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1);
+		final Patient retrievedUpdatedPatient = myPatientDao.read(pid1, new SystemRequestDetails());
+
+		final Meta meta = retrievedUpdatedPatient.getMeta();
+		final List<Coding> tags = meta.getTag();
+		tags.forEach(innerTag -> ourLog.info("TAGS: version: {}, userSelected: {}, code: {}, display: {}, system: {}", innerTag.getVersion(), innerTag.getUserSelected(), innerTag.getCode(), innerTag.getDisplay(), innerTag.getSystem()));
+		// TODO:  TagFirstRep() seems to be non-deterministic on master as well  it will either be the first or the second
+		final Coding tagFirstRep = meta.getTagFirstRep();
+		ourLog.info("TAG FIRST REP: version: {}, userSelected: {}, code: {}, display: {}, system: {}", tagFirstRep.getVersion(), tagFirstRep.getUserSelected(), tagFirstRep.getCode(), tagFirstRep.getDisplay(), tagFirstRep.getSystem());
 
 		assertAll(
-			() -> assertEquals(1, retrievedUpdatedPatient.getMeta().getTag().size()),
-			() -> assertEquals(0, retrievedUpdatedPatient.getMeta().getSecurity().size()),
-			() -> assertEquals(expectedSystem2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getSystem()),
-			() -> assertTrue(retrievedUpdatedPatient.getMeta().getTagFirstRep().getUserSelected()),
-			() -> assertEquals(expectedCode2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getCode()),
-			() -> assertEquals(expectedVersion2, retrievedUpdatedPatient.getMeta().getTagFirstRep().getVersion())
+			() -> assertEquals(2, tags.size()),
+			() -> assertEquals(0, meta.getSecurity().size()),
+			() -> assertEquals(1, tags.stream()
+													.filter(tag -> expectedSystem1.equals(tag.getSystem()))
+													.filter(tag -> expectedCode1.equals(tag.getCode()))
+													.filter(tag -> expectedDisplay1.equals(tag.getDisplay()))
+													.filter(tag -> expectedVersion1.equals(tag.getVersion()))
+													.filter(tag -> expectedUserSelected1 == tag.getUserSelected())
+													.count()),
+			() -> assertEquals(1, tags.stream()
+													.filter(tag -> expectedSystem2.equals(tag.getSystem()))
+													.filter(tag -> expectedCode2.equals(tag.getCode()))
+													.filter(tag -> expectedDisplay2.equals(tag.getDisplay()))
+													.filter(tag -> expectedVersion2.equals(tag.getVersion()))
+													.filter(tag -> expectedUserSelected2 == tag.getUserSelected())
+													.count())
 		);
-
-//		final DateRangeParam dateRange =
-//			new DateRangeParam(Date.from(LocalDateTime.now().minusSeconds(10).atZone(ZoneId.systemDefault()).toInstant()),
-//									 Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-//		final HistorySearchDateRangeParam historyDetails = new HistorySearchDateRangeParam(Map.of(), dateRange, 5);
-//		final RequestDetails requestDetailsForHistory = mock(RequestDetails.class);
-//		final IBundleProvider history = myPatientDao.history(pid1, historyDetails, requestDetailsForHistory);
-//		ourLog.info("history: {}", history);
 
 		// TODO: verify that for each ResourceHistoryTag  we have the correct userSelected value
 		// TODO:  why do we got from 1 ResourceHistoryTag to 3?
@@ -226,12 +248,34 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		ourLog.info("resourceHistoryTags: {}", resourceHistoryTags3);
 
 		// TODO:  why do we have tagId
-		resourceHistoryTags3.forEach(historyTag -> ourLog.info("tagId: {}, resourceId: {}, userSelected: {}", historyTag.getTagId(), historyTag.getResourceId(), historyTag.getUserSelected()));
+		resourceHistoryTags3.forEach(historyTag -> {
+			final TagDefinition tag = historyTag.getTag();
+			ourLog.info("tagId: {}, resourceId: {}, version: {}, userSelected: {}, system: {}, code: {}, display: {}", historyTag.getTagId(), historyTag.getResourceId(), tag.getVersion(), historyTag.getUserSelected(), tag.getSystem(), tag.getCode(), tag.getDisplay());
+		});
 
-		myCaptureQueriesListener.getInsertQueriesForCurrentThread()
-			.stream()
-			.map(query -> query.getSql(false, false))
-			.forEach(sql -> ourLog.info("sql: {}", sql));
+		// TODO:  how do I make records show up in HFJ_HISTORY_TAG during functional testing?
+		assertAll(
+			() -> assertEquals(3, resourceHistoryTags3.size()),
+			() -> assertEquals(2, resourceHistoryTags3.stream()
+				.filter(resourceHistoryTag -> expectedSystem1.equals(resourceHistoryTag.getTag().getSystem()))
+				.filter(resourceHistoryTag -> expectedCode1.equals(resourceHistoryTag.getTag().getCode()))
+				.filter(resourceHistoryTag -> expectedDisplay1.equals(resourceHistoryTag.getTag().getDisplay()))
+				.filter(resourceHistoryTag -> expectedVersion1.equals(resourceHistoryTag.getTag().getVersion()))
+				.filter(resourceHistoryTag -> expectedUserSelected1 == resourceHistoryTag.getUserSelected())
+				.count()),
+			() -> assertEquals(1, resourceHistoryTags3.stream()
+				.filter(resourceHistoryTag -> expectedSystem2.equals(resourceHistoryTag.getTag().getSystem()))
+				.filter(resourceHistoryTag -> expectedCode2.equals(resourceHistoryTag.getTag().getCode()))
+				.filter(resourceHistoryTag -> expectedDisplay2.equals(resourceHistoryTag.getTag().getDisplay()))
+				.filter(resourceHistoryTag -> expectedVersion2.equals(resourceHistoryTag.getTag().getVersion()))
+				.filter(resourceHistoryTag -> expectedUserSelected2 == resourceHistoryTag.getUserSelected())
+				.count())
+		);
+
+//		myCaptureQueriesListener.getInsertQueriesForCurrentThread()
+//			.stream()
+//			.map(query -> query.getSql(false, false))
+//			.forEach(sql -> ourLog.info("sql: {}", sql));
 
 		/*
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(false, false);

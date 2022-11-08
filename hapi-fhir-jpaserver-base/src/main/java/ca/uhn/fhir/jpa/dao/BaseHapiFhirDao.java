@@ -147,6 +147,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
@@ -275,15 +276,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
 			for (Tag next : tagList) {
-				final Set<Coding> codings = theResource.getMeta().getTag().stream()
-					.filter(Coding.class::isInstance)
-					.map(Coding.class::cast)
-					.collect(Collectors.toSet());
-				final String versionOrNull =
-					codings.isEmpty()  ? codings.iterator().next().getVersion()
-						: null;
+				// TODO:  how should this work?  theResource instanceof IResource
+//				final Set<Coding> codings = theResource.getMeta().getTag().stream()
+//					.filter(Coding.class::isInstance)
+//					.map(Coding.class::cast)
+//					.collect(Collectors.toSet());
+//				final String versionOrNull =
+//					codings.isEmpty() ? null
+//						: codings.iterator().next().getVersion();
 				// TODO:  test if this works
-				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), versionOrNull);
+//				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), versionOrNull);
+				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getScheme(), next.getTerm(), next.getLabel(), null);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
 					allDefs.add(tag);
@@ -323,23 +326,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		List<? extends IBaseCoding> tagList = theResource.getMeta().getTag();
 		if (tagList != null) {
 			for (IBaseCoding next : tagList) {
-				final Set<Coding> codings = theResource.getMeta().getTag().stream()
-					.filter(Coding.class::isInstance)
-					.map(Coding.class::cast)
-					.collect(Collectors.toSet());
+				final Optional<Coding> codingOrEmpty =
+					next instanceof Coding ? Optional.of((Coding) next)
+						: Optional.empty();
 				final String versionOrNull =
-					codings.isEmpty()  ? null
-						: codings.iterator().next().getVersion();
+					codingOrEmpty.map(Coding::getVersion)
+						.orElse(null);
 				TagDefinition def = getTagOrNull(theTransactionDetails, TagTypeEnum.TAG, next.getSystem(), next.getCode(), next.getDisplay(), versionOrNull);
 				if (def != null) {
 					ResourceTag tag = theEntity.addTag(def);
-					if (!codings.isEmpty()) {
-						// TODO:  what if there are more than one?
-						final Coding coding = codings.iterator().next();
-						tag.setUserSelected(coding.getUserSelected());
-						// TODO:  why isn't this setting anything
-						def.setVersion(coding.getVersion());
-					}
+					codingOrEmpty.ifPresent(theCoding -> tag.setUserSelected(theCoding.getUserSelected()));
 					theAllTags.add(tag);
 					theEntity.setHasTags(true);
 				}
@@ -482,10 +478,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 						try {
 							val = q.getSingleResult();
 						} catch (NoResultException e) {
-							// TODO:  how to handle this?
-							// TODO:  could this be the tag I'm looking for?
 							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel, theVersion);
-//							val = new TagDefinition(theTagType, theScheme, theTerm, theLabel, "3366:  I AM A FAKE VERSION");
 							myEntityManager.persist(val);
 						}
 						return val;
@@ -931,39 +924,29 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 			res.getMeta().getProfile().clear();
 			res.getMeta().getSecurity().clear();
 			for (BaseTag next : theTagList) {
-				switch (next.getTag().getTagType()) {
+				final TagDefinition nextTag = next.getTag();
+				switch (nextTag.getTagType()) {
 					case PROFILE:
-						res.getMeta().addProfile(next.getTag().getCode());
+						res.getMeta().addProfile(nextTag.getCode());
 						break;
 					case SECURITY_LABEL:
 						IBaseCoding sec = res.getMeta().addSecurity();
-						sec.setSystem(next.getTag().getSystem());
-						sec.setCode(next.getTag().getCode());
-						sec.setDisplay(next.getTag().getDisplay());
+						sec.setSystem(nextTag.getSystem());
+						sec.setCode(nextTag.getCode());
+						sec.setDisplay(nextTag.getDisplay());
 						break;
 					case TAG:
 						// TODO:  populate userSelected and version from DB
 						IBaseCoding tag = res.getMeta().addTag();
-						tag.setSystem(next.getTag().getSystem());
-						tag.setCode(next.getTag().getCode());
-						tag.setDisplay(next.getTag().getDisplay());
+						tag.setSystem(nextTag.getSystem());
+						tag.setCode(nextTag.getCode());
+						tag.setDisplay(nextTag.getDisplay());
 
-						// TODO:  START new code
 						if (tag instanceof Coding) {
 							final Coding codingTag = (Coding) tag;
-							if (theEntity instanceof ResourceTable) {
-								final ResourceTable theResourceTable = (ResourceTable) theEntity;
-								final Collection<ResourceTag> tags = theResourceTable.getTags();
-
-								if (! tags.isEmpty()) {
-									final ResourceTag resourceTag = tags.iterator().next();
-
-									codingTag.setVersion(resourceTag.getTag().getVersion());
-									codingTag.setUserSelected(resourceTag.getUserSelected());
-								}
-							}
+							codingTag.setVersion(nextTag.getVersion());
+							codingTag.setUserSelected(next.getUserSelected());
 						}
-						// TODO:  END new code
 
 						break;
 				}
