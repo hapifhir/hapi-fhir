@@ -103,6 +103,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("20221017.1", "BLOB_SIZE")
 			.nullable()
 			.withType(ColumnTypeEnum.LONG);
+
+		version.onTable("HFJ_SPIDX_URI")
+			.modifyColumn("20221103.1", "SP_URI")
+			.nullable()
+			.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	private void init610() {
