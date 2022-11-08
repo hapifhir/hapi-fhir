@@ -16,6 +16,7 @@ import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4b.model.Bundle;
 import org.hl7.fhir.r4b.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4b.model.CarePlan;
 import org.hl7.fhir.r4b.model.CodeableConcept;
 import org.hl7.fhir.r4b.model.Condition;
 import org.hl7.fhir.r4b.model.DateTimeType;
@@ -454,6 +455,28 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		assertThat(ids, Matchers.not(hasItem(p2Id)));
 		assertThat(ids, Matchers.not(hasItem(o2Id)));
 	}
+
+	@Test
+	void testTransactionBundleEntryUri() {
+		CarePlan carePlan = new CarePlan();
+		carePlan.getText().setDivAsString("A CarePlan");
+		carePlan.setId("ACarePlan");
+		myClient.create().resource(carePlan).execute();
+
+		// GET CarePlans from server
+		Bundle bundle = myClient.search()
+			.byUrl(ourServerBase + "/CarePlan")
+			.returnBundle(Bundle.class).execute();
+
+		// Create and populate list of CarePlans
+		List<CarePlan> carePlans = new ArrayList<>();
+		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
+
+		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
+		myClient.transaction().withResources(carePlans).execute();
+	}
+
+
 
 	private IIdType createOrganization(String methodName, String s) {
 		Organization o1 = new Organization();

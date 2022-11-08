@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4224
+title: "Added new System Property called 'CLEAR_LOCK_TABLE_WITH_DESCRIPTION' that when set to the uuid of a lock record, will clear that lock record before attempting to insert a new one."
