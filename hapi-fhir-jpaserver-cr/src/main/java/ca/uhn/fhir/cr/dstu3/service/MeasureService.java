@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.dstu3.service;
 
 import ca.uhn.fhir.cr.common.JpaDataProviderFactory;
 import ca.uhn.fhir.cr.common.JpaFhirDalFactory;
@@ -10,9 +10,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.dstu3.model.*;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
+import org.opencds.cqf.cql.engine.fhir.terminology.Dstu3FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.CqlOptions;
 import org.opencds.cqf.cql.evaluator.builder.DataProviderFactory;
@@ -80,7 +80,7 @@ public class MeasureService implements MeasureReportUser {
 
 		if (terminologyEndpoint != null) {
 			IGenericClient client = Clients.forEndpoint(getFhirContext(), terminologyEndpoint);
-			terminologyProvider = new R4FhirTerminologyProvider(client);
+			terminologyProvider = new Dstu3FhirTerminologyProvider(client);
 		} else {
 			terminologyProvider = this.jpaTerminologyProviderFactory.create(requestDetails);
 		}
@@ -89,7 +89,7 @@ public class MeasureService implements MeasureReportUser {
 		LibrarySourceProvider libraryContentProvider = this.libraryContentProviderFactory.create(requestDetails);
 		FhirDal fhirDal = this.fhirDalFactory.create(requestDetails);
 
-		org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor measureProcessor = new org.opencds.cqf.cql.evaluator.measure.r4.R4MeasureProcessor(
+		var measureProcessor = new org.opencds.cqf.cql.evaluator.measure.dstu3.Dstu3MeasureProcessor(
 			null, this.dataProviderFactory, null, null, null, terminologyProvider, libraryContentProvider, dataProvider,
 			fhirDal, measureEvaluationOptions, cqlOptions,
 			this.globalLibraryCache);

@@ -6,8 +6,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cr.common.interceptor.CqlExceptionHandlingInterceptor;
 import ca.uhn.fhir.cr.dstu2.PreExpandedTermReadSvcDstu2;
 import ca.uhn.fhir.cr.dstu3.PreExpandedTermReadSvcDstu3;
-import ca.uhn.fhir.cr.r4.MeasureOperationsProvider;
-import ca.uhn.fhir.cr.r4.MeasureService;
+import ca.uhn.fhir.cr.r4.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.cr.r4.service.MeasureService;
 import ca.uhn.fhir.cr.r4.PreExpandedTermReadSvcR4;
 import ca.uhn.fhir.cr.r5.PreExpandedTermReadSvcR5;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -49,7 +49,6 @@ import org.opencds.cqf.cql.evaluator.spring.fhir.adapter.AdapterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -67,9 +66,9 @@ import java.util.function.Function;
 
 @Import(AdapterConfiguration.class)
 @Configuration
-public class CrConfig {
+public class CqlConfig {
 
-	private static final Logger log = LoggerFactory.getLogger(CrConfig.class);
+	private static final Logger log = LoggerFactory.getLogger(CqlConfig.class);
 
 	@Bean
 	public CqlProperties cqlProperties() {
@@ -266,9 +265,9 @@ public class CrConfig {
 	public ITermReadSvc termReadSvc(FhirContext fhirContext) {
 		switch(fhirContext.getVersion().getVersion()) {
 			case R5: return new PreExpandedTermReadSvcR5();
-			case R4: 		return new PreExpandedTermReadSvcR4();
-			case DSTU3: 		return new PreExpandedTermReadSvcDstu3();
-			case DSTU2: 	return new PreExpandedTermReadSvcDstu2();
+			case R4: return new PreExpandedTermReadSvcR4();
+			case DSTU3: return new PreExpandedTermReadSvcDstu3();
+			case DSTU2: return new PreExpandedTermReadSvcDstu2();
 			default: throw new IllegalStateException("CQL support not yet implemented for this FHIR version. Please change versions or disable the CQL plugin.");
 		}
 	}
@@ -292,25 +291,5 @@ public class CrConfig {
 		var preExpandedValidationSupport = new PreExpandedValidationSupport(fhirContext);
 		jpaSupportChain.addValidationSupport(0, preExpandedValidationSupport);
 		return preExpandedValidationSupport;
-	}
-
-	@Bean
-	public MeasureOperationsProvider measureOperationsProvider() {
-		return new MeasureOperationsProvider();
-	}
-
-	@Bean
-	public Function<RequestDetails, MeasureService> r4MeasureServiceFactory() {
-		return r -> {
-			var ms = r4measureService();
-			ms.setRequestDetails(r);
-			return ms;
-		};
-	}
-
-	@Bean
-	@Scope("prototype")
-	public MeasureService r4measureService() {
-		return new MeasureService();
 	}
 }

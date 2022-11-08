@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import ca.uhn.fhir.cr.common.CrConfig;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;

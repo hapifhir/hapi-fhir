@@ -1,54 +1,46 @@
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.r4.provider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static ca.uhn.fhir.cr.common.utility.r4.Parameters.parameters;
-import static ca.uhn.fhir.cr.common.utility.r4.Parameters.part;
-import static ca.uhn.fhir.cr.common.utility.r4.Parameters.stringPart;
 
 import java.io.IOException;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cr.common.CrConfig;
+import ca.uhn.fhir.cr.config.CrR4Config;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.cr.r4.TestCrConfig;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
-import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { TestCrConfig.class, CrConfig.class})
+@ContextConfiguration(classes = { TestCrConfig.class, CrR4Config.class})
 class MeasureOperationsProviderIT extends BaseJpaR4Test {
 	private static final FhirContext ourFhirContext = FhirContext.forR4Cached();
+
 	@Autowired
 	MeasureOperationsProvider measureOperationsProvider;
 
 	@Autowired
 	DaoRegistry daoRegistry;
 
-	private void loadBundle(String bundleName) throws IOException {
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		org.springframework.core.io.Resource resource = resourceLoader.getResource(bundleName);
-		String bundle = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+	private void loadBundle(String theLocation) throws IOException {
+		var bundle = loadResource(ourFhirContext, Bundle.class, theLocation);
 		daoRegistry.getSystemDao().transaction(new SystemRequestDetails(), bundle);
 	}
 
 	@Test
 	void testMeasureEvaluate() throws IOException {
-		this.loadBundle("/dqm/Exm104FhirR4MeasureBundle.json");
+		this.loadBundle("Exm104FhirR4MeasureBundle.json");
 
 		MeasureReport returnMeasureReport = this.measureOperationsProvider.evaluateMeasure(
 			new SystemRequestDetails(),
@@ -73,10 +65,10 @@ class MeasureOperationsProviderIT extends BaseJpaR4Test {
 //				"2.16.840.1.114222.4.11.3591")).named("expand")
 //			.withNoParameters(Parameters.class).execute();
 //
-//		Endpoint terminologyEndpointValid = (Endpoint) loadResource("Endpoint.json");
+//		Endpoint terminologyEndpointValid = (Endpoint) loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
 //		terminologyEndpointValid.setAddress(this.getServerBase());
 //
-//		Endpoint terminologyEndpointInvalid = (Endpoint) loadResource("Endpoint.json");
+//		Endpoint terminologyEndpointInvalid = (Endpoint) loadResource(ourFhirContext, Endpoint.class, "Endpoint.json");
 //		terminologyEndpointInvalid.setAddress("https://tx.nhsnlink.org/fhir234");
 //
 //		Parameters params = parameters(
@@ -113,7 +105,7 @@ class MeasureOperationsProviderIT extends BaseJpaR4Test {
 //
 //		assertTrue(ex.getMessage().contains("Error performing expansion"));
 //	}
-//
+
 //	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
 //										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
 //										 String participationPeriod) {

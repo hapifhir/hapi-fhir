@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cr.dstu3;
+package ca.uhn.fhir.cr.r4.provider;
 
 /*-
  * #%L
@@ -20,18 +20,15 @@ package ca.uhn.fhir.cr.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.cr.r4.service.MeasureService;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Endpoint;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Measure;
-import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +42,7 @@ public class MeasureOperationsProvider {
 	private static final Logger log = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
 	@Autowired
-	Function<RequestDetails, MeasureService> dstu3MeasureServiceFactory;
+	Function<RequestDetails, MeasureService> r4MeasureServiceFactory;
 
 	/**
 	 * Implements the <a href=
@@ -61,8 +58,7 @@ public class MeasureOperationsProvider {
 	 * @param periodStart    The start of the reporting period
 	 * @param periodEnd      The end of the reporting period
 	 * @param reportType     The type of MeasureReport to generate
-	 * @param patient        the patient to use as the subject to use for the
-	 *                       evaluation
+	 * @param subject        the subject to use for the evaluation
 	 * @param practitioner   the practitioner to use for the evaluation
 	 * @param lastReceivedOn the date the results of this measure were last
 	 *                       received.
@@ -76,20 +72,20 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "periodStart") String periodStart,
 													 @OperationParam(name = "periodEnd") String periodEnd,
 													 @OperationParam(name = "reportType") String reportType,
-													 @OperationParam(name = "patient") String patient,
+													 @OperationParam(name = "subject") String subject,
 													 @OperationParam(name = "practitioner") String practitioner,
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
 													 @OperationParam(name = "productLine") String productLine,
 													 @OperationParam(name = "additionalData") Bundle additionalData,
 													 @OperationParam(name = "terminologyEndpoint") Endpoint terminologyEndpoint) throws InternalErrorException, FHIRException {
-		return this.dstu3MeasureServiceFactory
+		return this.r4MeasureServiceFactory
 			.apply(requestDetails)
 			.evaluateMeasure(
 				theId,
 				periodStart,
 				periodEnd,
 				reportType,
-				patient,
+				subject,
 				practitioner,
 				lastReceivedOn,
 				productLine,
