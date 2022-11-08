@@ -77,6 +77,8 @@ public abstract class RequestDetails {
 	private String myTransactionGuid;
 	private String myFixedConditionalUrl;
 	private boolean myRewriteHistory;
+	private int myMaxRetries;
+	private boolean myRetry;
 
 	/**
 	 * Constructor
@@ -541,5 +543,22 @@ public abstract class RequestDetails {
 
 	public void setRewriteHistory(boolean theRewriteHistory) {
 		myRewriteHistory = theRewriteHistory;
+	}
+
+
+	public int getMaxRetries() {
+		return myMaxRetries;
+	}
+
+	public void setMaxRetries(int theMaxRetries) {
+		myMaxRetries = theMaxRetries;
+	}
+
+	public boolean isRetry() {
+		return myRetry;
+	}
+
+	public void setRetry(boolean theRetry) {
+		myRetry = theRetry;
 	}
 }

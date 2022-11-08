@@ -51,6 +51,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ReindexStep implements IJobStepWorker<ReindexJobParameters, ResourceIdListWorkChunkJson, VoidModel> {
 
+	public static final int REINDEX_MAX_RETRIES = 5;
+
 	private static final Logger ourLog = LoggerFactory.getLogger(ReindexStep.class);
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
@@ -73,8 +75,8 @@ public class ReindexStep implements IJobStepWorker<ReindexJobParameters, Resourc
 	@Nonnull
 	public RunOutcome doReindex(ResourceIdListWorkChunkJson data, IJobDataSink<VoidModel> theDataSink, String theInstanceId, String theChunkId) {
 		RequestDetails requestDetails = new SystemRequestDetails();
-		// FIXME ND
-		// requestDetails.setMaxRetries(REINDEX_MAX_RETRIES); <- some constant in this file
+		requestDetails.setRetry(true);
+		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(requestDetails, transactionDetails, new ReindexJob(data, requestDetails, transactionDetails, theDataSink, theInstanceId, theChunkId));
 

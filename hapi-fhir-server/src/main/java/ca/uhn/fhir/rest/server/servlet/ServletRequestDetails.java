@@ -44,11 +44,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ServletRequestDetails extends RequestDetails {
 
@@ -186,11 +189,34 @@ public class ServletRequestDetails extends RequestDetails {
 		if ("true".equals(myServletRequest.getHeader(Constants.HEADER_REWRITE_HISTORY))) {
 			setRewriteHistory(true);
 		}
-		// FIXME ND move constants from UserRequestRetryVersionConflictsInterceptor to here, check those headers here, and set
-		// values in the request details
-		// setMaxRetries(....); <- this method lives in parent RequestDetails
-		//
+		setRetryFields(myServletRequest);
 		return this;
+	}
+
+	private void setRetryFields(HttpServletRequest theRequest){
+		if (theRequest == null){
+			return;
+		}
+		Enumeration<String> headers = theRequest.getHeaders(Constants.HEADER_RETRY_ON_VERSION_CONFLICT);
+		if (headers != null) {
+			Iterator<String> headerIterator = headers.asIterator();
+			while(headerIterator.hasNext()){
+				String headerValue = headerIterator.next();
+				if (isNotBlank(headerValue)) {
+					StringTokenizer tok = new StringTokenizer(headerValue, ";");
+					while (tok.hasMoreTokens()) {
+						String next = trim(tok.nextToken());
+						if (next.equals(Constants.HEADER_RETRY)) {
+							setRetry(true);
+						} else if (next.startsWith(Constants.HEADER_MAX_RETRIES + "=")) {
+							String val = trim(next.substring((Constants.HEADER_MAX_RETRIES + "=").length()));
+							int maxRetries = Integer.parseInt(val);
+							setMaxRetries(maxRetries);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void setServletResponse(HttpServletResponse myServletResponse) {
