@@ -81,7 +81,7 @@ public class Batch2JobRunnerImpl implements IBatch2JobRunner {
 	public Batch2JobOperationResult cancelInstance(String theJobId) throws ResourceNotFoundException {
 		JobOperationResultJson cancelResult = myJobCoordinator.cancelInstance(theJobId);
 		if (cancelResult == null) {
-			throw new ResourceNotFoundException(Msg.code(2131) + " : " + theJobId);
+			throw new ResourceNotFoundException(Msg.code(2195) + " : " + theJobId);
 		}
 		return fromJobOperationResultToBatch2JobOperationResult(cancelResult);
 	}

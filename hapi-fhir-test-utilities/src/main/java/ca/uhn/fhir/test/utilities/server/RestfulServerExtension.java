@@ -102,13 +102,15 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	@Override
-	protected void stopServer() throws Exception {
+	public void stopServer() throws Exception {
 		super.stopServer();
 		if (!isRunning()) {
 			return;
 		}
 		myFhirClient = null;
 		myRunningServerUserData.clear();
+		myPagingProvider = null;
+		myServlet = null;
 	}
 
 

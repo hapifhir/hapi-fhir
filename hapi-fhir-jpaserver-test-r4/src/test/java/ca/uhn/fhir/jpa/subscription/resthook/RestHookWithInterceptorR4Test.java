@@ -51,7 +51,6 @@ import static org.mockito.Mockito.mock;
 /**
  * Test the rest-hook subscriptions
  */
-@ContextConfiguration(classes = {RestHookWithInterceptorR4Test.MyTestCtxConfig.class})
 public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookWithInterceptorR4Test.class);
@@ -67,8 +66,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	StoppableSubscriptionDeliveringRestHookSubscriber myStoppableSubscriptionDeliveringRestHookSubscriber;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
-	@Autowired
-	private MyTestInterceptor myTestInterceptor;
+	private MyTestInterceptor myTestInterceptor = new MyTestInterceptor();
 
 	@AfterEach
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
