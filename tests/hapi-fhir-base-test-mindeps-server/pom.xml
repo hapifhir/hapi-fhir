@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>org.mortbay.jetty</groupId>
 			<artifactId>jetty</artifactId>
-			<version>6.1.26</version> <!-- Use an old version -->
+			<version>7.0.0pre4</version> <!-- Use an old version -->
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
