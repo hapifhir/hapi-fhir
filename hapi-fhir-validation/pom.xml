@@ -28,6 +28,17 @@
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-caching-caffeine</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.validation</artifactId>
 			<version>${fhir_core_version}</version>
 			<exclusions>
@@ -75,15 +86,11 @@
 			<version>${fhir_core_version}</version>
 		</dependency>
 
-        <dependency>
-            <groupId>org.fhir</groupId>
-            <artifactId>ucum</artifactId>
-        </dependency>
+	  <dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+	  </dependency>
 
-        <dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
 			<artifactId>jsr305</artifactId>

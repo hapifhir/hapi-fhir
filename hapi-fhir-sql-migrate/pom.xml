@@ -17,10 +17,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
 		</dependency>
@@ -84,6 +80,8 @@
 			<groupId>com.healthmarketscience.sqlbuilder</groupId>
 			<artifactId>sqlbuilder</artifactId>
 		</dependency>
+
+		<!-- test -->
 
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
