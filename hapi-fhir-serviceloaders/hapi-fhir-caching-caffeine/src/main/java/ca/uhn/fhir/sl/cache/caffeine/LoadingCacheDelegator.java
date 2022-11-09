@@ -14,13 +14,16 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		return (com.github.benmanes.caffeine.cache.LoadingCache<K, V>) cache;
 	}
 
+	@Override
 	public V get(K key) {
 		return getCache().get(key);
 	}
 
+	@Override
 	public Map<K, V> getAll(Iterable<? extends K> keys) {
 		return getCache().getAll(keys);
 	}
 
+	@Override
 	public void refresh(K key) { getCache().refresh(key); }
 }

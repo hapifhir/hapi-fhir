@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.cache.CacheLoader;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
@@ -25,7 +26,7 @@ public class CacheDelegator<K, V> implements ca.uhn.fhir.sl.cache.Cache<K, V> {
 		try {
 			return cache.get(key, () -> mappingFunction.apply(key));
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2206) + "Failed to red from cache", e);
 		} catch (UncheckedExecutionException e) {
 			if (e.getCause() instanceof RuntimeException) {
 				// Unwrap exception to match Caffeine

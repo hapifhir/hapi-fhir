@@ -17,6 +17,11 @@
 	<name>HAPI FHIR - ServiceLoaders - Caching API</name>
 
 	<dependencies>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

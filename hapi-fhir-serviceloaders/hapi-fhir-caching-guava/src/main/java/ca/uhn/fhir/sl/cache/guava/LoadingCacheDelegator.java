@@ -3,6 +3,7 @@ package ca.uhn.fhir.sl.cache.guava;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import ca.uhn.fhir.i18n.Msg;
 import com.google.common.cache.CacheLoader;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import ca.uhn.fhir.sl.cache.LoadingCache;
@@ -15,6 +16,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		return (com.google.common.cache.LoadingCache<K, V>) cache;
 	}
 
+	@Override
 	public V get(K key) {
 		try {
 			return getCache().get(key);
@@ -25,7 +27,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 			}
 			throw e;
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2204) + "Failed to red from cache", e);
 		} catch (CacheLoader.InvalidCacheLoadException e) {
 			// If the entry is not found or load as null, returns null instead of an exception.
 			// This matches the behaviour of Caffeine
@@ -33,6 +35,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		}
 	}
 
+	@Override
 	public Map<K, V> getAll(Iterable<? extends K> keys) {
 		try {
 			return getCache().getAll(keys);
@@ -43,7 +46,7 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 			}
 			throw e;
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(Msg.code(2205) + "Failed to red from cache", e);
 		} catch (CacheLoader.InvalidCacheLoadException e) {
 			// If the entry is not found or load as null, returns null instead of an exception
 			// This matches the behaviour of Caffeine
@@ -51,5 +54,6 @@ public class LoadingCacheDelegator<K, V> extends CacheDelegator<K, V> implements
 		}
 	}
 
+	@Override
 	public void refresh(K key) { getCache().refresh(key); }
 }
