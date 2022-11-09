@@ -107,7 +107,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
@@ -138,7 +138,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
 		try {
 			// Read it back using the operation
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content[1].attachment";
@@ -163,7 +163,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadNoPath() throws IOException {
 		IIdType id = createDocumentReference(true);
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ;
 		HttpGet get = new HttpGet(path);
@@ -181,7 +181,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadNoData() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
@@ -202,10 +202,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = createDocumentReference(true);
 
 		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_OUTGOING_RESPONSE);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_RESPONSE, latch);
 
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
@@ -231,7 +231,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Write a binary using the operation
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 			"?path=DocumentReference.content.attachment";
@@ -260,7 +260,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		myBinaryStorageSvc.expungeBlob(id, attachmentId);
 
-		path = ourServerBase +
+		path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
@@ -290,7 +290,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Write the binary using the operation
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
@@ -323,7 +323,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			path = ourServerBase +
+			path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
@@ -374,7 +374,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
@@ -428,7 +428,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			// Write using the operation
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=Binary";
@@ -459,7 +459,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			path = ourServerBase +
+			path = myServerBase +
 				"/Binary/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=Binary";
@@ -494,7 +494,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Write using the operation
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE;
 		HttpPost post = new HttpPost(path);
@@ -520,7 +520,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Read it back using the operation
 
-		path = ourServerBase +
+		path = myServerBase +
 			"/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ;
 		HttpGet get = new HttpGet(path);
@@ -559,7 +559,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			// Write using the operation
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
@@ -589,7 +589,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Read it back using the operation
 
-			path = ourServerBase +
+			path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_READ +
 				"?path=DocumentReference.content.attachment";
@@ -636,7 +636,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testResourceExpungeAlsoExpungesBinaryData() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		String path = ourServerBase +
+		String path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 			"?path=DocumentReference.content.attachment";
@@ -692,12 +692,12 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testWriteWithConflictInterceptor() throws IOException {
 		UserRequestRetryVersionConflictsInterceptor interceptor = new UserRequestRetryVersionConflictsInterceptor();
-		ourRestServer.registerInterceptor(interceptor);
+		myServer.getRestfulServer().registerInterceptor(interceptor);
 		try {
 
 			IIdType id = createDocumentReference(false);
 
-			String path = ourServerBase +
+			String path = myServerBase +
 				"/DocumentReference/" + id.getIdPart() + "/" +
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
@@ -718,7 +718,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			}
 
 		} finally {
-			ourRestServer.unregisterInterceptor(interceptor);
+			myServer.getRestfulServer().unregisterInterceptor(interceptor);
 		}
 	}
 

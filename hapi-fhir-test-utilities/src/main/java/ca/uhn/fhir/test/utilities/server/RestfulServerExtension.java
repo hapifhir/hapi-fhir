@@ -22,6 +22,7 @@ package ca.uhn.fhir.test.utilities.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.server.IPagingProvider;
@@ -192,4 +193,15 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 		withServer(t -> t.unregisterProvider(theProvider));
 	}
 
+	public Integer getDefaultPageSize() {
+		return myServlet.getDefaultPageSize();
+	}
+
+	public void setDefaultPageSize(Integer theInitialDefaultPageSize) {
+		myServlet.setDefaultPageSize(theInitialDefaultPageSize);
+	}
+
+	public IInterceptorService getInterceptorService() {
+		return myServlet.getInterceptorService();
+	}
 }

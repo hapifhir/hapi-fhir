@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -293,7 +292,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String replace = patientBinaryId.replace("_history/1", "");
 
 			{ // Test with the Accept Header omitted should stream out the results.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
 					String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
@@ -303,7 +302,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test with the Accept Header set to application/fhir+ndjson should stream out the results.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_NDJSON);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
@@ -314,7 +313,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test that demanding octet-stream will force it to whatever the Binary's content-type is set to.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_OCTET_STREAM);
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
 					Header[] headers = status.getHeaders("Content-Type");
@@ -325,7 +324,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			{ //Test with the Accept Header set to application/fhir+json should simply return the Binary resource.
-				HttpGet expandGet = new HttpGet(ourServerBase + "/" + replace);
+				HttpGet expandGet = new HttpGet(myServerBase + "/" + replace);
 				expandGet.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 
 				try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {

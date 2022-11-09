@@ -213,7 +213,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	public void testValidateGeneratedCapabilityStatement() throws IOException {
 
 		String input;
-		HttpGet get = new HttpGet(ourServerBase + "/metadata?_format=json");
+		HttpGet get = new HttpGet(myServerBase + "/metadata?_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			assertEquals(200, resp.getStatusLine().getStatusCode());
 			input = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
@@ -221,7 +221,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		}
 
 
-		HttpPost post = new HttpPost(ourServerBase + "/CapabilityStatement/$validate?_pretty=true");
+		HttpPost post = new HttpPost(myServerBase + "/CapabilityStatement/$validate?_pretty=true");
 		post.setEntity(new StringEntity(input, ContentType.APPLICATION_JSON));
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
@@ -360,7 +360,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";		
+		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
 		
 		HttpGet get = new HttpGet(uri);
@@ -492,7 +492,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 		// GET CarePlans from server
 		Bundle bundle = myClient.search()
-			.byUrl(ourServerBase + "/CarePlan")
+			.byUrl(myServerBase + "/CarePlan")
 			.returnBundle(Bundle.class).execute();
 
 		// Create and populate list of CarePlans

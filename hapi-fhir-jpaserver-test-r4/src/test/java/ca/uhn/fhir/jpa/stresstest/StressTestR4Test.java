@@ -97,7 +97,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
+		myServer.unregisterInterceptor(myRequestValidatingInterceptor);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
@@ -149,7 +149,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		IGenericClient fhirClient = this.myClient;
 
-		String url = ourServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
+		String url = myServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
 
 		int pageIndex = 0;
 		ourLog.info("Loading page {}", pageIndex);
@@ -529,7 +529,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	 */
 	@Test
 	public void testMultithreadedSearchWithValidation() throws Exception {
-		ourRestServer.registerInterceptor(myRequestValidatingInterceptor);
+		myServer.registerInterceptor(myRequestValidatingInterceptor);
 
 		Bundle input = new Bundle();
 		input.setType(BundleType.TRANSACTION);
@@ -540,7 +540,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		myClient.transaction().withBundle(input).execute();
 
-		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(myServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
 		}
 
@@ -669,7 +669,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					Bundle respBundle;
 
 					// Load search
-					HttpGet get = new HttpGet(ourServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
+					HttpGet get = new HttpGet(myServerBase + "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID());
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {

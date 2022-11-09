@@ -26,7 +26,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 		super.before();
 
 		mySvc = new SearchPreferHandlingInterceptor(mySearchParamRegistry);
-		ourRestServer.registerInterceptor(mySvc);
+		myServer.registerInterceptor(mySvc);
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 	public void after() throws Exception {
 		super.after();
 
-		ourRestServer.unregisterInterceptor(mySvc);
+		myServer.unregisterInterceptor(mySvc);
 	}
 
 
@@ -108,7 +108,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.execute();
 		assertEquals(0, outcome.getTotal());
 
-		assertEquals(ourServerBase + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
+		assertEquals(myServerBase + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
 	}
 
 	@Test

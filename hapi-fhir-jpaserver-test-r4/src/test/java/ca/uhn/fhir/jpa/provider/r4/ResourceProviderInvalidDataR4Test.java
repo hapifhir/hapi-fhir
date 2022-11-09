@@ -25,7 +25,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 	@AfterEach
 	public void after() throws Exception {
 		super.after();
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Test
@@ -46,7 +46,7 @@ public class ResourceProviderInvalidDataR4Test extends BaseResourceProviderR4Tes
 			myResourceHistoryTableDao.save(resVer);
 		});
 
-		HttpGet httpGet = new HttpGet(ourServerBase + "/Observation/" + id);
+		HttpGet httpGet = new HttpGet(myServerBase + "/Observation/" + id);
 		httpGet.addHeader("Accept", "application/fhir+json");
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);

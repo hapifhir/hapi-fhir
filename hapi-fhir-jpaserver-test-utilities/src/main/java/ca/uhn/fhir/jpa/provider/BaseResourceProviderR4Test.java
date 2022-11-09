@@ -62,22 +62,16 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-
-	// TODO: JA2 These are no longer static but are named like static. I'm going to
-	// rename them in a separate PR that only makes that change so that it's easier to review
-	protected int ourPort;
-	protected String ourServerBase;
-	protected IGenericClient ourClient;
-	protected RestfulServer ourRestServer;
+	protected int myPort;
+	protected String myServerBase;
 	protected IGenericClient myClient;
-
 	@Autowired
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(()->myServer)
-		.withServerBeforeEach(s -> {
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer)
+		.withServerBeforeAll(s -> {
 			s.registerProviders(myResourceProviders.createProviders());
 			s.setDefaultResponseEncoding(EncodingEnum.XML);
 			s.setDefaultPrettyPrint(false);
@@ -120,17 +114,14 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 			s.registerInterceptor(corsInterceptor);
 
-		}).withServerBeforeAll(s -> {
-			// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-			ourPort = myServer.getPort();
-			ourServerBase = myServer.getBaseUrl();
-			ourClient = myServer.getFhirClient();
+		}).withServerBeforeEach(s -> {
+			myPort = myServer.getPort();
+			myServerBase = myServer.getBaseUrl();
 			myClient = myServer.getFhirClient();
-			ourRestServer = myServer.getRestfulServer();
 
-			ourClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
+			myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 			if (shouldLogClient()) {
-				ourClient.registerInterceptor(new LoggingInterceptor());
+				myClient.registerInterceptor(new LoggingInterceptor());
 			}
 		});
 	@Autowired
@@ -149,7 +140,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() throws Exception {
 		myFhirContext.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	protected boolean shouldLogClient() {

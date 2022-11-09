@@ -37,7 +37,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -55,7 +55,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			myCaptureQueriesListener.clear();
 			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -84,7 +84,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 		Bundle actual = myClient
 			.search()
-			.byUrl(ourServerBase + "/" + url)
+			.byUrl(myServerBase + "/" + url)
 			.encodedJson()
 			.prettyPrint()
 			.returnBundle(Bundle.class)
@@ -117,7 +117,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			myCaptureQueriesListener.clear();
 			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)
@@ -137,7 +137,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			myCaptureQueriesListener.clear();
 			Bundle actual = myClient
 				.search()
-				.byUrl(ourServerBase + "/" + url)
+				.byUrl(myServerBase + "/" + url)
 				.encodedJson()
 				.prettyPrint()
 				.returnBundle(Bundle.class)

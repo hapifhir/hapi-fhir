@@ -490,6 +490,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 					}
 					myNameToChild.put(nextName, next);
 				}
+				myNameToChild.put(next.getElementName(), next);
 			}
 
 			myChildren = Collections.unmodifiableList(myChildren);

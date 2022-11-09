@@ -49,7 +49,7 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 		obsNotInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
 		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -87,7 +87,7 @@ public class AuthorizationInterceptorJpaR5Test extends BaseResourceProviderR5Tes
 		obsNotInCompartment.setStatus(Enumerations.ObservationStatus.FINAL);
 		IIdType obsNotInCompartmentId = myClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		myRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()

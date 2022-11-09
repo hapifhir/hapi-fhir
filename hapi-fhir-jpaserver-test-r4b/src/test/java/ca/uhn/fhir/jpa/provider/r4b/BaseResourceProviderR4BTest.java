@@ -15,7 +15,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
@@ -30,23 +29,19 @@ import java.util.Arrays;
 
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
+	protected int myPort;
+	protected String myServerBase;
+	protected IGenericClient myClient;
 
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
-
-	// TODO: JA2 These are no longer static but are named like static. I'm going to
-	// rename them in a separate PR that only makes that change so that it's easier to review
-	protected int ourPort;
-	protected String ourServerBase;
-	protected IGenericClient myClient;
-	protected RestfulServer ourRestServer;
 
 	@Autowired
 	@RegisterExtension
 	protected RestfulServerExtension myServer;
 
 	@RegisterExtension
-	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer).withServerBeforeEach(s -> {
+	protected RestfulServerConfigurerExtension myServerConfigurer = new RestfulServerConfigurerExtension(() -> myServer).withServerBeforeAll(s -> {
 		s.registerProviders(myResourceProviders.createProviders());
 		s.setDefaultResponseEncoding(EncodingEnum.XML);
 		s.setDefaultPrettyPrint(false);
@@ -84,13 +79,12 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		s.registerInterceptor(corsInterceptor);
 
-	}).withServerBeforeAll(s -> {
+	}).withServerBeforeEach(s -> {
 
 		// TODO: JA-2 These don't need to be static variables, should just inline all of the uses of these
-		ourPort = myServer.getPort();
-		ourServerBase = myServer.getBaseUrl();
+		myPort = myServer.getPort();
+		myServerBase = myServer.getBaseUrl();
 		myClient = myServer.getFhirClient();
-		ourRestServer = myServer.getRestfulServer();
 
 		myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof LoggingInterceptor);
 		if (shouldLogClient()) {
@@ -112,9 +106,7 @@ public abstract class BaseResourceProviderR4BTest extends BaseJpaR4BTest {
 	@AfterEach
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		if (ourRestServer != null) {
-			ourRestServer.getInterceptorService().unregisterAllInterceptors();
-		}
+		myServer.getRestfulServer().getInterceptorService().unregisterAllInterceptors();
 	}
 
 	protected boolean shouldLogClient() {
