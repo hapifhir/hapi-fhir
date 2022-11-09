@@ -11,14 +11,19 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.PatientReindexTestHelper;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -30,10 +35,13 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	private IJobCoordinator myJobCoordinator;
 
 	private ReindexTestHelper myReindexTestHelper;
+	private PatientReindexTestHelper myPatientReindexTestHelper;
 
 	@PostConstruct
 	public void postConstruct() {
 		myReindexTestHelper = new ReindexTestHelper(myFhirContext, myDaoRegistry, mySearchParamRegistry);
+		boolean incrementVersionAfterReindex = false;
+		myPatientReindexTestHelper = new PatientReindexTestHelper(myJobCoordinator, myBatch2JobHelper, myPatientDao, incrementVersionAfterReindex);
 	}
 
 	@AfterEach
@@ -165,6 +173,28 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertEquals(StatusEnum.FAILED, outcome.getStatus());
 		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+	}
+
+	private static Stream<Arguments> numResourcesParams(){
+		return PatientReindexTestHelper.numResourcesParams();
+	}
+
+	@ParameterizedTest
+	@MethodSource("numResourcesParams")
+	public void testReindex(int theNumResources){
+		myPatientReindexTestHelper.testReindex(theNumResources);
+	}
+
+	@ParameterizedTest
+	@MethodSource("numResourcesParams")
+	public void testSequentialReindexOperation(int theNumResources){
+		myPatientReindexTestHelper.testSequentialReindexOperation(theNumResources);
+	}
+
+	@ParameterizedTest
+	@MethodSource("numResourcesParams")
+	public void testParallelReindexOperation(int theNumResources){
+		myPatientReindexTestHelper.testParallelReindexOperation(theNumResources);
 	}
 
 }
